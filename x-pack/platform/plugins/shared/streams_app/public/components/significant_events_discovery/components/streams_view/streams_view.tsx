@@ -50,6 +50,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   const isInitialStatusUpdateDone = useRef(false);
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
   const streamsListFetch = useDiscoveryStreams();
+
   const [selectedStreams, setSelectedStreams] = useState<TableRow[]>([]);
   const [streamOnboardingResultMap, setStreamOnboardingResultMap] = useState<
     Record<string, TaskResult<OnboardingResult>>
@@ -94,17 +95,17 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   };
 
   useEffect(() => {
-    if (streamsListFetch.value === undefined) {
+    if (streamsListFetch.data === undefined) {
       return;
     }
 
-    streamsListFetch.value.streams.forEach((item) => {
+    streamsListFetch.data.streams.forEach((item) => {
       onboardingStatusUpdateQueue.add(item.stream.name);
     });
     processStatusUpdateQueue().finally(() => {
       isInitialStatusUpdateDone.current = true;
     });
-  }, [onboardingStatusUpdateQueue, processStatusUpdateQueue, streamsListFetch.value]);
+  }, [onboardingStatusUpdateQueue, processStatusUpdateQueue, streamsListFetch.data]);
 
   const bulkScheduleOnboardingTask = async (streamList: string[]) => {
     try {
@@ -178,7 +179,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
               'xpack.streams.significantEventsDiscovery.streamsTree.streamsCountLabel',
               {
                 defaultMessage: '{count} streams',
-                values: { count: streamsListFetch.value?.streams.length ?? 0 },
+                values: { count: streamsListFetch.data?.streams.length ?? 0 },
               }
             )}
           </EuiText>
@@ -195,9 +196,9 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
 
       <EuiFlexItem>
         <StreamsTreeTable
-          streams={streamsListFetch.value?.streams}
+          streams={streamsListFetch.data?.streams}
           streamOnboardingResultMap={streamOnboardingResultMap}
-          loading={streamsListFetch.loading}
+          loading={streamsListFetch.isLoading}
           searchQuery={searchQuery}
           selection={{ selected: selectedStreams, onSelectionChange: setSelectedStreams }}
           onOnboardStreamActionClick={onOnboardStreamActionClick}

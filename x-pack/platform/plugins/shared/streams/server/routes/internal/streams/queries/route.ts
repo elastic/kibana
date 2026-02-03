@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { badRequest } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
@@ -74,7 +75,57 @@ export const promoteAllUnbackedQueriesRoute = createServerRoute({
   },
 });
 
+export const promoteUnbackedQueryByIdRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/queries/{queryId}/_promote',
+  options: {
+    access: 'internal',
+    summary: 'Promote a single unbacked query',
+    description:
+      'Creates a Kibana rule for a stored query that does not yet have a backing rule, then marks it as backed.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      queryId: z.string(),
+    }),
+    body: z.object({
+      streamName: z.string(),
+    }),
+  }),
+  handler: async ({ params, request, getScopedClients, server }): Promise<{ promoted: number }> => {
+    const { queryClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const {
+      path: { queryId },
+      body: { streamName },
+    } = params;
+
+    const queries = await queryClient.bulkGetByIds(streamName, [queryId]);
+
+    if (queries.length === 0) {
+      throw badRequest('Query does not exist');
+    }
+
+    if (queries[0].rule_backed) {
+      return { promoted: 0 };
+    }
+
+    await queryClient.promoteQueries(streamName, [queryId]);
+
+    return { promoted: 1 };
+  },
+});
+
 export const internalQueriesRoutes = {
   ...getUnbackedQueriesCountRoute,
   ...promoteAllUnbackedQueriesRoute,
+  ...promoteUnbackedQueryByIdRoute,
 };

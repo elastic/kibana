@@ -10,19 +10,24 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiCallOut,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiPanel,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useQueryClient } from '@kbn/react-query';
+import { useQueryClient, useMutation } from '@kbn/react-query';
 import React, { useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { i18n } from '@kbn/i18n';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
   useFetchSignificantEvents,
   type SignificantEventItem,
@@ -37,42 +42,37 @@ import { LoadingPanel } from '../../../loading_panel';
 import { SparkPlot } from '../../../spark_plot';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 import { SeverityBadge } from '../severity_badge/severity_badge';
-import {
-  CHART_SERIES_NAME,
-  CHART_TITLE,
-  IMPACT_COLUMN,
-  LAST_OCCURRED_COLUMN,
-  NO_ITEMS_MESSAGE,
-  OCCURRENCES_COLUMN,
-  OCCURRENCES_TOOLTIP_NAME,
-  PROMOTE_ALL_BUTTON,
-  PROMOTE_ALL_CALLOUT_DESCRIPTION,
-  PROMOTE_ALL_ERROR_TOAST_TITLE,
-  SEARCH_PLACEHOLDER,
-  STREAM_COLUMN,
-  SYSTEMS_COLUMN,
-  TABLE_CAPTION,
-  TITLE_COLUMN,
-  getEventsCount,
-  getPromoteAllCalloutTitle,
-  getPromoteAllSuccessToast,
-} from './translations';
+import { useFetchStreams } from '../../hooks/use_fetch_streams';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { buildDiscoverParams } from '../../utils/discover_helpers';
 
 export function QueriesTable() {
   const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
-      start: { unifiedSearch },
+      start: { unifiedSearch, share },
     },
     core: {
       notifications: { toasts },
     },
   } = useKibana();
+  const { timeState } = useTimefilter();
   const [searchQuery, setSearchQuery] = useState('');
-  const { data, isLoading: queriesLoading } = useFetchSignificantEvents({ query: searchQuery });
+  const { data: queriesData, isLoading: queriesLoading } = useFetchSignificantEvents({
+    query: searchQuery,
+  });
+  const { data: streamsData, isLoading: streamsLoading } = useFetchStreams();
   const { count: unbackedCount } = useUnbackedQueriesCount();
   const queryClient = useQueryClient();
-  const { promoteAll } = useQueriesApi();
+  const { promoteAll, promote } = useQueriesApi();
+
+  const promoteMutation = useMutation({
+    mutationFn: promote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['significantEvents'] });
+      queryClient.invalidateQueries({ queryKey: ['unbackedQueriesCount'] });
+    },
+  });
 
   const [{ loading: isPromoting }, onPromoteAll] = useAsyncFn(async () => {
     try {
@@ -89,9 +89,22 @@ export function QueriesTable() {
     }
   }, [promoteAll, queryClient, toasts]);
 
-  if (queriesLoading && !data) {
+  if (queriesLoading || streamsLoading) {
     return <LoadingPanel size="l" />;
   }
+
+  if (!queriesData || !streamsData) {
+    return (
+      <EuiEmptyPrompt
+        iconType="error"
+        color="danger"
+        title={<h2>{UNABLE_TO_LOAD_QUERIES_TITLE}</h2>}
+        body={<p>{UNABLE_TO_LOAD_QUERIES_BODY}</p>}
+      />
+    );
+  }
+
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
     {
@@ -100,21 +113,6 @@ export function QueriesTable() {
       render: (_: unknown, item: SignificantEventItem) => (
         <EuiLink onClick={() => {}}>{item.query.title}</EuiLink>
       ),
-    },
-    {
-      field: 'stream_name',
-      name: STREAM_COLUMN,
-      render: (_: unknown, item: SignificantEventItem) => (
-        <EuiBadge color="hollow">{item.stream_name || '--'}</EuiBadge>
-      ),
-    },
-    {
-      field: 'query.feature',
-      name: SYSTEMS_COLUMN,
-      render: (_: unknown, item: SignificantEventItem) => {
-        const systemName = item.query.feature?.name;
-        return systemName ? <EuiBadge color="hollow">{systemName}</EuiBadge> : '--';
-      },
     },
     {
       field: 'query.severity_score',
@@ -150,6 +148,7 @@ export function QueriesTable() {
       field: 'occurrences',
       name: OCCURRENCES_COLUMN,
       width: '160px',
+      align: 'center',
       render: (_: unknown, item: SignificantEventItem) => {
         return (
           <SparkPlot
@@ -164,6 +163,69 @@ export function QueriesTable() {
           />
         );
       },
+    },
+    {
+      field: 'stream_name',
+      name: STREAM_COLUMN,
+      render: (_: unknown, item: SignificantEventItem) => (
+        <EuiBadge color="hollow">{item.stream_name}</EuiBadge>
+      ),
+    },
+    {
+      field: 'rule_baked',
+      name: BACKED_STATUS_COLUMN,
+      render: (_: unknown, item: SignificantEventItem) => {
+        return (
+          <EuiToolTip
+            content={item.rule_backed ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}
+          >
+            <>
+              {item.rule_backed && <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>}
+              {!item.rule_backed && <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>}
+            </>
+          </EuiToolTip>
+        );
+      },
+    },
+    {
+      name: ACTIONS_COLUMN_TITLE,
+      actions: [
+        {
+          name: OPEN_IN_DISCOVER_ACTION_TITLE,
+          type: 'icon',
+          icon: 'discoverApp',
+          description: OPEN_IN_DISCOVER_ACTION_DESCRIPTION,
+          enabled: () => discoverLocator !== undefined,
+          onClick: (item) => {
+            const definition = streamsData.streams.find(
+              (streamItem) => streamItem.stream.name === item.stream_name
+            );
+
+            if (!definition) {
+              return;
+            }
+
+            discoverLocator?.navigate(
+              buildDiscoverParams(item.query, definition.stream, timeState)
+            );
+          },
+          isPrimary: true,
+          'data-test-subj': 'significant_events_table_open_in_discover_action',
+        },
+        {
+          icon: 'launch',
+          type: 'icon',
+          color: 'primary',
+          name: PROMOTE_QUERY_ACTION_TITLE,
+          description: PROMOTE_QUERY_ACTION_DESCRIPTION,
+          onClick: (item) => {
+            promoteMutation.mutate({
+              queryId: item.query.id,
+              streamName: item.stream_name,
+            });
+          },
+        },
+      ],
     },
   ];
 
@@ -230,7 +292,7 @@ export function QueriesTable() {
                 id="aggregated-occurrences"
                 name={CHART_SERIES_NAME}
                 type="bar"
-                timeseries={data?.aggregated_occurrences ?? []}
+                timeseries={queriesData.aggregated_occurrences ?? []}
                 annotations={[]}
                 height={180}
               />
@@ -239,7 +301,7 @@ export function QueriesTable() {
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="s">{getEventsCount(data?.significant_events.length ?? 0)}</EuiText>
+        <EuiText size="s">{getEventsCount(queriesData.significant_events.length ?? 0)}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBasicTable
@@ -251,7 +313,7 @@ export function QueriesTable() {
           tableCaption={TABLE_CAPTION}
           columns={columns}
           itemId={(item) => item.query.id}
-          items={data?.significant_events ?? []}
+          items={queriesData.significant_events ?? []}
           loading={queriesLoading}
           noItemsMessage={!queriesLoading ? NO_ITEMS_MESSAGE : ''}
         />
@@ -259,3 +321,182 @@ export function QueriesTable() {
     </EuiFlexGroup>
   );
 }
+
+const getPromoteAllSuccessToast = (count: number) =>
+  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.promoteAllSuccess', {
+    defaultMessage: 'Promoted {count} {count, plural, one {query} other {queries}}',
+    values: { count },
+  });
+
+const PROMOTE_ALL_ERROR_TOAST_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllErrorTitle',
+  { defaultMessage: 'Failed to promote queries' }
+);
+
+const TITLE_COLUMN = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.titleColumn',
+  {
+    defaultMessage: 'Title',
+  }
+);
+
+const STREAM_COLUMN = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.streamColumn',
+  {
+    defaultMessage: 'Stream',
+  }
+);
+
+const BACKED_STATUS_COLUMN = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.backedStatusColumn',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+const IMPACT_COLUMN = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.impactColumn',
+  {
+    defaultMessage: 'Impact',
+  }
+);
+
+const LAST_OCCURRED_COLUMN = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.lastOccurredColumn',
+  {
+    defaultMessage: 'Last occurred',
+  }
+);
+
+const OCCURRENCES_COLUMN = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.occurrencesColumn',
+  {
+    defaultMessage: 'Occurrences',
+  }
+);
+
+const OCCURRENCES_TOOLTIP_NAME = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.occurrencesTooltipName',
+  { defaultMessage: 'Occurrences' }
+);
+
+const PROMOTED_BADGE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.promotedBadgeLabel',
+  {
+    defaultMessage: 'promoted',
+  }
+);
+
+const NOT_PROMOTED_BADGE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.notPromotedBadgeLabel',
+  {
+    defaultMessage: 'not promoted',
+  }
+);
+
+const PROMOTED_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.promotedTooltipContent',
+  {
+    defaultMessage: 'Query has a backing rule that looks for significant events',
+  }
+);
+
+const NOT_PROMOTED_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.notPromotedTooltipContent',
+  {
+    defaultMessage: "Query doesn't have a backing rule and it doesn't generate significant events",
+  }
+);
+
+const getPromoteAllCalloutTitle = (count: number) =>
+  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutTitle', {
+    defaultMessage:
+      '{count} {count, plural, one {query is} other {queries are}} ready for promotion',
+    values: { count },
+  });
+
+const PROMOTE_ALL_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutDescription',
+  {
+    defaultMessage:
+      'Enable scheduled runs for these queries so their results are saved as Significant events, powering Insight generation.',
+  }
+);
+
+const PROMOTE_ALL_BUTTON = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllButton',
+  { defaultMessage: 'Promote all' }
+);
+
+const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.searchPlaceholder',
+  { defaultMessage: 'Search' }
+);
+
+const CHART_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.chart.title',
+  {
+    defaultMessage: 'Detected event occurrences',
+  }
+);
+
+const CHART_SERIES_NAME = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.chart.seriesName',
+  {
+    defaultMessage: 'Occurrences',
+  }
+);
+
+const getEventsCount = (count: number) =>
+  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.eventsCount', {
+    defaultMessage: '{count} Queries',
+    values: { count },
+  });
+
+const TABLE_CAPTION = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.tableCaption',
+  { defaultMessage: 'Queries table' }
+);
+
+const NO_ITEMS_MESSAGE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.noItemsMessage',
+  {
+    defaultMessage: 'No queries found',
+  }
+);
+
+const UNABLE_TO_LOAD_QUERIES_TITLE = i18n.translate(
+  'xpack.streams.queriesTable.loadingError.title',
+  { defaultMessage: 'Unable to load queries' }
+);
+
+const UNABLE_TO_LOAD_QUERIES_BODY = i18n.translate('xpack.streams.queriesTable.loadingError.body', {
+  defaultMessage: "Try refreshing the page or contact support if error doesn't go away",
+});
+
+const ACTIONS_COLUMN_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.actionsColumnTitle',
+  { defaultMessage: 'Actions' }
+);
+
+const OPEN_IN_DISCOVER_ACTION_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.openInDiscoverActionTitle',
+  { defaultMessage: 'Open in Discover' }
+);
+
+const OPEN_IN_DISCOVER_ACTION_DESCRIPTION = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.openInDiscoverActionDescription',
+  { defaultMessage: 'Open query in Discover' }
+);
+
+const PROMOTE_QUERY_ACTION_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.promoteQueryActionTitle',
+  { defaultMessage: 'Promote' }
+);
+
+const PROMOTE_QUERY_ACTION_DESCRIPTION = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.promoteQueryActionDescription',
+  {
+    defaultMessage: 'Create a backing rule for this query and start looking for significant events',
+  }
+);

@@ -10,6 +10,13 @@ import { useMemo } from 'react';
 import { useKibana } from './use_kibana';
 
 interface QueriesApi {
+  promote: ({
+    queryId,
+    streamName,
+  }: {
+    queryId: string;
+    streamName: string;
+  }) => Promise<{ promoted: number }>;
   promoteAll: () => Promise<{ promoted: number }>;
   getUnbackedQueriesCount: (signal?: AbortSignal | null) => Promise<{ count: number }>;
   abort: () => void;
@@ -27,6 +34,19 @@ export function useQueriesApi(): QueriesApi {
 
   return useMemo(
     () => ({
+      promote: async ({ queryId, streamName }: { queryId: string; streamName: string }) => {
+        return streamsRepositoryClient.fetch('POST /internal/streams/queries/{queryId}/_promote', {
+          params: {
+            path: {
+              queryId,
+            },
+            body: {
+              streamName,
+            },
+          },
+          signal,
+        });
+      },
       promoteAll: async () => {
         return streamsRepositoryClient.fetch('POST /internal/streams/queries/_promote_all', {
           signal,

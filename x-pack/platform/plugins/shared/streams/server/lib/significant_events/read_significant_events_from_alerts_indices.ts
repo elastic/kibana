@@ -144,6 +144,7 @@ export async function readSignificantEventsFromAlertsIndices(
             stationary: { p_value: 0, change_point: 0 },
           },
         },
+        rule_backed: queryLink.rule_backed ?? true,
       })),
       aggregated_occurrences: [],
     };
@@ -169,6 +170,7 @@ export async function readSignificantEventsFromAlertsIndices(
             count: occurrence.doc_count,
           }))
         : [],
+      rule_backed: queryLink.rule_backed ?? true,
       change_points: changePoints,
     };
   });
@@ -185,6 +187,7 @@ export async function readSignificantEventsFromAlertsIndices(
           stationary: { p_value: 0, change_point: 0 },
         },
       },
+      rule_backed: queryLink.rule_backed ?? true,
     }));
 
   return {
