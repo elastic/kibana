@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { createStore, applyMiddleware, compose } from 'redux';
+import type { PreloadedState } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 
 import { remoteClusters } from './reducers';
 import { detailPanel } from './middleware';
+import type { RemoteClustersState } from './types';
 
-export function createRemoteClustersStore(initialState = {}) {
-  const enhancers = [applyMiddleware(thunk, detailPanel)];
-  return createStore(remoteClusters, initialState, compose(...enhancers));
+export function createRemoteClustersStore(initialState?: PreloadedState<RemoteClustersState>) {
+  const enhancer = applyMiddleware(thunk, detailPanel);
+  return createStore(remoteClusters, initialState, enhancer);
 }
 
 export const remoteClustersStore = createRemoteClustersStore();

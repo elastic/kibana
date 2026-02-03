@@ -17,8 +17,10 @@ import {
   ADD_CLUSTER_FAILURE,
   CLEAR_ADD_CLUSTER_ERRORS,
 } from '../action_types';
+import type { ClusterPayload } from '../../../../common/lib';
+import type { AppDispatch } from '../types';
 
-export const addCluster = (cluster) => async (dispatch) => {
+export const addCluster = (cluster: ClusterPayload) => async (dispatch: AppDispatch) => {
   dispatch({
     type: ADD_CLUSTER_START,
   });
@@ -87,7 +89,8 @@ export const addCluster = (cluster) => async (dispatch) => {
       location: { search },
     },
   } = getRouter();
-  const { redirect: redirectUrl } = extractQueryParams(search);
+  const { redirect: redirectParam } = extractQueryParams(search);
+  const redirectUrl = Array.isArray(redirectParam) ? redirectParam[0] : redirectParam;
 
   if (redirectUrl) {
     // A toast is only needed if we're leaving the app.
@@ -110,7 +113,7 @@ export const addCluster = (cluster) => async (dispatch) => {
   }
 };
 
-export const clearAddClusterErrors = () => (dispatch) => {
+export const clearAddClusterErrors = () => (dispatch: AppDispatch) => {
   dispatch({
     type: CLEAR_ADD_CLUSTER_ERRORS,
   });

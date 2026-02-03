@@ -8,10 +8,11 @@
 import { extractQueryParams } from '../../../shared_imports';
 import { getRouter } from '../../services';
 import { OPEN_DETAIL_PANEL, CLOSE_DETAIL_PANEL } from '../action_types';
+import type { AppDispatch } from '../types';
 
 export const openDetailPanel =
-  ({ name }) =>
-  (dispatch) => {
+  ({ name }: { name: string }) =>
+  (dispatch: AppDispatch) => {
     const { history } = getRouter();
     const search = history.location.search;
     const { cluster: clusterName } = extractQueryParams(search);
@@ -29,7 +30,7 @@ export const openDetailPanel =
     });
   };
 
-export const closeDetailPanel = () => (dispatch) => {
+export const closeDetailPanel = () => (dispatch: AppDispatch) => {
   dispatch({
     type: CLOSE_DETAIL_PANEL,
   });

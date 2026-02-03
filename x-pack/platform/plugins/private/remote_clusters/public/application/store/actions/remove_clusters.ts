@@ -20,8 +20,10 @@ import { REMOVE_CLUSTERS_START, REMOVE_CLUSTERS_FINISH } from '../action_types';
 
 import { closeDetailPanel } from './detail_panel';
 import { getDetailPanelClusterName } from '../selectors';
+import type { AppDispatch, RemoteClustersState } from '../types';
+import type { DeleteClustersResponse } from '../../services/http';
 
-function getErrorTitle(count, name = null) {
+function getErrorTitle(count: number, name: string | null = null) {
   if (count === 1) {
     if (name) {
       return i18n.translate('xpack.remoteClusters.removeAction.errorSingleNotificationTitle', {
@@ -37,78 +39,79 @@ function getErrorTitle(count, name = null) {
   }
 }
 
-export const removeClusters = (names) => async (dispatch, getState) => {
-  dispatch({
-    type: REMOVE_CLUSTERS_START,
-  });
-
-  let itemsDeleted = [];
-  let errors = [];
-
-  await Promise.all([
-    sendRemoveClusterRequest(names.join(',')).then((response) => {
-      ({ itemsDeleted, errors } = response);
-    }),
-    // Wait at least half a second to avoid a weird flicker of the saving feedback (only visible
-    // when requests resolve very quickly).
-    new Promise((resolve) => setTimeout(resolve, 500)),
-  ]).catch((error) => {
-    const errorTitle = getErrorTitle(names.length, names[0]);
-    toasts.addDanger({
-      title: errorTitle,
-      text: error.body?.message,
+export const removeClusters =
+  (names: string[]) => async (dispatch: AppDispatch, getState: () => RemoteClustersState) => {
+    dispatch({
+      type: REMOVE_CLUSTERS_START,
     });
-  });
 
-  if (errors.length > 0) {
-    const {
-      name,
-      error: {
-        payload: { message },
-      },
-    } = errors[0];
+    let itemsDeleted: DeleteClustersResponse['itemsDeleted'] = [];
+    let errors: DeleteClustersResponse['errors'] = [];
 
-    const title = getErrorTitle(errors.length, name);
-    toasts.addDanger({
-      title,
-      text: message,
+    await Promise.all([
+      sendRemoveClusterRequest(names.join(',')).then((response) => {
+        ({ itemsDeleted, errors } = response);
+      }),
+      // Wait at least half a second to avoid a weird flicker of the saving feedback (only visible
+      // when requests resolve very quickly).
+      new Promise((resolve) => setTimeout(resolve, 500)),
+    ]).catch((error) => {
+      const errorTitle = getErrorTitle(names.length, names[0]);
+      toasts.addDanger({
+        title: errorTitle,
+        text: error.body?.message,
+      });
     });
-  }
 
-  if (itemsDeleted.length > 0) {
-    // Only track successful requests.
-    trackUiMetric(
-      METRIC_TYPE.COUNT,
-      names.length > 1 ? UIM_CLUSTER_REMOVE_MANY : UIM_CLUSTER_REMOVE
-    );
+    if (errors.length > 0) {
+      const {
+        name,
+        error: {
+          payload: { message },
+        },
+      } = errors[0];
 
-    if (itemsDeleted.length === 1) {
-      toasts.addSuccess(
-        i18n.translate('xpack.remoteClusters.removeAction.successSingleNotificationTitle', {
-          defaultMessage: `Remote cluster ''{name}'' was removed`,
-          values: { name: itemsDeleted[0] },
-        })
-      );
-    } else {
-      toasts.addSuccess(
-        i18n.translate('xpack.remoteClusters.removeAction.successMultipleNotificationTitle', {
-          defaultMessage: '{count} remote clusters were removed',
-          values: { count: itemsDeleted.length },
-        })
-      );
+      const title = getErrorTitle(errors.length, name);
+      toasts.addDanger({
+        title,
+        text: message,
+      });
     }
-  }
 
-  // If we've just deleted a cluster we were looking at, we need to close the panel.
-  const detailPanelClusterName = getDetailPanelClusterName(getState());
-  if (detailPanelClusterName && names.includes(detailPanelClusterName)) {
-    dispatch(closeDetailPanel());
-  }
+    if (itemsDeleted.length > 0) {
+      // Only track successful requests.
+      trackUiMetric(
+        METRIC_TYPE.COUNT,
+        names.length > 1 ? UIM_CLUSTER_REMOVE_MANY : UIM_CLUSTER_REMOVE
+      );
 
-  dispatch({
-    type: REMOVE_CLUSTERS_FINISH,
-    // Send the cluster that have been removed to the reducers
-    // and update the store immediately without the need to re-fetch from the server
-    payload: itemsDeleted,
-  });
-};
+      if (itemsDeleted.length === 1) {
+        toasts.addSuccess(
+          i18n.translate('xpack.remoteClusters.removeAction.successSingleNotificationTitle', {
+            defaultMessage: `Remote cluster ''{name}'' was removed`,
+            values: { name: itemsDeleted[0] },
+          })
+        );
+      } else {
+        toasts.addSuccess(
+          i18n.translate('xpack.remoteClusters.removeAction.successMultipleNotificationTitle', {
+            defaultMessage: '{count} remote clusters were removed',
+            values: { count: itemsDeleted.length },
+          })
+        );
+      }
+    }
+
+    // If we've just deleted a cluster we were looking at, we need to close the panel.
+    const detailPanelClusterName = getDetailPanelClusterName(getState());
+    if (detailPanelClusterName && names.includes(detailPanelClusterName)) {
+      dispatch(closeDetailPanel());
+    }
+
+    dispatch({
+      type: REMOVE_CLUSTERS_FINISH,
+      // Send the cluster that have been removed to the reducers
+      // and update the store immediately without the need to re-fetch from the server
+      payload: itemsDeleted,
+    });
+  };

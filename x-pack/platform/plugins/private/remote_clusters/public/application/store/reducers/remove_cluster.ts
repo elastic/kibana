@@ -6,15 +6,17 @@
  */
 
 import { REMOVE_CLUSTERS_START, REMOVE_CLUSTERS_FINISH } from '../action_types';
+import type { RemoveClusterState, RemoteClustersAction } from '../types';
 
-const initialState = {
+const initialState: RemoveClusterState = {
   isRemoving: false,
 };
 
-export function removeCluster(state = initialState, action) {
-  const { type } = action;
-
-  switch (type) {
+export function removeCluster(
+  state = initialState,
+  action: RemoteClustersAction
+): RemoveClusterState {
+  switch (action.type) {
     case REMOVE_CLUSTERS_START:
       return {
         isRemoving: true,

@@ -12,8 +12,9 @@ import {
   REFRESH_CLUSTERS_SUCCESS,
   REMOVE_CLUSTERS_FINISH,
 } from '../action_types';
+import type { ClustersState, RemoteCluster, RemoteClustersAction } from '../types';
 
-const initialState = {
+const initialState: ClustersState = {
   isLoading: false,
   clusterLoadError: null,
   asList: [],
@@ -23,8 +24,8 @@ const initialState = {
 
 // Convert an  Array of clusters to an object where
 // each key is the cluster name
-const mapClustersToNames = (clusters) =>
-  clusters.reduce(
+const mapClustersToNames = (clustersList: RemoteCluster[]) =>
+  clustersList.reduce<Record<string, RemoteCluster>>(
     (byName, cluster) => ({
       ...byName,
       [cluster.name]: cluster,
@@ -32,42 +33,50 @@ const mapClustersToNames = (clusters) =>
     {}
   );
 
-const getClustersNames = (clusters) => clusters.map((cluster) => cluster.name);
+const getClustersNames = (clustersList: RemoteCluster[]) =>
+  clustersList.map((cluster) => cluster.name);
 
-export function clusters(state = initialState, action) {
-  const { type, payload } = action;
-
-  switch (type) {
+export function clusters(state = initialState, action: RemoteClustersAction): ClustersState {
+  switch (action.type) {
     case LOAD_CLUSTERS_START:
       return {
         ...state,
         isLoading: true,
       };
 
-    case LOAD_CLUSTERS_SUCCESS:
+    case LOAD_CLUSTERS_SUCCESS: {
+      const { clusters: clustersList } = action.payload;
       return {
-        asList: [...payload.clusters],
-        byName: mapClustersToNames(payload.clusters),
-        allNames: getClustersNames(payload.clusters),
+        ...state,
+        asList: [...clustersList],
+        byName: mapClustersToNames(clustersList),
+        allNames: getClustersNames(clustersList),
         isLoading: false,
+        clusterLoadError: null,
       };
+    }
 
-    case REFRESH_CLUSTERS_SUCCESS:
+    case REFRESH_CLUSTERS_SUCCESS: {
+      const { clusters: clustersList } = action.payload;
       return {
-        asList: [...payload.clusters],
-        byName: mapClustersToNames(payload.clusters),
-        allNames: getClustersNames(payload.clusters),
+        ...state,
+        asList: [...clustersList],
+        byName: mapClustersToNames(clustersList),
+        allNames: getClustersNames(clustersList),
       };
+    }
 
-    case LOAD_CLUSTERS_FAILURE:
+    case LOAD_CLUSTERS_FAILURE: {
+      const { error } = action.payload;
       return {
         ...state,
         isLoading: false,
-        clusterLoadError: payload.error,
+        clusterLoadError: error,
       };
+    }
 
     case REMOVE_CLUSTERS_FINISH:
-      const clustersRemoved = payload;
+      const clustersRemoved = action.payload;
 
       const updatedList = Object.keys(state.byName)
         .filter((name) => clustersRemoved.indexOf(name) < 0)

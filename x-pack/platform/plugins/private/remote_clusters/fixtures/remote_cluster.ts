@@ -8,6 +8,20 @@
 import { getRandomString } from '@kbn/test-jest-helpers';
 
 import { SECURITY_MODEL, SNIFF_MODE } from '../common/constants';
+import type { Cluster } from '../common/lib';
+
+export interface RemoteClusterMock extends Cluster {
+  isConfiguredByNode: boolean;
+  name: string;
+  seeds: string[];
+  isConnected: boolean;
+  connectedNodesCount: number;
+  maxConnectionsPerCluster: number;
+  initialConnectTimeout: string;
+  skipUnavailable: boolean;
+  mode: 'sniff' | 'proxy';
+  securityModel: 'certificate' | 'api_key';
+}
 
 export const getRemoteClusterMock = ({
   name = getRandomString(),
@@ -20,7 +34,7 @@ export const getRemoteClusterMock = ({
   proxyAddress,
   hasDeprecatedProxySetting = false,
   securityModel = SECURITY_MODEL.CERTIFICATE,
-} = {}) => ({
+}: Partial<Cluster & { isConfiguredByNode?: boolean }> = {}): RemoteClusterMock => ({
   name,
   seeds,
   isConnected,

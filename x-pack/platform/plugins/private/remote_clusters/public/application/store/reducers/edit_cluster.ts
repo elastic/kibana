@@ -13,21 +13,21 @@ import {
   EDIT_CLUSTER_FAILURE,
   CLEAR_EDIT_CLUSTER_ERRORS,
 } from '../action_types';
+import type { EditClusterState, RemoteClustersAction } from '../types';
 
-const initialState = {
+const initialState: EditClusterState = {
   clusterName: undefined,
   isEditing: false,
   error: undefined,
 };
 
-export function editCluster(state = initialState, action) {
-  const { type, payload } = action;
-
-  switch (type) {
+export function editCluster(state = initialState, action: RemoteClustersAction): EditClusterState {
+  switch (action.type) {
     case EDIT_CLUSTER_START:
-      const { clusterName } = payload;
+      const { clusterName } = action.payload;
 
       return {
+        ...state,
         clusterName,
       };
 
@@ -53,7 +53,7 @@ export function editCluster(state = initialState, action) {
     case EDIT_CLUSTER_FAILURE:
       return {
         ...state,
-        error: payload.error,
+        error: action.payload.error,
         isEditing: false,
       };
 

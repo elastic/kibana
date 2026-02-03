@@ -16,9 +16,9 @@ import {
 } from '../../../store/selectors';
 
 import { closeDetailPanel } from '../../../store/actions';
+import type { RemoteClustersState, AppDispatch } from '../../../store/types';
 
-/** @type {import('react-redux').MapStateToProps<any, any, any>} */
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: RemoteClustersState) => {
   return {
     isOpen: isDetailPanelOpen(state),
     isLoading: isLoading(state),
@@ -27,8 +27,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-/** @type {import('react-redux').MapDispatchToProps<any, any>} */
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = (dispatch: AppDispatch) => {
   return {
     closeDetailPanel: () => {
       dispatch(closeDetailPanel());
@@ -36,7 +35,4 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-/**
- * @type {import('react-redux').ConnectedComponent<typeof DetailPanelView, {}>}
- */
 export const DetailPanel = connect(mapStateToProps, mapDispatchToProps)(DetailPanelView);

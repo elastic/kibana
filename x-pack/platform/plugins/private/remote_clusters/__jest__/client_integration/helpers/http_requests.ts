@@ -47,8 +47,10 @@ const registerHttpRequestMockHelpers = (
       .set(path, error ? defuse(Promise.reject({ body: error })) : Promise.resolve(response));
   };
 
-  const setLoadRemoteClustersResponse = (response: Cluster[], error?: ResponseError) =>
-    mockResponse('GET', API_BASE_PATH, response, error);
+  const setLoadRemoteClustersResponse = (
+    response: Array<Partial<Cluster>>,
+    error?: ResponseError
+  ) => mockResponse('GET', API_BASE_PATH, response, error);
 
   const setDeleteRemoteClusterResponse = (
     clusterName: string,
