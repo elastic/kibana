@@ -66,7 +66,6 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   const armTemplateUrl =
     cloud && templateName
       ? getCloudConnectorRemoteRoleTemplate({
-          newPolicy,
           cloud,
           packageInfo,
           templateName,

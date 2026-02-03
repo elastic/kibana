@@ -39,7 +39,6 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   const cloudConnectorRemoteRoleTemplate =
     cloud && templateName
       ? getCloudConnectorRemoteRoleTemplate({
-          newPolicy,
           cloud,
           packageInfo,
           templateName,

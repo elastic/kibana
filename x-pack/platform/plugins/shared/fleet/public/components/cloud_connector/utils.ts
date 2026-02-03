@@ -160,7 +160,6 @@ const getTemplateFieldNameByProvider = (provider: CloudProviders): string | unde
 };
 
 export const getCloudConnectorRemoteRoleTemplate = ({
-  newPolicy,
   cloud,
   packageInfo,
   templateName,

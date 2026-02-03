@@ -106,7 +106,6 @@ export type CloudSetupForCloudConnector = Pick<
 >;
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {
-  newPolicy: NewPackagePolicy;
   cloud: CloudSetupForCloudConnector;
   packageInfo: PackageInfo;
   templateName: string;

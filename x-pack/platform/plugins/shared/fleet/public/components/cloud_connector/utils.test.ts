@@ -436,7 +436,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: serverlessCloudSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
@@ -451,7 +450,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
 
     it('should generate template URL for AWS with cloud ESS deployment', () => {
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: mockAwsCloudSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
@@ -473,7 +471,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: hybridCloudSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
@@ -488,7 +485,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
 
     it('should use organization-account type when passed as parameter', () => {
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: mockAwsCloudSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
@@ -501,7 +497,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
 
     it('should use single-account type when passed as parameter', () => {
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: mockAwsCloudSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
@@ -522,7 +517,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: complexCloudSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
@@ -543,7 +537,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: complexGcpCloudSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
@@ -564,7 +557,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: complexAzureCloudSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
@@ -583,7 +575,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: differentUrlSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
@@ -605,7 +596,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: noResourceCloudSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
@@ -625,7 +615,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: serverlessNoProjectSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
@@ -643,7 +632,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: noDeploymentUrlSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
@@ -661,7 +649,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: noCloudIdSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
@@ -674,7 +661,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
 
     it('should return undefined when provider is invalid', () => {
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: mockAwsCloudSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
@@ -688,7 +674,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
 
     it('should return undefined when template name does not exist in package info', () => {
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: mockAwsCloudSetup,
         packageInfo: mockPackageInfo,
         templateName: 'non-existent-template',
@@ -721,7 +706,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       } as PackageInfo;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: mockAwsCloudSetup,
         packageInfo: packageInfoWithoutTemplate,
         templateName: 'cspm',
@@ -741,7 +725,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: invalidCloudIdSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
@@ -759,7 +742,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: mockPolicy,
         cloud: invalidDeploymentUrlSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
@@ -839,7 +821,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         } as CloudSetup;
 
         const result = getCloudConnectorRemoteRoleTemplate({
-          newPolicy: azurePolicy,
           cloud: serverlessCloudSetup,
           packageInfo: azurePackageInfo,
           templateName: 'cspm',
@@ -854,7 +835,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
 
       it('should generate ARM template URL for Azure with cloud ESS deployment', () => {
         const result = getCloudConnectorRemoteRoleTemplate({
-          newPolicy: azurePolicy,
           cloud: mockAzureCloudSetup,
           packageInfo: azurePackageInfo,
           templateName: 'cspm',
@@ -869,7 +849,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
 
       it('should use Azure single-account type when passed as parameter', () => {
         const result = getCloudConnectorRemoteRoleTemplate({
-          newPolicy: azurePolicy,
           cloud: mockAzureCloudSetup,
           packageInfo: azurePackageInfo,
           templateName: 'cspm',
@@ -890,7 +869,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         } as CloudSetup;
 
         const result = getCloudConnectorRemoteRoleTemplate({
-          newPolicy: azurePolicy,
           cloud: complexAzureCloudSetup,
           packageInfo: azurePackageInfo,
           templateName: 'cspm',
@@ -925,7 +903,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         } as PackageInfo;
 
         const result = getCloudConnectorRemoteRoleTemplate({
-          newPolicy: azurePolicy,
           cloud: mockAzureCloudSetup,
           packageInfo: packageInfoWithoutArmTemplate,
           templateName: 'cspm',
@@ -944,7 +921,6 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         } as CloudSetup;
 
         const result = getCloudConnectorRemoteRoleTemplate({
-          newPolicy: azurePolicy,
           cloud: noResourceCloudSetup,
           packageInfo: azurePackageInfo,
           templateName: 'cspm',
