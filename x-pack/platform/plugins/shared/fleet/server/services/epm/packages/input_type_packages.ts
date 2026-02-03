@@ -15,6 +15,7 @@ import type {
   PackageInfo,
   PackagePolicy,
   RegistryDataStream,
+  RegistryPolicyInputOnlyTemplate,
 } from '../../../types';
 import {
   DATASET_VAR_NAME,
@@ -85,6 +86,17 @@ export const isInputPackageDatasetUsedByMultiplePolicies = (
   return filtered.length > 1;
 };
 
+export const hasDynamicSignalTypes = (packageInfo?: PackageInfo): boolean => {
+  if (!packageInfo) {
+    return false;
+  }
+  const inputOnlyTemplate = packageInfo.policy_templates?.find(
+    (template) => 'input' in template && template.input === OTEL_COLLECTOR_INPUT_TYPE
+  ) as RegistryPolicyInputOnlyTemplate | undefined;
+
+  return inputOnlyTemplate?.dynamic_signal_types === true;
+};
+
 // install the assets needed for inputs type packages
 export async function installAssetsForInputPackagePolicy(opts: {
   pkgInfo: PackageInfo;
@@ -100,10 +112,43 @@ export async function installAssetsForInputPackagePolicy(opts: {
 
   const datasetName = getDatasetName(packagePolicy.inputs);
 
-  const dataStreamType =
-    packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
-    packagePolicy.inputs[0].streams[0].data_stream?.type ||
-    'logs';
+  // For OTel packages with dynamic_signal_types, we need to create index templates for all signal types
+  const isDynamicSignalTypes = hasDynamicSignalTypes(pkgInfo);
+  const signalTypes: string[] = isDynamicSignalTypes
+    ? ['logs', 'metrics', 'traces']
+    : [
+        packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
+          packagePolicy.inputs[0].streams[0].data_stream?.type ||
+          'logs',
+      ];
+
+  // Check each signal type and install templates as needed
+  for (const dataStreamType of signalTypes) {
+    await installAssetsForDataStreamType({
+      pkgInfo,
+      logger,
+      datasetName,
+      dataStreamType,
+      inputType: packagePolicy.inputs[0].type,
+      esClient,
+      soClient,
+      force,
+    });
+  }
+}
+
+async function installAssetsForDataStreamType(opts: {
+  pkgInfo: PackageInfo;
+  logger: Logger;
+  datasetName: string;
+  dataStreamType: string;
+  inputType: string;
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  force: boolean;
+}) {
+  const { pkgInfo, logger, datasetName, dataStreamType, inputType, esClient, soClient, force } =
+    opts;
 
   const { dataStream, existingDataStreams } = await findDataStreamsFromDifferentPackages(
     datasetName,
@@ -114,7 +159,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
 
   applyTimeSeriesIndexMode({
     dataStream,
-    inputType: packagePolicy.inputs[0].type,
+    inputType,
     dataStreamType,
     pkgName: pkgInfo.name,
     logger,
