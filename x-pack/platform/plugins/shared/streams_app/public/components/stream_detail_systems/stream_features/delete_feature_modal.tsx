@@ -46,7 +46,11 @@ export function DeleteFeatureModal({
         name: FEATURE_COLUMN_LABEL,
         truncateText: true,
         render: (feature: Feature) => {
-          return Object.values(feature.value).join(', ');
+          return Object.entries(feature.properties).map(([key, value]) => (
+            <div key={key}>
+              <b>{key}</b> {value}
+            </div>
+          ));
         },
       },
       {
