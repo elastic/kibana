@@ -49,9 +49,6 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
   const { euiTheme } = useEuiTheme();
 
   const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
-  const currentAppId = useObservable(kibana.services.application.currentAppId$);
-  const solutionIdForExtensions =
-    activeSolutionId ?? (currentAppId === 'discover' ? 'oblt' : undefined);
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
 
@@ -77,14 +74,6 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
       };
     }
 
-    if (adHocDataview && typeof adHocDataview === 'string') {
-      return {
-        queryForRecommendedQueries: `FROM ${adHocDataview}`,
-        timeFieldName: undefined,
-        categorizationField: undefined,
-      };
-    }
-
     return {
       queryForRecommendedQueries: '',
       timeFieldName: undefined,
@@ -92,21 +81,19 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     };
   }, [adHocDataview]);
 
-  const queryForExtensions = 'FROM *';
-
   // Use a ref to store the *previous* fetched recommended queries
   const lastFetchedQueries = useRef<RecommendedQuery[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     const getESQLExtensions = async () => {
-      if (!solutionIdForExtensions || !queryForExtensions) {
+      if (!activeSolutionId || !queryForRecommendedQueries) {
         return; // Don't fetch if we don't have the active solution or query
       }
 
       try {
         const extensions: { recommendedQueries: RecommendedQuery[] } = await http.get(
-          `${REGISTRY_EXTENSIONS_ROUTE}${solutionIdForExtensions}/${queryForExtensions}`
+          `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${queryForRecommendedQueries}`
         );
 
         if (cancelled) return;
@@ -126,7 +113,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [solutionIdForExtensions, http, queryForExtensions]);
+  }, [activeSolutionId, http, queryForRecommendedQueries]);
 
   const toggleLanguageComponent = useCallback(() => {
     setIsLanguageComponentOpen(!isLanguageComponentOpen);
