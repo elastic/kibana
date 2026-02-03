@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 import type { NewPackagePolicy, PackageInfo } from '../../../common';
@@ -47,12 +46,6 @@ export interface AzureCloudConnectorCredentials extends BaseCloudConnectorCreden
 export type CloudConnectorCredentials =
   | AwsCloudConnectorCredentials
   | AzureCloudConnectorCredentials;
-
-export interface CloudConnectorConfig {
-  provider: CloudProviders;
-  fields: CloudConnectorField[];
-  description?: ReactNode;
-}
 
 export interface NewCloudConnectorFormProps {
   newPolicy: NewPackagePolicy;
@@ -111,10 +104,6 @@ export type CloudSetupForCloudConnector = Pick<
   | 'serverless'
   | 'isServerlessEnabled'
 >;
-
-export interface CloudFormationCloudCredentialsGuideProps {
-  cloudProvider?: CloudProvider;
-}
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {
   newPolicy: NewPackagePolicy;
