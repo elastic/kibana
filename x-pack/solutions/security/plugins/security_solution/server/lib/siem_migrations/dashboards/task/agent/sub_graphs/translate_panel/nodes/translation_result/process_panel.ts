@@ -73,6 +73,7 @@ export const processPanel = (
       w: parsedPanel.position.w,
       h: parsedPanel.position.h,
       i: parsedPanel.id,
+      sectionId: parsedPanel.section?.id,
     };
     panelJSON.panelIndex = parsedPanel.id;
   }

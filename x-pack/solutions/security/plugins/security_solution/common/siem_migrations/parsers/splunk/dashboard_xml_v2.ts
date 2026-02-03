@@ -115,7 +115,7 @@ export class SplunkXmlDashboardV2Parser extends XmlParser implements SplunkDashb
       for (const tabbedDefEl of allTabbedDefinitions) {
         const tabbedDef = tabbedDefEl._;
         if (tabbedDef) {
-          const title = tabbedDefEl.$?.title || 'Untitled Section';
+          const title = tabbedDefEl.$?.title || tabbedDefEl.$?.value || 'Untitled Section';
           const section: PanelSection = {
             id: uuidV4(),
             title,
