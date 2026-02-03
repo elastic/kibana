@@ -281,6 +281,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
+    if (plugins.agentBuilder?.events) {
+      plugins.agentBuilder.events.chat$.subscribe((event) => {
+        this.logger.info(`Agent Builder Chat Event: ${JSON.stringify(event)}`);
+      });
+    }
+
     return this.contract.getStartContract(core);
   }
 

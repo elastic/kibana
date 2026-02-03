@@ -14,6 +14,7 @@ export enum ToolResultType {
   dashboard = 'dashboard',
   query = 'query',
   visualization = 'visualization',
+  entity = 'entity',
   other = 'other',
   error = 'error',
 }
@@ -32,6 +33,16 @@ interface ToolResultMixin<TType extends ToolResultType, TData extends Object> {
   type: TType;
   data: TData;
 }
+
+export type EntityResult = ToolResultMixin<
+  ToolResultType.entity,
+  {
+    id: string;
+    type: string;
+    link?: { path: string; deepLinkId: string };
+    score?: number;
+  }
+>;
 
 export type DashboardResult = ToolResultMixin<
   ToolResultType.dashboard,
@@ -97,6 +108,7 @@ export type ToolResult<T extends Object = Record<string, unknown>> =
   | QueryResult
   | VisualizationResult
   | DashboardResult
+  | EntityResult
   | OtherResult<T>
   | ErrorResult;
 
@@ -124,6 +136,10 @@ export const isDashboardResult = (result: ToolResult): result is DashboardResult
   return result.type === ToolResultType.dashboard;
 };
 
+export const isEntityResult = (result: ToolResult): result is EntityResult => {
+  return result.type === ToolResultType.entity;
+};
+
 export interface VisualizationElementAttributes {
   toolResultId?: string;
   chartType?: ChartType;
@@ -143,6 +159,17 @@ export interface DashboardElementAttributes {
 
 export const dashboardElement = {
   tagName: 'dashboard',
+  attributes: {
+    toolResultId: 'tool-result-id',
+  },
+};
+
+export interface EntityElementAttributes {
+  toolResultId?: string;
+}
+
+export const entityElement = {
+  tagName: 'entity',
   attributes: {
     toolResultId: 'tool-result-id',
   },

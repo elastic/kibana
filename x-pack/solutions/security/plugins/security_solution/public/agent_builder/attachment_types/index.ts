@@ -8,7 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentContentProps } from '@kbn/agent-builder-browser/attachments';
+import type { ReactNode } from 'react';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+
+// Framework support being added: https://github.com/elastic/kibana/pull/248935
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -22,6 +26,7 @@ interface AttachmentTypeConfig {
   type: SecurityAgentBuilderAttachments;
   label: string;
   icon: string;
+  // customRenderer?: (props: AttachmentContentProps<UnknownAttachmentWithLabel>) => ReactNode;
 }
 
 const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
@@ -38,6 +43,7 @@ const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
       defaultMessage: 'Risk Entity',
     }),
     icon: 'user',
+    // customRenderer: (props: AttachmentContentProps<UnknownAttachmentWithLabel>) => {},
   },
   {
     type: SecurityAgentBuilderAttachments.rule,
@@ -48,12 +54,17 @@ const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
   },
 ];
 
-const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
+const createAttachmentTypeConfig = (
+  defaultLabel: string,
+  icon: string,
+  customRenderer?: (props: AttachmentContentProps<UnknownAttachmentWithLabel>) => ReactNode
+) => ({
   getLabel: (attachment: UnknownAttachmentWithLabel) => {
     const attachmentLabel = attachment?.data?.attachmentLabel;
     return attachmentLabel ?? defaultLabel;
   },
   getIcon: () => icon,
+  ...(customRenderer && { renderContent: customRenderer }),
 });
 
 export const registerAttachmentUiDefinitions = ({
@@ -61,10 +72,10 @@ export const registerAttachmentUiDefinitions = ({
 }: {
   attachments: AttachmentServiceStartContract;
 }) => {
-  ATTACHMENT_TYPE_CONFIGS.forEach(({ type, label, icon }) => {
+  ATTACHMENT_TYPE_CONFIGS.forEach(({ type, label, icon /* , customRenderer*/ }) => {
     attachments.addAttachmentType<UnknownAttachmentWithLabel>(
       type,
-      createAttachmentTypeConfig(label, icon)
+      createAttachmentTypeConfig(label, icon /* , customRenderer*/)
     );
   });
 };
