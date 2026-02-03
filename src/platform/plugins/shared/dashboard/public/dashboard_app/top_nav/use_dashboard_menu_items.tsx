@@ -221,12 +221,14 @@ export const useDashboardMenuItems = ({
       id: 'reset',
       testId: 'dashboardDiscardChangesMenuItem',
       iconType: 'editorUndo',
+      // Disable reset for new/non-persistent dashboards (!lastSavedId) because there is
+      // no saved state to reset to. Also disable when resetting, no changes, or overlays present.
       disableButton:
         isResetting ||
         !hasUnsavedChanges ||
         hasOverlays ||
         (viewMode === 'edit' && (isSaveInProgress || !lastSavedId)) ||
-        !lastSavedId, // Disable when on a new dashboard
+        !lastSavedId,
       isLoading: isResetting,
       run: () => resetChanges(),
     };
@@ -372,7 +374,10 @@ export const useDashboardMenuItems = ({
               iconType: 'save',
               order: 1,
               testId: 'dashboardInteractiveSaveMenuItem',
-              disableButton: isSaveInProgress || !lastSavedId, // Disable when on a new dashboard
+              // Disable "Save as" for new/non-persistent dashboards (!lastSavedId) because
+              // it would have the same effect as "Save". Only enable when dashboard has been
+              // saved at least once, allowing users to create a copy of an existing dashboard.
+              disableButton: isSaveInProgress || !lastSavedId,
               run: () => dashboardInteractiveSave(),
             },
             resetChangesMenuItem,

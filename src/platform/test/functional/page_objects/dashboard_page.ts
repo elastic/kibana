@@ -951,6 +951,36 @@ export class DashboardPageObject extends FtrService {
     }
   }
 
+  public async expectSaveAsButtonDisabled() {
+    this.log.debug('expectSaveAsButtonDisabled');
+    // The "Save as" button is part of the split button dropdown
+    // First, open the save menu dropdown
+    await this.testSubjects.click('dashboardQuickSaveMenuItem~togglePopover');
+    // Check if the "Save as" option is disabled
+    const saveAsButton = await this.testSubjects.find('dashboardInteractiveSaveMenuItem');
+    const isDisabled = await saveAsButton.getAttribute('disabled');
+    // Close the dropdown
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    if (!isDisabled) {
+      throw new Error('Save as button should be disabled for new dashboards');
+    }
+  }
+
+  public async expectSaveAsButtonEnabled() {
+    this.log.debug('expectSaveAsButtonEnabled');
+    // The "Save as" button is part of the split button dropdown
+    // First, open the save menu dropdown
+    await this.testSubjects.click('dashboardQuickSaveMenuItem~togglePopover');
+    // Check if the "Save as" option is enabled
+    const saveAsButton = await this.testSubjects.find('dashboardInteractiveSaveMenuItem');
+    const isDisabled = await saveAsButton.getAttribute('disabled');
+    // Close the dropdown
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    if (isDisabled) {
+      throw new Error('Save as button should be enabled for saved dashboards');
+    }
+  }
+
   public async getNotLoadedVisualizations(vizList: string[]) {
     const checkList = [];
     for (const name of vizList) {

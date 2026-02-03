@@ -95,6 +95,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.expectMissingQuickSaveOption();
       });
 
+      it('Disables "Save as" button on a new dashboard', async function () {
+        await dashboard.gotoDashboardLandingPage();
+        await dashboard.clickNewDashboard();
+        await dashboard.switchToEditMode();
+        // For new/non-persistent dashboards, "Save as" should be disabled
+        // because it has the same effect as "Save"
+        await dashboard.expectSaveAsButtonDisabled();
+      });
+
       it('Does not show dashboard save modal when on quick save', async function () {
         await esArchiver.loadIfNeeded(
           'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
@@ -111,6 +120,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clickQuickSave();
 
         await testSubjects.existOrFail('saveDashboardSuccess');
+      });
+
+      it('Enables "Save as" button after dashboard is saved', async function () {
+        await header.waitUntilLoadingHasFinished();
+        // After saving, "Save as" should be enabled to allow creating a copy
+        await dashboard.expectSaveAsButtonEnabled();
       });
 
       it('Stays in edit mode after performing a quick save', async function () {
