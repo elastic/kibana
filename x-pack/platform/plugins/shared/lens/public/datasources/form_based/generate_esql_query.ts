@@ -82,13 +82,23 @@ function getEsqlQueryFailedResult(
   return operationType ? { success: false, reason, operationType } : { success: false, reason };
 }
 
+/**
+ * Optional mapping of column IDs to semantic role names.
+ * Used to generate more meaningful ES|QL column names.
+ * e.g., { 'col-123': 'max_value' } will generate `EVAL max_value = 100` instead of `EVAL static = 100`
+ */
+export interface ColumnRoles {
+  [columnId: string]: string;
+}
+
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
   layer: FormBasedLayer,
   indexPattern: IndexPattern,
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
-  nowInstant: Date
+  nowInstant: Date,
+  columnRoles?: ColumnRoles
 ): EsqlQueryResult {
   // esql mode variables
   const partialRows = true;
@@ -151,9 +161,17 @@ export function generateEsqlQuery(
     const staticCol = col as StaticValueIndexPatternColumn;
     const value = staticCol.params?.value ?? '100';
 
-    // Generate a unique column name for the static value
-    // Use 'static' for single value, 'static_0', 'static_1' etc. for multiple
-    const esAggsId = staticValueEntries.length === 1 ? 'static' : `static_${index}`;
+    // Generate a column name for the static value
+    // Priority: 1) semantic role name from visualization, 2) 'static' for single, 3) 'static_N' for multiple
+    const roleName = columnRoles?.[colId];
+    let esAggsId: string;
+    if (roleName) {
+      esAggsId = `static_${roleName}`;
+    } else if (staticValueEntries.length === 1) {
+      esAggsId = 'static';
+    } else {
+      esAggsId = `static_${index}`;
+    }
 
     const format = isColumnFormatted(col) ? col.params?.format : undefined;
 

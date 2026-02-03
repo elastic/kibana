@@ -139,6 +139,63 @@ describe('generateEsqlQuery metric max (static_value)', () => {
     }
   });
 
+  it('should use semantic role name when columnRoles provided', () => {
+    uiSettings.get.mockImplementation((key: string) => {
+      return defaultUiSettingsGet(key);
+    });
+
+    const result = generateEsqlQuery(
+      [
+        [
+          '1',
+          {
+            operationType: 'count',
+            sourceField: 'records',
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+          },
+        ],
+        [
+          'max-col-id',
+          {
+            operationType: 'static_value',
+            label: 'Static value: 100',
+            dataType: 'number',
+            isBucketed: false,
+            references: [],
+            params: {
+              value: '100',
+            },
+          },
+        ],
+      ],
+      layer,
+      {
+        title: 'myIndexPattern',
+        getFieldByName: (field: string) => {
+          if (field === 'records') return undefined;
+          return { name: field };
+        },
+        getFormatterForField: () => ({ convert: (v: unknown) => v }),
+      } as unknown as IndexPattern,
+      uiSettings,
+      {
+        fromDate: '2021-01-01T00:00:00.000Z',
+        toDate: '2021-01-01T23:59:59.999Z',
+      },
+      new Date(),
+      { 'max-col-id': 'max_value' } // columnRoles
+    );
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      // Should use semantic name 'static_max_value' from columnRoles
+      expect(result.esql).toContain('EVAL static_max_value = 100');
+      expect(result.esAggsIdMap).toHaveProperty('static_max_value');
+    }
+  });
+
   it('should use indexed names for multiple static values', () => {
     uiSettings.get.mockImplementation((key: string) => {
       return defaultUiSettingsGet(key);

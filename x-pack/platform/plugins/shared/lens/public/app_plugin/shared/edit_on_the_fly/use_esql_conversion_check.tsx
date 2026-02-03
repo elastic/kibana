@@ -22,6 +22,7 @@ import type { CoreStart } from '@kbn/core/public';
 import {
   generateEsqlQuery,
   isEsqlQuerySuccess,
+  type ColumnRoles,
 } from '../../../datasources/form_based/generate_esql_query';
 import {
   esqlConversionFailureReasonMessages,
@@ -130,6 +131,13 @@ export const useEsqlConversionCheck = (
         col.operationType !== 'static_value'
     );
 
+    // Extract column roles from visualization state for semantic ES|QL column naming
+    const columnRoles: ColumnRoles = {};
+    const visState = state as Record<string, unknown>;
+    if (visState.maxAccessor && typeof visState.maxAccessor === 'string') {
+      columnRoles[visState.maxAccessor] = 'max_value';
+    }
+
     let esqlLayer;
     try {
       esqlLayer = generateEsqlQuery(
@@ -138,7 +146,8 @@ export const useEsqlConversionCheck = (
         framePublicAPI.dataViews.indexPatterns[singleLayer.indexPatternId],
         coreStart.uiSettings,
         framePublicAPI.dateRange,
-        startDependencies.data.nowProvider.get()
+        startDependencies.data.nowProvider.get(),
+        columnRoles
       );
     } catch (e) {
       // Layer remains non-convertible
