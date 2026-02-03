@@ -224,6 +224,7 @@ export type {
   IStaticAssets,
   SessionStorage,
   SessionStorageCookieOptions,
+  SessionStorageSetOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
   GetAuthState,
