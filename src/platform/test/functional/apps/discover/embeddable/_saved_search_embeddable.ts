@@ -63,8 +63,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
     });
 
-    const addSearchEmbeddableToDashboard = async () => {
-      await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
+    const addSearchEmbeddableToDashboard = async (title = 'Rendering Test: saved search') => {
+      await dashboardAddPanel.addSavedSearch(title);
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
       const rows = await dataGrid.getDocTableRows();
@@ -200,7 +200,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('can edit a session and return to the dashboard', async () => {
-      await addSearchEmbeddableToDashboard();
+      await addSearchEmbeddableToDashboard('logstash hits');
       expect(await discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
       await dashboardPanelActions.clickEdit();
       await header.waitUntilLoadingHasFinished();
@@ -211,9 +211,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Dashboards')),
         discover
           .getSavedSearchTitle()
-          .then((lastBreadcrumb) =>
-            expect(lastBreadcrumb).to.be('Editing Rendering Test: saved search')
-          ),
+          .then((lastBreadcrumb) => expect(lastBreadcrumb).to.be('Editing logstash hits')),
         testSubjects
           .exists('unifiedTabs_tabsBar', { timeout: 1000 })
           .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
@@ -222,10 +220,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.setQuery('test');
       await queryBar.submitQuery();
       await discover.waitUntilTabIsLoaded();
-      await discover.saveSearch('Rendering-Test:-saved-search');
+      await discover.saveSearch('logstash hits');
       await dashboard.waitForRenderComplete();
       await dashboard.verifyNoRenderErrors();
-      expect(await discover.getSavedSearchDocumentCount()).to.be('13 documents');
+      expect(await discover.getSavedSearchDocumentCount()).to.be('35 documents');
     });
 
     it('can edit a by-value session and return to the dashboard', async () => {
@@ -238,6 +236,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         globalNav
           .getFirstBreadcrumb()
           .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Dashboards')),
+        discover
+          .getSavedSearchTitle()
+          .then((lastBreadcrumb) =>
+            expect(lastBreadcrumb).to.be('Editing Rendering Test: saved search')
+          ),
         testSubjects
           .exists('unifiedTabs_tabsBar', { timeout: 1000 })
           .then((unifiedTabs) => expect(unifiedTabs).not.to.be(true)),
@@ -261,7 +264,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.setQuery('test');
       await queryBar.submitQuery();
       await discover.waitUntilTabIsLoaded();
-      expect(await discover.getSavedSearchDocumentCount()).to.be('13 documents');
+      expect(await discover.getHitCount()).to.be('13');
       await discover.clickCancelButton();
       await dashboard.waitForRenderComplete();
       await dashboard.verifyNoRenderErrors();
