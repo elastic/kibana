@@ -100,19 +100,17 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
 
       function setTimeslice(timeslice?: TimeSlice) {
         timeRangePercentage.setTimeRangePercentage(timeslice, timeRangeMeta$.value);
-        const {
-          timeslice_start_as_percentage_of_time_range,
-          timeslice_end_as_percentage_of_time_range,
-        } = timeRangePercentage.getLatestState();
+        const { start_percentage_of_time_range, end_percentage_of_time_range } =
+          timeRangePercentage.getLatestState();
 
         if (
-          timeslice_start_as_percentage_of_time_range !== undefined &&
-          timeslice_end_as_percentage_of_time_range !== undefined
+          start_percentage_of_time_range !== undefined &&
+          end_percentage_of_time_range !== undefined
         ) {
           timeslice$.next(
             getTimesliceSyncedWithTimeRangePercentage(
-              timeslice_start_as_percentage_of_time_range,
-              timeslice_end_as_percentage_of_time_range
+              start_percentage_of_time_range,
+              end_percentage_of_time_range
             )
           );
         } else {
@@ -319,21 +317,19 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
             )
               return;
 
-            const {
-              timeslice_start_as_percentage_of_time_range,
-              timeslice_end_as_percentage_of_time_range,
-            } = timeRangePercentage.getLatestState();
+            const { start_percentage_of_time_range, end_percentage_of_time_range } =
+              timeRangePercentage.getLatestState();
             syncTimesliceWithTimeRangePercentage(
-              timeslice_start_as_percentage_of_time_range,
-              timeslice_end_as_percentage_of_time_range
+              start_percentage_of_time_range,
+              end_percentage_of_time_range
             );
           }
         );
 
       // Initialize the timeslice
       syncTimesliceWithTimeRangePercentage(
-        state.timeslice_start_as_percentage_of_time_range,
-        state.timeslice_end_as_percentage_of_time_range
+        state.start_percentage_of_time_range,
+        state.end_percentage_of_time_range
       );
 
       return {

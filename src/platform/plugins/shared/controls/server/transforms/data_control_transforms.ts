@@ -60,7 +60,9 @@ export function transformDataControlOut<
 
   /** Pick the state that we care about after ensu */
   const { title, use_global_filters, ignore_validations, field_name } =
-    convertCamelCasedKeysToSnakeCase(state);
+    convertCamelCasedKeysToSnakeCase<LegacyStoredDataControlState>(
+      state as LegacyStoredDataControlState
+    );
 
   return {
     title,
