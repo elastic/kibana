@@ -8,7 +8,6 @@
  */
 
 import { useRef, useEffect } from 'react';
-import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type { CascadeQueryArgs } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import {
@@ -24,90 +23,111 @@ import {
   type DataCascadeRowCellProps,
 } from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { v5 as uuidv5 } from 'uuid';
+import { isNil } from 'lodash';
 import { fetchEsql } from '../../../../data_fetching/fetch_esql';
 import { type ESQLDataGroupNode } from '../blocks';
-import type { CascadedDocumentsRestorableState } from '../cascaded_documents_restorable_state';
+import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
 
-interface UseGroupedCascadeDataProps extends Pick<UnifiedDataTableProps, 'rows'> {
-  cascadeConfig: CascadedDocumentsRestorableState;
+interface UseGroupedCascadeDataProps
+  extends Pick<UnifiedDataTableProps, 'rows'>,
+    Pick<CascadedDocumentsContext, 'selectedCascadeGroups' | 'esqlVariables'> {
   queryMeta: ESQLStatsQueryMeta;
-  esqlVariables: ESQLControlVariable[] | undefined;
 }
+
+const NODE_ID_NAMESPACE = '5a14c15b-0999-49a6-84f5-2bad4f24c45a';
 
 /**
  * Function returns the data for the cascade group.
  */
 export const useGroupedCascadeData = ({
-  cascadeConfig,
+  selectedCascadeGroups,
   rows,
   queryMeta,
   esqlVariables,
 }: UseGroupedCascadeDataProps) => {
   return useMemo(
     () =>
-      cascadeConfig.selectedCascadeGroups.reduce((acc, cur, levelIdx) => {
-        let dataAccessorKey: string = cur;
+      selectedCascadeGroups.reduce<ESQLDataGroupNode[]>((allGroups, groupColumn, groupDepth) => {
+        let resolvedGroupColumn: string = groupColumn;
 
-        const selectedGroupVariable = esqlVariables?.find(
-          (variable) => variable.key === cur.replace(/^\?\?/, '')
+        const matchingGroupVariable = esqlVariables?.find(
+          (variable) => variable.key === groupColumn.replace(/^\?\?/, '')
         );
 
-        if (selectedGroupVariable) {
-          dataAccessorKey = selectedGroupVariable.value as string;
+        if (matchingGroupVariable) {
+          resolvedGroupColumn = matchingGroupVariable.value.toString();
         }
 
-        const groupMatch = Object.groupBy(
-          rows ?? [],
-          // @ts-expect-error - we know that the data accessor key is a string
-          (datum) => datum.flattened[dataAccessorKey]
+        const rowsGroupedByValue = Object.groupBy(rows ?? [], (row) =>
+          String(row.flattened[resolvedGroupColumn])
         );
 
-        Object.entries(groupMatch).forEach(([key, value], idx) => {
+        Object.entries(rowsGroupedByValue).forEach(([groupValue, groupRows = []]) => {
           // skip undefined and null values
-          if (key === 'undefined' || key === 'null') {
+          if (groupValue === 'undefined' || groupValue === 'null') {
             return;
           }
 
-          const record = {
-            id: String(idx),
-            [cur]: key,
-            ...value?.reduce((derivedColumns, datum) => {
-              queryMeta.appliedFunctions.forEach(({ identifier }) => {
-                if (datum.flattened[identifier]) {
-                  if (Number(datum.flattened[identifier])) {
-                    derivedColumns[identifier] =
-                      Number(derivedColumns[identifier] ?? 0) + Number(datum.flattened[identifier]);
-                  } else if (Array.isArray(datum.flattened[identifier])) {
-                    derivedColumns[identifier] = ([] as Array<string | number>).concat(
-                      derivedColumns[identifier] || [],
-                      datum.flattened[identifier]
-                    );
+          const groupNode: ESQLDataGroupNode = {
+            id: uuidv5(`${groupColumn}-${groupValue}`, NODE_ID_NAMESPACE),
+            // While we use explicit properties for better typing, the document_data_cascade package
+            // requires `[groupColumn]: groupValue` to be populated in order to build its `nodePathMap`
+            [groupColumn]: groupValue,
+            groupColumn,
+            groupValue,
+            aggregatedValues: groupRows.reduce<ESQLDataGroupNode['aggregatedValues']>(
+              (allValues, row) => {
+                queryMeta.appliedFunctions.forEach(({ identifier }) => {
+                  const currentValue = row.flattened[identifier];
+
+                  if (isNil(currentValue)) {
+                    return;
                   }
-                }
-              });
-              return derivedColumns;
-            }, {} as Record<string, number | Array<string | number>>),
+
+                  const existingValue = allValues[identifier];
+
+                  if (typeof currentValue === 'number') {
+                    if (typeof existingValue === 'number') {
+                      allValues[identifier] = existingValue + currentValue;
+                    } else if (isNil(existingValue)) {
+                      allValues[identifier] = currentValue;
+                    }
+                  } else if (Array.isArray(currentValue)) {
+                    const valuesArray = currentValue.map(String);
+
+                    if (Array.isArray(existingValue)) {
+                      allValues[identifier] = [...existingValue, ...valuesArray];
+                    } else if (isNil(existingValue)) {
+                      allValues[identifier] = valuesArray;
+                    }
+                  }
+                });
+
+                return allValues;
+              },
+              {}
+            ),
           };
 
-          if (levelIdx === 0) {
-            acc.push(record);
+          if (groupDepth === 0) {
+            allGroups.push(groupNode);
           } else {
-            // we need to find the record in acc that has the same value for the previous level of cascade grouping
-            const previousLevelRecord = acc.find(
-              (r: ESQLDataGroupNode) =>
-                r[cascadeConfig.selectedCascadeGroups[levelIdx - 1]] ===
-                record[cascadeConfig.selectedCascadeGroups[levelIdx - 1]]
+            // we need to find the node in allGroups that has the same value for the previous level of cascade grouping
+            const previousLevelColumn = selectedCascadeGroups[groupDepth - 1];
+            const previousLevelNode = allGroups.find(
+              (otherNode) => otherNode.groupColumn === previousLevelColumn
             );
 
-            if (previousLevelRecord) {
-              // TODO: insert the record as a child of the previous level record
+            if (previousLevelNode) {
+              // TODO: insert the node as a child of the previous level node
             }
           }
         });
 
-        return acc;
-      }, [] as ESQLDataGroupNode[]),
-    [cascadeConfig.selectedCascadeGroups, esqlVariables, queryMeta, rows]
+        return allGroups;
+      }, []),
+    [esqlVariables, queryMeta.appliedFunctions, rows, selectedCascadeGroups]
   );
 };
 
@@ -117,7 +137,6 @@ interface UseScopedESQLQueryFetchClientProps
     | 'dataView'
     | 'data'
     | 'expressions'
-    | 'filters'
     | 'timeRange'
     | 'scopedProfilesManager'
     | 'esqlVariables'
@@ -135,7 +154,6 @@ export function useScopedESQLQueryFetchClient({
   data,
   expressions,
   esqlVariables,
-  filters,
   timeRange,
   scopedProfilesManager,
   inspectorAdapters,
@@ -155,7 +173,6 @@ export function useScopedESQLQueryFetchClient({
         data,
         expressions,
         abortSignal,
-        filters,
         timeRange,
         scopedProfilesManager,
         inspectorAdapters,
@@ -174,7 +191,6 @@ export function useScopedESQLQueryFetchClient({
       dataView,
       esqlVariables,
       expressions,
-      filters,
       inspectorAdapters,
       scopedProfilesManager,
       timeRange,

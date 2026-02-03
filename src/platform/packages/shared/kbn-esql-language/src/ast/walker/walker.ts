@@ -737,6 +737,7 @@ export class Walker {
   ): void {
     if (this.aborted) return;
     if (!node) return;
+    if ('dialect' in node) return;
     const { options } = this;
     options.visitSingleAstItem?.(node, parent, this);
     switch (node.type) {
