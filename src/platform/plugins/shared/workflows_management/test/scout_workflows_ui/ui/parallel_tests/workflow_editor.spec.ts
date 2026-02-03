@@ -34,6 +34,16 @@ triggers:
   - type: manual
 `;
 
+const getIncompleteStepTypeYaml = (name: string) => `
+name: ${name}
+description: Test workflow
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: hello_world_step
+    type:`;
+
 test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
@@ -107,5 +117,37 @@ test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
 
     // Validation errors should disappear
     await expect(validationAccordion).toContainText('No validation errors');
+  });
+
+  test('should show step type autocompletion suggestions', async ({ page }) => {
+    await page.gotoApp('workflows');
+    await page.testSubj.click('createWorkflowButton');
+
+    const yamlEditor = page.testSubj.locator('workflowYamlEditor');
+    await expect(yamlEditor).toBeVisible();
+
+    const workflowName = `Autocomplete test ${Math.floor(Math.random() * 1000)}`;
+    const yamlEditorWrapper = new KibanaCodeEditorWrapper(page);
+
+    // Set incomplete YAML with empty step type
+    await yamlEditorWrapper.setCodeEditorValue(getIncompleteStepTypeYaml(workflowName));
+
+    // Click on the "type:" line to focus the editor at that position
+    await page.getByText('type:', { exact: true }).click();
+
+    // Move to end of line and trigger autocomplete
+    await page.keyboard.press('End');
+    await page.keyboard.press('Space');
+
+    // Verify the suggest widget appears with step type options
+    const suggestWidget = yamlEditorWrapper.getCodeEditorSuggestWidget();
+    await expect(suggestWidget).toBeVisible();
+
+    await page.keyboard.type('ela');
+
+    // Verify step types are shown in suggestions (alphabetically sorted, starting with 'a')
+    await expect(suggestWidget.getByRole('option', { name: 'elasticsearch.search' })).toBeVisible();
+    await expect(suggestWidget.getByRole('option', { name: 'elasticsearch.index' })).toBeVisible();
+    await expect(suggestWidget.getByRole('option', { name: 'elasticsearch.bulk' })).toBeVisible();
   });
 });
