@@ -92,6 +92,7 @@ export async function reassignAgentsToVersionSpecificPolicies(versionedAgentPoli
   const { baseId: agentPolicyId, version } = splitVersionSuffixFromPolicyId(versionedAgentPolicyId);
   // agents enrolled to parent policy or agents using child policy but upgraded to new version
   const kueryToReassignAgents = `(policy_id:"${agentPolicyId}" AND agent.version:${version}.*) OR (policy_id:${agentPolicyId}* AND agent.version:${version}.* AND upgraded_at:*)`;
+  appContextService.getLogger().debug(`Reassigning agents with kuery: ${kueryToReassignAgents}`);
 
   try {
     const { total } = await AgentService.getAgentsByKuery(esClient, soClient, {
