@@ -36,6 +36,9 @@ export interface SetupState {
   settings: {
     configured: boolean;
   };
+  profiling: {
+    enabled: boolean;
+  };
 }
 
 export type PartialSetupState = RecursivePartial<SetupState>;
@@ -54,6 +57,9 @@ export function createDefaultSetupState(): SetupState {
     },
     settings: {
       configured: false,
+    },
+    profiling: {
+      enabled: false,
     },
   };
 }

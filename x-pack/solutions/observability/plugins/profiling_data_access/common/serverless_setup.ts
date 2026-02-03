@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RecursivePartial } from '@elastic/eui';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ProfilingESClient } from './profiling_es_client';
+import type { SetupState } from './setup';
 
 export interface ProfilingSetupOptions {
   client: ProfilingESClient;
@@ -18,39 +18,9 @@ export interface ProfilingSetupOptions {
 
 export interface ServerlessSetupStateType {
   type: 'serverless';
-  setupState: ServerlessSetupState;
+  setupState: SetupState;
 }
 
-interface ServerlessSetupState {
-  data: {
-    available: boolean;
-  };
-  resource_management: {
-    enabled: boolean;
-  };
-  resources: {
-    created: boolean;
-    pre_8_9_1_data: boolean;
-  };
-}
-
-export type PartialServerlessSetupState = RecursivePartial<ServerlessSetupState>;
-
-export function createDefaultServerlessSetupState(): ServerlessSetupState {
-  return {
-    data: {
-      available: false,
-    },
-    resource_management: {
-      enabled: false,
-    },
-    resources: {
-      created: false,
-      pre_8_9_1_data: false,
-    },
-  };
-}
-
-export function areServerlessResourcesSetup(state: ServerlessSetupState): boolean {
-  return state.resource_management.enabled && state.resources.created;
+export function areServerlessResourcesSetup(state: SetupState): boolean {
+  return state.profiling.enabled;
 }
