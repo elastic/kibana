@@ -199,21 +199,18 @@ describe('KibanaEvalsClient', () => {
       },
     ];
 
-    const mockTaskTraceId = '1234567890abcdef1234567890abcdef';
-    const mockEvalTraceId = 'fedcba0987654321fedcba0987654321';
-    let callCount = 0;
-    (getCurrentTraceId as jest.Mock).mockImplementation(() => {
-      callCount++;
-      return callCount === 1 ? mockTaskTraceId : mockEvalTraceId;
-    });
+    const mockTaskTraceId = 'task-trace-id';
+    const mockEvalTraceId = 'evaluator-trace-id';
+    (getCurrentTraceId as jest.Mock)
+      .mockReturnValueOnce(mockTaskTraceId)
+      .mockReturnValueOnce(mockEvalTraceId);
 
     const exp = await client.runExperiment({ dataset, task }, evaluators);
-    const runKeys = Object.keys(exp.runs);
-    expect(runKeys.length).toBeGreaterThan(0);
-    const firstRun = exp.runs[runKeys[0]];
+    const [firstRun] = Object.values(exp.runs);
+    expect(firstRun).toBeDefined();
     expect(firstRun.traceId).toBe(mockTaskTraceId);
 
-    expect(exp.evaluationRuns.length).toBeGreaterThan(0);
+    expect(exp.evaluationRuns).toHaveLength(1);
     expect(exp.evaluationRuns[0].traceId).toBe(mockEvalTraceId);
 
     expect(withTaskSpan).toHaveBeenCalled();

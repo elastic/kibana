@@ -43,26 +43,26 @@ export const compareCmd: Command<void> = {
     const esClient = createEsClientForTesting({ esUrl: evaluationsEsUrl });
     const scoreRepository = new EvaluationScoreRepository(esClient, log);
 
-    const [scoresA, scoresB] = await Promise.all([
+    const [firstRunScores, secondRunScores] = await Promise.all([
       scoreRepository.getScoresByRunId(firstRunId),
       scoreRepository.getScoresByRunId(secondRunId),
     ]);
 
-    if (scoresA.length === 0) {
+    if (firstRunScores.length === 0) {
       throw new Error(`No scores found for run ID: ${firstRunId}`);
     }
 
-    if (scoresB.length === 0) {
+    if (secondRunScores.length === 0) {
       throw new Error(`No scores found for run ID: ${secondRunId}`);
     }
 
-    const datasetsA = new Map(
-      scoresA.map((score) => [score.example.dataset.id, score.example.dataset.name])
+    const firstRunDatasets = new Map(
+      firstRunScores.map((score) => [score.example.dataset.id, score.example.dataset.name])
     );
-    const datasetsB = new Map(
-      scoresB.map((score) => [score.example.dataset.id, score.example.dataset.name])
+    const secondRunDatasets = new Map(
+      secondRunScores.map((score) => [score.example.dataset.id, score.example.dataset.name])
     );
-    const overlappingDatasetIds = [...datasetsA.keys()].filter((id) => datasetsB.has(id));
+    const overlappingDatasetIds = [...firstRunDatasets.keys()].filter((id) => secondRunDatasets.has(id));
 
     if (overlappingDatasetIds.length === 0) {
       throw new Error('No overlapping datasets found between the two runs.');
@@ -71,16 +71,16 @@ export const compareCmd: Command<void> = {
     log.info(`Found ${overlappingDatasetIds.length} overlapping dataset(s).`);
 
     const overlappingDatasetSet = new Set(overlappingDatasetIds);
-    const filteredScoresA = scoresA.filter((score) =>
+    const filteredFirstRunScores = firstRunScores.filter((score) =>
       overlappingDatasetSet.has(score.example.dataset.id)
     );
-    const filteredScoresB = scoresB.filter((score) =>
+    const filteredSecondRunScores = secondRunScores.filter((score) =>
       overlappingDatasetSet.has(score.example.dataset.id)
     );
 
     const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(
-      filteredScoresA,
-      filteredScoresB
+      filteredFirstRunScores,
+      filteredSecondRunScores
     );
 
     if (pairs.length === 0) {
@@ -91,7 +91,7 @@ export const compareCmd: Command<void> = {
       `Paired ${pairs.length} scores (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
     );
 
-    const results = computePairedTTestResults(filteredScoresA, filteredScoresB);
+    const results = computePairedTTestResults(filteredFirstRunScores, filteredSecondRunScores);
     if (results.length === 0) {
       log.warning('No t-test results returned.');
       return;
