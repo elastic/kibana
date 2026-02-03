@@ -58,7 +58,7 @@ describe('copy to space', () => {
       createResolveSavedObjectsImportErrorsMock()
     );
 
-    const clientService = new SpacesClientService(jest.fn(), 'traditional');
+    const clientService = new SpacesClientService(jest.fn(), jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -73,7 +73,11 @@ describe('copy to space', () => {
       usageStatsServiceMock.createSetupContract(usageStatsClient)
     );
 
-    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
+    const clientServiceStart = clientService.start({
+      coreStart,
+      features: featuresPluginMock.createStart(),
+      onSpaceDeleteCallbacks: [],
+    });
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,

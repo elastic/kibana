@@ -69,15 +69,16 @@ const createService = (serverBasePath: string = '') => {
     basePath: httpSetup.basePath,
   });
 
-  const spacesClientService = new SpacesClientService(jest.fn(), 'traditional');
+  const spacesClientService = new SpacesClientService(jest.fn(), jest.fn(), 'traditional');
   spacesClientService.setup({
     config$: Rx.of(spacesConfig),
   });
 
-  const spacesClientServiceStart = spacesClientService.start(
+  const spacesClientServiceStart = spacesClientService.start({
     coreStart,
-    featuresPluginMock.createStart()
-  );
+    features: featuresPluginMock.createStart(),
+    onSpaceDeleteCallbacks: [],
+  });
 
   const spacesServiceStart = spacesService.start({
     basePath: coreStart.http.basePath,

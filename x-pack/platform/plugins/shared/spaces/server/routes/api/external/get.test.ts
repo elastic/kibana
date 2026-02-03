@@ -45,7 +45,7 @@ describe('GET space', () => {
 
     const log = loggingSystemMock.create().get('spaces');
 
-    const clientService = new SpacesClientService(jest.fn(), 'traditional');
+    const clientService = new SpacesClientService(jest.fn(), jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -57,7 +57,11 @@ describe('GET space', () => {
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
+    const clientServiceStart = clientService.start({
+      coreStart,
+      features: featuresPluginMock.createStart(),
+      onSpaceDeleteCallbacks: [],
+    });
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,

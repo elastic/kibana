@@ -12,6 +12,7 @@ import { spacesServiceMock } from './spaces_service/spaces_service.mock';
 
 function createSetupMock() {
   return {
+    registerOnSpaceDelete: jest.fn(),
     spacesService: spacesServiceMock.createSetupContract(),
     spacesClient: spacesClientServiceMock.createSetup(),
     hasOnlyDefaultSpace$: of(false),
