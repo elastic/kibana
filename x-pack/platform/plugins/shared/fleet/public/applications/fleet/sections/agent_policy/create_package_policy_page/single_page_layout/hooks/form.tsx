@@ -147,7 +147,10 @@ export const createAgentPolicyIfNeeded = async ({
   }
 };
 
-async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) {
+async function savePackagePolicy(
+  pkgPolicy: CreatePackagePolicyRequest['body'],
+  varGroups?: RegistryVarGroup[]
+) {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
 
   // If agentless use agentless policies API
@@ -155,6 +158,9 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
     function formatPackage(pkg: NewPackagePolicy['package']) {
       return omit(pkg, 'title');
     }
+
+    // Detect target cloud provider from var_groups or inputs
+    const targetCsp = detectTargetCsp(pkgPolicy as NewPackagePolicy, varGroups);
 
     const agentlessRequestBody = {
       package: formatPackage(pkgPolicy.package),
@@ -178,6 +184,8 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
       ...(pkgPolicy.supports_cloud_connector && {
         cloud_connector: {
           enabled: true,
+          // Include target_csp if detected (required for var_groups packages)
+          ...(targetCsp && { target_csp: targetCsp }),
           ...(pkgPolicy.cloud_connector_id && {
             cloud_connector_id: pkgPolicy.cloud_connector_id,
           }),
@@ -204,15 +212,16 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
 
   return result;
 }
+
 /**
  * Detects the target cloud provider from either:
  * 1. var_group selections (new approach - provider field in selected option)
- * 2. Input type matching (legacy approach - input.type contains aws|azure)
+ * 2. Input type matching (legacy approach - input.type contains aws|azure|gcp)
  */
 function detectTargetCsp(
   packagePolicy: NewPackagePolicy,
   varGroups: RegistryVarGroup[] | undefined
-): string | undefined {
+): CloudProvider | undefined {
   // First, check var_group selections for provider field (new approach)
   if (varGroups && packagePolicy.var_group_selections) {
     const cloudConnectorOption = getCloudConnectorOption(
@@ -220,7 +229,10 @@ function detectTargetCsp(
       packagePolicy.var_group_selections
     );
     if (cloudConnectorOption.isCloudConnector && cloudConnectorOption.provider) {
-      return cloudConnectorOption.provider;
+      const { provider } = cloudConnectorOption;
+      if (provider === 'aws' || provider === 'azure' || provider === 'gcp') {
+        return provider;
+      }
     }
   }
 
@@ -228,7 +240,11 @@ function detectTargetCsp(
   const input = packagePolicy.inputs?.find(
     (pinput: NewPackagePolicyInput) => pinput.enabled === true
   );
-  return input?.type.match(/aws|azure/)?.[0];
+  const match = input?.type.match(/aws|azure|gcp/)?.[0];
+  if (match === 'aws' || match === 'azure' || match === 'gcp') {
+    return match;
+  }
+  return undefined;
 }
 
 // Update the agentless policy with cloud connector info in the new agent policy when the package policy input `aws.support_cloud_connectors is updated
@@ -704,11 +720,14 @@ export function useOnSubmit({
       setFormState('LOADING');
       try {
         // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
-        const data = await savePackagePolicy({
-          ...packagePolicy,
-          policy_ids: agentPolicyIdToSave,
-          force: forceInstall,
-        });
+        const data = await savePackagePolicy(
+          {
+            ...packagePolicy,
+            policy_ids: agentPolicyIdToSave,
+            force: forceInstall,
+          },
+          packageInfo?.var_groups
+        );
 
         if (data?.item.package) {
           await ensurePackageKibanaAssetsInstalled({
