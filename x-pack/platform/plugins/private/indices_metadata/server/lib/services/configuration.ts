@@ -20,6 +20,7 @@ import type { ArtifactService } from './artifact';
 import { ArtifactNotFoundError, ManifestNotFoundError } from './artifact.errors';
 import type { IndicesMetadataConfiguration } from './indices_metadata.types';
 import { IndicesMetadataConfigurationSchema } from './indices_metadata.types';
+import { TelemetryConfigProvider } from './telemetry_config_provider';
 export const REFRESH_CONFIG_INTERVAL_MS = 60 * 60 * 1000;
 const CONFIGURATION_ARTIFACT_NAME = 'indices-metadata-configuration-v1';
 
@@ -27,6 +28,7 @@ export class ConfigurationService {
   private readonly logger: Logger;
   private artifactService!: ArtifactService;
   private indicesMetadataConfiguration$!: Observable<IndicesMetadataConfiguration | undefined>;
+  private telemetryConfigProvider!: TelemetryConfigProvider;
 
   private readonly stop$ = new ReplaySubject<void>(1);
 
@@ -36,11 +38,12 @@ export class ConfigurationService {
 
   public start(
     artifactService: ArtifactService,
-    defaultConfiguration: IndicesMetadataConfiguration
+    defaultConfiguration: IndicesMetadataConfiguration,
+    telemetryConfigProvider: TelemetryConfigProvider
   ) {
     this.artifactService = artifactService;
     this.indicesMetadataConfiguration$ = timer(0, REFRESH_CONFIG_INTERVAL_MS).pipe(
-      exhaustMap(() => this.getConfiguration()),
+      exhaustMap(() => this.getConfiguration(telemetryConfigProvider)),
       takeUntil(this.stop$),
       startWith(defaultConfiguration),
       filter((config) => config !== undefined),
@@ -60,10 +63,15 @@ export class ConfigurationService {
     return this.indicesMetadataConfiguration$;
   }
 
-  private async getConfiguration(): Promise<IndicesMetadataConfiguration | undefined> {
+  private async getConfiguration(
+    telemetryConfigProvider: TelemetryConfigProvider
+  ): Promise<IndicesMetadataConfiguration | undefined> {
     this.ensureStarted();
 
     try {
+      if (!telemetryConfigProvider.getIsOptedIn()) {
+        return undefined;
+      }
       this.logger.debug('Getting indices metadata configuration');
       const artifact = await this.artifactService.getArtifact(CONFIGURATION_ARTIFACT_NAME);
       if (!artifact.modified) {
@@ -90,7 +98,11 @@ export class ConfigurationService {
   }
 
   private ensureStarted() {
-    if (!this.artifactService || !this.indicesMetadataConfiguration$) {
+    if (
+      !this.artifactService ||
+      !this.indicesMetadataConfiguration$ ||
+      !this.telemetryConfigProvider
+    ) {
       throw new Error('Configuration service not started');
     }
   }
