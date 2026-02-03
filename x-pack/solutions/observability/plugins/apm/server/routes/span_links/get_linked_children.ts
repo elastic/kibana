@@ -96,12 +96,12 @@ async function fetchLinkedChildrenOfSpan({
 
     return {
       ...event,
-      [SPAN_LINKS]:
-        source?.span?.links ??
-        mapOtelToSpanLink({
-          trace_id: event[OTEL_SPAN_LINKS_TRACE_ID],
-          span_id: event[OTEL_SPAN_LINKS_SPAN_ID],
-        }),
+      [SPAN_LINKS]: Array.isArray(source?.span?.links)
+        ? source.span.links
+        : mapOtelToSpanLink({
+            trace_id: event[OTEL_SPAN_LINKS_TRACE_ID],
+            span_id: event[OTEL_SPAN_LINKS_SPAN_ID],
+          }),
     };
   });
   // Filter out documents that don't have any span.links that match the combination of traceId and spanId
