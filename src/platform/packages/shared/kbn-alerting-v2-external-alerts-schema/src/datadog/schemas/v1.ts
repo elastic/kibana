@@ -182,6 +182,8 @@ export const datadogAlertEventsRequestSchema = z.object({
    */
   pageLimit: z
     .number()
+    .min(1)
+    .max(1000)
     .optional()
     .default(500)
     .describe('Number of events per page (max 1000). Defaults to 500.'),
