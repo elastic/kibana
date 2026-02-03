@@ -168,19 +168,16 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
 
   const selectedOptionLabel = options.find((option) => option.checked)?.label;
 
-  const renderEndpointOption = useCallback(
-    (option: EuiSelectableOption<EndpointOptionData>, searchValue: string) => {
-      return (
-        <>
-          <EuiText size="s">{option.label}</EuiText>
-          <EuiText size="xs" color="subdued" className="eui-displayBlock">
-            <small>{option.description}</small>
-          </EuiText>
-        </>
-      );
-    },
-    []
-  );
+  const renderEndpointOption = useCallback((option: EuiSelectableOption<EndpointOptionData>) => {
+    return (
+      <>
+        <EuiText size="s">{option.label}</EuiText>
+        <EuiText size="xs" color="subdued" className="eui-displayBlock">
+          <small>{option.description}</small>
+        </EuiText>
+      </>
+    );
+  }, []);
 
   /**
    * Auto-select default inference endpoint when:

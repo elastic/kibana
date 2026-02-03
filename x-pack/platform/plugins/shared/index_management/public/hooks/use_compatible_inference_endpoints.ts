@@ -59,8 +59,10 @@ export const useCompatibleInferenceEndpoints = (
         return;
       }
       const provider = SERVICE_PROVIDERS[endpoint.service];
-      const service = provider ? provider.name : endpoint.service;
-      const modelId = endpoint.service_settings.model_id;
+      const modelId = endpoint.service_settings.model_id ?? endpoint.service_settings.model;
+      const service = provider?.name ?? endpoint.service;
+      const description = modelId ? `${service} - ${modelId}` : service;
+
       const isElserInEis =
         endpoint.inference_id === defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID;
       const requiredLicense = INFERENCE_ENDPOINT_LICENSE_MAP[endpoint.inference_id];
@@ -75,11 +77,12 @@ export const useCompatibleInferenceEndpoints = (
           defaultInferenceId = endpoint.inference_id;
         }
       }
+
       endpointDefinitions.push({
         inference_id: endpoint.inference_id,
         requiredLicense,
         accessible,
-        description: `${service} - ${modelId}`,
+        description,
       });
     });
     return {
