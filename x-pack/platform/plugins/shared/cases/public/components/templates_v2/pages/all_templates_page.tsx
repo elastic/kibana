@@ -53,7 +53,8 @@ export const AllTemplatesPage: React.FC = () => {
 
   const handleBulkActionSuccess = useCallback(() => {
     deselectTemplates();
-  }, [deselectTemplates]);
+    setQueryParams({ page: 1 });
+  }, [deselectTemplates, setQueryParams]);
 
   const {
     handleEdit,
