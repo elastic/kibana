@@ -13,7 +13,7 @@ import { Streams } from '@kbn/streams-schema';
 import { uniq } from 'lodash';
 import { AssetImage } from '../../asset_image';
 import { SchemaEditor } from '../schema_editor';
-import type { SchemaEditorField } from '../schema_editor/types';
+import type { MappedSchemaField, SchemaEditorField } from '../schema_editor/types';
 import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
@@ -88,7 +88,19 @@ export const DetectedFieldsEditor = ({ schemaEditorFields }: DetectedFieldsEdito
           if (field.status === 'mapped') {
             mapField(field);
           } else if (field.status === 'unmapped') {
-            unmapField(field.name);
+            // Check if the unmapped field has meaningful updates that should be preserved
+            // (e.g., a description or an explicit 'unmapped' type for documentation-only fields)
+            const hasMeaningfulUpdates = field.description || field.type === 'unmapped';
+            if (hasMeaningfulUpdates) {
+              // Convert to a mapped field to preserve the updates
+              mapField({
+                ...field,
+                status: 'mapped',
+                type: field.type ?? 'unmapped',
+              } as MappedSchemaField);
+            } else {
+              unmapField(field.name);
+            }
           }
         }}
         onFieldSelection={(names, checked) => {

@@ -41,9 +41,17 @@ export const EditDescriptionFlyout = ({
   const flyoutId = useGeneratedHtmlId({ prefix: 'streams-edit-description' });
 
   const handleSave = () => {
+    // When editing a description on an unmapped field, we need to:
+    // 1. Set status to 'mapped' so the field gets saved to the stream definition
+    // 2. Set type to 'unmapped' if no type exists (documentation-only field)
+    const isUnmappedField = field.status === 'unmapped';
     onSave({
       ...field,
       description: description || undefined,
+      ...(isUnmappedField && {
+        status: 'mapped' as const,
+        type: field.type ?? 'unmapped',
+      }),
     } as SchemaField);
     onClose();
   };
