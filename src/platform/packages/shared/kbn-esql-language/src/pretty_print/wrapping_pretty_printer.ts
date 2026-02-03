@@ -539,9 +539,15 @@ export class WrappingPrettyPrinter {
 
   protected readonly visitor: Visitor<any> = new Visitor()
     .on('visitExpression', (ctx, inp: Input): Output => {
-      const txt = ctx.node.text ?? '<EXPRESSION>';
+      let text = ctx.node.text ?? '<EXPRESSION>';
+
+      if (text) {
+        // TODO: this will be replaced by proper PromQL pretty-printing in subsequent PR
+        text = text.replace(/<EOF>/g, '').trim();
+      }
+
       // TODO: decorate with comments
-      return { txt };
+      return { txt: text };
     })
 
     .on('visitHeaderCommand', (ctx, inp: Input): Output => {

@@ -167,6 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cases_incremental_id_assignment',
         'cloud_security_posture-stats_task',
         'dashboard_telemetry',
+        'data-sources:bulk-delete-task',
         'endpoint:complete-external-response-actions',
         'endpoint:metadata-check-transforms-task',
         'endpoint:user-artifact-packager',
