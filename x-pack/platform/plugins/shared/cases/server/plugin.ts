@@ -128,7 +128,7 @@ export class CasePlugin
       logger: this.logger,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       lensEmbeddableFactory: this.lensEmbeddableFactory,
-      templatesConfig: this.caseConfig.templates,
+      config: this.caseConfig,
     });
 
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
