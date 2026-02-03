@@ -220,11 +220,58 @@ const alignNodesCenterInPlace = (g: Dagre.graphlib.Graph, filter: (node: string)
       );
 
       const centerY = Y(first) + (Y(last) - Y(first)) / 2;
-      const prevY = Y(currNode);
 
-      // Log the diff for current node
-      prevNodeY[currNode] = prevY;
-      setY(currNode, snapped(centerY));
+      // Check if this node has siblings (same parent) that share children
+      // If so, distribute them vertically around the center
+      const parents = (
+        g.predecessors(currNode)?.filter((parentNode) => filter(parentNode.toString())) ?? []
+      ).map((parentNode) => parentNode.toString());
+
+      // Find all siblings (including current node) that share any children with current node
+      const siblingsWithSharedChildren: string[] = [];
+      for (const parent of parents) {
+        const allSiblings = (g.successors(parent)?.filter((sV) => filter(sV.toString())) ?? []).map(
+          (s) => s.toString()
+        );
+
+        for (const sibling of allSiblings) {
+          if (siblingsWithSharedChildren.includes(sibling)) continue;
+
+          const siblingChildren = (
+            g.successors(sibling)?.filter((sV) => filter(sV.toString())) ?? []
+          ).map((s) => s.toString());
+
+          // Check if sibling shares any children with current node
+          if (children.some((child) => siblingChildren.includes(child))) {
+            siblingsWithSharedChildren.push(sibling);
+          }
+        }
+      }
+
+      if (siblingsWithSharedChildren.length > 1) {
+        // Sort siblings by their original Y position to maintain consistent ordering
+        siblingsWithSharedChildren.sort((a, b) => Y(a) - Y(b));
+
+        const siblingIndex = siblingsWithSharedChildren.indexOf(currNode);
+        const siblingCount = siblingsWithSharedChildren.length;
+        const nodeHeight = Height(currNode);
+        const spacing = nodeHeight + GRID_SIZE_OFFSET;
+
+        // Calculate total height needed for all siblings
+        const totalHeight = (siblingCount - 1) * spacing;
+
+        // Position current node based on its index, centered around the children's center
+        const newY = centerY - totalHeight / 2 + siblingIndex * spacing;
+
+        prevNodeY[currNode] = currY;
+        setY(currNode, snapped(newY));
+      } else {
+        const prevY = Y(currNode);
+
+        // Log the diff for current node
+        prevNodeY[currNode] = prevY;
+        setY(currNode, snapped(centerY));
+      }
     } else if (children.length === 1) {
       const child = children[0].toString();
       const siblings = (
@@ -273,20 +320,33 @@ const alignNodesCenterInPlace = (g: Dagre.graphlib.Graph, filter: (node: string)
       ).map((parentNode) => parentNode.toString());
 
       if (parents.length > 1) {
-        // const avg = parents.reduce((sum, parentNode) => sum + Y(parentNode), 0) / parents.length;
-        const { firstSiblingInfo: firstParentInfo, lastSiblingInfo: lastParentInfo } =
-          analyzeSiblings(parents, prevNodeY, Y, Height);
+        // Check if this node has siblings (other nodes that share any parent with it)
+        // If so, preserve Dagre's original positioning to avoid overlap
+        const hasSiblings = parents.some((parent) => {
+          const parentChildren = (
+            g.successors(parent)?.filter((sV) => filter(sV.toString())) ?? []
+          ).map((s) => s.toString());
+          return parentChildren.length > 1;
+        });
 
-        // We want to center the current node vertically between the first and last sibling
-        // So that the edges between the first and last sibling are equal in their length
-        const edgesHeight = lastParentInfo.middle - firstParentInfo.middle;
+        if (hasSiblings) {
+          // Preserve Dagre's original positioning to avoid overlapping with siblings
+          prevNodeY[currNode] = currY;
+        } else {
+          const { firstSiblingInfo: firstParentInfo, lastSiblingInfo: lastParentInfo } =
+            analyzeSiblings(parents, prevNodeY, Y, Height);
 
-        // Calculate the current node position relative to the first sibling
-        const newY = firstParentInfo.middle + (edgesHeight - Height(currNode)) / 2;
+          // We want to center the current node vertically between the first and last sibling
+          // So that the edges between the first and last sibling are equal in their length
+          const edgesHeight = lastParentInfo.middle - firstParentInfo.middle;
 
-        // Log the diff for current node
-        prevNodeY[currNode] = currY;
-        setY(currNode, snapped(newY));
+          // Calculate the current node position relative to the first sibling
+          const newY = firstParentInfo.middle + (edgesHeight - Height(currNode)) / 2;
+
+          // Log the diff for current node
+          prevNodeY[currNode] = currY;
+          setY(currNode, snapped(newY));
+        }
       } else if (parents.length === 1) {
         // There is only one parent
         const parent = parents[0].toString();
