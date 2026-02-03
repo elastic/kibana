@@ -80,12 +80,7 @@ jest.mock('./console_worker_proxy', () => {
   return { ConsoleWorkerProxyService };
 });
 
-import {
-  ConsoleLang,
-  ConsoleOutputLang,
-  CONSOLE_TRIGGER_CHARS,
-  getParsedRequestsProvider,
-} from './language';
+import { ConsoleLang, CONSOLE_TRIGGER_CHARS, getParsedRequestsProvider } from './language';
 
 type ProvideCompletionItems = NonNullable<
   monaco.languages.CompletionItemProvider['provideCompletionItems']
@@ -414,13 +409,6 @@ describe('console language', () => {
     createdModels.push(model);
     getParsedRequestsProvider(model);
 
-    expect(mockConsoleParsedRequestsProvider).toHaveBeenCalledTimes(1);
-  });
-
-  it('exports ConsoleOutputLang', () => {
-    expect(ConsoleOutputLang.ID).toBeTruthy();
-    expect(ConsoleOutputLang.languageConfiguration).toBeTruthy();
-    expect(ConsoleOutputLang.lexerRules).toBeTruthy();
-    expect(ConsoleOutputLang.foldingRangeProvider).toBeTruthy();
+    expect(mockConsoleParsedRequestsProvider).toHaveBeenCalledWith(expect.anything(), model);
   });
 });

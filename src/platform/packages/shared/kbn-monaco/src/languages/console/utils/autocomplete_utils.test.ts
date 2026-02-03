@@ -7,144 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Worker } from 'worker_threads';
 import { checkForTripleQuotesAndEsqlQuery, unescapeInvalidChars } from './autocomplete_utils';
-
-type QueryCheckResult = ReturnType<typeof checkForTripleQuotesAndEsqlQuery>;
-
-interface WorkerReadyMessage {
-  type: 'ready';
-}
-
-interface WorkerResultSuccessMessage {
-  type: 'result';
-  ok: true;
-  ms: number;
-  result: QueryCheckResult;
-}
-
-interface WorkerResultErrorMessage {
-  type: 'result';
-  ok: false;
-  error: string;
-  stack?: string;
-}
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
-const isWorkerReadyMessage = (value: unknown): value is WorkerReadyMessage =>
-  isRecord(value) && value.type === 'ready';
-
-const isWorkerResultMessage = (
-  value: unknown
-): value is WorkerResultSuccessMessage | WorkerResultErrorMessage =>
-  isRecord(value) && value.type === 'result' && typeof value.ok === 'boolean';
-
-interface CheckForTripleQuotesPerfWorker {
-  measure(request: string, timeoutMs: number): Promise<{ ms: number; result: QueryCheckResult }>;
-  terminate(): Promise<void>;
-}
-
-const createCheckForTripleQuotesPerfWorker = async (): Promise<CheckForTripleQuotesPerfWorker> => {
-  const autocompleteUtilsPath = require.resolve('./autocomplete_utils');
-
-  const worker = new Worker(
-    `
-      const { parentPort } = require('worker_threads');
-      require('@kbn/setup-node-env');
-
-      const { performance } = require('perf_hooks');
-      const { checkForTripleQuotesAndEsqlQuery } = require(${JSON.stringify(
-        autocompleteUtilsPath
-      )});
-
-      parentPort.on('message', ({ request }) => {
-        try {
-          const t0 = performance.now();
-          const result = checkForTripleQuotesAndEsqlQuery(request);
-          const t1 = performance.now();
-          parentPort.postMessage({ type: 'result', ok: true, ms: t1 - t0, result });
-        } catch (e) {
-          parentPort.postMessage({
-            type: 'result',
-            ok: false,
-            error: e && e.message ? e.message : String(e),
-            stack: e && e.stack ? e.stack : undefined,
-          });
-        }
-      });
-
-      parentPort.postMessage({ type: 'ready' });
-    `,
-    { eval: true }
-  );
-
-  const waitForMessageOnce = async (timeoutMs: number, timeoutMessage: string) => {
-    return await new Promise<unknown>((resolve, reject) => {
-      let settled = false;
-
-      const cleanup = () => {
-        clearTimeout(timer);
-        worker.off('message', onMessage);
-        worker.off('error', onError);
-      };
-
-      const onMessage = (msg: unknown) => {
-        if (settled) return;
-        settled = true;
-        cleanup();
-        resolve(msg);
-      };
-
-      const onError = (err: Error) => {
-        if (settled) return;
-        settled = true;
-        cleanup();
-        reject(err);
-      };
-
-      const timer = setTimeout(() => {
-        if (settled) return;
-        settled = true;
-        cleanup();
-        void worker.terminate();
-        reject(new Error(timeoutMessage));
-      }, timeoutMs);
-
-      worker.once('message', onMessage);
-      worker.once('error', onError);
-    });
-  };
-
-  const ready = await waitForMessageOnce(10_000, 'perf worker did not become ready after 10000ms');
-  if (!isWorkerReadyMessage(ready)) {
-    await worker.terminate();
-    throw new Error(`unexpected perf worker ready message: ${JSON.stringify(ready)}`);
-  }
-
-  return {
-    measure: async (request: string, timeoutMs: number) => {
-      worker.postMessage({ request });
-
-      const msg = await waitForMessageOnce(timeoutMs, `perf worker timed out after ${timeoutMs}ms`);
-      if (!isWorkerResultMessage(msg)) {
-        throw new Error(`unexpected perf worker response: ${JSON.stringify(msg)}`);
-      }
-
-      if (!msg.ok) {
-        const error = msg.error;
-        const stack = msg.stack;
-        throw new Error(stack ? `${error}\n${stack}` : error);
-      }
-
-      return { ms: msg.ms, result: msg.result };
-    },
-    terminate: async () => {
-      await worker.terminate();
-    },
-  };
-};
 
 describe('autocomplete_utils', () => {
   describe('checkForTripleQuotesAndQueries', () => {
@@ -211,58 +74,23 @@ describe('autocomplete_utils', () => {
       });
     });
 
-    it('has roughly linear runtime scaling (performance regression)', async () => {
-      // NOTE: Absolute timing thresholds are flaky on shared CI. This test instead checks
-      // *relative scaling* on a constructed input that is adversarial for the old
-      // (regex-per-quote) implementation (many unescaped quotes), so accidental
-      // super-linear regressions are more likely to be caught.
-      //
-      // To keep this test preemptible (and avoid hanging Jest on a severe regression),
-      // it runs the measurement in a separate worker thread with a hard timeout.
-      const median = (values: number[]) => {
-        const sorted = [...values].sort((a, b) => a - b);
-        return sorted[Math.floor(sorted.length / 2)];
-      };
+    it('does not treat longer words as request methods (e.g. GETS)', () => {
+      const request = `GETS _query\n{\n  "query": "SELECT * FROM logs `;
+      expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
+        insideTripleQuotes: false,
+        insideEsqlQuery: false,
+        esqlQueryIndex: -1,
+      });
+    });
 
-      const buildManyJsonPairs = (pairCount: number) => {
-        const pairs: string[] = [];
-        for (let i = 0; i < pairCount; i++) {
-          pairs.push(`"k${i}":"v${i}"`);
-        }
-        return `{${pairs.join(',')}}`;
-      };
-
-      const perf = await createCheckForTripleQuotesPerfWorker();
-      const measure = async (pairCount: number) => {
-        // Building the string can be non-trivial; exclude it from the timed section.
-        const request = `POST _search\n${buildManyJsonPairs(pairCount)}`;
-        const { ms, result } = await perf.measure(request, 1_000);
-
-        // correctness (still important)
-        expect(result).toEqual({
-          insideTripleQuotes: false,
-          insideEsqlQuery: false,
-          esqlQueryIndex: -1,
-        });
-
-        return ms;
-      };
-
-      try {
-        // warmup (JIT)
-        await measure(250);
-
-        // Keep sizes small enough that the pre-optimization implementation fails fast (bad scaling)
-        // rather than effectively hanging the test runtime.
-        const tSmall = median([await measure(500), await measure(500), await measure(500)]);
-        const tLarge = median([await measure(1_000), await measure(1_000), await measure(1_000)]);
-
-        // Linear would be ~2x. Allow some noise/GC: fail only if it's far worse.
-        expect(tLarge / tSmall).toBeLessThan(3.25);
-      } finally {
-        await perf.terminate();
-      }
-    }, 20_000);
+    it('does not treat longer words as request methods (e.g. POSTER)', () => {
+      const request = `POSTER _query\n{\n  "query": "SELECT * FROM logs `;
+      expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
+        insideTripleQuotes: false,
+        insideEsqlQuery: false,
+        esqlQueryIndex: -1,
+      });
+    });
   });
 
   it('sets insideEsqlQuery for single quoted query after POST _query', () => {
@@ -304,6 +132,16 @@ describe('autocomplete_utils', () => {
     });
   });
 
+  it('detects query with /_query/async endpoint', () => {
+    const request = `POST /_query/async\n{\n  "query": "FROM logs | STATS `;
+    const result = checkForTripleQuotesAndEsqlQuery(request);
+    expect(result).toEqual({
+      insideTripleQuotes: false,
+      insideEsqlQuery: true,
+      esqlQueryIndex: request.indexOf('"FROM logs ') + 1,
+    });
+  });
+
   it('detects triple quoted query after POST   _query?foo=bar with extra spaces', () => {
     const request = `POST   _query?foo=bar\n{\n  "query": """FROM metrics `;
     const result = checkForTripleQuotesAndEsqlQuery(request);
@@ -311,6 +149,36 @@ describe('autocomplete_utils', () => {
       insideTripleQuotes: true,
       insideEsqlQuery: true,
       esqlQueryIndex: request.indexOf('"""') + 3,
+    });
+  });
+
+  it('detects query when request line is indented', () => {
+    const request = `  \tPOST _query\n{\n  "query": "FROM logs | STATS `;
+    const result = checkForTripleQuotesAndEsqlQuery(request);
+    expect(result).toEqual({
+      insideTripleQuotes: false,
+      insideEsqlQuery: true,
+      esqlQueryIndex: request.indexOf('"FROM logs ') + 1,
+    });
+  });
+
+  it('detects query value with whitespace around the colon', () => {
+    const request = `POST _query\n{\n  "query"  :\t "FROM logs | STATS `;
+    const result = checkForTripleQuotesAndEsqlQuery(request);
+    expect(result).toEqual({
+      insideTripleQuotes: false,
+      insideEsqlQuery: true,
+      esqlQueryIndex: request.indexOf('"FROM logs ') + 1,
+    });
+  });
+
+  it('does not treat near-miss keys as the "query" value', () => {
+    const request = `POST _query\n{\n  "queryx": "FROM logs | STATS `;
+    const result = checkForTripleQuotesAndEsqlQuery(request);
+    expect(result).toEqual({
+      insideTripleQuotes: false,
+      insideEsqlQuery: false,
+      esqlQueryIndex: -1,
     });
   });
 

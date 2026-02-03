@@ -34,18 +34,30 @@ export const CONSOLE_TRIGGER_CHARS = ['/', '.', '_', ',', '?', '=', '&', '"'];
 
 const requestMethodRe = /^\s*(GET|POST|PUT|DELETE|HEAD|PATCH)\b/i;
 const esqlRequestLineRe = /^\s*post\s+\/?_query(?:\/async)?(?:\s|\?|$)/i;
-const maxLookbackLines = 2000;
+/**
+ * Safeguards for request-line lookup. We scan backwards from the cursor until we find the nearest
+ * request method line (GET/POST/...), but we cap the amount of work to avoid a potentially large
+ * number of `getLineContent()` calls on very long documents.
+ *
+ * If these limits are hit, ES|QL context detection is skipped and we fall back to the
+ * actions provider (preserving completion behavior, just without ES|QL suggestions).
+ */
+const MAX_REQUEST_LINE_LOOKBACK_LINES = 2000;
+const MAX_REQUEST_LINE_LOOKBACK_CHARS = 100_000;
 
 const findEsqlRequestLineNumber = (
   model: monaco.editor.ITextModel,
   positionLineNumber: number
 ): number | undefined => {
   for (
-    let lineNumber = positionLineNumber, lookedBack = 0;
-    lineNumber >= 1 && lookedBack < maxLookbackLines;
-    lineNumber--, lookedBack++
+    let lineNumber = positionLineNumber, scannedLines = 0, scannedChars = 0;
+    lineNumber >= 1 &&
+    scannedLines < MAX_REQUEST_LINE_LOOKBACK_LINES &&
+    scannedChars < MAX_REQUEST_LINE_LOOKBACK_CHARS;
+    lineNumber--, scannedLines++
   ) {
     const line = model.getLineContent(lineNumber);
+    scannedChars += line.length + 1;
     if (requestMethodRe.test(line)) {
       // Only treat this as an ES|QL request if the request line matches POST _query(/async)?...
       return esqlRequestLineRe.test(line) ? lineNumber : undefined;
@@ -94,8 +106,9 @@ export const ConsoleLang: LangModuleType = {
         context: monaco.languages.CompletionContext,
         token: monaco.CancellationToken
       ) => {
-        // NOTE: `model.getValue()` can be very expensive for large inputs (e.g. pasted JSON with
-        // huge string fields). We only do ES|QL context detection for POST /_query requests.
+        // NOTE: Materializing the full editor content (e.g. via `model.getValue()`) can be very
+        // expensive for large inputs (like pasted JSON with huge string fields). We only do ES|QL
+        // context detection when the cursor is within a POST /_query request.
         const delegateToActionsProvider = () => {
           const actions = actionsProvider.current;
           return (
@@ -105,14 +118,14 @@ export const ConsoleLang: LangModuleType = {
           );
         };
 
-        const requestLineNumber = findEsqlRequestLineNumber(model, position.lineNumber);
-        if (!requestLineNumber) {
+        const esqlRequestLineNumber = findEsqlRequestLineNumber(model, position.lineNumber);
+        if (!esqlRequestLineNumber) {
           return delegateToActionsProvider();
         }
 
         const requestTextBeforeCursor = getRequestTextBeforeCursor(
           model,
-          requestLineNumber,
+          esqlRequestLineNumber,
           position
         );
         const { insideTripleQuotes, insideEsqlQuery, esqlQueryIndex } =
