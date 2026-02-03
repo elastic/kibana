@@ -161,9 +161,6 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
-  const currentAppId = useObservable(core.application.currentAppId$);
-  const solutionIdForExtensions =
-    activeSolutionId ?? (currentAppId === 'discover' ? 'oblt' : undefined);
 
   const telemetryService = useMemo(
     () => new ESQLEditorTelemetryService(core.analytics),
@@ -640,7 +637,7 @@ const ESQLEditorInternal = function ESQLEditor({
     fieldsMetadata,
     esqlService,
     histogramBarTarget,
-    activeSolutionId: solutionIdForExtensions,
+    activeSolutionId: activeSolutionId ?? undefined,
     canCreateLookupIndex,
     minimalQueryRef,
     abortControllerRef,

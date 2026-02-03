@@ -39,6 +39,20 @@ export const getRecommendedQueriesTemplates = ({
 }): QueryTemplate[] => {
   const queries: QueryTemplate[] = [
     {
+      label: i18n.translate('kbn-esql-language.recommendedQueries.searchAllMetrics.label', {
+        defaultMessage: 'Search all metrics',
+      }),
+      description: i18n.translate(
+        'kbn-esql-language.recommendedQueries.searchAllMetrics.description',
+        {
+          defaultMessage: 'Searches all available metrics',
+        }
+      ),
+      queryString: 'TS metrics-*',
+      sortText: 'C',
+      category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
+    },
+    {
       label: i18n.translate('kbn-esql-language.recommendedQueries.searchExample.label', {
         defaultMessage: 'Search all fields',
       }),
