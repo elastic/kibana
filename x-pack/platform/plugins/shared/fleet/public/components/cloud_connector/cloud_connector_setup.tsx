@@ -11,15 +11,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 import type { NewPackagePolicy, PackageInfo } from '../../../common';
-import type { CloudProvider } from '../../types';
+import type { AccountType, CloudProvider } from '../../types';
 
 import { NewCloudConnectorForm } from './form/new_cloud_connector_form';
 import { ReusableCloudConnectorForm } from './form/reusable_cloud_connector_form';
 import { useGetCloudConnectors } from './hooks/use_get_cloud_connectors';
 import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
 import { CloudConnectorTabs, type CloudConnectorTab } from './cloud_connector_tabs';
+import { AccountTypeSelector } from './components/account_type_selector';
 import type { UpdatePolicy } from './types';
-import { TABS, CLOUD_FORMATION_EXTERNAL_DOC_URL } from './constants';
+import { TABS, CLOUD_FORMATION_EXTERNAL_DOC_URL, ORGANIZATION_ACCOUNT } from './constants';
 import { isCloudConnectorReusableEnabled } from './utils';
 
 export interface CloudConnectorSetupProps {
@@ -31,6 +32,8 @@ export interface CloudConnectorSetupProps {
   cloud?: CloudSetup;
   cloudProvider?: CloudProvider;
   templateName: string;
+  /** Optional account type. When provided, selector is hidden. When undefined, shows selector defaulting to 'organization-account'. */
+  accountType?: AccountType;
 }
 
 export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
@@ -42,6 +45,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   cloud,
   cloudProvider,
   templateName,
+  accountType,
 }) => {
   const reusableFeatureEnabled = isCloudConnectorReusableEnabled(
     cloudProvider || '',
@@ -49,19 +53,26 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     templateName
   );
 
-  // Use the cloud connector setup hook
   const {
     newConnectionCredentials,
     existingConnectionCredentials,
     updatePolicyWithNewCredentials,
     updatePolicyWithExistingCredentials,
-    accountTypeFromInputs,
   } = useCloudConnectorSetup(newPolicy, updatePolicy, packageInfo, cloudProvider);
 
-  // Get filtered cloud connectors based on provider and account type
+  // Local state for account type selection (used when accountType prop is not provided)
+  const [selectedAccountType, setSelectedAccountType] = useState<AccountType>(ORGANIZATION_ACCOUNT);
+
+  // Effective account type: prop takes precedence, then local state
+  const effectiveAccountType = accountType ?? selectedAccountType;
+
+  // Show selector only when accountType prop is not provided
+  const showAccountTypeSelector = accountType === undefined;
+
+  // Get filtered cloud connectors based on provider and effective account type
   const { data: cloudConnectors } = useGetCloudConnectors({
     cloudProvider,
-    accountType: accountTypeFromInputs,
+    accountType: effectiveAccountType,
   });
   const cloudConnectorsCount = cloudConnectors?.length;
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
@@ -134,6 +145,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
             cloudProvider={cloudProvider}
             credentials={newConnectionCredentials}
             setCredentials={updatePolicyWithNewCredentials}
+            accountType={effectiveAccountType}
           />
         </>
       ),
@@ -153,7 +165,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           cloudProvider={cloudProvider}
           credentials={existingConnectionCredentials}
           setCredentials={updatePolicyWithExistingCredentials}
-          accountType={accountTypeFromInputs}
+          accountType={effectiveAccountType}
         />
       ),
     },
@@ -180,6 +192,18 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
 
   return (
     <>
+      {/* Account type selector - shown when accountType prop is not provided */}
+      {showAccountTypeSelector && (
+        <>
+          <AccountTypeSelector
+            selectedAccountType={selectedAccountType}
+            onChange={setSelectedAccountType}
+            disabled={isEditPage}
+          />
+          <EuiSpacer size="l" />
+        </>
+      )}
+
       {!reusableFeatureEnabled && (
         <NewCloudConnectorForm
           templateName={templateName}
@@ -192,6 +216,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           cloudProvider={cloudProvider}
           credentials={newConnectionCredentials}
           setCredentials={updatePolicyWithNewCredentials}
+          accountType={effectiveAccountType}
         />
       )}
       {reusableFeatureEnabled && (

@@ -18,7 +18,7 @@ import {
   updateInputVarsWithCredentials,
   isAwsCredentials,
 } from '../utils';
-import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AWS_PROVIDER } from '../constants';
+import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AWS_PROVIDER, ORGANIZATION_ACCOUNT } from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -31,10 +31,10 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   packageInfo,
   cloud,
   hasInvalidRequiredVars = false,
-  isOrganization = false,
   templateName,
   credentials,
   setCredentials,
+  accountType = ORGANIZATION_ACCOUNT,
 }) => {
   const cloudConnectorRemoteRoleTemplate =
     cloud && templateName
@@ -44,6 +44,7 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           packageInfo,
           templateName,
           provider: AWS_PROVIDER,
+          accountType,
         })
       : undefined;
 
@@ -78,7 +79,7 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
         buttonContent={<EuiLink>{'Steps to assume role'}</EuiLink>}
         paddingSize="l"
       >
-        <CloudFormationCloudCredentialsGuide isOrganization={isOrganization} />
+        <CloudFormationCloudCredentialsGuide accountType={accountType} />
       </EuiAccordion>
       <EuiSpacer size="l" />
       <EuiButton

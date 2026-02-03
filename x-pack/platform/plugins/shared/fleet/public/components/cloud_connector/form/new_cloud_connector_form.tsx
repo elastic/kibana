@@ -23,6 +23,7 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
   credentials,
   setCredentials,
   hasInvalidRequiredVars,
+  accountType,
 }) => {
   // Default to AWS if no cloudProvider is specified
   const provider = cloudProvider || AWS_PROVIDER;
@@ -41,6 +42,7 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
           cloudProvider={provider}
           credentials={credentials}
           setCredentials={setCredentials}
+          accountType={accountType}
         />
       );
     case AZURE_PROVIDER:
@@ -55,6 +57,7 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
           hasInvalidRequiredVars={hasInvalidRequiredVars}
           credentials={credentials}
           setCredentials={setCredentials}
+          accountType={accountType}
         />
       );
     case 'gcp':

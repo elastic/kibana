@@ -28,6 +28,7 @@ import {
   isCloudConnectorNameValid,
   CLOUD_CONNECTOR_NAME_MAX_LENGTH,
 } from './utils';
+import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from './constants';
 import { getMockPolicyAWS, getMockPackageInfoAWS } from './test/mock';
 import type { CloudConnectorCredentials } from './types';
 import { AWS_PROVIDER, AZURE_PROVIDER } from './constants';
@@ -653,6 +654,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
         provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
       });
 
       expect(result).toBe(
@@ -667,6 +669,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
         provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
       });
 
       expect(result).toBe(
@@ -688,6 +691,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
         provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
       });
 
       // Current behavior: cloud ESS ID overwrites serverless project ID
@@ -695,42 +699,27 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       expect(result).not.toContain('serverless-priority');
     });
 
-    it('should use organization-account type when specified in policy', () => {
-      const orgPolicy: NewPackagePolicy = {
-        ...mockPolicy,
-        inputs: [
-          {
-            ...mockPolicy.inputs[0],
-            streams: [
-              {
-                ...mockPolicy.inputs[0].streams[0],
-                vars: {
-                  'aws.account_type': { value: 'organization-account', type: 'text' },
-                },
-              },
-            ],
-          },
-        ],
-      };
-
-      const result = getCloudConnectorRemoteRoleTemplate({
-        newPolicy: orgPolicy,
-        cloud: mockAwsCloudSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
-      });
-
-      expect(result).toContain('/organization-account/');
-    });
-
-    it('should use single-account type by default for AWS', () => {
+    it('should use organization-account type when passed as parameter', () => {
       const result = getCloudConnectorRemoteRoleTemplate({
         newPolicy: mockPolicy,
         cloud: mockAwsCloudSetup,
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
         provider: AWS_PROVIDER,
+        accountType: ORGANIZATION_ACCOUNT,
+      });
+
+      expect(result).toContain('/organization-account/');
+    });
+
+    it('should use single-account type when passed as parameter', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        newPolicy: mockPolicy,
+        cloud: mockAwsCloudSetup,
+        packageInfo: mockPackageInfo,
+        templateName: 'cspm',
+        provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
       });
 
       expect(result).toContain('/single-account/');
@@ -751,6 +740,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
         provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
       });
 
       expect(result).toContain('aws-kibana-complex-id');
@@ -771,6 +761,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
         provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
       });
 
       expect(result).toContain('gcp-kibana-complex-id');
@@ -791,6 +782,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
         provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
       });
 
       expect(result).toContain('azure-kibana-complex-id');
@@ -809,6 +801,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
         provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
       });
 
       expect(result).toBeDefined();
@@ -830,6 +823,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
         provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
       });
 
       expect(result).toBeUndefined();
@@ -849,6 +843,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
         provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
       });
 
       expect(result).toBeUndefined();
@@ -866,6 +861,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
         provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
       });
 
       expect(result).toBeUndefined();
@@ -883,6 +879,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
         provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
       });
 
       expect(result).toBeUndefined();
@@ -896,6 +893,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         templateName: 'cspm',
         // @ts-expect-error Testing invalid provider type
         provider: 'invalid-provider',
+        accountType: SINGLE_ACCOUNT,
       });
 
       expect(result).toBeUndefined();
@@ -908,6 +906,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         packageInfo: mockPackageInfo,
         templateName: 'non-existent-template',
         provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
       });
 
       expect(result).toBeUndefined();
@@ -940,6 +939,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         packageInfo: packageInfoWithoutTemplate,
         templateName: 'cspm',
         provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
       });
 
       expect(result).toBeUndefined();
@@ -959,6 +959,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
         provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
       });
 
       expect(result).toBeUndefined();
@@ -976,6 +977,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         packageInfo: mockPackageInfo,
         templateName: 'cspm',
         provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
       });
 
       expect(result).toBeUndefined();
@@ -1055,6 +1057,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
           packageInfo: azurePackageInfo,
           templateName: 'cspm',
           provider: AZURE_PROVIDER,
+          accountType: SINGLE_ACCOUNT,
         });
 
         expect(result).toBe(
@@ -1069,6 +1072,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
           packageInfo: azurePackageInfo,
           templateName: 'cspm',
           provider: AZURE_PROVIDER,
+          accountType: SINGLE_ACCOUNT,
         });
 
         expect(result).toBe(
@@ -1076,28 +1080,14 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         );
       });
 
-      it('should use Azure single-account type by default', () => {
-        const azurePolicyNoAccountType: NewPackagePolicy = {
-          ...azurePolicy,
-          inputs: [
-            {
-              ...azurePolicy.inputs[0],
-              streams: [
-                {
-                  ...azurePolicy.inputs[0].streams[0],
-                  vars: {},
-                },
-              ],
-            },
-          ],
-        };
-
+      it('should use Azure single-account type when passed as parameter', () => {
         const result = getCloudConnectorRemoteRoleTemplate({
-          newPolicy: azurePolicyNoAccountType,
+          newPolicy: azurePolicy,
           cloud: mockAzureCloudSetup,
           packageInfo: azurePackageInfo,
           templateName: 'cspm',
           provider: AZURE_PROVIDER,
+          accountType: SINGLE_ACCOUNT,
         });
 
         expect(result).toContain('/single-account/');
@@ -1118,6 +1108,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
           packageInfo: azurePackageInfo,
           templateName: 'cspm',
           provider: AZURE_PROVIDER,
+          accountType: SINGLE_ACCOUNT,
         });
 
         expect(result).toContain('azure-kibana-complex');
@@ -1152,6 +1143,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
           packageInfo: packageInfoWithoutArmTemplate,
           templateName: 'cspm',
           provider: AZURE_PROVIDER,
+          accountType: SINGLE_ACCOUNT,
         });
 
         expect(result).toBeUndefined();
@@ -1170,6 +1162,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
           packageInfo: azurePackageInfo,
           templateName: 'cspm',
           provider: AZURE_PROVIDER,
+          accountType: SINGLE_ACCOUNT,
         });
 
         expect(result).toBeUndefined();

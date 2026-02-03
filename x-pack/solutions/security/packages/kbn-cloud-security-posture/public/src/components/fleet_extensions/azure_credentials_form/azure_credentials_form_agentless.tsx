@@ -19,6 +19,7 @@ import type {
 import type { SetupTechnology } from '@kbn/fleet-plugin/common/types';
 import { LazyCloudConnectorSetup } from '@kbn/fleet-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import { SINGLE_ACCOUNT } from '@kbn/fleet-plugin/common';
 import {
   ARM_TEMPLATE_EXTERNAL_DOC_URL,
   AZURE_CREDENTIALS_TYPE,
@@ -77,6 +78,7 @@ export const AzureCredentialsFormAgentless = ({
   const { azureOverviewPath, azurePolicyType, isAzureCloudConnectorEnabled, templateName } =
     useCloudSetup();
 
+  const accountType = input?.streams?.[0].vars?.['azure.account_type']?.value ?? SINGLE_ACCOUNT;
   const azureCredentialsType = getAgentlessCredentialsType(input, isAzureCloudConnectorEnabled);
   const credentialSelectionDisabled =
     isEditPage &&
@@ -156,6 +158,7 @@ export const AzureCredentialsFormAgentless = ({
             cloudProvider="azure"
             templateName={templateName}
             isEditPage={isEditPage}
+            accountType={accountType}
           />
         </Suspense>
       ) : (

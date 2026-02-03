@@ -10,7 +10,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 import type { NewPackagePolicy, PackageInfo } from '../../../common';
 import type { CloudConnectorVar, CloudConnectorSecretVar } from '../../../common/types';
-import type { CloudConnectorSecretReference, CloudProvider } from '../../types';
+import type { AccountType, CloudConnectorSecretReference, CloudProvider } from '../../types';
 
 import type { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
 
@@ -65,6 +65,8 @@ export interface NewCloudConnectorFormProps {
   templateName?: string;
   credentials?: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
+  /** Account type to determine organization vs single account behavior */
+  accountType?: AccountType;
 }
 
 // Define the interface for connector options
@@ -93,10 +95,11 @@ export interface CloudConnectorFormProps {
   hasInvalidRequiredVars: boolean;
   cloud?: CloudSetup;
   cloudProvider?: CloudProvider;
-  isOrganization?: boolean;
   templateName?: string;
   credentials?: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
+  /** Account type for cloud connector template URL generation */
+  accountType?: AccountType;
 }
 
 export type CloudSetupForCloudConnector = Pick<
@@ -119,6 +122,7 @@ export interface GetCloudConnectorRemoteRoleTemplateParams {
   packageInfo: PackageInfo;
   templateName: string;
   provider: CloudProviders;
+  accountType: AccountType;
 }
 
 export interface CloudConnectorField {

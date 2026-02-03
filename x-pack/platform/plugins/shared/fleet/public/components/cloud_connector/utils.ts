@@ -15,7 +15,6 @@ import type {
   PackageInfo,
   PackagePolicyConfigRecord,
 } from '../../../common';
-import { extractRawCredentialVars } from '../../../common';
 import type {
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
@@ -40,11 +39,8 @@ import {
   CLOUD_CONNECTOR_AZURE_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
   AWS_PROVIDER,
   AZURE_PROVIDER,
-  SINGLE_ACCOUNT,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
-  AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME,
-  AWS_ACCOUNT_TYPE_INPUT_VAR_NAME,
 } from './constants';
 
 export type AzureCloudConnectorFieldNames =
@@ -180,36 +176,6 @@ export const getTemplateUrlFromPackageInfo = (
   }
 };
 
-/**
- * Gets the account type from the package policy using the accessor pattern
- * to read from the correct location (package-level or input-level vars)
- *
- * @param policy - The package policy
- * @param packageInfo - The package info for mode detection
- * @param provider - The cloud provider
- * @returns The account type or undefined
- */
-const getAccountTypeFromPolicy = (
-  policy: NewPackagePolicy,
-  packageInfo: PackageInfo,
-  provider: CloudProviders
-): string | undefined => {
-  // Use accessor to get vars from the correct location
-  const vars = extractRawCredentialVars(policy, packageInfo);
-
-  if (!vars) {
-    return SINGLE_ACCOUNT;
-  }
-
-  switch (provider) {
-    case AWS_PROVIDER:
-      return (vars[AWS_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value as string) ?? SINGLE_ACCOUNT;
-    case AZURE_PROVIDER:
-      return (vars[AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value as string) ?? SINGLE_ACCOUNT;
-  }
-  return undefined;
-};
-
 const getTemplateFieldNameByProvider = (provider: CloudProviders): string | undefined => {
   switch (provider) {
     case AWS_PROVIDER:
@@ -227,9 +193,9 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   packageInfo,
   templateName,
   provider,
+  accountType,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   let elasticResourceId: string | undefined;
-  const accountType = getAccountTypeFromPolicy(newPolicy, packageInfo, provider);
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
   const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
   const templateUrlFieldName = getTemplateFieldNameByProvider(provider);

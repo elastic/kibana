@@ -353,6 +353,7 @@ export const AwsCredentialsFormAgentless = ({
             hasInvalidRequiredVars={hasInvalidRequiredVars}
             cloud={cloud}
             cloudProvider={AWS_PROVIDER}
+            accountType={accountType}
           />
         </Suspense>
       )}

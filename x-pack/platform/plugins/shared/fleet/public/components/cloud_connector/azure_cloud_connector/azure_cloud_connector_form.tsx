@@ -24,7 +24,11 @@ import {
   getDeploymentIdFromUrl,
   getKibanaComponentId,
 } from '../utils';
-import { AZURE_CLOUD_CONNECTOR_FIELD_NAMES, AZURE_PROVIDER } from '../constants';
+import {
+  AZURE_CLOUD_CONNECTOR_FIELD_NAMES,
+  AZURE_PROVIDER,
+  ORGANIZATION_ACCOUNT,
+} from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -57,6 +61,7 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   templateName = 'azure-cloud-connector-template',
   credentials,
   setCredentials,
+  accountType = ORGANIZATION_ACCOUNT,
 }) => {
   const armTemplateUrl =
     cloud && templateName
@@ -66,6 +71,7 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           packageInfo,
           templateName,
           provider: AZURE_PROVIDER,
+          accountType,
         })
       : undefined;
 
