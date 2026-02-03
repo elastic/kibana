@@ -52,6 +52,7 @@ export interface UserActivityEvent {
   type: UserActivityEventType;
 }
 
+/** @public */
 export interface TrackUserActionParams {
   /** Custom log message. If omitted, a default message is generated. */
   message?: string;
