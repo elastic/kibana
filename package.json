@@ -573,6 +573,7 @@
     "@kbn/entity-manager-fixture-plugin": "link:x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin",
     "@kbn/entity-store": "link:x-pack/solutions/security/plugins/entity_store",
     "@kbn/entityManager-plugin": "link:x-pack/platform/plugins/shared/entity_manager",
+    "@kbn/enzyme-migrate": "link:src/platform/packages/private/kbn-enzyme-migrate",
     "@kbn/error-boundary-example-plugin": "link:examples/error_boundary",
     "@kbn/es-errors": "link:src/platform/packages/shared/kbn-es-errors",
     "@kbn/es-mappings": "link:src/platform/packages/shared/kbn-es-mappings",
