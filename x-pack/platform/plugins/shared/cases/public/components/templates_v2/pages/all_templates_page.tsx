@@ -126,6 +126,8 @@ export const AllTemplatesPage: React.FC = () => {
               css={css`
                 border-right: ${euiTheme.border.thin};
                 padding-right: ${euiTheme.size.s};
+                padding-bottom: ${euiTheme.size.s};
+                padding-top: ${euiTheme.size.s};
               `}
             >
               <EuiText size="xs" color="subdued">
