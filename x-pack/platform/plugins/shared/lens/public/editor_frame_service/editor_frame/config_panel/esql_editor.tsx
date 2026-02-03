@@ -292,7 +292,6 @@ function InnerESQLEditor({
       <div
         css={css`
           border-top: ${euiTheme.border.thin};
-          background-color: ${euiTheme.colors.backgroundBaseHighlighted};
         `}
       >
         <ESQLLangEditor
@@ -308,7 +307,6 @@ function InnerESQLEditor({
               : undefined
           }
           editorIsInline
-          hideRunQueryText
           onTextLangQuerySubmit={async (q, a) => {
             // do not run the suggestions if the query is the same as the previous one
             if (q && !isEqual(q, prevQuery.current)) {

@@ -10,6 +10,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import type { EsqlEditorActions } from '../editor_actions_context';
 import { useEsqlEditorActions } from '../editor_actions_context';
 import { searchPlaceholder } from '../editor_visor';
 import { HelpPopover } from './help_popover';
@@ -34,8 +35,17 @@ const removeStarredQueryLabel = i18n.translate(
   }
 );
 
-export function ESQLMenu() {
-  const editorActions = useEsqlEditorActions();
+// Uses context when wrapped by EsqlEditorActionsProvider.
+// For inline editors (no provider), actions are passed via props.
+export function ESQLMenu({
+  actions,
+  hideHistory,
+}: {
+  actions?: Partial<EsqlEditorActions>;
+  hideHistory?: boolean;
+} = {}) {
+  const contextActions = useEsqlEditorActions();
+  const editorActions = actions ?? contextActions;
   const { euiTheme } = useEuiTheme();
   const onToggleVisor = editorActions?.toggleVisor;
   const onToggleHistory = editorActions?.toggleHistory;
@@ -84,21 +94,28 @@ export function ESQLMenu() {
           />
         </EuiToolTip>
       </EuiFlexItem>
+      {!hideHistory && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip position="top" content={historyLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="clockCounter"
+              size="xs"
+              aria-label={historyLabel}
+              onClick={onToggleHistory}
+              isDisabled={!onToggleHistory}
+              data-test-subj="ESQLEditor-toggle-query-history-icon"
+              color="text"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={historyLabel} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="clockCounter"
-            size="xs"
-            aria-label={historyLabel}
-            onClick={onToggleHistory}
-            isDisabled={!onToggleHistory}
-            data-test-subj="ESQLEditor-toggle-query-history-icon"
-            color="text"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <HelpPopover />
+        <HelpPopover
+          actions={{
+            currentQuery: editorActions?.currentQuery,
+            submitEsqlQuery: editorActions?.submitEsqlQuery,
+          }}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

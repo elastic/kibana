@@ -283,7 +283,6 @@ export function ValueControlForm({
             disableAutoFocus={true}
             errors={esqlQueryErrors}
             editorIsInline
-            hideRunQueryText
             onTextLangQuerySubmit={async (q, a) => {
               if (q) {
                 await onValuesQuerySubmit(q.esql);

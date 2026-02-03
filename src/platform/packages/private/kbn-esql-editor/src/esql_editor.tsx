@@ -57,6 +57,7 @@ import { QuerySource } from '@kbn/esql-types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './lookup_join';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
+import { ESQLMenu } from './editor_menu';
 import { getTrimmedQuery } from './history_local_storage';
 import {
   EDITOR_INITIAL_HEIGHT,
@@ -115,7 +116,6 @@ const ESQLEditorInternal = function ESQLEditor({
   warning: serverWarning,
   isLoading,
   isDisabled,
-  hideRunQueryText,
   hideRunQueryButton,
   editorIsInline,
   disableSubmitAction,
@@ -785,7 +785,6 @@ const ESQLEditorInternal = function ESQLEditor({
         label: i18n.translate('esqlEditor.query.cancel', {
           defaultMessage: 'Cancel',
         }),
-        iconType: 'cross',
         color: 'text',
       };
     }
@@ -794,15 +793,13 @@ const ESQLEditorInternal = function ESQLEditor({
         label: i18n.translate('esqlEditor.query.runQuery', {
           defaultMessage: 'Run query',
         }),
-        iconType: 'play',
         color: 'success',
       };
     }
     return {
-      label: i18n.translate('esqlEditor.query.refreshLabel', {
-        defaultMessage: 'Refresh',
+      label: i18n.translate('esqlEditor.query.searchLabel', {
+        defaultMessage: 'Search',
       }),
-      iconType: 'refresh',
       color: 'primary',
     };
   }, [allowQueryCancellation, code, codeWhenSubmitted, isLoading]);
@@ -1135,31 +1132,11 @@ const ESQLEditorInternal = function ESQLEditor({
           gutterSize="none"
           responsive={false}
           justifyContent="spaceBetween"
-          alignItems={hideRunQueryButton ? 'flexEnd' : 'center'}
+          alignItems="center"
           css={css`
-            padding: ${theme.euiTheme.size.s} 0;
+            padding: ${theme.euiTheme.size.s};
           `}
         >
-          <EuiFlexItem grow={false}>
-            {formLabel && (
-              <EuiFormLabel
-                isFocused={labelInFocus && !isDisabled}
-                isDisabled={isDisabled}
-                aria-invalid={Boolean(editorMessages.errors.length)}
-                isInvalid={Boolean(editorMessages.errors.length)}
-                onClick={() => {
-                  // HTML `for` doesn't correctly transfer click behavior to the code editor hint, so apply it manually
-                  const editorElement = document.getElementById(htmlId);
-                  if (editorElement) {
-                    editorElement.click();
-                  }
-                }}
-                htmlFor={htmlId}
-              >
-                {formLabel}
-              </EuiFormLabel>
-            )}
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {!hideRunQueryButton && (
               <EuiToolTip
@@ -1171,7 +1148,6 @@ const ESQLEditorInternal = function ESQLEditor({
                 <EuiButton
                   color={queryRunButtonProperties.color as EuiButtonColor}
                   onClick={() => onQuerySubmit(QuerySource.MANUAL)}
-                  iconType={queryRunButtonProperties.iconType}
                   size="s"
                   isLoading={isLoading && !allowQueryCancellation}
                   isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
@@ -1183,7 +1159,42 @@ const ESQLEditorInternal = function ESQLEditor({
               </EuiToolTip>
             )}
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ESQLMenu
+              actions={{
+                toggleVisor: onToggleVisor,
+                toggleHistory: hideQueryHistory ? undefined : onToggleHistory,
+                toggleStarredQuery: onToggleStarredQuery,
+                submitEsqlQuery: onSubmitEsqlQuery,
+                isHistoryOpen,
+                isCurrentQueryStarred,
+                canToggleStarredQuery: Boolean(starredQueriesService && trimmedQuery),
+                currentQuery: code,
+              }}
+              hideHistory={hideQueryHistory}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
+      )}
+      {formLabel && (
+        <EuiFlexItem grow={false}>
+          <EuiFormLabel
+            isFocused={labelInFocus && !isDisabled}
+            isDisabled={isDisabled}
+            aria-invalid={Boolean(editorMessages.errors.length)}
+            isInvalid={Boolean(editorMessages.errors.length)}
+            onClick={() => {
+              // HTML `for` doesn't correctly transfer click behavior to the code editor hint, so apply it manually
+              const editorElement = document.getElementById(htmlId);
+              if (editorElement) {
+                editorElement.click();
+              }
+            }}
+            htmlFor={htmlId}
+          >
+            {formLabel}
+          </EuiFormLabel>
+        </EuiFlexItem>
       )}
       <EuiFlexGroup
         gutterSize="none"
@@ -1358,7 +1369,6 @@ const ESQLEditorInternal = function ESQLEditor({
         }}
         onUpdateAndSubmitQuery={onUpdateAndSubmitQuery}
         onPrettifyQuery={onPrettifyQuery}
-        hideRunQueryText={hideRunQueryText}
         editorIsInline={editorIsInline}
         isSpaceReduced={isSpaceReduced}
         isHistoryOpen={isHistoryOpen}

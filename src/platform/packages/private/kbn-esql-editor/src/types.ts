@@ -44,8 +44,6 @@ export interface ESQLEditorProps {
   /** Disables the editor */
   isDisabled?: boolean;
   dataTestSubj?: string;
-  /** Hide the Run query information which appears on the footer*/
-  hideRunQueryText?: boolean;
   /** Hide the Run query button which appears when editor is inlined*/
   hideRunQueryButton?: boolean;
   /** This is used for applications (such as the inline editing flyout in dashboards)

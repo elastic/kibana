@@ -979,7 +979,6 @@ export const QueryBarTopRow = React.memo(
               })
             }
             isDisabled={props.isDisabled}
-            hideRunQueryText={true}
             data-test-subj="unifiedTextLangEditor"
             isLoading={props.isLoading}
             initialState={props.esqlEditorInitialState}
