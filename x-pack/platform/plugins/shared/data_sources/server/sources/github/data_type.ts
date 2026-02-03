@@ -54,6 +54,11 @@ export const githubDataSource: DataSource = {
       { name: 'list_releases', description: '' },
       { name: 'list_tags', description: '' },
       { name: 'pull_request_read', description: '' },
+      { name: 'search_issues', description: '' },
+      { name: 'search_code', description: '' },
+      { name: 'search_pull_requests', description: '' },
+      { name: 'search_repositories', description: '' },
+      { name: 'search_users', description: '' },
     ],
   },
 
@@ -61,7 +66,7 @@ export const githubDataSource: DataSource = {
     return [
       {
         content: generateGithubSearchWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
+        shouldGenerateABTool: false,
       },
     ];
   },
