@@ -66,6 +66,18 @@ const getAnomalyDetectionJobsSchema = z.object({
     .describe(
       'Include detailed anomaly score explanations. Disabled by default to reduce response size.'
     ),
+  partitionFieldValue: z
+    .string()
+    .optional()
+    .describe(
+      'Filter anomalies by partition field value (e.g., service name). Supports wildcards like "prod-*".'
+    ),
+  byFieldValue: z
+    .string()
+    .optional()
+    .describe(
+      'Filter anomalies by "by" field value (e.g., transaction type). Supports wildcards like "request*".'
+    ),
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
 });
 
@@ -106,6 +118,8 @@ When to use:
         limit: jobsLimit,
         minAnomalyScore,
         includeExplanation,
+        partitionFieldValue,
+        byFieldValue,
         start: rangeStart,
         end: rangeEnd,
       } = toolParams;
@@ -123,6 +137,8 @@ When to use:
           jobsLimit,
           minAnomalyScore,
           includeExplanation,
+          partitionFieldValue,
+          byFieldValue,
           rangeStart,
           rangeEnd,
         });

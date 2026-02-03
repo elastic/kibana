@@ -26,6 +26,8 @@ export async function getToolHandler({
   jobsLimit,
   minAnomalyScore,
   includeExplanation,
+  partitionFieldValue,
+  byFieldValue,
   rangeStart,
   rangeEnd,
 }: {
@@ -38,6 +40,8 @@ export async function getToolHandler({
   jobsLimit: number;
   minAnomalyScore: number;
   includeExplanation: boolean;
+  partitionFieldValue?: string;
+  byFieldValue?: string;
   rangeStart: string;
   rangeEnd: string;
 }) {
@@ -77,6 +81,8 @@ export async function getToolHandler({
         jobId: job.job_id,
         minAnomalyScore,
         includeExplanation,
+        partitionFieldValue,
+        byFieldValue,
         start: rangeStart,
         end: rangeEnd,
       });
@@ -109,6 +115,8 @@ async function getTopAnomalyRecords({
   jobId,
   minAnomalyScore,
   includeExplanation,
+  partitionFieldValue,
+  byFieldValue,
   start,
   end,
 }: {
@@ -116,6 +124,8 @@ async function getTopAnomalyRecords({
   jobId: string;
   minAnomalyScore: number;
   includeExplanation: boolean;
+  partitionFieldValue?: string;
+  byFieldValue?: string;
   start: string;
   end: string;
 }) {
@@ -132,6 +142,23 @@ async function getTopAnomalyRecords({
     ...(includeExplanation ? ['anomaly_score_explanation'] : []),
   ];
 
+  // Build filter array with optional wildcard filters
+  const filters: Array<Record<string, unknown>> = [
+    { term: { job_id: jobId } },
+    { term: { result_type: 'record' } },
+    { term: { is_interim: false } },
+    { range: { timestamp: { gte: start, lte: end } } },
+    { range: { record_score: { gte: minAnomalyScore } } },
+  ];
+
+  if (partitionFieldValue) {
+    filters.push({ wildcard: { partition_field_value: partitionFieldValue } });
+  }
+
+  if (byFieldValue) {
+    filters.push({ wildcard: { by_field_value: byFieldValue } });
+  }
+
   const response = await mlSystem.mlAnomalySearch<MlAnomalyRecordDoc>(
     {
       track_total_hits: false,
@@ -139,21 +166,7 @@ async function getTopAnomalyRecords({
       sort: [{ record_score: { order: 'desc' as const } }],
       query: {
         bool: {
-          filter: [
-            { term: { job_id: jobId } },
-            { term: { result_type: 'record' } },
-            { term: { is_interim: false } },
-            {
-              range: {
-                timestamp: { gte: start, lte: end },
-              },
-            },
-            {
-              range: {
-                record_score: { gte: minAnomalyScore },
-              },
-            },
-          ],
+          filter: filters,
         },
       },
       _source: sourceFields,
