@@ -9,18 +9,14 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import React from 'react';
 import { EndpointInfo } from './endpoint_info';
 
-// Mock clipboard API
-const mockWriteText = jest.fn().mockResolvedValue(undefined);
-Object.assign(navigator, {
-  clipboard: {
-    writeText: mockWriteText,
-  },
-});
+// Mock document.execCommand for EUI's copy functionality
+const mockExecCommand = jest.fn().mockReturnValue(true);
+document.execCommand = mockExecCommand;
 
 describe('RenderEndpoint component tests', () => {
   beforeEach(() => {
     jest.useFakeTimers();
-    mockWriteText.mockClear();
+    mockExecCommand.mockClear();
   });
 
   afterEach(() => {
@@ -116,7 +112,7 @@ describe('RenderEndpoint component tests', () => {
       fireEvent.click(copyButton);
 
       await waitFor(() => {
-        expect(mockWriteText).toHaveBeenCalledWith('test-endpoint');
+        expect(mockExecCommand).toHaveBeenCalledWith('copy');
       });
     });
 
