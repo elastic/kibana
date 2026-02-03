@@ -173,7 +173,12 @@ describe('attachment tools', () => {
           ({
             id: AttachmentType.visualizationRef,
             validate: () => ({ valid: true, data: {} }),
-            format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+            format: (attachment: Attachment) => ({
+              getRepresentation: () => ({
+                type: 'text',
+                value: JSON.stringify(attachment.data),
+              }),
+            }),
             resolve: async (_a: Attachment, ctx: AttachmentResolveContext) => {
               const resolved = await ctx.savedObjectsClient!.resolve('lens', 'so-123');
               return {
@@ -211,13 +216,9 @@ describe('attachment tools', () => {
       } as any)) as ToolHandlerStandardReturn;
 
       expect((result.results[0] as any).data.type).toBe(AttachmentType.visualizationRef);
-      expect((result.results[0] as any).data.resolved.found).toBe(true);
-      expect((result.results[0] as any).data.resolved.title).toBe('My Lens');
-      expect((result.results[0] as any).data.resolved.attributes).toEqual({
-        title: 'My Lens',
-        description: 'Desc',
-        state: { a: 1 },
-      });
+      expect((result.results[0] as any).data.raw_data).toEqual({ saved_object_id: 'so-123' });
+      expect((result.results[0] as any).data.data).toContain('"found":true');
+      expect((result.results[0] as any).data.data).toContain('"title":"My Lens"');
     });
 
     it('reads a specific version', async () => {

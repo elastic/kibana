@@ -56,7 +56,7 @@ export const createAttachmentReadTool = ({
     const { data: versionData, type } = attachment;
 
     let formattedData: unknown = versionData.data;
-    const resolvedData = (versionData as { resolved?: unknown }).resolved;
+    const rawData = (versionData as { raw_data?: unknown }).raw_data;
     if (attachmentsService && formatContext) {
       const definition = attachmentsService.getTypeDefinition(attachment.type);
       const typeReadonly = definition?.isReadonly ?? true;
@@ -93,7 +93,7 @@ export const createAttachmentReadTool = ({
             type,
             version: attachment.version,
             data: formattedData,
-            ...(resolvedData !== undefined ? { resolved: resolvedData } : {}),
+            ...(rawData !== undefined ? { raw_data: rawData } : {}),
           },
         },
       ],

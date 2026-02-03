@@ -26,6 +26,8 @@ describe('AttachmentStateManager', () => {
   let manager: AttachmentStateManager;
   const mockContext = { request: {} as any, spaceId: 'default' };
 
+  let resolvedByRefPayload: Record<string, unknown> = { value: 'resolved-1' };
+
   const getTypeDefinition = (type: string): AttachmentTypeDefinition | undefined => {
     switch (type) {
       case 'text':
@@ -78,6 +80,22 @@ describe('AttachmentStateManager', () => {
           },
           format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
         } as any;
+      case 'by_ref':
+        return {
+          id: 'by_ref',
+          validate: (input: unknown) => {
+            if (
+              typeof input === 'object' &&
+              input !== null &&
+              typeof (input as any).ref === 'string'
+            ) {
+              return { valid: true, data: input as any };
+            }
+            return { valid: false, error: 'Expected { ref: string }' };
+          },
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          resolve: async () => resolvedByRefPayload,
+        } as any;
       default:
         return undefined;
     }
@@ -85,6 +103,7 @@ describe('AttachmentStateManager', () => {
 
   beforeEach(() => {
     manager = createAttachmentStateManager([], { getTypeDefinition });
+    resolvedByRefPayload = { value: 'resolved-1' };
   });
 
   // Helper to create a test attachment
@@ -548,6 +567,44 @@ describe('AttachmentStateManager', () => {
       const resolved = manager.resolveRefs(refs);
 
       expect(resolved[0].active).toBe(false);
+    });
+  });
+
+  describe('resolveAttachment()', () => {
+    it('caches first resolve without bumping version and increments on diff', async () => {
+      const attachment = await manager.add({
+        id: 'by-ref-1',
+        type: 'by_ref',
+        data: { ref: 'a' },
+      });
+
+      const firstRead = await manager.get(attachment.id, {
+        version: 1,
+        context: mockContext,
+      });
+
+      expect(firstRead?.data.data).toEqual({ value: 'resolved-1' });
+      expect((firstRead?.data as { raw_data?: unknown }).raw_data).toEqual({ ref: 'a' });
+
+      const afterFirst = manager.getAttachmentRecord(attachment.id);
+      expect(afterFirst?.current_version).toBe(1);
+
+      resolvedByRefPayload = { value: 'resolved-2' };
+
+      const secondRead = await manager.get(attachment.id, {
+        version: 1,
+        context: mockContext,
+      });
+
+      expect(secondRead?.data.data).toEqual({ value: 'resolved-2' });
+      expect((secondRead?.data as { raw_data?: unknown }).raw_data).toEqual({ ref: 'a' });
+
+      const afterSecond = manager.getAttachmentRecord(attachment.id);
+      expect(afterSecond?.current_version).toBe(2);
+      expect(getLatestVersion(afterSecond!)?.data).toEqual({ value: 'resolved-2' });
+      expect((getLatestVersion(afterSecond!) as { raw_data?: unknown }).raw_data).toEqual({
+        ref: 'a',
+      });
     });
   });
 

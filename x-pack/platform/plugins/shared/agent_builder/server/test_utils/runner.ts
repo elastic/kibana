@@ -179,6 +179,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     request: httpServerMock.createKibanaRequest(),
     spaceId: 'default',
     esClient: elasticsearchServiceMock.createScopedClusterClient(),
+    savedObjectsClient: savedObjectsServiceMock.createStartContract().getScopedClient({} as any),
     modelProvider: createModelProviderMock(),
     toolProvider: createToolProviderMock(),
     runner: createScopedRunnerMock(),

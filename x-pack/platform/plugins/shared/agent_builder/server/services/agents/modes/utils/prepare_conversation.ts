@@ -197,6 +197,16 @@ export const prepareConversation = async ({
     })
   );
 
+  const activeAttachments = attachmentStateManager.getActive();
+  await Promise.all(
+    activeAttachments.map(async (attachment) => {
+      await attachmentStateManager.get(attachment.id, {
+        version: attachment.current_version,
+        context,
+      });
+    })
+  );
+
   const versionedAttachmentPresentation = await prepareAttachmentPresentation(
     attachmentStateManager.getAll(),
     undefined,

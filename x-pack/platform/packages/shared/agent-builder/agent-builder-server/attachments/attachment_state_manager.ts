@@ -205,7 +205,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       return undefined;
     }
 
-    const resolved = await this.resolveAttachment(attachment, {
+    const resolvedContent = await this.resolveAttachment(attachment, {
       context: options.context,
       version,
     });
@@ -214,12 +214,20 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       this.recordAccess(id, version, ATTACHMENT_REF_OPERATION.read, options.actor);
     }
 
+    const responseVersion: AttachmentVersion =
+      resolvedContent !== undefined
+        ? {
+            ...attachmentVersion,
+            data: resolvedContent,
+            raw_data: attachmentVersion.raw_data ?? attachmentVersion.data,
+          }
+        : attachmentVersion;
+
     return {
       id,
       version,
       type: attachment.type as AttachmentType,
-      data: resolved ? { ...attachmentVersion, resolved } : attachmentVersion,
-      ...(resolved ? { raw_data: attachmentVersion.data } : {}),
+      data: responseVersion,
     };
   }
 
@@ -479,42 +487,58 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
   ): Promise<unknown | undefined> {
     const { version, context } = options;
     const { id, type } = attachment;
-    const data = getVersion(attachment, version);
+    const attachmentVersion = getVersion(attachment, version);
     const definition = this.options.getTypeDefinition(type);
     if (!definition?.resolve) {
-      return data;
+      return undefined;
     }
 
-    const resolved = definition.resolve(
+    if (!attachmentVersion) {
+      return undefined;
+    }
+
+    const referenceData = attachmentVersion.raw_data ?? attachmentVersion.data;
+    const resolved = await definition.resolve(
       {
         id,
         type,
-        data,
+        data: referenceData,
       },
       context
     );
 
     if (resolved === undefined) {
-      return data;
+      return undefined;
     }
 
-    const existingResolved = data?.data;
+    const currentResolved =
+      attachmentVersion.raw_data !== undefined ? attachmentVersion.data : undefined;
     const isSameResolved =
-      existingResolved !== undefined &&
-      JSON.stringify(existingResolved) === JSON.stringify(resolved);
+      currentResolved !== undefined && JSON.stringify(currentResolved) === JSON.stringify(resolved);
 
     if (isSameResolved) {
-      return data;
+      return resolved;
+    }
+
+    const newContentHash = hashContent(resolved);
+    const newTokens = estimateTokens(resolved);
+
+    if (attachmentVersion.raw_data === undefined) {
+      // First resolve: cache resolved data on the existing version without bumping version.
+      attachmentVersion.raw_data = attachmentVersion.data;
+      attachmentVersion.data = resolved;
+      attachmentVersion.content_hash = newContentHash;
+      attachmentVersion.estimated_tokens = newTokens;
+      this.dirty = true;
+      return resolved;
     }
 
     const newVersionNumber = attachment.current_version + 1;
-    const newContentHash = hashContent(resolved);
-    const newTokens = estimateTokens(resolved);
     const newVersion: AttachmentVersion = {
-      ...data!,
+      ...attachmentVersion,
       version: newVersionNumber,
       data: resolved,
-      raw_data: data?.raw_data,
+      raw_data: attachmentVersion.raw_data,
       created_at: new Date().toISOString(),
       content_hash: newContentHash,
       estimated_tokens: newTokens,
@@ -524,7 +548,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     attachment.current_version = newVersionNumber;
     this.dirty = true;
 
-    return newVersion;
+    return resolved;
   }
 
   getTotalTokenEstimate(): number {
