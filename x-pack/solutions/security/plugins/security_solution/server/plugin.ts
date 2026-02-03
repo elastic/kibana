@@ -497,6 +497,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     };
 
     // TODO We need to get the endpoint routes inside of initRoutes
+    const enableDataGeneratorRoutes =
+      pluginContext.env.mode.dev || plugins.cloud.isElasticStaffOwned === true;
     initRoutes(
       router,
       config,
@@ -514,7 +516,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.isServerless,
       core.docLinks,
       this.endpointContext,
-      trialCompanionDeps
+      trialCompanionDeps,
+      enableDataGeneratorRoutes
     );
 
     registerEndpointRoutes(router, this.endpointContext);
@@ -666,6 +669,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.trialCompanionMilestoneService.setup({
         taskManager: plugins.taskManager,
         enabled: trialCompanionDeps.enabled,
+        telemetry: core.analytics,
       });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');

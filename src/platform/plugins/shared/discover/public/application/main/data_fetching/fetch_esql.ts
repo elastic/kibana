@@ -44,6 +44,7 @@ export function fetchEsql({
   esqlVariables,
   searchSessionId,
   projectRouting,
+  inspectorConfig,
 }: {
   query: Query | AggregateQuery;
   inputQuery?: Query;
@@ -58,6 +59,10 @@ export function fetchEsql({
   esqlVariables?: ESQLControlVariable[];
   searchSessionId?: string;
   projectRouting?: ProjectRouting;
+  inspectorConfig?: {
+    title: string;
+    description: string;
+  };
 }): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
     query,
@@ -66,6 +71,7 @@ export function fetchEsql({
     timeRange,
     dataView,
     data,
+    inspectorConfig,
   });
   return textBasedQueryStateToAstWithValidation(props)
     .then((ast) => {
@@ -146,6 +152,7 @@ export function getTextBasedQueryStateToAstProps({
   timeRange,
   dataView,
   data,
+  inspectorConfig,
 }: {
   query: Query | AggregateQuery;
   inputQuery?: Query;
@@ -153,6 +160,10 @@ export function getTextBasedQueryStateToAstProps({
   timeRange?: TimeRange;
   dataView: DataView;
   data: DataPublicPluginStart;
+  inspectorConfig?: {
+    title: string;
+    description: string;
+  };
 }) {
   return {
     filters,
@@ -160,11 +171,15 @@ export function getTextBasedQueryStateToAstProps({
     time: timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime(),
     timeFieldName: dataView.timeFieldName,
     inputQuery,
-    titleForInspector: i18n.translate('discover.inspectorEsqlRequestTitle', {
-      defaultMessage: 'Table',
-    }),
-    descriptionForInspector: i18n.translate('discover.inspectorEsqlRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
-    }),
+    titleForInspector:
+      inspectorConfig?.title ??
+      i18n.translate('discover.inspectorEsqlRequestTitle', {
+        defaultMessage: 'Table',
+      }),
+    descriptionForInspector:
+      inspectorConfig?.description ??
+      i18n.translate('discover.inspectorEsqlRequestDescription', {
+        defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
+      }),
   };
 }

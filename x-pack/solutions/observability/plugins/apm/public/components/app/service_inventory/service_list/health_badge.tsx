@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, useEuiTheme } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import type { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
   getServiceHealthStatusBadgeColor,
@@ -14,10 +14,8 @@ import {
 } from '../../../../../common/service_health_status';
 
 export function HealthBadge({ healthStatus }: { healthStatus: ServiceHealthStatus }) {
-  const { euiTheme } = useEuiTheme();
-
   return (
-    <EuiBadge color={getServiceHealthStatusBadgeColor(euiTheme, healthStatus)}>
+    <EuiBadge color={getServiceHealthStatusBadgeColor(healthStatus)}>
       {getServiceHealthStatusLabel(healthStatus)}
     </EuiBadge>
   );

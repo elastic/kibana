@@ -41,7 +41,8 @@ export async function FleetAndAgentsProvider({ getService }: FtrProviderContext)
       id: string,
       policyId: string,
       version?: string,
-      upgradeDetails?: any
+      upgradeDetails?: any,
+      upgradedAt?: string
     ) {
       let data: any = {};
 
@@ -112,6 +113,7 @@ export async function FleetAndAgentsProvider({ getService }: FtrProviderContext)
           },
           ...data,
           ...(upgradeDetails ? { upgrade_details: upgradeDetails } : {}),
+          ...(upgradedAt ? { upgraded_at: upgradedAt } : {}),
         },
         refresh: 'wait_for',
       });
