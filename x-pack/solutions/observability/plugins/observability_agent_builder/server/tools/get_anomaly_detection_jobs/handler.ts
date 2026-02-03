@@ -25,6 +25,7 @@ export async function getToolHandler({
   jobIds = [],
   jobsLimit,
   minAnomalyScore,
+  includeExplanation,
   rangeStart,
   rangeEnd,
 }: {
@@ -36,6 +37,7 @@ export async function getToolHandler({
   jobIds?: string[];
   jobsLimit: number;
   minAnomalyScore: number;
+  includeExplanation: boolean;
   rangeStart: string;
   rangeEnd: string;
 }) {
@@ -74,6 +76,7 @@ export async function getToolHandler({
         mlSystem,
         jobId: job.job_id,
         minAnomalyScore,
+        includeExplanation,
         start: rangeStart,
         end: rangeEnd,
       });
@@ -105,15 +108,30 @@ async function getTopAnomalyRecords({
   mlSystem,
   jobId,
   minAnomalyScore,
+  includeExplanation,
   start,
   end,
 }: {
   mlSystem: MlSystem;
   jobId: string;
   minAnomalyScore: number;
+  includeExplanation: boolean;
   start: string;
   end: string;
 }) {
+  const sourceFields = [
+    'timestamp',
+    'record_score',
+    'by_field_name',
+    'by_field_value',
+    'partition_field_name',
+    'partition_field_value',
+    'field_name',
+    'typical',
+    'actual',
+    ...(includeExplanation ? ['anomaly_score_explanation'] : []),
+  ];
+
   const response = await mlSystem.mlAnomalySearch<MlAnomalyRecordDoc>(
     {
       track_total_hits: false,
@@ -138,18 +156,7 @@ async function getTopAnomalyRecords({
           ],
         },
       },
-      _source: [
-        'timestamp',
-        'record_score',
-        'by_field_name',
-        'by_field_value',
-        'partition_field_name',
-        'partition_field_value',
-        'field_name',
-        'anomaly_score_explanation',
-        'typical',
-        'actual',
-      ],
+      _source: sourceFields,
     },
     [jobId]
   );
@@ -166,8 +173,8 @@ async function getTopAnomalyRecords({
     partitionFieldName: record.partition_field_name,
     partitionFieldValue: record.partition_field_value,
     fieldName: record.field_name,
-    anomalyScoreExplanation: record.anomaly_score_explanation,
     typicalValue: record.typical,
     actualValue: record.actual,
+    ...(includeExplanation && { anomalyScoreExplanation: record.anomaly_score_explanation }),
   }));
 }

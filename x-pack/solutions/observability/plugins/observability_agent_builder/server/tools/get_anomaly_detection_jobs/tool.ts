@@ -60,6 +60,12 @@ const getAnomalyDetectionJobsSchema = z.object({
     .describe(
       'Minimum anomaly score threshold (0-100). Higher scores indicate more severe anomalies. Default is 50 to filter noise.'
     ),
+  includeExplanation: z
+    .boolean()
+    .default(false)
+    .describe(
+      'Include detailed anomaly score explanations. Disabled by default to reduce response size.'
+    ),
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
 });
 
@@ -99,6 +105,7 @@ When to use:
         jobIds,
         limit: jobsLimit,
         minAnomalyScore,
+        includeExplanation,
         start: rangeStart,
         end: rangeEnd,
       } = toolParams;
@@ -115,6 +122,7 @@ When to use:
           jobIds,
           jobsLimit,
           minAnomalyScore,
+          includeExplanation,
           rangeStart,
           rangeEnd,
         });
