@@ -47,7 +47,8 @@
     "@kbn/apm-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/react-query",
-    "@kbn/streams-plugin"
+    "@kbn/streams-plugin",
+    "@kbn/data-views-plugin"
   ],
   "exclude": [
     "target/**/*"
