@@ -175,6 +175,11 @@ export const validateRuleImportResponseActions = async ({
     { concurrency: 20 }
   );
 
+  logger.debug(
+    () =>
+      `Validation done: valid rules [${response.valid.length}], errors [${response.errors.length}]`
+  );
+
   return response;
 };
 
