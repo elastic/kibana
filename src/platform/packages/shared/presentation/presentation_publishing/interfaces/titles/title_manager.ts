@@ -12,50 +12,37 @@ import type { WithAllKeys } from '../../state_manager';
 import { initializeStateManager } from '../../state_manager/state_manager';
 import type { StateComparators, StateManager } from '../../state_manager/types';
 import type { PublishesWritableDescription } from './publishes_description';
-import type { PublishesTitle, PublishesWritableTitle } from './publishes_title';
+import type { PublishesWritableTitle } from './publishes_title';
 
 export type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
+
+export type TitleManager = { api: PublishesWritableTitle & PublishesWritableDescription } & Pick<
+  StateManager<SerializedTitles>,
+  'anyStateChange$' | 'getLatestState' | 'reinitializeState'
+>;
 
 const defaultTitlesState: WithAllKeys<SerializedTitles> = {
   title: undefined,
   description: undefined,
-  hidePanelTitles: undefined,
+  hide_title: undefined,
 };
 
 export const titleComparators: StateComparators<SerializedTitles> = {
   title: 'referenceEquality',
   description: 'referenceEquality',
-  hidePanelTitles: (a, b) => Boolean(a) === Boolean(b),
+  hide_title: (a, b) => Boolean(a) === Boolean(b),
 };
 
 export const stateHasTitles = (state: unknown): state is SerializedTitles => {
   return (
     (state as SerializedTitles)?.title !== undefined ||
     (state as SerializedTitles)?.description !== undefined ||
-    (state as SerializedTitles)?.hidePanelTitles !== undefined
+    (state as SerializedTitles)?.hide_title !== undefined
   );
 };
 
 export interface TitlesApi extends PublishesWritableTitle, PublishesWritableDescription {}
 
-export const initializeTitleManager = (
-  initialTitlesState: SerializedTitles
-): StateManager<SerializedTitles> & {
-  api: {
-    hideTitle$: PublishesTitle['hideTitle$'];
-    setHideTitle: PublishesWritableTitle['setHideTitle'];
-  };
-} => {
-  const stateManager = initializeStateManager(initialTitlesState, defaultTitlesState);
-  return {
-    ...stateManager,
-    api: {
-      ...stateManager.api,
-      // SerializedTitles defines hideTitles as hidePanelTitles
-      // This state is persisted and this naming conflict will be resolved TBD
-      // add named APIs that match interface names as a work-around
-      hideTitle$: stateManager.api.hidePanelTitles$,
-      setHideTitle: stateManager.api.setHidePanelTitles,
-    },
-  };
+export const initializeTitleManager = (initialTitlesState: SerializedTitles): TitleManager => {
+  return initializeStateManager(initialTitlesState, defaultTitlesState);
 };

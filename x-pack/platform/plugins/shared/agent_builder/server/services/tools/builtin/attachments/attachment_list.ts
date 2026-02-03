@@ -41,6 +41,7 @@ export const createAttachmentListTool = ({
         type: attachment.type,
         description: attachment.description,
         current_version: attachment.current_version,
+        readonly: attachment.readonly ?? true,
       };
     });
 

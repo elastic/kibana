@@ -134,6 +134,10 @@ describe('setupProject', () => {
     const Fs = jest.requireMock('fs');
     Fs.existsSync.mockReturnValue(true);
 
+    (findPlugins as jest.Mock).mockReturnValue([
+      { id: 'test-plugin', isPlugin: true, directory: '/tmp/test' },
+    ]);
+
     const options: CliOptions = {
       collectReferences: false,
       pluginFilter: ['test-plugin'],
@@ -149,10 +153,24 @@ describe('setupProject', () => {
 
     const options: CliOptions = {
       collectReferences: false,
-      stats: ['any'],
       pluginFilter: ['nonexistent-plugin'],
     };
 
-    await expect(setupProject(context, options)).rejects.toThrow('expected --plugin was not found');
+    await expect(setupProject(context, options)).rejects.toThrow(
+      "expected --plugin 'nonexistent-plugin' was not found"
+    );
+  });
+
+  it('validates package filter and throws error if packages not found', async () => {
+    (findPlugins as jest.Mock).mockReturnValue([]);
+
+    const options: CliOptions = {
+      collectReferences: false,
+      packageFilter: ['@kbn/nonexistent-package'],
+    };
+
+    await expect(setupProject(context, options)).rejects.toThrow(
+      "expected --package '@kbn/nonexistent-package' was not found"
+    );
   });
 });

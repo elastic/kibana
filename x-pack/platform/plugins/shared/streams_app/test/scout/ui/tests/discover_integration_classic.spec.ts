@@ -46,14 +46,7 @@ test.describe(
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.waitForDocTableRendered();
 
-      // Expand the first document row to open the flyout
-      const expandButton = page.locator(
-        '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
-      );
-
-      // Wait for the row to be rendered before clicking
-      await expandButton.waitFor({ state: 'visible', timeout: 30_000 });
-      await expandButton.click();
+      await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
 
       // Verify the doc viewer flyout is open
       await pageObjects.discover.waitForDocViewerFlyoutOpen();
@@ -102,14 +95,7 @@ test.describe(
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.waitForDocTableRendered();
 
-      // Expand the first document row to open the flyout
-      const expandButton = page.locator(
-        '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
-      );
-
-      // Wait for the row to be rendered before clicking
-      await expandButton.waitFor({ state: 'visible', timeout: 30_000 });
-      await expandButton.click();
+      await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
 
       // Verify the doc viewer flyout is open
       await pageObjects.discover.waitForDocViewerFlyoutOpen();

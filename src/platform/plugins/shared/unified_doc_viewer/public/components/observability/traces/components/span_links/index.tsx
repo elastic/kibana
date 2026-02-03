@@ -36,7 +36,7 @@ import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { useGetGenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
 import { getColumns } from './get_columns';
 import { useFetchSpanLinks } from './use_fetch_span_links';
-import { OPEN_IN_DISCOVER_LABEL, OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL } from '../../common/constants';
+import { OPEN_IN_DISCOVER_LABEL, OPEN_IN_DISCOVER_ARIA_LABEL } from '../../common/constants';
 
 export interface Props {
   traceId: string;
@@ -138,7 +138,7 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
               {
                 icon: 'discoverApp',
                 label: OPEN_IN_DISCOVER_LABEL,
-                ariaLabel: OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL,
+                ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
                 href: openInDiscoverLink,
                 dataTestSubj: 'unifiedDocViewerSpanLinksRefreshButton',
               },
