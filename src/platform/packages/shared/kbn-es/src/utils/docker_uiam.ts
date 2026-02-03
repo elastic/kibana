@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { writeFile } from 'fs/promises';
+import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import {
   generateCosmosDBApiRequestHeaders,
@@ -322,6 +322,9 @@ export async function initializeUiamContainers(log: ToolingLog) {
 async function tryExportLogs(containerName: string, log: ToolingLog) {
   try {
     const { stdout: logs } = await execa('docker', ['logs', containerName]);
+    await mkdir(join(REPO_ROOT, '.es'), {
+      recursive: true,
+    });
     return writeFile(join(REPO_ROOT, '.es', 'uiam_docker_error.log'), logs);
   } catch (err) {
     log.error(`Failed to export logs for container ${containerName}: ${err}`);
