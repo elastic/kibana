@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
@@ -28,13 +29,31 @@ const containerStyles = css`
   }
 `;
 
+const copyButtonHiddenStyles = ({ euiTheme }: UseEuiTheme) => css`
+  opacity: 0;
+  transition: opacity ${euiTheme.animation.fast} ease-in-out;
+
+  &:focus {
+    opacity: 1;
+  }
+`;
+
+const copyButtonVisibleStyles = ({ euiTheme }: UseEuiTheme) => css`
+  opacity: 1;
+  transition: opacity ${euiTheme.animation.fast} ease-in-out;
+
+  &:focus {
+    opacity: 1;
+  }
+`;
+
 export interface EndpointInfoProps {
   inferenceId: string;
   endpointInfo: InferenceInferenceEndpointInfo;
 }
 
 export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpointInfo }) => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
   const [isCopied, setIsCopied] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -57,15 +76,6 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
     }, COPIED_ICON_DISPLAY_DURATION_MS);
   }, []);
 
-  const copyButtonStyles = css`
-    opacity: ${isCopied ? 1 : 0};
-    transition: opacity ${euiTheme.animation.fast} ease-in-out;
-
-    &:focus {
-      opacity: 1;
-    }
-  `;
-
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -80,7 +90,15 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
               <EuiFlexItem grow={false}>
                 <strong>{inferenceId}</strong>
               </EuiFlexItem>
-              <EuiFlexItem grow={false} className="copyButton" css={copyButtonStyles}>
+              <EuiFlexItem
+                grow={false}
+                className="copyButton"
+                css={
+                  isCopied
+                    ? copyButtonVisibleStyles(euiThemeContext)
+                    : copyButtonHiddenStyles(euiThemeContext)
+                }
+              >
                 <EuiCopy textToCopy={inferenceId} afterMessage={i18n.COPY_ID_COPIED}>
                   {(copy) => (
                     <EuiButtonIcon
