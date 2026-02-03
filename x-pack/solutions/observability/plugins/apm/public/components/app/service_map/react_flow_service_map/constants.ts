@@ -53,3 +53,6 @@ export const EDGE_OFFSET_DIVISOR = 4;
 
 /** Duration of the center animation in milliseconds */
 export const CENTER_ANIMATION_DURATION_MS = 200;
+
+/** Minimum distance threshold for directional keyboard navigation (in pixels) */
+export const DIRECTION_THRESHOLD = 50;

@@ -20,38 +20,17 @@ import type {
   ScopedRunnerRunToolsParams,
   ToolAvailabilityContext,
   InternalToolDefinition,
+  ToolRegistry,
+  ToolListParams,
+  ToolCreateParams,
+  ToolUpdateParams,
 } from '@kbn/agent-builder-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import type {
-  ToolCreateParams,
-  ToolUpdateParams,
-  ToolProvider,
-  WritableToolProvider,
-  ReadonlyToolProvider,
-} from './tool_provider';
+import type { ToolProvider, WritableToolProvider, ReadonlyToolProvider } from './tool_provider';
 import { isReadonlyToolProvider } from './tool_provider';
 import { toExecutableTool } from './utils';
 import type { ToolHealthClient } from './health';
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ToolListParams {
-  // blank for now
-  // type?: ToolType[];
-  // tags?: string[];
-}
-
-export interface ToolRegistry {
-  has(toolId: string): Promise<boolean>;
-  get(toolId: string): Promise<InternalToolDefinition>;
-  list(opts?: ToolListParams): Promise<InternalToolDefinition[]>;
-  create(tool: ToolCreateParams): Promise<InternalToolDefinition>;
-  update(toolId: string, update: ToolUpdateParams): Promise<InternalToolDefinition>;
-  delete(toolId: string): Promise<boolean>;
-  execute<TParams extends object = Record<string, unknown>>(
-    params: ScopedRunnerRunToolsParams<TParams>
-  ): Promise<RunToolReturn>;
-}
 
 interface CreateToolRegistryParams {
   getRunner: () => Runner;
