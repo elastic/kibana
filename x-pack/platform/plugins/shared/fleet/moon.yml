@@ -119,6 +119,7 @@ dependsOn:
   - '@kbn/fs'
   - '@kbn/kql'
   - '@kbn/scout'
+  - '@kbn/rule-data-utils'
 tags:
   - plugin
   - prod
