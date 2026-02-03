@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
+import { css } from '@emotion/react';
 import styled from 'styled-components';
 import * as i18n from './translations';
 import { KpiPanel } from '../common/components';
@@ -85,7 +86,9 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
         <StyledFlexGroup
           data-test-subj="alerts-charts-container"
           className="eui-yScroll"
-          wrap
+          css={css`
+            max-height: 300px;
+          `}
           gutterSize="m"
         >
           <StyledFlexItem>
