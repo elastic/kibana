@@ -174,7 +174,7 @@ describe('transformCustomScheduleToRRule', () => {
       transformCustomScheduleToRRule({
         duration: '1m',
         start: '2025-01-14T05:05:00.000Z',
-        recurring: { every: '-1h' },
+        recurring: { every: '1h' },
       })
     ).toEqual({
       duration: 60000,
