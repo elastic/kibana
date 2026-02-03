@@ -7,32 +7,26 @@
 
 import {
   EuiBadge,
-  EuiBasicTable,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
+  EuiInMemoryTable,
   EuiLink,
   EuiText,
-  useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Feature } from '@kbn/streams-schema';
 import { upperFirst } from 'lodash';
 import React, { useState, useCallback } from 'react';
 import { useFetchFeatures } from '../../../../hooks/use_fetch_features';
 import { LoadingPanel } from '../../../loading_panel';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { FeatureDetailsFlyout } from '../../../stream_detail_systems/stream_features/feature_details_flyout';
 import { getConfidenceColor } from '../../../stream_detail_systems/stream_features/use_stream_features_table';
 
 export function FeaturesTable() {
-  const { euiTheme } = useEuiTheme();
-  const { unifiedSearch } = useKibana().dependencies.start;
-  const [searchQuery, setSearchQuery] = useState('');
-  const { data, isLoading: loading } = useFetchFeatures({ query: searchQuery });
+  const { data, isLoading: loading } = useFetchFeatures();
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
 
   const handleSelectFeature = useCallback((feature: Feature | null) => {
@@ -65,12 +59,12 @@ export function FeaturesTable() {
       ),
     },
     {
+      field: 'name',
       name: i18n.translate('xpack.streams.significantEventsDiscovery.featuresTable.featureColumn', {
         defaultMessage: 'Feature',
       }),
       truncateText: true,
-      render: (feature: Feature) => {
-        const displayTitle = feature.title ?? Object.values(feature.value).join(', ');
+      render: (_name: string, feature: Feature) => {
         return (
           <EuiLink
             onClick={() => handleSelectFeature(feature)}
@@ -78,11 +72,11 @@ export function FeaturesTable() {
           >
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem grow={false}>
-                <EuiText size="s">{displayTitle}</EuiText>
+                <EuiText size="s">{feature.title}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
-                  {feature.name}
+                  {feature.title}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -96,7 +90,7 @@ export function FeaturesTable() {
         defaultMessage: 'Stream',
       }),
       width: '15%',
-      render: (_: unknown, feature: Feature) => (
+      render: (_streamName: string, feature: Feature) => (
         <EuiBadge color="hollow">{feature.stream_name || '--'}</EuiBadge>
       ),
     },
@@ -126,34 +120,6 @@ export function FeaturesTable() {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem>
-            <unifiedSearch.ui.SearchBar
-              appName="streamsApp"
-              showFilterBar={false}
-              showQueryMenu={false}
-              showQueryInput
-              showDatePicker={false}
-              submitButtonStyle="iconOnly"
-              displayStyle="inPage"
-              disableQueryLanguageSwitcher
-              onQuerySubmit={(queryPayload) => {
-                setSearchQuery(String(queryPayload.query?.query ?? ''));
-              }}
-              query={{
-                query: searchQuery,
-                language: 'text',
-              }}
-              isLoading={loading}
-              placeholder={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.featuresTable.searchPlaceholder',
-                { defaultMessage: 'Search features' }
-              )}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
         <EuiText size="s">
           {i18n.translate('xpack.streams.significantEventsDiscovery.featuresTable.featuresCount', {
             defaultMessage: '{count} Features',
@@ -162,12 +128,7 @@ export function FeaturesTable() {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiBasicTable
-          css={css`
-            & thead tr {
-              background-color: ${euiTheme.colors.backgroundBaseSubdued};
-            }
-          `}
+        <EuiInMemoryTable
           tableCaption={i18n.translate(
             'xpack.streams.significantEventsDiscovery.featuresTable.tableCaption',
             { defaultMessage: 'Features table' }
@@ -176,6 +137,17 @@ export function FeaturesTable() {
           itemId="id"
           items={data?.features ?? []}
           loading={loading}
+          search={{
+            box: {
+              incremental: true,
+              placeholder: i18n.translate(
+                'xpack.streams.significantEventsDiscovery.featuresTable.searchPlaceholder',
+                { defaultMessage: 'Search features' }
+              ),
+            },
+            filters: [],
+          }}
+          searchFormat="text"
           noItemsMessage={
             !loading
               ? i18n.translate(
