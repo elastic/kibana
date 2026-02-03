@@ -70,12 +70,12 @@ const TRACES_ESQL_RECOMMENDED_QUERIES = [
 
 const METRICS_ESQL_RECOMMENDED_QUERIES = [
   {
-    name: i18n.translate('xpack.observability.esqlQueries.allMetrics.name', {
-      defaultMessage: 'All metrics',
+    name: i18n.translate('xpack.observability.esqlQueries.searchAllMetrics.name', {
+      defaultMessage: 'Search all metrics',
     }),
     query: `TS ${METRICS_INDEX_PATTERN}`,
-    description: i18n.translate('xpack.observability.esqlQueries.allMetrics.description', {
-      defaultMessage: 'Loads all available metrics',
+    description: i18n.translate('xpack.observability.esqlQueries.searchAllMetrics.description', {
+      defaultMessage: 'Searches all available metrics',
     }),
   },
 ];
