@@ -411,6 +411,16 @@ module.exports = {
 
   overrides: [
     /**
+     * .mts files - ES module TypeScript files
+     * These need explicit sourceType: module to avoid parsing errors
+     */
+    {
+      files: ['**/*.mts'],
+      parserOptions: {
+        sourceType: 'module',
+      },
+    },
+    /**
      * Vitest test files - enable vitest globals
      */
     {
