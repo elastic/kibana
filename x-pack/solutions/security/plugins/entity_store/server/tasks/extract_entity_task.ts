@@ -154,19 +154,19 @@ export async function scheduleExtractEntityTask({
   logger: Logger;
   taskManager: TaskManagerStartContract;
   type: EntityType;
-  frequency?: string;
+  frequency: string;
   namespace: string;
   request: KibanaRequest;
 }): Promise<void> {
+
   try {
     const taskType = getTaskType(type);
     const taskId = getTaskId(type, namespace);
-    const interval = frequency ?? TasksConfig[EntityStoreTaskType.Values.extractEntity].interval;
     await taskManager.ensureScheduled(
       {
         id: taskId,
         taskType,
-        schedule: { interval },
+        schedule: { interval: frequency },
         state: { namespace },
         params: {},
       },
