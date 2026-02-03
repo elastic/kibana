@@ -291,13 +291,9 @@ export const StepsEditor = React.memo(() => {
     if (isLoadingExistingSuggestion || isLoadingSuggestion) {
       return (
         <SuggestionLoadingPrompt
-          onCancel={
-            isLoadingSuggestion
-              ? () => {
-                  cancelSuggestion();
-                }
-              : undefined
-          }
+          onCancel={() => {
+            cancelSuggestion();
+          }}
         />
       );
     }

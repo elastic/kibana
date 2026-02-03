@@ -14,6 +14,7 @@ import {
   EuiSkeletonText,
   EuiCallOut,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -44,6 +45,13 @@ export function SuggestionLoadingPrompt({ onCancel }: SuggestionLoadingPromptPro
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiProgress size="s" color="accent" />
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued">
+        {i18n.translate('xpack.streams.stepsEditor.backgroundProcessingMessage', {
+          defaultMessage:
+            "You don't need to stay on this page. The suggestion will be available when you return.",
+        })}
+      </EuiText>
       {onCancel && (
         <>
           <EuiSpacer size="s" />

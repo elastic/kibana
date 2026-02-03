@@ -441,6 +441,18 @@ export const interactiveModeMachine = setup({
               target: 'idle',
             },
           },
+          on: {
+            'suggestion.cancel': {
+              target: 'idle',
+              actions: [
+                {
+                  type: 'cancelSuggestionTask',
+                  params: ({ context }) => ({ streamName: context.streamName }),
+                },
+                { type: 'clearSuggestion' },
+              ],
+            },
+          },
         },
         idle: {
           on: {

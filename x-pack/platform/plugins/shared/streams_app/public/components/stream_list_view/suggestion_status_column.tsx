@@ -14,6 +14,8 @@ import {
   EuiPopover,
   EuiListGroup,
   EuiListGroupItem,
+  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SuggestionBulkStatusItem } from '@kbn/streams-plugin/common';
@@ -23,15 +25,18 @@ interface SuggestionStatusColumnProps {
   streamName: string;
   status: SuggestionBulkStatusItem | undefined;
   isLoading: boolean;
+  onDismiss?: (streamName: string) => void;
 }
 
 export function SuggestionStatusColumn({
   streamName,
   status,
   isLoading,
+  onDismiss,
 }: SuggestionStatusColumnProps) {
   const router = useStreamsAppRouter();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isDismissing, setIsDismissing] = useState(false);
 
   if (isLoading) {
     return (
@@ -60,6 +65,16 @@ export function SuggestionStatusColumn({
   const togglePopover = () => setIsPopoverOpen((prev) => !prev);
   const closePopover = () => setIsPopoverOpen(false);
 
+  const handleDismiss = async () => {
+    if (!onDismiss) return;
+    setIsDismissing(true);
+    try {
+      await onDismiss(streamName);
+    } finally {
+      setIsDismissing(false);
+    }
+  };
+
   // Build suggestion items for the popover - only show pipeline suggestions for now
   const suggestionItems: Array<{ count: number; label: string; tab: string }> = [];
 
@@ -87,9 +102,9 @@ export function SuggestionStatusColumn({
     </EuiListGroup>
   );
 
-  // Suggestions are available - show count with popover
+  // Suggestions are available - show count with popover and dismiss button
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none">
+    <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="xs">
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={
@@ -111,6 +126,22 @@ export function SuggestionStatusColumn({
           {popoverContent}
         </EuiPopover>
       </EuiFlexItem>
+      {onDismiss && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={DISMISS_SUGGESTION_TOOLTIP}>
+            <EuiButtonIcon
+              iconType="cross"
+              size="xs"
+              color="text"
+              aria-label={DISMISS_SUGGESTION_ARIA_LABEL}
+              data-test-subj={`suggestionDismissButton-${streamName}`}
+              onClick={handleDismiss}
+              isLoading={isDismissing}
+              disabled={isDismissing}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }
@@ -127,6 +158,20 @@ const OPEN_SUGGESTIONS_POPOVER_ARIA_LABEL = i18n.translate(
   'xpack.streams.suggestionStatusColumn.openPopoverAriaLabel',
   {
     defaultMessage: 'Open suggestions details',
+  }
+);
+
+const DISMISS_SUGGESTION_ARIA_LABEL = i18n.translate(
+  'xpack.streams.suggestionStatusColumn.dismissAriaLabel',
+  {
+    defaultMessage: 'Dismiss suggestion',
+  }
+);
+
+const DISMISS_SUGGESTION_TOOLTIP = i18n.translate(
+  'xpack.streams.suggestionStatusColumn.dismissTooltip',
+  {
+    defaultMessage: 'Dismiss and delete this suggestion',
   }
 );
 

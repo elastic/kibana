@@ -258,8 +258,8 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
             contentType: 'application/json',
             body: JSON.stringify({
               status: 'completed',
-              // Empty pipeline triggers noSuggestionsFound state
-              pipeline: [],
+              // null pipeline triggers noSuggestionsFound state
+              pipeline: null,
             }),
           });
         } else if (body?.action === 'acknowledge') {
@@ -267,7 +267,7 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
           await route.fulfill({
             status: 200,
             contentType: 'application/json',
-            body: JSON.stringify({ status: 'acknowledged', pipeline: [] }),
+            body: JSON.stringify({ status: 'acknowledged', pipeline: null }),
           });
         } else {
           await route.continue();
@@ -284,7 +284,7 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
         contentType: 'application/json',
         body: JSON.stringify({
           status: 'completed',
-          pipeline: [],
+          pipeline: null,
         }),
       });
     });

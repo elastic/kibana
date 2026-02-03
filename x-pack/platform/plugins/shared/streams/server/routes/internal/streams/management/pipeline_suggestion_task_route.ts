@@ -279,8 +279,9 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
       for (const [taskId, status] of statusMap.entries()) {
         const extractedStreamName = extractStreamNameFromTaskId(taskId, taskType);
 
-        // A suggestion counts as available if the task completed (or acknowledged) successfully
-        const hasSuggestion = status === TaskStatus.Completed || status === TaskStatus.Acknowledged;
+        // A suggestion counts as available only if the task completed but not yet acknowledged
+        // Acknowledged tasks have already been accepted/rejected/dismissed by the user
+        const hasSuggestion = status === TaskStatus.Completed;
 
         const counts = getOrCreateCounts(extractedStreamName);
         if (hasSuggestion) {

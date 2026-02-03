@@ -309,4 +309,92 @@ describe('SuggestionStatusColumn', () => {
       });
     });
   });
+
+  describe('Dismiss Button', () => {
+    it('should not show dismiss button when onDismiss is not provided', () => {
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="test-stream"
+          status={{
+            stream: 'test-stream',
+            suggestionCount: 1,
+            pipelineCount: 1,
+            featuresCount: 0,
+            significantEventsCount: 0,
+          }}
+          isLoading={false}
+        />
+      );
+
+      expect(screen.queryByTestId('suggestionDismissButton-test-stream')).not.toBeInTheDocument();
+    });
+
+    it('should show dismiss button when onDismiss is provided', () => {
+      const mockOnDismiss = jest.fn();
+
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="test-stream"
+          status={{
+            stream: 'test-stream',
+            suggestionCount: 1,
+            pipelineCount: 1,
+            featuresCount: 0,
+            significantEventsCount: 0,
+          }}
+          isLoading={false}
+          onDismiss={mockOnDismiss}
+        />
+      );
+
+      expect(screen.getByTestId('suggestionDismissButton-test-stream')).toBeInTheDocument();
+    });
+
+    it('should call onDismiss with stream name when clicked', async () => {
+      const user = userEvent.setup();
+      const mockOnDismiss = jest.fn().mockResolvedValue(undefined);
+
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="logs.linux"
+          status={{
+            stream: 'logs.linux',
+            suggestionCount: 1,
+            pipelineCount: 1,
+            featuresCount: 0,
+            significantEventsCount: 0,
+          }}
+          isLoading={false}
+          onDismiss={mockOnDismiss}
+        />
+      );
+
+      await user.click(screen.getByTestId('suggestionDismissButton-logs.linux'));
+
+      await waitFor(() => {
+        expect(mockOnDismiss).toHaveBeenCalledWith('logs.linux');
+      });
+    });
+
+    it('should have correct aria label', () => {
+      const mockOnDismiss = jest.fn();
+
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="test-stream"
+          status={{
+            stream: 'test-stream',
+            suggestionCount: 1,
+            pipelineCount: 1,
+            featuresCount: 0,
+            significantEventsCount: 0,
+          }}
+          isLoading={false}
+          onDismiss={mockOnDismiss}
+        />
+      );
+
+      expect(screen.getByLabelText('Dismiss suggestion')).toBeInTheDocument();
+    });
+  });
 });

@@ -156,7 +156,6 @@ export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise
   // Step 4: Handle terminal states
   switch (taskResult.status) {
     case TaskStatus.Completed:
-    case TaskStatus.Acknowledged:
       if (taskResult.pipeline) {
         return streamlangDSLSchema.parse(taskResult.pipeline);
       }
@@ -166,6 +165,17 @@ export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise
           'xpack.streams.streamDetailView.managementTab.enrichment.noSuggestionsError',
           {
             defaultMessage: 'Could not generate suggestions',
+          }
+        )
+      );
+
+    case TaskStatus.Acknowledged:
+      // Task was acknowledged from another session - treat as already handled
+      throw new NoSuggestionsError(
+        i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.suggestionAlreadyHandled',
+          {
+            defaultMessage: 'This suggestion was already handled',
           }
         )
       );
@@ -354,7 +364,7 @@ export async function loadExistingSuggestionLogic(
   // Handle terminal states
   switch (taskResult.status) {
     case TaskStatus.Completed:
-    case TaskStatus.Acknowledged:
+      // Only show suggestions for completed (not yet acknowledged) tasks
       if (taskResult.pipeline) {
         return {
           type: 'completed',
@@ -366,6 +376,10 @@ export async function loadExistingSuggestionLogic(
 
     case TaskStatus.Failed:
       return { type: 'failed', error: taskResult.error };
+
+    case TaskStatus.Acknowledged:
+      // Acknowledged tasks have already been accepted/rejected/dismissed - don't show again
+      return { type: 'none' };
 
     case TaskStatus.NotStarted:
     case TaskStatus.Stale:
