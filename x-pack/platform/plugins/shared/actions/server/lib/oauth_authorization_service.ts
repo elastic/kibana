@@ -7,7 +7,7 @@
 
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ActionsClient } from '../actions_client';
-import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
+import { BASE_ACTION_API_PATH } from '../../common';
 
 /**
  * OAuth connector secrets stored in encrypted saved objects
@@ -158,7 +158,7 @@ export class OAuthAuthorizationService {
         'Kibana public URL not configured. Please set server.publicBaseUrl in kibana.yml'
       );
     }
-    return `${this.kibanaBaseUrl}${INTERNAL_BASE_ACTION_API_PATH}/connector/_oauth_callback`;
+    return `${this.kibanaBaseUrl}${BASE_ACTION_API_PATH}/connector/_oauth_callback`;
   }
 
   /**

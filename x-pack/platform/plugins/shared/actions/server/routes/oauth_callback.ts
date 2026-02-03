@@ -10,7 +10,7 @@ import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import startCase from 'lodash/startCase';
 import type { ActionsPluginsStart } from '../plugin';
 import type { ILicenseState } from '../lib';
-import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
+import { BASE_ACTION_API_PATH } from '../../common';
 import type { ActionsRequestHandlerContext } from '../types';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
@@ -175,7 +175,7 @@ export const oauthCallbackRoute = (
 ) => {
   router.get(
     {
-      path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/_oauth_callback`,
+      path: `${BASE_ACTION_API_PATH}/connector/_oauth_callback`,
       security: DEFAULT_ACTION_ROUTE_SECURITY,
       validate: {
         query: querySchema,
