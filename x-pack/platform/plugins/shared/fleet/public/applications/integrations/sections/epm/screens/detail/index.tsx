@@ -365,8 +365,13 @@ export function Detail() {
                     <EuiText>
                       {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
                       <h1>
-                        {integrationInfo?.title || packageInfo?.title || '\u00A0'}
-                        {packageInfo?.deprecated ? ' (deprecated)' : ''}
+                        {(() => {
+                          const title = integrationInfo?.title || packageInfo?.title || '\u00A0';
+                          const isDeprecated = !!packageInfo?.deprecated;
+                          return isDeprecated && !title.match(/ \(deprecated\)$/)
+                            ? `${title} (deprecated)`
+                            : title;
+                        })()}
                       </h1>
                     </EuiText>
                   </EuiFlexItem>

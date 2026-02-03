@@ -149,6 +149,7 @@ export function PackageCard({
   }
 
   let deprecatedBadge: React.ReactNode | null = null;
+
   if (isDeprecated && showLabels) {
     deprecatedBadge = (
       <EuiFlexItem grow={false}>
@@ -220,7 +221,9 @@ export function PackageCard({
     showInstallationStatus,
     isActive: hasDataStreams,
   });
-
+  // if the title already contains " (deprecated)", don't add it again, e.g. "Log Management (deprecated)"
+  const concatTitle =
+    isDeprecated && !title.match(/ \(deprecated\)$/) ? `${title} (deprecated)` : title;
   const testid = `integration-card:${id}`;
   return (
     <TrackApplicationView viewId={testid}>
@@ -261,12 +264,7 @@ export function PackageCard({
         data-test-subj={testid}
         betaBadgeProps={quickstartBadge(isQuickstart)}
         layout="horizontal"
-        title={
-          <CardTitle
-            title={isDeprecated ? `${title} (deprecated)` : title}
-            titleBadge={titleBadge}
-          />
-        }
+        title={<CardTitle title={concatTitle} titleBadge={titleBadge} />}
         titleSize={titleSize}
         description={showDescription ? description : ''}
         hasBorder

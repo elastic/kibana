@@ -143,7 +143,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               const url = getHref('integration_details_overview', {
                 pkgkey: `${item.name}-${item.installationInfo!.version}`,
               });
-              const isDeprecated = !!item.installationInfo?.deprecated;
+              const isDeprecated = !!item?.deprecated;
 
               return (
                 <EuiLink href={url}>
@@ -160,8 +160,12 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                       data-test-subj={`installedIntegrationsTable.integrationNameColumn.${item.name}`}
                       grow={false}
                     >
-                      {item.title}
-                      {isDeprecated ? ' (deprecated)' : ''}
+                      {(() => {
+                        const title = item.title;
+                        return isDeprecated && !title.match(/ \(deprecated\)$/)
+                          ? `${title} (deprecated)`
+                          : title;
+                      })()}
                     </EuiFlexItem>
                     {isDeprecated && (
                       <EuiFlexItem grow={false}>

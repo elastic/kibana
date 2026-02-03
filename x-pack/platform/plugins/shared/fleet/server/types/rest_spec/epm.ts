@@ -158,15 +158,17 @@ export const PackageInfoSchema = schema
       schema.object({
         description: schema.string(),
         since: schema.string(),
-        replaced_by: schema.recordOf(
-          schema.oneOf([
-            schema.literal('package'),
-            schema.literal('policyTemplate'),
-            schema.literal('input'),
-            schema.literal('dataStream'),
-            schema.literal('variable'),
-          ]),
-          schema.string()
+        replaced_by: schema.maybe(
+          schema.recordOf(
+            schema.oneOf([
+              schema.literal('package'),
+              schema.literal('policyTemplate'),
+              schema.literal('input'),
+              schema.literal('dataStream'),
+              schema.literal('variable'),
+            ]),
+            schema.string()
+          )
         ),
       })
     ),
