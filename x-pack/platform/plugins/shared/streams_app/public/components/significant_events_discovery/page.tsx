@@ -17,7 +17,7 @@ import { useUnbackedQueriesCount } from '../../hooks/use_unbacked_queries_count'
 import { FeedbackButton } from '../feedback_button';
 import { RedirectTo } from '../redirect_to';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
-import { FeaturesTable } from './components/features_table';
+import { FeaturesTable } from './components/features_table/features_table';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { InsightsTab } from './components/insights/tab';

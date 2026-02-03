@@ -19,22 +19,23 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { Feature } from '@kbn/streams-schema';
 import { upperFirst } from 'lodash';
 import React, { useState, useCallback } from 'react';
-import { useFetchFeatures, type FeatureWithStream } from '../../../hooks/use_fetch_features';
-import { LoadingPanel } from '../../loading_panel';
-import { useKibana } from '../../../hooks/use_kibana';
-import { FeatureDetailsFlyout } from '../../stream_detail_systems/stream_features/feature_details_flyout';
-import { getConfidenceColor } from '../../stream_detail_systems/stream_features/use_stream_features_table';
+import { useFetchFeatures } from '../../../../hooks/use_fetch_features';
+import { LoadingPanel } from '../../../loading_panel';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { FeatureDetailsFlyout } from '../../../stream_detail_systems/stream_features/feature_details_flyout';
+import { getConfidenceColor } from '../../../stream_detail_systems/stream_features/use_stream_features_table';
 
 export function FeaturesTable() {
   const { euiTheme } = useEuiTheme();
   const { unifiedSearch } = useKibana().dependencies.start;
   const [searchQuery, setSearchQuery] = useState('');
   const { data, isLoading: loading } = useFetchFeatures({ query: searchQuery });
-  const [selectedFeature, setSelectedFeature] = useState<FeatureWithStream | null>(null);
+  const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
 
-  const handleSelectFeature = useCallback((feature: FeatureWithStream | null) => {
+  const handleSelectFeature = useCallback((feature: Feature | null) => {
     setSelectedFeature(feature);
   }, []);
 
@@ -46,12 +47,12 @@ export function FeaturesTable() {
     return <LoadingPanel size="l" />;
   }
 
-  const columns: Array<EuiBasicTableColumn<FeatureWithStream>> = [
+  const columns: Array<EuiBasicTableColumn<Feature>> = [
     {
       field: 'details',
       name: '',
       width: '40px',
-      render: (_: unknown, feature: FeatureWithStream) => (
+      render: (_: unknown, feature: Feature) => (
         <EuiButtonIcon
           data-test-subj="featuresDiscoveryDetailsButton"
           iconType="expand"
@@ -68,7 +69,7 @@ export function FeaturesTable() {
         defaultMessage: 'Feature',
       }),
       truncateText: true,
-      render: (feature: FeatureWithStream) => {
+      render: (feature: Feature) => {
         const displayTitle = feature.title ?? Object.values(feature.value).join(', ');
         return (
           <EuiLink
@@ -95,7 +96,7 @@ export function FeaturesTable() {
         defaultMessage: 'Stream',
       }),
       width: '15%',
-      render: (_: unknown, feature: FeatureWithStream) => (
+      render: (_: unknown, feature: Feature) => (
         <EuiBadge color="hollow">{feature.stream_name || '--'}</EuiBadge>
       ),
     },

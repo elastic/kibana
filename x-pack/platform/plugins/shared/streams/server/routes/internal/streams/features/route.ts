@@ -13,7 +13,6 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
-import { type FeatureWithStream } from '../../../../lib/streams/feature/feature_client';
 import {
   type FeaturesIdentificationTaskParams,
   getFeaturesIdentificationTaskId,
@@ -159,11 +158,7 @@ export const listAllFeaturesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({
-    request,
-    getScopedClients,
-    server,
-  }): Promise<{ features: FeatureWithStream[] }> => {
+  handler: async ({ request, getScopedClients, server }): Promise<{ features: Feature[] }> => {
     const { featureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
       request,
     });

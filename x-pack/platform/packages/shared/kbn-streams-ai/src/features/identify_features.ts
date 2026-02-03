@@ -62,6 +62,10 @@ export async function identifyFeatures({
 
   const features = response.toolCalls
     .flatMap((toolCall) => toolCall.function.arguments.features)
+    .map((feature) => ({
+      ...feature,
+      stream_name: stream.name,
+    }))
     .filter((feature) => {
       const result = baseFeatureSchema.safeParse(feature);
       return result.success;

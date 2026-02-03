@@ -14,6 +14,7 @@ export const featureStatusSchema = z.enum(featureStatus);
 
 export interface BaseFeature {
   id: string;
+  stream_name: string;
   type: string;
   subtype?: string;
   title?: string;
@@ -34,6 +35,7 @@ export interface Feature extends BaseFeature {
 
 export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
   id: z.string(),
+  stream_name: z.string(),
   type: z.string(),
   subtype: z.string().optional(),
   title: z.string().optional(),

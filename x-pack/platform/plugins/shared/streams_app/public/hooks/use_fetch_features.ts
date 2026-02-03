@@ -10,16 +10,12 @@ import type { Feature } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 
-export interface FeatureWithStream extends Feature {
-  stream_name: string;
-}
-
 interface UseFetchFeaturesOptions {
   query?: string;
 }
 
 interface FetchFeaturesResult {
-  features: FeatureWithStream[];
+  features: Feature[];
 }
 
 export const useFetchFeatures = (options: UseFetchFeaturesOptions = {}) => {
@@ -40,7 +36,7 @@ export const useFetchFeatures = (options: UseFetchFeaturesOptions = {}) => {
       signal: signal ?? null,
     });
 
-    let features = response.features as FeatureWithStream[];
+    let features = response.features as Feature[];
 
     // Filter by query if provided (case-insensitive search on name and value only)
     if (query?.trim()) {

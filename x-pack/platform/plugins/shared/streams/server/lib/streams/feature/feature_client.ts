@@ -166,7 +166,7 @@ export class FeatureClient {
     });
   }
 
-  async getAllFeatures(streams: string[]): Promise<{ hits: FeatureWithStream[]; total: number }> {
+  async getAllFeatures(streams: string[]): Promise<{ hits: Feature[]; total: number }> {
     const filterClauses: QueryDslQueryContainer[] = [
       {
         bool: {
@@ -196,7 +196,7 @@ export class FeatureClient {
     });
 
     return {
-      hits: featuresResponse.hits.hits.map((hit) => fromStorageWithStream(hit._source)),
+      hits: featuresResponse.hits.hits.map((hit) => fromStorage(hit._source)),
       total: featuresResponse.hits.total.value,
     };
   }
@@ -226,6 +226,7 @@ function fromStorage(feature: StoredFeature): Feature {
   return {
     uuid: feature[FEATURE_UUID],
     id: feature[FEATURE_ID],
+    stream_name: feature[STREAM_NAME],
     type: feature[FEATURE_TYPE],
     subtype: feature[FEATURE_SUBTYPE],
     description: feature[FEATURE_DESCRIPTION],
@@ -239,24 +240,4 @@ function fromStorage(feature: StoredFeature): Feature {
     expires_at: feature[FEATURE_EXPIRES_AT],
     title: feature[FEATURE_TITLE],
   };
-}
-
-export interface FeatureWithStream extends Feature {
-  stream_name: string;
-}
-
-function fromStorageWithStream(feature: StoredFeature): FeatureWithStream {
-  return {
-    ...fromStorage(feature),
-    stream_name: feature[STREAM_NAME],
-  };
-}
-
-export function getFeatureId(stream: string, feature: BaseFeature): string {
-  return objectHash({
-    [FEATURE_TYPE]: feature.type,
-    [STREAM_NAME]: stream,
-    [FEATURE_NAME]: feature.name,
-    [FEATURE_VALUE]: feature.value,
-  });
 }
