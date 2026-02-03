@@ -411,6 +411,16 @@ module.exports = {
 
   overrides: [
     /**
+     * Vitest test files - enable vitest globals
+     */
+    {
+      files: ['**/*.test.{ts,tsx}', '**/vitest.config.{ts,mts}'],
+      rules: {
+        // vi is available globally in vitest
+        'no-undef': 'off',
+      },
+    },
+    /**
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */
     {
