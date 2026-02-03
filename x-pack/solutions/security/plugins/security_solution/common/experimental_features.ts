@@ -47,7 +47,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Memory Dump response actions support for Elastic Defend.
    * Release: v9.3
    */
-  responseActionsEndpointMemoryDump: false,
+  responseActionsEndpointMemoryDump: true,
 
   /**
    * `runscript` response action for Elastic Defend Endpoint
@@ -180,7 +180,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Protects all the work related to the attacks and alerts alignment effort
    */
-  attacksAlertsAlignment: false,
+  enableAlertsAndAttacksAlignment: false,
   /**
    *  Enables the QRadar rules import feature
    */
