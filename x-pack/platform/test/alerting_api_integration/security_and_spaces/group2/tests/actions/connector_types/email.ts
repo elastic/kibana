@@ -156,7 +156,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should execute email action correclty when replyTo is set', async () => {
+    it('should execute email action correctly when replyTo is set', async () => {
       await supertest
         .post(`/api/actions/connector/${createdActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
