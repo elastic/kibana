@@ -30,7 +30,6 @@ import { registerContentInsights } from '@kbn/content-management-content-insight
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import { registerAccessControl } from '@kbn/content-management-access-control-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import {
   initializeDashboardTelemetryTask,
@@ -126,15 +125,6 @@ export class DashboardPlugin
     core.uiSettings.register(getUISettings());
 
     registerRoutes(core.http);
-
-    void registerAccessControl({
-      http: core.http,
-      isAccessControlEnabled: core.savedObjects.isAccessControlEnabled(),
-      getStartServices: () =>
-        core.getStartServices().then(([_, { security }]) => ({
-          security,
-        })),
-    });
 
     return {};
   }

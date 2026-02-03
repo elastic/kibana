@@ -153,9 +153,9 @@ export interface SavedObjectsServiceSetup {
   getDefaultIndex: () => string;
 
   /**
-   * Returns whether the access control feature is enabled for saved objects.
+   * Returns whether the access control feature is enabled for saved objects, optionally checking support for a specific type.
    */
-  isAccessControlEnabled: () => boolean;
+  isAccessControlEnabled: (type?: string) => boolean;
 }
 
 /**

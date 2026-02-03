@@ -13,6 +13,7 @@ import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { SubFeaturePrivilegeIterator } from '@kbn/features-plugin/server/feature_privilege_iterator';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { defineAccessControlRoutes } from './access_control';
 import { defineAnalyticsRoutes } from './analytics';
 import { defineAnonymousAccessRoutes } from './anonymous_access';
 import { defineApiKeysRoutes } from './api_keys';
@@ -60,6 +61,7 @@ export interface RouteDefinitionParams {
   analyticsService: AnalyticsServiceSetup;
   buildFlavor: BuildFlavor;
   docLinks: DocLinksServiceSetup;
+  isAccessControlEnabled: (type?: string) => boolean;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
@@ -71,6 +73,7 @@ export function defineRoutes(params: RouteDefinitionParams) {
   defineUserProfileRoutes(params);
   defineUsersRoutes(params); // Temporarily allow user APIs (ToDo: move to non-serverless block below)
   defineViewRoutes(params);
+  defineAccessControlRoutes(params);
 
   // In the serverless environment...
   if (params.buildFlavor !== 'serverless') {
