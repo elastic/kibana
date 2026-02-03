@@ -13,6 +13,7 @@ import { replaceParamsQuery } from '../../common/utils/replace_params_query';
 import { AlertAttachmentContext } from '../common/contexts';
 import { LiveQueryForm } from './form';
 import type { AgentSelection } from '../agents/types';
+import type { AddToTimelineHandler } from '../types';
 
 interface LiveQueryProps {
   agentId?: string;
@@ -32,6 +33,7 @@ interface LiveQueryProps {
   hideAgentsField?: boolean;
   packId?: string;
   agentSelection?: AgentSelection;
+  addToTimeline?: AddToTimelineHandler;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
@@ -51,6 +53,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   packId,
   agentSelection,
   timeout,
+  addToTimeline,
 }) => {
   const initialAgentSelection = useMemo(() => {
     if (agentSelection) {
@@ -103,6 +106,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
       formType={formType}
       enabled={enabled}
       hideAgentsField={hideAgentsField}
+      addToTimeline={addToTimeline}
     />
   );
 };
