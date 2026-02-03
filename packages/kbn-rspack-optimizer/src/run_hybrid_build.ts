@@ -181,14 +181,21 @@ async function runWatchBuild(
       return Promise.resolve();
     };
 
+    log?.info('Setting up RSPack watcher...');
+    log?.info(`Watcher will ignore: /node_modules/`);
+    log?.info(`Aggregate timeout: 300ms`);
+
     const watching = compiler.watch(
       {
         aggregateTimeout: 300,
         ignored: /node_modules/,
       },
       (err, stats) => {
+        log?.info('RSPack watch callback triggered');
+
         // Ignore callbacks during shutdown
         if (isShuttingDown) {
+          log?.info('Ignoring callback - shutdown in progress');
           return;
         }
 
@@ -243,12 +250,14 @@ async function runWatchBuild(
         }
 
         // For subsequent builds (rebuilds), just log the result
+        isFirstBuild = false; // Ensure this is set
         if (result.success) {
-          log?.success('Rebuild completed');
+          log?.success(`Rebuild completed at ${new Date().toISOString()}`);
           copyBundlesToPluginDirs(repoRoot, log);
         } else {
           log?.error('Rebuild failed - waiting for changes...');
         }
+        log?.info('Waiting for more changes...');
       }
     );
 

@@ -24,6 +24,32 @@ import {
 import type { ThemeTag } from '../types';
 
 /**
+ * Compute a hash of the config files that affect the build.
+ * This ensures cache invalidation when config changes, since RSPack's
+ * buildDependencies may not work correctly with TypeScript files.
+ */
+function getConfigHash(repoRoot: string): string {
+  const configFiles = [
+    'packages/kbn-rspack-optimizer/src/config/create_single_compile_config.ts',
+    'packages/kbn-rspack-optimizer/src/config/shared_config.ts',
+    'packages/kbn-rspack-optimizer/src/config/externals.ts',
+    'packages/kbn-rspack-optimizer/src/loaders/theme_loader.ts',
+    'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts',
+  ];
+
+  const hash = crypto.createHash('md5');
+  for (const file of configFiles) {
+    try {
+      const content = Fs.readFileSync(Path.resolve(repoRoot, file), 'utf-8');
+      hash.update(content);
+    } catch {
+      // File might not exist in some scenarios, skip
+    }
+  }
+  return hash.digest('hex').slice(0, 8); // Short hash for readability
+}
+
+/**
  * Global shutdown flag - when set to true, RSPack logging will stop immediately.
  * This is used to prevent log output after Ctrl+C while RSPack finishes its current work.
  */
@@ -359,12 +385,15 @@ export async function createSingleCompileConfig(
       cache: cache
         ? {
             type: 'persistent',
-            // Build dependencies - cache is invalidated when any of these change
+            // Build dependencies - files that should invalidate cache when changed
             buildDependencies: [
               // RSPack optimizer config files
               Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/config/externals.ts'),
               Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/config/shared_config.ts'),
               Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/config/create_single_compile_config.ts'),
+              // Loaders
+              Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/loaders/theme_loader.ts'),
+              Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts'),
               // Transpiler config (SWC settings)
               Path.resolve(repoRoot, 'packages/kbn-swc-config/src/browser.ts'),
               Path.resolve(repoRoot, 'packages/kbn-transpiler-config/src/shared_config.ts'),
@@ -380,8 +409,9 @@ export async function createSingleCompileConfig(
                 'src/platform/packages/private/kbn-ui-shared-deps-npm/webpack.config.js'
               ),
             ],
-            // Version string to invalidate cache when config changes
-            version: `v7-${dist ? 'prod' : 'dev'}`,
+            // Version includes hash of this config file for reliable invalidation
+            // RSPack's buildDependencies may not trigger on TypeScript file changes
+            version: `v8-${dist ? 'prod' : 'dev'}-${getConfigHash(repoRoot)}`,
           }
         : false,
     },
@@ -437,16 +467,21 @@ function findEntry(contextDir: string): string | null {
  * This creates natural chunk boundaries via dynamic imports while
  * ensuring all plugins are registered before the app starts.
  */
+// Entry file version - increment when changing the entry generation logic
+// This ensures the entry file is regenerated when config structure changes
+const ENTRY_VERSION = 'v3';
+
 function createUnifiedEntry(
   wrapperDir: string,
   pluginEntries: Array<{ id: string; path: string; bundleId: string }>
 ): string {
   const unifiedEntryPath = Path.join(wrapperDir, 'kibana-unified-entry.js');
 
-  // Create a hash of the plugin list to detect changes
+  // Create a hash that includes both plugin list AND config version
+  // This ensures regeneration when either plugins or config changes
   const pluginListHash = crypto
     .createHash('md5')
-    .update(pluginEntries.map((e) => `${e.id}:${e.path}`).join('\n'))
+    .update(`${ENTRY_VERSION}\n${pluginEntries.map((e) => `${e.id}:${e.path}`).join('\n')}`)
     .digest('hex');
 
   // Check if file exists and has the same hash (skip regeneration)
