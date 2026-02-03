@@ -25,7 +25,7 @@ This separation ensures that:
 
 ## Architecture
 
-```
+```text
 ┌───────────────────────────────────────────────────────────┐
 │                    Other Plugins                          │
 │  ┌──────────────────┐         ┌──────────────────┐        │
@@ -165,7 +165,7 @@ import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { i18n } from '@kbn/i18n';
 import { MyStepTypeId, myStepCommonDefinition } from '../../common/step_types/my_step';
 
-import { StepMenuCatalog } from '@kbn/workflows-extensions/public';
+import { ActionsMenuGroup } from '@kbn/workflows-extensions/public';
 
 export const myStepDefinition: PublicStepDefinition = {
   ...myStepCommonDefinition,
@@ -192,7 +192,7 @@ export const myStepDefinition: PublicStepDefinition = {
 \`\`\``,
     ],
   },
-  actionsMenuCatalog: StepMenuCatalog.kibana, // Optional: determines which catalog the step appears under in the actions menu
+  actionsMenuGroup: ActionsMenuGroup.kibana, // Optional: determines which group the step appears under in the actions menu
 };
 ```
 
@@ -208,7 +208,7 @@ import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { i18n } from '@kbn/i18n';
 import { MyStepTypeId, myStepCommonDefinition } from '../../common/step_types/my_step';
 
-import { StepMenuCatalog } from '@kbn/workflows-extensions/public';
+import { ActionsMenuGroup } from '@kbn/workflows-extensions/public';
 
 export const myStepDefinition: PublicStepDefinition = {
   ...myStepCommonDefinition,
@@ -235,7 +235,7 @@ export const myStepDefinition: PublicStepDefinition = {
 \`\`\``,
     ],
   },
-  actionsMenuCatalog: StepMenuCatalog.kibana, // Optional: determines which catalog the step appears under in the actions menu
+  actionsMenuGroup: ActionsMenuGroup.kibana, // Optional: determines which group the step appears under in the actions menu
   editorHandlers: {
     dynamicSchema: {
       getOutputSchema: ({ input }) => {
@@ -816,8 +816,8 @@ The public definition must include:
 - `icon`: (Optional) React component (can be imported from EUI assets, not a direct string), preferably lazy loaded using `React.lazy`.
 - `description`: (Optional) user-facing description
 - `documentation`: (Optional) documentation with details and examples
-- `actionsMenuCatalog`: (Optional) The catalog under which the step is displayed in the actions menu. Must be one of `StepMenuCatalog.elasticsearch`, `StepMenuCatalog.external`, `StepMenuCatalog.ai`, or `StepMenuCatalog.kibana`. Defaults to `StepMenuCatalog.kibana` if not provided.
-- `editorHandlers`: (Optional) Property handlers for custom completion and validation. See [Custom Property Completion and Validation](#custom-property-completion-and-validation) for details.
+- `actionsMenuGroup`: (Optional) The group under which the step is displayed in the actions menu. Must be one of `ActionsMenuGroup.elasticsearch`, `ActionsMenuGroup.external`, `ActionsMenuGroup.ai`, `ActionsMenuGroup.data`, or `ActionsMenuGroup.kibana`. Defaults to `ActionsMenuGroup.kibana` if not provided.
+- `editorHandlers`: (Optional) Property handlers for custom completion and validation. See [Custom Property Selection](#custom-property-selection) for details.
   - `config`: Handlers for config properties (step-level, outside `with`)
   - `input`: Handlers for input properties (inside `with`)
   - `dynamicSchema`: Dynamic schema handlers (e.g., `getOutputSchema`)
@@ -850,7 +850,8 @@ All custom step definitions must be approved by the workflows-eng team before be
    - Changes to handler implementations are detected (even if the step ID remains the same)
 
 3. **Approval Required**: The test compares registered steps against the approved list in:
-   ```
+
+   ```text
    test/scout/api/fixtures/approved_step_definitions.ts
    ```
 
