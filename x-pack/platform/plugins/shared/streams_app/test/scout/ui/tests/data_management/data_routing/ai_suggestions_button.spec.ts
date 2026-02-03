@@ -81,7 +81,7 @@ test.describe('Stream data routing - AI suggestions button', { tag: ['@ess'] }, 
 
     await page.reload();
 
-    const moreButton = page.getByTestId('streamsAppGenerateSuggestionButtonMoreButton');
+    const moreButton = page.getByTestId('streamsAppAiPickConnectorButton');
     await expect(moreButton).toBeVisible();
   });
 });
