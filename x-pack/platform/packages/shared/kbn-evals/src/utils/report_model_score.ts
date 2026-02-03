@@ -13,7 +13,6 @@ import { hostname } from 'os';
 import type { Model } from '@kbn/inference-common';
 import { EvaluationScoreRepository, type EvaluationScoreDocument } from './score_repository';
 import { getGitMetadata } from './git_metadata';
-import { getCurrentTraceId } from './tracing';
 import type { RanExperiment } from '../types';
 
 function computeInputHash(input: unknown): string {
@@ -104,7 +103,7 @@ export async function buildFlattenedScoreDocuments({
           },
         },
         task: {
-          trace_id: runEntry?.traceId ?? getCurrentTraceId(),
+          trace_id: runEntry?.traceId ?? null,
           repetition_index: repetitionIndex,
           model: taskModel,
         },
@@ -114,7 +113,7 @@ export async function buildFlattenedScoreDocuments({
           label: evalRunInfo.result?.label ?? null,
           explanation: evalRunInfo.result?.explanation ?? null,
           metadata: evalRunInfo.result?.metadata ?? null,
-          trace_id: evalRunInfo.traceId ?? getCurrentTraceId(),
+          trace_id: evalRunInfo.traceId ?? null,
           model: evaluatorModel,
         },
         run_metadata: {
