@@ -12,9 +12,8 @@ import dedent from 'dedent';
 import { compact, isEmpty } from 'lodash';
 import moment from 'moment';
 import type { Observable } from 'rxjs';
-import { concat, of } from 'rxjs';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
-import type { AiInsightResult, ContextEvent } from './types';
+import { createAiInsightResult, type AiInsightResult } from './types';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -81,12 +80,7 @@ export async function getAlertAiInsight({
     context: relatedContext,
   });
 
-  const streamWithContext$ = concat(
-    of<ContextEvent>({ type: 'context', context: relatedContext }),
-    events$
-  );
-
-  return { events$: streamWithContext$, context: relatedContext };
+  return createAiInsightResult(relatedContext, events$);
 }
 
 // Time window offsets in minutes before alert start
