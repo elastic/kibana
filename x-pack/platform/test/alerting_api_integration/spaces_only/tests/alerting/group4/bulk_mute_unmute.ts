@@ -24,7 +24,8 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
   const retry = getService('retry');
   const supertest = getService('supertest');
 
-  describe('bulkMuteUnmute', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/246730
+  describe.skip('bulkMuteUnmute', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     const createRule = async (): Promise<string> => {
