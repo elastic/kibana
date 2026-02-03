@@ -48,7 +48,7 @@ export const OutputSchema = z.object({
   structured_output: z
     .any()
     .optional()
-    .describe('The structured output from the agent. Only here when schem was provided'),
+    .describe('The structured output from the agent. Only here when schema was provided'),
   conversation_id: z
     .string()
     .optional()
