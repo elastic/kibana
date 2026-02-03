@@ -22,6 +22,8 @@ export interface Props {
 
 export const GridLayoutProjectSideNav = ({ isCollapsed$, navProps }: Props) => {
   const isCollapsed = useObservable(isCollapsed$, isCollapsed$.getValue());
+  const showLabels = useObservable(navProps.showLabels$, true);
+  const showSecondaryPanel = useObservable(navProps.showSecondaryPanel$, true);
   const updateLayout = useLayoutUpdate();
   const setWidth = useCallback(
     (width: number) => {
@@ -40,7 +42,13 @@ export const GridLayoutProjectSideNav = ({ isCollapsed$, navProps }: Props) => {
           }
         `}
       />
-      <Navigation isCollapsed={isCollapsed} setWidth={setWidth} {...navProps} />
+      <Navigation
+        isCollapsed={isCollapsed}
+        showLabels={showLabels}
+        showSecondaryPanel={showSecondaryPanel}
+        setWidth={setWidth}
+        {...navProps}
+      />
     </>
   );
 };

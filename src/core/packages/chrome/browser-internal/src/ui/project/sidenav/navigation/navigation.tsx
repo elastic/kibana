@@ -30,6 +30,8 @@ import { NavigationFeedbackSnippet } from './navigation_feedback_snippet';
 export interface ChromeNavigationProps {
   // sidenav state
   isCollapsed: boolean;
+  showLabels: boolean;
+  showSecondaryPanel: boolean;
   setWidth: (width: number) => void;
 
   // kibana deps
@@ -53,6 +55,8 @@ export interface ChromeNavigationProps {
 
   // collapse toggle callback
   onToggleCollapsed: (isCollapsed: boolean) => void;
+  onSetShowLabels: (showLabels: boolean) => void;
+  onSetShowSecondaryPanel: (showSecondaryPanel: boolean) => void;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
@@ -80,8 +84,12 @@ export const Navigation = (props: ChromeNavigationProps) => {
           />
         }
         isCollapsed={props.isCollapsed}
+        showLabels={props.showLabels}
+        showSecondaryPanel={props.showSecondaryPanel}
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
+        onSetShowLabels={props.onSetShowLabels}
+        onSetShowSecondaryPanel={props.onSetShowSecondaryPanel}
         activeItemId={activeItemId}
         data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
       />

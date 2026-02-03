@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButtonIcon, EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody, EuiModalFooter, EuiButton, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody, EuiSwitch, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
@@ -17,7 +17,11 @@ import { PRIMARY_NAVIGATION_ID } from '../constants';
 
 interface Props {
   isCollapsed: boolean;
+  showLabels: boolean;
+  showSecondaryPanel: boolean;
   toggle: (isCollapsed: boolean) => void;
+  onSetShowLabels: (showLabels: boolean) => void;
+  onSetShowSecondaryPanel: (showSecondaryPanel: boolean) => void;
 }
 
 const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
@@ -39,7 +43,14 @@ const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
 /**
  * Button for the side navigation that opens a modal
  */
-export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
+export const SideNavCollapseButton: FC<Props> = ({
+  isCollapsed,
+  showLabels,
+  showSecondaryPanel,
+  toggle,
+  onSetShowLabels,
+  onSetShowSecondaryPanel,
+}) => {
   const iconType = 'brush';
   const { euiTheme } = useEuiTheme();
   const styles = useMemo(() => sideNavCollapseButtonStyles(euiTheme), [euiTheme]);
@@ -65,28 +76,41 @@ export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
         />
       </div>
       {isModalOpen && (
-        <EuiModal onClose={closeModal} aria-labelledby="navigation-modal-title">
+        <EuiModal
+          onClose={closeModal}
+          aria-labelledby="navigation-modal-title"
+          maxWidth={800}
+          style={{ width: '600px' }}
+        >
           <EuiModalHeader>
             <EuiModalHeaderTitle id="navigation-modal-title">
               {i18n.translate('core.ui.chrome.sideNavigation.modalTitle', {
-                defaultMessage: 'Navigation',
+                defaultMessage: 'Navigation preferences',
               })}
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <p>
-              {i18n.translate('core.ui.chrome.sideNavigation.modalBody', {
-                defaultMessage: 'Navigation menu content',
-              })}
-            </p>
+            <EuiFlexGroup direction="row" gutterSize="l">
+              <EuiFlexItem>
+                <EuiSwitch
+                  label={i18n.translate('core.ui.chrome.sideNavigation.showLabelsLabel', {
+                    defaultMessage: 'Show labels',
+                  })}
+                  checked={showLabels}
+                  onChange={(e) => onSetShowLabels(e.target.checked)}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiSwitch
+                  label={i18n.translate('core.ui.chrome.sideNavigation.showSecondaryNavigationLabel', {
+                    defaultMessage: 'Show secondary navigation',
+                  })}
+                  checked={showSecondaryPanel}
+                  onChange={(e) => onSetShowSecondaryPanel(e.target.checked)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButton onClick={closeModal} fill>
-              {i18n.translate('core.ui.chrome.sideNavigation.modalCloseButton', {
-                defaultMessage: 'Close',
-              })}
-            </EuiButton>
-          </EuiModalFooter>
         </EuiModal>
       )}
     </>

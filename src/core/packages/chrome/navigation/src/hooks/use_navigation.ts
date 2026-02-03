@@ -38,6 +38,7 @@ interface NavigationState {
  */
 export const useNavigation = (
   isCollapsed: boolean,
+  showSecondaryPanel: boolean,
   items: NavigationStructure,
   logoId: string,
   activeItemId?: string
@@ -58,7 +59,7 @@ export const useNavigation = (
   const visuallyActivePageId = isLogoActive ? logoId : primaryItem?.id;
   const visuallyActiveSubpageId = secondaryItem?.id;
   const openerNode = defaultOpenerNode;
-  const isSidePanelOpen = !isCollapsed && !!openerNode?.sections;
+  const isSidePanelOpen = showSecondaryPanel && !isCollapsed && !!openerNode?.sections;
 
   const state: NavigationState = {
     actualActiveItemId,

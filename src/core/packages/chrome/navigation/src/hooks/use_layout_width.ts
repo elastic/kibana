@@ -15,6 +15,7 @@ export const SIDE_PANEL_WIDTH = 248;
 
 interface UseLayoutWidthArgs {
   isCollapsed: boolean;
+  showLabels: boolean;
   isSidePanelOpen: boolean;
   setWidth: (width: number) => void;
 }
@@ -22,15 +23,22 @@ interface UseLayoutWidthArgs {
 /**
  * Hook for handling layout width changes.
  *
- * @param isCollapsed - whether the side nav is collapsed.
+ * @param isCollapsed - whether the side nav is collapsed (for mobile).
+ * @param showLabels - whether labels are shown (affects width).
  * @param isSidePanelOpen - whether the side panel is open.
  * @param setWidth - callback to set the width of the navigation component.
  */
-export const useLayoutWidth = ({ isCollapsed, isSidePanelOpen, setWidth }: UseLayoutWidthArgs) => {
+export const useLayoutWidth = ({
+  isCollapsed,
+  showLabels,
+  isSidePanelOpen,
+  setWidth,
+}: UseLayoutWidthArgs) => {
   useEffect(() => {
-    const baseWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
+    // Use collapsed width when labels are hidden (similar to collapsed mode)
+    const baseWidth = !showLabels ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
     const width = isSidePanelOpen ? baseWidth + SIDE_PANEL_WIDTH : baseWidth;
 
     setWidth(width);
-  }, [isCollapsed, isSidePanelOpen, setWidth]);
+  }, [isCollapsed, showLabels, isSidePanelOpen, setWidth]);
 };

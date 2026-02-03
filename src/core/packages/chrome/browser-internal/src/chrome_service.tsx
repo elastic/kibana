@@ -77,6 +77,8 @@ import type { NavigationProps } from './ui/project/sidenav/types';
 import { HeaderBreadcrumbsBadges } from './ui/header/header_breadcrumbs_badges';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
+const SHOW_LABELS_KEY = 'core.chrome.sideNav.showLabels';
+const SHOW_SECONDARY_PANEL_KEY = 'core.chrome.sideNav.showSecondaryPanel';
 const SNAPSHOT_REGEX = /-snapshot/i;
 
 interface ConstructorParams {
@@ -115,6 +117,12 @@ export class ChromeService {
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation: ProjectNavigationService;
   private readonly isSideNavCollapsed$ = new BehaviorSubject(false);
+  private readonly showLabels$ = new BehaviorSubject(
+    localStorage.getItem(SHOW_LABELS_KEY) !== 'false'
+  );
+  private readonly showSecondaryPanel$ = new BehaviorSubject(
+    localStorage.getItem(SHOW_SECONDARY_PANEL_KEY) !== 'false'
+  );
   private readonly isFeedbackBtnVisible$ = new BehaviorSubject(false);
   private logger: Logger;
   private isServerless = false;
@@ -339,6 +347,16 @@ export class ChromeService {
       // this.isSideNavCollapsed$.next(isCollapsed);
     };
 
+    const setShowLabels = (showLabels: boolean) => {
+      localStorage.setItem(SHOW_LABELS_KEY, JSON.stringify(showLabels));
+      this.showLabels$.next(showLabels);
+    };
+
+    const setShowSecondaryPanel = (showSecondaryPanel: boolean) => {
+      localStorage.setItem(SHOW_SECONDARY_PANEL_KEY, JSON.stringify(showSecondaryPanel));
+      this.showSecondaryPanel$.next(showSecondaryPanel);
+    };
+
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       getNotifications().then((notifications) => {
         notifications.toasts.addWarning({
@@ -431,6 +449,10 @@ export class ChromeService {
       isFeedbackBtnVisible$: this.isFeedbackBtnVisible$,
       feedbackUrlParams$,
       onToggleCollapsed: setIsSideNavCollapsed,
+      onSetShowLabels: setShowLabels,
+      onSetShowSecondaryPanel: setShowSecondaryPanel,
+      showLabels$: this.showLabels$.asObservable(),
+      showSecondaryPanel$: this.showSecondaryPanel$.asObservable(),
       isFeedbackEnabled$: isFeedbackEnabled,
     };
 

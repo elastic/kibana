@@ -8,5 +8,12 @@
  */
 
 import type { ChromeNavigationProps } from './navigation/navigation';
+import type { Observable } from 'rxjs';
 
-export type NavigationProps = Omit<ChromeNavigationProps, 'isCollapsed' | 'setWidth'>;
+export type NavigationProps = Omit<
+  ChromeNavigationProps,
+  'isCollapsed' | 'setWidth' | 'showLabels' | 'showSecondaryPanel'
+> & {
+  showLabels$: Observable<boolean>;
+  showSecondaryPanel$: Observable<boolean>;
+};
