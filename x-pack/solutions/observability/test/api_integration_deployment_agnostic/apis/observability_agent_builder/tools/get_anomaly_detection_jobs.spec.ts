@@ -231,5 +231,87 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(jobs).to.have.length(1);
       expect(jobs[0].topAnomalies).to.be.empty();
     });
+
+    it('filters anomalies by minAnomalyScore', async () => {
+      // With very high threshold, should return fewer or no anomalies
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO, minAnomalyScore: 99 },
+        });
+
+      const { topAnomalies } = toolResults[0].data.jobs[0];
+      // All returned anomalies should have score >= 99
+      topAnomalies.forEach((anomaly) => {
+        expect(anomaly.anomalyScore).to.be.greaterThan(98);
+      });
+    });
+
+    it('excludes anomalyScoreExplanation by default', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO },
+        });
+
+      const { topAnomalies } = toolResults[0].data.jobs[0];
+      expect(topAnomalies.length).to.be.greaterThan(0);
+      topAnomalies.forEach((anomaly) => {
+        expect(anomaly).not.to.have.property('anomalyScoreExplanation');
+      });
+    });
+
+    it('includes anomalyScoreExplanation when includeExplanation is true', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO, includeExplanation: true },
+        });
+
+      const { topAnomalies } = toolResults[0].data.jobs[0];
+      expect(topAnomalies.length).to.be.greaterThan(0);
+      topAnomalies.forEach((anomaly) => {
+        expect(anomaly).to.have.property('anomalyScoreExplanation');
+      });
+    });
+
+    it('filters by partitionFieldValue with wildcard', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO, partitionFieldValue: 'service-*' },
+        });
+
+      const { topAnomalies } = toolResults[0].data.jobs[0];
+      expect(topAnomalies.length).to.be.greaterThan(0);
+      topAnomalies.forEach((anomaly) => {
+        expect(anomaly.partitionFieldValue).to.match(/^service-/);
+      });
+    });
+
+    it('filters by byFieldValue', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO, byFieldValue: 'request' },
+        });
+
+      const { topAnomalies } = toolResults[0].data.jobs[0];
+      expect(topAnomalies.length).to.be.greaterThan(0);
+      topAnomalies.forEach((anomaly) => {
+        expect(anomaly.byFieldValue).to.be('request');
+      });
+    });
+
+    it('returns empty anomalies when filter matches nothing', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO, partitionFieldValue: 'nonexistent-*' },
+        });
+
+      const { topAnomalies } = toolResults[0].data.jobs[0];
+      expect(topAnomalies).to.be.empty();
+    });
   });
 }
