@@ -42,3 +42,5 @@ export const DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT = 750;
 
 export const AGENT_LOG_LEVELS = ['error', 'warning', 'info', 'debug'] as const;
 export const DEFAULT_LOG_LEVEL = 'info' as const;
+
+export const AGENT_POLICY_VERSION_SEPARATOR = '#';
