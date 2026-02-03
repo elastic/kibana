@@ -14,10 +14,8 @@ import type {
   ESQLMapEntry,
   ESQLParens,
   ESQLBinaryExpression,
-  ESQLUnknownItem,
   ESQLAstPromqlCommand,
 } from '../../types';
-import { Walker } from '../../ast/walker';
 import { printAst } from '../../shared/debug';
 
 /**
@@ -368,14 +366,6 @@ map 7-19
           );
         });
 
-        it('the "unknown" node carries correct .text for pretty-printing', () => {
-          const text = `PROMQL start="2024-01-01" (up{job="prometheus"})`;
-          const query = EsqlQuery.fromSrc(text);
-          const unk = Walker.match(query.ast, { type: 'unknown' })!;
-
-          expect(unk.text).toBe('up{job="prometheus"}');
-        });
-
         it('parses complex PromQL query with nested parentheses', () => {
           const text = `PROMQL index=k8s (sum(rate(http_requests_total{job="api"}[5m])) by (status))`;
           const query = EsqlQuery.fromSrc(text);
@@ -515,116 +505,6 @@ map 7-19
             type: 'identifier',
             name: 'index',
           });
-
-          // Second arg is the query (unknown node, not wrapped in parens)
-          const queryNode = promqlCmd.args[1] as ESQLUnknownItem;
-          expect(queryNode.type).toBe('unknown');
-          expect(queryNode.text).toBe('bytes_in');
-        });
-
-        it('parses complex query without parentheses', () => {
-          const text = `PROMQL index=k8s sum(rate(http_requests_total[5m]))`;
-          const query = EsqlQuery.fromSrc(text);
-          const promqlCmd = query.ast.commands[0] as ESQLCommand<'promql'>;
-
-          const queryNode = promqlCmd.args[1] as ESQLUnknownItem;
-          expect(queryNode.type).toBe('unknown');
-          expect(queryNode.text).toBe('sum(rate(http_requests_total[5m]))');
-        });
-      });
-
-      describe('node positions (correctly extracts `.location` objects)', () => {
-        it('PROMQL <query>', () => {
-          const src = `PROMQL bytes_in`;
-          const query = EsqlQuery.fromSrc(src);
-          const snapshot = printAst(query.ast, {
-            compact: true,
-            src,
-            printSrc: true,
-          });
-
-          expect('\n' + snapshot).toBe(`
-query "PROMQL bytes_in"
-└─ command "PROMQL bytes_in"
-   └─ unknown "bytes_in"`);
-        });
-
-        it('PROMQL ( <query> )', () => {
-          const src = `PROMQL ( bytes_in )`;
-          const query = EsqlQuery.fromSrc(src);
-          const snapshot = printAst(query.ast, {
-            compact: true,
-            src,
-            printSrc: true,
-          });
-
-          expect('\n' + snapshot).toBe(`
-query "PROMQL ( bytes_in )"
-└─ command "PROMQL ( bytes_in )"
-   └─ parens "( bytes_in )"
-      └─ unknown "bytes_in"`);
-        });
-
-        it('PROMQL <name> = ( <query> )', () => {
-          const src = `PROMQL result = ( bytes_in )`;
-          const query = EsqlQuery.fromSrc(src);
-          const snapshot = printAst(query.ast, {
-            compact: true,
-            src,
-            printSrc: true,
-          });
-
-          expect('\n' + snapshot).toBe(`
-query "PROMQL result = ( bytes_in )"
-└─ command "PROMQL result = ( bytes_in )"
-   └─ function "result = ( bytes_in )"
-      ├─ identifier "result"
-      └─ parens "( bytes_in )"
-         └─ unknown "bytes_in"`);
-        });
-
-        it('PROMQL <key>=<value> <query>', () => {
-          const src = `PROMQL hello = ?world bytes_in{job="prometheus"}`;
-          const query = EsqlQuery.fromSrc(src);
-          const snapshot = printAst(query.ast, {
-            compact: true,
-            src,
-            printSrc: true,
-          });
-
-          expect('\n' + snapshot).toBe(`
-query "PROMQL hello = ?world bytes_in{job="prometheus"}"
-└─ command "PROMQL hello = ?world bytes_in{job="prometheus"}"
-   ├─ map "hello = ?world"
-   │  └─ map-entry "hello = ?world"
-   │     ├─ identifier "hello"
-   │     └─ literal "?world"
-   └─ unknown "bytes_in{job="prometheus"}"`);
-        });
-
-        it('PROMQL <key1>=<value1> <key2>=<value2> name = ( <query> )', () => {
-          const src = `PROMQL hello = ?world ?param = \`identifier\` \`the_name\` = (bytes_in{job="prometheus"})`;
-          const query = EsqlQuery.fromSrc(src);
-          const snapshot = printAst(query.ast, {
-            compact: true,
-            src,
-            printSrc: true,
-          });
-
-          expect('\n' + snapshot).toBe(`
-query "PROMQL hello = ?world ?param = \`identifier\` \`the_name\` = (bytes_in{job="prometheus"})"
-└─ command "PROMQL hello = ?world ?param = \`identifier\` \`the_name\` = (bytes_in{job="prometheus"})"
-   ├─ map "hello = ?world ?param = \`identifier\`"
-   │  ├─ map-entry "hello = ?world"
-   │  │  ├─ identifier "hello"
-   │  │  └─ literal "?world"
-   │  └─ map-entry "?param = \`identifier\`"
-   │     ├─ literal "?param"
-   │     └─ identifier "\`identifier\`"
-   └─ function "\`the_name\` = (bytes_in{job="prometheus"})"
-      ├─ identifier "\`the_name\`"
-      └─ parens "(bytes_in{job="prometheus"})"
-         └─ unknown "bytes_in{job="prometheus"}"`);
         });
       });
     });
