@@ -65,7 +65,7 @@ export const useChartLayers = ({
             ...(metric.unit ? getLensMetricFormat(metric.unit) : {}),
           },
         ],
-        breakdown: hasDimensions ? dimensions[0].name : undefined,
+        breakdown: hasDimensions ? dimensions.map((dim) => dim.name) : undefined,
       },
     ];
   }, [
