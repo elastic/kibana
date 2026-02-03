@@ -100,6 +100,20 @@ class ChatServiceImpl implements ChatService {
 
         span?.setAttribute('elastic.connector.id', services.selectedConnectorId);
 
+        // if resend, update conversation with empty response in last round
+        if (resend && conversationId) {
+          const conversation = await services.conversationClient.get(conversationId);
+          const lastRound = conversation.rounds[conversation.rounds.length - 1];
+          lastRound.response = {
+            message: '',
+          };
+          conversation.rounds[conversation.rounds.length - 1] = lastRound;
+          await services.conversationClient.update({
+            id: conversationId,
+            rounds: conversation.rounds,
+          });
+        }
+
         // Get conversation and determine operation (CREATE, UPDATE, or RESEND)
         const conversation = await getConversation({
           agentId,

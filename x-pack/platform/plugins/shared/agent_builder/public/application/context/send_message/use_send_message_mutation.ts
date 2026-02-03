@@ -24,7 +24,6 @@ import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { mutationKeys } from '../../mutation_keys';
-import { queryKeys } from '../../query_keys';
 import { usePendingMessageState } from './use_pending_message_state';
 import { useSubscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
@@ -266,9 +265,9 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       // from overwriting the streaming response during resend.
       // The actual clearing of the response is handled by the roundResending event
       // emitted by the backend when the stream starts.
-      await queryClient.cancelQueries({
-        queryKey: queryKeys.conversations.byId(conversationId!),
-      });
+      // await queryClient.cancelQueries({
+      //   queryKey: queryKeys.conversations.byId(conversationId!),
+      // });
 
       setIsResending(true);
     },

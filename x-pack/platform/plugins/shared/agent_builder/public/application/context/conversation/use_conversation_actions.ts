@@ -41,10 +41,10 @@ export interface ConversationActions {
   }) => void;
   removeOptimisticRound: () => void;
   /**
-   * Clears the last round's response (message and steps) for resend operation.
-   * Used when resending to start fresh with a new response.
+   * Fetches the conversation from the server to get the cleared round.
+   * Called when resending - the backend has already persisted an empty round.
    */
-  clearLastRoundResponse: () => void;
+  clearLastRoundResponse: () => Promise<void>;
   setAgentId: (agentId: string) => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
   addToolCall: ({ step }: { step: ToolCallStep }) => void;
@@ -156,15 +156,32 @@ const createConversationActions = ({
       );
     },
     /**
-     * Clears the last round's response (message and steps) for resend operation.
-     * Sets status to inProgress to prevent stale server data from overwriting during streaming.
+     * Fetches the conversation from the server to get the cleared round.
+     * Uses fetchQuery which bypasses the query's `enabled` state entirely.
      */
-    clearLastRoundResponse: () => {
-      setCurrentRound((round) => {
-        round.response.message = '';
-        round.steps = [];
-        round.status = ConversationRoundStatus.inProgress;
-      });
+    clearLastRoundResponse: async () => {
+      if (!conversationId) {
+        // eslint-disable-next-line no-console
+        console.log('[clearLastRoundResponse] No conversationId, skipping fetch');
+        return;
+      }
+
+      try {
+        // also update the lat round state locally
+        setCurrentRound((round) => {
+          round.response.message = '';
+          round.steps = [];
+          round.status = ConversationRoundStatus.inProgress;
+        });
+        // fetchQuery bypasses the `enabled` check and directly fetches + updates cache
+        const conversation = await conversationsService.get({ conversationId });
+        queryClient.setQueryData(queryKey, conversation);
+        // eslint-disable-next-line no-console
+        console.log('[clearLastRoundResponse] Updated cache with fetched conversation');
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('[clearLastRoundResponse] Failed to fetch:', error);
+      }
     },
     setAgentId: (agentId: string) => {
       // We allow to change agent only at the start of the conversation
