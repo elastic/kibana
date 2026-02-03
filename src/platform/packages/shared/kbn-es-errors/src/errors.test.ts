@@ -111,61 +111,62 @@ describe('isMaximumResponseSizeExceededError', () => {
   });
 });
 
-describe('getDetailedErrorMessage', () => {
-  describe('Elasticsearch ResponseError', () => {
-    it('returns stringified body for ResponseError', () => {
-      const body = { error: { type: 'search_phase_execution_exception', reason: 'test' } };
-      const error = new errors.ResponseError(createApiResponseError({ statusCode: 500, body }));
-      expect(getDetailedErrorMessage(error)).toBe(JSON.stringify(body));
-    });
+describe('#getDetailedErrorMessage', () => {
+  it('extracts body payload from Boom error', () => {
+    expect(getDetailedErrorMessage(Boom.badRequest())).toBe(
+      JSON.stringify({ statusCode: 400, error: 'Bad Request', message: 'Bad Request' })
+    );
+    expect(getDetailedErrorMessage(Boom.unauthorized())).toBe(
+      JSON.stringify({ statusCode: 401, error: 'Unauthorized', message: 'Unauthorized' })
+    );
+
+    const customBoomError = Boom.unauthorized();
+    customBoomError.output.payload = {
+      statusCode: 401,
+      error: 'some-weird-error',
+      message: 'some-weird-message',
+    };
+    expect(getDetailedErrorMessage(customBoomError)).toBe(
+      JSON.stringify({
+        statusCode: 401,
+        error: 'some-weird-error',
+        message: 'some-weird-message',
+      })
+    );
   });
 
-  describe('Boom errors', () => {
-    it('returns stringified payload for Boom errors', () => {
-      const error = Boom.badRequest('Invalid input');
-      const result = getDetailedErrorMessage(error);
-      expect(result).toContain('Invalid input');
-      expect(result).toContain('Bad Request');
-    });
-
-    it('handles Boom internal errors', () => {
-      const error = Boom.internal('Server error');
-      const result = getDetailedErrorMessage(error);
-      expect(result).toContain('Internal Server Error');
-    });
+  it('extracts body from Elasticsearch client response error', () => {
+    expect(
+      getDetailedErrorMessage(
+        new errors.ResponseError(
+          createApiResponseError({
+            statusCode: 401,
+            body: { field1: 'value-1', field2: 'value-2' },
+          })
+        )
+      )
+    ).toBe(JSON.stringify({ field1: 'value-1', field2: 'value-2' }));
   });
 
-  describe('standard Error objects', () => {
-    it('returns message for simple errors', () => {
-      const error = new Error('Simple error message');
-      expect(getDetailedErrorMessage(error)).toBe('Simple error message');
-    });
+  it('extracts `cause` property', () => {
+    expect(getDetailedErrorMessage(new Error('some-message', { cause: 'oops' }))).toBe(
+      'some-message (cause: oops)'
+    );
 
-    it('includes cause message when cause is an Error', () => {
-      const cause = new Error('Root cause');
-      const error = new Error('Main error', { cause });
-      expect(getDetailedErrorMessage(error)).toBe('Main error (cause: Root cause)');
-    });
+    expect(getDetailedErrorMessage(new Error('some-message', { cause: { oh: 'no' } }))).toBe(
+      `some-message (cause: { oh: 'no' })`
+    );
 
-    it('includes cause when cause is a string', () => {
-      const error = new Error('Main error', { cause: 'String cause' });
-      expect(getDetailedErrorMessage(error)).toBe('Main error (cause: String cause)');
-    });
-
-    it('inspects cause when cause is an object', () => {
-      const error = new Error('Main error', { cause: { code: 'ERR_CODE', detail: 'details' } });
-      const result = getDetailedErrorMessage(error);
-      expect(result).toContain('Main error (cause:');
-      expect(result).toContain('ERR_CODE');
-    });
+    expect(
+      getDetailedErrorMessage(
+        new TypeError('fetch failed', {
+          cause: new Error('unable to get local issuer certificate'),
+        })
+      )
+    ).toBe('fetch failed (cause: unable to get local issuer certificate)');
   });
 
-  describe('non-Error values', () => {
-    it('converts non-Error values to string', () => {
-      expect(getDetailedErrorMessage('string error')).toBe('string error');
-      expect(getDetailedErrorMessage(42)).toBe('42');
-      expect(getDetailedErrorMessage(null)).toBe('null');
-      expect(getDetailedErrorMessage(undefined)).toBe('undefined');
-    });
+  it('extracts `message` property', () => {
+    expect(getDetailedErrorMessage(new Error('some-message'))).toBe('some-message');
   });
 });

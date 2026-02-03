@@ -64,7 +64,7 @@ export function isMaximumResponseSizeExceededError(
  * @returns A detailed error message suitable for logging.
  * @public
  */
-export function getDetailedErrorMessage(error: unknown): string {
+export function getDetailedErrorMessage(error: any): string {
   if (error instanceof errors.ResponseError) {
     return JSON.stringify(error.body);
   }
@@ -73,21 +73,16 @@ export function getDetailedErrorMessage(error: unknown): string {
     return JSON.stringify(error.output.payload);
   }
 
-  if (error instanceof Error) {
-    if (!error.cause) {
-      return error.message;
-    }
-
-    // Usually it's enough to get the first level cause message.
-    return `${error.message} (cause: ${
-      typeof error.cause === 'string'
-        ? error.cause
-        : error.cause instanceof Error
-        ? error.cause.message
-        : inspect(error.cause)
-    })`;
+  if (!error.cause) {
+    return error.message;
   }
 
-  // Fallback for non-Error objects
-  return String(error);
+  // Usually it's enough to get the first level cause message.
+  return `${error.message} (cause: ${
+    typeof error.cause === 'string'
+      ? error.cause
+      : error.cause instanceof Error
+      ? error.cause.message
+      : inspect(error.cause)
+  })`;
 }
