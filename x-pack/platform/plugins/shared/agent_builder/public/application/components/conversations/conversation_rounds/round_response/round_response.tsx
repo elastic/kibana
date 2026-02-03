@@ -19,6 +19,7 @@ export interface RoundResponseProps {
   steps: ConversationRoundStep[];
   isLoading: boolean;
   hasError: boolean;
+  isLastRound: boolean;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
@@ -26,6 +27,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   response: { message },
   steps,
   isLoading,
+  isLastRound,
 }) => (
   <EuiFlexGroup
     direction="column"
@@ -47,7 +49,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
     </EuiFlexItem>
     {!isLoading && !hasError && (
       <EuiFlexItem grow={false}>
-        <RoundResponseActions content={message} isVisible />
+        <RoundResponseActions content={message} isVisible isLastRound={isLastRound} />
       </EuiFlexItem>
     )}
   </EuiFlexGroup>

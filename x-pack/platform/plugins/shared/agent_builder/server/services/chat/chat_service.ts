@@ -33,6 +33,7 @@ import {
   createConversation$,
   resolveServices,
   convertErrors,
+  createRoundResendingEvent,
   type ConversationWithOperation,
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
@@ -125,6 +126,19 @@ class ChatServiceImpl implements ChatService {
               ? of(createConversationIdSetEvent(context.conversation.id))
               : EMPTY;
 
+          // Emit round resending event for resend operations
+          const isResendOperation = context.conversation.operation === 'RESEND';
+          const roundResendingEvent$ =
+            isResendOperation && conversationId
+              ? of(createRoundResendingEvent(conversationId)).pipe(
+                  tap(() => {
+                    this.dependencies.logger.debug(
+                      `[ChatService] Emitting roundResending event for conversation: ${conversationId}`
+                    );
+                  })
+                )
+              : EMPTY;
+
           // For resend, use the last round's input instead of the provided nextInput
           const effectiveNextInput =
             context.conversation.operation === 'RESEND'
@@ -173,7 +187,12 @@ class ChatServiceImpl implements ChatService {
           const effectiveConversationId =
             context.conversation.operation === 'CREATE' ? context.conversation.id : conversationId;
           const modelProvider = getConnectorProvider(context.chatModel.getConnector());
-          return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
+          return merge(
+            conversationIdEvent$,
+            roundResendingEvent$,
+            agentEvents$,
+            persistenceEvents$
+          ).pipe(
             handleCancellation(abortSignal),
             convertErrors({
               agentId,

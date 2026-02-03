@@ -40,6 +40,11 @@ export interface ConversationActions {
     attachments?: AttachmentInput[];
   }) => void;
   removeOptimisticRound: () => void;
+  /**
+   * Clears the last round's response (message and steps) for resend operation.
+   * Used when resending to start fresh with a new response.
+   */
+  clearLastRoundResponse: () => void;
   setAgentId: (agentId: string) => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
   addToolCall: ({ step }: { step: ToolCallStep }) => void;
@@ -149,6 +154,17 @@ const createConversationActions = ({
           draft?.rounds?.pop();
         })
       );
+    },
+    /**
+     * Clears the last round's response (message and steps) for resend operation.
+     * Sets status to inProgress to prevent stale server data from overwriting during streaming.
+     */
+    clearLastRoundResponse: () => {
+      setCurrentRound((round) => {
+        round.response.message = '';
+        round.steps = [];
+        round.status = ConversationRoundStatus.inProgress;
+      });
     },
     setAgentId: (agentId: string) => {
       // We allow to change agent only at the start of the conversation

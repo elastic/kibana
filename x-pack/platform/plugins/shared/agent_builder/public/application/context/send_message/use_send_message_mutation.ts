@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { firstValueFrom } from 'rxjs';
@@ -24,6 +24,7 @@ import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { mutationKeys } from '../../mutation_keys';
+import { queryKeys } from '../../query_keys';
 import { usePendingMessageState } from './use_pending_message_state';
 import { useSubscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
@@ -101,15 +102,18 @@ const withScreenContextAttachment = async ({
 export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
   const { chatService } = useAgentBuilderServices();
   const { services } = useKibana();
+  const queryClient = useQueryClient();
   const { conversationActions, attachments, resetAttachments, browserApiTools } =
     useConversationContext();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
   const conversationId = useConversationId();
   const { conversation } = useConversation();
   const isMutatingNewConversationRef = useRef(false);
   const agentId = useAgentId();
   const messageControllerRef = useRef<AbortController | null>(null);
+  const resendControllerRef = useRef<AbortController | null>(null);
 
   const [error, setError] = useState<unknown | null>(null);
   const [errorSteps, setErrorSteps] = useState<ConversationRoundStep[]>([]);
@@ -144,6 +148,14 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     setAgentReasoning,
     setIsResponseLoading,
     isAborted: () => Boolean(messageControllerRef?.current?.signal?.aborted),
+    browserToolExecutor,
+  });
+
+  // Separate subscription for resend operations with its own loading state
+  const { subscribeToChatEvents: subscribeToResendEvents } = useSubscribeToChatEvents({
+    setAgentReasoning,
+    setIsResponseLoading: setIsResending,
+    isAborted: () => Boolean(resendControllerRef?.current?.signal?.aborted),
     browserToolExecutor,
   });
 
@@ -219,6 +231,60 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     },
   });
 
+  const resendMessage = async () => {
+    const signal = resendControllerRef.current?.signal;
+    if (!signal) {
+      return Promise.reject(new Error('Abort signal not present'));
+    }
+
+    if (!conversationId) {
+      return Promise.reject(new Error('Conversation ID is required to resend'));
+    }
+
+    // eslint-disable-next-line no-console
+    console.log('[Resend] Starting resend for conversation:', conversationId);
+
+    const events$ = chatService.resend({
+      signal,
+      conversationId,
+      agentId,
+      connectorId,
+      browserApiTools: browserApiToolsMetadata,
+    });
+
+    return subscribeToResendEvents(events$);
+  };
+
+  const { mutate: resendMutate, isLoading: isResendLoading } = useMutation({
+    mutationKey: mutationKeys.sendMessage,
+    mutationFn: resendMessage,
+    onMutate: async () => {
+      removeError();
+      resendControllerRef.current = new AbortController();
+
+      // Cancel any in-flight queries for this conversation to prevent stale data
+      // from overwriting the streaming response during resend.
+      // The actual clearing of the response is handled by the roundResending event
+      // emitted by the backend when the stream starts.
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.conversations.byId(conversationId!),
+      });
+
+      setIsResending(true);
+    },
+    onSettled: () => {
+      conversationActions.invalidateConversation();
+      resendControllerRef.current = null;
+      setAgentReasoning(null);
+      if (isResending) {
+        setIsResending(false);
+      }
+    },
+    onError: (err) => {
+      setError(err);
+    },
+  });
+
   const canCancel = isLoading;
   const cancel = () => {
     if (!canCancel) {
@@ -265,5 +331,11 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
         removePendingMessage();
       }
     },
+    /**
+     * Resend the last conversation round.
+     * Clears the response message and calls the API with resend=true.
+     */
+    resend: resendMutate,
+    isResending: isResending || isResendLoading,
   };
 };

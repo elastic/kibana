@@ -13,6 +13,7 @@ import {
   isPromptRequestEvent,
   isReasoningEvent,
   isRoundCompleteEvent,
+  isRoundResendingEvent,
   isToolCallEvent,
   isToolProgressEvent,
   isToolResultEvent,
@@ -126,6 +127,8 @@ export const useSubscribeToChatEvents = ({
       });
       // Stop loading when a prompt is requested - the round is now awaiting user input
       setIsResponseLoading(false);
+    } else if (isRoundResendingEvent(event)) {
+      conversationActions.clearLastRoundResponse();
     }
   };
 

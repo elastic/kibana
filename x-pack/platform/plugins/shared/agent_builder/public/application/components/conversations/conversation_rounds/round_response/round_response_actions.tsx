@@ -11,6 +11,7 @@ import copy from 'copy-to-clipboard';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useToasts } from '../../../../hooks/use_toasts';
+import { useSendMessage } from '../../../../context/send_message/send_message_context';
 
 const labels = {
   copy: i18n.translate('xpack.agentBuilder.roundResponseActions.copy', {
@@ -19,18 +20,24 @@ const labels = {
   copySuccess: i18n.translate('xpack.agentBuilder.roundResponseActions.copySuccess', {
     defaultMessage: 'Response copied to clipboard',
   }),
+  resend: i18n.translate('xpack.agentBuilder.roundResponseActions.resend', {
+    defaultMessage: 'Resend response',
+  }),
 };
 
 interface RoundResponseActionsProps {
   content: string;
   isVisible: boolean;
+  isLastRound: boolean;
 }
 
 export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   content,
   isVisible,
+  isLastRound,
 }) => {
   const { addSuccessToast } = useToasts();
+  const { resend, isResending, isResponseLoading } = useSendMessage();
 
   const handleCopy = useCallback(() => {
     const isSuccess = copy(content);
@@ -39,10 +46,16 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
     }
   }, [content, addSuccessToast]);
 
+  const handleResend = useCallback(() => {
+    resend();
+  }, [resend]);
+
+  // Disable resend button while any response is loading
+  const isResendDisabled = isResending || isResponseLoading;
+
   return (
     <EuiFlexGroup
       direction="row"
-      justifyContent="spaceBetween"
       gutterSize="xs"
       responsive={false}
       css={css`
@@ -59,6 +72,19 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
           data-test-subj="roundResponseCopyButton"
         />
       </EuiFlexItem>
+      {isLastRound && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="refresh"
+            aria-label={labels.resend}
+            onClick={handleResend}
+            color="text"
+            isDisabled={isResendDisabled}
+            isLoading={isResending}
+            data-test-subj="roundResponseResendButton"
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

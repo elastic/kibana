@@ -41,6 +41,10 @@ export type ResumeRoundParams = BaseConverseParams & {
   prompts: Record<string, PromptResponse>;
 };
 
+export type ResendParams = BaseConverseParams & {
+  conversationId: string;
+};
+
 export class ChatService {
   private readonly http: HttpSetup;
   private readonly events: EventsService;
@@ -73,6 +77,17 @@ export class ChatService {
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       prompts: params.prompts,
       browser_api_tools: params.browserApiTools ?? [],
+    });
+  }
+
+  resend(params: ResendParams): Observable<ChatEvent> {
+    return this.converse(params.signal, {
+      agent_id: params.agentId,
+      conversation_id: params.conversationId,
+      connector_id: params.connectorId,
+      capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
+      browser_api_tools: params.browserApiTools ?? [],
+      resend: true,
     });
   }
 
