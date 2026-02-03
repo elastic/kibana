@@ -36,7 +36,7 @@ export const usePackQueryLastResults = ({
     async () => {
       const lastResultsSearchSource = await data.search.searchSource.create({
         size: 1,
-        sort: [{ '@timestamp': SortDirection.desc }],
+        sort: [{ 'event.ingested': SortDirection.desc }],
         query: {
           // @ts-expect-error update types
           bool: {
@@ -54,9 +54,10 @@ export const usePackQueryLastResults = ({
       lastResultsSearchSource.setField('index', logsDataView);
 
       const lastResultsResponse = await lastValueFrom(lastResultsSearchSource.fetch$());
-      const timestamp = lastResultsResponse.rawResponse?.hits?.hits[0]?.fields?.['@timestamp'][0];
+      const eventIngested =
+        lastResultsResponse.rawResponse?.hits?.hits[0]?.fields?.['event.ingested']?.[0];
 
-      if (timestamp) {
+      if (eventIngested) {
         const aggsSearchSource = await data.search.searchSource.create({
           size: 1,
           query: {
@@ -65,11 +66,11 @@ export const usePackQueryLastResults = ({
               filter: [
                 {
                   range: {
-                    '@timestamp': {
+                    'event.ingested': {
                       gte: startDate
                         ? moment(startDate).format()
-                        : moment(timestamp).subtract(interval, 'seconds').format(),
-                      lte: moment(endDate || timestamp).format(),
+                        : moment(eventIngested).subtract(interval, 'seconds').format(),
+                      lte: moment(endDate || eventIngested).format(),
                     },
                   },
                 },
@@ -90,7 +91,8 @@ export const usePackQueryLastResults = ({
         const aggsResponse = await lastValueFrom(aggsSearchSource.fetch$());
 
         return {
-          '@timestamp': lastResultsResponse.rawResponse?.hits?.hits[0]?.fields?.['@timestamp'],
+          lastResultTime:
+            lastResultsResponse.rawResponse?.hits?.hits[0]?.fields?.['event.ingested'],
           // @ts-expect-error update types
           uniqueAgentsCount: aggsResponse?.rawResponse.aggregations?.unique_agents?.value,
           docCount: aggsResponse?.rawResponse?.hits?.total,
