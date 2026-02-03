@@ -66,12 +66,14 @@ async function installIndicesAndDataStreams(
 ) {
   await Promise.all([
     (async () => {
-      await createIndex(esClient, getLatestEntitiesIndexName(namespace), true);
+      await createIndex(esClient, getLatestEntitiesIndexName(namespace), { throwIfExists: false });
       logger.debug(`created latest entity index in ${namespace}`);
     })(),
 
     (async () => {
-      await createDataStream(esClient, getUpdatesEntitiesDataStreamName(namespace), true);
+      await createDataStream(esClient, getUpdatesEntitiesDataStreamName(namespace), {
+        throwIfExists: false,
+      });
       logger.debug(`created updates entity data stream in ${namespace}`);
     })(),
   ]);

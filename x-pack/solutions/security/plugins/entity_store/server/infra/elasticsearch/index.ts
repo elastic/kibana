@@ -13,15 +13,22 @@ import type {
   ClusterPutComponentTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 
+export interface CreateOptions {
+  throwIfExists?: boolean;
+}
+
 export const createIndex = async (
   esClient: EsClient,
   index: IndexName,
-  if_not_exists: boolean = false
+  options: CreateOptions = { throwIfExists: true }
 ) => {
   try {
     await esClient.indices.create({ index });
   } catch (error) {
-    if (if_not_exists && error?.meta?.body?.error?.type === 'resource_already_exists_exception') {
+    if (
+      !options.throwIfExists &&
+      error?.meta?.body?.error?.type === 'resource_already_exists_exception'
+    ) {
       return;
     }
     throw error;
@@ -57,12 +64,15 @@ export const deleteIndexTemplate = async (esClient: EsClient, name: Names) => {
 export const createDataStream = async (
   esClient: EsClient,
   name: IndexName,
-  if_not_exists: boolean = false
+  options: CreateOptions = { throwIfExists: true }
 ) => {
   try {
     await esClient.indices.createDataStream({ name });
   } catch (error) {
-    if (if_not_exists && error?.meta?.body?.error?.type === 'resource_already_exists_exception') {
+    if (
+      !options.throwIfExists &&
+      error?.meta?.body?.error?.type === 'resource_already_exists_exception'
+    ) {
       return;
     }
     throw error;
