@@ -19,18 +19,25 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: StoryFn<typeof Component> = () => {
+const Template: StoryFn<typeof Component> = (args) => {
   const methods = useForm({ defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES });
   return (
     <FormProvider {...methods}>
-      <Component />
+      <Component {...args} />
     </FormProvider>
   );
 };
 
-const defaultProps = {};
-
-export const SloEditFormObjectives = {
+export const FullPage = {
   render: Template,
-  args: defaultProps,
+  args: {
+    formSettings: undefined,
+  },
+};
+
+export const Flyout = {
+  render: Template,
+  args: {
+    formSettings: { isFlyout: true },
+  },
 };
