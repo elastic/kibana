@@ -32,7 +32,9 @@ import { CustomHttpRequestError } from '../../../../utils/custom_http_request_er
 
 type RuleResponseActions = Pick<BaseOptionalFields, 'response_actions'>;
 
-interface ValidateRuleResponseActionsOptions<T extends RuleResponseActions = RuleResponseActions> {
+export interface ValidateRuleResponseActionsOptions<
+  T extends RuleResponseActions = RuleResponseActions
+> {
   /**
    * Endpoint Authz can be retrieve via Route context or `endpointService.getEndpointAuthz(httpRequest)`
    */
