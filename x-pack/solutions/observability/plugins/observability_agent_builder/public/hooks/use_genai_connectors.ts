@@ -20,7 +20,6 @@ export interface UseGenAIConnectorsResult {
 
 /**
  * Hook to fetch available GenAI connectors and determine the selected connector.
- * Mirrors the server-side logic in get_default_connector_id.ts
  */
 export function useGenAIConnectors(): UseGenAIConnectorsResult {
   const {

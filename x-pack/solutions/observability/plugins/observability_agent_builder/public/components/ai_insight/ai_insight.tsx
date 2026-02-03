@@ -90,16 +90,15 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
 
   const handleFeedback = useCallback(
     (feedback: Feedback) => {
+      if (!selectedConnector) return;
       analytics.reportEvent(ObservabilityAgentBuilderTelemetryEventType.AiInsightFeedback, {
         feedback,
         insight_type: insightType,
-        connector: selectedConnector
-          ? {
-              connectorId: selectedConnector.connectorId,
-              name: selectedConnector.name,
-              type: selectedConnector.type,
-            }
-          : undefined,
+        connector: {
+          connectorId: selectedConnector.connectorId,
+          name: selectedConnector.name,
+          type: selectedConnector.type,
+        },
       });
     },
     [analytics, insightType, selectedConnector]
@@ -230,7 +229,7 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
               <EuiSpacer size="s" />
               <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <FeedbackButtons insightType={insightType} onClickFeedback={handleFeedback} />
+                  <FeedbackButtons onClickFeedback={handleFeedback} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <StartConversationButton
