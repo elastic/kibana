@@ -10,7 +10,6 @@ import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/act
 import { getJiraServiceManagementConnectorType } from './jira-service-management';
 import { getMicrosoftDefenderEndpointConnectorType } from './microsoft_defender_endpoint';
 import { getConnectorType as getCasesWebhookConnectorType } from './cases_webhook';
-import { getConnectorType as getJiraConnectorType } from './jira';
 import { getServiceNowITSMConnectorType } from './servicenow_itsm';
 import { getServiceNowSIRConnectorType } from './servicenow_sir';
 import { getServiceNowITOMConnectorType } from './servicenow_itom';
@@ -64,12 +63,11 @@ export function registerConnectorTypes({
   actions.registerType(getServiceNowITSMConnectorType());
   actions.registerType(getServiceNowSIRConnectorType());
   actions.registerType(getServiceNowITOMConnectorType());
-  // actions.registerType(getJiraConnectorType()); // Commented out: using spec-based .jira from kbn-connector-specs
   actions.registerType(getTeamsConnectorType());
   actions.registerType(getTorqConnectorType());
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
-  // actions.registerSubActionConnectorType(getJiraServiceManagementConnectorType());
+  actions.registerSubActionConnectorType(getJiraServiceManagementConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
   actions.registerSubActionConnectorType(getOpenAIConnectorType());
   actions.registerSubActionConnectorType(getBedrockConnectorType());

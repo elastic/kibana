@@ -5,6 +5,9 @@ import { z } from 'zod/v4';
 const buildBaseUrl = (ctx: ActionContext) =>
   `https://${(ctx.config?.subdomain as string).trim()}.atlassian.net`;
 
+const omitUndefined = <T extends Record<string, unknown>>(obj: T): Partial<T> =>
+  Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined)) as Partial<T>;
+
 export const JiraConnector: ConnectorSpec = {
   metadata: {
     id: '.jira',
@@ -55,7 +58,10 @@ export const JiraConnector: ConnectorSpec = {
         };
         const subdomain = (ctx.config?.subdomain as string) ?? '';
         const baseUrl = `https://${subdomain.trim()}.atlassian.net`;
-        const response = await ctx.client.post(`${baseUrl}/rest/api/3/search/jql`, typedInput);
+        const response = await ctx.client.post(
+          `${baseUrl}/rest/api/3/search/jql`,
+          omitUndefined(typedInput)
+        );
         return response.data;
       },
     },
@@ -88,7 +94,7 @@ export const JiraConnector: ConnectorSpec = {
         };
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.get(`${baseUrl}/rest/api/3/project/search`, {
-          params: typedInput,
+          params: omitUndefined(typedInput),
         });
         return response.data;
       },
@@ -128,7 +134,7 @@ export const JiraConnector: ConnectorSpec = {
         };
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.get(`${baseUrl}/rest/api/3/user/search`, {
-          params: typedInput,
+          params: omitUndefined(typedInput),
         });
         return response.data;
       },
