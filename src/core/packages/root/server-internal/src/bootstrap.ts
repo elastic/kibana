@@ -63,6 +63,23 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   // in order to be able to reload the log configuration
   // under the cluster mode
   process.on('message', (msg: any) => {
+    // Handle array-format messages from cli-dev-mode
+    if (Array.isArray(msg)) {
+      const [type, data] = msg;
+
+      // Handle Vite plugin config from cli-dev-mode
+      if (type === 'VITE_PLUGINS' && data) {
+        cliLogger.info(`Received Vite config: ${data.pluginIds?.length || 0} plugins`);
+        // Store Vite config in global for bootstrap_renderer to access
+        (global as any).__kbnViteConfig = {
+          serverUrl: data.serverUrl,
+          pluginIds: data.pluginIds || [],
+          pluginDependencies: data.pluginDependencies || {},
+        };
+        return;
+      }
+    }
+
     if (!msg || msg.reloadConfiguration !== true) {
       return;
     }
