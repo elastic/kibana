@@ -48,6 +48,9 @@ export function useReviewSuggestionsForm() {
 
   const [suggestions, setSuggestions] = useState<PartitionSuggestion[] | undefined>(undefined);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [selectedSuggestionIndexes, setSelectedSuggestionIndexes] = useState<Set<number>>(
+    new Set()
+  );
 
   const abortController = useAbortController();
 
@@ -82,6 +85,66 @@ export function useReviewSuggestionsForm() {
 
     const updatedSuggestions = suggestions.toSpliced(index, 1);
 
+    // Update selected indexes after removal
+    setSelectedSuggestionIndexes((prevSelected) => {
+      const newSelected = new Set<number>();
+      prevSelected.forEach((selectedIndex) => {
+        if (selectedIndex < index) {
+          newSelected.add(selectedIndex);
+        } else if (selectedIndex > index) {
+          // Shift down indexes that come after the removed item
+          newSelected.add(selectedIndex - 1);
+        }
+        // Don't include the removed index
+      });
+      return newSelected;
+    });
+
+    // Reset form when all partitions are removed
+    if (isEmpty(updatedSuggestions)) {
+      resetForm();
+    } else {
+      setSuggestions(updatedSuggestions);
+    }
+  };
+
+  const toggleSuggestionSelection = (index: number) => {
+    setSelectedSuggestionIndexes((prevSelected) => {
+      const newSelected = new Set(prevSelected);
+      if (newSelected.has(index)) {
+        newSelected.delete(index);
+      } else {
+        newSelected.add(index);
+      }
+      return newSelected;
+    });
+  };
+
+  const clearSuggestionSelection = () => {
+    setSelectedSuggestionIndexes(new Set());
+  };
+
+  const selectAllSuggestions = () => {
+    if (!suggestions) return;
+    setSelectedSuggestionIndexes(new Set(suggestions.map((_, index) => index)));
+  };
+
+  // Bulk accept: removes multiple suggestions at once after successful fork operations
+  // Indexes should be sorted in descending order to avoid shifting issues
+  const bulkAcceptSuggestions = (indexes: number[]) => {
+    if (!suggestions) return;
+
+    // Sort indexes in descending order to remove from end first
+    const sortedIndexes = [...indexes].sort((a, b) => b - a);
+
+    let updatedSuggestions = [...suggestions];
+    for (const index of sortedIndexes) {
+      updatedSuggestions = updatedSuggestions.toSpliced(index, 1);
+    }
+
+    // Clear selection since all selected items are being removed
+    setSelectedSuggestionIndexes(new Set());
+
     // Reset form when all partitions are removed
     if (isEmpty(updatedSuggestions)) {
       resetForm();
@@ -111,6 +174,7 @@ export function useReviewSuggestionsForm() {
     abortController.abort();
     abortController.refresh();
     setSuggestions(undefined);
+    setSelectedSuggestionIndexes(new Set());
     resetPreview();
   };
 
@@ -145,5 +209,12 @@ export function useReviewSuggestionsForm() {
       }
       removeSuggestion(index);
     },
+    // Bulk selection state and functions
+    selectedSuggestionIndexes,
+    toggleSuggestionSelection,
+    clearSuggestionSelection,
+    selectAllSuggestions,
+    isSuggestionSelected: (index: number) => selectedSuggestionIndexes.has(index),
+    bulkAcceptSuggestions,
   };
 }

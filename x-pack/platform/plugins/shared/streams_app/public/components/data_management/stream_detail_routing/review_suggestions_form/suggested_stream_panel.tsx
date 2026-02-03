@@ -16,6 +16,7 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiButtonIcon,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -43,6 +44,8 @@ export function SuggestedStreamPanel({
   index,
   onEdit,
   onSave,
+  isSelectedForBulk,
+  onToggleSelection,
 }: {
   definition: Streams.WiredStream.GetResponse;
   partition: PartitionSuggestion;
@@ -51,6 +54,8 @@ export function SuggestedStreamPanel({
   index: number;
   onEdit(index: number, suggestion: PartitionSuggestion): void;
   onSave?: () => void;
+  isSelectedForBulk: boolean;
+  onToggleSelection(): void;
 }) {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { changeSuggestionNameDebounced, changeSuggestionCondition, reviewSuggestedRule } =
@@ -132,8 +137,23 @@ export function SuggestedStreamPanel({
   }
 
   return (
-    <SelectablePanel paddingSize="m" isSelected={isSelected}>
+    <SelectablePanel paddingSize="m" isSelected={isSelected || isSelectedForBulk}>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiCheckbox
+            id={`suggestion-checkbox-${index}`}
+            checked={isSelectedForBulk}
+            onChange={onToggleSelection}
+            aria-label={i18n.translate(
+              'xpack.streams.streamDetailRouting.suggestedStreamPanel.selectForBulk',
+              {
+                defaultMessage: 'Select {name} for bulk action',
+                values: { name: currentSuggestion.name },
+              }
+            )}
+            data-test-subj={`suggestionCheckbox-${currentSuggestion.name}`}
+          />
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="s">
             <h4 data-test-subj={`suggestionName-${currentSuggestion.name}`}>

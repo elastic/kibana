@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiText, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiCallOut, EuiSpacer, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import React from 'react';
@@ -34,11 +34,15 @@ export interface ReviewSuggestionsFormProps
     | 'acceptSuggestion'
     | 'rejectSuggestion'
     | 'updateSuggestion'
+    | 'selectedSuggestionIndexes'
+    | 'toggleSuggestionSelection'
+    | 'isSuggestionSelected'
   > {
   suggestions: PartitionSuggestion[];
   onRegenerate: (connectorId: string) => void;
   definition: Streams.WiredStream.GetResponse;
   aiFeatures: AIFeatures;
+  onBulkAccept: () => void;
 }
 
 export function ReviewSuggestionsForm({
@@ -52,6 +56,10 @@ export function ReviewSuggestionsForm({
   rejectSuggestion,
   updateSuggestion,
   onRegenerate,
+  selectedSuggestionIndexes,
+  toggleSuggestionSelection,
+  isSuggestionSelected,
+  onBulkAccept,
 }: ReviewSuggestionsFormProps) {
   const ruleUnderReview = useStreamsRoutingSelector((snapshot) =>
     snapshot.matches({ ready: 'reviewSuggestedRule' }) ? snapshot.context.suggestedRuleId : null
@@ -148,25 +156,47 @@ export function ReviewSuggestionsForm({
                   onDismiss={() => rejectSuggestion(index, selectedPreviewName === partition.name)}
                   onEdit={editSuggestion}
                   onSave={handleSave}
+                  isSelectedForBulk={isSuggestionSelected(index)}
+                  onToggleSelection={() => toggleSuggestionSelection(index)}
                 />
                 <EuiSpacer size="s" />
               </NestedView>
             ))}
             <EuiSpacer size="m" />
-            <GenerateSuggestionButton
-              iconType="refresh"
-              size="s"
-              onClick={onRegenerate}
-              isLoading={isLoadingSuggestions}
-              aiFeatures={aiFeatures}
-            >
-              {i18n.translate(
-                'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
-                {
-                  defaultMessage: 'Regenerate',
-                }
+            <EuiFlexGroup gutterSize="m" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <GenerateSuggestionButton
+                  iconType="refresh"
+                  size="s"
+                  onClick={onRegenerate}
+                  isLoading={isLoadingSuggestions}
+                  aiFeatures={aiFeatures}
+                >
+                  {i18n.translate(
+                    'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
+                    {
+                      defaultMessage: 'Regenerate',
+                    }
+                  )}
+                </GenerateSuggestionButton>
+              </EuiFlexItem>
+              {selectedSuggestionIndexes.size > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    iconType="check"
+                    size="s"
+                    fill
+                    onClick={onBulkAccept}
+                    data-test-subj="streamsAppAcceptSelectedSuggestionsButton"
+                  >
+                    {i18n.translate('xpack.streams.reviewSuggestionsForm.acceptSelectedButton', {
+                      defaultMessage: 'Accept selected ({count})',
+                      values: { count: selectedSuggestionIndexes.size },
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
               )}
-            </GenerateSuggestionButton>
+            </EuiFlexGroup>
           </>
         )}
       </EuiCallOut>
