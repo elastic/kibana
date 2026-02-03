@@ -33,3 +33,14 @@ export type {
 } from './step_registry/types';
 
 export { createServerStepDefinition } from './step_registry/types';
+
+export type {
+  ServerTriggerDefinition,
+  TriggerEventData,
+  TriggerMatchResult,
+  TriggerMatcher,
+} from './trigger_registry/types';
+
+export { createServerTriggerDefinition } from './trigger_registry/types';
+
+export type { StreamsUpsertStreamEventPayload } from './triggers';

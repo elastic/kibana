@@ -1,14 +1,13 @@
 # Workflows Extensions Plugin
 
-Extension point registry for workflow extensions. This plugin provides a centralized location for registering custom workflow extensions, including step types.
+Extension point registry for workflow extensions. This plugin provides a centralized location for registering custom workflow extensions, including step types and trigger types.
 
 ## Overview
 
-The `workflows_extensions` plugin serves as the home for workflow extension points. Currently, it provides:
+The `workflows_extensions` plugin serves as the home for workflow extension points. It provides:
 
 - **Step Type Registry**: Allows other plugins to register custom workflow steps with both server-side execution logic and client-side UI definition
-
-Future extension points (such as triggers) will also be registered through this plugin.
+- **Trigger Type Registry**: Allows other plugins to register custom workflow triggers with both server-side configuration and client-side UI definition
 
 ### Step Type Registry Architecture
 
@@ -23,6 +22,13 @@ This separation ensures that:
 - UI definition is available directly to client-side code without HTTP requests
 - Type safety is maintained between server and client registries via step type IDs
 
+### Trigger Type Registry Architecture
+
+The trigger type registry follows the same pattern as steps:
+
+- **Server-side registry**: Stores trigger configuration schema and any server-side logic
+- **Public-side registry**: Stores UI definition (labels, descriptions, icons, documentation)
+
 ## Architecture
 
 ```
@@ -31,6 +37,7 @@ This separation ensures that:
 │  ┌──────────────────┐         ┌──────────────────┐        │
 │  │  Server Setup    │         │  Public Setup    │        │
 │  │  registerStep()  │         │  registerStep()  │        │
+│  │  registerTrigger()│        │  registerTrigger()│       │
 │  └──────────────────┘         └──────────────────┘        │
 └────────────────────┬──────────────────┬───────────────────┘
                      │                  │
@@ -38,6 +45,7 @@ This separation ensures that:
          ┌───────────────────┐  ┌──────────────────┐
          │  Server Registry  │  │  Public Registry │
          │  (Step handlers)  │  │  (UI Definition) │
+         │  (Trigger config) │  │  (Trigger UI)    │
          └─────────┬─────────┘  └─────────┬────────┘
                    │                      │
                    │                      │
@@ -835,6 +843,152 @@ The `workflows_extensions` plugin is automatically integrated with:
 - `workflows_management`: Uses public registry to display step definitions in the UI
 
 No additional configuration is required.
+
+## Contributing Custom Trigger Types
+
+This section provides a guide for contributors who want to add custom trigger types to the workflows system.
+
+### Step 1: Define the Trigger Schema
+
+First, add the trigger schema to `@kbn/workflows` package in `spec/schema.ts`:
+
+```typescript
+import { z } from '@kbn/zod/v4';
+
+// Define any enums for trigger configuration
+export const MyChangeTypeSchema = z.enum(['typeA', 'typeB', 'typeC']);
+export type MyChangeType = z.infer<typeof MyChangeTypeSchema>;
+
+// Define the trigger schema
+export const MyCustomTriggerSchema = z.object({
+  type: z.literal('myPlugin.myTrigger'),
+  with: z
+    .object({
+      targetId: z.string().min(1),
+      changeTypes: z.array(MyChangeTypeSchema).optional(),
+    })
+    .optional(),
+});
+export type MyCustomTrigger = z.infer<typeof MyCustomTriggerSchema>;
+```
+
+Then add the schema to the `TriggerSchema` discriminated union and `TriggerTypes` array.
+
+### Step 2: Register Server-Side Trigger Definition
+
+Create a server-side trigger definition and register it during plugin setup:
+
+```typescript
+import type { Plugin, CoreSetup } from '@kbn/core/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import { createServerTriggerDefinition } from '@kbn/workflows-extensions/server';
+import { z } from '@kbn/zod/v4';
+
+export interface MyPluginServerSetupDeps {
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+}
+
+export class MyPlugin implements Plugin {
+  public setup(core: CoreSetup, plugins: MyPluginServerSetupDeps) {
+    // Register server-side trigger definition
+    plugins.workflowsExtensions.registerTriggerDefinition(
+      createServerTriggerDefinition({
+        id: 'myPlugin.myTrigger',
+        configSchema: z.object({
+          targetId: z.string().min(1),
+          changeTypes: z.array(z.string()).optional(),
+        }),
+      })
+    );
+  }
+}
+```
+
+### Step 3: Register Public-Side Trigger Definition
+
+Create a public-side trigger definition for UI display:
+
+```typescript
+import type { Plugin, CoreSetup } from '@kbn/core/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import { createPublicTriggerDefinition } from '@kbn/workflows-extensions/public';
+import { i18n } from '@kbn/i18n';
+import { z } from '@kbn/zod/v4';
+
+export interface MyPluginPublicSetupDeps {
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
+}
+
+export class MyPlugin implements Plugin {
+  public setup(_core: CoreSetup, plugins: MyPluginPublicSetupDeps) {
+    // Register public-side trigger definition
+    plugins.workflowsExtensions.registerTriggerDefinition(
+      createPublicTriggerDefinition({
+        id: 'myPlugin.myTrigger',
+        configSchema: z.object({
+          targetId: z.string().min(1),
+          changeTypes: z.array(z.string()).optional(),
+        }),
+        label: i18n.translate('myPlugin.myTrigger.label', {
+          defaultMessage: 'My Custom Trigger',
+        }),
+        description: i18n.translate('myPlugin.myTrigger.description', {
+          defaultMessage: 'Triggers when a specific event occurs',
+        }),
+        documentation: {
+          details: i18n.translate('myPlugin.myTrigger.documentation.details', {
+            defaultMessage: 'This trigger fires when the specified target changes.',
+          }),
+          examples: [
+            `## Basic usage
+\`\`\`yaml
+triggers:
+  - type: myPlugin.myTrigger
+    with:
+      targetId: "my-target-id"
+      changeTypes: ["typeA", "typeB"]
+\`\`\``,
+          ],
+        },
+      })
+    );
+  }
+}
+```
+
+### Available Trigger Types
+
+The following trigger types are currently supported:
+
+| Trigger Type | Description | Configuration |
+|--------------|-------------|---------------|
+| `alert` | Triggered by alert rules | `rule_id` or `rule_name` |
+| `scheduled` | Triggered on a schedule | `every` interval or `rrule` configuration |
+| `manual` | Triggered manually | None |
+| `streams.upsertStream` | Triggered when a stream is created/updated | `stream` name/pattern, optional `changeTypes` array |
+
+### Stream Change Trigger
+
+The `streams.upsertStream` trigger fires when a stream definition is created or updated. Configuration options:
+
+- `stream`: Stream name or pattern (supports wildcards, e.g., "logs-*")
+- `changeTypes`: Optional array of change types to filter on:
+  - `mapping`: Field mappings changed
+  - `processing`: Processing pipeline steps changed
+  - `description`: Stream description changed
+  - `settings`: Stream settings changed
+  - `lifecycle`: Lifecycle policy changed
+  - `failure_store`: Failure store configuration changed
+
+Example usage:
+
+```yaml
+triggers:
+  - type: streams.upsertStream
+    with:
+      stream: "logs-*"
+      changeTypes: ["mapping", "processing"]
+```
 
 ## Step Definition Approval Process
 

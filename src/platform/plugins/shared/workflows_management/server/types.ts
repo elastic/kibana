@@ -32,13 +32,20 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type { TriggerService } from './trigger_service';
 import type { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 
 export interface WorkflowsServerPluginSetup {
   management: WorkflowsManagementApi;
 }
 
-export type WorkflowsServerPluginStart = Record<string, never>;
+export interface WorkflowsServerPluginStart {
+  /**
+   * Service for firing triggers and scheduling matching workflows.
+   * Use this to trigger workflows when events occur (e.g., stream changes).
+   */
+  triggerService: TriggerService;
+}
 
 export interface WorkflowsServerPluginSetupDeps {
   features?: FeaturesPluginSetup;

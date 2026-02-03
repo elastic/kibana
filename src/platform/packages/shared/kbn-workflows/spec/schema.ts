@@ -128,16 +128,49 @@ export const ManualTriggerSchema = z.object({
   type: z.literal('manual'),
 });
 
+/**
+ * Stream change types that can trigger a workflow.
+ * These correspond to the different aspects of a stream that can be modified.
+ */
+export const StreamChangeTypeSchema = z.enum([
+  'mapping', // Field mappings changed
+  'processing', // Processing pipeline steps changed
+  'description', // Stream description changed
+  'settings', // Stream settings changed
+  'lifecycle', // Lifecycle policy changed
+  'failure_store', // Failure store configuration changed
+]);
+export type StreamChangeType = z.infer<typeof StreamChangeTypeSchema>;
+
+/**
+ * Trigger type for stream upsert (create/update) operations.
+ * Fires when a stream definition is created or updated.
+ */
+export const StreamsUpsertStreamTriggerSchema = z.object({
+  type: z.literal('streams.upsertStream'),
+  with: z
+    .object({
+      /** Stream name or pattern to watch. Supports wildcards (e.g., "logs-*") */
+      stream: z.string().min(1),
+      /** Optional array of change types to filter on. If empty, triggers on any change. */
+      changeTypes: z.array(StreamChangeTypeSchema).optional(),
+    })
+    .optional(),
+});
+export type StreamsUpsertStreamTrigger = z.infer<typeof StreamsUpsertStreamTriggerSchema>;
+
 export const TriggerSchema = z.discriminatedUnion('type', [
   AlertRuleTriggerSchema,
   ScheduledTriggerSchema,
   ManualTriggerSchema,
+  StreamsUpsertStreamTriggerSchema,
 ]);
 
 export const TriggerTypes = [
   AlertRuleTriggerSchema.shape.type.value,
   ScheduledTriggerSchema.shape.type.value,
   ManualTriggerSchema.shape.type.value,
+  StreamsUpsertStreamTriggerSchema.shape.type.value,
 ];
 export type TriggerType = (typeof TriggerTypes)[number];
 

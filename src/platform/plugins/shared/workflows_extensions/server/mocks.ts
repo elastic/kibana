@@ -8,22 +8,27 @@
  */
 
 import type { ServerStepDefinition } from './step_registry/types';
+import type { ServerTriggerDefinition } from './trigger_registry/types';
 import type { WorkflowsExtensionsServerPluginSetup } from './types';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
 
 const createSetupMock: () => jest.Mocked<WorkflowsExtensionsServerPluginSetup> = () => {
   return {
     registerStepDefinition: jest.fn(),
+    registerTriggerDefinition: jest.fn(),
   };
 };
 
 const createStartMock: () => jest.Mocked<
-  WorkflowsExtensionsStartContract<ServerStepDefinition>
+  WorkflowsExtensionsStartContract<ServerStepDefinition, ServerTriggerDefinition>
 > = () => {
   return {
     getStepDefinition: jest.fn(),
     hasStepDefinition: jest.fn(),
     getAllStepDefinitions: jest.fn(),
+    getTriggerDefinition: jest.fn(),
+    hasTriggerDefinition: jest.fn(),
+    getAllTriggerDefinitions: jest.fn(),
   };
 };
 

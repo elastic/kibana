@@ -19,3 +19,5 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { WorkflowsServerPluginSetup, WorkflowsServerPluginStart } from './types';
+export type { FireTriggerOptions, FireTriggerResult } from './trigger_service';
+export type { TriggerService } from './trigger_service';

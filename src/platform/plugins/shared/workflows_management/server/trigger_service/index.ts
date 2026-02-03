@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { CommonStepDefinition } from './step_registry/types';
-export type { CommonTriggerDefinition } from './trigger_registry/types';
-export { DataMapStepTypeId } from './steps/data';
+export { TriggerService } from './trigger_service';
+export type { FireTriggerOptions, FireTriggerResult } from './trigger_service';
