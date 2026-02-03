@@ -15,7 +15,7 @@ import { getLatestAlertEventStateQuery, type LatestAlertEventState } from './que
 import type { AlertEpisodeStatus } from '../../resources/alert_events';
 import { alertEpisodeStatus, type AlertEvent } from '../../resources/alert_events';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
-import { TransitionStrategyResolver } from './strategies/strategy_resolver';
+import { TransitionStrategyFactory } from './strategies/strategy_resolver';
 import type { ITransitionStrategy } from './strategies/types';
 
 interface RunDirectorParams {
@@ -37,8 +37,8 @@ interface ResolveEpisodeIdParams {
 @injectable()
 export class DirectorService {
   constructor(
-    @inject(TransitionStrategyResolver)
-    private readonly strategyResolver: TransitionStrategyResolver,
+    @inject(TransitionStrategyFactory)
+    private readonly strategyFactory: TransitionStrategyFactory,
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
@@ -48,19 +48,19 @@ export class DirectorService {
       return [];
     }
 
-    const strategy = this.strategyResolver.resolve();
+    const strategy = this.strategyFactory.getStrategy();
     const groupHashes = Array.from(new Set(alertEvents.map((event) => event.group_hash)));
     const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(ruleId, groupHashes);
 
-    const enrichedEvents = alertEvents.map((currentAlertEvent) =>
-      this.calculateNextState({
+    const alertsWithNextEpisode = alertEvents.map((currentAlertEvent) =>
+      this.getAlertEventWithNextEpisode({
         currentAlertEvent,
         previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
         strategy,
       })
     );
 
-    return enrichedEvents;
+    return alertsWithNextEpisode;
   }
 
   private async fetchLatestAlertStateByGroupHash(
@@ -81,7 +81,7 @@ export class DirectorService {
     return new Map(records.map((record) => [record.group_hash, record]));
   }
 
-  private calculateNextState({
+  private getAlertEventWithNextEpisode({
     currentAlertEvent,
     previousAlertEvent,
     strategy,

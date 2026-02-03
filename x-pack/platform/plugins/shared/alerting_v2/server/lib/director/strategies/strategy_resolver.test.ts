@@ -5,33 +5,26 @@
  * 2.0.
  */
 
-import { TransitionStrategyResolver } from './strategy_resolver';
+import { TransitionStrategyFactory } from './strategy_resolver';
 import { BasicTransitionStrategy } from './basic_strategy';
 
-describe('TransitionStrategyResolver', () => {
-  let resolver: TransitionStrategyResolver;
+describe('TransitionStrategyFactory', () => {
+  let strategyFactory: TransitionStrategyFactory;
   let basicStrategy: BasicTransitionStrategy;
 
   beforeEach(() => {
     basicStrategy = new BasicTransitionStrategy();
-    resolver = new TransitionStrategyResolver(basicStrategy);
+    strategyFactory = new TransitionStrategyFactory(basicStrategy);
   });
 
   describe('constructor', () => {
     it('registers the basic strategy by default', () => {
-      const resolved = resolver.resolve();
+      const resolved = strategyFactory.getStrategy();
       expect(resolved.name).toBe('basic');
     });
 
     it('sets basic strategy as the default', () => {
-      const resolved = resolver.resolve();
-      expect(resolved).toBe(basicStrategy);
-    });
-  });
-
-  describe('resolve', () => {
-    it('returns the default strategy', () => {
-      const resolved = resolver.resolve();
+      const resolved = strategyFactory.getStrategy();
       expect(resolved).toBe(basicStrategy);
     });
   });

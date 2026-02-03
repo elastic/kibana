@@ -30,13 +30,13 @@ export class DirectorStep implements RuleExecutionStep {
     });
 
     try {
-      const enrichedAlertEvents = await this.director.run({ ruleId: input.ruleId, alertEvents });
+      const alertsWithNextEpisode = await this.director.run({ ruleId: input.ruleId, alertEvents });
 
       this.logger.debug({
         message: `[${this.name}] Director completed for rule ${input.ruleId}`,
       });
 
-      return { type: 'continue', data: { alertEvents: enrichedAlertEvents } };
+      return { type: 'continue', data: { alertEvents: alertsWithNextEpisode } };
     } catch (error) {
       this.logger.debug({
         message: `[${this.name}] Director failed for rule ${input.ruleId}`,

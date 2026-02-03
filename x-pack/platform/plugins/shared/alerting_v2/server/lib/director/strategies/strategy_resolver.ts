@@ -9,8 +9,12 @@ import { inject, injectable } from 'inversify';
 import type { ITransitionStrategy } from './types';
 import { BasicTransitionStrategy } from './basic_strategy';
 
+export interface RegisterStrategyOptions {
+  default?: boolean;
+}
+
 @injectable()
-export class TransitionStrategyResolver {
+export class TransitionStrategyFactory {
   private strategies = new Map<string, ITransitionStrategy>();
   private defaultStrategy: ITransitionStrategy;
 
@@ -19,11 +23,15 @@ export class TransitionStrategyResolver {
     this.defaultStrategy = basic;
   }
 
-  register(strategy: ITransitionStrategy) {
+  register(strategy: ITransitionStrategy, options: RegisterStrategyOptions = {}) {
     this.strategies.set(strategy.name, strategy);
+
+    if (Boolean(options.default)) {
+      this.defaultStrategy = strategy;
+    }
   }
 
-  resolve(): ITransitionStrategy {
+  getStrategy(): ITransitionStrategy {
     return this.defaultStrategy;
   }
 }
