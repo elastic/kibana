@@ -14,6 +14,7 @@ import type {
   SavedObject,
 } from '@kbn/core/server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
+import { getDetailedErrorMessage } from '@kbn/es-errors';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 
@@ -21,6 +22,7 @@ import { isReservedSpace } from '../../common';
 import type { spaceV1 as v1 } from '../../common';
 import type { ConfigType } from '../config';
 import { withSpaceSolutionDisabledFeatures } from '../lib/utils/space_solution_disabled_features';
+import type { OnSpaceDeleteCallback } from '../types';
 
 const SUPPORTED_GET_SPACE_PURPOSES: v1.GetAllSpacesPurpose[] = [
   'any',
@@ -94,11 +96,13 @@ export class SpacesClient implements ISpacesClient {
 
   constructor(
     private readonly debugLogger: (message: string) => void,
+    private readonly errorLogger: (message: string) => void,
     private readonly config: ConfigType,
     private readonly repository: ISavedObjectsRepository,
     private readonly nonGlobalTypeNames: string[],
     private readonly buildFlavour: BuildFlavor,
-    private readonly features: FeaturesPluginStart
+    private readonly features: FeaturesPluginStart,
+    private readonly onSpaceDeleteCallbacks: OnSpaceDeleteCallback[] = []
   ) {
     this.isServerless = this.buildFlavour === 'serverless';
     this.deprecatedFeaturesReferences = this.collectDeprecatedFeaturesReferences(
@@ -218,6 +222,27 @@ export class SpacesClient implements ISpacesClient {
     await this.repository.deleteByNamespace(id);
 
     await this.repository.delete('space', id);
+
+    this.notifySpaceDeleted(id);
+  }
+
+  /**
+   * Notifies registered callbacks that a space has been deleted.
+   * This is a fire-and-forget operation - errors are caught and logged,
+   * and do not prevent the deletion from succeeding.
+   */
+  private notifySpaceDeleted(spaceId: string): void {
+    for (const callback of this.onSpaceDeleteCallbacks) {
+      try {
+        callback(spaceId);
+      } catch (error) {
+        this.errorLogger(
+          `Error in space deletion callback for space "${spaceId}": ${getDetailedErrorMessage(
+            error
+          )}`
+        );
+      }
+    }
   }
 
   public async disableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]) {

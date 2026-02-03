@@ -19,6 +19,10 @@ const createMockDebugLogger = () => {
   return jest.fn();
 };
 
+const createMockErrorLogger = () => {
+  return jest.fn();
+};
+
 const createMockConfig = (
   mockConfig: ConfigType = {
     enabled: true,
@@ -229,6 +233,7 @@ describe('#getAll', () => {
 
   test(`finds spaces using callWithRequestRepository`, async () => {
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.find.mockResolvedValue({
       saved_objects: savedObjects,
@@ -237,6 +242,7 @@ describe('#getAll', () => {
 
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],
@@ -256,6 +262,7 @@ describe('#getAll', () => {
 
   test('strips solution property in serverless build', async () => {
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const [SOWithSolution] = savedObjects;
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.find.mockResolvedValue({
@@ -265,6 +272,7 @@ describe('#getAll', () => {
 
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],
@@ -289,10 +297,12 @@ describe('#getAll', () => {
 
   test(`throws Boom.badRequest when an invalid purpose is provided'`, async () => {
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     const mockConfig = createMockConfig();
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],
@@ -335,12 +345,14 @@ describe('#get', () => {
 
   test(`gets space using callWithRequestRepository`, async () => {
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
 
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],
@@ -356,6 +368,7 @@ describe('#get', () => {
 
   test('strips solution property in serverless build', async () => {
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue({
       ...savedObject,
@@ -365,6 +378,7 @@ describe('#get', () => {
 
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],
@@ -380,6 +394,7 @@ describe('#get', () => {
 
   test(`doesn't strip solution property in traditional build`, async () => {
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue({
       ...savedObject,
@@ -389,6 +404,7 @@ describe('#get', () => {
 
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],
@@ -442,6 +458,7 @@ describe('#create', () => {
   test(`creates space using callWithRequestRepository when we're under the max`, async () => {
     const maxSpaces = 5;
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.create.mockResolvedValue({
       ...savedObject,
@@ -460,6 +477,7 @@ describe('#create', () => {
 
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],
@@ -491,6 +509,7 @@ describe('#create', () => {
   test(`throws bad request when we are at the maximum number of spaces`, async () => {
     const maxSpaces = 5;
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
     mockCallWithRequestRepository.find.mockResolvedValue({
@@ -506,6 +525,7 @@ describe('#create', () => {
 
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],
@@ -528,6 +548,7 @@ describe('#create', () => {
   test('throws bad request when solution property is provided in serverless build', async () => {
     const maxSpaces = 5;
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
     mockCallWithRequestRepository.find.mockResolvedValue({
@@ -543,6 +564,7 @@ describe('#create', () => {
 
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],
@@ -573,6 +595,7 @@ describe('#create', () => {
   test('creates space when solution property is provided in traditional build', async () => {
     const maxSpaces = 5;
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.create.mockResolvedValue({
       ...savedObject,
@@ -591,6 +614,7 @@ describe('#create', () => {
 
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],
@@ -624,6 +648,7 @@ describe('#create', () => {
     test(`creates space without disabledFeatures`, async () => {
       const maxSpaces = 5;
       const mockDebugLogger = createMockDebugLogger();
+      const mockErrorLogger = createMockErrorLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
       mockCallWithRequestRepository.find.mockResolvedValue({
@@ -639,6 +664,7 @@ describe('#create', () => {
 
       const client = new SpacesClient(
         mockDebugLogger,
+        mockErrorLogger,
         mockConfig,
         mockCallWithRequestRepository,
         [],
@@ -662,6 +688,7 @@ describe('#create', () => {
     test(`throws bad request when creating space with disabledFeatures`, async () => {
       const maxSpaces = 5;
       const mockDebugLogger = createMockDebugLogger();
+      const mockErrorLogger = createMockErrorLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
       mockCallWithRequestRepository.find.mockResolvedValue({
@@ -677,6 +704,7 @@ describe('#create', () => {
 
       const client = new SpacesClient(
         mockDebugLogger,
+        mockErrorLogger,
         mockConfig,
         mockCallWithRequestRepository,
         [],
@@ -703,6 +731,7 @@ describe('#create', () => {
     test(`throws bad request when creating space with solution`, async () => {
       const maxSpaces = 5;
       const mockDebugLogger = createMockDebugLogger();
+      const mockErrorLogger = createMockErrorLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
       mockCallWithRequestRepository.find.mockResolvedValue({
@@ -718,6 +747,7 @@ describe('#create', () => {
 
       const client = new SpacesClient(
         mockDebugLogger,
+        mockErrorLogger,
         mockConfig,
         mockCallWithRequestRepository,
         [],
@@ -777,6 +807,7 @@ describe('#update', () => {
 
   test(`updates space using callWithRequestRepository`, async () => {
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValueOnce({
@@ -787,6 +818,7 @@ describe('#update', () => {
 
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],
@@ -810,12 +842,14 @@ describe('#update', () => {
 
   test('throws bad request when solution property is provided in serverless build', async () => {
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
 
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],
@@ -843,12 +877,14 @@ describe('#update', () => {
 
   test('throws bad request when solution property is undefined in traditional build', async () => {
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
 
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],
@@ -870,12 +906,14 @@ describe('#update', () => {
 
   test('updates space with solution property using callWithRequestRepository in traditional build', async () => {
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
 
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],
@@ -895,6 +933,7 @@ describe('#update', () => {
   describe('when config.allowFeatureVisibility is disabled', () => {
     test(`updates space without disabledFeatures`, async () => {
       const mockDebugLogger = createMockDebugLogger();
+      const mockErrorLogger = createMockErrorLogger();
       const mockConfig = createMockConfig({
         enabled: true,
         maxSpaces: 1000,
@@ -906,6 +945,7 @@ describe('#update', () => {
 
       const client = new SpacesClient(
         mockDebugLogger,
+        mockErrorLogger,
         mockConfig,
         mockCallWithRequestRepository,
         [],
@@ -922,6 +962,7 @@ describe('#update', () => {
 
     test(`throws bad request when updating space with disabledFeatures`, async () => {
       const mockDebugLogger = createMockDebugLogger();
+      const mockErrorLogger = createMockErrorLogger();
       const mockConfig = createMockConfig({
         enabled: true,
         maxSpaces: 1000,
@@ -933,6 +974,7 @@ describe('#update', () => {
 
       const client = new SpacesClient(
         mockDebugLogger,
+        mockErrorLogger,
         mockConfig,
         mockCallWithRequestRepository,
         [],
@@ -955,6 +997,7 @@ describe('#update', () => {
   describe('when config.allowSolutionVisibility is disabled', () => {
     test(`throws bad request when updating space with solution`, async () => {
       const mockDebugLogger = createMockDebugLogger();
+      const mockErrorLogger = createMockErrorLogger();
       const mockConfig = createMockConfig({
         enabled: true,
         maxSpaces: 1000,
@@ -966,6 +1009,7 @@ describe('#update', () => {
 
       const client = new SpacesClient(
         mockDebugLogger,
+        mockErrorLogger,
         mockConfig,
         mockCallWithRequestRepository,
         [],
@@ -1014,12 +1058,14 @@ describe('#delete', () => {
 
   test(`throws bad request when the space is reserved`, async () => {
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(reservedSavedObject);
 
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],
@@ -1036,12 +1082,14 @@ describe('#delete', () => {
 
   test(`deletes space using callWithRequestRepository when space isn't reserved`, async () => {
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(notReservedSavedObject);
 
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],
@@ -1055,16 +1103,106 @@ describe('#delete', () => {
     expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
     expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith(id);
   });
+
+  test(`invokes onSpaceDelete callbacks after successful deletion`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue(notReservedSavedObject);
+
+    const callback1 = jest.fn();
+    const callback2 = jest.fn();
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockErrorLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      [callback1, callback2]
+    );
+
+    await client.delete(id);
+
+    expect(callback1).toHaveBeenCalledWith(id);
+    expect(callback2).toHaveBeenCalledWith(id);
+    expect(callback1).toHaveBeenCalledTimes(1);
+    expect(callback2).toHaveBeenCalledTimes(1);
+  });
+
+  test(`catches and logs errors from onSpaceDelete callbacks without failing deletion`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue(notReservedSavedObject);
+
+    const errorCallback = jest.fn(() => {
+      throw new Error('Callback error');
+    });
+    const successCallback = jest.fn();
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockErrorLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      [errorCallback, successCallback]
+    );
+
+    // Should not throw even though callback throws
+    await client.delete(id);
+
+    expect(errorCallback).toHaveBeenCalledWith(id);
+    expect(successCallback).toHaveBeenCalledWith(id);
+    expect(mockErrorLogger).toHaveBeenCalledWith(
+      `Error in space deletion callback for space "${id}": Callback error`
+    );
+    expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
+  });
+
+  test(`does not invoke callbacks when space deletion fails`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue(reservedSavedObject);
+
+    const callback = jest.fn();
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockErrorLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      [callback]
+    );
+
+    await expect(client.delete(id)).rejects.toThrow();
+
+    expect(callback).not.toHaveBeenCalled();
+  });
 });
 
 describe('#disableLegacyUrlAliases', () => {
   test(`updates legacy URL aliases using callWithRequestRepository`, async () => {
     const mockDebugLogger = createMockDebugLogger();
+    const mockErrorLogger = createMockErrorLogger();
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
 
     const client = new SpacesClient(
       mockDebugLogger,
+      mockErrorLogger,
       mockConfig,
       mockCallWithRequestRepository,
       [],

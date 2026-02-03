@@ -18,10 +18,11 @@ import type {
   Logger,
   PackageInfo,
 } from '@kbn/core/server';
+import { getDetailedErrorMessage } from '@kbn/es-errors';
 import { i18n } from '@kbn/i18n';
 
 import type { SecurityLicense } from '../../common';
-import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import { getErrorStatusCode } from '../errors';
 
 export const KIBANA_USER_ROLE_NAME = 'kibana_user';
 export const KIBANA_ADMIN_ROLE_NAME = 'kibana_admin';

@@ -6,10 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { getDetailedErrorMessage } from '@kbn/es-errors';
 
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
-import { getDetailedErrorMessage, getErrorStatusCode } from '../../errors';
+import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';

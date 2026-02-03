@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { getDetailedErrorMessage } from '@kbn/es-errors';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -16,7 +17,7 @@ import type {
 import type { SecurityLicense } from '../../common';
 import { transformElasticsearchRoleToRole } from '../authorization';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
-import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import { getErrorStatusCode } from '../errors';
 
 export const getPrivilegeDeprecationsService = ({
   authz,

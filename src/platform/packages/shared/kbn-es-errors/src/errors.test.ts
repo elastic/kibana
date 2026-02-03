@@ -9,11 +9,13 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
 import {
   isResponseError,
   isUnauthorizedError,
   isRequestAbortedError,
   isMaximumResponseSizeExceededError,
+  getDetailedErrorMessage,
 } from './errors';
 
 const createApiResponseError = ({
@@ -106,5 +108,64 @@ describe('isMaximumResponseSizeExceededError', () => {
         new errors.ResponseError(createApiResponseError({ statusCode: 500 }))
       )
     ).toBe(false);
+  });
+});
+
+describe('getDetailedErrorMessage', () => {
+  describe('Elasticsearch ResponseError', () => {
+    it('returns stringified body for ResponseError', () => {
+      const body = { error: { type: 'search_phase_execution_exception', reason: 'test' } };
+      const error = new errors.ResponseError(createApiResponseError({ statusCode: 500, body }));
+      expect(getDetailedErrorMessage(error)).toBe(JSON.stringify(body));
+    });
+  });
+
+  describe('Boom errors', () => {
+    it('returns stringified payload for Boom errors', () => {
+      const error = Boom.badRequest('Invalid input');
+      const result = getDetailedErrorMessage(error);
+      expect(result).toContain('Invalid input');
+      expect(result).toContain('Bad Request');
+    });
+
+    it('handles Boom internal errors', () => {
+      const error = Boom.internal('Server error');
+      const result = getDetailedErrorMessage(error);
+      expect(result).toContain('Internal Server Error');
+    });
+  });
+
+  describe('standard Error objects', () => {
+    it('returns message for simple errors', () => {
+      const error = new Error('Simple error message');
+      expect(getDetailedErrorMessage(error)).toBe('Simple error message');
+    });
+
+    it('includes cause message when cause is an Error', () => {
+      const cause = new Error('Root cause');
+      const error = new Error('Main error', { cause });
+      expect(getDetailedErrorMessage(error)).toBe('Main error (cause: Root cause)');
+    });
+
+    it('includes cause when cause is a string', () => {
+      const error = new Error('Main error', { cause: 'String cause' });
+      expect(getDetailedErrorMessage(error)).toBe('Main error (cause: String cause)');
+    });
+
+    it('inspects cause when cause is an object', () => {
+      const error = new Error('Main error', { cause: { code: 'ERR_CODE', detail: 'details' } });
+      const result = getDetailedErrorMessage(error);
+      expect(result).toContain('Main error (cause:');
+      expect(result).toContain('ERR_CODE');
+    });
+  });
+
+  describe('non-Error values', () => {
+    it('converts non-Error values to string', () => {
+      expect(getDetailedErrorMessage('string error')).toBe('string error');
+      expect(getDetailedErrorMessage(42)).toBe('42');
+      expect(getDetailedErrorMessage(null)).toBe('null');
+      expect(getDetailedErrorMessage(undefined)).toBe('undefined');
+    });
   });
 });

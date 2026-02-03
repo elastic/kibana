@@ -6,6 +6,7 @@
  */
 
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import { getDetailedErrorMessage } from '@kbn/es-errors';
 import type {
   GrantAPIKeyResult,
   GrantUiamAPIKeyParams,
@@ -15,7 +16,6 @@ import type {
 } from '@kbn/security-plugin-types-server';
 
 import type { SecurityLicense } from '../../../../common';
-import { getDetailedErrorMessage } from '../../../errors';
 import type { UiamServicePublic } from '../../../uiam';
 import { HTTPAuthorizationHeader } from '../../http_authentication';
 

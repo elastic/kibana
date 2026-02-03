@@ -8,6 +8,8 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
+import { inspect } from 'util';
 
 /**
  * An unauthorized (401) error returned by elasticsearch
@@ -51,4 +53,41 @@ export function isMaximumResponseSizeExceededError(
   error: unknown
 ): error is errors.RequestAbortedError {
   return isRequestAbortedError(error) && error.message.includes('content length');
+}
+
+/**
+ * Extracts a detailed error message from Boom and Elasticsearch "native" errors.
+ * This message is intended for server-side logging only and should never be returned
+ * to the client as it may contain sensitive information.
+ *
+ * @param error - The error instance to extract a message from.
+ * @returns A detailed error message suitable for logging.
+ * @public
+ */
+export function getDetailedErrorMessage(error: unknown): string {
+  if (error instanceof errors.ResponseError) {
+    return JSON.stringify(error.body);
+  }
+
+  if (Boom.isBoom(error)) {
+    return JSON.stringify(error.output.payload);
+  }
+
+  if (error instanceof Error) {
+    if (!error.cause) {
+      return error.message;
+    }
+
+    // Usually it's enough to get the first level cause message.
+    return `${error.message} (cause: ${
+      typeof error.cause === 'string'
+        ? error.cause
+        : error.cause instanceof Error
+        ? error.cause.message
+        : inspect(error.cause)
+    })`;
+  }
+
+  // Fallback for non-Error objects
+  return String(error);
 }

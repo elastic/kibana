@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { getDetailedErrorMessage } from '@kbn/es-errors';
 import type { FeatureKibanaPrivileges, KibanaFeature } from '@kbn/features-plugin/common';
 import type { SubFeaturePrivilegeIterator } from '@kbn/features-plugin/server';
 import { getReplacedByForPrivilege } from '@kbn/security-authorization-core';
@@ -19,7 +20,6 @@ import {
   PRIVILEGES_ALL_WILDCARD,
   RESERVED_PRIVILEGES_APPLICATION_WILDCARD,
 } from '../../../common/constants';
-import { getDetailedErrorMessage } from '../../errors';
 import { PrivilegeSerializer } from '../privilege_serializer';
 import { ResourceSerializer } from '../resource_serializer';
 
