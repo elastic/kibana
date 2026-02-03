@@ -13,6 +13,15 @@ import { tags } from '@kbn/scout';
 import { apiTest, DASHBOARD_API_PATH } from '../fixtures';
 import snapshot from '../fixtures/schema_snapshot.json';
 
+/**
+ * Dashboard REST schema validation tests.
+ *
+ * These tests require the OAS (OpenAPI Specification) endpoint to be enabled,
+ * which is configured in the custom server config at:
+ * src/platform/packages/shared/kbn-scout/src/servers/configs/custom/oas_schema/
+ *
+ * See README.md for usage instructions.
+ */
 apiTest.describe('dashboard REST schema', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   let viewerCredentials: RoleApiCredentials;
 
