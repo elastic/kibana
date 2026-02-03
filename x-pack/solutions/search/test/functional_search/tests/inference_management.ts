@@ -60,6 +60,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('preconfigured endpoints can not be deleted', async () => {
         await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectPreconfiguredEndpointsCannotBeDeleted();
       });
+
+      it('displays endpoint stats bar with counts', async () => {
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectEndpointStatsToBeDisplayed();
+      });
+
+      it('endpoint stats update when filters are applied', async () => {
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectEndpointStatsToUpdateOnFilter();
+      });
     });
 
     describe('copy endpoint id action', () => {

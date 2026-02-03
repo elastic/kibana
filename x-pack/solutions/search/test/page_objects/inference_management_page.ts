@@ -40,6 +40,53 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
         expect(hasE5).to.be(true);
       },
 
+      async expectEndpointStatsToBeDisplayed() {
+        // Verify the endpoint stats bar exists
+        await testSubjects.existOrFail('endpointStats');
+        await testSubjects.existOrFail('endpointStatsServices');
+        await testSubjects.existOrFail('endpointStatsModels');
+        await testSubjects.existOrFail('endpointStatsEndpoints');
+
+        // Verify stats show non-zero counts (we have preconfigured endpoints)
+        const servicesText = await testSubjects.getVisibleText('endpointStatsServices');
+        const modelsText = await testSubjects.getVisibleText('endpointStatsModels');
+        const endpointsText = await testSubjects.getVisibleText('endpointStatsEndpoints');
+
+        // Extract numbers from the text (format: "Services: X")
+        const servicesCount = parseInt(servicesText.match(/\d+/)?.[0] || '0', 10);
+        const modelsCount = parseInt(modelsText.match(/\d+/)?.[0] || '0', 10);
+        const endpointsCount = parseInt(endpointsText.match(/\d+/)?.[0] || '0', 10);
+
+        // We should have at least 1 service, 1 model, and 1 endpoint (preconfigured)
+        expect(servicesCount).to.greaterThan(0);
+        expect(modelsCount).to.greaterThan(0);
+        expect(endpointsCount).to.greaterThan(0);
+      },
+
+      async expectEndpointStatsToUpdateOnFilter() {
+        // Get initial endpoint count
+        const initialEndpointsText = await testSubjects.getVisibleText('endpointStatsEndpoints');
+        const initialCount = parseInt(initialEndpointsText.match(/\d+/)?.[0] || '0', 10);
+
+        // Apply a search filter to reduce results
+        const searchField = await testSubjects.find('search-field-endpoints');
+        await searchField.clearValue();
+        await searchField.type('elser');
+
+        // Wait for table to update and check stats
+        await browser.sleep(500); // Allow time for filtering
+
+        const filteredEndpointsText = await testSubjects.getVisibleText('endpointStatsEndpoints');
+        const filteredCount = parseInt(filteredEndpointsText.match(/\d+/)?.[0] || '0', 10);
+
+        // Filtered count should be less than or equal to initial count
+        expect(filteredCount).to.be.lessThan(initialCount + 1);
+        expect(filteredCount).to.greaterThan(0);
+
+        // Clear the search field
+        await searchField.clearValue();
+      },
+
       async expectModelColumnToBeDisplayed() {
         // Verify model column cells exist using data-test-subj
         const modelCells = await testSubjects.findAll('modelCell');
