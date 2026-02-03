@@ -772,6 +772,9 @@ export const mockCasesContract = (): CasesServerStart => ({
       taskIntervalMinutes: 10,
       taskStartDelayMinutes: 10,
     },
+    templates: {
+      enabled: true,
+    },
   },
 });
 

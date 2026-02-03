@@ -120,6 +120,9 @@ describe('config validation', () => {
           "stack": Object {
             "enabled": true,
           },
+          "templates": Object {
+            "enabled": false,
+          },
         }
       `);
     });
