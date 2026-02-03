@@ -8,6 +8,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../kibana_services';
@@ -45,6 +46,10 @@ export function transformPanelsOut(
   return [...topLevelPanels, ...Object.values(sectionsMap)];
 }
 
+const defaultTransform = (
+  config: SavedDashboardPanel['embeddableConfig']
+): SavedDashboardPanel['embeddableConfig'] => transformTitlesOut(config);
+
 function transformPanelProperties(
   {
     embeddableConfig,
@@ -81,13 +86,9 @@ function transformPanelProperties(
 
   let transformedPanelConfig;
   try {
-    if (transforms?.transformOut) {
-      transformedPanelConfig = transforms.transformOut(
-        config,
-        panelReferences,
-        containerReferences
-      );
-    }
+    transformedPanelConfig =
+      transforms?.transformOut?.(config, panelReferences, containerReferences) ??
+      defaultTransform(config);
   } catch (transformOutError) {
     // do not prevent read on transformOutError
     logger.warn(

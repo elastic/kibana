@@ -192,9 +192,11 @@ export function removeBrokenLinks(
     });
   });
 
-  if (missingCnt > 0) {
+  const uniqueMissing = Object.keys(missingApiItems[pluginApi.id] ?? {}).length;
+
+  if (uniqueMissing > 0) {
     log.info(
-      `${pluginApi.id} had ${missingCnt} API item references removed to avoid broken links use the flag '--stats exports' to get a list of every missing export `
+      `${pluginApi.id} had ${uniqueMissing} missing exported API item(s). Removed ${missingCnt} reference(s) to avoid broken links. Use '--stats exports' to list missing exports.`
     );
   }
 }

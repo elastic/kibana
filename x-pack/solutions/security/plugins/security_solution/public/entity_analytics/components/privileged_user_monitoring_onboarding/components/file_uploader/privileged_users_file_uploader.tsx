@@ -116,7 +116,7 @@ export const PrivilegedUsersFileUploader: React.FC<PrivilegedUsersFileUploaderPr
           state.validatedFile.name
         );
 
-        if (result.stats.failed > 0) {
+        if (result.stats.failedOperations > 0) {
           dispatch({
             type: 'fileUploadError',
             payload: {
@@ -124,7 +124,7 @@ export const PrivilegedUsersFileUploader: React.FC<PrivilegedUsersFileUploaderPr
             },
           });
         } else {
-          onFileUploaded(result.stats.successful);
+          onFileUploaded(result.stats.uploaded);
         }
       } catch (e) {
         dispatch({
