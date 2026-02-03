@@ -128,27 +128,27 @@ async function fetchAlertContext({
   const fetchConfigs = [
     {
       key: 'apmServiceSummary' as const,
-      window: START_TIME_OFFSETS.serviceSummary,
+      startOffset: START_TIME_OFFSETS.serviceSummary,
       params: { serviceName, serviceEnvironment, transactionType },
     },
     {
       key: 'apmDownstreamDependencies' as const,
-      window: START_TIME_OFFSETS.downstream,
+      startOffset: START_TIME_OFFSETS.downstream,
       params: { serviceName, serviceEnvironment },
     },
     {
       key: 'apmErrors' as const,
-      window: START_TIME_OFFSETS.errors,
+      startOffset: START_TIME_OFFSETS.errors,
       params: { serviceName, serviceEnvironment },
     },
     {
       key: 'apmServiceChangePoints' as const,
-      window: START_TIME_OFFSETS.changePoints,
+      startOffset: START_TIME_OFFSETS.changePoints,
       params: { serviceName, serviceEnvironment, transactionType, transactionName },
     },
     {
       key: 'apmExitSpanChangePoints' as const,
-      window: START_TIME_OFFSETS.changePoints,
+      startOffset: START_TIME_OFFSETS.changePoints,
       params: { serviceName, serviceEnvironment },
     },
   ];
@@ -159,19 +159,20 @@ async function fetchAlertContext({
   async function fetchLogCategories() {
     try {
       const start = getStart(START_TIME_OFFSETS.logs);
+      const end = alertStart;
       const result = await getLogCategories({
         core,
         logger,
         esClient,
         start,
-        end: alertStart,
+        end,
         kqlFilter: `service.name: "${serviceName}"`,
         fields: ['service.name'],
       });
       const hasCategories =
         (result.highSeverityCategories?.categories?.length ?? 0) > 0 ||
         (result.lowSeverityCategories?.categories?.length ?? 0) > 0;
-      return hasCategories ? { key: 'logCategories' as const, start, data: result } : null;
+      return hasCategories ? { key: 'logCategories' as const, start, end, data: result } : null;
     } catch (err) {
       logger.debug(`AI insight: logCategories failed: ${err}`);
       return null;
@@ -181,14 +182,15 @@ async function fetchAlertContext({
   const allFetchers = [
     ...fetchConfigs.map(async (config) => {
       try {
-        const start = getStart(config.window);
+        const start = getStart(config.startOffset);
+        const end = alertStart;
         const data = await dataRegistry.getData(config.key, {
           request,
           ...config.params,
           start,
-          end: alertStart,
+          end,
         });
-        return isEmpty(data) ? null : { key: config.key, start, data };
+        return isEmpty(data) ? null : { key: config.key, start, end, data };
       } catch (err) {
         logger.debug(`AI insight: ${config.key} failed: ${err}`);
         return null;
@@ -199,8 +201,8 @@ async function fetchAlertContext({
 
   const results = await Promise.all(allFetchers);
   const contextParts = compact(results).map(
-    ({ key, start, data }) =>
-      `<${key}>\nTime window: ${start} to ${alertStart}\n\`\`\`json\n${JSON.stringify(
+    ({ key, start, end, data }) =>
+      `<${key}>\nTime window: ${start} to ${end}\n\`\`\`json\n${JSON.stringify(
         data,
         null,
         2
