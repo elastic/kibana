@@ -823,5 +823,42 @@ apiTest.describe(
       // Documents should pass through unchanged
       expect(body.documents).toHaveLength(1);
     });
+
+    apiTest('should simulate join processor', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+
+      const { statusCode, body } = await apiClient.post(
+        'internal/streams/logs/processing/_simulate',
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            processing: {
+              steps: [
+                {
+                  action: 'join',
+                  from: ['field1', 'field2', 'field3'],
+                  to: 'attributes.my_joined_field',
+                  delimiter: ', ',
+                },
+              ],
+            },
+            documents: [
+              {
+                field1: 'value1',
+                field2: 'value2',
+                field3: 'value3',
+                '@timestamp': new Date().toISOString(),
+              },
+            ],
+          },
+          responseType: 'json',
+        }
+      );
+
+      expect(statusCode).toBe(200);
+      expect(body.documents).toHaveLength(1);
+      expect(body.documents[0].value['attributes.my_joined_field']).toBeDefined();
+      expect(body.documents[0].value['attributes.my_joined_field']).toBe('value1, value2, value3');
+    });
   }
 );
