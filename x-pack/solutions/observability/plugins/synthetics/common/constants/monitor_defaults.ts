@@ -187,6 +187,7 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
     number: '10',
   },
   [ConfigKey.SOURCE_INLINE]: '',
+  [ConfigKey.SOURCE_INLINE_ENCODING]: 'base64',
   [ConfigKey.SOURCE_PROJECT_CONTENT]: '',
   [ConfigKey.TEXT_ASSERTION]: '',
   [ConfigKey.URLS]: '',

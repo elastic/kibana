@@ -34,6 +34,14 @@ export const throttlingFormatter: Formatter = (fields) => {
   });
 };
 
+export const base64InlineScriptFormatter: Formatter = (fields, key) => {
+  const script = fields[key] as string;
+  if (!script) return null;
+
+  const encoded = Buffer.from(script).toString('base64');
+  return JSON.stringify(encoded);
+};
+
 export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
   [ConfigKey.SCREENSHOTS]: null,
@@ -43,7 +51,8 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.PORT]: stringToJsonFormatter,
   [ConfigKey.URLS]: stringToJsonFormatter,
   [ConfigKey.METADATA]: objectToJsonFormatter,
-  [ConfigKey.SOURCE_INLINE]: stringToJsonFormatter,
+  [ConfigKey.SOURCE_INLINE]: base64InlineScriptFormatter,
+  [ConfigKey.SOURCE_INLINE_ENCODING]: null,
   [ConfigKey.SYNTHETICS_ARGS]: arrayToJsonFormatter,
   [ConfigKey.JOURNEY_FILTERS_MATCH]: stringToJsonFormatter,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayToJsonFormatter,
