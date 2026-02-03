@@ -16,13 +16,10 @@ import {
 } from '../constants';
 import { getUpdatesComponentTemplateName } from './component_templates';
 import { ALL_ENTITY_TYPES } from '../definitions/entity_schema';
-import { getEntitySpaceId } from './latest_index';
 
 const DATA_RETENTION_PERIOD = '1d';
 export const getUpdatesIndexTemplateId = (namespace: string) =>
-  `.${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_UPDATES}_${getEntitySpaceId(
-    namespace
-  )}_index_template` as const;
+  `.${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_UPDATES}_security_${namespace}_index_template` as const;
 
 export const getUpdatesEntityIndexTemplateConfig = (
   namespace: string
@@ -48,7 +45,7 @@ export const getUpdatesEntityIndexTemplateConfig = (
     getEntityIndexPattern({
       schemaVersion: ENTITY_SCHEMA_VERSION_V2,
       dataset: ENTITY_UPDATES,
-      spaceId: getEntitySpaceId(namespace),
+      namespace,
     }),
   ],
   priority: 200,

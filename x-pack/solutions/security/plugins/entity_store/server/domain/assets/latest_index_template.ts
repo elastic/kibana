@@ -15,15 +15,12 @@ import {
   getEntitiesAliasPattern,
 } from '../constants';
 import { getComponentTemplateName } from './component_templates';
-import { getEntitySpaceId } from './latest_index';
 import { ALL_ENTITY_TYPES } from '../definitions/entity_schema';
 
 // Mostly copied from x-pack/platform/plugins/shared/entity_manager/server/lib/entities/templates/entities_latest_template.ts
 
 export const getLatestIndexTemplateId = (namespace: string) =>
-  `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_LATEST}_${getEntitySpaceId(
-    namespace
-  )}_index_template` as const;
+  `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_LATEST}_security_${namespace}_index_template` as const;
 
 export const getLatestEntityIndexTemplateConfig = (
   namespace: string
@@ -47,7 +44,7 @@ export const getLatestEntityIndexTemplateConfig = (
     getEntityIndexPattern({
       schemaVersion: ENTITY_SCHEMA_VERSION_V2,
       dataset: ENTITY_LATEST,
-      spaceId: getEntitySpaceId(namespace),
+      namespace,
     }),
   ],
   priority: 200,

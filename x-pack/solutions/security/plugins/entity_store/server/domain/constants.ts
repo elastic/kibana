@@ -22,7 +22,7 @@ type Dataset = typeof ENTITY_LATEST | typeof ENTITY_UPDATES;
 interface IndexPatternOptions<TDataset extends Dataset> {
   dataset: TDataset;
   schemaVersion: SchemaVersion;
-  spaceId: string;
+  namespace: string;
 }
 
 interface AliasPatternOptions<TDataset extends Dataset> {
@@ -32,9 +32,9 @@ interface AliasPatternOptions<TDataset extends Dataset> {
 export const getEntityIndexPattern = <TDataset extends Dataset>({
   schemaVersion,
   dataset,
-  spaceId,
+  namespace,
 }: IndexPatternOptions<TDataset>) =>
-  `.${ENTITY_BASE_PREFIX}.${schemaVersion}.${dataset}.${spaceId}` as const;
+  `.${ENTITY_BASE_PREFIX}.${schemaVersion}.${dataset}.security_${namespace}` as const;
 
 export const getEntitiesAliasPattern = <TDataset extends Dataset>({
   dataset,

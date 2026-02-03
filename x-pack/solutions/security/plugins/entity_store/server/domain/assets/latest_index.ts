@@ -14,8 +14,7 @@ export const getLatestEntitiesIndexName = (namespace: string) =>
   getEntityIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V2,
     dataset: ENTITY_LATEST,
-    spaceId: getEntitySpaceId(namespace),
+    namespace,
   });
 
 export const getEntityDefinitionId = (type: string, space: string) => `security_${type}_${space}`;
-export const getEntitySpaceId = (space: string) => `security_${space}`;
