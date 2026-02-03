@@ -247,7 +247,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       describe('when sorting by latency with different latency types', () => {
         const latencyTypes = ['avg', 'p95', 'p99'] as const;
         for (const latencyType of latencyTypes) {
-          it(`returns values sorted by average latency descending when latencyType=${latencyType}`, async () => {
+          it(`returns values sorted by "${latencyType}" latency descending when latencyType=${latencyType}`, async () => {
             const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
               id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
               params: {
