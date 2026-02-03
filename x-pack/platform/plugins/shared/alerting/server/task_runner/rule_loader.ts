@@ -153,13 +153,12 @@ export function getFakeKibanaRequest(
   context: TaskRunnerContext,
   spaceId: string,
   apiKey: RawRule['apiKey'],
-  uiamApiKey?: RawRule['uiamApiKey']
+  uiamApiKey?: RawRule['uiamApiKey'],
+  apiKeyTypeConfig?: 'es' | 'uiam'
 ) {
   const requestHeaders: Headers = {};
 
-  const apiKeyTypeFromConfig: 'es' | 'uiam' = 'uiam';
-
-  if (uiamApiKey && apiKeyTypeFromConfig === 'uiam') {
+  if (uiamApiKey && apiKeyTypeConfig === 'uiam') {
     const [_, uiamApiKeyValue] = Buffer.from(uiamApiKey, 'base64').toString().split(':');
     requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
   } else if (apiKey) {

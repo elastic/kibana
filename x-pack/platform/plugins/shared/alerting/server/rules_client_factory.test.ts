@@ -105,6 +105,7 @@ beforeEach(() => {
     securityService: securityServiceMock.createStart(),
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
+    isServerless: false,
   };
 
   rulesClientFactoryParams.actions = actionsMock.createStart();
@@ -184,6 +185,7 @@ test('creates a rules client with proper constructor arguments when security is 
     alertsService: null,
     backfillClient,
     uiSettings: rulesClientFactoryParams.uiSettings,
+    isServerless: false,
   });
 });
 
@@ -241,6 +243,7 @@ test('creates a rules client with proper constructor arguments', async () => {
     alertsService: null,
     backfillClient,
     uiSettings: rulesClientFactoryParams.uiSettings,
+    isServerless: false,
   });
 });
 
@@ -312,7 +315,7 @@ test('createAPIKey() returns an API key when security is enabled', async () => {
   await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
   const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-  securityPluginStart.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
+  securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
     api_key: '123',
     id: 'abc',
     name: '',
@@ -322,7 +325,7 @@ test('createAPIKey() returns an API key when security is enabled', async () => {
     apiKeysEnabled: true,
     result: { api_key: '123', id: 'abc', name: '' },
   });
-  expect(securityPluginStart.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
+  expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
     expect.any(Object),
     {
       metadata: { managed: true, kibana: { type: 'alerting_rule' } },
@@ -343,7 +346,7 @@ test('createAPIKey() throws when security plugin createAPIKey throws an error', 
   await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
   const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-  securityPluginStart.authc.apiKeys.grantAsInternalUser.mockRejectedValueOnce(
+  securityService.authc.apiKeys.grantAsInternalUser.mockRejectedValueOnce(
     new Error('TLS disabled')
   );
   await expect(constructorCall.createAPIKey()).rejects.toThrowErrorMatchingInlineSnapshot(

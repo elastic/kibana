@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { apiKeyAsAlertAttributes } from './api_key_as_alert_attributes';
+import {
+  apiKeyAsAlertAttributes,
+  apiKeyAsRuleDomainProperties,
+} from './api_key_as_alert_attributes';
 
 describe('apiKeyAsAlertAttributes', () => {
   test('return attributes', () => {
@@ -63,6 +66,33 @@ describe('apiKeyAsAlertAttributes', () => {
       apiKey: 'MTIzOmFiYw==',
       apiKeyOwner: 'test',
       apiKeyCreatedByUser: true,
+    });
+  });
+
+  test('returns UIAM APIKeys as well', () => {
+    expect(
+      apiKeyAsRuleDomainProperties(
+        {
+          apiKeysEnabled: true,
+          result: {
+            id: '123',
+            name: '123',
+            api_key: 'abc',
+          },
+          uiamResult: {
+            id: '456',
+            name: '456',
+            api_key: 'def',
+          },
+        },
+        'test',
+        true
+      )
+    ).toEqual({
+      apiKey: 'MTIzOmFiYw==',
+      apiKeyOwner: 'test',
+      apiKeyCreatedByUser: true,
+      uiamApiKey: 'NDU2OmRlZg==',
     });
   });
 });

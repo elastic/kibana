@@ -288,6 +288,19 @@ describe('rule_loader', () => {
       expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
     });
+
+    test('returns UIAM API key when config is set to uiam', async () => {
+      const fakeRequest = getFakeKibanaRequest(
+        context,
+        'default',
+        null,
+        Buffer.from('456:essu_uiam_api_key').toString('base64'),
+        'uiam'
+      );
+      expect(fakeRequest.headers).toEqual({
+        authorization: `ApiKey essu_uiam_api_key`,
+      });
+    });
   });
 });
 

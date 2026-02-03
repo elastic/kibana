@@ -52,7 +52,11 @@ export function apiKeyAsRuleDomainProperties(
       apiKeyOwner: username,
       apiKey: Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64'),
       apiKeyCreatedByUser: createdByUser,
-      ...(uiamApiKey ? { uiamApiKey: `${uiamApiKeyId}:${uiamApiKey}` } : {}),
+      ...(uiamApiKey
+        ? {
+            uiamApiKey: Buffer.from(`${uiamApiKeyId}:${uiamApiKey}`).toString('base64'),
+          }
+        : {}),
     };
   }
   return {
