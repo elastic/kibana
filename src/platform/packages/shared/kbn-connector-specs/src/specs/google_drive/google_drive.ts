@@ -21,12 +21,27 @@ const DEFAULT_EXPORT_MIME_TYPE = 'application/pdf';
 const SHEETS_EXPORT_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
 /**
- * Escapes single quotes in a string for use in Google Drive query syntax.
- * Google Drive queries use single quotes for string values, so any single
- * quotes in the value must be escaped to avoid syntax errors.
+ * Escapes special characters in a string for use in Google Drive query syntax.
+ * Google Drive queries use single quotes for string values, so backslashes
+ * and single quotes must be escaped to avoid syntax errors and injection.
  */
 function escapeQueryValue(value: string): string {
-  return value.replace(/'/g, "\\'");
+  // Escape backslashes first, then single quotes
+  return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+/**
+ * Extracts and throws a meaningful error from Google Drive API responses.
+ * Returns void if the error doesn't have Google API error details.
+ */
+function throwGoogleDriveError(error: unknown): void {
+  const axiosError = error as {
+    response?: { data?: { error?: { message?: string; code?: number } } };
+  };
+  const googleError = axiosError.response?.data?.error;
+  if (googleError) {
+    throw new Error(`Google Drive API error: ${googleError.message}`);
+  }
 }
 
 export const GoogleDriveConnector: ConnectorSpec = {
@@ -96,14 +111,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             nextPageToken: response.data.nextPageToken,
           };
         } catch (error: unknown) {
-          // Extract detailed error from Google API response
-          const axiosError = error as {
-            response?: { data?: { error?: { message?: string; code?: number } } };
-          };
-          const googleError = axiosError.response?.data?.error;
-          if (googleError) {
-            throw new Error(`Google Drive API error: ${googleError.message}`);
-          }
+          throwGoogleDriveError(error);
           throw error;
         }
       },
@@ -162,13 +170,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             nextPageToken: response.data.nextPageToken,
           };
         } catch (error: unknown) {
-          const axiosError = error as {
-            response?: { data?: { error?: { message?: string; code?: number } } };
-          };
-          const googleError = axiosError.response?.data?.error;
-          if (googleError) {
-            throw new Error(`Google Drive API error: ${googleError.message}`);
-          }
+          throwGoogleDriveError(error);
           throw error;
         }
       },
@@ -245,13 +247,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             encoding: 'base64',
           };
         } catch (error: unknown) {
-          const axiosError = error as {
-            response?: { data?: { error?: { message?: string; code?: number } } };
-          };
-          const googleError = axiosError.response?.data?.error;
-          if (googleError) {
-            throw new Error(`Google Drive API error: ${googleError.message}`);
-          }
+          throwGoogleDriveError(error);
           throw error;
         }
       },

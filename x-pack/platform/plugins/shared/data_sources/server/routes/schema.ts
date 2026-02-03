@@ -65,5 +65,5 @@ export const createDataSourceRequestSchema = schema.object({
    * The array should match the stackConnectors defined in the data source definition.
    * Optional connectors can be omitted.
    */
-  connector_credentials: schema.arrayOf(connectorCredentialsSchema),
+  connector_credentials: schema.arrayOf(connectorCredentialsSchema, { maxSize: 10 }),
 });
