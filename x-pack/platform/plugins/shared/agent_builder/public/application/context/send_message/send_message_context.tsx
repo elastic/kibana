@@ -62,12 +62,7 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
   });
 
   // Combine agentReasoning from mutations - use the one that's currently active
-  // Priority: resuming > resending > sending
-  const agentReasoning = isResuming
-    ? resumeAgentReasoning
-    : isResending
-    ? sendAgentReasoning
-    : sendAgentReasoning;
+  const agentReasoning = isResuming ? resumeAgentReasoning : sendAgentReasoning;
 
   return (
     <SendMessageContext.Provider

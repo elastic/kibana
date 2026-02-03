@@ -41,10 +41,10 @@ export interface ConversationActions {
   }) => void;
   removeOptimisticRound: () => void;
   /**
-   * Fetches the conversation from the server to get the cleared round.
+   * Optimistically clears the last round's response when resending.
    * Called when resending - the backend has already persisted an empty round.
    */
-  clearLastRoundResponse: () => Promise<void>;
+  clearLastRoundResponse: () => void;
   setAgentId: (agentId: string) => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
   addToolCall: ({ step }: { step: ToolCallStep }) => void;
@@ -156,66 +156,16 @@ const createConversationActions = ({
       );
     },
     /**
-     * Fetches the conversation from the server to get the cleared round.
-     * Uses fetchQuery which bypasses the query's `enabled` state entirely.
+     * Optimistically clears the last round's response when resending.
+     * We trust that the backend has persisted the cleared state before emitting the event.
+     * Streaming will then update this state with the new response chunks.
      */
-    clearLastRoundResponse: async () => {
-      if (!conversationId) {
-        // eslint-disable-next-line no-console
-        console.log('[clearLastRoundResponse] No conversationId, skipping fetch');
-        return;
-      }
-      // eslint-disable-next-line no-console
-      console.log('[clearLastRoundResponse] Starting:', {
-        queryKey: JSON.stringify(queryKey),
-        conversationId,
+    clearLastRoundResponse: () => {
+      setCurrentRound((round) => {
+        round.response.message = '';
+        round.steps = [];
+        round.status = ConversationRoundStatus.inProgress;
       });
-
-      try {
-        // Synchronously clear local state BEFORE the async fetch
-        // This ensures streaming chunks append to empty string, not old message
-        // Get current state before clearing for logging
-        const currentData = queryClient.getQueryData<Conversation>(queryKey);
-        const currentRound = currentData?.rounds?.at(-1);
-        // eslint-disable-next-line no-console
-        console.log('[clearLastRoundResponse] Before clear:', {
-          messageLength: currentRound?.response?.message?.length ?? 0,
-          stepsCount: currentRound?.steps?.length ?? 0,
-        });
-
-        setCurrentRound((round) => {
-          round.response.message = '';
-          round.steps = [];
-          round.status = ConversationRoundStatus.inProgress;
-        });
-
-        // Verify the clear worked
-        const afterData = queryClient.getQueryData<Conversation>(queryKey);
-        const afterRound = afterData?.rounds?.at(-1);
-        // eslint-disable-next-line no-console
-        console.log('[clearLastRoundResponse] After clear:', {
-          messageLength: afterRound?.response?.message?.length ?? 0,
-          stepsCount: afterRound?.steps?.length ?? 0,
-        });
-
-        // eslint-disable-next-line no-console
-        console.log('[clearLastRoundResponse] Local state cleared, starting fetch...');
-
-        const conversation = await conversationsService.get({ conversationId });
-        const lastRound = conversation.rounds?.at(-1);
-        // eslint-disable-next-line no-console
-        console.log('[clearLastRoundResponse] Fetched from server:', {
-          messageLength: lastRound?.response?.message?.length ?? 0,
-          stepsCount: lastRound?.steps?.length ?? 0,
-        });
-
-        queryClient.setQueryData(queryKey, conversation);
-        // eslint-disable-next-line no-console
-        console.log('[clearLastRoundResponse] Cache updated');
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('[clearLastRoundResponse] Failed to fetch:', error);
-      }
     },
     setAgentId: (agentId: string) => {
       // We allow to change agent only at the start of the conversation
