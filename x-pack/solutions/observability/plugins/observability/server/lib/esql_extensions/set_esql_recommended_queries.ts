@@ -8,6 +8,8 @@ import { i18n } from '@kbn/i18n';
 import { ALL_RECOMMENDED_FIELDS_FOR_ESQL } from '@kbn/discover-utils';
 import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 
+const SOLUTION_IDS = ['security', 'oblt', 'es'] as const;
+
 const TRACES_INDEX_PATTERN = 'traces-*';
 const METRICS_INDEX_PATTERN = 'metrics-*';
 const LOGS_INDEX_PATTERN = 'logs-*';
@@ -66,6 +68,18 @@ const TRACES_ESQL_RECOMMENDED_QUERIES = [
   },
 ];
 
+const METRICS_ESQL_RECOMMENDED_QUERIES = [
+  {
+    name: i18n.translate('xpack.observability.esqlQueries.allMetrics.name', {
+      defaultMessage: 'All metrics',
+    }),
+    query: `TS ${METRICS_INDEX_PATTERN}`,
+    description: i18n.translate('xpack.observability.esqlQueries.allMetrics.description', {
+      defaultMessage: 'Loads all available metrics',
+    }),
+  },
+];
+
 const LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES = [
   {
     name: i18n.translate('xpack.observability.esqlQueries.k8sPodsByMemory.name', {
@@ -110,6 +124,10 @@ const LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES = [
 
 export function setEsqlRecommendedQueries(esqlPlugin: ESQLSetup) {
   const esqlExtensionsRegistry = esqlPlugin.getExtensionsRegistry();
+
+  SOLUTION_IDS.forEach((solutionId) => {
+    esqlExtensionsRegistry.setRecommendedQueries([...METRICS_ESQL_RECOMMENDED_QUERIES], solutionId);
+  });
 
   // Register recommended queries
   esqlExtensionsRegistry.setRecommendedQueries(
