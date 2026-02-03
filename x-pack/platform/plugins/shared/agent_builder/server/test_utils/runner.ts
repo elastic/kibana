@@ -21,6 +21,7 @@ import type {
   AgentHandlerContext,
   ScopedRunner,
   ToolProvider,
+  ToolRegistry,
 } from '@kbn/agent-builder-server';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
@@ -44,6 +45,7 @@ import { createAgentsServiceStartMock } from './agents';
 export type ToolResultStoreMock = jest.Mocked<WritableToolResultStore>;
 export type AttachmentsServiceStartMock = jest.Mocked<AttachmentServiceStart>;
 export type ToolProviderMock = jest.Mocked<ToolProvider>;
+export type ToolRegistryMock = jest.Mocked<ToolRegistry>;
 export type AttachmentsServiceMock = jest.Mocked<AttachmentsService>;
 export type AttachmentStateManagerMock = jest.Mocked<AttachmentStateManager>;
 export type PromptManagerMock = jest.Mocked<PromptManager>;
@@ -57,6 +59,18 @@ export const createToolProviderMock = (): ToolProviderMock => {
     has: jest.fn(),
     get: jest.fn(),
     list: jest.fn(),
+  };
+};
+
+export const createToolRegistryMock = (): ToolRegistryMock => {
+  return {
+    has: jest.fn(),
+    get: jest.fn(),
+    list: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    execute: jest.fn(),
   };
 };
 
@@ -169,6 +183,7 @@ export interface CreateRunnerDepsMock extends CreateRunnerDeps {
 
 export interface AgentHandlerContextMock extends AgentHandlerContext {
   toolProvider: ToolProviderMock;
+  toolRegistry: ToolRegistryMock;
   resultStore: ToolResultStoreMock;
   attachments: AttachmentsServiceMock;
   filestore: FileSystemStoreMock;
@@ -182,6 +197,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     savedObjectsClient: savedObjectsServiceMock.createStartContract().getScopedClient({} as any),
     modelProvider: createModelProviderMock(),
     toolProvider: createToolProviderMock(),
+    toolRegistry: createToolRegistryMock(),
     runner: createScopedRunnerMock(),
     attachments: createAttachmentsService(),
     resultStore: createToolResultStoreMock(),
