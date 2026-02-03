@@ -6,15 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import {
-  EuiCallOut,
-  EuiFilePicker,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
 import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
