@@ -74,7 +74,7 @@ export function useStreamFeaturesTable({
     if (!selectedFeature) return;
 
     try {
-      await deleteFeature(selectedFeature.id);
+      await deleteFeature(selectedFeature.uuid);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamFeaturesTable.deleteSuccess.title', {
           defaultMessage: 'Feature deleted',
@@ -98,7 +98,7 @@ export function useStreamFeaturesTable({
     if (selectedFeatures.length === 0) return;
 
     try {
-      await deleteFeaturesInBulk(selectedFeatures.map((f) => f.id));
+      await deleteFeaturesInBulk(selectedFeatures.map(({ uuid }) => uuid));
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamFeaturesTable.bulkDeleteSuccess.title', {
           defaultMessage: '{count, plural, one {Feature deleted} other {Features deleted}}',
@@ -158,7 +158,7 @@ export function useStreamFeaturesTable({
         name: FEATURE_COLUMN_HEADER_LABEL,
         truncateText: true,
         render: (feature: Feature) => {
-          const valueStr = Object.values(feature.value).join(', ');
+          const displayTitle = feature.title ?? feature.id;
           return (
             <EuiLink
               onClick={() => onSelectFeature(feature)}
@@ -167,11 +167,11 @@ export function useStreamFeaturesTable({
             >
               <EuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem grow={false}>
-                  <EuiText size="s">{valueStr}</EuiText>
+                  <EuiText size="s">{displayTitle}</EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
-                    {feature.name}
+                    {feature.subtype}
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
