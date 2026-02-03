@@ -53,7 +53,11 @@ export const ConnectorMissingCallout = memo(
   ({ canSeeAdvancedSettings }: ConnectorMissingCalloutProps) => {
     const { navigateTo } = useNavigateTo();
     const goToKibanaSettings = useCallback(
-      () => navigateTo({ appId: 'management', path: '/kibana/settings?query=defaultAIConnector' }),
+      () =>
+        navigateTo({
+          appId: 'management',
+          path: '/ai/genAiSettings',
+        }),
       [navigateTo]
     );
 
