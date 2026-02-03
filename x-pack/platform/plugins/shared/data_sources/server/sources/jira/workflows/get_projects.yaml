@@ -1,0 +1,25 @@
+version: '1'
+name: 'sources.jira.get_projects'
+description: 'Search for Jira projects'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: maxResults
+    type: number
+    required: false
+  - name: startAt
+    type: number
+    required: false
+  - name: query
+    type: string
+    required: false
+steps:
+  - name: get-projects
+    type: jira.getProjects
+    connector-id: <%= stackConnectorId %>
+    with:
+      maxResults: ${{inputs.maxResults}}
+      startAt: ${{inputs.startAt}}
+      query: "${{inputs.query}}"

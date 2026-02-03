@@ -1,11 +1,12 @@
-import { DataSource } from '@kbn/data-catalog-plugin';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { DataSource } from '@kbn/data-catalog-plugin';
 import { i18n } from '@kbn/i18n';
-import {
-  generateGetIssueWorkflow,
-  generateGetProjectWorkflow,
-  generateGetProjectsWorkflow,
-  generateSearchIssuesWithJqlWorkflow,
-} from './workflows';
 
 export const jiraDataSource: DataSource = {
   id: 'jira',
@@ -14,28 +15,14 @@ export const jiraDataSource: DataSource = {
     defaultMessage: 'Connect to Jira to pull data from your project.',
   }),
 
+  iconType: '.jira',
+
   stackConnector: {
     type: '.jira',
     config: {},
   },
-  generateWorkflows(stackConnectorId: string) {
-    return [
-      {
-        content: generateSearchIssuesWithJqlWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGetIssueWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGetProjectsWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGetProjectWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-    ];
+
+  workflows: {
+    directory: __dirname + '/workflows',
   },
 };

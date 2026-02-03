@@ -1,0 +1,16 @@
+version: '1'
+name: 'sources.jira.get_project'
+description: 'Get a Jira project by its ID or key'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: projectId
+    type: string
+steps:
+  - name: get-project
+    type: jira.getProject
+    connector-id: <%= stackConnectorId %>
+    with:
+      projectId: "${{inputs.projectId}}"
