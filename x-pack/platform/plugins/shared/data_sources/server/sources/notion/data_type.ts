@@ -6,31 +6,32 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataSource } from '@kbn/data-catalog-plugin';
-import { EARSSupportedOAuthProvider } from '@kbn/data-catalog-plugin';
+import { DataSourceBase, EARSSupportedOAuthProvider } from '@kbn/data-catalog-plugin/common';
 
-export const notionDataSource: DataSource = {
-  id: 'notion',
-  name: 'Notion',
-  description: i18n.translate('xpack.dataSources.notion.description', {
+class NotionDataSource extends DataSourceBase {
+  id = 'notion';
+  name = 'Notion';
+  description = i18n.translate('xpack.dataSources.notion.description', {
     defaultMessage: 'Connect to Notion to pull data from your workspace.',
-  }),
+  });
 
-  iconType: '.notion',
+  iconType = '.notion';
 
-  oauthConfiguration: {
+  oauthConfiguration = {
     provider: EARSSupportedOAuthProvider.NOTION,
     initiatePath: '/oauth/start/notion',
     fetchSecretsPath: '/oauth/fetch_request_secrets',
     oauthBaseUrl: 'https://localhost:8052',
-  },
+  };
 
-  stackConnector: {
+  stackConnector = {
     type: '.notion',
     config: {},
-  },
+  };
 
-  workflows: {
+  workflows = {
     directory: __dirname + '/workflows',
-  },
-};
+  };
+}
+
+export const notionDataSource = new NotionDataSource();

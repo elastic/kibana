@@ -75,12 +75,8 @@ export interface WorkflowsConfig {
 }
 
 /**
- * Abstraction defining a federated data source ("fetcher").
- * This defines:
- * - Connectivity (OAuth) configuration
- * - What workflows should be created
- * - How to interact with data stored in third-party systems
- *
+ * Interface defining a federated data source ("fetcher").
+ * Use DataSourceBase abstract class to create implementations.
  */
 export interface DataSource {
   /** Unique identifier for the data type */
@@ -110,4 +106,10 @@ export interface DataSource {
 
   /** OAuth configuration for authentication */
   oauthConfiguration?: EARSOAuthConfiguration | CustomOAuthConfiguration;
+
+  /**
+   * Generates workflow info objects with the given stack connector ID injected.
+   * @param stackConnectorId - The ID of the stack connector to inject into workflows
+   */
+  generateWorkflows(stackConnectorId: string): Promise<WorkflowInfo[]>;
 }
