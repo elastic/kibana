@@ -48,10 +48,7 @@ export async function getSuggestions(
   //   type: slack
   //   connector-id: |<-
   if (lineParseResult?.matchType === 'connector-id') {
-    return getConnectorIdSuggestions({
-      ...autocompleteContext,
-      position: autocompleteContext.position,
-    });
+    return getConnectorIdSuggestions(autocompleteContext);
   }
 
   // Handle completions inside {{ }} or foreach variables

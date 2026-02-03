@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import type { LineColumnPosition } from '../../../../../../entities/workflows/store';
+import { getActionTypeIdFromStepType } from '../../../../../../shared/lib/action_type_utils';
 
 /**
  * Generate connector-id suggestions for a specific connector type
@@ -19,8 +20,7 @@ import type { LineColumnPosition } from '../../../../../../entities/workflows/st
 export function getConnectorIdSuggestionsItems(
   connectorType: string,
   range: monaco.IRange | monaco.languages.CompletionItemRanges,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>,
-  insertPosition?: LineColumnPosition
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): monaco.languages.CompletionItem[] {
   const suggestions: monaco.languages.CompletionItem[] = [];
 
@@ -58,19 +58,18 @@ export function getConnectorIdSuggestionsItems(
   });
 
   // Use provided insertPosition or calculate from range
-  const finalInsertPosition: LineColumnPosition =
-    insertPosition ??
-    ('startLineNumber' in range
+  const insertPosition: LineColumnPosition =
+    'startLineNumber' in range
       ? { lineNumber: range.startLineNumber, column: range.startColumn }
-      : { lineNumber: range.replace.startLineNumber, column: range.replace.startColumn });
+      : { lineNumber: range.replace.startLineNumber, column: range.replace.startColumn };
 
   // Create a zero-width range at the insert position to prevent Monaco from replacing any text
   // when the empty insertText is applied. The command will handle the insertion after connector creation.
   const zeroWidthRange: monaco.IRange = {
-    startLineNumber: finalInsertPosition.lineNumber,
-    endLineNumber: finalInsertPosition.lineNumber,
-    startColumn: finalInsertPosition.column,
-    endColumn: finalInsertPosition.column,
+    startLineNumber: insertPosition.lineNumber,
+    endLineNumber: insertPosition.lineNumber,
+    startColumn: insertPosition.column,
+    endColumn: insertPosition.column,
   };
 
   suggestions.push({
@@ -86,7 +85,7 @@ export function getConnectorIdSuggestionsItems(
     command: {
       id: 'workflows.editor.action.createConnector',
       title: 'Create connector',
-      arguments: [getConnectorActionType(connectorType), finalInsertPosition],
+      arguments: [{ connectorType: getActionTypeIdFromStepType(connectorType), insertPosition }],
     },
   });
 
@@ -131,10 +130,4 @@ export function getConnectorInstancesForType(
   }
 
   return [];
-}
-
-function getConnectorActionType(stepType: string): string {
-  const cleanStepType = stepType.startsWith('.') ? stepType.slice(1) : stepType;
-  const [actionType] = cleanStepType.split('.');
-  return `.${actionType}`;
 }

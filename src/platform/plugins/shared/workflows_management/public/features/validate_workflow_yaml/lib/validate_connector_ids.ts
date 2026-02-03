@@ -9,11 +9,15 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import {
+  getActionTypeDisplayNameFromStepType,
+  getActionTypeIdFromStepType,
+} from '../../../shared/lib/action_type_utils';
 import { getConnectorInstancesForType } from '../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
 import {
-  createHoverClickActionLink,
-  WorkflowAction,
-} from '../../../widgets/workflow_yaml_editor/ui/hooks/use_monaco_hover_click_interceptor';
+  getCreateConnectorHoverCommandLink,
+  getEditConnectorHoverCommandLink,
+} from '../../../widgets/workflow_yaml_editor/lib/use_register_hover_commands';
 import type { ConnectorIdItem, YamlValidationResult } from '../model/types';
 
 const TRANSLATIONS = {
@@ -68,16 +72,16 @@ export function validateConnectorIds(
 
     const instance = instances.find((ins) => ins.id === connectorIdItem.key);
 
-    const actionType = getActionTypeFromStepType(connectorIdItem.connectorType);
+    const actionType = getActionTypeIdFromStepType(connectorIdItem.connectorType);
     // Create insert position at the start of the connector-id value
     const insertPosition = {
       lineNumber: connectorIdItem.startLineNumber,
       column: connectorIdItem.startColumn,
     };
-    const createConnectorLink = createHoverClickActionLink({
-      action: WorkflowAction.OpenConnectorCreationFlyout,
-      params: { connectorType: actionType, insertPosition },
+    const createConnectorLink = getCreateConnectorHoverCommandLink({
       text: TRANSLATIONS.createConnector,
+      connectorType: actionType,
+      insertPosition,
     });
 
     const manageConnectorLink = `[${TRANSLATIONS.manageConnector}](${connectorsManagementUrl})`;
@@ -101,10 +105,10 @@ export function validateConnectorIds(
       };
       results.push(errorResult);
     } else {
-      const editConnectorLink = createHoverClickActionLink({
-        action: WorkflowAction.OpenConnectorEditFlyout,
-        params: { connectorType: actionType, connectorId: instance.id },
+      const editConnectorLink = getEditConnectorHoverCommandLink({
         text: TRANSLATIONS.editConnector,
+        connectorType: actionType,
+        connectorId: instance.id,
       });
 
       const connectedMessage = i18n.translate(
@@ -134,14 +138,4 @@ export function validateConnectorIds(
   }
 
   return results;
-}
-
-function getActionTypeFromStepType(stepType: string): string {
-  const [actionType] = stepType.split('.');
-  return `.${actionType}`;
-}
-
-function getActionTypeDisplayNameFromStepType(stepType: string): string {
-  const [actionType] = stepType.split('.');
-  return actionType.charAt(0).toUpperCase() + actionType.slice(1);
 }

@@ -7,44 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { monaco } from '@kbn/monaco';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { useFetchConnector } from '../../../entities/connectors/model/use_available_connectors';
+import type { LineColumnPosition } from '../../../entities/workflows/store';
 import {
   closeConnectorFlyout,
-  type LineColumnPosition,
   selectConnectorFlyoutConnectorToEdit,
   selectConnectorFlyoutInsertPosition,
   selectConnectorFlyoutType,
   selectIsConnectorFlyoutOpen,
-  selectYamlString,
-  setYamlString,
 } from '../../../entities/workflows/store';
+import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk';
+import { useAsyncThunk } from '../../../hooks/use_async_thunk';
 import { useKibana } from '../../../hooks/use_kibana';
-import { insertTextAtPosition } from '../../../shared/utils/insert_text_at_position';
 
 interface WorkflowDetailConnectorFlyoutProps {
-  onConnectorsChanged: () => void;
+  editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
 }
-export const WorkflowDetailConnectorFlyout = React.memo<WorkflowDetailConnectorFlyoutProps>(
-  ({ onConnectorsChanged }) => {
+
+export const WorkflowDetailConnectorFlyout = React.memo(
+  ({ editorRef }: WorkflowDetailConnectorFlyoutProps) => {
     const { triggersActionsUi } = useKibana().services;
+    const loadConnectors = useAsyncThunk(loadConnectorsThunk);
     const isOpen = useSelector(selectIsConnectorFlyoutOpen);
     const connectorType = useSelector(selectConnectorFlyoutType);
     const connectorIdToEdit = useSelector(selectConnectorFlyoutConnectorToEdit);
     const insertPosition = useSelector(selectConnectorFlyoutInsertPosition);
     const { data: connector, isLoading: isLoadingConnector } = useFetchConnector(connectorIdToEdit);
-    const yamlString = useSelector(selectYamlString);
     const dispatch = useDispatch();
-
-    const insertConnectorId = useCallback(
-      (id: string, position: LineColumnPosition) => {
-        const updatedYaml = insertTextAtPosition(yamlString, position, id);
-        dispatch(setYamlString(updatedYaml));
-      },
-      [dispatch, yamlString]
-    );
 
     const addConnectorFlyout = useMemo(() => {
       if (!isOpen || !connectorType) {
@@ -60,7 +53,7 @@ export const WorkflowDetailConnectorFlyout = React.memo<WorkflowDetailConnectorF
               dispatch(closeConnectorFlyout());
             },
             onConnectorUpdated: () => {
-              onConnectorsChanged();
+              loadConnectors();
               dispatch(closeConnectorFlyout());
             },
           });
@@ -74,9 +67,9 @@ export const WorkflowDetailConnectorFlyout = React.memo<WorkflowDetailConnectorF
           },
           onConnectorCreated: (createdConnector: ActionConnector) => {
             if (insertPosition) {
-              insertConnectorId(createdConnector.id, insertPosition);
+              insertConnectorId(createdConnector.id, insertPosition, editorRef.current);
             }
-            onConnectorsChanged();
+            loadConnectors();
             dispatch(closeConnectorFlyout());
           },
         });
@@ -85,16 +78,36 @@ export const WorkflowDetailConnectorFlyout = React.memo<WorkflowDetailConnectorF
       triggersActionsUi,
       isOpen,
       dispatch,
-      onConnectorsChanged,
+      loadConnectors,
       connectorType,
       connectorIdToEdit,
       connector,
       isLoadingConnector,
       insertPosition,
-      insertConnectorId,
+      editorRef,
     ]);
 
     return addConnectorFlyout;
   }
 );
 WorkflowDetailConnectorFlyout.displayName = 'WorkflowDetailConnectorFlyout';
+
+function insertConnectorId(
+  id: string,
+  insertPosition: LineColumnPosition,
+  editor: monaco.editor.IStandaloneCodeEditor | null
+) {
+  const model = editor?.getModel();
+  if (model) {
+    try {
+      const { lineNumber, column } = insertPosition;
+      const endColumn = model.getLineMaxColumn(lineNumber); // make sure to replace the entire line
+      const replaceRange = new monaco.Range(lineNumber, column, lineNumber, endColumn);
+
+      model.pushEditOperations(null, [{ range: replaceRange, text: id }], () => null);
+    } catch (_) {
+      // fallback to edit the yaml string
+    }
+  }
+  // TODO: When the visual builder is implemented, dispatch an action to edit the yaml string to the store directly.
+}
