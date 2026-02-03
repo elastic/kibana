@@ -2,6 +2,7 @@
 name: Bug report
 about: Things break. Help us identify those things so we can fix them!
 labels: bug
+type: Bug
 
 ---
 
@@ -33,3 +34,5 @@ labels: bug
 **Provide logs and/or server output (if relevant):**
 
 **Any additional context:**
+
+
