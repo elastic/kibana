@@ -292,8 +292,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       return lastValidEsQuery.current;
     }, [dataView, kquery, notifications, searchFilters, uiSettings]);
 
-    const pinnedEntities = useMemo(() => {
+    const pinnedIds = useMemo(() => {
       return getFilterValues(searchFilters, [
+        EVENT_ID,
         ...GRAPH_ACTOR_ENTITY_FIELDS,
         ...GRAPH_TARGET_ENTITY_FIELDS,
       ]).map(String);
@@ -309,7 +310,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           end: timeRange.to,
         },
         nodesLimit: GRAPH_NODES_LIMIT,
-        pinnedEntityIds: pinnedEntities,
+        pinnedIds,
       },
       options: {
         refetchOnWindowFocus: false,

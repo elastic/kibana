@@ -519,9 +519,9 @@ describe('fetchGraph', () => {
     });
   });
 
-  describe('Pinned entity IDs', () => {
-    it('should include pinned entity parameters when pinnedEntityIds are provided', async () => {
-      const pinnedEntityIds = ['entity-1', 'entity-2'];
+  describe('Pinned IDs', () => {
+    it('should include pinned parameters when pinnedIds are provided', async () => {
+      const pinnedIds = ['entity-1', 'entity-2'];
       const validIndexPatterns = ['valid_index'];
       const params = {
         esClient,
@@ -533,7 +533,7 @@ describe('fetchGraph', () => {
         indexPatterns: validIndexPatterns,
         spaceId: 'default',
         esQuery: undefined as EsQuery | undefined,
-        pinnedEntityIds,
+        pinnedIds,
       };
 
       await fetchGraph(params);
@@ -542,13 +542,14 @@ describe('fetchGraph', () => {
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const query = esqlCallArgs[0].query;
 
-      // Verify EVAL pinned CASE statement is present
+      // Verify EVAL pinned CASE statement is present with _id, actorEntityId, and targetEntityId checks
       expect(query).toContain('EVAL pinned = CASE(');
+      expect(query).toContain('_id IN (?pinned_id0, ?pinned_id1)');
       expect(query).toContain('actorEntityId IN (?pinned_id0, ?pinned_id1)');
       expect(query).toContain('targetEntityId IN (?pinned_id0, ?pinned_id1)');
     });
 
-    it('should use null fallback for pinned when no pinnedEntityIds are provided', async () => {
+    it('should use null fallback for pinned when no pinnedIds are provided', async () => {
       const validIndexPatterns = ['valid_index'];
       const params = {
         esClient,
@@ -560,7 +561,7 @@ describe('fetchGraph', () => {
         indexPatterns: validIndexPatterns,
         spaceId: 'default',
         esQuery: undefined as EsQuery | undefined,
-        pinnedEntityIds: undefined,
+        pinnedIds: undefined,
       };
 
       await fetchGraph(params);
@@ -579,7 +580,7 @@ describe('fetchGraph', () => {
       expect(pinnedParams).toHaveLength(0);
     });
 
-    it('should use null fallback for pinned when pinnedEntityIds is empty array', async () => {
+    it('should use null fallback for pinned when pinnedIds is empty array', async () => {
       const validIndexPatterns = ['valid_index'];
       const params = {
         esClient,
@@ -591,7 +592,7 @@ describe('fetchGraph', () => {
         indexPatterns: validIndexPatterns,
         spaceId: 'default',
         esQuery: undefined as EsQuery | undefined,
-        pinnedEntityIds: [],
+        pinnedIds: [],
       };
 
       await fetchGraph(params);
