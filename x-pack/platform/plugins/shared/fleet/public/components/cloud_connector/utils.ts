@@ -15,6 +15,7 @@ import type {
   PackageInfo,
   PackagePolicyConfigRecord,
 } from '../../../common';
+import { extractRawCredentialVars } from '../../../common';
 import type {
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
@@ -179,17 +180,32 @@ export const getTemplateUrlFromPackageInfo = (
   }
 };
 
-const getAccountTypeFromInput = (
-  input: NewPackagePolicyInput,
+/**
+ * Gets the account type from the package policy using the accessor pattern
+ * to read from the correct location (package-level or input-level vars)
+ *
+ * @param policy - The package policy
+ * @param packageInfo - The package info for mode detection
+ * @param provider - The cloud provider
+ * @returns The account type or undefined
+ */
+const getAccountTypeFromPolicy = (
+  policy: NewPackagePolicy,
+  packageInfo: PackageInfo,
   provider: CloudProviders
 ): string | undefined => {
+  // Use accessor to get vars from the correct location
+  const vars = extractRawCredentialVars(policy, packageInfo);
+
+  if (!vars) {
+    return SINGLE_ACCOUNT;
+  }
+
   switch (provider) {
     case AWS_PROVIDER:
-      return input?.streams?.[0]?.vars?.[AWS_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ?? SINGLE_ACCOUNT;
+      return (vars[AWS_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value as string) ?? SINGLE_ACCOUNT;
     case AZURE_PROVIDER:
-      return (
-        input?.streams?.[0]?.vars?.[AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ?? SINGLE_ACCOUNT
-      );
+      return (vars[AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value as string) ?? SINGLE_ACCOUNT;
   }
   return undefined;
 };
@@ -206,14 +222,14 @@ const getTemplateFieldNameByProvider = (provider: CloudProviders): string | unde
 };
 
 export const getCloudConnectorRemoteRoleTemplate = ({
-  input,
+  newPolicy,
   cloud,
   packageInfo,
   templateName,
   provider,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   let elasticResourceId: string | undefined;
-  const accountType = getAccountTypeFromInput(input, provider);
+  const accountType = getAccountTypeFromPolicy(newPolicy, packageInfo, provider);
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
   const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
   const templateUrlFieldName = getTemplateFieldNameByProvider(provider);
@@ -576,6 +592,13 @@ export const isCloudConnectorReusableEnabled = (
  * If found, it returns the variable definition object; otherwise, it returns undefined.
  */
 export const findVariableDef = (packageInfo: PackageInfo, key: string) => {
+  // First check package-level vars (for scope-aware credential storage)
+  const packageLevelVar = packageInfo?.vars?.find((v) => v?.name === key);
+  if (packageLevelVar) {
+    return packageLevelVar;
+  }
+
+  // Then check data stream vars
   return packageInfo?.data_streams
     ?.filter((datastreams) => datastreams !== undefined)
     .map((ds) => ds.streams)

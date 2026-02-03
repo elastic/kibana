@@ -10,7 +10,7 @@ import { EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
-import type { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '../../../common';
+import type { NewPackagePolicy, PackageInfo } from '../../../common';
 import type { CloudProvider } from '../../types';
 
 import { NewCloudConnectorForm } from './form/new_cloud_connector_form';
@@ -21,8 +21,8 @@ import { CloudConnectorTabs, type CloudConnectorTab } from './cloud_connector_ta
 import type { UpdatePolicy } from './types';
 import { TABS, CLOUD_FORMATION_EXTERNAL_DOC_URL } from './constants';
 import { isCloudConnectorReusableEnabled } from './utils';
+
 export interface CloudConnectorSetupProps {
-  input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
   updatePolicy: UpdatePolicy;
@@ -34,7 +34,6 @@ export interface CloudConnectorSetupProps {
 }
 
 export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
-  input,
   newPolicy,
   packageInfo,
   updatePolicy,
@@ -76,14 +75,17 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   }, [cloudConnectorsCount]);
 
   // Ensure root-level supports_cloud_connector is true when this component is rendered
-  if (!newPolicy.supports_cloud_connector) {
-    updatePolicy({
-      updatedPolicy: {
-        ...newPolicy,
-        supports_cloud_connector: true,
-      },
-    });
-  }
+  // NOTE: This must be in a useEffect, NOT during render, to avoid React errors
+  useEffect(() => {
+    if (!newPolicy.supports_cloud_connector) {
+      updatePolicy({
+        updatedPolicy: {
+          ...newPolicy,
+          supports_cloud_connector: true,
+        },
+      });
+    }
+  }, [newPolicy, updatePolicy]);
 
   const tabs: CloudConnectorTab[] = [
     {
@@ -122,7 +124,6 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           </div>
           <EuiSpacer size="l" />
           <NewCloudConnectorForm
-            input={input}
             templateName={templateName}
             newPolicy={newPolicy}
             packageInfo={packageInfo}
@@ -181,7 +182,6 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     <>
       {!reusableFeatureEnabled && (
         <NewCloudConnectorForm
-          input={input}
           templateName={templateName}
           newPolicy={newPolicy}
           packageInfo={packageInfo}

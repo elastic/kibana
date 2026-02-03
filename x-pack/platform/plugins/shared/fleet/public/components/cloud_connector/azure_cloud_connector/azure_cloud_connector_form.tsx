@@ -18,11 +18,9 @@ import { extractRawCredentialVars } from '../../../../common';
 import type { CloudConnectorFormProps, CloudSetupForCloudConnector } from '../types';
 
 import {
-  type AzureCloudConnectorFieldNames,
   getCloudConnectorRemoteRoleTemplate,
   isAzureCredentials,
   updateInputVarsWithCredentials,
-  updatePolicyWithAzureCloudConnectorCredentials,
   getDeploymentIdFromUrl,
   getKibanaComponentId,
 } from '../utils';
@@ -52,10 +50,8 @@ const getElasticStackId = (cloud?: CloudSetupForCloudConnector): string | undefi
 };
 
 export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
-  input,
   newPolicy,
   packageInfo,
-  updatePolicy,
   cloud,
   hasInvalidRequiredVars = false,
   templateName = 'azure-cloud-connector-template',
@@ -65,7 +61,7 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   const armTemplateUrl =
     cloud && templateName
       ? getCloudConnectorRemoteRoleTemplate({
-          input,
+          newPolicy,
           cloud,
           packageInfo,
           templateName,
@@ -133,38 +129,21 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           fields={fields}
           packageInfo={packageInfo}
           onChange={(key, value) => {
-            // Update local credentials state if available
-            if (credentials && isAzureCredentials(credentials) && setCredentials) {
-              const updatedCredentials = { ...credentials };
-              if (
-                key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID ||
-                key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID
-              ) {
-                updatedCredentials.tenantId = value;
-              } else if (
-                key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID ||
-                key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID
-              ) {
-                updatedCredentials.clientId = value;
-              } else if (
-                key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID
-              ) {
-                updatedCredentials.azure_credentials_cloud_connector_id = value;
-              }
-              setCredentials(updatedCredentials);
-            } else {
-              // Fallback to old method
-              const updatedPolicyWithCredentials = updatePolicyWithAzureCloudConnectorCredentials(
-                newPolicy,
-                input,
-                {
-                  [key]: value,
-                } as Record<AzureCloudConnectorFieldNames, string | undefined>
-              );
+            if (!credentials || !isAzureCredentials(credentials) || !setCredentials) return;
 
-              updatePolicy({
-                updatedPolicy: updatedPolicyWithCredentials,
-              });
+            // Map field keys to credential properties (handles both package-level and input-level var names)
+            const fieldToCredentialKey: Record<string, keyof typeof credentials> = {
+              [AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID]: 'tenantId',
+              [AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID]: 'tenantId',
+              [AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID]: 'clientId',
+              [AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID]: 'clientId',
+              [AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID]:
+                'azure_credentials_cloud_connector_id',
+            };
+
+            const credentialKey = fieldToCredentialKey[key];
+            if (credentialKey) {
+              setCredentials({ ...credentials, [credentialKey]: value });
             }
           }}
           hasInvalidRequiredVars={hasInvalidRequiredVars}

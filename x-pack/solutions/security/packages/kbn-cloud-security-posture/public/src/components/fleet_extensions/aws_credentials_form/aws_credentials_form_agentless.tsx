@@ -346,7 +346,6 @@ export const AwsCredentialsFormAgentless = ({
         <Suspense fallback={<EuiLoadingSpinner />}>
           <LazyCloudConnectorSetup
             templateName={templateName}
-            input={input}
             newPolicy={newPolicy}
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}

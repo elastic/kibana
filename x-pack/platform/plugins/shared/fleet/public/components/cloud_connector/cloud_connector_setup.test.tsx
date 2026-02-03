@@ -70,7 +70,6 @@ const mockUpdatePolicyWithExistingCredentials = jest.fn();
 const mockUpdatePolicy = jest.fn();
 
 describe('CloudConnectorSetup', () => {
-  const mockInput = getMockPolicyAWS().inputs[0];
   const mockPackageInfo = getMockPackageInfoAWS();
   const mockPolicy = getMockPolicyAWS();
 
@@ -86,7 +85,6 @@ describe('CloudConnectorSetup', () => {
   } as CloudSetup;
 
   const defaultProps: CloudConnectorSetupProps = {
-    input: mockInput,
     newPolicy: mockPolicy,
     updatePolicy: mockUpdatePolicy,
     packageInfo: mockPackageInfo,

@@ -13,7 +13,6 @@ import { AzureCloudConnectorForm } from '../azure_cloud_connector/azure_cloud_co
 import { AWS_PROVIDER, AZURE_PROVIDER } from '../constants';
 
 export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
-  input,
   newPolicy,
   packageInfo,
   updatePolicy,
@@ -33,7 +32,6 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
       return (
         <AWSCloudConnectorForm
           templateName={templateName || ''}
-          input={input}
           newPolicy={newPolicy}
           packageInfo={packageInfo}
           updatePolicy={updatePolicy}
@@ -49,7 +47,6 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
       return (
         <AzureCloudConnectorForm
           templateName={templateName || ''}
-          input={input}
           newPolicy={newPolicy}
           packageInfo={packageInfo}
           updatePolicy={updatePolicy}

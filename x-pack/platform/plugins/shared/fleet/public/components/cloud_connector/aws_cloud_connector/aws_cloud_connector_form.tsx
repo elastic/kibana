@@ -14,11 +14,9 @@ import { extractRawCredentialVars } from '../../../../common';
 import { type CloudConnectorFormProps } from '../types';
 
 import {
-  updatePolicyWithAwsCloudConnectorCredentials,
   getCloudConnectorRemoteRoleTemplate,
   updateInputVarsWithCredentials,
   isAwsCredentials,
-  type AwsCloudConnectorFieldNames,
 } from '../utils';
 import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AWS_PROVIDER } from '../constants';
 
@@ -29,11 +27,9 @@ import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connect
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide';
 
 export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
-  input,
   newPolicy,
   packageInfo,
   cloud,
-  updatePolicy,
   hasInvalidRequiredVars = false,
   isOrganization = false,
   templateName,
@@ -43,7 +39,7 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   const cloudConnectorRemoteRoleTemplate =
     cloud && templateName
       ? getCloudConnectorRemoteRoleTemplate({
-          input,
+          newPolicy,
           cloud,
           packageInfo,
           templateName,
@@ -104,28 +100,19 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           fields={fields}
           packageInfo={packageInfo}
           onChange={(key, value) => {
-            // Update local credentials state if available
-            if (credentials && isAwsCredentials(credentials) && setCredentials) {
-              const updatedCredentials = { ...credentials };
-              if (
-                key === AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN ||
-                key === AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN
-              ) {
-                updatedCredentials.roleArn = value;
-              } else if (
-                key === AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID ||
-                key === AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID
-              ) {
-                updatedCredentials.externalId = value;
-              }
-              setCredentials(updatedCredentials);
-            } else {
-              // Fallback to old method
-              updatePolicy({
-                updatedPolicy: updatePolicyWithAwsCloudConnectorCredentials(newPolicy, input, {
-                  [key]: value,
-                } as Record<AwsCloudConnectorFieldNames, string | undefined>),
-              });
+            if (!credentials || !isAwsCredentials(credentials) || !setCredentials) return;
+
+            // Map field keys to credential properties (handles both package-level and input-level var names)
+            const fieldToCredentialKey: Record<string, keyof typeof credentials> = {
+              [AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN]: 'roleArn',
+              [AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]: 'roleArn',
+              [AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID]: 'externalId',
+              [AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]: 'externalId',
+            };
+
+            const credentialKey = fieldToCredentialKey[key];
+            if (credentialKey) {
+              setCredentials({ ...credentials, [credentialKey]: value });
             }
           }}
           hasInvalidRequiredVars={hasInvalidRequiredVars}

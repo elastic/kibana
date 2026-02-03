@@ -148,7 +148,6 @@ export const AzureCredentialsFormAgentless = ({
       {azureCredentialsType === 'cloud_connectors' && isAzureCloudConnectorEnabled ? (
         <Suspense fallback={<EuiLoadingSpinner />}>
           <LazyCloudConnectorSetup
-            input={input}
             newPolicy={newPolicy}
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}

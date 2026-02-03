@@ -8,7 +8,7 @@
 import type { ReactNode } from 'react';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
-import type { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '../../../common';
+import type { NewPackagePolicy, PackageInfo } from '../../../common';
 import type { CloudConnectorVar, CloudConnectorSecretVar } from '../../../common/types';
 import type { CloudConnectorSecretReference, CloudProvider } from '../../types';
 
@@ -55,7 +55,6 @@ export interface CloudConnectorConfig {
 }
 
 export interface NewCloudConnectorFormProps {
-  input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
   updatePolicy: UpdatePolicy;
@@ -87,7 +86,6 @@ export interface AzureCloudConnectorOption {
 }
 
 export interface CloudConnectorFormProps {
-  input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
   updatePolicy: UpdatePolicy;
@@ -116,7 +114,7 @@ export interface CloudFormationCloudCredentialsGuideProps {
 }
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {
-  input: NewPackagePolicyInput;
+  newPolicy: NewPackagePolicy;
   cloud: CloudSetupForCloudConnector;
   packageInfo: PackageInfo;
   templateName: string;

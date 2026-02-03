@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useMemo, useEffect } from 'react';
+import React, { memo, useState, useMemo, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -28,11 +28,19 @@ import {
 import styled from 'styled-components';
 
 import { NamespaceComboBox } from '../../../../../../../components/namespace_combo_box';
+import { CloudConnectorSetup } from '../../../../../../../components/cloud_connector';
+import type { UpdatePolicy } from '../../../../../../../components/cloud_connector/types';
 import type { PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../../../types';
+import type { CloudProvider } from '../../../../../types';
 import { Loading } from '../../../../../components';
 import { useGetEpmDatastreams, useStartServices } from '../../../../../hooks';
 
-import { isAdvancedVar, shouldShowVar, isVarRequiredByVarGroup } from '../../services';
+import {
+  isAdvancedVar,
+  shouldShowVar,
+  isVarRequiredByVarGroup,
+  getCloudConnectorOption,
+} from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 
 import { PackagePolicyInputVarField, VarGroupSelector, useVarGroupSelections } from './components';
@@ -69,7 +77,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     isEditPage = false,
     isAgentlessSelected = false,
   }) => {
-    const { docLinks } = useStartServices();
+    const { docLinks, cloud } = useStartServices();
 
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
@@ -82,6 +90,20 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         isAgentlessEnabled: isAgentlessSelected,
         onSelectionsChange: updatePackagePolicy,
       });
+
+    // Check if a cloud connector option is selected
+    const cloudConnectorOption = useMemo(
+      () => getCloudConnectorOption(packageInfo.var_groups, varGroupSelections),
+      [packageInfo.var_groups, varGroupSelections]
+    );
+
+    // Create an UpdatePolicy callback compatible with CloudConnectorSetup
+    const handleCloudConnectorUpdate: UpdatePolicy = useCallback(
+      ({ updatedPolicy, isValid }) => {
+        updatePackagePolicy(updatedPolicy);
+      },
+      [updatePackagePolicy]
+    );
 
     // Package-level vars, filtered by var_group visibility
     const { requiredVars, advancedVars } = useMemo(() => {
@@ -270,6 +292,22 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 />
               </EuiFlexItem>
             ))}
+
+            {/* Cloud Connector Setup - shown when a cloud connector option is selected */}
+            {cloudConnectorOption.isCloudConnector && (
+              <EuiFlexItem>
+                <CloudConnectorSetup
+                  newPolicy={packagePolicy}
+                  packageInfo={packageInfo}
+                  updatePolicy={handleCloudConnectorUpdate}
+                  isEditPage={isEditPage}
+                  hasInvalidRequiredVars={submitAttempted && !!validationResults?.vars}
+                  cloud={cloud}
+                  cloudProvider={cloudConnectorOption.provider as CloudProvider}
+                  templateName={packageInfo.name}
+                />
+              </EuiFlexItem>
+            )}
 
             {/* Required vars */}
             {requiredVars.map((varDef) => {
