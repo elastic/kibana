@@ -71,14 +71,6 @@ export class OnboardingApp {
     return this.page.getByTestId('integration-card:gcp-logs-virtual');
   }
 
-  public get kubernetesQuickstartDocsLink() {
-    return this.page.getByTestId('observabilityOnboardingKubernetesPanelQuickstartDocsLink');
-  }
-
-  public get otelKubernetesQuickstartDocsLink() {
-    return this.page.getByTestId('observabilityOnboardingOtelKubernetesPanelQuickstartDocsLink');
-  }
-
   public get firehoseQuickstartCard() {
     return this.page.getByTestId('integration-card:firehose-quick-start');
   }
