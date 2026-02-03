@@ -18,9 +18,51 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, type ReactNode } from 'react';
-import { useFieldArray, useFormContext } from 'react-hook-form';
-import { ProcessorFieldSelector } from '../processor_field_selector';
+import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import type { NetworkDirectionFormState } from '../../../../types';
+import { ProcessorFieldSelector } from '../processor_field_selector';
+
+interface InternalNetworksFieldInputProps {
+  index: number;
+  onRemove: (index: number) => void;
+}
+
+const InternalNetworksFieldInput = ({ index, onRemove }: InternalNetworksFieldInputProps) => {
+  const { control } = useFormContext();
+
+  return (
+    <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+      <EuiFlexItem>
+        <Controller
+          control={control}
+          name={`internal_networks.${index}.value`}
+          render={({ field }) => (
+            <EuiFormRow>
+              <EuiFieldText
+                value={field.value}
+                onChange={field.onChange}
+                fullWidth
+                data-test-subj="streamsAppInternalNetworksInput"
+              />
+            </EuiFormRow>
+          )}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="trash"
+          color="danger"
+          size="m"
+          onClick={() => onRemove(index)}
+          aria-label={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionsSelectorInternalNetworksRemoveButton',
+            { defaultMessage: 'Remove' }
+          )}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 const InternalNetworksContent = () => {
   const { fields, append, remove } = useFieldArray<
@@ -43,19 +85,7 @@ const InternalNetworksContent = () => {
       <EuiFlexGroup direction="column" gutterSize="s">
         {fields.map((field, index) => (
           <EuiFlexItem key={field.id}>
-            <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-              <EuiFlexItem>
-                <EuiFieldText value={field.value} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="trash"
-                  color="danger"
-                  size="m"
-                  onClick={() => handleRemove(index)}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <InternalNetworksFieldInput index={index} onRemove={handleRemove} />
           </EuiFlexItem>
         ))}
         <EuiButtonIcon
