@@ -132,10 +132,10 @@ export function useDashboardAgentContext({
         .subscribe(async (event) => {
           const { custom_event: eventType, data } = event.data;
 
-          // Guard: only apply events for our dashboard attachment
-          if (data.dashboardAttachmentId !== sessionAttachmentId) {
-            return;
-          }
+          // // Guard: only apply events for our dashboard attachment
+          // if (data.dashboardAttachmentId !== sessionAttachmentId) {
+          //   return;
+          // }
 
           // TODO: Handle DASHBOARD_PANEL_REMOVED_EVENT
           if (eventType !== DASHBOARD_PANEL_ADDED_EVENT) {
