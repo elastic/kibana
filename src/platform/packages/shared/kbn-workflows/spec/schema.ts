@@ -9,9 +9,9 @@
 
 import moment from 'moment-timezone';
 import { z } from '@kbn/zod/v4';
+import { JsonModelShapeSchema } from './json_model_shape_schema';
 import { convertLegacyInputsToJsonSchema } from './lib/input_conversion';
 import { isValidJsonSchema } from './lib/validate_json_schema';
-import { JsonModelShapeSchema } from './json_model_shape_schema';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
