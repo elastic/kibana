@@ -30,12 +30,12 @@ import type { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { ESQLQueryStats as QueryStats } from '@kbn/esql-types';
 import { isMac } from '@kbn/shared-ux-utility';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';
-import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_starred_queries';
+import type { EsqlStarredQueriesService } from './esql_starred_queries_service';
+import { HistoryAndStarredQueriesTabs } from './history_starred_queries';
 import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
 import { ESQLQueryStats } from './query_stats';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
-import { QuickSearchAction } from '../editor_visor/quick_search_action';
 
 const COMMAND_KEY = isMac ? '⌘' : '^';
 
@@ -59,11 +59,9 @@ interface EditorFooterProps {
   hideRunQueryText?: boolean;
   editorIsInline?: boolean;
   isSpaceReduced?: boolean;
-  hideQueryHistory?: boolean;
-  hideQuickSearch?: boolean;
   displayDocumentationAsFlyout?: boolean;
   dataErrorsControl?: DataErrorsControl;
-  toggleVisor: () => void;
+  starredQueriesService?: EsqlStarredQueriesService | null;
   queryStats?: QueryStats;
 }
 
@@ -80,27 +78,20 @@ export const EditorFooter = memo(function EditorFooter({
   setIsHistoryOpen,
   isLanguageComponentOpen,
   setIsLanguageComponentOpen,
-  hideQueryHistory,
-  hideQuickSearch,
   displayDocumentationAsFlyout,
   measuredContainerWidth,
   errors,
   warnings,
   onErrorClick,
   dataErrorsControl,
+  starredQueriesService,
   queryStats,
-  toggleVisor,
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
 
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
-
-  const toggleHistoryComponent = useCallback(() => {
-    setIsHistoryOpen(!isHistoryOpen);
-    setIsLanguageComponentOpen(false);
-  }, [isHistoryOpen, setIsHistoryOpen, setIsLanguageComponentOpen]);
 
   const toggleLanguageComponent = useCallback(async () => {
     setIsLanguageComponentOpen(!isLanguageComponentOpen);
@@ -161,18 +152,7 @@ export const EditorFooter = memo(function EditorFooter({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-              {!Boolean(editorIsInline) && (
-                <>
-                  {!hideQuickSearch && <QuickSearchAction toggleVisor={toggleVisor} />}
-                  {!hideQueryHistory && (
-                    <QueryHistoryAction
-                      toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
-                      isHistoryOpen={isHistoryOpen}
-                    />
-                  )}
-                  <KeyboardShortcuts />
-                </>
-              )}
+              {!Boolean(editorIsInline) && <KeyboardShortcuts />}
               {!hideRunQueryText && (
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
@@ -222,39 +202,27 @@ export const EditorFooter = memo(function EditorFooter({
             </EuiFlexGroup>
           </EuiFlexItem>
           {Boolean(editorIsInline) && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-                  {!hideQuickSearch && (
-                    <QuickSearchAction toggleVisor={toggleVisor} isSpaceReduced={true} />
-                  )}
-                  {!hideQueryHistory && (
-                    <QueryHistoryAction
-                      toggleHistory={toggleHistoryComponent}
-                      isHistoryOpen={isHistoryOpen}
-                      isSpaceReduced={true}
-                    />
-                  )}
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      position="top"
-                      content={i18n.translate('esqlEditor.query.quickReferenceLabel', {
-                        defaultMessage: 'Quick reference',
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    position="top"
+                    content={i18n.translate('esqlEditor.query.quickReferenceLabel', {
+                      defaultMessage: 'Quick reference',
+                    })}
+                  >
+                    <EuiButtonIcon
+                      iconType="documentation"
+                      onClick={toggleLanguageComponent}
+                      aria-label={i18n.translate('esqlEditor.query.documentationAriaLabel', {
+                        defaultMessage: 'Open documentation',
                       })}
-                    >
-                      <EuiButtonIcon
-                        iconType="documentation"
-                        onClick={toggleLanguageComponent}
-                        aria-label={i18n.translate('esqlEditor.query.documentationAriaLabel', {
-                          defaultMessage: 'Open documentation',
-                        })}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                  <KeyboardShortcuts />
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </>
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <KeyboardShortcuts />
+              </EuiFlexGroup>
+            </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -266,6 +234,7 @@ export const EditorFooter = memo(function EditorFooter({
             containerWidth={measuredContainerWidth}
             height={resizableContainerHeight}
             isSpaceReduced={isSpaceReduced}
+            starredQueriesService={starredQueriesService}
           />
         </EuiFlexItem>
       )}

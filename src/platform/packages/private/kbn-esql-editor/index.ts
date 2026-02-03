@@ -11,6 +11,8 @@ export type { DataErrorsControl } from './src/types';
 export type { ESQLEditorProps } from './src/esql_editor';
 import { ESQLEditor } from './src/esql_editor';
 export type { ESQLEditorRestorableState } from './src/restorable_state';
+export { ESQLMenu } from './src/editor_menu';
+export { EsqlEditorActionsProvider } from './src/editor_actions_context';
 
 export { registerESQLEditorAnalyticsEvents } from './src/telemetry/events_registration';
 export { ESQLEditorTelemetryService } from './src/telemetry/telemetry_service';

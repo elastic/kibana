@@ -9,10 +9,11 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import {
   EuiPopover,
-  EuiButton,
+  EuiButtonIcon,
   type EuiContextMenuPanelDescriptor,
   EuiContextMenuItem,
   EuiContextMenu,
+  EuiToolTip,
   useEuiScrollBar,
   useEuiTheme,
 } from '@elastic/eui';
@@ -23,34 +24,35 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
-import { type RecommendedQuery, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { type RecommendedQuery, REGISTRY_EXTENSIONS_ROUTE, QuerySource } from '@kbn/esql-types';
 import { getRecommendedQueriesTemplates } from '@kbn/esql-language/src/commands/registry/options/recommended_queries';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import { getCategorizationField } from '@kbn/aiops-utils';
 import { prettifyQueryTemplate } from '@kbn/esql-language/src/commands/registry/options/recommended_queries/utils';
-import { ESQLEditorTelemetryService } from '@kbn/esql-editor/src/telemetry/telemetry_service';
-import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
-import type { IUnifiedSearchPluginServices } from '../types';
+import { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+import type { ESQLEditorDeps } from '../types';
+import { useEsqlEditorActions } from '../editor_actions_context';
 
-export interface ESQLMenuPopoverProps {
-  onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
-  adHocDataview?: DataView | string;
-  onESQLQuerySubmit?: (query: string) => void;
-}
+const esqlHelpLabel = i18n.translate('esqlEditor.menu.helpLabel', {
+  defaultMessage: 'ES|QL help',
+});
 
-export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
-  onESQLDocsFlyoutVisibilityChanged,
-  adHocDataview,
-  onESQLQuerySubmit,
-}) => {
-  const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { docLinks, http, chrome, analytics, notifications } = kibana.services;
-  const isFeedbackEnabled = useMemo(() => notifications.feedback.isEnabled(), [notifications]);
+export const HelpPopover: React.FC = () => {
+  const kibana = useKibana<ESQLEditorDeps>();
+  const { core, data } = kibana.services;
+  const { docLinks, http, chrome, analytics, notifications } = core;
+  const isFeedbackEnabled = useMemo(
+    () => notifications?.feedback?.isEnabled?.() ?? false,
+    [notifications]
+  );
   const { euiTheme } = useEuiTheme();
+  const actions = useEsqlEditorActions();
 
   const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
+  const [adHocDataview, setAdHocDataview] = useState<DataView | undefined>(undefined);
 
   const [solutionsRecommendedQueries, setSolutionsRecommendedQueries] = useState<
     RecommendedQuery[]
@@ -58,8 +60,37 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
 
   const telemetryServiceRef = useRef(new ESQLEditorTelemetryService(analytics));
 
+  useEffect(() => {
+    let isMounted = true;
+    const getDataViewForQuery = async () => {
+      if (!actions?.currentQuery) {
+        setAdHocDataview(undefined);
+        return;
+      }
+      try {
+        const dataView = await getESQLAdHocDataview({
+          dataViewsService: data.dataViews,
+          query: actions.currentQuery,
+        });
+        if (isMounted) {
+          setAdHocDataview(dataView);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setAdHocDataview(undefined);
+        }
+      }
+    };
+
+    getDataViewForQuery();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [actions?.currentQuery, data.dataViews]);
+
   const { queryForRecommendedQueries, timeFieldName, categorizationField } = useMemo(() => {
-    if (adHocDataview && typeof adHocDataview !== 'string') {
+    if (adHocDataview) {
       const textFields = adHocDataview.fields?.getByType('string') ?? [];
       let tempCategorizationField;
       if (textFields.length) {
@@ -80,7 +111,6 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     };
   }, [adHocDataview]);
 
-  // Use a ref to store the *previous* fetched recommended queries
   const lastFetchedQueries = useRef<RecommendedQuery[]>([]);
 
   useEffect(() => {
@@ -97,10 +127,9 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
 
         if (cancelled) return;
 
-        // Only update state if the new data is actually different from the *last successfully set* data
         if (!isEqual(extensions.recommendedQueries, lastFetchedQueries.current)) {
           setSolutionsRecommendedQueries(extensions.recommendedQueries);
-          lastFetchedQueries.current = extensions.recommendedQueries; // Update the ref with the new data
+          lastFetchedQueries.current = extensions.recommendedQueries;
         }
       } catch (error) {
         // Do nothing if the extensions are not available
@@ -122,25 +151,17 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
   const onHelpMenuVisibilityChange = useCallback(
     (status: boolean) => {
       setIsLanguageComponentOpen(status);
-      onESQLDocsFlyoutVisibilityChanged?.(status);
     },
-    [setIsLanguageComponentOpen, onESQLDocsFlyoutVisibilityChanged]
+    [setIsLanguageComponentOpen]
   );
 
   const esqlContextMenuPanels = useMemo(() => {
     const recommendedQueries = [];
-    if (solutionsRecommendedQueries.length && typeof adHocDataview !== 'string') {
-      // Construct the full recommended queries by prepending the base 'FROM' command
-      // and add them to the main list of recommended queries.
-
+    if (solutionsRecommendedQueries.length) {
       recommendedQueries.push(
         ...solutionsRecommendedQueries.map((recommendedQuery) => {
           const template = prettifyQueryTemplate(recommendedQuery.query);
-
-          // Check if query starts with FROM or TS
           const startsWithTs = recommendedQuery.query.startsWith('TS');
-
-          // Use the information to conditionally format the query
           const queryString = startsWithTs
             ? `TS ${adHocDataview?.name} ${template}`
             : `${queryForRecommendedQueries} ${template}`;
@@ -153,7 +174,6 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
       );
     }
 
-    // Handle the static recommended queries, no solutions specific
     if (queryForRecommendedQueries && timeFieldName) {
       const recommendedQueriesFromStaticTemplates = getRecommendedQueriesTemplates({
         fromCommand: queryForRecommendedQueries,
@@ -168,10 +188,10 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
         id: 0,
         items: [
           {
-            name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.quickReference', {
+            name: i18n.translate('esqlEditor.menu.quickReference', {
               defaultMessage: 'Quick Reference',
             }),
-            icon: 'nedocumentationsted', // Typo: Should be 'documentation'
+            icon: 'documentation',
             renderItem: () => (
               <EuiContextMenuItem
                 key="quickReference"
@@ -179,14 +199,14 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
                 data-test-subj="esql-quick-reference"
                 onClick={() => toggleLanguageComponent()}
               >
-                {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.quickReference', {
+                {i18n.translate('esqlEditor.menu.quickReference', {
                   defaultMessage: 'Quick Reference',
                 })}
               </EuiContextMenuItem>
             ),
           },
           {
-            name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.documentation', {
+            name: i18n.translate('esqlEditor.menu.documentation', {
               defaultMessage: 'Documentation',
             }),
             icon: 'info',
@@ -199,7 +219,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
                 href={docLinks.links.query.queryESQL}
                 onClick={() => setIsESQLMenuPopoverOpen(false)}
               >
-                {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.documentation', {
+                {i18n.translate('esqlEditor.menu.documentation', {
                   defaultMessage: 'Documentation',
                 })}
               </EuiContextMenuItem>
@@ -208,7 +228,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
           ...(Boolean(recommendedQueries.length)
             ? [
                 {
-                  name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.exampleQueries', {
+                  name: i18n.translate('esqlEditor.menu.exampleQueries', {
                     defaultMessage: 'Recommended queries',
                   }),
                   icon: 'nested',
@@ -220,7 +240,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
           ...(isFeedbackEnabled
             ? [
                 {
-                  name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.feedback', {
+                  name: i18n.translate('esqlEditor.menu.feedback', {
                     defaultMessage: 'Submit feedback',
                   }),
                   icon: 'editorComment',
@@ -233,7 +253,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
                       href={FEEDBACK_LINK}
                       onClick={() => setIsESQLMenuPopoverOpen(false)}
                     >
-                      {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.feedback', {
+                      {i18n.translate('esqlEditor.menu.feedback', {
                         defaultMessage: 'Submit feedback',
                       })}
                     </EuiContextMenuItem>
@@ -245,7 +265,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
       },
       {
         id: 1,
-        title: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.exampleQueries', {
+        title: i18n.translate('esqlEditor.menu.exampleQueries', {
           defaultMessage: 'Recommended queries',
         }),
         items: recommendedQueries.map((query) => {
@@ -256,7 +276,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
                 QuerySource.HELP,
                 query.label
               );
-              onESQLQuerySubmit?.(query.queryString);
+              actions?.submitEsqlQuery?.(query.queryString);
               telemetryServiceRef.current.trackQuerySubmitted({
                 source: QuerySource.HELP,
                 query: query.queryString,
@@ -269,15 +289,15 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     ];
     return panels as EuiContextMenuPanelDescriptor[];
   }, [
-    adHocDataview,
+    actions,
+    adHocDataview?.name,
+    categorizationField,
     docLinks.links.query.queryESQL,
-    onESQLQuerySubmit,
+    isFeedbackEnabled,
     queryForRecommendedQueries,
+    solutionsRecommendedQueries,
     timeFieldName,
     toggleLanguageComponent,
-    solutionsRecommendedQueries, // This dependency is fine here, as it *uses* the state
-    categorizationField,
-    isFeedbackEnabled,
   ]);
 
   const esqlMenuPopoverStyles = css`
@@ -292,16 +312,16 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     <>
       <EuiPopover
         button={
-          <EuiButton
-            color="text"
-            onClick={() => setIsESQLMenuPopoverOpen(!isESQLMenuPopoverOpen)}
-            data-test-subj="esql-menu-button"
-            size="s"
-          >
-            {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.label', {
-              defaultMessage: 'ES|QL help',
-            })}
-          </EuiButton>
+          <EuiToolTip position="top" content={esqlHelpLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              color="text"
+              onClick={() => setIsESQLMenuPopoverOpen(!isESQLMenuPopoverOpen)}
+              data-test-subj="esql-help-popover-button"
+              size="xs"
+              iconType="question"
+              aria-label={esqlHelpLabel}
+            />
+          </EuiToolTip>
         }
         panelProps={{
           ['data-test-subj']: 'esql-menu-popover',

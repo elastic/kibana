@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import React from 'react';
+import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
 import { screen, render, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,93 +16,100 @@ import { createStubDataView, stubLogstashFieldSpecMap } from '@kbn/data-views-pl
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { coreMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { ESQLMenuPopover } from './esql_menu_popover';
+import { HelpPopover } from './help_popover';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
+
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLAdHocDataview: jest.fn(),
+}));
+
+jest.mock('../editor_actions_context', () => ({
+  useEsqlEditorActions: () => ({
+    currentQuery: 'FROM logstash-*',
+    submitEsqlQuery: jest.fn(),
+  }),
+}));
 
 const startMock = coreMock.createStart();
 const notificationsMock = notificationServiceMock.createStartContract();
-// Mock the necessary services
+
 startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
-const httpModule = {
-  http: {
-    get: jest.fn().mockResolvedValue({ recommendedQueries: [] }), // Mock the HTTP GET request
+startMock.http.get = jest.fn().mockResolvedValue({ recommendedQueries: [] });
+startMock.notifications = notificationsMock;
+
+const services = {
+  core: startMock,
+  data: {
+    dataViews: {},
   },
 };
-const services = {
-  docLinks: startMock.docLinks,
-  http: httpModule.http,
-  chrome: startMock.chrome,
-  notifications: notificationsMock,
-};
 
-describe('ESQLMenuPopover', () => {
-  const renderESQLPopover = async (adHocDataview?: DataView) => {
+describe('HelpPopover', () => {
+  const renderHelpPopover = async (adHocDataView?: DataView | null) => {
+    (getESQLAdHocDataview as jest.Mock).mockResolvedValue(adHocDataView ?? null);
     return await act(async () => {
       render(
-        <KibanaContextProvider services={services}>
-          <ESQLMenuPopover adHocDataview={adHocDataview} />
+        <KibanaContextProvider services={services as any}>
+          <HelpPopover />
         </KibanaContextProvider>
       );
     });
   };
 
   beforeEach(() => {
-    // Reset mocks before each test
-    httpModule.http.get.mockClear();
+    startMock.http.get.mockClear();
+    (getESQLAdHocDataview as jest.Mock).mockClear();
     notificationsMock.feedback.isEnabled.mockReturnValue(true);
   });
 
   it('should render a button', async () => {
-    await renderESQLPopover();
-    expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
+    await renderHelpPopover();
+    expect(screen.getByTestId('esql-help-popover-button')).toBeInTheDocument();
   });
 
   it('should open a menu when the popover is open', async () => {
-    await renderESQLPopover();
-    expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button'));
+    await renderHelpPopover();
+    await userEvent.click(screen.getByTestId('esql-help-popover-button'));
     expect(screen.getByTestId('esql-quick-reference')).toBeInTheDocument();
     expect(screen.queryByTestId('esql-recommended-queries')).not.toBeInTheDocument();
     expect(screen.getByTestId('esql-about')).toBeInTheDocument();
     expect(screen.getByTestId('esql-feedback')).toBeInTheDocument();
   });
 
-  it('should have recommended queries if a dataview is passed', async () => {
-    await renderESQLPopover(stubIndexPattern);
-    await userEvent.click(screen.getByRole('button'));
+  it('should have recommended queries if a dataview is available', async () => {
+    await renderHelpPopover(stubIndexPattern);
+    await userEvent.click(screen.getByTestId('esql-help-popover-button'));
     expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
   });
 
   it('should not have feedback if feedback is not enabled', async () => {
     notificationsMock.feedback.isEnabled.mockReturnValue(false);
-    await renderESQLPopover(stubIndexPattern);
-    await userEvent.click(screen.getByRole('button'));
+    await renderHelpPopover(stubIndexPattern);
+    await userEvent.click(screen.getByTestId('esql-help-popover-button'));
     expect(screen.queryByTestId('esql-feedback')).not.toBeInTheDocument();
   });
 
-  it('should fetch ESQL extensions when activeSolutionId and queryForRecommendedQueries are present and the popover is open', async () => {
+  it('should fetch ESQL extensions when activeSolutionId and queryForRecommendedQueries are present', async () => {
     const mockQueries = [
       { name: 'Count of logs', query: 'FROM logstash1 | STATS COUNT()' },
       { name: 'Average bytes', query: 'FROM logstash2 | STATS AVG(bytes) BY log.level' },
     ];
 
-    // Configure the mock to resolve with mockQueries
-    httpModule.http.get.mockResolvedValueOnce({ recommendedQueries: mockQueries });
+    startMock.http.get.mockResolvedValueOnce({ recommendedQueries: mockQueries });
 
-    await renderESQLPopover(stubIndexPattern);
+    await renderHelpPopover(stubIndexPattern);
     const esqlQuery = `FROM ${stubIndexPattern.name}`;
 
-    // Assert that http.get was called with the correct URL
     await waitFor(() => {
-      expect(httpModule.http.get).toHaveBeenCalledTimes(1);
-      expect(httpModule.http.get).toHaveBeenCalledWith(
+      expect(startMock.http.get).toHaveBeenCalledTimes(1);
+      expect(startMock.http.get).toHaveBeenCalledWith(
         `/internal/esql_registry/extensions/oblt/${esqlQuery}`
       );
     });
 
-    // open the popover and check for recommended queries
-    await userEvent.click(screen.getByRole('button'));
+    await userEvent.click(screen.getByTestId('esql-help-popover-button'));
     expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
-    // Open the nested section to see the recommended queries
     await waitFor(() => userEvent.click(screen.getByTestId('esql-recommended-queries')));
 
     await waitFor(() => {
@@ -113,18 +120,14 @@ describe('ESQLMenuPopover', () => {
   });
 
   it('should handle API call failure gracefully', async () => {
-    // Configure the mock to reject with an error
-    httpModule.http.get.mockRejectedValueOnce(new Error('Network error'));
+    startMock.http.get.mockRejectedValueOnce(new Error('Network error'));
 
-    await renderESQLPopover(stubIndexPattern);
-    // Assert that http.get was called (even if it failed)
+    await renderHelpPopover(stubIndexPattern);
     await waitFor(() => {
-      expect(httpModule.http.get).toHaveBeenCalledTimes(1);
+      expect(startMock.http.get).toHaveBeenCalledTimes(1);
     });
 
-    // The catch block does nothing, so we assert that no error is thrown
-    // and that the static recommended queries are still shown.
-    await userEvent.click(screen.getByRole('button'));
+    await userEvent.click(screen.getByTestId('esql-help-popover-button'));
     expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
   });
 
@@ -151,12 +154,9 @@ describe('ESQLMenuPopover', () => {
       },
     });
 
-    await renderESQLPopover(stubLogstashDataView);
-
-    // open the popover and check for recommended queries
-    await userEvent.click(screen.getByRole('button'));
+    await renderHelpPopover(stubLogstashDataView);
+    await userEvent.click(screen.getByTestId('esql-help-popover-button'));
     expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
-    // Open the nested section to see the recommended queries
     await waitFor(() => userEvent.click(screen.getByTestId('esql-recommended-queries')));
 
     await waitFor(() => {

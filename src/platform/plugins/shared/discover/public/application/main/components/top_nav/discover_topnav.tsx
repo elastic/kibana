@@ -9,11 +9,7 @@
 
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import { DataViewType, type DataView, type DataViewSpec } from '@kbn/data-views-plugin/public';
-import {
-  DiscoverFlyouts,
-  dismissAllFlyoutsExceptFor,
-  prepareDataViewForEditing,
-} from '@kbn/discover-utils';
+import { prepareDataViewForEditing } from '@kbn/discover-utils';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import {
   type Filter,
@@ -304,12 +300,6 @@ export const DiscoverTopNav = ({
     onCreateDefaultAdHocDataView,
   ]);
 
-  const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {
-    if (isOpen) {
-      dismissAllFlyoutsExceptFor(DiscoverFlyouts.esqlDocs);
-    }
-  }, []);
-
   const searchBarCustomization = useDiscoverCustomization('search_bar');
 
   const SearchBar = useMemo(
@@ -390,7 +380,6 @@ export const DiscoverTopNav = ({
             <searchBarCustomization.PrependFilterBar />
           ) : undefined
         }
-        onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         draft={searchDraftUiState}
         onDraftChange={onSearchDraftChange}
         esqlEditorInitialState={esqlEditorUiState}

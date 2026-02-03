@@ -150,7 +150,6 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   submitOnBlur?: boolean;
 
   renderQueryInputAppend?: () => React.ReactNode;
-  onESQLDocsFlyoutVisibilityChanged?: QueryBarTopRowProps['onESQLDocsFlyoutVisibilityChanged'];
   /**
    * Optional configuration for ES|QL variables.
    *
@@ -799,7 +798,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           suggestionsAbstraction={this.props.suggestionsAbstraction}
           renderQueryInputAppend={this.props.renderQueryInputAppend}
           disableExternalPadding={this.props.displayStyle === 'withBorders'}
-          onESQLDocsFlyoutVisibilityChanged={this.props.onESQLDocsFlyoutVisibilityChanged}
           bubbleSubmitEvent={this.props.bubbleSubmitEvent}
           esqlEditorInitialState={this.props.esqlEditorInitialState}
           onEsqlEditorInitialStateChange={this.props.onEsqlEditorInitialStateChange}

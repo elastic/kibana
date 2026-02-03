@@ -499,19 +499,22 @@ export function HistoryAndStarredQueriesTabs({
   isSpaceReduced,
   onUpdateAndSubmit,
   height,
+  starredQueriesService: externalStarredQueriesService,
 }: {
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
   onUpdateAndSubmit: (qs: string, querySource: QuerySource) => void;
   isSpaceReduced?: boolean;
   height: number;
+  starredQueriesService?: EsqlStarredQueriesService | null;
 }) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { core, usageCollection, storage } = kibana.services;
 
   const [starredQueriesService, setStarredQueriesService] = useState<
     EsqlStarredQueriesService | null | undefined
-  >();
+  >(externalStarredQueriesService);
+  const effectiveStarredQueriesService = externalStarredQueriesService ?? starredQueriesService;
   const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
   const [historyItems, setHistoryItems] = useState<QueryHistoryItem[]>(() =>
     getHistoryItems('desc')
@@ -530,6 +533,11 @@ export function HistoryAndStarredQueriesTabs({
   }, [onUpdateAndSubmit]);
 
   useEffect(() => {
+    if (externalStarredQueriesService !== undefined) {
+      setStarredQueriesService(externalStarredQueriesService);
+      return;
+    }
+
     const initializeService = async () => {
       const starredService = await EsqlStarredQueriesService.initialize({
         http: core.http,
@@ -547,9 +555,16 @@ export function HistoryAndStarredQueriesTabs({
     if (!starredQueriesService) {
       initializeService();
     }
-  }, [core.http, core.userProfile, starredQueriesService, storage, usageCollection]);
+  }, [
+    core.http,
+    core.userProfile,
+    externalStarredQueriesService,
+    starredQueriesService,
+    storage,
+    usageCollection,
+  ]);
 
-  starredQueriesService?.queries$.subscribe((nextQueries) => {
+  effectiveStarredQueriesService?.queries$.subscribe((nextQueries) => {
     if (nextQueries.length !== starredQueries.length) {
       setStarredQueries(nextQueries);
     }
@@ -588,7 +603,7 @@ export function HistoryAndStarredQueriesTabs({
         tableCaption={i18n.translate('esqlEditor.query.querieshistoryTable', {
           defaultMessage: 'Queries history table',
         })}
-        starredQueriesService={starredQueriesService ?? undefined}
+        starredQueriesService={effectiveStarredQueriesService ?? undefined}
       />
     ),
     [
@@ -597,7 +612,7 @@ export function HistoryAndStarredQueriesTabs({
       containerWidth,
       height,
       filteredHistoryItems,
-      starredQueriesService,
+      effectiveStarredQueriesService,
     ]
   );
 
@@ -613,7 +628,7 @@ export function HistoryAndStarredQueriesTabs({
         tableCaption={i18n.translate('esqlEditor.query.starredQueriesTable', {
           defaultMessage: 'Starred queries table',
         })}
-        starredQueriesService={starredQueriesService ?? undefined}
+        starredQueriesService={effectiveStarredQueriesService ?? undefined}
         isStarredTab={true}
       />
     ),
@@ -623,7 +638,7 @@ export function HistoryAndStarredQueriesTabs({
       containerWidth,
       height,
       filteredStarredQueries,
-      starredQueriesService,
+      effectiveStarredQueriesService,
     ]
   );
 
@@ -642,7 +657,7 @@ export function HistoryAndStarredQueriesTabs({
         dataTestSubj: 'history-queries-tab',
         content: historyQueryList,
       },
-      starredQueriesService !== null && {
+      effectiveStarredQueriesService !== null && {
         id: HistoryTabId.standardQueries,
         dataTestSubj: 'starred-queries-tab',
         name: i18n.translate('esqlEditor.query.starredQueriesTabLabel', {
@@ -656,7 +671,7 @@ export function HistoryAndStarredQueriesTabs({
         content: starredQueryList,
       },
     ]);
-  }, [historyQueryList, starredQueriesService, starredQueries?.length, starredQueryList]);
+  }, [effectiveStarredQueriesService, historyQueryList, starredQueries?.length, starredQueryList]);
 
   const [selectedTabId, setSelectedTabId] = useRestorableState(
     'historySelectedTabId',
