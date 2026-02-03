@@ -392,7 +392,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
               data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.CLOSE_BUTTON}
             >
               <FormattedMessage
-                id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.closeButton"
+                id="xpack.fleet.cloudConnector.cloudConnectorPoliciesFlyout.closeButton"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
