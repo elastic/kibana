@@ -7,13 +7,18 @@
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '@kbn/triggers-actions-ui-plugin/public';
 
 export interface DataSourcesPluginSetup {}
 
 export interface DataSourcesPluginStart {}
 
-export interface DataSourcesPluginSetupDependencies {}
+export interface DataSourcesPluginSetupDependencies {
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+}
 
 export interface DataSourcesPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;

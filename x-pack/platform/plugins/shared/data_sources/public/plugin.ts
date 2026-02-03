@@ -13,6 +13,10 @@ import {
 } from '@kbn/core/public';
 import { DATA_SOURCES_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { registerApp } from './application/register';
+import {
+  registerDataSourceUIConfigs,
+  registerDataSourceConnectorTypes,
+} from './application/lib/data_source_ui_configs';
 import type {
   DataSourcesPluginSetup,
   DataSourcesPluginSetupDependencies,
@@ -31,15 +35,25 @@ export class DataSourcesPlugin
 {
   constructor(context: PluginInitializerContext) {}
   setup(
-    core: CoreSetup<DataSourcesPluginStartDependencies, DataSourcesPluginStart>
+    core: CoreSetup<DataSourcesPluginStartDependencies, DataSourcesPluginStart>,
+    plugins: DataSourcesPluginSetupDependencies
   ): DataSourcesPluginSetup {
     const isDataSourcesEnabled = core.settings.client.get<boolean>(DATA_SOURCES_ENABLED_SETTING_ID);
     if (isDataSourcesEnabled) {
       registerApp({ core });
     }
+
+    // Register UI configs first
+    registerDataSourceUIConfigs();
+
+    // Then register custom connector types with action type registry
+    registerDataSourceConnectorTypes({
+      actionTypeRegistry: plugins.triggersActionsUi.actionTypeRegistry,
+    });
+
     return {};
   }
-  start(core: CoreStart): DataSourcesPluginStart {
+  start(core: CoreStart, plugins: DataSourcesPluginStartDependencies): DataSourcesPluginStart {
     return {};
   }
 }
