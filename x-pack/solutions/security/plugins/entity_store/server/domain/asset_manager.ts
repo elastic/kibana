@@ -51,8 +51,10 @@ export class AssetManager {
   public async start(request: KibanaRequest, type: EntityType) {
     try {
       this.logger.get(type).debug(`Scheduling extract entity task for type: ${type}`);
-      const { logExtractionState: { frequency } } = await this.engineDescriptorClient.findOrThrow(type);
-      
+      const {
+        logExtractionState: { frequency },
+      } = await this.engineDescriptorClient.findOrThrow(type);
+
       await scheduleExtractEntityTask({
         logger: this.logger,
         taskManager: this.taskManager,

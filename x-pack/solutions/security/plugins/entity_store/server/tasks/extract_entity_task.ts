@@ -158,7 +158,6 @@ export async function scheduleExtractEntityTask({
   namespace: string;
   request: KibanaRequest;
 }): Promise<void> {
-
   try {
     const taskType = getTaskType(type);
     const taskId = getTaskId(type, namespace);
