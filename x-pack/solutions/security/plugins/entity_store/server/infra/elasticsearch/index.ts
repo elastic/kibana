@@ -38,11 +38,11 @@ export const createIndex = async (
 export const deleteIndex = (esClient: EsClient, index: IndexName) =>
   esClient.indices.delete({ index }, { ignore: [404] });
 
-export const putComponentTemplate = (
+export const putComponentTemplate = async (
   esClient: EsClient,
   request: ClusterPutComponentTemplateRequest
 ) => {
-  esClient.cluster.putComponentTemplate(request);
+  await esClient.cluster.putComponentTemplate(request);
 };
 
 export const deleteComponentTemplate = (esClient: EsClient, name: Names) =>
