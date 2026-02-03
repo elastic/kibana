@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { GenericIndexPatternColumn, StaticValueIndexPatternColumn } from '@kbn/lens-common';
 import { generateEsqlQuery } from './generate_esql_query';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
 import { defaultUiSettingsGet } from './__mocks__/ui_settings';
@@ -14,6 +15,21 @@ import {
   mockIndexPatternWithoutTimeField,
   mockDateRange,
 } from './__mocks__/esql_query_mocks';
+
+// Helper to create static_value column with proper typing
+const createStaticValueColumn = (
+  value: string,
+  label: string
+): StaticValueIndexPatternColumn & GenericIndexPatternColumn => ({
+  operationType: 'static_value',
+  label,
+  dataType: 'number',
+  isBucketed: false,
+  references: [],
+  params: {
+    value,
+  },
+});
 
 describe('generateEsqlQuery metric max (static_value)', () => {
   const { uiSettings } = createCoreSetupMock();
@@ -45,19 +61,7 @@ describe('generateEsqlQuery metric max (static_value)', () => {
             isBucketed: false,
           },
         ],
-        [
-          '3',
-          {
-            operationType: 'static_value',
-            label: 'Static value: 100',
-            dataType: 'number',
-            isBucketed: false,
-            references: [],
-            params: {
-              value: '100',
-            },
-          },
-        ],
+        ['3', createStaticValueColumn('100', 'Static value: 100')],
       ],
       mockLayer,
       mockIndexPattern,
@@ -85,21 +89,7 @@ describe('generateEsqlQuery metric max (static_value)', () => {
 
   it('should handle static_value without other metrics', () => {
     const result = generateEsqlQuery(
-      [
-        [
-          '1',
-          {
-            operationType: 'static_value',
-            label: 'Static value: 50',
-            dataType: 'number',
-            isBucketed: false,
-            references: [],
-            params: {
-              value: '50',
-            },
-          },
-        ],
-      ],
+      [['1', createStaticValueColumn('50', 'Static value: 50')]],
       mockLayer,
       mockIndexPatternWithoutTimeField,
       uiSettings,
@@ -131,19 +121,7 @@ describe('generateEsqlQuery metric max (static_value)', () => {
             isBucketed: false,
           },
         ],
-        [
-          'max-col-id',
-          {
-            operationType: 'static_value',
-            label: 'Static value: 100',
-            dataType: 'number',
-            isBucketed: false,
-            references: [],
-            params: {
-              value: '100',
-            },
-          },
-        ],
+        ['max-col-id', createStaticValueColumn('100', 'Static value: 100')],
       ],
       mockLayer,
       mockIndexPatternWithoutTimeField,
@@ -167,32 +145,8 @@ describe('generateEsqlQuery metric max (static_value)', () => {
   it('should use indexed names for multiple static values', () => {
     const result = generateEsqlQuery(
       [
-        [
-          '1',
-          {
-            operationType: 'static_value',
-            label: 'Static value: 100',
-            dataType: 'number',
-            isBucketed: false,
-            references: [],
-            params: {
-              value: '100',
-            },
-          },
-        ],
-        [
-          '2',
-          {
-            operationType: 'static_value',
-            label: 'Static value: 200',
-            dataType: 'number',
-            isBucketed: false,
-            references: [],
-            params: {
-              value: '200',
-            },
-          },
-        ],
+        ['1', createStaticValueColumn('100', 'Static value: 100')],
+        ['2', createStaticValueColumn('200', 'Static value: 200')],
       ],
       mockLayer,
       mockIndexPatternWithoutTimeField,

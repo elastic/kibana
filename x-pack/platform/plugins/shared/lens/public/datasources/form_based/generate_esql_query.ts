@@ -17,7 +17,6 @@ import type {
   DateRange,
   FormBasedLayer,
   IndexPattern,
-  ValueFormatConfig,
   GenericIndexPatternColumn,
   StaticValueIndexPatternColumn,
 } from '@kbn/lens-common';
@@ -27,6 +26,7 @@ import type { OriginalColumn } from '../../../common/types';
 import { operationDefinitionMap } from './operations';
 import { resolveTimeShift } from './time_shift_utils';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
+import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
@@ -176,23 +176,15 @@ export function generateEsqlQuery(
     const format = isColumnFormatted(col) ? col.params?.format : undefined;
 
     // Add to esAggsIdMap so the column can be mapped in text-based layer
-    esAggsIdMap[esAggsId] = [
-      {
-        ...col,
-        id: colId,
-        format: format as unknown as ValueFormatConfig,
-        interval: undefined as never,
-        label: col.customLabel
-          ? col.label
-          : operationDefinitionMap[col.operationType].getDefaultLabel(
-              col,
-              layer.columns,
-              indexPattern,
-              uiSettings,
-              dateRange
-            ),
-      },
-    ];
+    esAggsIdMap[esAggsId] = createEsAggsIdMapEntry({
+      col,
+      colId,
+      format,
+      layer,
+      indexPattern,
+      uiSettings,
+      dateRange,
+    });
 
     // Generate EVAL statement for the static value
     staticValueEvals.push(`${esAggsId} = ${value}`);
@@ -246,23 +238,15 @@ export function generateEsqlQuery(
           : undefined
         : undefined);
 
-    esAggsIdMap[esAggsId] = [
-      {
-        ...col,
-        id: colId,
-        format: format as unknown as ValueFormatConfig,
-        interval: undefined as never,
-        label: col.customLabel
-          ? col.label
-          : operationDefinitionMap[col.operationType].getDefaultLabel(
-              col,
-              layer.columns,
-              indexPattern,
-              uiSettings,
-              dateRange
-            ),
-      },
-    ];
+    esAggsIdMap[esAggsId] = createEsAggsIdMapEntry({
+      col,
+      colId,
+      format,
+      layer,
+      indexPattern,
+      uiSettings,
+      dateRange,
+    });
 
     const rawResult = def.toESQL(
       {
@@ -383,24 +367,17 @@ export function generateEsqlQuery(
       // 3. Field's default format from data view (buckets don't need fallback)
       undefined;
 
-    esAggsIdMap[esAggsId] = [
-      {
-        ...col,
-        id: colId,
-        format: format as unknown as ValueFormatConfig,
-        interval: interval as never,
-        ...('sourceField' in col ? { sourceField: col.sourceField! } : {}),
-        label: col.customLabel
-          ? col.label
-          : operationDefinitionMap[col.operationType].getDefaultLabel(
-              col,
-              layer.columns,
-              indexPattern,
-              uiSettings,
-              dateRange
-            ),
-      },
-    ];
+    esAggsIdMap[esAggsId] = createEsAggsIdMapEntry({
+      col,
+      colId,
+      format,
+      interval,
+      layer,
+      indexPattern,
+      uiSettings,
+      dateRange,
+      includeSourceField: true,
+    });
 
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
       const column = col;
