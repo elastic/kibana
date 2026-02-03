@@ -24,8 +24,12 @@ export default async function (ftrContext: FtrConfigProviderContext) {
   }
 
   const preconfiguredConnectors = getPreconfiguredConnectorConfig();
+  const eisServerArg = `xpack.inference.elastic.url=${EIS_QA_URL}`;
 
-  return createStatefulTestConfig({
+  // eslint-disable-next-line no-console
+  console.log(`[EIS Config] Adding ES server arg: ${eisServerArg}`);
+
+  const config = await createStatefulTestConfig({
     services: agentBuilderApiServices,
     testFiles: [require.resolve('./tests')],
     junit: {
@@ -33,10 +37,15 @@ export default async function (ftrContext: FtrConfigProviderContext) {
     },
     // @ts-expect-error - esTestCluster is not in the type but is supported for local FTR
     esTestCluster: {
-      serverArgs: [`xpack.inference.elastic.url=${EIS_QA_URL}`],
+      serverArgs: [eisServerArg],
     },
     kbnTestServer: {
       serverArgs: [`--xpack.actions.preconfigured=${JSON.stringify(preconfiguredConnectors)}`],
     },
   })(ftrContext);
+
+  // eslint-disable-next-line no-console
+  console.log(`[EIS Config] Final esTestCluster.serverArgs:`, config.esTestCluster?.serverArgs);
+
+  return config;
 }
