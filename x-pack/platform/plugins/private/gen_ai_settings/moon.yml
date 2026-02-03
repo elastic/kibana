@@ -49,6 +49,8 @@ dependsOn:
   - '@kbn/product-doc-common'
   - '@kbn/react-kibana-mount'
   - '@kbn/agent-builder-common'
+  - '@kbn/scout'
+  - '@kbn/ai-assistant-management-plugin'
 tags:
   - plugin
   - prod
