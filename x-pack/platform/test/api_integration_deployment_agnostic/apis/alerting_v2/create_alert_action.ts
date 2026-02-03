@@ -30,12 +30,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       olderAlertEvent = createAlertEvent({
         group_hash: 'test-group-hash',
-        episode_id: 'episode-1',
+        episode: { id: 'episode-1', status: 'active' },
         '@timestamp': '2024-01-01T00:00:00.000Z',
       });
       alertEvent = createAlertEvent({
         group_hash: 'test-group-hash',
-        episode_id: 'episode-2',
+        episode: { id: 'episode-2', status: 'active' },
         '@timestamp': '2024-01-02T00:00:00.000Z',
       });
 
@@ -104,7 +104,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(action).to.be.ok();
       expect(action!.group_hash).to.be('test-group-hash');
       expect(action!.action_type).to.be('ack');
-      expect(action!.episode_id).to.be(alertEvent.episode_id);
+      expect(action!.episode_id).to.be(alertEvent.episode?.id);
       expect(action!.rule_id).to.be(alertEvent.rule.id);
       expect(action!.last_series_event_timestamp).to.be(alertEvent['@timestamp']);
     });
@@ -122,7 +122,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(action).to.be.ok();
       expect(action!.group_hash).to.be('test-group-hash');
       expect(action!.action_type).to.be('unack');
-      expect(action!.episode_id).to.be(alertEvent.episode_id);
+      expect(action!.episode_id).to.be(alertEvent.episode?.id);
     });
 
     it('should return 204 for tag action with tags and write action document', async () => {
@@ -272,7 +272,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(action).to.be.ok();
       expect(action!.group_hash).to.be('test-group-hash');
       expect(action!.action_type).to.be('ack');
-      expect(action!.episode_id).to.be(olderAlertEvent.episode_id);
+      expect(action!.episode_id).to.be(olderAlertEvent.episode?.id);
       expect(action!.last_series_event_timestamp).to.be(olderAlertEvent['@timestamp']);
     });
   });
