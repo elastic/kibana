@@ -134,7 +134,9 @@ function buildVisualizationState(config: LensXYConfig): XYState {
             xAccessor: `x_${ACCESSOR}${i}`,
             ...(layerBreakdown.length > 0
               ? {
-                  splitAccessors: layerBreakdown.map((_, breakdownIndex) => `${ACCESSOR}${i}_breakdown_${breakdownIndex}`),
+                  splitAccessors: layerBreakdown.map(
+                    (_, breakdownIndex) => `${ACCESSOR}${i}_breakdown_${breakdownIndex}`
+                  ),
                 }
               : {}),
             accessors: layer.yAxis.map((_, index) => `${ACCESSOR}${i}_${index}`),
