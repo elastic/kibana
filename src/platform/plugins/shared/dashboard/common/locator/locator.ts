@@ -84,6 +84,7 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       preserveSavedFilters,
       dashboardId,
       dashboardAttachmentId,
+      versionId,
       ...restParams
     } = params;
     const useHash = paramsUseHash ?? this.deps.useHashedUrl;
@@ -133,6 +134,9 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       path = `${path}&${DASHBOARD_ATTACHMENT_ID_PARAM}=${encodeURIComponent(
         dashboardAttachmentId
       )}`;
+    }
+    if (versionId) {
+      path = `${path}&versionId=${encodeURIComponent(versionId)}`;
     }
 
     return {

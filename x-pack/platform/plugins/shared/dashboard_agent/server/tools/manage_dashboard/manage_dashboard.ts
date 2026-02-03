@@ -44,9 +44,185 @@ const getPanelId = (panel: AttachmentPanel): string => {
 };
 
 /**
- * Input schema for inline visualization creation.
+ * Failure record for tracking visualization errors.
  */
-const inlineVisualizationInputSchema = z.object({
+interface VisualizationFailure {
+  type: string;
+  identifier: string;
+  error: string;
+}
+
+/**
+ * Input for generating a visualization from natural language.
+ */
+interface VisualizationQueryInput {
+  query: string;
+  index?: string;
+  chartType?: SupportedChartType;
+  esql?: string;
+}
+
+/**
+ * Resolves existing visualization attachments and adds them as dashboard panels.
+ * - simply looks up pre-built configurations.
+ */
+const resolveExistingVisualizations = async ({
+  visualizationIds,
+  attachments,
+  dashboardAttachmentId,
+  events,
+  logger,
+}: {
+  visualizationIds: string[];
+  attachments: Parameters<BuiltinToolDefinition['handler']>[1]['attachments'];
+  dashboardAttachmentId: string;
+  events: Parameters<BuiltinToolDefinition['handler']>[1]['events'];
+  logger: Parameters<BuiltinToolDefinition['handler']>[1]['logger'];
+}): Promise<{ panels: LensAttachmentPanel[]; failures: VisualizationFailure[] }> => {
+  const panels: LensAttachmentPanel[] = [];
+  const failures: VisualizationFailure[] = [];
+
+  for (const attachmentId of visualizationIds) {
+    try {
+      const vizConfig = resolveLensConfigFromAttachment(attachmentId, attachments);
+
+      const panelEntry: LensAttachmentPanel = {
+        type: 'lens',
+        panelId: uuidv4(),
+        visualization: vizConfig,
+        title: vizConfig.title,
+      };
+      panels.push(panelEntry);
+
+      events.sendUiEvent(DASHBOARD_PANEL_ADDED_EVENT, {
+        dashboardAttachmentId,
+        panel: {
+          type: 'lens',
+          panelId: panelEntry.panelId,
+          visualization: vizConfig,
+          title: vizConfig.title,
+        },
+      });
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      logger.error(`Error resolving visualization attachment "${attachmentId}": ${errorMessage}`);
+      failures.push({
+        type: 'existing_visualization',
+        identifier: attachmentId,
+        error: errorMessage,
+      });
+    }
+  }
+
+  logger.debug(
+    `Successfully resolved ${panels.length}/${visualizationIds.length} existing visualizations`
+  );
+
+  return { panels, failures };
+};
+
+/**
+ * Generates new visualizations from natural language queries using LLM - requires AI inference.
+ */
+const generateVisualizationsFromQueries = async ({
+  queries,
+  modelProvider,
+  esClient,
+  dashboardAttachmentId,
+  events,
+  logger,
+}: {
+  queries: VisualizationQueryInput[];
+  modelProvider: Parameters<BuiltinToolDefinition['handler']>[1]['modelProvider'];
+  esClient: Parameters<BuiltinToolDefinition['handler']>[1]['esClient'];
+  dashboardAttachmentId: string;
+  events: Parameters<BuiltinToolDefinition['handler']>[1]['events'];
+  logger: Parameters<BuiltinToolDefinition['handler']>[1]['logger'];
+}): Promise<{ panels: LensAttachmentPanel[]; failures: VisualizationFailure[] }> => {
+  const panels: LensAttachmentPanel[] = [];
+  const failures: VisualizationFailure[] = [];
+
+  const model = await modelProvider.getDefaultModel();
+  const graph = createVisualizationGraph(model, logger, events, esClient);
+
+  for (let i = 0; i < queries.length; i++) {
+    const { query: nlQuery, index, chartType, esql } = queries[i];
+
+    events.reportProgress(`Creating visualization ${i + 1} of ${queries.length}: "${nlQuery}"`);
+
+    try {
+      let selectedChartType: SupportedChartType = chartType || SupportedChartType.Metric;
+      if (!chartType) {
+        logger.debug('Chart type not provided, using LLM to suggest one');
+        selectedChartType = await guessChartType(modelProvider, '', nlQuery);
+      }
+
+      const schema = getSchemaForChartType(selectedChartType);
+
+      const finalState = await graph.invoke({
+        nlQuery,
+        index,
+        chartType: selectedChartType,
+        schema,
+        existingConfig: undefined,
+        parsedExistingConfig: null,
+        esqlQuery: esql || '',
+        currentAttempt: 0,
+        actions: [],
+        validatedConfig: null,
+        error: null,
+      });
+
+      const { validatedConfig, error, currentAttempt, esqlQuery } = finalState;
+
+      if (!validatedConfig) {
+        throw new Error(
+          `Failed to generate valid configuration after ${currentAttempt} attempts. Last error: ${
+            error || 'Unknown error'
+          }`
+        );
+      }
+
+      const panelEntry: LensAttachmentPanel = {
+        type: 'lens',
+        panelId: uuidv4(),
+        visualization: validatedConfig,
+        title: validatedConfig.title ?? nlQuery.slice(0, 50),
+        query: nlQuery,
+        esql: esqlQuery,
+      };
+
+      panels.push(panelEntry);
+
+      events.sendUiEvent(DASHBOARD_PANEL_ADDED_EVENT, {
+        dashboardAttachmentId,
+        panel: {
+          type: 'lens',
+          panelId: panelEntry.panelId,
+          visualization: validatedConfig,
+          title: panelEntry.title,
+        },
+      });
+
+      logger.debug(`Created lens visualization: ${panelEntry.panelId}`);
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      logger.error(`Error creating visualization for query "${nlQuery}": ${errorMessage}`);
+      failures.push({
+        type: 'generated_visualization',
+        identifier: nlQuery,
+        error: errorMessage,
+      });
+    }
+  }
+
+  return { panels, failures };
+};
+
+/**
+ * Input schema for generating a visualization from natural language.
+ */
+const visualizationQuerySchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
   index: z.string().optional().describe('(optional) Index, alias, or datastream to target.'),
   chartType: z
@@ -54,7 +230,7 @@ const inlineVisualizationInputSchema = z.object({
     .optional()
     .describe('(optional) The type of chart to create.'),
   esql: z.string().optional().describe('(optional) An ES|QL query to use for the visualization.'),
-});
+}) satisfies z.ZodType<VisualizationQueryInput>;
 
 const manageDashboardSchema = z.object({
   dashboardAttachmentId: z
@@ -75,13 +251,13 @@ const manageDashboardSchema = z.object({
     .string()
     .optional()
     .describe('(optional) Markdown content for a summary panel at the top of the dashboard.'),
-  addVisualizations: z
-    .array(inlineVisualizationInputSchema)
+  visualizationQueries: z
+    .array(visualizationQuerySchema)
     .optional()
     .describe(
-      '(optional) Array of visualization configurations to create inline and add to the dashboard.'
+      '(optional) Array of natural language queries to generate new visualizations using LLM.'
     ),
-  addVisualizationAttachments: z
+  existingVisualizationIds: z
     .array(z.string())
     .optional()
     .describe('(optional) Array of existing visualization attachment IDs to add to the dashboard.'),
@@ -122,8 +298,8 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
         title,
         description,
         markdownContent,
-        addVisualizations,
-        addVisualizationAttachments,
+        visualizationQueries,
+        existingVisualizationIds,
         removePanelIds,
       },
       { logger, attachments, esClient, modelProvider, events }
@@ -132,6 +308,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
         let currentAttachmentId: string;
         let previousData: DashboardAttachmentData;
         let isNewDashboard = false;
+        console.log('###dashboardAttachmentId', dashboardAttachmentId);
 
         if (dashboardAttachmentId) {
           // Updating existing dashboard
@@ -183,16 +360,11 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
           logger.debug(`Created new dashboard attachment: ${currentAttachmentId}`);
         }
 
-        // Build updated metadata
-        const updatedTitle = title ?? previousData.title;
-        const updatedDescription = description ?? previousData.description;
-        const updatedMarkdownContent = markdownContent ?? previousData.markdownContent;
-
         // Start with existing panels
         let panels: AttachmentPanel[] = [...previousData.panels];
 
         // Track failures to report to the user
-        const failures: Array<{ type: string; identifier: string; error: string }> = [];
+        const failures: VisualizationFailure[] = [];
 
         // Remove panels if specified
         if (removePanelIds && removePanelIds.length > 0) {
@@ -212,133 +384,36 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
           logger.debug(`Removed ${removedPanels.length} panels from dashboard`);
         }
 
-        // Add visualization attachments - resolve them inline as lens panels
-        if (addVisualizationAttachments && addVisualizationAttachments.length > 0) {
-          let addedCount = 0;
-          for (const attachmentId of addVisualizationAttachments) {
-            try {
-              // Resolve the visualization config from the attachment
-              const vizConfig = resolveLensConfigFromAttachment(attachmentId, attachments);
-
-              const panelEntry: LensAttachmentPanel = {
-                type: 'lens',
-                panelId: uuidv4(),
-                visualization: vizConfig,
-                title: vizConfig.title,
-              };
-              panels.push(panelEntry);
-
-              // Emit panel added event with full visualization config
-              events.sendUiEvent(DASHBOARD_PANEL_ADDED_EVENT, {
-                dashboardAttachmentId: currentAttachmentId,
-                panel: {
-                  type: 'lens',
-                  panelId: panelEntry.panelId,
-                  visualization: vizConfig,
-                  title: vizConfig.title,
-                },
-              });
-              addedCount++;
-            } catch (error) {
-              const errorMessage = getErrorMessage(error);
-              logger.error(
-                `Error resolving visualization attachment "${attachmentId}": ${errorMessage}`
-              );
-              failures.push({
-                type: 'visualization_attachment',
-                identifier: attachmentId,
-                error: errorMessage,
-              });
-            }
-          }
-          logger.debug(
-            `Successfully added ${addedCount}/${addVisualizationAttachments.length} visualization attachments to dashboard`
-          );
+        if (existingVisualizationIds && existingVisualizationIds.length > 0) {
+          const result = await resolveExistingVisualizations({
+            visualizationIds: existingVisualizationIds,
+            attachments,
+            dashboardAttachmentId: currentAttachmentId,
+            events,
+            logger,
+          });
+          panels.push(...result.panels);
+          failures.push(...result.failures);
         }
 
-        // Create inline visualizations
-        if (addVisualizations && addVisualizations.length > 0) {
-          const model = await modelProvider.getDefaultModel();
-          const graph = createVisualizationGraph(model, logger, events, esClient);
-
-          for (let i = 0; i < addVisualizations.length; i++) {
-            const vizInput = addVisualizations[i];
-            const { query: nlQuery, index, chartType, esql } = vizInput;
-
-            events.reportProgress(
-              `Creating visualization ${i + 1} of ${addVisualizations.length}: "${nlQuery}"`
-            );
-
-            try {
-              // Determine chart type if not provided
-              let selectedChartType: SupportedChartType = chartType || SupportedChartType.Metric;
-              if (!chartType) {
-                logger.debug('Chart type not provided, using LLM to suggest one');
-                selectedChartType = await guessChartType(modelProvider, '', nlQuery);
-              }
-
-              // Get schema for chart type
-              const schema = getSchemaForChartType(selectedChartType);
-
-              const finalState = await graph.invoke({
-                nlQuery,
-                index,
-                chartType: selectedChartType,
-                schema,
-                existingConfig: undefined,
-                parsedExistingConfig: null,
-                esqlQuery: esql || '',
-                currentAttempt: 0,
-                actions: [],
-                validatedConfig: null,
-                error: null,
-              });
-
-              const { validatedConfig, error, currentAttempt, esqlQuery } = finalState;
-
-              if (!validatedConfig) {
-                throw new Error(
-                  `Failed to generate valid configuration after ${currentAttempt} attempts. Last error: ${
-                    error || 'Unknown error'
-                  }`
-                );
-              }
-
-              // Create lens panel entry
-              const panelEntry: LensAttachmentPanel = {
-                type: 'lens',
-                panelId: uuidv4(),
-                visualization: validatedConfig,
-                title: validatedConfig.title ?? nlQuery.slice(0, 50),
-                query: nlQuery,
-                esql: esqlQuery,
-              };
-
-              panels.push(panelEntry);
-
-              // Emit panel added event with full visualization config
-              events.sendUiEvent(DASHBOARD_PANEL_ADDED_EVENT, {
-                dashboardAttachmentId: currentAttachmentId,
-                panel: {
-                  type: 'lens',
-                  panelId: panelEntry.panelId,
-                  visualization: validatedConfig,
-                  title: panelEntry.title,
-                },
-              });
-
-              logger.debug(`Created lens visualization: ${panelEntry.panelId}`);
-            } catch (error) {
-              const errorMessage = getErrorMessage(error);
-              logger.error(`Error creating visualization for query "${nlQuery}": ${errorMessage}`);
-              failures.push({
-                type: 'inline_visualization',
-                identifier: nlQuery,
-                error: errorMessage,
-              });
-            }
-          }
+        // Generate new visualizations from queries (slow - requires LLM)
+        if (visualizationQueries && visualizationQueries.length > 0) {
+          const result = await generateVisualizationsFromQueries({
+            queries: visualizationQueries,
+            modelProvider,
+            esClient,
+            dashboardAttachmentId: currentAttachmentId,
+            events,
+            logger,
+          });
+          panels.push(...result.panels);
+          failures.push(...result.failures);
         }
+
+        // Build updated metadata
+        const updatedTitle = title ?? previousData.title;
+        const updatedDescription = description ?? previousData.description;
+        const updatedMarkdownContent = markdownContent ?? previousData.markdownContent;
 
         const updatedAttachment = await attachments.update(currentAttachmentId, {
           data: {

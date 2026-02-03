@@ -69,5 +69,6 @@ export type DashboardLocatorParams = Partial<
      * Used to maintain continuity between agent interactions and dashboard state.
      */
     dashboardAttachmentId?: string;
+    versionId?: string;
   }
 >;

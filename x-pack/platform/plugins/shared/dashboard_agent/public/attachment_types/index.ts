@@ -68,7 +68,8 @@ export const registerDashboardAttachmentUiDefinition = ({
         time_range: { from: 'now-24h', to: 'now' },
         // Use a unique attachment ID that includes timestamp to force URL change
         // This ensures navigation triggers even when clicking the same attachment multiple times
-        dashboardAttachmentId: `${attachment.id}-${version.version}`,
+        dashboardAttachmentId: attachment.id,
+        versionId: version.version,
       };
 
       // Navigate to dashboard with panel state
