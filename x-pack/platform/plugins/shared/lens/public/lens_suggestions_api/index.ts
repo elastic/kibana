@@ -80,8 +80,9 @@ const shouldShowLineChart = (
 
   // Check if there's at least one date column (for x-axis)
   const hasDateColumn = columns.some((col) => col.meta?.type === 'date');
+  const hasMultipleSeries = columns.length > 2;
 
-  return hasDateColumn;
+  return hasDateColumn && !hasMultipleSeries;
 };
 
 export const suggestionsApi = ({
@@ -168,11 +169,8 @@ export const suggestionsApi = ({
       (!sug.hide && sug.visualizationId !== 'lnsLegacyMetric')
   );
 
-  const chartType = preferredChartType
-    ? preferredChartType?.toLowerCase()
-    : shouldShowLineChart(context)
-    ? 'line'
-    : undefined;
+  const chartType =
+    preferredChartType?.toLowerCase() ?? shouldShowLineChart(context) ? 'line' : undefined;
 
   // to return line / area instead of a bar chart
   const xyResult = switchVisualizationType({
