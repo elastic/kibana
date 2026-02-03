@@ -12,7 +12,7 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { KpiPanel } from '../../alerts_kpis/common/components';
 import { KpiCollapse } from './kpi_collapse/kpi_collapse';
 import { KpiViewSelect } from './kpi_view_select/kpi_view_select';
-import type { KpiViewSelection } from './kpi_view_select/helpers';
+import { KpiViewSelection } from './kpi_view_select/helpers';
 
 const ATTACKS_KPI_SECTION_PANEL_ID = 'attacks-kpis-section';
 
@@ -27,7 +27,9 @@ export const KPIsSection = memo(() => {
   const { toggleStatus: isExpanded, setToggleStatus: setIsExpanded } = useQueryToggle(
     ATTACKS_KPI_SECTION_PANEL_ID
   );
-  const [kpiViewSelection, setKpiViewSelection] = useState<KpiViewSelection>('summary');
+  const [kpiViewSelection, setKpiViewSelection] = useState<KpiViewSelection>(
+    KpiViewSelection.Summary
+  );
 
   const title = useMemo(
     () =>

@@ -9,49 +9,49 @@ import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 
 import * as i18n from './translations';
 
-export const SUMMARY_ID = 'summary';
-export const TREND_ID = 'trend';
-export const COUNT_ID = 'count';
-export const TREEMAP_ID = 'treemap';
-
-export type KpiViewSelection = 'summary' | 'trend' | 'count' | 'treemap';
+export enum KpiViewSelection {
+  Summary = 'summary',
+  Trend = 'trend',
+  Count = 'count',
+  Treemap = 'treemap',
+}
 
 export const getOptionProperties = (view: KpiViewSelection): EuiButtonGroupOptionProps => {
   switch (view) {
-    case SUMMARY_ID:
+    case KpiViewSelection.Summary:
       return {
-        id: SUMMARY_ID,
-        'data-test-subj': `kpi-view-select-${SUMMARY_ID}`,
+        id: KpiViewSelection.Summary,
+        'data-test-subj': `kpi-view-select-${KpiViewSelection.Summary}`,
         label: i18n.SUMMARY,
-        value: SUMMARY_ID,
+        value: KpiViewSelection.Summary,
       };
-    case TREND_ID:
+    case KpiViewSelection.Trend:
       return {
-        id: TREND_ID,
-        'data-test-subj': `kpi-view-select-${TREND_ID}`,
+        id: KpiViewSelection.Trend,
+        'data-test-subj': `kpi-view-select-${KpiViewSelection.Trend}`,
         label: i18n.TREND,
-        value: TREND_ID,
+        value: KpiViewSelection.Trend,
       };
-    case COUNT_ID:
+    case KpiViewSelection.Count:
       return {
-        id: COUNT_ID,
-        'data-test-subj': `kpi-view-select-${COUNT_ID}`,
+        id: KpiViewSelection.Count,
+        'data-test-subj': `kpi-view-select-${KpiViewSelection.Count}`,
         label: i18n.COUNT,
-        value: COUNT_ID,
+        value: KpiViewSelection.Count,
       };
-    case TREEMAP_ID:
+    case KpiViewSelection.Treemap:
       return {
-        id: TREEMAP_ID,
-        'data-test-subj': `kpi-view-select-${TREEMAP_ID}`,
+        id: KpiViewSelection.Treemap,
+        'data-test-subj': `kpi-view-select-${KpiViewSelection.Treemap}`,
         label: i18n.TREEMAP,
-        value: TREEMAP_ID,
+        value: KpiViewSelection.Treemap,
       };
     default:
       return {
-        id: SUMMARY_ID,
-        'data-test-subj': `kpi-view-select-${SUMMARY_ID}`,
+        id: KpiViewSelection.Summary,
+        'data-test-subj': `kpi-view-select-${KpiViewSelection.Summary}`,
         label: i18n.SUMMARY,
-        value: SUMMARY_ID,
+        value: KpiViewSelection.Summary,
       };
   }
 };

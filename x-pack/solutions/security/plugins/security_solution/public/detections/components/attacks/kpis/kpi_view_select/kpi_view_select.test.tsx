@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { KpiViewSelect } from './kpi_view_select';
+import { KpiViewSelection } from './helpers';
 
 describe('<KpiViewSelect />', () => {
   const mockSetKpiViewSelection = jest.fn();
@@ -20,7 +21,10 @@ describe('<KpiViewSelect />', () => {
   it('renders the view selector with all tabs', () => {
     render(
       <TestProviders>
-        <KpiViewSelect kpiViewSelection="summary" setKpiViewSelection={mockSetKpiViewSelection} />
+        <KpiViewSelect
+          kpiViewSelection={KpiViewSelection.Summary}
+          setKpiViewSelection={mockSetKpiViewSelection}
+        />
       </TestProviders>
     );
 
@@ -34,7 +38,10 @@ describe('<KpiViewSelect />', () => {
   it('marks the selected view with aria-pressed', () => {
     render(
       <TestProviders>
-        <KpiViewSelect kpiViewSelection="trend" setKpiViewSelection={mockSetKpiViewSelection} />
+        <KpiViewSelect
+          kpiViewSelection={KpiViewSelection.Trend}
+          setKpiViewSelection={mockSetKpiViewSelection}
+        />
       </TestProviders>
     );
 
@@ -45,24 +52,30 @@ describe('<KpiViewSelect />', () => {
   it('calls setKpiViewSelection when a different view is clicked', () => {
     render(
       <TestProviders>
-        <KpiViewSelect kpiViewSelection="summary" setKpiViewSelection={mockSetKpiViewSelection} />
+        <KpiViewSelect
+          kpiViewSelection={KpiViewSelection.Summary}
+          setKpiViewSelection={mockSetKpiViewSelection}
+        />
       </TestProviders>
     );
 
     fireEvent.click(screen.getByTestId('kpi-view-select-count'));
 
-    expect(mockSetKpiViewSelection).toHaveBeenCalledWith('count');
+    expect(mockSetKpiViewSelection).toHaveBeenCalledWith(KpiViewSelection.Count);
   });
 
   it('calls setKpiViewSelection with treemap when treemap tab is clicked', () => {
     render(
       <TestProviders>
-        <KpiViewSelect kpiViewSelection="summary" setKpiViewSelection={mockSetKpiViewSelection} />
+        <KpiViewSelect
+          kpiViewSelection={KpiViewSelection.Summary}
+          setKpiViewSelection={mockSetKpiViewSelection}
+        />
       </TestProviders>
     );
 
     fireEvent.click(screen.getByTestId('kpi-view-select-treemap'));
 
-    expect(mockSetKpiViewSelection).toHaveBeenCalledWith('treemap');
+    expect(mockSetKpiViewSelection).toHaveBeenCalledWith(KpiViewSelection.Treemap);
   });
 });

@@ -10,12 +10,13 @@ import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { KpiCollapse } from './kpi_collapse';
 import * as i18n from '../kpi_view_select/translations';
+import { KpiViewSelection } from '../kpi_view_select/helpers';
 
 describe('<KpiCollapse />', () => {
   it('renders Summary label when kpiViewSelection is summary', () => {
     render(
       <TestProviders>
-        <KpiCollapse kpiViewSelection="summary" />
+        <KpiCollapse kpiViewSelection={KpiViewSelection.Summary} />
       </TestProviders>
     );
 
@@ -25,7 +26,7 @@ describe('<KpiCollapse />', () => {
   it('renders Trends label when kpiViewSelection is trend', () => {
     render(
       <TestProviders>
-        <KpiCollapse kpiViewSelection="trend" />
+        <KpiCollapse kpiViewSelection={KpiViewSelection.Trend} />
       </TestProviders>
     );
 
@@ -35,7 +36,7 @@ describe('<KpiCollapse />', () => {
   it('renders Count label when kpiViewSelection is count', () => {
     render(
       <TestProviders>
-        <KpiCollapse kpiViewSelection="count" />
+        <KpiCollapse kpiViewSelection={KpiViewSelection.Count} />
       </TestProviders>
     );
 
@@ -45,7 +46,7 @@ describe('<KpiCollapse />', () => {
   it('renders Treemap label when kpiViewSelection is treemap', () => {
     render(
       <TestProviders>
-        <KpiCollapse kpiViewSelection="treemap" />
+        <KpiCollapse kpiViewSelection={KpiViewSelection.Treemap} />
       </TestProviders>
     );
 

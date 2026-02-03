@@ -7,11 +7,15 @@
 
 import { EuiButtonGroup } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import type { KpiViewSelection } from './helpers';
-import { getOptionProperties } from './helpers';
+import { KpiViewSelection, getOptionProperties } from './helpers';
 import * as i18n from './translations';
 
-const KPI_VIEW_OPTIONS: KpiViewSelection[] = ['summary', 'trend', 'count', 'treemap'];
+const KPI_VIEW_OPTIONS: KpiViewSelection[] = [
+  KpiViewSelection.Summary,
+  KpiViewSelection.Trend,
+  KpiViewSelection.Count,
+  KpiViewSelection.Treemap,
+];
 
 export interface KpiViewSelectProps {
   kpiViewSelection: KpiViewSelection;

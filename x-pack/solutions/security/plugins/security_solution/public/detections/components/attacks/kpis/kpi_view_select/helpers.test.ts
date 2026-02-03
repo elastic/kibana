@@ -5,57 +5,58 @@
  * 2.0.
  */
 
-import { getOptionProperties, SUMMARY_ID, TREND_ID, COUNT_ID, TREEMAP_ID } from './helpers';
+import { getOptionProperties, KpiViewSelection } from './helpers';
 import * as i18n from './translations';
 
 describe('getOptionProperties', () => {
   it('returns correct properties for summary', () => {
-    const result = getOptionProperties('summary');
+    const result = getOptionProperties(KpiViewSelection.Summary);
     expect(result).toEqual({
-      id: SUMMARY_ID,
-      'data-test-subj': `kpi-view-select-${SUMMARY_ID}`,
+      id: KpiViewSelection.Summary,
+      'data-test-subj': `kpi-view-select-${KpiViewSelection.Summary}`,
       label: i18n.SUMMARY,
-      value: SUMMARY_ID,
+      value: KpiViewSelection.Summary,
     });
   });
 
   it('returns correct properties for trend', () => {
-    const result = getOptionProperties('trend');
+    const result = getOptionProperties(KpiViewSelection.Trend);
     expect(result).toEqual({
-      id: TREND_ID,
-      'data-test-subj': `kpi-view-select-${TREND_ID}`,
+      id: KpiViewSelection.Trend,
+      'data-test-subj': `kpi-view-select-${KpiViewSelection.Trend}`,
       label: i18n.TREND,
-      value: TREND_ID,
+      value: KpiViewSelection.Trend,
     });
   });
 
   it('returns correct properties for count', () => {
-    const result = getOptionProperties('count');
+    const result = getOptionProperties(KpiViewSelection.Count);
     expect(result).toEqual({
-      id: COUNT_ID,
-      'data-test-subj': `kpi-view-select-${COUNT_ID}`,
+      id: KpiViewSelection.Count,
+      'data-test-subj': `kpi-view-select-${KpiViewSelection.Count}`,
       label: i18n.COUNT,
-      value: COUNT_ID,
+      value: KpiViewSelection.Count,
     });
   });
 
   it('returns correct properties for treemap', () => {
-    const result = getOptionProperties('treemap');
+    const result = getOptionProperties(KpiViewSelection.Treemap);
     expect(result).toEqual({
-      id: TREEMAP_ID,
-      'data-test-subj': `kpi-view-select-${TREEMAP_ID}`,
+      id: KpiViewSelection.Treemap,
+      'data-test-subj': `kpi-view-select-${KpiViewSelection.Treemap}`,
       label: i18n.TREEMAP,
-      value: TREEMAP_ID,
+      value: KpiViewSelection.Treemap,
     });
   });
 
   it('returns summary properties for unknown view (default)', () => {
-    const result = getOptionProperties('unknown' as 'summary');
+    // @ts-expect-error Testing default case
+    const result = getOptionProperties('unknown');
     expect(result).toEqual({
-      id: SUMMARY_ID,
-      'data-test-subj': `kpi-view-select-${SUMMARY_ID}`,
+      id: KpiViewSelection.Summary,
+      'data-test-subj': `kpi-view-select-${KpiViewSelection.Summary}`,
       label: i18n.SUMMARY,
-      value: SUMMARY_ID,
+      value: KpiViewSelection.Summary,
     });
   });
 });

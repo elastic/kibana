@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiText } from '@elastic/eui';
-import type { KpiViewSelection } from '../kpi_view_select/helpers';
+import { KpiViewSelection } from '../kpi_view_select/helpers';
 import * as i18n from '../kpi_view_select/translations';
 
 export interface KpiCollapseProps {
@@ -16,13 +16,13 @@ export interface KpiCollapseProps {
 
 const getViewLabel = (view: KpiViewSelection): string => {
   switch (view) {
-    case 'summary':
+    case KpiViewSelection.Summary:
       return i18n.SUMMARY;
-    case 'trend':
+    case KpiViewSelection.Trend:
       return i18n.TREND;
-    case 'count':
+    case KpiViewSelection.Count:
       return i18n.COUNT;
-    case 'treemap':
+    case KpiViewSelection.Treemap:
       return i18n.TREEMAP;
     default:
       return i18n.SUMMARY;
