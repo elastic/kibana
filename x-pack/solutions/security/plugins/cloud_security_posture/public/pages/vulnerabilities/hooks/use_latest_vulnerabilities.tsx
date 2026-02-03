@@ -43,6 +43,7 @@ interface VulnerabilitiesQuery extends BaseEsQuery {
   sort: string[][];
   enabled: boolean;
   pageSize: number;
+  refreshCounter?: number;
 }
 
 const getMultiFieldsSort = (sort: string[][]) => {
@@ -112,6 +113,7 @@ export const useLatestVulnerabilities = (options: VulnerabilitiesQuery) => {
    * it uses the getNextPageParam to know if there are more pages to load and retrieve the position of
    * the last loaded record to be used as a from parameter to fetch the next chunk of data.
    */
+
   return useInfiniteQuery(
     [CDR_VULNERABILITIES_INDEX_PATTERN, options],
     async ({ pageParam }) => {

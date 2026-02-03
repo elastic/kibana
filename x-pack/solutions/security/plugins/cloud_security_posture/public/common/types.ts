@@ -18,6 +18,8 @@ export interface FindingsBaseURLQuery {
    * Grouping component selection
    */
   groupBy?: string[];
+
+  refresherCounter?: number;
 }
 
 export interface FindingsBaseESQueryConfig {

@@ -53,7 +53,37 @@ export const useCloudSecurityGrouping = ({
   groupsUnit?: (n: number, parentSelectedGroup: string, hasNullGroup: boolean) => string;
 }) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
-  const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
+  // const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
+  const { urlQuery, setUrlQuery: originalSetUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
+
+  // // Custom setUrlQuery that appends a random string to query.query
+  // const setUrlQuery = useCallback(
+  //   (newQuery: Partial<FindingsBaseURLQuery>) => {
+  //     const randomSuffix = `_${uuid.v4()}`;
+  //     const updatedQuery = {
+  //       ...newQuery,
+  //       query: {
+  //         ...(newQuery.query ?? urlQuery.query),
+  //         query: `${newQuery.query?.query ?? urlQuery.query.query ?? ''}${randomSuffix}`,
+  //       },
+  //     };
+  //     originalSetUrlQuery(updatedQuery);
+  //   },
+  //   [originalSetUrlQuery, urlQuery]
+  // );
+  const setUrlQuery = useCallback(
+    (newQuery: Partial<FindingsBaseURLQuery>) => {
+      const updatedQuery: Partial<FindingsBaseURLQuery> = {
+        ...urlQuery,
+        ...newQuery,
+        refresherCounter: (urlQuery?.refresherCounter ?? 0) + 1,
+      };
+
+      originalSetUrlQuery(updatedQuery);
+    },
+    [originalSetUrlQuery, urlQuery]
+  );
+
   const [activePageIndex, setActivePageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
@@ -93,7 +123,7 @@ export const useCloudSecurityGrouping = ({
    */
   useEffect(() => {
     setActivePageIndex(0);
-  }, [urlQuery.filters, urlQuery.query]);
+  }, [urlQuery.filters, urlQuery.query, urlQuery.refresherCounter]);
 
   /**
    * Set the selected groups from the URL query on the initial render
