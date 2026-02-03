@@ -16,6 +16,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type {
   ModelProvider,
@@ -63,6 +64,10 @@ export interface AgentHandlerContext {
    * Can be used to access ES on behalf of either the current user or the system user.
    */
   esClient: IScopedClusterClient;
+  /**
+   * Saved objects client scoped to the current user.
+   */
+  savedObjectsClient?: SavedObjectsClientContract;
   /**
    * Inference model provider scoped to the current user.
    * Can be used to access the inference APIs or chatModel.

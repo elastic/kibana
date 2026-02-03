@@ -10,6 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   elasticsearchServiceMock,
   httpServerMock,
+  savedObjectsServiceMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
@@ -103,10 +104,7 @@ export const createStateManagerMock = (): StateManagerMock => {
 export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock => {
   return {
     get: jest.fn(),
-    getLatest: jest.fn(),
-    getVersion: jest.fn(),
-    readLatest: jest.fn(),
-    readVersion: jest.fn(),
+    getAttachmentRecord: jest.fn(),
     getActive: jest.fn(),
     getAll: jest.fn(),
     getDiff: jest.fn(),
@@ -119,6 +117,7 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     getAccessedRefs: jest.fn(),
     clearAccessTracking: jest.fn(),
     resolveRefs: jest.fn(),
+    resolveAttachment: jest.fn(),
     getTotalTokenEstimate: jest.fn(),
     hasChanges: jest.fn(),
     markClean: jest.fn(),
@@ -180,6 +179,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     request: httpServerMock.createKibanaRequest(),
     spaceId: 'default',
     esClient: elasticsearchServiceMock.createScopedClusterClient(),
+    savedObjectsClient: savedObjectsServiceMock.createStartContract().getScopedClient({} as any),
     modelProvider: createModelProviderMock(),
     toolProvider: createToolProviderMock(),
     runner: createScopedRunnerMock(),
@@ -203,6 +203,9 @@ export interface ToolHandlerContextMock extends ToolHandlerContext {
   filestore: FileSystemStoreMock;
   prompts: ToolPromptManagerMock;
   stateManager: ToolStateManagerMock;
+  savedObjectsClient: ReturnType<
+    ReturnType<typeof savedObjectsServiceMock.createStartContract>['getScopedClient']
+  >;
 }
 
 export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
@@ -223,6 +226,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     stateManager: createToolStateManagerMock(),
     attachments: createAttachmentStateManagerMock(),
     filestore: createFileSystemStoreMock(),
+    savedObjectsClient: savedObjectsServiceMock.createStartContract().getScopedClient({} as any),
   };
 };
 
@@ -238,6 +242,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
     security: securityServiceMock.createStart(),
+    savedObjects: savedObjectsServiceMock.createStartContract(),
     spaces: spacesMock.createStart(),
     actions: actionsMock.createStart(),
     modelProvider: createModelProviderMock(),
@@ -258,6 +263,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
     security: securityServiceMock.createStart(),
+    savedObjects: savedObjectsServiceMock.createStartContract(),
     spaces: spacesMock.createStart(),
     actions: actionsMock.createStart(),
     modelProviderFactory: createModelProviderFactoryMock(),
