@@ -25,6 +25,7 @@ export interface ProcessorFieldSelectorProps {
   onChange?: (value: string) => void;
   labelAppend?: React.ReactNode;
   processorId?: string;
+  isRequired?: boolean;
 }
 
 export const ProcessorFieldSelector = ({
@@ -35,6 +36,7 @@ export const ProcessorFieldSelector = ({
   onChange,
   labelAppend,
   processorId: processorIdProp,
+  isRequired = true,
 }: ProcessorFieldSelectorProps) => {
   const fieldSuggestions = useEnrichmentFieldSuggestions();
   const streamName = useSimulatorSelector((state) => state.context.streamName);
@@ -68,10 +70,12 @@ export const ProcessorFieldSelector = ({
   const { field, fieldState } = useController({
     name: fieldKey,
     rules: {
-      required: i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorRequiredError',
-        { defaultMessage: 'A field value is required.' }
-      ),
+      required: isRequired
+        ? i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorRequiredError',
+            { defaultMessage: 'A field value is required.' }
+          )
+        : undefined,
     },
   });
 
