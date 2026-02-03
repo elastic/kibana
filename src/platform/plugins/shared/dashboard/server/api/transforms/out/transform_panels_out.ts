@@ -12,7 +12,8 @@ import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../kibana_services';
-import { getPanelReferences, transformPanelReferencesOut } from './get_panel_references';
+import { getPanelReferences } from './get_panel_references';
+import { panelBwc } from './panel_bwc';
 
 export function transformPanelsOut(
   panelsJSON: string = '[]',
@@ -51,65 +52,34 @@ const defaultTransform = (
 ): SavedDashboardPanel['embeddableConfig'] => transformTitlesOut(config);
 
 function transformPanelProperties(
-  {
-    embeddableConfig,
-    gridData,
-    id,
-    panelIndex,
-    panelRefName,
-    title,
-    type,
-    version,
-  }: SavedDashboardPanel,
-  panelReferences?: SavedObjectReference[],
+  storedPanel: SavedDashboardPanel,
+  storedPanelReferences?: SavedObjectReference[],
   containerReferences?: SavedObjectReference[]
 ) {
+  const { panel, panelReferences } = panelBwc(storedPanel, storedPanelReferences ?? []);
+  const { embeddableConfig, gridData, panelIndex, type, version } = panel;
+
   const { sectionId, i, ...restOfGrid } = gridData;
 
-  function getPanelType() {
-    if (type) {
-      return type;
-    }
-
-    // Original by-reference implemenation stored embeddable type in reference
-    const matchingReference =
-      panelRefName && panelReferences
-        ? panelReferences.find((reference) => reference.name === panelRefName)
-        : undefined;
-
-    return matchingReference ? matchingReference.type : 'unknown';
-  }
-
-  const panelType = getPanelType();
-
-  const transforms = embeddableService?.getTransforms(panelType);
-
-  const config = {
-    ...embeddableConfig,
-    // <8.19 title stored as siblings to embeddableConfig
-    ...(title !== undefined && { title }),
-  };
+  const transforms = embeddableService?.getTransforms(type);
 
   let transformedPanelConfig;
   try {
     transformedPanelConfig =
-      transforms?.transformOut?.(
-        config,
-        panelReferences ? transformPanelReferencesOut(panelReferences, panelRefName) : undefined,
-        containerReferences
-      ) ?? defaultTransform(config);
+      transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
+      defaultTransform(embeddableConfig);
   } catch (transformOutError) {
     // do not prevent read on transformOutError
     logger.warn(
-      `Unable to transform "${panelType}" embeddable state on read. Error: ${transformOutError.message}`
+      `Unable to transform "${type}" embeddable state on read. Error: ${transformOutError.message}`
     );
   }
 
   return {
     grid: restOfGrid,
-    config: transformedPanelConfig ? transformedPanelConfig : config,
+    config: transformedPanelConfig ? transformedPanelConfig : embeddableConfig,
     uid: panelIndex,
-    type: panelType,
+    type,
     ...(version && { version }),
   };
 }
