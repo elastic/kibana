@@ -35,15 +35,21 @@ export function ExternalsListContents({ elementData }: ContentsProps) {
         <EuiDescriptionList>
           {nodeData.groupedConnections.map((resource: ExternalConnectionNode) => {
             const title = resource.label || resource[SPAN_DESTINATION_SERVICE_RESOURCE];
-            const desc = `${resource[SPAN_TYPE]} (${resource[SPAN_SUBTYPE]})`;
+            // Support both Cytoscape (span.type/span.subtype) and React Flow (spanType/spanSubtype) formats
+            // To be refactored when the Cytoscape is replaced.
+            const spanType = resource[SPAN_TYPE] ?? resource.spanType;
+            const spanSubtype = resource[SPAN_SUBTYPE] ?? resource.spanSubtype;
+            const desc = spanType && spanSubtype ? `${spanType} (${spanSubtype})` : '';
             return (
               <Fragment key={resource.id}>
                 <EuiDescriptionListTitle className="eui-textTruncate" title={title}>
                   {title}
                 </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription className="eui-textTruncate" title={desc}>
-                  {desc}
-                </EuiDescriptionListDescription>
+                {desc && (
+                  <EuiDescriptionListDescription className="eui-textTruncate" title={desc}>
+                    {desc}
+                  </EuiDescriptionListDescription>
+                )}
               </Fragment>
             );
           })}

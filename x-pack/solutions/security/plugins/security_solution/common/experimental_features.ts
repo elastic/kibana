@@ -47,7 +47,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Memory Dump response actions support for Elastic Defend.
    * Release: v9.3
    */
-  responseActionsEndpointMemoryDump: false,
+  responseActionsEndpointMemoryDump: true,
 
   /**
    * `runscript` response action for Elastic Defend Endpoint
