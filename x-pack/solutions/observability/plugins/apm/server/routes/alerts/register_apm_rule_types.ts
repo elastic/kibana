@@ -92,7 +92,21 @@ export const apmRuleTypeAlertFieldMap = {
 // Defines which alerts-as-data index alerts will use
 export const ApmRuleTypeAlertDefinition: IRuleTypeAlerts<ObservabilityApmAlert> = {
   context: APM_RULE_TYPE_ALERT_CONTEXT,
-  mappings: { fieldMap: apmRuleTypeAlertFieldMap },
+  mappings: {
+    fieldMap: apmRuleTypeAlertFieldMap,
+    dynamicTemplates: [
+      {
+        strings_as_keywords: {
+          path_match: 'kibana.alert.grouping.*',
+          match_mapping_type: 'string',
+          mapping: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+        },
+      },
+    ],
+  },
   useLegacyAlerts: true,
   shouldWrite: true,
 };

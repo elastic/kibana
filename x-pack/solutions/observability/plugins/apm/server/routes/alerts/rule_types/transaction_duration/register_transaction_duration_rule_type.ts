@@ -31,6 +31,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
   ALERT_RULE_PARAMETERS,
+  ALERT_GROUPING,
   ApmRuleType,
 } from '@kbn/rule-data-utils';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
@@ -319,6 +320,7 @@ export function registerTransactionDurationRuleType({
           [ALERT_EVALUATION_VALUE]: transactionDuration,
           [ALERT_EVALUATION_THRESHOLD]: thresholdMicroseconds,
           [ALERT_REASON]: reason,
+          [ALERT_GROUPING]: groupingObject,
           ...sourceFields,
           ...groupByFields,
         };
@@ -381,7 +383,7 @@ export function registerTransactionDurationRuleType({
           threshold: ruleParams.threshold,
           triggerValue: transactionDurationFormatted,
           viewInAppUrl,
-          grouping: groupingObject,
+          grouping: alertHits?.[ALERT_GROUPING],
           ...groupByActionVariables,
         };
 

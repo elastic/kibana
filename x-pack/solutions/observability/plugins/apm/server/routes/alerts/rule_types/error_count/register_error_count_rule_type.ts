@@ -28,6 +28,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
   ALERT_RULE_PARAMETERS,
+  ALERT_GROUPING,
   ApmRuleType,
 } from '@kbn/rule-data-utils';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
@@ -251,6 +252,7 @@ export function registerErrorCountRuleType({
             [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
             [ERROR_GROUP_ID]: ruleParams.errorGroupingKey,
             [ALERT_REASON]: alertReason,
+            [ALERT_GROUPING]: groupingObject,
             ...sourceFields,
             ...groupByFields,
           };
