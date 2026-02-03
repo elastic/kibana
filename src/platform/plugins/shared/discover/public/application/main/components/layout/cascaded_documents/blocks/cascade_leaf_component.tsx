@@ -75,8 +75,6 @@ const EMPTY_SORT: SortOrder[] = [];
  *
  * Key optimizations:
  * - Fixed row heights prevent measurement-triggered recalculations
- * - Stable scroll margin captured once to prevent position jumps
- * - Total size calculated from fixed heights (count * ROW_HEIGHT) for stability
  */
 export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGridBody({
   isFullScreenMode,
