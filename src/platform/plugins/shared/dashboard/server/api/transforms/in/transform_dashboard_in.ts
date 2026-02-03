@@ -63,7 +63,6 @@ export const transformDashboardIn = (
     );
 
     const { controls, references: controlGroupReferences } = transformControlGroupIn(pinned_panels);
-    console.log({ controls });
 
     const attributes = {
       description: '',
@@ -81,7 +80,7 @@ export const transformDashboardIn = (
       kibanaSavedObjectMeta: { searchSourceJSON },
       ...(project_routing !== undefined && { projectRouting: project_routing }),
     };
-    console.log({ tesszt: attributes.pinned_panels });
+
     return {
       attributes,
       references: [

@@ -26,7 +26,9 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
       const { uid = uuidv4(), type } = controlState;
       const transforms = embeddableService.getTransforms(type);
 
-      let transformedControlState = { ...controlState } as Partial<LegacyStoredPinnedControlState>;
+      let transformedControlState = { ...controlState } as Partial<
+        LegacyStoredPinnedControlState[string]
+      >;
       try {
         if (transforms?.transformIn) {
           const transformed = transforms.transformIn(controlState.config);
@@ -41,7 +43,7 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
             transformedControlState = {
               ...transformedControlState,
               explicitInput: {
-                ...(transformedState as LegacyStoredPinnedControlState['explicitInput']),
+                ...(transformedState as LegacyStoredPinnedControlState[string]['explicitInput']),
                 dataViewRefName: `${uid}:${transformedState.dataViewRefName}`,
               },
             };
@@ -49,7 +51,8 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
         } else {
           transformedControlState = {
             ...transformedControlState,
-            explicitInput: controlState.config as LegacyStoredPinnedControlState['explicitInput'],
+            explicitInput:
+              controlState.config as LegacyStoredPinnedControlState[string]['explicitInput'],
           };
         }
       } catch (transformInError) {
@@ -58,8 +61,6 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
           `Unable to transform "${type}" embeddable state on save. Error: ${transformInError.message}`
         );
       }
-
-      console.log({ transformedControlState: JSON.stringify(transformedControlState) });
 
       const { width, grow, explicitInput } = transformedControlState;
       return [
