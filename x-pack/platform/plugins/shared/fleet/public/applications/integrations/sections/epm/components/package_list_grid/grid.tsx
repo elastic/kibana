@@ -34,6 +34,7 @@ interface GridColumnProps {
   emptyStateStyles?: Record<string, string>;
   columnCount?: 1 | 2 | 3;
   gutterSize?: 's' | 'm';
+  searchTerm?: string;
 }
 
 export const GridColumn = ({
@@ -45,6 +46,7 @@ export const GridColumn = ({
   emptyStateStyles,
   columnCount = 3,
   gutterSize = 'm',
+  searchTerm,
 }: GridColumnProps) => {
   const windowScrollerRef = useRef<WindowScroller>(null);
   const listRef = useRef<VirtualizedList>(null);
@@ -131,7 +133,7 @@ export const GridColumn = ({
                   `}
                   tabIndex={-1}
                 >
-                  <PackageCard {...item} showLabels={showCardLabels} />
+                  <PackageCard {...item} showLabels={showCardLabels} searchTerm={searchTerm} />
                 </EuiFlexItem>
               ))}
             </EuiFlexGrid>

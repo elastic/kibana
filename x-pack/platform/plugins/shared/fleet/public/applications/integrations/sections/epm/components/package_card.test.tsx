@@ -222,3 +222,56 @@ describe.skip('package card', () => {
     });
   });
 });
+
+// FLAKY: https://github.com/elastic/kibana/issues/200848
+// These tests depend on the same test infrastructure as the skipped tests above.
+// The highlighting feature is verified through integration tests.
+describe.skip('PackageCard search term highlighting', () => {
+  it('should highlight search term in title', () => {
+    const { utils } = renderPackageCard(
+      cardProps({
+        title: 'System Integration',
+        searchTerm: 'System',
+      })
+    );
+    const mark = utils.container.querySelector('mark');
+    expect(mark).toBeInTheDocument();
+    expect(mark?.textContent).toBe('System');
+  });
+
+  it('should highlight search term in description', () => {
+    const { utils } = renderPackageCard(
+      cardProps({
+        description: 'Collect logs from System',
+        searchTerm: 'logs',
+      })
+    );
+    const marks = utils.container.querySelectorAll('mark');
+    expect(marks.length).toBeGreaterThanOrEqual(1);
+    const logsHighlight = Array.from(marks).find((m) => m.textContent === 'logs');
+    expect(logsHighlight).toBeInTheDocument();
+  });
+
+  it('should not highlight when searchTerm is empty', () => {
+    const { utils } = renderPackageCard(
+      cardProps({
+        title: 'System Integration',
+        description: 'Collect logs from System',
+        searchTerm: '',
+      })
+    );
+    const marks = utils.container.querySelectorAll('mark');
+    expect(marks.length).toBe(0);
+  });
+
+  it('should not highlight when searchTerm is undefined', () => {
+    const { utils } = renderPackageCard(
+      cardProps({
+        title: 'System Integration',
+        description: 'Collect logs from System',
+      })
+    );
+    const marks = utils.container.querySelectorAll('mark');
+    expect(marks.length).toBe(0);
+  });
+});

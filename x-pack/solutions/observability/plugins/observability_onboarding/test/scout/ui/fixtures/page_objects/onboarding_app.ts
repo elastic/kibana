@@ -183,4 +183,28 @@ export class OnboardingApp {
     await this.kubernetesUseCaseTile.waitFor({ state: 'visible' });
     await this.cloudUseCaseTile.waitFor({ state: 'visible' });
   }
+
+  public get searchBar() {
+    return this.page.getByRole('searchbox', {
+      name: 'This is a search bar. As you type, the results lower in the page will automatically filter.',
+    });
+  }
+
+  async searchForIntegration(searchTerm: string) {
+    await this.searchBar.waitFor({ state: 'visible' });
+    // Use pressSequentially to simulate typing, which triggers onChange events correctly
+    await this.searchBar.click();
+    await this.searchBar.pressSequentially(searchTerm, { delay: 50 });
+    // Wait for search results to load and render
+    await this.page.waitForTimeout(3000);
+  }
+
+  async getIntegrationCards() {
+    return this.page.locator('[data-test-subj^="integration-card:"]');
+  }
+
+  async getHighlightedTextInCards() {
+    // EuiHighlight wraps matched text in <mark> elements
+    return this.page.locator('[data-test-subj^="integration-card:"] mark');
+  }
 }

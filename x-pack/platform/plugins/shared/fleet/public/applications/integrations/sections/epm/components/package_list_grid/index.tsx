@@ -311,6 +311,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             showMissingIntegrationMessage={showMissingIntegrationMessage}
             showCardLabels={showCardLabels}
             scrollElementId={scrollElementId}
+            searchTerm={searchTerm}
           />
         </EuiFlexItem>
         {showMissingIntegrationMessage && (

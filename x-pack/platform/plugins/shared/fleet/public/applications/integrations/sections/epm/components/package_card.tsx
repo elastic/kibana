@@ -12,6 +12,7 @@ import {
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHighlight,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
@@ -42,7 +43,9 @@ import {
   shouldShowInstallationStatus,
 } from './installation_status';
 
-export type PackageCardProps = IntegrationCardItem;
+export interface PackageCardProps extends IntegrationCardItem {
+  searchTerm?: string;
+}
 
 export function PackageCard({
   description,
@@ -76,6 +79,7 @@ export function PackageCard({
   showDescription = true,
   showReleaseBadge = true,
   hasDataStreams,
+  searchTerm,
 }: PackageCardProps) {
   const theme = useEuiTheme();
   let releaseBadge: React.ReactNode | null = null;
@@ -243,9 +247,15 @@ export function PackageCard({
         data-test-subj={testid}
         betaBadgeProps={quickstartBadge(isQuickstart)}
         layout="horizontal"
-        title={<CardTitle title={title} titleBadge={titleBadge} />}
+        title={<CardTitle title={title} titleBadge={titleBadge} searchTerm={searchTerm} />}
         titleSize={titleSize}
-        description={showDescription ? description : ''}
+        description={
+          showDescription ? (
+            <EuiHighlight search={searchTerm ?? ''}>{description}</EuiHighlight>
+          ) : (
+            ''
+          )
+        }
         hasBorder
         icon={
           <CardIcon
@@ -298,29 +308,31 @@ export function PackageCard({
   );
 }
 
-const CardTitle = React.memo<Pick<IntegrationCardItem, 'title' | 'titleBadge'>>(
-  ({ title, titleBadge }) => {
-    if (!titleBadge) {
-      return title;
-    }
-    return (
-      <EuiFlexGroup
-        direction="row"
-        alignItems="flexStart"
-        justifyContent="spaceBetween"
-        gutterSize="s"
-        responsive={false}
-      >
-        <EuiFlexItem>
-          <EuiTitle>
-            <h3>{title}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{titleBadge}</EuiFlexItem>
-      </EuiFlexGroup>
-    );
+const CardTitle = React.memo<
+  Pick<IntegrationCardItem, 'title' | 'titleBadge'> & { searchTerm?: string }
+>(({ title, titleBadge, searchTerm }) => {
+  const highlightedTitle = <EuiHighlight search={searchTerm ?? ''}>{title}</EuiHighlight>;
+
+  if (!titleBadge) {
+    return highlightedTitle;
   }
-);
+  return (
+    <EuiFlexGroup
+      direction="row"
+      alignItems="flexStart"
+      justifyContent="spaceBetween"
+      gutterSize="s"
+      responsive={false}
+    >
+      <EuiFlexItem>
+        <EuiTitle>
+          <h3>{highlightedTitle}</h3>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{titleBadge}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
 
 function quickstartBadge(isQuickstart: boolean): { label: string; color: 'accent' } | undefined {
   return isQuickstart
