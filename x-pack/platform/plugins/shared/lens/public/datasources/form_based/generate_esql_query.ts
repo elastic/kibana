@@ -162,15 +162,15 @@ export function generateEsqlQuery(
     const value = staticCol.params?.value ?? '100';
 
     // Generate a column name for the static value
-    // Priority: 1) semantic role name from visualization, 2) 'static' for single, 3) 'static_N' for multiple
+    // Priority: 1) semantic role name from visualization, 2) 'static_value' for single, 3) 'static_value_N' for multiple
     const roleName = columnRoles?.[colId];
     let esAggsId: string;
     if (roleName) {
       esAggsId = `static_${roleName}`;
     } else if (staticValueEntries.length === 1) {
-      esAggsId = 'static';
+      esAggsId = 'static_value';
     } else {
-      esAggsId = `static_${index}`;
+      esAggsId = `static_value_${index}`;
     }
 
     const format = isColumnFormatted(col) ? col.params?.format : undefined;

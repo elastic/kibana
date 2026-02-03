@@ -97,12 +97,12 @@ describe('generateEsqlQuery metric max (static_value)', () => {
   | STATS bucket_0_0 = COUNT(*)
         BY order_date = BUCKET(order_date, 30 minutes)
   | SORT order_date ASC
-  | EVAL static = 100`,
+  | EVAL static_value = 100`,
       })
     );
     if (result.success) {
-      expect(result.esAggsIdMap).toHaveProperty('static');
-      expect(result.esAggsIdMap.static[0].id).toBe('3');
+      expect(result.esAggsIdMap).toHaveProperty('static_value');
+      expect(result.esAggsIdMap.static_value[0].id).toBe('3');
     }
   });
 
@@ -136,11 +136,11 @@ describe('generateEsqlQuery metric max (static_value)', () => {
     expect(result).toEqual(
       expect.objectContaining({
         success: true,
-        esql: 'FROM myIndexPattern | EVAL static = 50',
+        esql: 'FROM myIndexPattern | EVAL static_value = 50',
       })
     );
     if (result.success) {
-      expect(result.esAggsIdMap).toHaveProperty('static');
+      expect(result.esAggsIdMap).toHaveProperty('static_value');
     }
   });
 
@@ -236,12 +236,12 @@ describe('generateEsqlQuery metric max (static_value)', () => {
     expect(result).toEqual(
       expect.objectContaining({
         success: true,
-        esql: 'FROM myIndexPattern | EVAL static_0 = 100, static_1 = 200',
+        esql: 'FROM myIndexPattern | EVAL static_value_0 = 100, static_value_1 = 200',
       })
     );
     if (result.success) {
-      expect(result.esAggsIdMap).toHaveProperty('static_0');
-      expect(result.esAggsIdMap).toHaveProperty('static_1');
+      expect(result.esAggsIdMap).toHaveProperty('static_value_0');
+      expect(result.esAggsIdMap).toHaveProperty('static_value_1');
     }
   });
 });
