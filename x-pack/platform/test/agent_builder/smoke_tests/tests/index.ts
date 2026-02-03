@@ -91,11 +91,29 @@ export default function (providerContext: FtrProviderContext) {
         });
         log.info('✅ CCM API key set');
 
-        // Step 2: Discover EIS models
+        // Step 2: Discover EIS models (with retry - endpoints may take time to appear)
         log.info('Discovering EIS inference endpoints...');
-        const response = await es.inference.get({ inference_id: '_all' });
-        const endpoints = response.endpoints as EisInferenceEndpoint[];
-        const discovered = getEisChatCompletionModels(endpoints);
+        let discovered: EisChatModel[] = [];
+        const maxRetries = 5;
+        const retryDelayMs = 3000;
+
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+          const response = await es.inference.get({ inference_id: '_all' });
+          const endpoints = response.endpoints as EisInferenceEndpoint[];
+          discovered = getEisChatCompletionModels(endpoints);
+
+          if (discovered.length > 0) {
+            log.info(`Found ${discovered.length} EIS models on attempt ${attempt}`);
+            break;
+          }
+
+          if (attempt < maxRetries) {
+            log.info(
+              `No EIS models found (attempt ${attempt}/${maxRetries}), waiting ${retryDelayMs}ms...`
+            );
+            await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+          }
+        }
 
         log.info(`Found ${discovered.length} EIS chat completion models`);
 
