@@ -228,15 +228,26 @@ export const getInferenceServicesRoute = (
 
           const taskSettings = config?.headers ? { headers: config.headers } : undefined;
 
+          const numAllocations = config?.providerConfig?.num_allocations;
+          const maxAllocations =
+            config?.providerConfig?.adaptive_allocations?.max_number_of_allocations;
+
           // currently update api only allows api_key and num_allocations
           const body = {
             service_settings: {
               ...(secrets?.providerSecrets?.api_key && {
                 api_key: secrets.providerSecrets.api_key,
               }),
-              ...(config?.providerConfig?.num_allocations !== undefined && {
-                num_allocations: config.providerConfig.num_allocations,
-              }),
+              ...(numAllocations
+                ? {
+                    num_allocations: config.providerConfig.num_allocations,
+                  }
+                : {}),
+              ...(maxAllocations
+                ? {
+                    adaptive_allocations: config.providerConfig.adaptive_allocations,
+                  }
+                : {}),
             },
             ...(taskSettings ? { task_settings: taskSettings } : {}),
           };

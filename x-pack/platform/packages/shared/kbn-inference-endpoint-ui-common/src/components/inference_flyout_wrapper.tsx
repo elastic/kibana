@@ -29,14 +29,14 @@ import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mu
 const MIN_ALLOCATIONS = 0;
 const DEFAULT_NUM_THREADS = 1;
 
-const formDeserializer = (data: InferenceEndpoint) => {
+const formDeserializer = (data: InferenceEndpoint): InferenceEndpoint => {
   if (
-    data.config?.providerConfig?.adaptive_allocations?.max_number_of_allocations ||
+    data.config?.providerConfig?.['adaptive_allocations.max_number_of_allocations'] ||
     data.config?.headers
   ) {
     const { headers, ...restConfig } = data.config;
     const maxAllocations =
-      data.config.providerConfig?.adaptive_allocations?.max_number_of_allocations;
+      data.config.providerConfig?.['adaptive_allocations.max_number_of_allocations'];
 
     return {
       ...data,
@@ -49,7 +49,7 @@ const formDeserializer = (data: InferenceEndpoint) => {
             ? // remove the adaptive_allocations from the data config as form does not expect it
               { max_number_of_allocations: maxAllocations, adaptive_allocations: undefined }
             : {}),
-        },
+        } as InferenceEndpoint['config']['providerConfig'],
       },
     };
   }
@@ -58,7 +58,7 @@ const formDeserializer = (data: InferenceEndpoint) => {
 };
 
 // This serializer is used to transform the form data before sending it to the server
-export const formSerializer = (formData: InferenceEndpoint) => {
+export const formSerializer = (formData: InferenceEndpoint): InferenceEndpoint => {
   const providerConfig = formData.config?.providerConfig as
     | InferenceEndpoint['config']['providerConfig']
     | undefined;
