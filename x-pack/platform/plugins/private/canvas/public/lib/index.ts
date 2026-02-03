@@ -11,3 +11,7 @@ export { elasticOutline } from './elastic_outline';
 export * from './httpurl';
 export * from './resolve_dataurl';
 export * from './url';
+
+// Lazy loader for elasticOutline - used by image_upload argument
+export const getElasticOutline = () =>
+  import('./elastic_outline').then((m) => ({ elasticOutline: m.elasticOutline }));

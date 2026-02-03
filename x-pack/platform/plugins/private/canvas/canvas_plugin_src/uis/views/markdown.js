@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MarkdownLang } from '@kbn/code-editor';
+import { MarkdownLang } from '@kbn/monaco';
 import { ViewStrings } from '../../../i18n';
 
 const { Markdown: strings } = ViewStrings;

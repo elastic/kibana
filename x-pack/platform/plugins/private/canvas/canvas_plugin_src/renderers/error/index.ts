@@ -7,3 +7,4 @@
 
 export { getErrorRenderer, errorRendererFactory } from './error_renderer';
 export type { ErrorRendererConfig } from './types';
+export { LazyErrorComponent } from './components';
