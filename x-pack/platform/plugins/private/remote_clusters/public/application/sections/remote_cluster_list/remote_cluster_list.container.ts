@@ -22,11 +22,11 @@ import {
   openDetailPanel,
   closeDetailPanel,
 } from '../../store/actions';
+import type { AppDispatch, RemoteClustersState } from '../../store/types';
 
 import { RemoteClusterList as RemoteClusterListView } from './remote_cluster_list';
 
-/** @type {import('react-redux').MapStateToProps<any, any, any>} */
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: RemoteClustersState) => {
   return {
     clusters: getClustersList(state),
     isDetailPanelOpen: isDetailPanelOpen(state),
@@ -37,8 +37,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-/** @type {import('react-redux').MapDispatchToProps<any, any>} */
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = (dispatch: AppDispatch) => {
   return {
     loadClusters: () => {
       dispatch(loadClusters());
@@ -46,7 +45,7 @@ const mapDispatchToProps = (dispatch) => {
     refreshClusters: () => {
       dispatch(refreshClusters());
     },
-    openDetailPanel: (name) => {
+    openDetailPanel: (name: string) => {
       dispatch(openDetailPanel({ name }));
     },
     closeDetailPanel: () => {
@@ -55,9 +54,6 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-/**
- * @type {import('react-redux').ConnectedComponent<typeof RemoteClusterListView, {}>}
- */
 export const RemoteClusterList = connect(
   mapStateToProps,
   mapDispatchToProps

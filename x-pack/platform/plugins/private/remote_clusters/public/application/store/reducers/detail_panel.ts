@@ -6,18 +6,17 @@
  */
 
 import { OPEN_DETAIL_PANEL, CLOSE_DETAIL_PANEL } from '../action_types';
+import type { DetailPanelState, RemoteClustersAction } from '../types';
 
-const initialState = {
+const initialState: DetailPanelState = {
   isOpen: false,
   clusterName: undefined,
 };
 
-export function detailPanel(state = initialState, action) {
-  const { type, payload } = action;
-
-  switch (type) {
+export function detailPanel(state = initialState, action: RemoteClustersAction): DetailPanelState {
+  switch (action.type) {
     case OPEN_DETAIL_PANEL:
-      const { clusterName } = payload;
+      const { clusterName } = action.payload;
 
       return {
         clusterName,

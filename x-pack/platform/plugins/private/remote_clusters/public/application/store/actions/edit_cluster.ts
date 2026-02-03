@@ -21,8 +21,10 @@ import {
   EDIT_CLUSTER_FAILURE,
   CLEAR_EDIT_CLUSTER_ERRORS,
 } from '../action_types';
+import type { ClusterPayload } from '../../../../common/lib';
+import type { AppDispatch } from '../types';
 
-export const editCluster = (cluster) => async (dispatch) => {
+export const editCluster = (cluster: ClusterPayload) => async (dispatch: AppDispatch) => {
   dispatch({
     type: EDIT_CLUSTER_SAVE,
   });
@@ -74,7 +76,8 @@ export const editCluster = (cluster) => async (dispatch) => {
       location: { search },
     },
   } = getRouter();
-  const { redirect: redirectUrl } = extractQueryParams(search);
+  const { redirect: redirectParam } = extractQueryParams(search);
+  const redirectUrl = Array.isArray(redirectParam) ? redirectParam[0] : redirectParam;
 
   if (redirectUrl) {
     // A toast is only needed if we're leaving the app.
@@ -98,8 +101,8 @@ export const editCluster = (cluster) => async (dispatch) => {
 };
 
 export const startEditingCluster =
-  ({ clusterName }) =>
-  (dispatch) => {
+  ({ clusterName }: { clusterName: string }) =>
+  (dispatch: AppDispatch) => {
     dispatch(loadClusters());
 
     dispatch({
@@ -108,7 +111,7 @@ export const startEditingCluster =
     });
   };
 
-export const stopEditingCluster = () => (dispatch) => {
+export const stopEditingCluster = () => (dispatch: AppDispatch) => {
   // Load the clusters to refresh the one we just edited.
   dispatch(loadClusters());
 
@@ -117,7 +120,7 @@ export const stopEditingCluster = () => (dispatch) => {
   });
 };
 
-export const clearEditClusterErrors = () => (dispatch) => {
+export const clearEditClusterErrors = () => (dispatch: AppDispatch) => {
   dispatch({
     type: CLEAR_EDIT_CLUSTER_ERRORS,
   });

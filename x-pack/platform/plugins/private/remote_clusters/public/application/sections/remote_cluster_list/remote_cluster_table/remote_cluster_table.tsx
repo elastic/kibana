@@ -21,17 +21,23 @@ import {
   EuiToolTip,
   EuiText,
 } from '@elastic/eui';
+import type {
+  EuiBasicTableColumn,
+  EuiSearchBarOnChangeArgs,
+  EuiSearchBarProps,
+} from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { UIM_SHOW_DETAILS_CLICK } from '../../../constants';
 import { PROXY_MODE } from '../../../../../common/constants';
 import { trackUiMetric, METRIC_TYPE, getRouter } from '../../../services';
 import { ConnectionStatus, RemoveClusterButtonProvider, SecurityModel } from '../components';
+import type { RemoteCluster } from '../../../store/types';
 
-const getFilteredClusters = (clusters, queryText) => {
+const getFilteredClusters = (clusters: RemoteCluster[], queryText: string): RemoteCluster[] => {
   if (queryText) {
     const normalizedSearchText = queryText.toLowerCase();
 
-    return clusters.filter((cluster) => {
+    return clusters.filter((cluster: RemoteCluster) => {
       const { name, seeds, proxyAddress } = cluster;
       const normalizedName = name.toLowerCase();
 
@@ -44,7 +50,7 @@ const getFilteredClusters = (clusters, queryText) => {
       }
 
       if (seeds) {
-        return seeds.some((seed) => seed.includes(normalizedSearchText));
+        return seeds.some((seed: string) => seed.includes(normalizedSearchText));
       }
 
       return false;
@@ -54,7 +60,19 @@ const getFilteredClusters = (clusters, queryText) => {
   }
 };
 
-export class RemoteClusterTable extends Component {
+export interface Props {
+  clusters: RemoteCluster[];
+  openDetailPanel: (clusterName: string) => void;
+}
+
+interface State {
+  prevClusters: RemoteCluster[];
+  selectedItems: RemoteCluster[];
+  filteredClusters: RemoteCluster[];
+  queryText: string;
+}
+
+export class RemoteClusterTable extends Component<Props, State> {
   static propTypes = {
     clusters: PropTypes.array,
     openDetailPanel: PropTypes.func.isRequired,
@@ -64,7 +82,7 @@ export class RemoteClusterTable extends Component {
     clusters: [],
   };
 
-  static getDerivedStateFromProps(props, state) {
+  static getDerivedStateFromProps(props: Props, state: State): Partial<State> | null {
     const { clusters } = props;
     const { prevClusters, queryText } = state;
 
@@ -79,7 +97,7 @@ export class RemoteClusterTable extends Component {
     return null;
   }
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
@@ -90,14 +108,14 @@ export class RemoteClusterTable extends Component {
     };
   }
 
-  onSearch = ({ query }) => {
+  onSearch = ({ query, queryText }: EuiSearchBarOnChangeArgs) => {
     // There's no need to update the state if there arent any search params
     if (!query) {
       return;
     }
 
     const { clusters } = this.props;
-    const { text } = query;
+    const text = queryText ?? '';
 
     // We cache the filtered indices instead of calculating them inside render() because
     // of https://github.com/elastic/eui/issues/3445.
@@ -112,7 +130,7 @@ export class RemoteClusterTable extends Component {
     const { selectedItems, filteredClusters } = this.state;
     const { history } = getRouter();
 
-    const columns = [
+    const columns: Array<EuiBasicTableColumn<RemoteCluster>> = [
       {
         field: 'name',
         name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.nameColumnTitle', {
@@ -120,7 +138,10 @@ export class RemoteClusterTable extends Component {
         }),
         sortable: true,
         truncateText: false,
-        render: (name, { isConfiguredByNode, hasDeprecatedProxySetting }) => {
+        render: (
+          name: string,
+          { isConfiguredByNode, hasDeprecatedProxySetting }: RemoteCluster
+        ) => {
           const link = (
             <EuiLink
               data-test-subj="remoteClustersTableListClusterLink"
@@ -195,7 +216,7 @@ export class RemoteClusterTable extends Component {
           defaultMessage: 'Status',
         }),
         sortable: true,
-        render: (isConnected, { mode }) => (
+        render: (isConnected: boolean | undefined, { mode }: RemoteCluster) => (
           <ConnectionStatus isConnected={isConnected} mode={mode} />
         ),
         width: '240px',
@@ -206,16 +227,16 @@ export class RemoteClusterTable extends Component {
           defaultMessage: 'Mode',
         }),
         sortable: true,
-        render: (mode) => {
-          let modeMessage;
-          mode === PROXY_MODE
-            ? (modeMessage = mode)
-            : (modeMessage = i18n.translate(
-                'xpack.remoteClusters.remoteClusterList.table.sniffModeDescription',
-                {
-                  defaultMessage: 'default',
-                }
-              ));
+        render: (mode: RemoteCluster['mode']) => {
+          const modeMessage =
+            mode === PROXY_MODE
+              ? mode
+              : i18n.translate(
+                  'xpack.remoteClusters.remoteClusterList.table.sniffModeDescription',
+                  {
+                    defaultMessage: 'default',
+                  }
+                );
           const modeMessageComponent = (
             <EuiFlexItem grow={false} className="remoteClustersConnectionMode__message">
               <EuiText
@@ -237,8 +258,9 @@ export class RemoteClusterTable extends Component {
         }),
         'data-test-subj': 'remoteClustersAddress',
         truncateText: true,
-        render: (mode, { seeds, proxyAddress }) => {
-          const clusterAddressString = mode === PROXY_MODE ? proxyAddress : seeds.join(', ');
+        render: (mode: RemoteCluster['mode'], { seeds, proxyAddress }: RemoteCluster) => {
+          const clusterAddressString =
+            mode === PROXY_MODE ? proxyAddress : seeds ? seeds.join(', ') : '';
           const connectionMode = (
             <EuiFlexItem grow={false} className="remoteClustersConnectionAddress__message">
               <EuiText data-test-subj="remoteClusterConnectionAddressMessage" size="s">
@@ -255,7 +277,7 @@ export class RemoteClusterTable extends Component {
           defaultMessage: 'Authentication type',
         }),
         sortable: true,
-        render: (securityModel) => {
+        render: (securityModel: RemoteCluster['securityModel']) => {
           return <SecurityModel securityModel={securityModel} />;
         },
       },
@@ -270,7 +292,10 @@ export class RemoteClusterTable extends Component {
         sortable: true,
         width: '160px',
         align: 'right',
-        render: (mode, { connectedNodesCount, connectedSocketsCount }) => {
+        render: (
+          mode: RemoteCluster['mode'],
+          { connectedNodesCount, connectedSocketsCount }: RemoteCluster
+        ) => {
           const remoteNodesCount =
             mode === PROXY_MODE ? connectedSocketsCount : connectedNodesCount;
           const connectionMode = (
@@ -290,7 +315,7 @@ export class RemoteClusterTable extends Component {
         width: '100px',
         actions: [
           {
-            render: ({ name, isConfiguredByNode }) => {
+            render: ({ name, isConfiguredByNode }: RemoteCluster) => {
               const label = isConfiguredByNode
                 ? i18n.translate(
                     'xpack.remoteClusters.remoteClusterList.table.actionBlockedEditDescription',
@@ -314,14 +339,13 @@ export class RemoteClusterTable extends Component {
                     color="primary"
                     isDisabled={isConfiguredByNode}
                     {...reactRouterNavigate(history, `/edit/${name}`)}
-                    disabled={isConfiguredByNode}
                   />
                 </EuiToolTip>
               );
             },
           },
           {
-            render: ({ name, isConfiguredByNode }) => {
+            render: ({ name, isConfiguredByNode }: RemoteCluster) => {
               const label = isConfiguredByNode
                 ? i18n.translate(
                     'xpack.remoteClusters.remoteClusterList.table.actionBlockedDeleteDescription',
@@ -358,14 +382,16 @@ export class RemoteClusterTable extends Component {
       },
     ];
 
+    const sortField: 'name' = 'name';
+    const sortDirection: 'asc' = 'asc';
     const sorting = {
       sort: {
-        field: 'name',
-        direction: 'asc',
+        field: sortField,
+        direction: sortDirection,
       },
     };
 
-    const search = {
+    const search: EuiSearchBarProps = {
       toolsLeft: selectedItems.length ? (
         <RemoveClusterButtonProvider clusterNames={selectedItems.map(({ name }) => name)}>
           {(removeCluster) => (
@@ -411,8 +437,9 @@ export class RemoteClusterTable extends Component {
     };
 
     const selection = {
-      onSelectionChange: (selectedItems) => this.setState({ selectedItems }),
-      selectable: ({ isConfiguredByNode }) => !isConfiguredByNode,
+      onSelectionChange: (nextSelectedItems: RemoteCluster[]) =>
+        this.setState({ selectedItems: nextSelectedItems }),
+      selectable: ({ isConfiguredByNode }: RemoteCluster) => !isConfiguredByNode,
     };
 
     return (

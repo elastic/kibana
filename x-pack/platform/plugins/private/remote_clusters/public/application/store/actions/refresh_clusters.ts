@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { loadClusters as sendLoadClustersRequest, showApiWarning } from '../../services';
 
 import { REFRESH_CLUSTERS_SUCCESS } from '../action_types';
+import type { AppDispatch } from '../types';
 
-export const refreshClusters = () => async (dispatch) => {
+export const refreshClusters = () => async (dispatch: AppDispatch) => {
   let clusters;
   try {
     clusters = await sendLoadClustersRequest({ asSystemRequest: true });

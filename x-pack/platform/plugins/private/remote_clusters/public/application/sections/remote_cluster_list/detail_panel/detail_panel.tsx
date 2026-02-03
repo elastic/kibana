@@ -6,9 +6,9 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { History } from 'history';
 
 import {
   EuiBadge,
@@ -37,17 +37,18 @@ import { ConfiguredByNodeWarning } from '../../components';
 import { ConnectionStatus, RemoveClusterButtonProvider, SecurityModel } from '../components';
 import { getRouter } from '../../../services';
 import { proxyModeUrl } from '../../../services/documentation';
+import type { RemoteCluster } from '../../../store/types';
 
-export class DetailPanel extends Component {
-  static propTypes = {
-    isOpen: PropTypes.bool.isRequired,
-    isLoading: PropTypes.bool,
-    cluster: PropTypes.object,
-    closeDetailPanel: PropTypes.func.isRequired,
-    clusterName: PropTypes.string,
-  };
+export interface Props {
+  isOpen: boolean;
+  isLoading?: boolean;
+  cluster?: RemoteCluster;
+  closeDetailPanel: () => void;
+  clusterName?: string;
+}
 
-  renderSkipUnavailableValue(skipUnavailable) {
+export class DetailPanel extends Component<Props> {
+  renderSkipUnavailableValue(skipUnavailable: boolean | undefined) {
     if (skipUnavailable === true) {
       return (
         <FormattedMessage
@@ -100,7 +101,7 @@ export class DetailPanel extends Component {
     );
   }
 
-  renderClusterConfiguredByNodeWarning({ isConfiguredByNode }) {
+  renderClusterConfiguredByNodeWarning({ isConfiguredByNode }: { isConfiguredByNode?: boolean }) {
     if (!isConfiguredByNode) {
       return null;
     }
@@ -113,9 +114,12 @@ export class DetailPanel extends Component {
   }
 
   renderClusterWithDeprecatedSettingWarning(
-    { hasDeprecatedProxySetting, isConfiguredByNode },
-    clusterName,
-    history
+    {
+      hasDeprecatedProxySetting,
+      isConfiguredByNode,
+    }: { hasDeprecatedProxySetting?: boolean; isConfiguredByNode?: boolean },
+    clusterName: string,
+    history: History
   ) {
     if (!hasDeprecatedProxySetting) {
       return null;
@@ -183,7 +187,18 @@ export class DetailPanel extends Component {
     initialConnectTimeout,
     mode,
     securityModel,
-  }) {
+  }: Pick<
+    RemoteCluster,
+    | 'isConnected'
+    | 'connectedNodesCount'
+    | 'skipUnavailable'
+    | 'seeds'
+    | 'maxConnectionsPerCluster'
+    | 'nodeConnections'
+    | 'initialConnectTimeout'
+    | 'mode'
+    | 'securityModel'
+  >) {
     return (
       <EuiFlexGroup data-test-subj="remoteClusterDetailPanelStatusValues">
         <EuiFlexItem>
@@ -233,7 +248,7 @@ export class DetailPanel extends Component {
               </EuiTitle>
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription data-test-subj="remoteClusterDetailSeeds">
-              {seeds.map((seed) => (
+              {seeds?.map((seed) => (
                 <EuiText size="s" key={seed}>
                   {seed}
                 </EuiText>
@@ -308,7 +323,19 @@ export class DetailPanel extends Component {
     mode,
     serverName,
     securityModel,
-  }) {
+  }: Pick<
+    RemoteCluster,
+    | 'isConnected'
+    | 'skipUnavailable'
+    | 'initialConnectTimeout'
+    | 'proxyAddress'
+    | 'proxySocketConnections'
+    | 'maxProxySocketConnections'
+    | 'connectedSocketsCount'
+    | 'mode'
+    | 'serverName'
+    | 'securityModel'
+  >) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -429,7 +456,7 @@ export class DetailPanel extends Component {
     );
   }
 
-  renderCluster(cluster) {
+  renderCluster(cluster: RemoteCluster) {
     return (
       <section
         aria-labelledby="clusterStatus"
@@ -453,13 +480,13 @@ export class DetailPanel extends Component {
     );
   }
 
-  renderFlyoutBody(history) {
+  renderFlyoutBody(history: History) {
     const { cluster, clusterName } = this.props;
 
     return (
       <EuiFlyoutBody>
         {!cluster && this.renderClusterNotFound()}
-        {cluster && (
+        {cluster && clusterName && (
           <Fragment>
             {this.renderClusterConfiguredByNodeWarning(cluster)}
             {this.renderClusterWithDeprecatedSettingWarning(cluster, clusterName, history)}
@@ -470,7 +497,7 @@ export class DetailPanel extends Component {
     );
   }
 
-  renderFlyoutFooter(history) {
+  renderFlyoutFooter(history: History) {
     const { cluster, clusterName, closeDetailPanel } = this.props;
 
     return (
@@ -490,7 +517,7 @@ export class DetailPanel extends Component {
             </EuiButtonEmpty>
           </EuiFlexItem>
 
-          {cluster && !cluster.isConfiguredByNode && (
+          {cluster && !cluster.isConfiguredByNode && clusterName && (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>

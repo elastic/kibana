@@ -6,14 +6,19 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 
 import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 
-import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
+import { SNIFF_MODE } from '../../../../../../common/constants';
+import type { RemoteCluster } from '../../../../store/types';
 
-export function ConnectionStatus({ isConnected, mode }) {
+interface Props {
+  isConnected?: boolean;
+  mode?: RemoteCluster['mode'];
+}
+
+export function ConnectionStatus({ isConnected, mode }: Props) {
   const seedNodeTooltip = i18n.translate(
     'xpack.remoteClusters.connectedStatus.notConnectedToolTip',
     {
@@ -46,8 +51,3 @@ export function ConnectionStatus({ isConnected, mode }) {
     </EuiFlexGroup>
   );
 }
-
-ConnectionStatus.propTypes = {
-  isConnected: PropTypes.bool,
-  mode: PropTypes.oneOf([SNIFF_MODE, PROXY_MODE]),
-};
