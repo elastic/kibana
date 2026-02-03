@@ -20,7 +20,7 @@ const feedbackBodySchema = schema.object({
   user_email: schema.maybe(schema.string()),
   solution: schema.string(),
   csat_score: schema.maybe(schema.number()),
-  questions: schema.maybe(schema.arrayOf(feedbackQuestionSchema)),
+  questions: schema.maybe(schema.arrayOf(feedbackQuestionSchema, { maxSize: 2 })),
   organization_id: schema.maybe(schema.string()),
   allow_email_contact: schema.boolean(),
   url: schema.string(),
