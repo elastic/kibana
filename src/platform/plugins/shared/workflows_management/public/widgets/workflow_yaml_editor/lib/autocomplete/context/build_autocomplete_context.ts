@@ -32,12 +32,12 @@ export interface BuildAutocompleteContextParams {
   completionContext: monaco.languages.CompletionContext;
 }
 
-export async function buildAutocompleteContext({
+export function buildAutocompleteContext({
   editorState,
   model,
   position,
   completionContext,
-}: BuildAutocompleteContextParams): Promise<AutocompleteContext | null> {
+}: BuildAutocompleteContextParams): AutocompleteContext | null {
   // derived from workflow state
   const currentDynamicConnectorTypes = editorState?.connectors?.connectorTypes;
   const workflowGraph = editorState?.computed?.workflowGraph;
@@ -92,12 +92,7 @@ export async function buildAutocompleteContext({
   const parseResult = parseLineForCompletion(lineUpToCursor);
 
   if (workflowDefinition && workflowGraph) {
-    contextSchema = await getContextSchemaForPath(
-      workflowDefinition,
-      workflowGraph,
-      path,
-      yamlDocument
-    );
+    contextSchema = getContextSchemaForPath(workflowDefinition, workflowGraph, path, yamlDocument);
   }
 
   if (parseResult?.fullKey) {

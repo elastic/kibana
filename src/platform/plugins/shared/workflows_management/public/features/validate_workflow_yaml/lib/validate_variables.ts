@@ -14,12 +14,12 @@ import { validateVariable } from './validate_variable';
 import { getContextSchemaForPath } from '../../workflow_context/lib/get_context_for_path';
 import type { VariableItem, YamlValidationResult } from '../model/types';
 
-export async function validateVariables(
+export function validateVariables(
   variableItems: VariableItem[],
   workflowGraph: WorkflowGraph,
   workflowDefinition: WorkflowYaml,
   yamlDocument?: Document | null
-): Promise<YamlValidationResult[]> {
+): YamlValidationResult[] {
   const errors: YamlValidationResult[] = [];
 
   for (const variableItem of variableItems) {
@@ -27,12 +27,7 @@ export async function validateVariables(
 
     let context: typeof DynamicStepContextSchema;
     try {
-      context = await getContextSchemaForPath(
-        workflowDefinition,
-        workflowGraph,
-        path,
-        yamlDocument
-      );
+      context = getContextSchemaForPath(workflowDefinition, workflowGraph, path, yamlDocument);
       const error = validateVariable(variableItem, context);
       if (error) {
         errors.push(error);

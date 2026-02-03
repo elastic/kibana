@@ -121,7 +121,7 @@ export function getCompletionItemProvider(
       // Then, get workflow-specific suggestions (variables, connectors, etc.)
       // These require workflowDefinition, so only run if available
       const editorState = getState();
-      const autocompleteContext = await buildAutocompleteContext({
+      const autocompleteContext = buildAutocompleteContext({
         editorState,
         model,
         position,

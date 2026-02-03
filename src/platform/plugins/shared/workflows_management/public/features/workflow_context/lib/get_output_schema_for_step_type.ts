@@ -12,7 +12,7 @@ import { isAtomic } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import { stepSchemas } from '../../../../common/step_schemas';
 
-export const getOutputSchemaForStepType = async (node: GraphNodeUnion): Promise<z.ZodSchema> => {
+export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema => {
   // Handle internal actions with pattern matching first
   // TODO: add output schema support for elasticsearch.request and kibana.request connectors
 

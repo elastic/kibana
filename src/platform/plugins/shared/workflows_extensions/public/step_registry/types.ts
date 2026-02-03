@@ -114,7 +114,7 @@ export interface DynamicSchema<
   getOutputSchema?(params: {
     input: z.infer<Input>;
     config: z.infer<Config>;
-  }): Promise<z.ZodType<z.infer<Output>>>;
+  }): z.ZodType<z.infer<Output>>;
 }
 
 /**

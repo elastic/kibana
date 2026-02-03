@@ -24,16 +24,16 @@ export const AiPromptStepDefinition = createPublicStepDefinition({
     dynamicSchema: {
       getOutputSchema: ({ input }) => {
         if (!input.schema) {
-          return Promise.resolve(AiPromptOutputSchema);
+          return AiPromptOutputSchema;
         }
 
         const zodSchema = fromJSONSchema(input.schema);
 
         if (!zodSchema) {
-          return Promise.resolve(AiPromptOutputSchema);
+          return AiPromptOutputSchema;
         }
 
-        return Promise.resolve(getStructuredOutputSchema(zodSchema));
+        return getStructuredOutputSchema(zodSchema);
       },
     },
   },

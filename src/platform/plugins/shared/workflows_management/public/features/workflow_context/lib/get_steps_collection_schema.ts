@@ -15,7 +15,7 @@ import { z } from '@kbn/zod/v4';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
 
-export async function getStepsCollectionSchema(
+export function getStepsCollectionSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   workflowExecutionGraph: WorkflowGraph,
   stepName: string
@@ -44,7 +44,7 @@ export async function getStepsCollectionSchema(
     if (!isEnterForeach(node)) {
       stepsSchema = stepsSchema.extend({
         [node.stepId]: z.object({
-          output: (await getOutputSchemaForStepType(node)).optional(),
+          output: getOutputSchemaForStepType(node).optional(),
           error: z.any().optional(),
         }),
       });

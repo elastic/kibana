@@ -30,12 +30,12 @@ type WorkflowDefinitionForContext =
 
 // Implementation should be the same as in the 'WorkflowContextManager.getContext' function
 // src/platform/plugins/shared/workflows_execution_engine/server/workflow_context_manager/workflow_context_manager.ts
-export async function getContextSchemaForPath(
+export function getContextSchemaForPath(
   definition: WorkflowDefinitionForContext,
   workflowGraph: WorkflowGraph,
   path: Array<string | number>,
   yamlDocument?: Document | null
-): Promise<typeof DynamicStepContextSchema> {
+): typeof DynamicStepContextSchema {
   // getWorkflowContextSchema normalizes inputs internally, so it can handle both formats
   // Pass yamlDocument to allow extraction of inputs if definition.inputs is undefined
   let schema = DynamicStepContextSchema.merge(
@@ -51,11 +51,7 @@ export async function getContextSchemaForPath(
     return schema;
   }
 
-  const stepsCollectionSchema = await getStepsCollectionSchema(
-    schema,
-    workflowGraph,
-    nearestStep.name
-  );
+  const stepsCollectionSchema = getStepsCollectionSchema(schema, workflowGraph, nearestStep.name);
 
   if (Object.keys(stepsCollectionSchema.shape).length > 0) {
     schema = schema.extend({ steps: stepsCollectionSchema });

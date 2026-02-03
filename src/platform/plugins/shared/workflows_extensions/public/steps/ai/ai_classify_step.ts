@@ -20,7 +20,7 @@ export const AiClassifyStepDefinition = createPublicStepDefinition({
   ...AiClassifyStepCommonDefinition,
   editorHandlers: {
     dynamicSchema: {
-      getOutputSchema: ({ input }) => Promise.resolve(buildStructuredOutputSchema(input)),
+      getOutputSchema: ({ input }) => buildStructuredOutputSchema(input),
     },
   },
   icon: React.lazy(() =>
