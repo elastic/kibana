@@ -19,7 +19,10 @@ import type {
   UnifiedHistogramServices,
 } from '@kbn/unified-histogram/types';
 import { createChartSection } from './chart_section';
-import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
+import type {
+  ChartSectionConfiguration,
+  ChartSectionConfigurationExtensionParams,
+} from '../../../../types';
 import { useAppStateSelector } from '../../../../../application/main/state_management/redux';
 
 type UnifiedGridProps = ChartSectionProps & {
@@ -55,7 +58,10 @@ const createChartSectionProps = (overrides: Partial<ChartSectionProps> = {}): Ch
 
 const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
   const getChartSection = createChartSection();
-  const configFactory = getChartSection?.(() => ({}), { context: {} });
+  const configFactory = getChartSection(
+    () => ({ replaceDefaultChart: false }) as ChartSectionConfiguration,
+    { context: {} as object }
+  );
 
   if (!configFactory) {
     throw new Error('getChartSectionConfiguration was not created.');
