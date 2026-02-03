@@ -28,7 +28,7 @@ export const deleteAllRules = async (
   await countDownTest(
     async () => {
       await deleteAllRulesViaBulkAction(supertest, log, spaceId);
-      await verifyAllRulesWereDeleted(supertest, log, spaceId);
+      await verifyThereAreNoRules(supertest, log, spaceId);
 
       return { passed: true };
     },
@@ -72,7 +72,7 @@ async function deleteAllRulesViaBulkAction(
   log.debug('Delete all detection rules: action succeeded ✅', { space });
 }
 
-async function verifyAllRulesWereDeleted(
+async function verifyThereAreNoRules(
   supertest: SuperTest.Agent,
   log: ToolingLog,
   spaceId?: string

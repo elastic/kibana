@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-const DEFAULT_SPACE_ID = 'default';
+import { DEFAULT_SPACE_ID, getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
+
+// TODO: Refactor and move this code to the spaces plugin's common folder
 
 /**
  * Returns a normalized space ID that can't be undefined.
@@ -23,7 +25,6 @@ export function getSpaceId(spaceId?: string): string {
  * - `withSpaceUrl('/api/some_endpoint', 'default')` returns `/api/some_endpoint`
  * - `withSpaceUrl('/api/some_endpoint', 'my_space') returns `/s/my_space/api/some_endpoint`
  */
-export function withSpaceUrl(url: string, spaceId = DEFAULT_SPACE_ID): string {
-  const normalizedSpaceId = getSpaceId(spaceId);
-  return normalizedSpaceId === DEFAULT_SPACE_ID ? url : `/s/${spaceId}${url}`;
+export function withSpaceUrl(routeUrl: string, spaceId?: string): string {
+  return getRouteUrlForSpace(routeUrl, spaceId);
 }
