@@ -115,6 +115,7 @@ export function createDashboardRenderer({
       toolResultId,
       ToolResultType.dashboard
     );
+    console.log('[DASHBOARD_RENDERER] Rendering dashboard for toolResultId:', toolResult);
 
     if (!toolResult) {
       const ToolResultAttribute = (

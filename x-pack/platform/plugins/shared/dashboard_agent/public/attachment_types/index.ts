@@ -38,7 +38,8 @@ export const registerDashboardAttachmentUiDefinition = ({
       );
     },
     getIcon: () => 'productDashboard',
-    onClick: async ({ attachment }) => {
+    onClick: async ({ version, attachment }) => {
+      console.log('[DASHBOARD_ATTACHMENT] onClick triggered for attachment:', attachment);
       if (!share) return;
 
       const data = attachment.data as DashboardAttachmentData | undefined;
@@ -53,11 +54,10 @@ export const registerDashboardAttachmentUiDefinition = ({
       const markdownPanel = markdownContent ? buildMarkdownPanel(markdownContent) : undefined;
       const yOffset = markdownContent ? getMarkdownPanelHeight(markdownContent) : 0;
 
+      const normalizedPanels = normalizePanels(panels, yOffset);
+
       // Normalize attachment panels to dashboard panel format
-      const dashboardPanels = [
-        ...(markdownPanel ? [markdownPanel] : []),
-        ...normalizePanels(panels, yOffset),
-      ];
+      const dashboardPanels = [...(markdownPanel ? [markdownPanel] : []), ...normalizedPanels];
 
       const locatorParams = {
         dashboardId: savedObjectId,
@@ -68,7 +68,7 @@ export const registerDashboardAttachmentUiDefinition = ({
         time_range: { from: 'now-24h', to: 'now' },
         // Use a unique attachment ID that includes timestamp to force URL change
         // This ensures navigation triggers even when clicking the same attachment multiple times
-        dashboardAttachmentId: `${attachment.id}-${Date.now()}`,
+        dashboardAttachmentId: `${attachment.id}-${version.version}`,
       };
 
       // Navigate to dashboard with panel state
