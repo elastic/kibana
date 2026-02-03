@@ -132,7 +132,7 @@ ruleTester.run('@kbn/eslint/scout_require_api_client_in_api_test', rule, {
     // UI test
     {
       code: dedent`
-    test.describe('Painless Lab', { tag: tags.ESS_ONLY }, () => {
+    test.describe('Painless Lab', { tag: tags.stateful.all }, () => {
       test.beforeEach(async ({ browserAuth, pageObjects }) => {
       });
       test('validate painless lab editor and request', async ({ pageObjects }) => {
@@ -143,7 +143,7 @@ ruleTester.run('@kbn/eslint/scout_require_api_client_in_api_test', rule, {
     // Parallel test
     {
       code: dedent`
-    spaceTest.describe('Painless Lab', { tag: tags.ESS_ONLY }, () => {
+    spaceTest.describe('Painless Lab', { tag: tags.stateful.all }, () => {
       spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       });
       spaceTest('validate painless lab editor and request', async ({ pageObjects }) => {
