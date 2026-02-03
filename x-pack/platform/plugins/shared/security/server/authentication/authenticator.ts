@@ -908,13 +908,16 @@ export class Authenticator {
     if (!existingSessionValue) {
       const startTime = performance.now();
 
-      newSessionValue = await this.session.create(request, {
-        username: authenticationResult.user?.username,
-        userProfileId,
-        provider,
-        state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
-        stateCookieOptions: authenticationResult.stateCookieOptions,
-      });
+      newSessionValue = await this.session.create(
+        request,
+        {
+          username: authenticationResult.user?.username,
+          userProfileId,
+          provider,
+          state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
+        },
+        authenticationResult.stateCookieOptions
+      );
 
       const duration = performance.now() - startTime;
 

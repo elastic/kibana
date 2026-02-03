@@ -81,20 +81,20 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
   }
 
   public set(sessionValue: T, options?: SessionStorageSetOptions) {
-    if (options) {
-      // Use custom cookie options
-      const h = this.getResponseToolkit();
-      const isSecure = options?.isSecure ?? this.cookieOptions.isSecure;
-      const sameSite = options?.sameSite ?? this.cookieOptions.sameSite;
-
-      h.state(this.cookieOptions.name, sessionValue, {
-        isSecure,
-        isSameSite: sameSite,
-      });
-    } else {
+    if (!options) {
       // Use default cookie auth
       return this.request.cookieAuth.set(sessionValue);
     }
+
+    // Use custom cookie options
+    const h = this.getResponseToolkit();
+    const isSecure = options?.isSecure ?? this.cookieOptions.isSecure;
+    const sameSite = options?.sameSite ?? this.cookieOptions.sameSite;
+
+    h.state(this.cookieOptions.name, sessionValue, {
+      isSecure,
+      isSameSite: sameSite,
+    });
   }
 
   public clear() {

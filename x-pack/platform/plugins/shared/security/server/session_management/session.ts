@@ -85,8 +85,6 @@ export interface SessionValue {
    * Additional information about the session value.
    */
   metadata: { index: SessionIndexValue };
-
-  stateCookieOptions?: SessionStorageSetOptions;
 }
 
 export interface SessionOptions {
@@ -238,6 +236,7 @@ export class Session {
    * Creates new session document in the session index encrypting sensitive state.
    * @param request Request instance to create session value for.
    * @param sessionValue Session value parameters.
+   * @param stateCookieOptions Options to change the associated session cookie's properties
    */
   async create(
     request: KibanaRequest,
@@ -246,7 +245,8 @@ export class Session {
         SessionValue,
         'sid' | 'idleTimeoutExpiration' | 'lifespanExpiration' | 'createdAt' | 'metadata'
       >
-    >
+    >,
+    stateCookieOptions?: SessionStorageSetOptions
   ) {
     const [sid, aad] = await Promise.all([
       this.randomBytes(SID_BYTE_LENGTH).then((sidBuffer) => sidBuffer.toString('base64')),
@@ -257,8 +257,7 @@ export class Session {
     sessionLogger.debug('Creating a new session.');
 
     const sessionExpirationInfo = this.calculateExpiry(sessionValue.provider);
-    const { username, userProfileId, state, stateCookieOptions, ...publicSessionValue } =
-      sessionValue;
+    const { username, userProfileId, state, ...publicSessionValue } = sessionValue;
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.

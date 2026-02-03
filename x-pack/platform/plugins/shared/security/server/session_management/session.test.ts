@@ -490,13 +490,16 @@ describe('Session', () => {
 
       const mockRequest = httpServerMock.createKibanaRequest();
       await expect(
-        session.create(mockRequest, {
-          username: mockAuthenticatedUser().username,
-          userProfileId: 'uid',
-          provider: { type: 'saml', name: 'saml1' },
-          state: 'some-state',
-          stateCookieOptions: { isSecure: true, sameSite: 'None' },
-        })
+        session.create(
+          mockRequest,
+          {
+            username: mockAuthenticatedUser().username,
+            userProfileId: 'uid',
+            provider: { type: 'saml', name: 'saml1' },
+            state: 'some-state',
+          },
+          { isSecure: true, sameSite: 'None' }
+        )
       ).resolves.toEqual({
         sid: mockSID,
         username: 'user',
