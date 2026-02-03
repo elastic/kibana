@@ -37,6 +37,8 @@ import {
   putTemplateRoute,
   patchTemplateRoute,
   deleteTemplateRoute,
+  bulkDeleteTemplatesRoute,
+  bulkExportTemplatesRoute,
 } from './templates';
 
 export const getInternalRoutes = (userProfileService: UserProfileService) =>
@@ -68,4 +70,6 @@ export const getInternalRoutes = (userProfileService: UserProfileService) =>
     putTemplateRoute,
     patchTemplateRoute,
     deleteTemplateRoute,
+    bulkDeleteTemplatesRoute,
+    bulkExportTemplatesRoute,
   ] as CaseRoute[];

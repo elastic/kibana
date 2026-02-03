@@ -10,6 +10,8 @@ import yaml from 'js-yaml';
 import {
   INTERNAL_TEMPLATE_DETAILS_URL,
   INTERNAL_TEMPLATES_URL,
+  INTERNAL_BULK_DELETE_TEMPLATES_URL,
+  INTERNAL_BULK_EXPORT_TEMPLATES_URL,
 } from '../../../../common/constants';
 import type {
   Template,
@@ -22,6 +24,7 @@ import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
+import { escapeHatch } from '../utils';
 
 // Mock data store (simulates database)
 const mockTemplates: Template[] = [
@@ -447,6 +450,123 @@ export const deleteTemplateRoute = createCasesRoute({
     } catch (error) {
       throw createCaseError({
         message: `Failed to delete template with id ${request.params.template_id}: ${error}`,
+        error,
+      });
+    }
+  },
+});
+
+/**
+ * POST /internal/cases/templates/_bulk_delete
+ * Bulk soft delete templates by IDs
+ */
+export const bulkDeleteTemplatesRoute = createCasesRoute({
+  method: 'post',
+  path: INTERNAL_BULK_DELETE_TEMPLATES_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
+  params: {
+    body: escapeHatch,
+  },
+  routerOptions: {
+    access: 'internal',
+    summary: 'Bulk delete case templates',
+  },
+  handler: async ({ context, request, response }) => {
+    try {
+      const caseContext = await context.cases;
+      await caseContext.getCasesClient();
+
+      const { ids } = request.body as { ids: string[] };
+
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return response.badRequest({
+          body: { message: 'ids must be a non-empty array of template IDs' },
+        });
+      }
+
+      const deletedAt = new Date().toISOString();
+      const notFound: string[] = [];
+
+      for (const templateId of ids) {
+        const templateVersions = mockTemplates.filter(
+          (t) => t.templateId === templateId && t.deletedAt === null
+        );
+
+        if (templateVersions.length === 0) {
+          notFound.push(templateId);
+        } else {
+          templateVersions.forEach((template) => {
+            template.deletedAt = deletedAt;
+          });
+        }
+      }
+
+      if (notFound.length > 0) {
+        return response.notFound({
+          body: { message: `Templates not found: ${notFound.join(', ')}` },
+        });
+      }
+
+      return response.noContent();
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to bulk delete templates: ${error}`,
+        error,
+      });
+    }
+  },
+});
+
+/**
+ * POST /internal/cases/templates/_bulk_export
+ * Bulk export templates by IDs
+ */
+export const bulkExportTemplatesRoute = createCasesRoute({
+  method: 'post',
+  path: INTERNAL_BULK_EXPORT_TEMPLATES_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
+  params: {
+    body: escapeHatch,
+  },
+  routerOptions: {
+    access: 'internal',
+    summary: 'Bulk export case templates',
+  },
+  handler: async ({ context, request, response }) => {
+    try {
+      const caseContext = await context.cases;
+      await caseContext.getCasesClient();
+
+      const { ids } = request.body as { ids: string[] };
+
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return response.badRequest({
+          body: { message: 'ids must be a non-empty array of template IDs' },
+        });
+      }
+
+      const templates = mockTemplates.filter(
+        (t) => ids.includes(t.templateId) && t.deletedAt === null
+      );
+
+      const notFound = ids.filter((id) => !templates.some((t) => t.templateId === id));
+
+      if (notFound.length > 0) {
+        return response.notFound({
+          body: { message: `Templates not found: ${notFound.join(', ')}` },
+        });
+      }
+
+      const parsedTemplates: ParsedTemplate[] = templates.map((template) =>
+        parseTemplate(template)
+      );
+
+      return response.ok({
+        body: parsedTemplates,
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to bulk export templates: ${error}`,
         error,
       });
     }
