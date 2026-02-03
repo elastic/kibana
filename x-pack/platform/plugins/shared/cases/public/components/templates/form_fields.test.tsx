@@ -15,7 +15,7 @@ import { FormTestComponent } from '../../common/test_utils';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetChoicesResponse } from '../create/mock';
 import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
-import { TEMPLATE_FIELDS, CASE_FIELDS, CONNECTOR_FIELDS, CASE_SETTINGS } from './translations';
+import { EXTENDED_FIELDS, CASE_FIELDS, CONNECTOR_FIELDS, CASE_SETTINGS } from './translations';
 import { FormFields } from './form_fields';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
@@ -69,7 +69,7 @@ describe('form fields', () => {
       </FormTestComponent>
     );
 
-    expect(await screen.findByText(TEMPLATE_FIELDS)).toBeInTheDocument();
+    expect(await screen.findByText(EXTENDED_FIELDS)).toBeInTheDocument();
     expect(await screen.findByText(CASE_FIELDS)).toBeInTheDocument();
     expect(await screen.findByText(CASE_SETTINGS)).toBeInTheDocument();
     expect(await screen.findByText(CONNECTOR_FIELDS)).toBeInTheDocument();

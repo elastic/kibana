@@ -55,6 +55,7 @@ import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_fram
 import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
+import { TemplatesService } from '../routes/api/templates';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
@@ -108,11 +109,13 @@ export class CasesClientFactory {
   public async create({
     request,
     scopedClusterClient,
+    internalClusterClient,
     savedObjectsService,
   }: {
     request: KibanaRequest;
     savedObjectsService: SavedObjectsServiceStart;
     scopedClusterClient: ElasticsearchClient;
+    internalClusterClient: ElasticsearchClient;
   }): Promise<CasesClient> {
     this.validateInitialization();
 
@@ -141,6 +144,7 @@ export class CasesClientFactory {
       unsecuredSavedObjectsClient,
       savedObjectsSerializer,
       esClient: scopedClusterClient,
+      internalEsClient: internalClusterClient,
       request,
       auditLogger,
       alertsClient,
@@ -180,6 +184,7 @@ export class CasesClientFactory {
     unsecuredSavedObjectsClient,
     savedObjectsSerializer,
     esClient,
+    internalEsClient,
     request,
     auditLogger,
     alertsClient,
@@ -187,11 +192,18 @@ export class CasesClientFactory {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     savedObjectsSerializer: ISavedObjectsSerializer;
     esClient: ElasticsearchClient;
+    internalEsClient: ElasticsearchClient;
     request: KibanaRequest;
     auditLogger: AuditLogger;
     alertsClient: PublicMethodsOf<AlertsClient>;
   }): CasesServices {
     this.validateInitialization();
+
+    const templatesService = new TemplatesService({
+      unsecuredSavedObjectsClient,
+      savedObjectsSerializer,
+      internalEsClient,
+    });
 
     const attachmentService = new AttachmentService({
       log: this.logger,
@@ -225,6 +237,7 @@ export class CasesClientFactory {
     });
 
     return {
+      templatesService,
       alertsService: new AlertService(esClient, this.logger, alertsClient),
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),

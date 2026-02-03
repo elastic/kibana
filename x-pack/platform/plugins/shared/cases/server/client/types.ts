@@ -30,6 +30,7 @@ import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_fram
 import type { LicensingService } from '../services/licensing';
 import type { NotificationService } from '../services/notifications/types';
 import type { User } from '../common/types/user';
+import { type TemplatesService } from '../routes/api/templates';
 
 export interface CasesServices {
   alertsService: AlertService;
@@ -40,6 +41,7 @@ export interface CasesServices {
   attachmentService: AttachmentService;
   licensingService: LicensingService;
   notificationService: NotificationService;
+  templatesService: TemplatesService;
 }
 
 /**

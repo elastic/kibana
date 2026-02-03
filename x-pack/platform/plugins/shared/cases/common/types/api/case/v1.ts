@@ -22,6 +22,7 @@ import {
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  CASE_EXTENDED_FIELDS,
 } from '../../../constants';
 import {
   limitedStringSchema,
@@ -40,6 +41,7 @@ import {
   CaseSeverityRt,
   CasesRt,
   CaseStatusRt,
+  CaseTemplate,
   RelatedCaseRt,
   SimilarCaseRt,
 } from '../../domain/case/v1';
@@ -131,6 +133,9 @@ export const CaseBaseOptionalFieldsRequestRt = rt.exact(
      * The alert sync settings
      */
     settings: CaseSettingsRt,
+    [CASE_EXTENDED_FIELDS]: rt.any,
+
+    template: rt.union([CaseTemplate, rt.null]),
   })
 );
 
@@ -218,6 +223,10 @@ export const CasePostRequestRt = rt.intersection([
        * The list of custom field values of the case.
        */
       customFields: CaseRequestCustomFieldsRt,
+
+      template: rt.union([CaseTemplate, rt.null]),
+
+      [CASE_EXTENDED_FIELDS]: rt.any,
     })
   ),
 ]);

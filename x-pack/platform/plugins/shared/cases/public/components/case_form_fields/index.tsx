@@ -16,6 +16,7 @@ import { useCasesFeatures } from '../../common/use_cases_features';
 import { Assignees } from './assignees';
 import { CustomFields } from './custom_fields';
 import type { CasesConfigurationUI } from '../../containers/types';
+import { CreateCaseTemplateFields } from '../templates_v2';
 
 interface Props {
   isLoading: boolean;
@@ -48,6 +49,7 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
         configurationCustomFields={configurationCustomFields}
         isEditMode={isEditMode}
       />
+      <CreateCaseTemplateFields />
     </EuiFlexGroup>
   );
 };

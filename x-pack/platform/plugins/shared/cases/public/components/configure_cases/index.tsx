@@ -24,6 +24,7 @@ import {
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
+import type { Template } from '../../../common/templates';
 import type {
   CustomFieldConfiguration,
   TemplateConfiguration,
@@ -54,6 +55,7 @@ import { Templates } from '../templates';
 import type { TemplateFormProps } from '../templates/types';
 import { CustomFieldsForm } from '../custom_fields/form';
 import { TemplateForm } from '../templates/form';
+import { TemplateFlyout, TemplatesSection } from '../templates_v2';
 import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservableTypes } from '../observable_types';
@@ -75,7 +77,13 @@ const getFormWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
 `;
 
 interface Flyout {
-  type: 'addConnector' | 'editConnector' | 'customField' | 'template' | 'observableTypes';
+  type:
+    | 'addConnector'
+    | 'editConnector'
+    | 'customField'
+    | 'template'
+    | 'observableTypes'
+    | 'templatesV2';
   visible: boolean;
 }
 
@@ -133,6 +141,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const [observableTypeToEdit, setObservableTypeToEdit] =
     useState<ObservableTypeConfiguration | null>(null);
   const { euiTheme } = useEuiTheme();
+  const [templateV2ToEdit, setTemplateV2ToEdit] = useState<Template | null>(null);
 
   const {
     data: currentConfiguration,
@@ -428,6 +437,11 @@ export const ConfigureCases: React.FC = React.memo(() => {
     setObservableTypeToEdit(null);
   }, [setFlyOutVisibility]);
 
+  const onCloseTemplatesV2Flyout = useCallback(() => {
+    setFlyOutVisibility({ type: 'templatesV2', visible: false });
+    setTemplateV2ToEdit(null);
+  }, [setFlyOutVisibility]);
+
   const onObservableTypeSave = useCallback(
     (data: ObservableTypeConfiguration) => {
       const existingObservableIndex = observableTypes.findIndex((item) => item.key === data.key);
@@ -624,6 +638,11 @@ export const ConfigureCases: React.FC = React.memo(() => {
       </CommonFlyout>
     ) : null;
 
+  const TemplatesV2Flyout =
+    flyOutVisibility?.type === 'templatesV2' && flyOutVisibility?.visible ? (
+      <TemplateFlyout template={templateV2ToEdit} onClose={onCloseTemplatesV2Flyout} />
+    ) : null;
+
   return (
     <EuiPageSection restrictWidth={true}>
       <HeaderPage data-test-subj="case-configure-title" title={i18n.CONFIGURE_CASES_PAGE_TITLE} />
@@ -738,12 +757,26 @@ export const ConfigureCases: React.FC = React.memo(() => {
           )}
 
           <EuiSpacer size="xl" />
+          <div css={sectionWrapperCss}>
+            <EuiFlexItem grow={false}>
+              <TemplatesSection
+                onAddTemplate={() => setFlyOutVisibility({ type: 'templatesV2', visible: true })}
+                onEditTemplate={(template) => {
+                  setFlyOutVisibility({ type: 'templatesV2', visible: true });
+                  setTemplateV2ToEdit(template);
+                }}
+              />
+            </EuiFlexItem>
+          </div>
+
+          <EuiSpacer size="xl" />
 
           {ConnectorAddFlyout}
           {ConnectorEditFlyout}
           {AddOrEditCustomFieldFlyout}
           {AddOrEditTemplateFlyout}
           {AddOrEditObservableTypeFlyout}
+          {TemplatesV2Flyout}
         </div>
       </EuiPageBody>
     </EuiPageSection>

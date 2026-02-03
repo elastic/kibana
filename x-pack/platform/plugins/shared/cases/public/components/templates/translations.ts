@@ -47,8 +47,8 @@ export const TEMPLATE_TAGS_HELP = i18n.translate('xpack.cases.templates.template
   defaultMessage: 'Separate tags with a line break.',
 });
 
-export const TEMPLATE_FIELDS = i18n.translate('xpack.cases.templates.templateFields', {
-  defaultMessage: 'Template fields',
+export const EXTENDED_FIELDS = i18n.translate('xpack.cases.templates.extendedFields', {
+  defaultMessage: 'Extended fields',
 });
 
 export const CASE_FIELDS = i18n.translate('xpack.cases.templates.caseFields', {

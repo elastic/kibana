@@ -27,6 +27,52 @@ export interface FormState<T extends FormData = FormData, I extends FormData = T
   submit: FormHook<T, I>['submit'];
 }
 
+export interface CommonFlyoutFooterProps {
+  disabled: boolean;
+  isLoading: boolean;
+  onCancel: VoidFunction;
+  onSave: VoidFunction;
+}
+
+export const CommonFlyoutFooter = ({
+  disabled,
+  isLoading,
+  onCancel,
+  onSave,
+}: CommonFlyoutFooterProps) => {
+  return (
+    <EuiFlyoutFooter data-test-subj={'common-flyout-footer'}>
+      <EuiFlexGroup justifyContent="flexStart">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            onClick={onCancel}
+            data-test-subj={'common-flyout-cancel'}
+            disabled={disabled}
+            isLoading={isLoading}
+          >
+            {i18n.CANCEL}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={onSave}
+              data-test-subj={'common-flyout-save'}
+              disabled={disabled}
+              isLoading={isLoading}
+            >
+              {i18n.SAVE}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexGroup>
+    </EuiFlyoutFooter>
+  );
+};
+
+CommonFlyoutFooter.displayName = 'CommonFlyoutFooter';
+
 export interface FlyOutBodyProps<T extends FormData = FormData, I extends FormData = T> {
   onChange: (state: FormState<T, I>) => void;
 }
@@ -38,6 +84,7 @@ export interface FlyoutProps<T extends FormData = FormData, I extends FormData =
   onSaveField: (data: I) => void;
   renderHeader: () => React.ReactNode;
   children: ({ onChange }: FlyOutBodyProps<T, I>) => React.ReactNode;
+  footer?: React.ReactNode;
 }
 
 export const CommonFlyout = <T extends FormData = FormData, I extends FormData = T>({
@@ -47,6 +94,7 @@ export const CommonFlyout = <T extends FormData = FormData, I extends FormData =
   disabled,
   renderHeader,
   children,
+  footer,
 }: FlyoutProps<T, I>) => {
   const [formState, setFormState] = useState<FormState<T, I>>({
     isValid: undefined,
@@ -99,33 +147,14 @@ export const CommonFlyout = <T extends FormData = FormData, I extends FormData =
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{memoizedChildren}</EuiFlyoutBody>
-      <EuiFlyoutFooter data-test-subj={'common-flyout-footer'}>
-        <EuiFlexGroup justifyContent="flexStart">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={onCloseFlyout}
-              data-test-subj={'common-flyout-cancel'}
-              disabled={disabled}
-              isLoading={isLoading}
-            >
-              {i18n.CANCEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={handleSaveField}
-                data-test-subj={'common-flyout-save'}
-                disabled={disabled}
-                isLoading={isLoading}
-              >
-                {i18n.SAVE}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+      {footer || (
+        <CommonFlyoutFooter
+          isLoading={isLoading}
+          disabled={disabled}
+          onCancel={onCloseFlyout}
+          onSave={handleSaveField}
+        />
+      )}
     </EuiFlyout>
   );
 };

@@ -99,6 +99,12 @@ export const useOnUpdateField = ({ caseData }: { caseData: CaseUI }) => {
             callUpdate('customFields', customFields);
           }
           break;
+        case 'extendedFields':
+          const extendedFields = getTypedPayload<CaseAttributes['extended_fields']>(value);
+          if (!deepEqual(caseData.customFields, value)) {
+            callUpdate('extended_fields', extendedFields);
+          }
+          break;
         default:
           return null;
       }
