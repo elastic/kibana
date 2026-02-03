@@ -412,12 +412,14 @@ module.exports = {
   overrides: [
     /**
      * .mts files - ES module TypeScript files
-     * These need explicit sourceType: module to avoid parsing errors
+     * These need explicit parser and sourceType configuration
      */
     {
       files: ['**/*.mts'],
+      parser: '@typescript-eslint/parser',
       parserOptions: {
         sourceType: 'module',
+        ecmaVersion: 2020,
       },
     },
     /**
