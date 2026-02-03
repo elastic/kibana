@@ -25,7 +25,7 @@ const mockRouter: StatefulStreamsAppRouter = {
   getRoutesToMatch: jest.fn(),
 } as StatefulStreamsAppRouter;
 
-jest.mock('../../../hooks/use_streams_app_router', () => ({
+jest.mock('../../hooks/use_streams_app_router', () => ({
   useStreamsAppRouter: () => mockRouter,
 }));
 
@@ -36,11 +36,14 @@ const mockRoutingContext = {
   routing: [] as Array<{ destination: string; isNew?: boolean }>,
 };
 
-jest.mock('./state_management/stream_routing_state_machine', () => ({
-  useStreamsRoutingSelector: (
-    selector: (snapshot: { context: typeof mockRoutingContext }) => any
-  ) => selector({ context: mockRoutingContext }),
-}));
+jest.mock(
+  '../data_management/stream_detail_routing/state_management/stream_routing_state_machine',
+  () => ({
+    useStreamsRoutingSelector: (
+      selector: (snapshot: { context: typeof mockRoutingContext }) => any
+    ) => selector({ context: mockRoutingContext }),
+  })
+);
 
 describe('StreamNameFormRow', () => {
   beforeEach(() => {
