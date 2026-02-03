@@ -18,13 +18,25 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useBasePath } from '../../../common/lib/kibana';
 
-export const IntegrationSelectablePopover = (
-  props: Pick<EuiSelectableProps, 'options' | 'onChange'>
-) => {
+export const IntegrationSelectablePopover = (props: Pick<EuiSelectableProps, 'options'>) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { options, onChange } = props;
+  const { options } = props;
   const { euiTheme } = useEuiTheme();
+  const basePath = useBasePath();
+
+  const handleChange: EuiSelectableProps['onChange'] = (newOptions) => {
+    // Find the selected option
+    const selectedOption = newOptions.find((option) => option.checked === 'on');
+
+    if (selectedOption?.key) {
+      // Navigate to the integration detail page
+      const integrationUrl = `${basePath}/app/integrations/detail/${selectedOption.key}`;
+      window.open(integrationUrl, '_blank', 'noopener,noreferrer');
+      setIsPopoverOpen(false);
+    }
+  };
 
   return (
     <EuiPopover
@@ -81,9 +93,7 @@ export const IntegrationSelectablePopover = (
           compressed: true,
         }}
         options={options}
-        onChange={(newOptions, event, changedOption) => {
-          onChange?.(newOptions, event, changedOption);
-        }}
+        onChange={handleChange}
       >
         {(list, search) => (
           <div style={{ width: `calc(${euiTheme.base} * 15)` }}>
