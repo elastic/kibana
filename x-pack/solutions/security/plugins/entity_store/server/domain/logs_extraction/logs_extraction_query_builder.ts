@@ -40,7 +40,7 @@ interface LogsExtractionQueryParams {
   // contains all the fields and id descriptions
   entityDefinition: EntityDefinition;
   // limits amount of logs and entities processed
-  maxPageSearchSize: number;
+  docsLimit: number;
 
   fromDateISO: string;
 
@@ -52,20 +52,18 @@ export const buildLogsExtractionEsqlQuery = ({
   entityDefinition: { fields, identityField, type, entityTypeFallback },
   fromDateISO,
   toDateISO,
-  maxPageSearchSize,
+  docsLimit,
   latestIndex,
 }: LogsExtractionQueryParams): string => {
   const idFieldName = getIdFieldName(identityField);
 
-  return `SET unmapped_fields="nullify";
-  
-  FROM ${indexPatterns.join(', ')}
+  return `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}
   | WHERE (${entityIdFilter(identityField, type)})
       AND ${TIMESTAMP_FIELD} > TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
   | SORT ${TIMESTAMP_FIELD} ASC
-  | LIMIT ${maxPageSearchSize}
+  | LIMIT ${docsLimit}
   ${entityFieldEvaluation(identityField, type)}
   | STATS
     ${recentData('timestamp')} = MAX(${TIMESTAMP_FIELD}),
