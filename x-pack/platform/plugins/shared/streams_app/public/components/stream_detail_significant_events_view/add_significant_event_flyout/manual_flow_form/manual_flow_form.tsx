@@ -106,6 +106,7 @@ export function ManualFlowForm({
             }
           >
             <EuiFieldText
+              compressed={true}
               value={query?.title}
               disabled={isSubmitting}
               onBlur={() => {
@@ -153,6 +154,7 @@ export function ManualFlowForm({
             }
           >
             <EuiSuperSelect
+            compressed={true}
               options={options}
               valueOfSelected={
                 query.feature
