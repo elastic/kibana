@@ -52,6 +52,43 @@ apiTest.describe(
     );
 
     apiTest(
+      'should set network direction with target field in both ingest pipeline and ES|QL',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'network_direction',
+              source_ip: 'source_ip',
+              destination_ip: 'destination_ip',
+              target_field: 'test_network_direction',
+              internal_networks: ['private'],
+            } as NetworkDirectionProcessor,
+          ],
+        };
+
+        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { query } = transpileEsql(streamlangDSL);
+
+        const docs = [{ source_ip: '128.232.110.120', destination_ip: '192.168.1.1' }];
+        await testBed.ingest('ingest-e2e-test-network-direction-target-field', docs, processors);
+        const ingestResult = await testBed.getDocs(
+          'ingest-e2e-test-network-direction-target-field'
+        );
+
+        await testBed.ingest('esql-e2e-test-network-direction-target-field', docs);
+        const esqlResult = await esql.queryOnIndex(
+          'esql-e2e-test-network-direction-target-field',
+          query
+        );
+
+        expect(ingestResult).toHaveLength(1);
+        expect(ingestResult[0]).toHaveProperty('test_network_direction', 'inbound');
+        expect(esqlResult.documents).toHaveLength(1);
+        expect(esqlResult.documents[0]).toHaveProperty(['test_network_direction'], 'inbound');
+      }
+    );
+
+    apiTest(
       'should set network direction with internal networks field in both ingest pipeline and ES|QL',
       async ({ testBed, esql }) => {
         const streamlangDSL: StreamlangDSL = {

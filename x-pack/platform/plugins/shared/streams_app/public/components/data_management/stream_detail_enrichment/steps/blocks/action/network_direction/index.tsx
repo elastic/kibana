@@ -8,9 +8,11 @@
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
-import { SourceIpField } from './network_direction_inputs';
-import { DestinationIpField } from './network_direction_inputs';
-import { NetworkDirectionTargetField } from './network_direction_inputs';
+import {
+  SourceIpField,
+  DestinationIpField,
+  NetworkDirectionTargetField,
+} from './network_direction_inputs';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { InternalNetworksSelector } from './internal_networks_selector';
