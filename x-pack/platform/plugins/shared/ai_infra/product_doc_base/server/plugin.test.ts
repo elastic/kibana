@@ -50,7 +50,12 @@ describe('ProductDocBasePlugin', () => {
       update: jest.fn().mockResolvedValue({}),
       uninstall: jest.fn().mockResolvedValue({}),
       getStatus: jest.fn().mockResolvedValue({}),
+      getStatuses: jest.fn().mockResolvedValue({}),
       updateAll: jest.fn().mockResolvedValue({}),
+      installSecurityLabs: jest.fn().mockResolvedValue({}),
+      uninstallSecurityLabs: jest.fn().mockResolvedValue({}),
+      getSecurityLabsStatus: jest.fn().mockResolvedValue({}),
+      updateSecurityLabsAll: jest.fn().mockResolvedValue({}),
     });
   });
 
@@ -89,10 +94,15 @@ describe('ProductDocBasePlugin', () => {
       expect(startContract).toEqual({
         management: {
           getStatus: expect.any(Function),
+          getStatuses: expect.any(Function),
           install: expect.any(Function),
           uninstall: expect.any(Function),
           update: expect.any(Function),
           updateAll: expect.any(Function),
+          updateSecurityLabsAll: expect.any(Function),
+          installSecurityLabs: expect.any(Function),
+          uninstallSecurityLabs: expect.any(Function),
+          getSecurityLabsStatus: expect.any(Function),
         },
         search: expect.any(Function),
       });
@@ -102,6 +112,7 @@ describe('ProductDocBasePlugin', () => {
       plugin.setup(coreMock.createSetup(), pluginSetupDeps);
       plugin.start(coreMock.createStart(), pluginStartDeps);
       expect(DocumentationManagerMock().updateAll).toHaveBeenCalledTimes(1);
+      expect(DocumentationManagerMock().updateSecurityLabsAll).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -13,34 +13,45 @@ import {
   useNavigation,
   NavigationProvider,
 } from '@kbn/security-solution-navigation';
-import type { ToastInput } from '@kbn/core-notifications-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { RuleMigrationStats } from '../../types';
 
-export const getSuccessToast = (migration: RuleMigrationStats, core: CoreStart): ToastInput => ({
-  color: 'success',
-  iconType: 'check',
-  toastLifeTimeMs: 1000 * 60 * 30, // 30 minutes
-  title: i18n.translate('xpack.securitySolution.siemMigrations.rulesService.polling.successTitle', {
-    defaultMessage: 'Rules translation complete.',
-  }),
-  text: toMountPoint(
-    <NavigationProvider core={core}>
-      <SuccessToastContent migration={migration} />
-    </NavigationProvider>,
-    core
-  ),
-});
+export const raiseSuccessToast = (migration: RuleMigrationStats, core: CoreStart) => {
+  const toast = core.notifications.toasts.addSuccess({
+    color: 'success',
+    iconType: 'check',
+    toastLifeTimeMs: 1000 * 60 * 30, // 30 minutes
+    title: i18n.translate(
+      'xpack.securitySolution.siemMigrations.rulesService.polling.successTitle',
+      {
+        defaultMessage: 'Rules translation complete.',
+      }
+    ),
+    text: toMountPoint(
+      <NavigationProvider core={core}>
+        <SuccessToastContent
+          migration={migration}
+          dismissHandler={() => core.notifications.toasts.remove(toast)}
+        />
+      </NavigationProvider>,
+      core
+    ),
+  });
+};
 
-const SuccessToastContent: React.FC<{ migration: RuleMigrationStats }> = ({ migration }) => {
+export const SuccessToastContent: React.FC<{
+  migration: RuleMigrationStats;
+  dismissHandler: () => void;
+}> = ({ migration, dismissHandler }) => {
   const navigation = { deepLinkId: SecurityPageName.siemMigrationsRules, path: migration.id };
 
   const { navigateTo, getAppUrl } = useNavigation();
   const onClick: React.MouseEventHandler = (ev) => {
     ev.preventDefault();
     navigateTo(navigation);
+    dismissHandler();
   };
   const url = getAppUrl(navigation);
 

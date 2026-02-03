@@ -11,6 +11,7 @@ import supertest from 'supertest';
 import { createCoreContext } from '@kbn/core-http-server-mocks';
 import type { HttpService, InternalHttpServicePreboot } from '@kbn/core-http-server-internal';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { registerPrebootStatusRoute } from '@kbn/core-status-server-internal/src/routes';
 import { createInternalHttpService } from '../../utilities';
 
@@ -26,6 +27,7 @@ describe('GET /api/status', () => {
     server = createInternalHttpService(coreContext);
     httpPreboot = await server.preboot({
       context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
     });
 
     httpPreboot.registerRoutes('', (router) => {

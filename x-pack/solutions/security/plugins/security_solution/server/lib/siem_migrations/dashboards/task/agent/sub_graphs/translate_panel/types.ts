@@ -7,6 +7,8 @@
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
 import type { EsqlKnowledgeBase } from '../../../../../common/task/util/esql_knowledge_base';
 import type { DashboardMigrationsRetriever } from '../../../retrievers';
@@ -30,9 +32,17 @@ export interface TranslatePanelGraphParams {
   dashboardMigrationsRetriever: DashboardMigrationsRetriever;
   telemetryClient: DashboardMigrationTelemetryClient;
   logger: Logger;
+  inference: InferenceServerStart;
+  request: KibanaRequest;
+  connectorId: string;
 }
 
 export interface ValidationErrors {
   retries_left: number;
   esql_errors?: string;
+}
+
+export interface EsqlColumn {
+  name: string;
+  type: string;
 }

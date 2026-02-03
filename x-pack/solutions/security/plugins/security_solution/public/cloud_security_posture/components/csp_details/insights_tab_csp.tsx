@@ -137,8 +137,12 @@ export const InsightsTabCsp = memo(
       panels.left?.params?.hasVulnerabilitiesFindings,
     ]);
 
+    const isSingleOption = insightsButtons.length === 1;
+
     const onTabChange = (id: string) => {
-      setActiveInsightsId(id);
+      if (!isSingleOption) {
+        setActiveInsightsId(id);
+      }
     };
 
     if (insightsButtons.length === 0) {
@@ -160,6 +164,7 @@ export const InsightsTabCsp = memo(
           onChange={onTabChange}
           buttonSize="compressed"
           isFullWidth
+          isDisabled={isSingleOption}
           data-test-subj={'insightButtonGroupsTestId'}
         />
         <EuiSpacer size="xl" />

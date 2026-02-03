@@ -17,7 +17,7 @@ export const DeprecatedBadge = () => {
           'This component template is no longer supported and might be removed in a future release. Instead, use one of the other component templates available or create a new one.',
       })}
     >
-      <EuiBadge color="warning" data-test-subj="deprecatedComponentTemplateBadge">
+      <EuiBadge color="warning" tabIndex={0} data-test-subj="deprecatedComponentTemplateBadge">
         {i18n.translate('xpack.idxMgmt.componentTemplate.deprecatedTemplateBadgeText', {
           defaultMessage: 'Deprecated',
         })}

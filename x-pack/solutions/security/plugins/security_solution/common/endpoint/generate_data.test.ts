@@ -164,6 +164,57 @@ describe('data generator', () => {
     expect(processEvent.process?.name).not.toBeNull();
   });
 
+  it('creates device event documents', () => {
+    const deviceEvents = [...generator.deviceEventsGenerator(1)];
+    expect(deviceEvents.length).toEqual(1);
+
+    const deviceEvent = deviceEvents[0];
+    expect(deviceEvent['@timestamp']).not.toBeNull();
+    expect(deviceEvent.event?.category).toEqual(['host']);
+    expect(deviceEvent.event?.kind).toEqual('event');
+    expect(deviceEvent.event?.type).toEqual(['denied', 'device']);
+    expect(deviceEvent.agent).not.toBeNull();
+    expect(deviceEvent.host).not.toBeNull();
+    expect(deviceEvent.device?.serial_number).not.toBeNull();
+    expect(deviceEvent.device?.vendor?.id).not.toBeNull();
+    expect(deviceEvent.device?.vendor?.name).not.toBeNull();
+    expect(deviceEvent.device?.product?.id).not.toBeNull();
+    expect(deviceEvent.device?.product?.name).not.toBeNull();
+    expect(deviceEvent.device?.type).not.toBeNull();
+  });
+
+  it('creates multiple device events via generator', () => {
+    const numEvents = 5;
+    const deviceEvents = [...generator.deviceEventsGenerator(numEvents)];
+    expect(deviceEvents.length).toEqual(numEvents);
+
+    deviceEvents.forEach((event) => {
+      expect(event.event?.category).toEqual(['host']);
+      expect(event.event?.kind).toEqual('event');
+      expect(event.event?.type).toEqual(['denied', 'device']);
+      expect(event.device?.serial_number).not.toBeNull();
+      expect(event.device?.vendor?.id).not.toBeNull();
+      expect(event.device?.product?.id).not.toBeNull();
+    });
+
+    // Verify each event has unique serial numbers (randomness)
+    const serialNumbers = deviceEvents.map((event) => event.device?.serial_number);
+    const uniqueSerialNumbers = new Set(serialNumbers);
+    expect(uniqueSerialNumbers.size).toBeGreaterThan(1);
+  });
+
+  it('creates device events with custom data stream', () => {
+    const customDataStream = { type: 'custom', dataset: 'custom.device', namespace: 'test' };
+    const deviceEvents = [...generator.deviceEventsGenerator(3, customDataStream)];
+
+    deviceEvents.forEach((event) => {
+      expect(event.data_stream).toEqual({
+        ...customDataStream,
+        dataset: 'endpoint.events.device',
+      });
+    });
+  });
+
   describe('creates events with an empty ancestry array', () => {
     let tree: Tree;
     beforeEach(() => {

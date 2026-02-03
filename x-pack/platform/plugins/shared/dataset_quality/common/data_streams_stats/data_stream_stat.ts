@@ -33,6 +33,8 @@ export class DataStreamStat {
   degradedDocs: QualityStat;
   failedDocs: QualityStat;
   hasFailureStore?: DataStreamStatType['hasFailureStore'];
+  defaultRetentionPeriod?: DataStreamStatType['defaultRetentionPeriod'];
+  customRetentionPeriod?: DataStreamStatType['customRetentionPeriod'];
 
   private constructor(dataStreamStat: DataStreamStat) {
     this.rawName = dataStreamStat.rawName;
@@ -51,6 +53,8 @@ export class DataStreamStat {
     this.degradedDocs = dataStreamStat.degradedDocs;
     this.failedDocs = dataStreamStat.failedDocs;
     this.hasFailureStore = dataStreamStat.hasFailureStore;
+    this.defaultRetentionPeriod = dataStreamStat.defaultRetentionPeriod;
+    this.customRetentionPeriod = dataStreamStat.customRetentionPeriod;
   }
 
   public static create(dataStreamStat: DataStreamStatType) {
@@ -71,6 +75,8 @@ export class DataStreamStat {
       quality: DEFAULT_DATASET_QUALITY,
       degradedDocs: DEFAULT_QUALITY_DOC_STATS,
       failedDocs: DEFAULT_QUALITY_DOC_STATS,
+      defaultRetentionPeriod: dataStreamStat.defaultRetentionPeriod,
+      customRetentionPeriod: dataStreamStat.customRetentionPeriod,
     };
 
     return new DataStreamStat(dataStreamStatProps);

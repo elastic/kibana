@@ -9,7 +9,10 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiCopy,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiIcon,
   EuiLink,
@@ -23,9 +26,11 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
+import { buildRequestPreviewCodeContent } from '../data_management/shared/utils';
+import { getFormattedError } from '../../util/errors';
 
 export function StreamDeleteModal({
   onClose,
@@ -59,7 +64,7 @@ export function StreamDeleteModal({
       onClose();
     } catch (error) {
       setDeleteInProgress(false);
-      notifications.toasts.addError(error, {
+      notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate('xpack.streams.failedToDelete', {
           defaultMessage: 'Failed to delete stream {id}',
           values: {
@@ -70,12 +75,19 @@ export function StreamDeleteModal({
     }
   };
 
+  const copyCodeContent = React.useMemo(() => {
+    return buildRequestPreviewCodeContent({
+      method: 'DELETE',
+      url: `/api/streams/${name}`,
+    });
+  }, [name]);
+
   return (
     <EuiModal aria-labelledby={modalTitleId} onClose={onClose}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.title', {
-            defaultMessage: 'Delete {stream} ?',
+            defaultMessage: 'Are you sure you want to delete {stream} ?',
             values: { stream: name },
           })}
         </EuiModalHeaderTitle>
@@ -88,7 +100,7 @@ export function StreamDeleteModal({
           title={
             <FormattedMessage
               id="xpack.streams.streamDetailView.deleteStreamModal.warningText"
-              defaultMessage="This action cannot be undone and permanently deletes the {stream} stream and all its contents."
+              defaultMessage="This action cannot be undone and permanently deletes the {stream} stream and all its contents. This action cannot be undone."
               values={{
                 stream: (
                   <EuiLink
@@ -112,7 +124,8 @@ export function StreamDeleteModal({
           label={i18n.translate(
             'xpack.streams.streamDetailView.deleteStreamModal.confirmationInputLabel',
             {
-              defaultMessage: 'Type the stream name to confirm',
+              defaultMessage: 'To confirm, type {stream}',
+              values: { stream: name },
             }
           )}
         >
@@ -121,29 +134,55 @@ export function StreamDeleteModal({
             onChange={(e) => setStreamName(e.target.value)}
             fullWidth
             name={'stream-name-deletion'}
+            autoFocus
           />
         </EuiFormRow>
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty isDisabled={isDeletingStream} onClick={onCancel}>
-          {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.cancelButton', {
-            defaultMessage: 'Cancel',
-          })}
-        </EuiButtonEmpty>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiCopy textToCopy={copyCodeContent}>
+              {(copy) => (
+                <EuiButtonEmpty
+                  data-test-subj="streamsAppDeleteStreamModalCopyCodeButton"
+                  size="s"
+                  iconType="editorCodeBlock"
+                  onClick={copy}
+                >
+                  {copyCodeButtonText}
+                </EuiButtonEmpty>
+              )}
+            </EuiCopy>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
+              <EuiButtonEmpty isDisabled={isDeletingStream} onClick={onCancel}>
+                {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.cancelButton', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
 
-        <EuiButton
-          isDisabled={streamName !== name}
-          isLoading={isDeletingStream}
-          color="danger"
-          onClick={handleDelete}
-          fill
-        >
-          {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.deleteButton', {
-            defaultMessage: 'Delete',
-          })}
-        </EuiButton>
+              <EuiButton
+                isDisabled={streamName !== name}
+                isLoading={isDeletingStream}
+                color="danger"
+                onClick={handleDelete}
+                fill
+              >
+                {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.deleteButton', {
+                  defaultMessage: 'Delete',
+                })}
+              </EuiButton>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalFooter>
     </EuiModal>
   );
 }
+
+const copyCodeButtonText = i18n.translate(
+  'xpack.streams.streamDetailView.deleteStreamModal.copyCodeButton',
+  { defaultMessage: 'Copy API request' }
+);

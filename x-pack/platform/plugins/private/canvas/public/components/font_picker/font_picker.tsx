@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSuperSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { FontValue } from '../../../common/lib/fonts';
 import { fonts } from '../../../common/lib/fonts';
 
@@ -42,6 +43,9 @@ export const FontPicker: FC<Props> = ({ value, onSelect }) => {
       }))}
       valueOfSelected={value}
       onChange={(newValue: DisplayedFont['value']) => onSelect && onSelect(newValue)}
+      aria-label={i18n.translate('xpack.canvas.fontPicker.fontFamilyAriaLabel', {
+        defaultMessage: 'Font family',
+      })}
     />
   );
 };
@@ -50,6 +54,7 @@ FontPicker.propTypes = {
   /** Function to execute when a Font is selected. */
   onSelect: PropTypes.func,
   /** Initial value of the Font Picker. */
+  // @ts-expect-error upgrade typescript v5.9.3
   value: PropTypes.string,
 };
 

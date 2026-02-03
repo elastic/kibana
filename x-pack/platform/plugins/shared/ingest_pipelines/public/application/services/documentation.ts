@@ -33,7 +33,7 @@ export class DocumentationService {
     this.ingestNodeUrl = links.ingest.pipelines;
     this.processorsUrl = links.ingest.processors;
     this.handlingFailureUrl = links.ingest.pipelineFailure;
-    this.createPipelineUrl = links.ingest.pipelines;
+    this.createPipelineUrl = links.ingest.pipelineCreate;
     this.createPipelineCSVUrl = links.ingest.csvPipelines;
     this.simulatePipelineApiUrl = links.apis.simulatePipeline;
     this.enrichDataUrl = links.ingest.enrich;

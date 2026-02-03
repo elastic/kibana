@@ -33,6 +33,7 @@ import { CreateCaseOwnerSelector } from './owner_selector';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { getInitialCaseValue, getOwnerDefaultValue } from './utils';
 import { useCasesFeatures } from '../../common/use_cases_features';
+import { useSubmitCase } from './use_submit_case';
 
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
   onCancel: () => void;
@@ -166,16 +167,20 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
       [configurations, selectedOwner]
     );
 
+    const { submitCase, isSubmitting } = useSubmitCase({
+      attachments,
+      observables: canExtractObservables ? observables : [],
+      onSuccess: handleOnSuccess,
+      afterCaseCreated,
+    });
+
     return (
       <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
         <FormContext
-          afterCaseCreated={afterCaseCreated}
-          onSuccess={handleOnSuccess}
-          attachments={attachments}
           initialValue={initialValue}
           currentConfiguration={currentConfiguration}
           selectedOwner={selectedOwner}
-          observables={canExtractObservables ? observables : []}
+          onSubmitCase={submitCase}
         >
           <FormFieldsWithFormContext
             withSteps={withSteps}
@@ -210,7 +215,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <SubmitCaseButton />
+                <SubmitCaseButton isSubmitting={isSubmitting} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFormRow>

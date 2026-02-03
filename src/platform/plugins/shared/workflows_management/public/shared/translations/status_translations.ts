@@ -35,6 +35,9 @@ export const STATUS_LABELS = {
   [ExecutionStatus.CANCELLED]: i18n.translate('workflowsManagement.executionStatus.cancelled', {
     defaultMessage: 'Canceled',
   }),
+  [ExecutionStatus.TIMED_OUT]: i18n.translate('workflowsManagement.executionStatus.timedOut', {
+    defaultMessage: 'Timed out',
+  }),
   [ExecutionStatus.SKIPPED]: i18n.translate('workflowsManagement.executionStatus.skipped', {
     defaultMessage: 'Skipped',
   }),

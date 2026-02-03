@@ -94,8 +94,11 @@ export async function concatenateProfiles({
     // Remap & append nodes, samples
     remapNodesSequential({ source: profile, target: merged });
 
-    // Append time deltas directly (sequential mode)
-    merged.timeDeltas.push(...profile.timeDeltas);
+    // Cannot use spread here because profile.timeDeltas is very large and causes stack overflow
+    for (const delta of profile.timeDeltas) {
+      // Append time deltas directly (sequential mode)
+      merged.timeDeltas.push(delta);
+    }
 
     accDuration += duration;
   }

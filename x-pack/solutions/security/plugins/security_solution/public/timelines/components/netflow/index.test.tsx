@@ -61,7 +61,25 @@ import {
   NETWORK_TRANSPORT_FIELD_NAME,
 } from '../../../explore/network/components/source_destination/field_names';
 import { getMockNetflowData } from '../../../common/mock/netflow';
-import { CellActionsWrapper } from '../../../common/components/drag_and_drop/cell_actions_wrapper';
+import { SecurityCellActions } from '../../../common/components/cell_actions';
+
+jest.mock('../../../common/components/cell_actions', () => {
+  return {
+    SecurityCellActions: jest.fn(),
+    CellActionsMode: {
+      HOVER_DOWN: 'hover-down',
+      HOVER_RIGHT: 'hover-right',
+      INLINE: 'inline',
+    },
+    SecurityCellActionsTrigger: {
+      DEFAULT: 'default',
+    },
+  };
+});
+
+const MockedSecurityCellActions = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-security-cell-actions">{children}</div>;
+});
 
 jest.mock('../../../common/lib/kibana');
 
@@ -71,16 +89,6 @@ jest.mock('@elastic/eui', () => {
     ...original,
     EuiScreenReaderOnly: () => <></>,
   };
-});
-
-jest.mock('../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
-  return {
-    CellActionsWrapper: jest.fn(),
-  };
-});
-
-const MockedCellActionsWrapper = jest.fn(({ children }) => {
-  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
 });
 
 const getNetflowInstance = () => (
@@ -149,7 +157,8 @@ jest.mock('../../../common/components/links/link_props');
 
 describe('Netflow', () => {
   beforeEach(() => {
-    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+    jest.clearAllMocks();
+    (SecurityCellActions as unknown as jest.Mock).mockImplementation(MockedSecurityCellActions);
   });
 
   test('renders correctly against snapshot', () => {
@@ -390,9 +399,11 @@ describe('Netflow', () => {
   test('should passing correct scopeId to cell actions', () => {
     render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+    expect(MockedSecurityCellActions).toHaveBeenCalledWith(
       expect.objectContaining({
-        scopeId: 'some_scope',
+        metadata: expect.objectContaining({
+          scopeId: 'some_scope',
+        }),
       }),
       {}
     );

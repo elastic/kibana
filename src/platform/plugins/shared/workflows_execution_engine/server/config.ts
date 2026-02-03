@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
   logging: schema.object({
     console: schema.boolean({ defaultValue: false }),
   }),
@@ -23,6 +23,14 @@ const configSchema = schema.object({
         defaultValue: ['*'],
       }
     ),
+  }),
+  collectQueueMetrics: schema.boolean({
+    defaultValue: false,
+    meta: {
+      description:
+        'When enabled, stores queue delay metrics (scheduledAt, runAt, queueDelayMs, scheduleDelayMs) in workflow executions. ' +
+        'Useful for observability but adds to document size. Disabled by default for performance.',
+    },
   }),
 });
 

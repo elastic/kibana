@@ -22,6 +22,7 @@ import {
   EuiFlyoutHeader,
   EuiFormRow,
   EuiHealth,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   useEuiTheme,
@@ -76,6 +77,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
     isMapToTermsInvalid,
     mapToTermErrors,
     mapToTerms,
+    announcement,
     clearFromTerms,
     onCreateOption,
     onMapToChange,
@@ -198,6 +200,21 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
                           color="text"
                           onClick={() => onSortTerms()}
                           iconType={currentSortDirection === 'ascending' ? 'sortUp' : 'sortDown'}
+                          aria-label={
+                            currentSortDirection === 'ascending'
+                              ? i18n.translate(
+                                  'xpack.searchSynonyms.synonymsSetRuleFlyout.sortAscendingAriaLabel',
+                                  {
+                                    defaultMessage: 'Sort terms A to Z',
+                                  }
+                                )
+                              : i18n.translate(
+                                  'xpack.searchSynonyms.synonymsSetRuleFlyout.sortDescendingAriaLabel',
+                                  {
+                                    defaultMessage: 'Sort terms Z to A',
+                                  }
+                                )
+                          }
                         >
                           {currentSortDirection === 'ascending' ? (
                             <FormattedMessage
@@ -220,6 +237,12 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
                       color="danger"
                       size="s"
                       onClick={clearFromTerms}
+                      aria-label={i18n.translate(
+                        'xpack.searchSynonyms.synonymsSetRuleFlyout.clearAllAriaLabel',
+                        {
+                          defaultMessage: 'Remove all terms',
+                        }
+                      )}
                     >
                       <FormattedMessage
                         id="xpack.searchSynonyms.synonymsSetRuleFlyout.clearAll"
@@ -327,6 +350,12 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="searchSynonymsSynonymsRuleFlyoutResetChangesButton"
+                  aria-label={i18n.translate(
+                    'xpack.searchSynonyms.synonymsSetRuleFlyout.resetAriaLabel',
+                    {
+                      defaultMessage: 'Reset all changes',
+                    }
+                  )}
                   iconType="refresh"
                   disabled={!hasChanges}
                   onClick={resetChanges}
@@ -336,6 +365,11 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
+              {/* Shared live region for action voiceover announcements*/}
+              <EuiScreenReaderOnly>
+                <span aria-live="polite">{announcement}</span>
+              </EuiScreenReaderOnly>
+
               <EuiFlexItem grow={false}>
                 <EuiButton
                   data-test-subj="searchSynonymsSynonymsRuleFlyoutSaveButton"

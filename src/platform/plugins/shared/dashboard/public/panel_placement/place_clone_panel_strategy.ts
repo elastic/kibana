@@ -10,8 +10,8 @@
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { cloneDeep, forOwn } from 'lodash';
 
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/content_management';
-import type { GridData } from '../../server/content_management';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
+import type { GridData } from '../../server';
 import type { PanelPlacementProps, PanelPlacementReturn } from './types';
 import type { DashboardLayoutPanel } from '../dashboard_api/layout_manager';
 
@@ -51,12 +51,12 @@ export function placeClonePanel({
   if (!panelToPlaceBeside) {
     throw new PanelNotFoundError();
   }
-  const beside = panelToPlaceBeside.grid;
-  const otherPanelGridData: GridData[] = [];
-  forOwn(currentPanels, (panel: DashboardLayoutPanel) => {
+  const beside = { ...panelToPlaceBeside.grid, panelId: placeBesideId };
+  const otherPanelGridData: Array<GridData & { panelId: string }> = [];
+  forOwn(currentPanels, (panel: DashboardLayoutPanel, panelId: string) => {
     if (panel.grid.sectionId === sectionId) {
       // only check against panels that are in the same section as the cloned panel
-      otherPanelGridData.push(panel.grid);
+      otherPanelGridData.push({ ...panel.grid, panelId });
     }
   });
 
@@ -99,18 +99,18 @@ export function placeClonePanel({
 
   let position = 0;
   for (position; position < sortedGrid.length; position++) {
-    if (beside.i === sortedGrid[position].i) {
+    if (beside.panelId === sortedGrid[position].panelId) {
       break;
     }
   }
   const bottomPlacement = possiblePlacementDirections[2];
   // place to the bottom and move all other panels
-  let originalPositionInTheGrid = sortedGrid[position + 1].i;
+  let originalPositionInTheGrid = sortedGrid[position + 1].panelId;
   const diff =
     bottomPlacement.grid.y + bottomPlacement.grid.h - otherPanels[originalPositionInTheGrid].grid.y;
 
   for (let j = position + 1; j < sortedGrid.length; j++) {
-    originalPositionInTheGrid = sortedGrid[j].i;
+    originalPositionInTheGrid = sortedGrid[j].panelId;
     const { grid, ...movedPanel } = cloneDeep(otherPanels[originalPositionInTheGrid]);
     if (grid.sectionId === sectionId) {
       // only move panels in the cloned panel's section

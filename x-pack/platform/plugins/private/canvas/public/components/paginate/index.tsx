@@ -80,6 +80,7 @@ export const Paginate: React.FunctionComponent<InPaginateProps> = ({
 
 Paginate.propTypes = {
   rows: PropTypes.array.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   perPage: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   startPage: PropTypes.number,
 };

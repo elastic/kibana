@@ -102,7 +102,9 @@ const SuppressionDurationSelectorFields = memo(function SuppressionDurationSelec
             id: AlertSuppressionDurationType.PerRuleExecution,
             label: onlyPerTimePeriod ? (
               <EuiToolTip content={onlyPerTimePeriodReasonMessage}>
-                <> {i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION}</>
+                <span tabIndex={0}>
+                  {i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION}
+                </span>
               </EuiToolTip>
             ) : (
               i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION

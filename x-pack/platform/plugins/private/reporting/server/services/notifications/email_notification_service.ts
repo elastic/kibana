@@ -63,8 +63,7 @@ export class EmailNotificationService implements NotificationService {
     }
 
     const attachments = await this.getAttachments(reporting, index, id, filename, contentType);
-    const { to, bcc, cc, subject, spaceId } = emailParams;
-    const message = 'Your scheduled report is attached for you to download or share.';
+    const { to, bcc, cc, subject, message, spaceId } = emailParams;
     await this.notifications.getEmailService().sendAttachmentEmail({
       to,
       bcc,

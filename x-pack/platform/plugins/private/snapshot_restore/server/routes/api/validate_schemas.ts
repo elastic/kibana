@@ -45,6 +45,7 @@ export const snapshotListSchema = schema.object({
       schema.literal('snapshot'),
       schema.literal('repository'),
       schema.literal('policyName'),
+      schema.literal('state'),
     ])
   ),
   searchValue: schema.maybe(schema.string()),

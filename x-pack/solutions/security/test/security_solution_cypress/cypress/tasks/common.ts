@@ -7,7 +7,6 @@
 
 import { recurse } from 'cypress-recurse';
 import { KIBANA_LOADING_ICON } from '../screens/security_header';
-import { EUI_BASIC_TABLE_LOADING } from '../screens/common/controls';
 
 const primaryButton = 0;
 
@@ -87,16 +86,9 @@ export const resetRulesTableState = () => {
   clearSessionStorage();
 };
 
-export const scrollToBottom = () => cy.scrollTo('bottom');
-
 export const waitForWelcomePanelToBeLoaded = () => {
   cy.get(KIBANA_LOADING_ICON).should('exist');
   cy.get(KIBANA_LOADING_ICON).should('not.exist');
-};
-
-export const waitForTableToLoad = () => {
-  cy.get(EUI_BASIC_TABLE_LOADING).should('exist');
-  cy.get(EUI_BASIC_TABLE_LOADING).should('not.exist');
 };
 
 export const waitForTabToBeLoaded = (tabId: string) => {

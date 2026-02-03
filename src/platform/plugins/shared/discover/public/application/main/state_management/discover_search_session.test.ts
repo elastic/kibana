@@ -26,8 +26,10 @@ describe('DiscoverSearchSessionManager', () => {
       const nextId = 'id';
       session.start.mockImplementationOnce(() => nextId);
 
-      const id = searchSessionManager.getNextSearchSessionId();
-      expect(id).toEqual(nextId);
+      const { searchSessionId, isSearchSessionRestored } =
+        searchSessionManager.getNextSearchSessionId();
+      expect(searchSessionId).toEqual(nextId);
+      expect(isSearchSessionRestored).toBe(false);
       expect(session.start).toBeCalled();
     });
 
@@ -35,8 +37,10 @@ describe('DiscoverSearchSessionManager', () => {
       const nextId = 'id_from_url';
       history.push(`/?searchSessionId=${nextId}`);
 
-      const id = searchSessionManager.getNextSearchSessionId();
-      expect(id).toEqual(nextId);
+      const { searchSessionId, isSearchSessionRestored } =
+        searchSessionManager.getNextSearchSessionId();
+      expect(searchSessionId).toEqual(nextId);
+      expect(isSearchSessionRestored).toBe(true);
       expect(session.restore).toBeCalled();
     });
 
@@ -49,8 +53,10 @@ describe('DiscoverSearchSessionManager', () => {
       session.isCurrentSession.mockImplementationOnce(() => true);
       session.isRestore.mockImplementationOnce(() => true);
 
-      const id = searchSessionManager.getNextSearchSessionId();
-      expect(id).toEqual(nextId);
+      const { searchSessionId, isSearchSessionRestored } =
+        searchSessionManager.getNextSearchSessionId();
+      expect(searchSessionId).toEqual(nextId);
+      expect(isSearchSessionRestored).toBe(false);
       expect(session.start).toBeCalled();
       expect(history.location.search).toMatchInlineSnapshot(`""`);
     });
@@ -60,7 +66,7 @@ describe('DiscoverSearchSessionManager', () => {
     test('notifies about searchSessionId changes in the URL', () => {
       const emits: Array<string | null> = [];
 
-      const sub = searchSessionManager.newSearchSessionIdFromURL$.subscribe((newId) => {
+      const sub = searchSessionManager.getNewSearchSessionIdFromURL$().subscribe((newId) => {
         emits.push(newId);
       });
 

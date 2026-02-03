@@ -35,6 +35,7 @@ describe('checkRuleTypeEnabled', () => {
       enabledInLicense: true,
       category: 'my-category',
       isExportable: true,
+      isInternallyManaged: false,
     };
     expect(checkRuleTypeEnabled(alertType)).toMatchInlineSnapshot(`
           Object {
@@ -61,6 +62,7 @@ describe('checkRuleTypeEnabled', () => {
       enabledInLicense: false,
       category: 'my-category',
       isExportable: true,
+      isInternallyManaged: false,
     };
     expect(checkRuleTypeEnabled(alertType)).toMatchInlineSnapshot(`
       Object {

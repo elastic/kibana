@@ -29,6 +29,9 @@ interface Props {
 
 export function ShardFailureFlyout({ failures, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId();
+  const backButtonLabel = i18n.translate('inspector.requests.clusters.shards.backButtonLabel', {
+    defaultMessage: 'Back',
+  });
 
   return (
     <EuiFlyout
@@ -40,7 +43,7 @@ export function ShardFailureFlyout({ failures, onClose }: Props) {
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h1 id={flyoutTitleId}>
-            <EuiButtonIcon iconType="sortLeft" onClick={onClose} />
+            <EuiButtonIcon iconType="sortLeft" onClick={onClose} aria-label={backButtonLabel} />
             {i18n.translate('inspector.requests.clusters.shards.flyoutTitle', {
               defaultMessage:
                 '{failedShardCount} failed {failedShardCount, plural, one {shard} other {shards}}',
@@ -56,9 +59,7 @@ export function ShardFailureFlyout({ failures, onClose }: Props) {
 
       <EuiFlyoutFooter>
         <EuiButtonEmpty iconType="sortLeft" onClick={onClose} flush="left">
-          {i18n.translate('inspector.requests.clusters.shards.backButtonLabel', {
-            defaultMessage: 'Back',
-          })}
+          {backButtonLabel}
         </EuiButtonEmpty>
       </EuiFlyoutFooter>
     </EuiFlyout>

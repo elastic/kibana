@@ -1,0 +1,25 @@
+{
+  "lastModified": "2025-12-03T19:03:28.200Z",
+  "sha1": "74c880ce84b4ba381b42e9aebef24466a1523e54",
+  "tests": [
+    {
+      "id": "0d46d86b877f63c-caca4780f786cad",
+      "title": "Maps Full screen mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlSecurity",
+        "@svlSecurityEssentials",
+        "@svlSecurityEase",
+        "@svlOblt",
+        "@svlLogsEssentials",
+        "@svlSearch"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/full_screen_mode.spec.ts",
+        "line": 28,
+        "column": 9
+      }
+    }
+  ]
+}

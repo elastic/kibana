@@ -211,6 +211,8 @@ const generateSchemaLines = ({
           lineWriter.addLine(`${keyToWrite}: ${getSchemaDefinition('schemaUnknown', isArray)},`);
         }
         break;
+      case 'unmapped':
+        break;
       default:
         logError(`unknown type ${type}: ${JSON.stringify(fieldMap)}`);
         break;

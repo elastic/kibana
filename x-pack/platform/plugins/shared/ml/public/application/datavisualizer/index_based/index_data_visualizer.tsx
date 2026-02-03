@@ -9,15 +9,15 @@ import type { FC } from 'react';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  IndexDataVisualizerSpec,
-  ResultLink,
-  GetAdditionalLinks,
-  GetAdditionalLinksParams,
-} from '@kbn/data-visualizer-plugin/public';
+import type { IndexDataVisualizerSpec } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
+import type {
+  GetAdditionalLinksParams,
+  ResultLink,
+  GetAdditionalLinks,
+} from '@kbn/file-upload-common';
 import { useMlApi, useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';

@@ -213,123 +213,138 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     }
   }, [isDisabled, item.autoRecoverAlerts, onEnable, onDisableModalOpen, onDisable]);
 
-  const panels = [
-    {
-      id: 0,
-      hasFocus: false,
-      items: [
-        ...snoozePanelItem,
+  const getUpdateApiKeyPanelItem = (testId: string) => ({
+    disabled: !item.isEditable,
+    'data-test-subj': testId,
+    onClick: () => {
+      setIsPopoverOpen(!isPopoverOpen);
+      onUpdateAPIKey(item);
+    },
+    name: i18n.translate(
+      'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.updateApiKey',
+      { defaultMessage: 'Update API key' }
+    ),
+  });
+
+  const getDisablePanelItem = (testId: string) => ({
+    disabled: !item.isEditable || !item.enabledInLicense,
+    'data-test-subj': testId,
+    onClick: onDisableClick,
+    name: isDisabled
+      ? i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.enableTitle',
+          { defaultMessage: 'Enable' }
+        )
+      : i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.disableTitle',
+          { defaultMessage: 'Disable' }
+        ),
+  });
+
+  const panels = item.isInternallyManaged
+    ? [
         {
-          isSeparator: true as const,
+          id: 0,
+          hasFocus: true,
+          items: [
+            getDisablePanelItem('disableButtonInternallyManaged'),
+            getUpdateApiKeyPanelItem('updateApiKeyInternallyManaged'),
+          ],
         },
+      ]
+    : [
         {
-          disabled: !item.isEditable || !item.enabledInLicense,
-          'data-test-subj': 'disableButton',
-          onClick: onDisableClick,
-          name: isDisabled
-            ? i18n.translate(
-                'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.enableTitle',
-                { defaultMessage: 'Enable' }
-              )
-            : i18n.translate(
-                'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.disableTitle',
-                { defaultMessage: 'Disable' }
+          id: 0,
+          hasFocus: false,
+          items: [
+            ...snoozePanelItem,
+            {
+              isSeparator: true as const,
+            },
+            getDisablePanelItem('disableButton'),
+            {
+              disabled: !item.isEditable || item.consumer === AlertConsumers.SIEM,
+              'data-test-subj': 'cloneRule',
+              onClick: async () => {
+                setIsPopoverOpen(!isPopoverOpen);
+                onCloneRule(item.id);
+              },
+              name: i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.cloneRuleTitle',
+                { defaultMessage: 'Clone rule' }
               ),
+            },
+            {
+              disabled: !item.isEditable || !isRuleTypeEditableInContext,
+              'data-test-subj': 'editRule',
+              onClick: () => {
+                setIsPopoverOpen(!isPopoverOpen);
+                onEditRule(item);
+              },
+              name: i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.editTitle',
+                { defaultMessage: 'Edit rule' }
+              ),
+            },
+            getUpdateApiKeyPanelItem('updateApiKey'),
+            {
+              disabled: !item.isEditable,
+              'data-test-subj': 'runRule',
+              onClick: () => {
+                setIsPopoverOpen(!isPopoverOpen);
+                onRunRule(item);
+              },
+              name: i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.runRule',
+                { defaultMessage: 'Run rule' }
+              ),
+            },
+            {
+              disabled: !item.isEditable,
+              className: 'collapsedItemActions__deleteButton',
+              'data-test-subj': 'deleteRule',
+              onClick: () => {
+                setIsPopoverOpen(!isPopoverOpen);
+                onDeleteRule(item);
+              },
+              name: i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.deleteRuleTitle',
+                { defaultMessage: 'Delete rule' }
+              ),
+            },
+          ],
         },
         {
-          disabled: !item.isEditable || item.consumer === AlertConsumers.SIEM,
-          'data-test-subj': 'cloneRule',
-          onClick: async () => {
-            setIsPopoverOpen(!isPopoverOpen);
-            onCloneRule(item.id);
-          },
-          name: i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.cloneRuleTitle',
-            { defaultMessage: 'Clone rule' }
+          id: 1,
+          title: (
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="bellSlash" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {i18n.translate(
+                  'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.snoozeActions',
+                  { defaultMessage: 'Snooze notifications' }
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          width: 500,
+          content: (
+            <EuiPanel>
+              <SnoozePanel
+                interval={futureTimeToInterval(item.isSnoozedUntil)}
+                hasTitle={false}
+                scheduledSnoozes={item.snoozeSchedule ?? []}
+                activeSnoozes={item.activeSnoozes ?? []}
+                showCancel={isRuleSnoozed(item)}
+                snoozeRule={snoozeRuleInternal}
+                unsnoozeRule={unsnoozeRuleInternal}
+              />
+            </EuiPanel>
           ),
         },
-        {
-          disabled: !item.isEditable || !isRuleTypeEditableInContext,
-          'data-test-subj': 'editRule',
-          onClick: () => {
-            setIsPopoverOpen(!isPopoverOpen);
-            onEditRule(item);
-          },
-          name: i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.editTitle',
-            { defaultMessage: 'Edit rule' }
-          ),
-        },
-        {
-          disabled: !item.isEditable,
-          'data-test-subj': 'updateApiKey',
-          onClick: () => {
-            setIsPopoverOpen(!isPopoverOpen);
-            onUpdateAPIKey(item);
-          },
-          name: i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.updateApiKey',
-            { defaultMessage: 'Update API key' }
-          ),
-        },
-        {
-          disabled: !item.isEditable,
-          'data-test-subj': 'runRule',
-          onClick: () => {
-            setIsPopoverOpen(!isPopoverOpen);
-            onRunRule(item);
-          },
-          name: i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.runRule',
-            { defaultMessage: 'Run rule' }
-          ),
-        },
-        {
-          disabled: !item.isEditable,
-          className: 'collapsedItemActions__deleteButton',
-          'data-test-subj': 'deleteRule',
-          onClick: () => {
-            setIsPopoverOpen(!isPopoverOpen);
-            onDeleteRule(item);
-          },
-          name: i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.deleteRuleTitle',
-            { defaultMessage: 'Delete rule' }
-          ),
-        },
-      ],
-    },
-    {
-      id: 1,
-      title: (
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="bellSlash" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.snoozeActions',
-              { defaultMessage: 'Snooze notifications' }
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      width: 500,
-      content: (
-        <EuiPanel>
-          <SnoozePanel
-            interval={futureTimeToInterval(item.isSnoozedUntil)}
-            hasTitle={false}
-            scheduledSnoozes={item.snoozeSchedule ?? []}
-            activeSnoozes={item.activeSnoozes ?? []}
-            showCancel={isRuleSnoozed(item)}
-            snoozeRule={snoozeRuleInternal}
-            unsnoozeRule={unsnoozeRuleInternal}
-          />
-        </EuiPanel>
-      ),
-    },
-  ];
+      ];
 
   return (
     item.isEditable && (

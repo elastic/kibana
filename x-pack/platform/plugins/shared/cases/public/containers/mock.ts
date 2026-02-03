@@ -6,7 +6,6 @@
  */
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import moment from 'moment';
 import type {
   UserActionAction,
   CommentUserAction,
@@ -50,8 +49,6 @@ import type {
   CasesSimilarResponseUI,
   ObservableUI,
   InternalFindCaseUserActions,
-  CaseSummary,
-  InferenceConnectors,
   EventAttachmentUI,
 } from '../../common/ui/types';
 import { CaseMetricsFeature } from '../../common/types/api';
@@ -277,6 +274,7 @@ export const basicCase: CaseUI = {
   category: null,
   customFields: [],
   observables: [],
+  totalObservables: 0,
   incrementalId: undefined,
 };
 
@@ -370,19 +368,6 @@ export const basicCaseMetrics: SingleCaseMetrics = {
   },
 };
 
-export const mockCaseSummary: CaseSummary = {
-  content: 'case summary',
-  generatedAt: moment().toISOString(),
-};
-
-export const mockInferenceConnectors: InferenceConnectors = {
-  connectors: [
-    {
-      connectorId: 'connector-id',
-    },
-  ],
-};
-
 export const mockCase: CaseUI = {
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
@@ -418,6 +403,7 @@ export const mockCase: CaseUI = {
   category: null,
   customFields: [],
   observables: [],
+  totalObservables: 0,
   incrementalId: undefined,
 };
 
@@ -612,6 +598,7 @@ export const basicCaseSnake: Case = {
   owner: SECURITY_SOLUTION_OWNER,
   customFields: [],
   incremental_id: undefined,
+  total_observables: 0,
 } as Case;
 
 export const caseWithAlertsSnake = {
@@ -1053,7 +1040,9 @@ export const getCaseUserActionsStatsResponse: CaseUserActionsStats = {
   total: 20,
   totalDeletions: 0,
   totalComments: 10,
+  totalCommentCreations: 10,
   totalCommentDeletions: 0,
+  totalHiddenCommentUpdates: 0,
   totalOtherActions: 10,
   totalOtherActionDeletions: 0,
 };

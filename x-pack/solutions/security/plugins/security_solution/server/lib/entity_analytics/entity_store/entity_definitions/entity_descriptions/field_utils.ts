@@ -40,7 +40,7 @@ export const newestValue = ({
   mapping = { type: 'keyword' },
   source,
   sort,
-  allowAPIUpdate,
+  allowAPIUpdate = false,
 }: {
   source: string;
   destination?: string;

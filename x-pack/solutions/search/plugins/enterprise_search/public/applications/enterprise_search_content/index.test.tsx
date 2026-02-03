@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { SearchIndicesRouter } from './components/search_indices';
+import { ConnectorsRouter } from './components/connectors/connectors_router';
 
 import { EnterpriseSearchContent, EnterpriseSearchContentConfigured } from '.';
 
@@ -33,6 +33,6 @@ describe('EnterpriseSearchContentConfigured', () => {
   const wrapper = shallow(<EnterpriseSearchContentConfigured {...DEFAULT_INITIAL_APP_DATA} />);
 
   it('renders engine routes', () => {
-    expect(wrapper.find(SearchIndicesRouter)).toHaveLength(1);
+    expect(wrapper.find(ConnectorsRouter)).toHaveLength(1);
   });
 });

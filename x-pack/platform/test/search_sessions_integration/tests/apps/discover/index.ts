@@ -11,7 +11,6 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common']);
-  const searchSessions = getService('searchSessions');
 
   describe('Discover', function () {
     before(async () => {
@@ -22,11 +21,10 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await PageObjects.common.navigateToApp('discover');
     });
 
-    beforeEach(async () => {
-      await searchSessions.markTourDone();
-    });
-
+    loadTestFile(require.resolve('./classic'));
+    loadTestFile(require.resolve('./esql'));
     loadTestFile(require.resolve('./async_search'));
     loadTestFile(require.resolve('./sessions_in_space'));
+    loadTestFile(require.resolve('./tabs'));
   });
 }

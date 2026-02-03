@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { SUB_ACTION } from '../../../common/crowdstrike/constants';
-import type { CrowdstrikeActionParams } from '../../../common/crowdstrike/types';
+import { SUB_ACTION } from '@kbn/connector-schemas/crowdstrike/constants';
+import type { CrowdstrikeActionParams } from '@kbn/connector-schemas/crowdstrike';
 import CrowdstrikeParamsFields from './crowdstrike_params';
 
 const actionParams = {

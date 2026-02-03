@@ -6,12 +6,16 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ENDPOINT_LIST_ID, ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import {
+  ENDPOINT_ARTIFACT_LISTS,
+  ENDPOINT_LIST_ITEM_URL,
+} from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   FindEndpointListItemsRequestQuery,
   FindEndpointListItemsResponse,
 } from '@kbn/securitysolution-endpoint-exceptions-common/api';
+import { LISTS_API_READ } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -24,7 +28,7 @@ export const findEndpointListItemRoute = (router: ListsPluginRouter): void => {
       path: `${ENDPOINT_LIST_ITEM_URL}/_find`,
       security: {
         authz: {
-          requiredPrivileges: ['lists-read'],
+          requiredPrivileges: [LISTS_API_READ],
         },
       },
     })
@@ -63,7 +67,7 @@ export const findEndpointListItemRoute = (router: ListsPluginRouter): void => {
             // happen as the findEndpointListItem tries to auto-create the endpoint list if
             // does not exist.
             return siemResponse.error({
-              body: `list id: "${ENDPOINT_LIST_ID}" does not exist`,
+              body: `list id: "${ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id}" does not exist`,
               statusCode: 404,
             });
           }

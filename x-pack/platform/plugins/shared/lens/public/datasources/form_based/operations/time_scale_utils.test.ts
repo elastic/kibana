@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { TimeScaleUnit } from '../../../../common/expressions';
 import { adjustTimeScaleLabelSuffix } from './time_scale_utils';
-
-export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
 
 describe('time scale utils', () => {
   describe('adjustTimeScaleLabelSuffix', () => {

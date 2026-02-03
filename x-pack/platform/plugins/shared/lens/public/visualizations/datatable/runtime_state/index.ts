@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { GeneralDatasourceStates } from '../../../state_management';
-import type { DatatableVisualizationState } from '../datatable_visualization';
+import type { GeneralDatasourceStates, DatatableVisualizationState } from '@kbn/lens-common';
 import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(

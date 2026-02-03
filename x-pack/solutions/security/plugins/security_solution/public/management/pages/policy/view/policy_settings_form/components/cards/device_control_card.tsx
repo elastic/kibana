@@ -8,7 +8,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { EuiSpacer } from '@elastic/eui';
 import type { PolicyFormComponentCommonProps } from '../../types';
 import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import { useLicense } from '../../../../../../../common/hooks/use_license';
@@ -102,8 +101,6 @@ export const DeviceControlCard = React.memo<DeviceControlProps>(
           mode={mode}
           data-test-subj={getTestId('notifyUser')}
         />
-
-        <EuiSpacer size="m" />
       </SettingCard>
     );
   }

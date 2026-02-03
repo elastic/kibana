@@ -8,6 +8,7 @@
 import { random } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
@@ -25,6 +26,7 @@ export interface SampleTaskManagerFixtureSetupDeps {
   taskManager: TaskManagerSetupContract;
 }
 export interface SampleTaskManagerFixtureStartDeps {
+  security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
 }
 
@@ -32,6 +34,10 @@ export class SampleTaskManagerFixturePlugin
   implements
     Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps>
 {
+  securityStart$: Subject<SecurityPluginStart | undefined> = new Subject<
+    SecurityPluginStart | undefined
+  >();
+  securityStart: Promise<SecurityPluginStart | undefined> = firstValueFrom(this.securityStart$);
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
   taskManagerStart: Promise<TaskManagerStartContract> = firstValueFrom(this.taskManagerStart$);
 
@@ -326,6 +332,19 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
+      sampleLongRunningRecurringTask: {
+        title: 'Sample Long Running Recurring Task',
+        description: 'A sample long running task that hangs for 1m 30s.',
+        timeout: '365d',
+        createTaskRunner: () => ({
+          async run() {
+            await new Promise((resolve) => setTimeout(resolve, 90000));
+            return {
+              state: {},
+            };
+          },
+        }),
+      },
       sampleOneTimeTaskThrowingError: {
         title: 'Sample One-Time Task that throws an error',
         description: 'A sample task that throws an error each run.',
@@ -488,12 +507,19 @@ export class SampleTaskManagerFixturePlugin
         return context;
       },
     });
-    initRoutes(core.http.createRouter(), this.taskManagerStart, taskTestingEvents);
+    initRoutes(
+      core.http.createRouter(),
+      this.taskManagerStart,
+      this.securityStart,
+      taskTestingEvents
+    );
   }
 
-  public start(core: CoreStart, { taskManager }: SampleTaskManagerFixtureStartDeps) {
+  public start(core: CoreStart, { security, taskManager }: SampleTaskManagerFixtureStartDeps) {
     this.taskManagerStart$.next(taskManager);
     this.taskManagerStart$.complete();
+    this.securityStart$.next(security);
+    this.securityStart$.complete();
   }
   public stop() {}
 }

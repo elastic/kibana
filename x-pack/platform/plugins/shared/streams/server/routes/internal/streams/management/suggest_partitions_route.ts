@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { Streams } from '@kbn/streams-schema';
 import { partitionStream } from '@kbn/streams-ai';
 import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
@@ -15,6 +14,7 @@ import { STREAMS_TIERED_ML_FEATURE } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { createServerRoute } from '../../../create_server_route';
+import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 
 export interface SuggestPartitionsParams {
   path: {
@@ -72,10 +72,6 @@ export const suggestPartitionsRoute = createServerRoute({
 
     const stream = await streamsClient.getStream(params.path.name);
 
-    if (!Streams.ingest.all.Definition.is(stream)) {
-      throw new Error(`Stream ${stream.name} is not a valid ingest stream`);
-    }
-
     const partitionsPromise = partitionStream({
       definition: stream,
       inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
@@ -84,7 +80,7 @@ export const suggestPartitionsRoute = createServerRoute({
       start: params.body.start,
       end: params.body.end,
       maxSteps: 1, // Longer reasoning seems to add unnecessary conditions (and latency), instead of improving accuracy, so we limit the steps.
-      signal: new AbortController().signal,
+      signal: getRequestAbortSignal(request),
     });
 
     // Turn our promise into an Observable ServerSideEvent. The only reason we're streaming the

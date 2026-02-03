@@ -41,10 +41,14 @@
       "ignore_throttled": "__flag__",
       "ignore_unavailable": "__flag__",
       "lenient": "__flag__",
-      "max_concurrent_shard_requests": "",
-      "preference": "",
+      "max_concurrent_shard_requests": [
+        "5"
+      ],
+      "preference": [
+        "random"
+      ],
       "request_cache": "__flag__",
-      "routing": "",
+      "routing": [],
       "search_type": [
         "query_then_fetch",
         "dfs_query_then_fetch"
@@ -74,7 +78,9 @@
       "_source_includes": [],
       "seq_no_primary_term": "__flag__",
       "q": "",
-      "size": "",
+      "size": [
+        "10"
+      ],
       "from": "",
       "sort": []
     },

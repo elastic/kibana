@@ -39,8 +39,7 @@
       "taskManager",
       "usageCollection",
       "spaces",
-      "serverless",
-      "inference"
+      "serverless"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -49,8 +48,7 @@
       "savedObjectsFinder"
     ],
     "extraPublicDirs": [
-      "common",
-      "public/client/attachment_framework/types"
+      "common"
     ]
   }
 }

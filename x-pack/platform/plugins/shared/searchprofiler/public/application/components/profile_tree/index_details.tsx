@@ -57,7 +57,7 @@ export const IndexDetails = ({ index }: Props) => {
                 'The cumulative time of all shards in the index. Note: this is not wall-clock time, as shards can execute in parallel.',
             })}
           >
-            <small>
+            <small tabIndex={0}>
               {i18n.translate('xpack.searchProfiler.profileTree.cumulativeTimeTitle', {
                 defaultMessage: 'Cumulative time:',
               })}

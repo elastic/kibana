@@ -23,6 +23,7 @@ export class TimeHistory {
       isDuplicate: (oldItem: TimeRange, newItem: TimeRange) => {
         return oldItem.from === newItem.from && oldItem.to === newItem.to;
       },
+      enableBrowserTabsSync: true,
     };
     this.history = new PersistedLog('kibana.timepicker.timeHistory', historyOptions, storage);
   }

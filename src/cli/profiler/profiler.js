@@ -13,6 +13,7 @@ import { join } from 'path';
 import { Session } from 'node:inspector';
 import { threadId } from 'node:worker_threads';
 import { promisify } from 'util';
+import { chain } from 'lodash';
 import { Logger } from '../logger';
 
 class Profiler {
@@ -24,7 +25,10 @@ class Profiler {
   constructor(logger) {
     const execOpts = getopts(process.execArgv);
     const envOpts = getopts(process.env.NODE_OPTIONS ? process.env.NODE_OPTIONS.split(/\s+/) : []);
-    this.#path = execOpts['diagnostic-dir'] || envOpts['diagnostic-dir'] || process.cwd();
+    this.#path = chain(execOpts['diagnostic-dir'] || envOpts['diagnostic-dir'] || process.cwd())
+      .castArray()
+      .last()
+      .value();
     this.#logger = logger;
   }
 

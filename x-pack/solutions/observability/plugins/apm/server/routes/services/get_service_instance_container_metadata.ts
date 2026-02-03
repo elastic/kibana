@@ -6,7 +6,7 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   CONTAINER_ID,
@@ -82,24 +82,26 @@ export const getServiceInstanceContainerMetadata = async ({
     },
   });
 
-  const sample = unflattenKnownApmEventFields(maybe(response.hits.hits[0])?.fields);
+  const hits = maybe(response.hits.hits[0])?.fields;
+
+  const sample = hits && accessKnownApmEventFields(hits);
 
   return {
     kubernetes: {
       pod: {
-        name: sample?.kubernetes?.pod?.name,
-        uid: sample?.kubernetes?.pod?.uid,
+        name: sample?.[KUBERNETES_POD_NAME],
+        uid: sample?.[KUBERNETES_POD_UID],
       },
       deployment: {
-        name: sample?.kubernetes?.deployment?.name,
+        name: sample?.[KUBERNETES_DEPLOYMENT_NAME],
       },
       replicaset: {
-        name: sample?.kubernetes?.replicaset?.name,
+        name: sample?.[KUBERNETES_REPLICASET_NAME],
       },
-      namespace: sample?.kubernetes?.namespace,
+      namespace: sample?.[KUBERNETES_NAMESPACE],
       container: {
-        name: sample?.kubernetes?.container?.name,
-        id: sample?.kubernetes?.container?.id,
+        name: sample?.[KUBERNETES_CONTAINER_NAME],
+        id: sample?.[KUBERNETES_CONTAINER_ID],
       },
     },
   };

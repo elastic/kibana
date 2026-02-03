@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UseQueryOptions } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import type { FindRulesQueryArgs } from '../api/hooks/use_find_rules_query';
 import { useFindRulesQuery } from '../api/hooks/use_find_rules_query';

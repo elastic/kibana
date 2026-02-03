@@ -22,7 +22,12 @@ import {
 import { useAgentless } from '../hooks/setup_technology';
 
 import { WithHeaderLayout } from '../../../../../layouts';
-import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
+import type {
+  AgentPolicy,
+  NewPackagePolicy,
+  PackageInfo,
+  RegistryPolicyTemplate,
+} from '../../../../../types';
 import { PackageIcon } from '../../../../../components';
 import type { EditPackagePolicyFrom } from '../../types';
 
@@ -41,6 +46,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
   packageInfo?: PackageInfo;
   integrationInfo?: RegistryPolicyTemplate;
+  defaultPolicyData?: Partial<NewPackagePolicy>;
   'data-test-subj'?: string;
   tabs?: Array<{
     title: string;
@@ -57,6 +63,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
     packageInfo,
     integrationInfo,
     children,
+    defaultPolicyData,
     'data-test-subj': dataTestSubj,
     tabs = [],
   }) => {
@@ -68,6 +75,16 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
           'upgrade-from-fleet-policy-list',
           'upgrade-from-integrations-policy-list',
           'upgrade-from-extension',
+        ].includes(from),
+      [from]
+    );
+
+    const isCopy = useMemo(
+      () =>
+        [
+          'copy-from-fleet-policy-list',
+          'copy-from-integrations-policy-list',
+          'copy-from-installed-integrations',
         ].includes(from),
       [from]
     );
@@ -152,6 +169,22 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
         );
       }
 
+      if (isCopy) {
+        return (
+          <EuiText>
+            <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
+              <FormattedMessage
+                id="xpack.fleet.copyPackagePolicy.pageTitle"
+                defaultMessage="Create integration from {packagePolicyName}"
+                values={{
+                  packagePolicyName: defaultPolicyData?.name?.replace(/^copy-/, '') || '',
+                }}
+              />
+            </h1>
+          </EuiText>
+        );
+      }
+
       return (
         <EuiText>
           <h1>
@@ -168,9 +201,11 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       integrationInfo?.name,
       integrationInfo?.title,
       packageInfo,
+      defaultPolicyData?.name,
       isAdd,
       isEdit,
       isUpgrade,
+      isCopy,
     ]);
 
     const pageDescription = useMemo(() => {

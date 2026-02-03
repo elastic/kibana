@@ -39,7 +39,7 @@ export default function (providerContext: FtrProviderContext) {
         });
         await expectToRejectWithError(
           () => apiClient.postStandaloneApiKey('tata'),
-          /403 Forbidden Missing permissions to create standalone API key/
+          /403 "Forbidden" Missing permissions to create standalone API key/
         );
       });
     });

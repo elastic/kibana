@@ -45,9 +45,13 @@ describe('BodyRow', () => {
       children: 1,
       flexBasis: 'foo',
       flexGrow: 0,
+      role: 'cell',
+      ariaColindex: 1,
     });
     expect(cells.at(1).props()).toEqual({
       children: 'Whatever',
+      role: 'cell',
+      ariaColindex: 2,
     });
   });
 

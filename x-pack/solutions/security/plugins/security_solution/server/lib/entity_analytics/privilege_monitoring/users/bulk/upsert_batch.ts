@@ -34,7 +34,15 @@ export const bulkUpsertBatch =
             { create: {} },
             {
               '@timestamp': timestamp,
-              user: { name: u.username, is_privileged: true },
+              event: {
+                ingested: timestamp,
+                '@timestamp': timestamp,
+              },
+              user: {
+                name: u.username,
+                is_privileged: true,
+                entity: { attributes: { Privileged: true } },
+              },
               labels: { sources: ['csv'], source_ids: [] },
               ...labelField,
             },
@@ -75,12 +83,19 @@ export const bulkUpsertBatch =
 
                 if (ctx._source.user.is_privileged == false) {
                   ctx._source.user.is_privileged = true;
+                  ctx._source.user.entity = ctx._source.user.entity != null ? ctx._source.user.entity : new HashMap();
+                  ctx._source.user.entity.attributes = ctx._source.user.entity.attributes != null ? ctx._source.user.entity.attributes : new HashMap();
+                  ctx._source.user.entity.attributes.Privileged = true;
                   userModified = true;
                 }
 
                 if (userModified) {
                   ctx._source['@timestamp'] = params.timestamp;
+                  if (ctx._source.event == null) {
+                    ctx._source.event = new HashMap();
+                  }
                   ctx._source.event.ingested = params.timestamp;
+                  ctx._source.event.put('@timestamp', params.timestamp);
                 }
               `,
               lang: 'painless',

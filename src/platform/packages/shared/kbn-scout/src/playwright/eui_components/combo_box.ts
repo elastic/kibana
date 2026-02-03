@@ -20,6 +20,7 @@ export class EuiComboBoxWrapper {
   private readonly comboBoxMainInput: Locator;
   private readonly comboBoxSearchInput: Locator;
   private readonly comboBoxClearButton: Locator;
+  private readonly comboBoxSelectedOptions: Locator;
 
   /**
    * Create a new EuiComboBoxWrapper instance.
@@ -34,15 +35,14 @@ export class EuiComboBoxWrapper {
     this.comboBoxMainInput = this.comboBoxWrapper.locator(subj('comboBoxInput'));
     this.comboBoxSearchInput = this.comboBoxWrapper.locator(subj('comboBoxSearchInput'));
     this.comboBoxClearButton = this.comboBoxWrapper.locator(subj('comboBoxClearButton'));
+    this.comboBoxSelectedOptions = this.comboBoxMainInput.locator('.euiComboBoxPill');
   }
 
   async getSelectedMultiOptions(): Promise<string[]> {
     await this.comboBoxWrapper.waitFor({ state: 'attached' });
     await this.comboBoxMainInput.waitFor({ state: 'attached' });
 
-    const selectedOptions = await this.comboBoxMainInput
-      .locator('.euiComboBoxPill')
-      .allInnerTexts();
+    const selectedOptions = await this.comboBoxSelectedOptions.allInnerTexts();
     return selectedOptions;
   }
 
@@ -122,6 +122,13 @@ export class EuiComboBoxWrapper {
   }
 
   async clear() {
+    const inputValue = await this.getSelectedValue();
+    const inputPillsCount = await this.comboBoxSelectedOptions.count();
+    // multi-selection combobox input has no value, but only "pills", so we need to check both
+    if (inputValue === '' && inputPillsCount === 0) {
+      // no need to clean, it is empty
+      return;
+    }
     await this.comboBoxClearButton.click();
     await this.page.keyboard.press('Escape');
     // Wait for the input to be cleared with a timeout

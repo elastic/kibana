@@ -25,8 +25,6 @@ import {
   INTERNAL_CASE_OBSERVABLES_PATCH_URL,
   INTERNAL_CASE_SIMILAR_CASES_URL,
   INTERNAL_CASE_OBSERVABLES_DELETE_URL,
-  INTERNAL_CASE_SUMMARY_URL,
-  INTERNAL_INFERENCE_CONNECTORS_URL,
   INTERNAL_BULK_CREATE_CASE_OBSERVABLES_URL,
 } from '../constants';
 
@@ -117,12 +115,4 @@ export const getBulkCreateObservablesUrl = (id: string): string => {
 
 export const getCaseSimilarCasesUrl = (caseId: string) => {
   return INTERNAL_CASE_SIMILAR_CASES_URL.replace('{case_id}', caseId);
-};
-
-export const getCaseSummaryUrl = (id: string): string => {
-  return INTERNAL_CASE_SUMMARY_URL.replace('{case_id}', id);
-};
-
-export const getInferenceConnectorsUrl = (): string => {
-  return INTERNAL_INFERENCE_CONNECTORS_URL;
 };

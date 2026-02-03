@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ScrollContainer } from '@kbn/core-chrome-layout-utils';
 import type { UserInteractionEvent } from '../types';
 import { handleAutoscroll, startAutoScroll, stopAutoScroll } from './autoscroll';
 
@@ -34,15 +35,17 @@ export const startMouseInteraction = ({
   onStart,
   onMove,
   onEnd,
+  scrollContainer,
 }: {
   e: UserMouseEvent;
   onStart: (e: UserInteractionEvent) => void;
   onMove: (e: UserInteractionEvent) => void;
   onEnd: () => void;
+  scrollContainer: ScrollContainer;
 }) => {
   if (e.button !== MOUSE_BUTTON_LEFT) return;
   e.stopPropagation();
-  startAutoScroll();
+  startAutoScroll(scrollContainer);
 
   const handleMouseMove = (ev: UserMouseEvent) => {
     handleAutoscroll(ev);

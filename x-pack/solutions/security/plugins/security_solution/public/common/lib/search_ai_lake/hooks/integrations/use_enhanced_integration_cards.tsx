@@ -13,6 +13,7 @@ import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/type
 import { CONFIGURATIONS_PATH } from '../../../../../../common/constants';
 import { IntegrationsFacets } from '../../../../../configurations/constants';
 import { RETURN_APP_ID, RETURN_PATH } from './constants';
+import { CARD_TITLE_LINE_CLAMP } from '../../../integrations/constants';
 
 export interface EnhancedCardOptions {
   showInstallationStatus?: boolean;
@@ -56,6 +57,7 @@ export const applyCategoryBadgeAndStyling = (
   const categoryBadge = getCategoryBadgeIfAny(card.categories);
   return {
     ...card,
+    titleLineClamp: CARD_TITLE_LINE_CLAMP,
     url,
     showInstallationStatus: options?.showInstallationStatus,
     showCompressedInstallationStatus: options?.showCompressedInstallationStatus,

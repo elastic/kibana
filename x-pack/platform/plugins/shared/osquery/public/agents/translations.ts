@@ -69,3 +69,21 @@ export const FAIL_ALL_AGENTS = i18n.translate('xpack.osquery.agents.failSearchDe
 export const ATTACHED_QUERY = i18n.translate('xpack.osquery.agent.attachedQuery', {
   defaultMessage: `attached query`, // as in 'User attached query 5 minutes ago'
 });
+
+export const DEGRADED_AGENT_TOOLTIP = i18n.translate('xpack.osquery.agents.degradedAgentTooltip', {
+  defaultMessage: `Agent is degraded but Osquery component is healthy. Queries should work normally.`,
+});
+
+export const DEGRADED_AGENTS_CALLOUT_TITLE = i18n.translate(
+  'xpack.osquery.agents.degradedAgentsCalloutTitle',
+  {
+    defaultMessage: `Degraded agents with healthy Osquery`,
+  }
+);
+
+export const DEGRADED_AGENTS_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.osquery.agents.degradedAgentsCalloutDescription',
+  {
+    defaultMessage: `Some agents are degraded but their Osquery component is healthy. These agents are marked with an orange indicator and can still run queries successfully.`,
+  }
+);

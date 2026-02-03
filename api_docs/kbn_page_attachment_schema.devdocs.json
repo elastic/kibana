@@ -45,7 +45,7 @@
         "label": "PageAttachmentPersistedState",
         "description": [],
         "signature": [
-          "{ type: string; url: { label: string; pathAndQuery: string; actionLabel: string; iconType?: string | undefined; }; summary?: string | undefined; screenContext?: { screenDescription: string; }[] | undefined; }"
+          "{ type: string; url: { label: string; pathAndQuery: string; actionLabel: string; iconType?: string | undefined; }; screenContext?: { screenDescription: string; }[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-page-attachment-schema/src/schema/v1.ts",
         "deprecated": false,
@@ -62,7 +62,7 @@
         "label": "pageAttachmentPersistedStateSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ type: Zod.ZodString; url: Zod.ZodObject<{ pathAndQuery: Zod.ZodString; actionLabel: Zod.ZodString; label: Zod.ZodString; iconType: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { label: string; pathAndQuery: string; actionLabel: string; iconType?: string | undefined; }, { label: string; pathAndQuery: string; actionLabel: string; iconType?: string | undefined; }>; screenContext: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ screenDescription: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { screenDescription: string; }, { screenDescription: string; }>, \"many\">>; summary: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: string; url: { label: string; pathAndQuery: string; actionLabel: string; iconType?: string | undefined; }; summary?: string | undefined; screenContext?: { screenDescription: string; }[] | undefined; }, { type: string; url: { label: string; pathAndQuery: string; actionLabel: string; iconType?: string | undefined; }; summary?: string | undefined; screenContext?: { screenDescription: string; }[] | undefined; }>"
+          "Zod.ZodObject<{ type: Zod.ZodString; url: Zod.ZodObject<{ pathAndQuery: Zod.ZodString; actionLabel: Zod.ZodString; label: Zod.ZodString; iconType: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { label: string; pathAndQuery: string; actionLabel: string; iconType?: string | undefined; }, { label: string; pathAndQuery: string; actionLabel: string; iconType?: string | undefined; }>; screenContext: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ screenDescription: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { screenDescription: string; }, { screenDescription: string; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { type: string; url: { label: string; pathAndQuery: string; actionLabel: string; iconType?: string | undefined; }; screenContext?: { screenDescription: string; }[] | undefined; }, { type: string; url: { label: string; pathAndQuery: string; actionLabel: string; iconType?: string | undefined; }; screenContext?: { screenDescription: string; }[] | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-page-attachment-schema/src/schema/v1.ts",
         "deprecated": false,

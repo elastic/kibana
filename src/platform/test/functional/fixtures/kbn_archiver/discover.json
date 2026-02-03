@@ -49,3 +49,36 @@
   "type": "search",
   "version": "WzUsMl0="
 }
+
+{
+  "id": "15ba60d9-a202-49f4-aabe-b9b97efe9a32",
+  "type": "search",
+  "version": "WzExLDFd",
+  "attributes": {
+    "title": "ES|QL Discover Session",
+    "description": "ES|QL Discover Session Description",
+    "tabs": [
+      {
+        "id": "c94f57e3-dc37-4a78-8f5b-17269f479b0e",
+        "label": "Untitled",
+        "attributes": {
+          "columns": [],
+          "isTextBasedQuery": true,
+          "timeRestore": false,
+          "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"query\":{\"esql\":\"FROM logstash-* | SORT @timestamp desc | LIMIT 1000\"},\"filter\":[]}"
+          },
+          "sort": [
+            [
+              "@timestamp",
+              "desc"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  "references": [],
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "10.9.0"
+}

@@ -194,6 +194,32 @@ describe('combineFindAttackDiscoveryFilters', () => {
     });
   });
 
+  describe('when an executionUuid filter is provided', () => {
+    it('returns an executionUuid filter when provided', () => {
+      const result = combineFindAttackDiscoveryFilters({
+        executionUuid: 'execution-123-uuid',
+      });
+
+      expect(result).toBe('kibana.alert.rule.execution.uuid: "execution-123-uuid"');
+    });
+
+    it('returns an empty string when executionUuid is undefined', () => {
+      const result = combineFindAttackDiscoveryFilters({
+        executionUuid: undefined,
+      });
+
+      expect(result).toBe('');
+    });
+
+    it('returns an empty string when executionUuid is an empty string', () => {
+      const result = combineFindAttackDiscoveryFilters({
+        executionUuid: '',
+      });
+
+      expect(result).toBe('');
+    });
+  });
+
   describe('when a date range filters are provided', () => {
     it('returns a start date filter when start is provided', () => {
       const result = combineFindAttackDiscoveryFilters({
@@ -231,12 +257,13 @@ describe('combineFindAttackDiscoveryFilters', () => {
         status: ['open'],
         connectorNames: ['GPT-4'],
         alertIds: ['alert123'],
+        executionUuid: 'execution-456-uuid',
         start: '2024-01-01T00:00:00.000Z',
         end: '2024-12-31T23:59:59.999Z',
       });
 
       const expectedSearchFilter = `${ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS}: "*malware*" OR ${ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS}: "*malware*" OR ${ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS}: "*malware*" OR ${ALERT_ATTACK_DISCOVERY_TITLE_WITH_REPLACEMENTS}: "*malware*"`;
-      const expectedResult = `(${expectedSearchFilter}) AND (_id: "id1" OR _id: "id2") AND (${ALERT_WORKFLOW_STATUS}: "open") AND (${ALERT_ATTACK_DISCOVERY_API_CONFIG_NAME}: "GPT-4") AND (${ALERT_ATTACK_DISCOVERY_ALERT_IDS}: "alert123") AND @timestamp >= "2024-01-01T00:00:00.000Z" AND @timestamp <= "2024-12-31T23:59:59.999Z"`;
+      const expectedResult = `(${expectedSearchFilter}) AND (_id: "id1" OR _id: "id2") AND (${ALERT_WORKFLOW_STATUS}: "open") AND (${ALERT_ATTACK_DISCOVERY_API_CONFIG_NAME}: "GPT-4") AND (${ALERT_ATTACK_DISCOVERY_ALERT_IDS}: "alert123") AND kibana.alert.rule.execution.uuid: "execution-456-uuid" AND @timestamp >= "2024-01-01T00:00:00.000Z" AND @timestamp <= "2024-12-31T23:59:59.999Z"`;
 
       expect(result).toBe(expectedResult);
     });
@@ -248,6 +275,7 @@ describe('combineFindAttackDiscoveryFilters', () => {
         status: ['open'],
         connectorNames: undefined,
         alertIds: ['alert123'],
+        executionUuid: undefined,
         start: undefined,
         end: '2024-12-31T23:59:59.999Z',
       });

@@ -104,7 +104,7 @@ const PacksTableComponent = () => {
 
     return updatedAt ? (
       <EuiToolTip content={`${moment(updatedAt).fromNow()}${updatedBy}`}>
-        <span css={updatedAtCss}>{`${moment(updatedAt).fromNow()}${updatedBy}`}</span>
+        <span tabIndex={0} css={updatedAtCss}>{`${moment(updatedAt).fromNow()}${updatedBy}`}</span>
       </EuiToolTip>
     ) : (
       '-'
@@ -131,12 +131,13 @@ const PacksTableComponent = () => {
       });
 
       return (
-        <EuiToolTip position="top" content={playText}>
+        <EuiToolTip position="top" content={playText} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="play"
             onClick={handlePlayClick(item)}
             isDisabled={!enabled}
             data-test-subj={`play-${item.name}-button`}
+            aria-label={playText}
           />
         </EuiToolTip>
       );

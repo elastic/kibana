@@ -25,7 +25,7 @@ toc:
       - file: http-service.md
       - file: logging-service.md
       - file: logging-config-changes.md
-      - file: saved-objects-service.md
+      - file: saved-objects.md
       - file: ui-settings-service.md
       - file: patterns.md
       - file: core-packages.md

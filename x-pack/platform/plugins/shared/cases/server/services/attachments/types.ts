@@ -30,6 +30,7 @@ export interface ServiceContext {
 export interface AttachedToCaseArgs {
   caseId: string;
   filter?: KueryNode;
+  attachmentTypes?: AttachmentType[];
 }
 
 export interface GetAttachmentArgs {

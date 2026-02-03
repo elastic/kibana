@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { SUB_ACTION } from '../../../common/sentinelone/constants';
-import type { SentinelOneActionParams } from '../../../common/sentinelone/types';
+import { SUB_ACTION } from '@kbn/connector-schemas/sentinelone/constants';
+import type { SentinelOneActionParams } from '@kbn/connector-schemas/sentinelone';
 import SentinelOneParamsFields from './sentinelone_params';
 
 const actionParams = {

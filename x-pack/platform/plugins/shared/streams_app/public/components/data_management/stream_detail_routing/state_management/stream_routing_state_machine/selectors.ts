@@ -8,6 +8,7 @@
 import { createSelector } from 'reselect';
 import { flattenObject } from '@kbn/object-utils';
 import type { FlattenRecord } from '@kbn/streams-schema';
+import { isEqual } from 'lodash';
 import type { StreamRoutingContext } from './types';
 import type { RoutingSamplesContext } from './routing_samples_state_machine';
 
@@ -37,5 +38,25 @@ export const selectPreviewDocuments = createSelector(
   [(context: RoutingSamplesContext) => context.documents],
   (documents) => {
     return documents.map((doc) => flattenObject(doc)) as FlattenRecord[];
+  }
+);
+
+/**
+ * Selects whether routing has changes compared to initial routing.
+ */
+export const selectHasRoutingChanges = createSelector(
+  [
+    (context: StreamRoutingContext) => context.routing,
+    (context: StreamRoutingContext) => context.initialRouting,
+  ],
+  (routing, initialRouting) => {
+    if (routing.length !== initialRouting.length) {
+      return true;
+    }
+
+    return routing.some((rule, index) => {
+      const initialRule = initialRouting[index];
+      return !isEqual(rule, initialRule);
+    });
   }
 );

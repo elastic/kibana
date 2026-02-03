@@ -16,6 +16,7 @@ import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { bulkInstallPackages } from './epm/packages';
 import { incrementPackageName } from './package_policies';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
+import type { KibanaRequest } from '@kbn/core/server';
 
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
@@ -71,19 +72,24 @@ describe('createAgentPolicyWithPackages', () => {
         id: options?.id || 'new_id',
       } as AgentPolicy)
     );
+    mockedAgentPolicyService.deployPolicy.mockReset();
     mockedAgentPolicyService.deployPolicy.mockResolvedValue();
 
     mockedPackagePolicyService.buildPackagePolicyFromPackage.mockImplementation(
       (soClient, packageToInstall) => Promise.resolve(getPackagePolicy(packageToInstall))
     );
-    mockIncrementPackageName.mockImplementation((soClient: any, pkg: string) =>
-      Promise.resolve(`${pkg}-1`)
+    mockIncrementPackageName.mockImplementation(
+      (soClient: any, packageName: string, spaceIds: string[]) =>
+        Promise.resolve(`${packageName}-1`)
     );
     mockedPackagePolicyService.create.mockImplementation((soClient, esClient, newPolicy) =>
       Promise.resolve({
         ...newPolicy,
       } as PackagePolicy)
     );
+
+    jest.mocked(mockedBulkInstallPackages).mockReset();
+    jest.mocked(mockedPackagePolicyService.create).mockReset();
   });
 
   afterEach(() => {
@@ -128,6 +134,7 @@ describe('createAgentPolicyWithPackages', () => {
       withSysMonitoring: true,
       monitoringEnabled: ['logs', 'metrics'],
       spaceId: 'default',
+      request: {} as KibanaRequest,
     });
 
     expect(response.id).toEqual('fleet-server-policy');
@@ -137,17 +144,22 @@ describe('createAgentPolicyWithPackages', () => {
       esClient: esClientMock,
       packagesToInstall: ['fleet_server', 'system', 'elastic_agent'],
       spaceId: 'default',
+      request: expect.anything(),
     });
     expect(mockedPackagePolicyService.create).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       getPackagePolicy('system-1', 'fleet-server-policy'),
+      expect.anything(),
+      undefined,
       expect.anything()
     );
     expect(mockedPackagePolicyService.create).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       getPackagePolicy('fleet_server-1', 'fleet-server-policy'),
+      expect.anything(),
+      undefined,
       expect.anything()
     );
   });
@@ -162,6 +174,7 @@ describe('createAgentPolicyWithPackages', () => {
       withSysMonitoring: false,
       monitoringEnabled: [],
       spaceId: 'default',
+      request: {} as KibanaRequest,
     });
 
     expect(response.id).toEqual('new_id');
@@ -170,11 +183,14 @@ describe('createAgentPolicyWithPackages', () => {
       esClient: esClientMock,
       packagesToInstall: ['fleet_server'],
       spaceId: 'default',
+      request: expect.anything(),
     });
     expect(mockedPackagePolicyService.create).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       getPackagePolicy('fleet_server-1', 'new_id'),
+      expect.anything(),
+      undefined,
       expect.anything()
     );
   });
@@ -186,6 +202,7 @@ describe('createAgentPolicyWithPackages', () => {
       newPolicy: { name: 'Agent policy 1', namespace: 'default' },
       withSysMonitoring: true,
       spaceId: 'default',
+      request: {} as KibanaRequest,
     });
 
     expect(response.id).toEqual('new_id');
@@ -194,12 +211,63 @@ describe('createAgentPolicyWithPackages', () => {
       esClient: esClientMock,
       packagesToInstall: ['system'],
       spaceId: 'default',
+      request: expect.anything(),
     });
     expect(mockedPackagePolicyService.create).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       getPackagePolicy('system-1', 'new_id'),
+      expect.anything(),
+      undefined,
       expect.anything()
+    );
+  });
+
+  it('should no create agentless policy with system package or monitoring', async () => {
+    const response = await createAgentPolicyWithPackages({
+      esClient: esClientMock,
+      soClient: soClientMock,
+      agentPolicyService: mockedAgentPolicyService,
+      newPolicy: {
+        name: 'Agent policy 1',
+        namespace: 'default',
+        supports_agentless: true,
+        monitoring_enabled: [],
+      },
+      withSysMonitoring: true,
+      monitoringEnabled: ['logs', 'metrics'],
+      spaceId: 'default',
+    });
+
+    expect(response.id).toEqual('new_id');
+    expect(mockedBulkInstallPackages).not.toHaveBeenCalled();
+    expect(mockedPackagePolicyService.create).not.toHaveBeenCalled();
+
+    expect(agentPolicyService.create).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      {
+        name: 'Agent policy 1',
+        namespace: 'default',
+        supports_agentless: true,
+        monitoring_enabled: [],
+        keep_monitoring_alive: true,
+      },
+      expect.objectContaining({ skipDeploy: true })
+    );
+
+    expect(appContextService.getLogger().info).toHaveBeenCalledWith(
+      'Disabling system monitoring for agentless policy [Agent policy 1]'
+    );
+    expect(appContextService.getLogger().info).toHaveBeenCalledWith(
+      'Disabling monitoring for agentless policy [Agent policy 1]'
+    );
+
+    expect(mockedAgentPolicyService.deployPolicy).toHaveBeenCalledWith(
+      expect.anything(),
+      'new_id',
+      undefined,
+      { throwOnAgentlessError: true }
     );
   });
 
@@ -244,6 +312,7 @@ describe('createAgentPolicyWithPackages', () => {
       withSysMonitoring: true,
       spaceId: 'default',
       monitoringEnabled: ['logs'],
+      request: {} as KibanaRequest,
     });
 
     expect(response.id).toEqual('new_id');
@@ -252,11 +321,14 @@ describe('createAgentPolicyWithPackages', () => {
       esClient: esClientMock,
       packagesToInstall: ['system', 'elastic_agent'],
       spaceId: 'default',
+      request: expect.anything(),
     });
     expect(mockedPackagePolicyService.create).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       getPackagePolicy('system-1', 'new_id'),
+      expect.anything(),
+      undefined,
       expect.anything()
     );
   });
@@ -270,6 +342,7 @@ describe('createAgentPolicyWithPackages', () => {
       withSysMonitoring: false,
       spaceId: 'default',
       monitoringEnabled: [],
+      request: {} as KibanaRequest,
     });
 
     expect(response.id).toEqual('policy-1');
@@ -284,6 +357,7 @@ describe('createAgentPolicyWithPackages', () => {
       withSysMonitoring: false,
       spaceId: 'default',
       monitoringEnabled: [],
+      request: {} as KibanaRequest,
     });
 
     expect(response.id).toEqual('policy-1');

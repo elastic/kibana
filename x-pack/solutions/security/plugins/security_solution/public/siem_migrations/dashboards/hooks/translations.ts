@@ -10,15 +10,14 @@ import { i18n } from '@kbn/i18n';
 export const START_DASHBOARDS_MIGRATION_DIALOG_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.startMigrationDialog.title',
   {
-    defaultMessage: 'Start dashboards migration',
+    defaultMessage: 'Migrate dashboards',
   }
 );
 
 export const START_DASHBOARDS_MIGRATION_DIALOG_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.startMigrationDialog.description',
   {
-    defaultMessage:
-      'You are about to start dashboards migration and this will incur additional tokens. You have option to choose a different LLM. This option applies only to the current execution.',
+    defaultMessage: 'You are about to start a migration. Select which AI connector to use.',
   }
 );
 
@@ -33,7 +32,7 @@ export const RETRY_DASHBOARDS_MIGRATION_DIALOG_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.retryMigrationDialog.description',
   {
     defaultMessage:
-      'You are about to retry dashboards migration and this will incur additional tokens. You have option to choose a different LLM. This option applies only to the current execution.',
+      'You are about to retry a migration, which will use additional tokens. Select which AI connector to use.',
   }
 );
 
@@ -47,6 +46,6 @@ export const REPROCESS_DASHBOARDS_MIGRATION_DIALOG_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.reprocessDialog.description',
   {
     defaultMessage:
-      'You are about to reprocess selected dashboards and this will incur additional tokens. You have option to choose a different LLM. This option applies only to the current execution.',
+      'You are about to reprocess a migration, which will use additional tokens. Select which AI connector to use.',
   }
 );

@@ -6,19 +6,17 @@
  */
 
 import type { PostAttackDiscoveryGenerationsDismissResponse } from '@kbn/elastic-assistant-common';
-import { ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
+  API_VERSIONS,
+} from '@kbn/elastic-assistant-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 import { useInvalidateGetAttackDiscoveryGenerations } from '../use_get_attack_discovery_generations';
-
-export const DISMISS_ATTACK_DISCOVERY_GENERATION_MUTATION_KEY = [
-  'POST',
-  ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
-];
 
 interface DismissAttackDiscoveryGenerationParams {
   executionUuid: string;
@@ -26,26 +24,24 @@ interface DismissAttackDiscoveryGenerationParams {
   signal?: AbortSignal;
 }
 /** Disables the attack discovery schedule. */
-const dismissAttackDiscoveryGeneration = async ({
-  executionUuid,
-  signal,
-}: DismissAttackDiscoveryGenerationParams): Promise<PostAttackDiscoveryGenerationsDismissResponse> =>
-  KibanaServices.get().http.post<PostAttackDiscoveryGenerationsDismissResponse>(
-    replaceParams(ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS, { execution_uuid: executionUuid }),
-    { version: '1', signal }
-  );
 
 export const useDismissAttackDiscoveryGeneration = () => {
   const { addError } = useAppToasts();
 
   const invalidateGetAttackDiscoveryGenerations = useInvalidateGetAttackDiscoveryGenerations();
 
+  const dismiss = async ({ executionUuid, signal }: DismissAttackDiscoveryGenerationParams) =>
+    KibanaServices.get().http.post<PostAttackDiscoveryGenerationsDismissResponse>(
+      replaceParams(ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS, { execution_uuid: executionUuid }),
+      { version: API_VERSIONS.public.v1, signal }
+    );
+
   return useMutation<
     PostAttackDiscoveryGenerationsDismissResponse,
     Error,
     DismissAttackDiscoveryGenerationParams
-  >(({ executionUuid }) => dismissAttackDiscoveryGeneration({ executionUuid }), {
-    mutationKey: DISMISS_ATTACK_DISCOVERY_GENERATION_MUTATION_KEY,
+  >(({ executionUuid }) => dismiss({ executionUuid }), {
+    mutationKey: ['POST', ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS],
     onSuccess: () => {
       invalidateGetAttackDiscoveryGenerations();
     },

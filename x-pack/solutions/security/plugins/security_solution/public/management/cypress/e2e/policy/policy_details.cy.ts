@@ -25,15 +25,6 @@ describe(
       // skipped on MKI since feature flags are not supported there
       '@skipInServerlessMKI',
     ],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'sentinelOneManualHostActionsEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     const getAutomaticUpdatesToggle = () => cy.getByTestSubj('protection-updates-manifest-switch');

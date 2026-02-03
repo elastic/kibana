@@ -15,6 +15,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
+import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/model/common.gen';
 import type { MigrationType } from '../../../../../common/siem_migrations/types';
 import type { ItemDocument, Stored } from '../types';
 import {
@@ -48,36 +49,43 @@ export abstract class SiemMigrationsDataItemClient<
   I extends ItemDocument = ItemDocument
 > extends SiemMigrationsDataBaseClient {
   protected abstract type: MigrationType;
+  public abstract getVendor(migrationId: string): Promise<SiemMigrationVendor | undefined>;
 
   /** Indexes an array of migration items in pending status */
   async create(items: CreateMigrationItemInput<I>[]): Promise<void> {
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    let itemsSlice: CreateMigrationItemInput<I>[];
-    const allItems = structuredClone(items);
     const createdAt = new Date().toISOString();
-    while ((itemsSlice = allItems.splice(0, BULK_MAX_SIZE)).length) {
-      await this.esClient
-        .bulk({
-          refresh: 'wait_for',
-          operations: itemsSlice.flatMap((item) => [
-            { create: { _index: index } },
-            {
-              ...item,
-              '@timestamp': createdAt,
-              status: SiemMigrationStatus.PENDING,
-              created_by: profileId,
-              updated_by: profileId,
-              updated_at: createdAt,
-            },
-          ]),
-        })
-        .catch((error) => {
-          this.logger.error(`Error creating migration ${this.type}: ${error.message}`);
-          throw error;
-        });
+
+    const batches: CreateMigrationItemInput<I>[][] = [];
+    for (let i = 0; i < items.length; i += BULK_MAX_SIZE) {
+      batches.push(items.slice(i, i + BULK_MAX_SIZE));
     }
+
+    await Promise.all(
+      batches.map((itemsSlice) =>
+        this.esClient
+          .bulk({
+            refresh: 'wait_for',
+            operations: itemsSlice.flatMap((item) => [
+              { create: { _index: index } },
+              {
+                ...item,
+                '@timestamp': createdAt,
+                status: SiemMigrationStatus.PENDING,
+                created_by: profileId,
+                updated_by: profileId,
+                updated_at: createdAt,
+              },
+            ]),
+          })
+          .catch((error) => {
+            this.logger.error(`Error creating migration ${this.type}: ${error.message}`);
+            throw error;
+          })
+      )
+    );
   }
 
   /** Updates an array of migration items */
@@ -85,10 +93,14 @@ export abstract class SiemMigrationsDataItemClient<
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    let itemsUpdateSlice: U[];
     const updatedAt = new Date().toISOString();
-    while ((itemsUpdateSlice = itemsUpdate.splice(0, BULK_MAX_SIZE)).length) {
-      await this.esClient
+    const batches: U[][] = [];
+    for (let i = 0; i < itemsUpdate.length; i += BULK_MAX_SIZE) {
+      batches.push(itemsUpdate.slice(i, i + BULK_MAX_SIZE));
+    }
+
+    const batchPromises = batches.map((itemsUpdateSlice) =>
+      this.esClient
         .bulk({
           refresh: 'wait_for',
           operations: itemsUpdateSlice.flatMap((item) => {
@@ -108,8 +120,10 @@ export abstract class SiemMigrationsDataItemClient<
         .catch((error) => {
           this.logger.error(`Error updating migration ${this.type}: ${error.message}`);
           throw error;
-        });
-    }
+        })
+    );
+
+    await Promise.all(batchPromises);
   }
 
   /** Retrieves an array of migration items of a specific migration */
@@ -125,6 +139,29 @@ export abstract class SiemMigrationsDataItemClient<
       .search<I>({ index, query, sort, from, size })
       .catch((error) => {
         this.logger.error(`Error searching migration ${this.type}: ${error.message}`);
+        throw error;
+      });
+    return {
+      total: this.getTotalHits(result),
+      data: this.processResponseHits(result),
+    };
+  }
+
+  async getByQuery(
+    migrationId: string,
+    { queryDSL, from, size }: { queryDSL: object; from?: number; size?: number }
+  ): Promise<{ total: number; data: Stored<I>[] }> {
+    const index = await this.getIndexName();
+    const baseQuery = this.getFilterQuery(migrationId, {});
+    const combinedQuery = {
+      bool: {
+        must: [baseQuery, queryDSL],
+      },
+    };
+    const result = await this.esClient
+      .search<I>({ index, query: combinedQuery, from, size })
+      .catch((error) => {
+        this.logger.error(`Error searching migration ${this.type} by query: ${error.message}`);
         throw error;
       });
     return {
@@ -169,6 +206,8 @@ export abstract class SiemMigrationsDataItemClient<
       createdAt: { min: { field: '@timestamp' } },
       lastUpdatedAt: { max: { field: 'updated_at' } },
     };
+
+    const vendor = await this.getVendor(migrationId);
     const result = await this.esClient
       .search({ index, query, aggregations, _source: false })
       .catch((error) => {
@@ -185,6 +224,7 @@ export abstract class SiemMigrationsDataItemClient<
       },
       created_at: (aggs.createdAt as AggregationsMinAggregate)?.value_as_string ?? '',
       last_updated_at: (aggs.lastUpdatedAt as AggregationsMaxAggregate)?.value_as_string ?? '',
+      vendor,
     };
   }
 
@@ -210,8 +250,12 @@ export abstract class SiemMigrationsDataItemClient<
 
     const migrationsAgg = result.aggregations?.migrationIds as AggregationsStringTermsAggregate;
     const buckets = (migrationsAgg?.buckets as AggregationsStringTermsBucket[]) ?? [];
-    return buckets.map<SiemMigrationDataStats>((bucket) => ({
+    const vendors = await Promise.all(
+      buckets.map(async (bucket) => this.getVendor(`${bucket.key}`))
+    );
+    return buckets.map<SiemMigrationDataStats>((bucket, idx) => ({
       id: `${bucket.key}`,
+      vendor: vendors[idx],
       items: {
         total: bucket.doc_count,
         ...this.statusAggCounts(bucket.status as AggregationsStringTermsAggregate),
@@ -297,6 +341,11 @@ export abstract class SiemMigrationsDataItemClient<
       this.logger.error(`Error updating migration ${this.type} status: ${error.message}`);
       throw error;
     });
+  }
+
+  protected getVendorFromAggs(vendorAgg: AggregationsStringTermsAggregate): string {
+    const buckets = vendorAgg.buckets as AggregationsStringTermsBucket[];
+    return buckets[0]?.key?.toString() ?? 'unknown';
   }
 
   protected statusAggCounts(

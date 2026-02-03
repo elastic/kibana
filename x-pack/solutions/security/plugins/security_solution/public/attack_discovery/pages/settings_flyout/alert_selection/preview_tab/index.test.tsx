@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { PreviewTab } from '.';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -170,7 +170,7 @@ describe('PreviewTab', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith({
       payload: {
-        id: 'detections',
+        id: 'alerts',
         selectedDataViewId: 'mock-signal-index',
         selectedPatterns: ['mock-signal-index'],
         shouldValidateSelectedPatterns: false,

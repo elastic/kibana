@@ -9,16 +9,27 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 
 import type { Owner } from '../../common/constants/types';
 import {
+  CAI_ATTACHMENTS_SOURCE_INDEX,
   CAI_ATTACHMENTS_SYNC_TYPE,
+  getAttachmentsDestinationIndexName,
   getAttachmentsSynchronizationSourceQuery,
 } from './attachments_index/constants';
-import { CAI_CASES_SYNC_TYPE, getCasesSynchronizationSourceQuery } from './cases_index/constants';
 import {
+  CAI_CASES_SOURCE_INDEX,
+  CAI_CASES_SYNC_TYPE,
+  getCasesDestinationIndexName,
+  getCasesSynchronizationSourceQuery,
+} from './cases_index/constants';
+import {
+  CAI_COMMENTS_SOURCE_INDEX,
   CAI_COMMENTS_SYNC_TYPE,
+  getCommentsDestinationIndexName,
   getCommentsSynchronizationSourceQuery,
 } from './comments_index/constants';
 import {
+  CAI_ACTIVITY_SOURCE_INDEX,
   CAI_ACTIVITY_SYNC_TYPE,
+  getActivityDestinationIndexName,
   getActivitySynchronizationSourceQuery,
 } from './activity_index/constants';
 
@@ -45,6 +56,13 @@ export type CAISyncType =
   | typeof CAI_ATTACHMENTS_SYNC_TYPE
   | typeof CAI_ACTIVITY_SYNC_TYPE;
 
+export const CAISyncTypes = [
+  CAI_CASES_SYNC_TYPE,
+  CAI_COMMENTS_SYNC_TYPE,
+  CAI_ATTACHMENTS_SYNC_TYPE,
+  CAI_ACTIVITY_SYNC_TYPE,
+] as const;
+
 export const SYNCHRONIZATION_QUERIES_DICTIONARY: Record<
   string,
   (lastSyncAt: Date, spaceId: string, owner: Owner) => QueryDslQueryContainer
@@ -53,4 +71,38 @@ export const SYNCHRONIZATION_QUERIES_DICTIONARY: Record<
   [CAI_COMMENTS_SYNC_TYPE]: getCommentsSynchronizationSourceQuery,
   [CAI_ATTACHMENTS_SYNC_TYPE]: getAttachmentsSynchronizationSourceQuery,
   [CAI_ACTIVITY_SYNC_TYPE]: getActivitySynchronizationSourceQuery,
+};
+
+export const sourceIndexBySyncType = (syncType: CAISyncType): string => {
+  switch (syncType) {
+    case CAI_CASES_SYNC_TYPE:
+      return CAI_CASES_SOURCE_INDEX;
+    case CAI_COMMENTS_SYNC_TYPE:
+      return CAI_COMMENTS_SOURCE_INDEX;
+    case CAI_ATTACHMENTS_SYNC_TYPE:
+      return CAI_ATTACHMENTS_SOURCE_INDEX;
+    case CAI_ACTIVITY_SYNC_TYPE:
+      return CAI_ACTIVITY_SOURCE_INDEX;
+    default:
+      throw new Error(`[sourceIndexBySyncType]: Unknown sync type: ${syncType}`);
+  }
+};
+
+export const destinationIndexBySyncType = (
+  syncType: CAISyncType,
+  spaceId: string,
+  owner: Owner
+): string => {
+  switch (syncType) {
+    case CAI_CASES_SYNC_TYPE:
+      return getCasesDestinationIndexName(spaceId, owner);
+    case CAI_COMMENTS_SYNC_TYPE:
+      return getCommentsDestinationIndexName(spaceId, owner);
+    case CAI_ATTACHMENTS_SYNC_TYPE:
+      return getAttachmentsDestinationIndexName(spaceId, owner);
+    case CAI_ACTIVITY_SYNC_TYPE:
+      return getActivityDestinationIndexName(spaceId, owner);
+    default:
+      throw new Error(`[destinationIndexBySyncType]: Unknown sync type: ${syncType}`);
+  }
 };

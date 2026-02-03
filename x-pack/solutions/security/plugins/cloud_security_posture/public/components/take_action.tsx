@@ -21,8 +21,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { HttpSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n as kbnI18n } from '@kbn/i18n';
-import type { QueryClient } from '@tanstack/react-query';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { QueryClient } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import {
   CREATE_DETECTION_FROM_TABLE_ROW_ACTION,
   uiMetricService,

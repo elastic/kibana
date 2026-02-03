@@ -17,6 +17,10 @@ import { translateDashboardPanelState } from './state';
 import type { TranslatePanelGraphParams, TranslateDashboardPanelState } from './types';
 import { migrateDashboardConfigSchema } from '../../state';
 import { getSelectIndexPatternNode } from './nodes/select_index_pattern';
+import { RETRY_POLICY } from '../../constants';
+import { getExtractColumnsFromEsqlQueryNode } from './nodes/extract_columns';
+import { getIndexMappingNode as createGetIndexMappingNode } from './nodes/get_index_mapping';
+import { getCorrectColumnsFromMappingNode } from './nodes/correct_columns_from_mapping';
 
 export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
   const translateQueryNode = getTranslateQueryNode(params);
@@ -24,19 +28,40 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
   const validationNode = getValidationNode(params);
   const fixQueryErrorsNode = getFixQueryErrorsNode(params);
   const ecsMappingNode = getEcsMappingNode(params);
+  const extractColumnsFromEsqlNode = getExtractColumnsFromEsqlQueryNode(params);
   const selectIndexPatternNode = getSelectIndexPatternNode(params);
   const translationResultNode = getTranslationResultNode(params);
+  const correctColumnsFromMappingNode = getCorrectColumnsFromMappingNode({
+    esqlKnowledgeBase: params.esqlKnowledgeBase,
+    logger: params.logger,
+  });
+  const getIndexMappingNodeInstance = createGetIndexMappingNode(params);
 
   const translateDashboardPanelGraph = new StateGraph(
     translateDashboardPanelState,
     migrateDashboardConfigSchema
   )
     // Nodes
-    .addNode('inlineQuery', inlineQueryNode)
-    .addNode('translateQuery', translateQueryNode)
+    .addNode('inlineQuery', inlineQueryNode, {
+      retryPolicy: RETRY_POLICY,
+    })
+    .addNode('getIndexMapping', getIndexMappingNodeInstance)
+    .addNode('translateQuery', translateQueryNode, {
+      retryPolicy: RETRY_POLICY,
+    })
     .addNode('validation', validationNode)
-    .addNode('fixQueryErrors', fixQueryErrorsNode)
-    .addNode('ecsMapping', ecsMappingNode)
+    .addNode('fixQueryErrors', fixQueryErrorsNode, {
+      retryPolicy: RETRY_POLICY,
+    })
+    .addNode('ecsMapping', ecsMappingNode, {
+      retryPolicy: RETRY_POLICY,
+    })
+    .addNode('extractColumnsFromEsql', extractColumnsFromEsqlNode, {
+      retryPolicy: RETRY_POLICY,
+    })
+    .addNode('correctColumnsFromMapping', correctColumnsFromMappingNode, {
+      retryPolicy: RETRY_POLICY,
+    })
     .addNode('selectIndexPattern', selectIndexPatternNode)
     .addNode('translationResult', translationResultNode)
 
@@ -51,7 +76,10 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
       'ecsMapping',
       'selectIndexPattern',
     ])
-    .addEdge('selectIndexPattern', 'translationResult')
+    .addEdge('selectIndexPattern', 'getIndexMapping')
+    .addEdge('getIndexMapping', 'correctColumnsFromMapping')
+    .addEdge('correctColumnsFromMapping', 'extractColumnsFromEsql')
+    .addEdge('extractColumnsFromEsql', 'translationResult')
     .addEdge('translationResult', END);
 
   const graph = translateDashboardPanelGraph.compile();

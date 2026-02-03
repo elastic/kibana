@@ -59,7 +59,9 @@ export const ComparePercentageBadge = ({
         `}
       >
         <EuiToolTip content={percentInfo.note}>
-          <EuiBadge color={percentInfo.color}>{percentInfo.percent}</EuiBadge>
+          <EuiBadge color={percentInfo.color} tabIndex={0}>
+            {percentInfo.percent}
+          </EuiBadge>
         </EuiToolTip>
         {timeRange && (
           <EuiText size="xs" color="subdued">

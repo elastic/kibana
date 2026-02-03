@@ -41,6 +41,8 @@
           "FavoritesRegistrySetup"
         ],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -52,6 +54,8 @@
             "label": "{\n  logger,\n  core,\n  usageCollection,\n}",
             "description": [],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
+            "lineNumber": 42,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -67,6 +71,8 @@
                   "<{}, unknown>"
                 ],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
+                "lineNumber": 43,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -87,6 +93,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -108,6 +116,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
+                "lineNumber": 45,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -127,6 +137,8 @@
         "label": "AddFavoriteResponse",
         "description": [],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -141,6 +153,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -155,6 +169,8 @@
         "label": "GetFavoritesResponse",
         "description": [],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -169,6 +185,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -183,6 +201,8 @@
               "Record<string, object> | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -197,6 +217,8 @@
         "label": "RemoveFavoriteResponse",
         "description": [],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -211,6 +233,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -231,6 +255,8 @@
           "{ registerFavoriteType: (type: string, config?: FavoriteTypeConfig) => void; }"
         ],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -26,8 +26,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlCommonPage.loginWithRole('developer');
     });
     beforeEach(async () => {
+      await pageObjects.svlCommonNavigation.sidenav.openPanel('data_management');
       await pageObjects.svlCommonNavigation.sidenav.clickLink({
-        deepLinkId: 'searchSynonyms',
+        navId: 'searchSynonyms:synonyms',
       });
     });
     describe('Synonyms get started Page', () => {

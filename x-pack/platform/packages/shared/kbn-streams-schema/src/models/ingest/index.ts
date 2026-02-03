@@ -6,13 +6,13 @@
  */
 import { z } from '@kbn/zod';
 import { BaseStream } from '../base';
-import { IngestBase } from './base';
+import { IngestBase, IngestBaseUpsertRequest } from './base';
 import type { ModelValidation } from '../validation/model_validation';
 import { joinValidation } from '../validation/model_validation';
 import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
-import { ClassicIngest, ClassicStream } from './classic';
-import { WiredIngest, WiredStream } from './wired';
+import { ClassicIngest, ClassicIngestUpsertRequest, ClassicStream } from './classic';
+import { WiredIngest, WiredIngestUpsertRequest, WiredStream } from './wired';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace IngestStream {
@@ -45,3 +45,10 @@ export const Ingest: Validation<IngestBase, Ingest> = validation(
   IngestBase.right,
   z.union([WiredIngest.right, ClassicIngest.right])
 );
+
+export type IngestUpsertRequest = WiredIngestUpsertRequest | ClassicIngestUpsertRequest;
+export const IngestUpsertRequest: Validation<IngestBaseUpsertRequest, IngestUpsertRequest> =
+  validation(
+    IngestBaseUpsertRequest.right,
+    z.union([WiredIngestUpsertRequest.right, ClassicIngestUpsertRequest.right])
+  );

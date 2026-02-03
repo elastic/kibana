@@ -9,34 +9,13 @@ import React, { memo } from 'react';
 import { DEFAULT_INDEX_KEY } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { IndexPatternPlaceholderFormWrapper } from './flyout';
-import type { FormSchema } from '../../../../../shared_imports';
-import {
-  Field,
-  FIELD_TYPES,
-  fieldValidators,
-  getUseField,
-  useForm,
-} from '../../../../../shared_imports';
+import { Field, getUseField, useForm } from '../../../../../shared_imports';
+import { schema } from './schema';
+import type { IndexPatternsFormData } from './types';
 
 import * as i18n from './translations';
 
 const CommonUseField = getUseField({ component: Field });
-
-interface IndexPatternsFormData {
-  index: string[];
-}
-
-const schema: FormSchema<IndexPatternsFormData> = {
-  index: {
-    fieldsToValidateOnChange: ['index'],
-    type: FIELD_TYPES.COMBO_BOX,
-    validations: [
-      {
-        validator: fieldValidators.emptyField(i18n.UPDATE_INDEX_PATTERN_REQUIRED_ERROR),
-      },
-    ],
-  },
-};
 
 const initialFormData: IndexPatternsFormData = {
   index: [],

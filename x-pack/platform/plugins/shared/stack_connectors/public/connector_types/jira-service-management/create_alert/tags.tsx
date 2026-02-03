@@ -19,8 +19,8 @@ import {
 
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Params as JiraServiceManagementActionParams } from '@kbn/connector-schemas/jira-service-management';
 import { RULE_TAGS_TEMPLATE } from '../../../../common/jira-service-management/constants';
-import type { JiraServiceManagementActionParams } from '../../../../server/connector_types';
 import * as i18n from './translations';
 import type { EditActionCallback } from '../types';
 import { OptionalFieldLabel } from '../../../common/optional_field_label';

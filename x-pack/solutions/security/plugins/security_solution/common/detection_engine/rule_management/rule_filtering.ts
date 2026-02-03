@@ -8,7 +8,7 @@
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { RuleExecutionStatus } from '../../api/detection_engine';
 import { RuleCustomizationStatus, RuleExecutionStatusEnum } from '../../api/detection_engine';
-import { prepareKQLStringParam } from '../../utils/kql';
+import { fullyEscapeKQLStringParam, prepareKQLStringParam } from '../../utils/kql';
 import {
   ENABLED_FIELD,
   IS_CUSTOMIZED_FIELD,
@@ -60,7 +60,7 @@ export function convertRulesFilterToKQL({
 }: Partial<RulesFilterOptions>): string {
   const kql: string[] = [];
 
-  if (searchTerm?.length) {
+  if (searchTerm?.trim().length) {
     kql.push(`(${convertRuleSearchTermToKQL(searchTerm)})`);
   }
 
@@ -106,7 +106,6 @@ export function convertRulesFilterToKQL({
 }
 
 const SEARCHABLE_RULE_ATTRIBUTES = [
-  RULE_NAME_FIELD,
   RULE_PARAMS_FIELDS.INDEX,
   RULE_PARAMS_FIELDS.TACTIC_ID,
   RULE_PARAMS_FIELDS.TACTIC_NAME,
@@ -116,11 +115,36 @@ const SEARCHABLE_RULE_ATTRIBUTES = [
   RULE_PARAMS_FIELDS.SUBTECHNIQUE_NAME,
 ];
 
-export function convertRuleSearchTermToKQL(
-  searchTerm: string,
-  attributes = SEARCHABLE_RULE_ATTRIBUTES
-): string {
-  return attributes.map((param) => `${param}: ${prepareKQLStringParam(searchTerm)}`).join(' OR ');
+/**
+ * Build KQL search terms.
+ *
+ * Note that RULE_NAME_FIELD is special, for single term searches
+ * it includes partial matches, supporting special characters.
+ *
+ * Ie - "sql" =KQL=> *sql* --matches-->  sql, Postgreslq, SQLCMD.EXE
+ *    - "sql:" =KQL=> *sql\:* --matches-->  sql:x64, but NOT sql_x64
+ *
+ * Whereas the rest of the fields, and multiple term searches,
+ * we use exact term match with quotations.
+ *
+ * Ie - "sql" =KQL=> "sql" --matches--> sql server, but NOT mssql or SQLCMD.EXE
+ *
+ * @param searchTerm search term (ie from the search bar)
+ * @returns KQL String
+ */
+export function convertRuleSearchTermToKQL(searchTerm: string): string {
+  const searchableConditions = SEARCHABLE_RULE_ATTRIBUTES.map(
+    (attribute) => `${attribute}: ${prepareKQLStringParam(searchTerm)}`
+  );
+  const escapedTerm = fullyEscapeKQLStringParam(searchTerm);
+  const isSingleTerm = escapedTerm.split(' ').length === 1;
+  let ruleNameCondition = '';
+  if (isSingleTerm) {
+    ruleNameCondition = `${RULE_NAME_FIELD}.keyword: *${escapedTerm}*`;
+  } else {
+    ruleNameCondition = `${RULE_NAME_FIELD}: ${prepareKQLStringParam(searchTerm)}`;
+  }
+  return [ruleNameCondition].concat(searchableConditions).join(' OR ');
 }
 
 export function convertRuleTagsToKQL(tags: string[]): string {

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { asPrettyString } from './as_pretty_string';
 
 describe('asPrettyString', () => {
   test('Converts null and undefined values into a string signifying no value', () => {
-    expect(asPrettyString(null)).toBe(' - ');
-    expect(asPrettyString(undefined)).toBe(' - ');
+    expect(asPrettyString(null)).toBe(NULL_LABEL);
+    expect(asPrettyString(undefined)).toBe(NULL_LABEL);
   });
 
   test('Does not mutate string values', () => {

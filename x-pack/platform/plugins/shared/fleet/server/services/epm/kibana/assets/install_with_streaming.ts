@@ -76,6 +76,13 @@ export async function installKibanaAssetsWithStreaming({
       return;
     }
 
+    if (
+      soType === KibanaSavedObjectType.sloTemplate &&
+      !appContextService.getExperimentalFeatures().enableSloTemplates
+    ) {
+      return;
+    }
+
     batch.push(savedObject);
     assetRefs.push(toAssetReference(savedObject));
 

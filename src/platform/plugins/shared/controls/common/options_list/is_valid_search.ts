@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getIpRangeQuery, getIsValidFullIp } from './ip_search';
-import type { OptionsListSearchTechnique } from './suggestions_searching';
+import type { OptionsListSearchTechnique } from '@kbn/controls-schemas';
+import { getIpRangeQuery, getIsValidFullIp, getValidCidrRange } from './ip_search';
 
 /**
  * ipaddr is a fairly large library - therefore, this function needs to be separate from
@@ -38,10 +38,10 @@ export const isValidSearch = ({
     case 'ip': {
       if (searchTechnique === 'exact') {
         /**
-         * exact match searching will throw an error if the search string isn't a **full** IP,
+         * exact match searching will throw an error if the search string isn't a **full** IP or a valid CIDR notation,
          * so we need a slightly different validity check here than for other search techniques
          */
-        return getIsValidFullIp(searchString);
+        return getIsValidFullIp(searchString) || getValidCidrRange(searchString).isValid;
       }
       return getIpRangeQuery(searchString).validSearch;
     }

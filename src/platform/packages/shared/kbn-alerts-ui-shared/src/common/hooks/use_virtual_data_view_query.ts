@@ -8,7 +8,7 @@
  */
 
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useEffect } from 'react';
 import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';
 

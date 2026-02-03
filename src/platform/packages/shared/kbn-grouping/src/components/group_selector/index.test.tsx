@@ -186,4 +186,119 @@ describe('group selector', () => {
       });
     });
   });
+
+  describe('custom settings', () => {
+    it('Does not present the "none" option when `hideNoneOption` is true', () => {
+      const { getByTestId, queryByTestId } = render(
+        <GroupSelector {...testProps} settings={{ hideNoneOption: true }} />
+      );
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+      expect(queryByTestId('panel-none')).toBeNull();
+    });
+
+    it('Does not present the "Custom field" option when `hideCustomFieldOption` is true', () => {
+      const { getByTestId, queryByTestId } = render(
+        <GroupSelector {...testProps} settings={{ hideCustomFieldOption: true }} />
+      );
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+      expect(queryByTestId('panel-custom')).toBeNull();
+    });
+
+    it('Renders custom button label when `popoverButtonLabel` is provided', () => {
+      const { getByTestId } = render(
+        <GroupSelector {...testProps} settings={{ popoverButtonLabel: 'Custom Label' }} />
+      );
+      expect(getByTestId('group-selector-dropdown').textContent).toBe('Custom Label');
+    });
+
+    it('Does not present the title in the dropdown when `hideOptionsTitle` is true', () => {
+      const { getByTestId, queryByTestId } = render(
+        <GroupSelector {...testProps} settings={{ hideOptionsTitle: true }} />
+      );
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+      expect(queryByTestId('contextMenuPanelTitle')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('enforced groups', () => {
+    it('disables enforced groups when they are selected', () => {
+      const { getByTestId } = render(
+        <GroupSelector
+          {...testProps}
+          groupsSelected={['kibana.alert.rule.name']}
+          settings={{ enforcedGroups: ['kibana.alert.rule.name'] }}
+        />
+      );
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+      expect(getByTestId('panel-kibana.alert.rule.name')).toHaveAttribute('disabled');
+    });
+
+    it('disables "none" option when only enforced groups are selected', () => {
+      const { getByTestId } = render(
+        <GroupSelector
+          {...testProps}
+          groupsSelected={['kibana.alert.rule.name']}
+          settings={{ enforcedGroups: ['kibana.alert.rule.name'] }}
+        />
+      );
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+      expect(getByTestId('panel-none')).toHaveAttribute('disabled');
+    });
+
+    it('enables "none" option when non-enforced groups are also selected', () => {
+      const { getByTestId } = render(
+        <GroupSelector
+          {...testProps}
+          groupsSelected={['kibana.alert.rule.name', 'user.name']}
+          settings={{ enforcedGroups: ['kibana.alert.rule.name'] }}
+        />
+      );
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+      expect(getByTestId('panel-none')).not.toHaveAttribute('disabled');
+    });
+
+    it('disables "none" when multiple enforced groups are selected and no other groups', () => {
+      const { getByTestId } = render(
+        <GroupSelector
+          {...testProps}
+          groupsSelected={['kibana.alert.rule.name', 'host.name']}
+          settings={{ enforcedGroups: ['kibana.alert.rule.name', 'host.name'] }}
+        />
+      );
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+      expect(getByTestId('panel-none')).toHaveAttribute('disabled');
+    });
+
+    it('does not disable non-enforced groups when maxGroupingLevels > 1 and enforced groups are selected', () => {
+      const { getByTestId } = render(
+        <GroupSelector
+          {...testProps}
+          maxGroupingLevels={3}
+          groupsSelected={['kibana.alert.rule.name', 'user.name']}
+          settings={{ enforcedGroups: ['kibana.alert.rule.name'] }}
+        />
+      );
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+
+      // Enforced group should be disabled
+      expect(getByTestId('panel-kibana.alert.rule.name')).toHaveAttribute('disabled');
+      // Non-enforced selected group should not be disabled
+      expect(getByTestId('panel-user.name')).not.toHaveAttribute('disabled');
+      // Other non-enforced groups should not be disabled (unless maxGroupingLevels is reached)
+      expect(getByTestId('panel-host.name')).not.toHaveAttribute('disabled');
+    });
+
+    it('disables enforced groups even when not selected (to prevent selection)', () => {
+      const { getByTestId } = render(
+        <GroupSelector
+          {...testProps}
+          groupsSelected={['user.name']}
+          settings={{ enforcedGroups: ['kibana.alert.rule.name'] }}
+        />
+      );
+      fireEvent.click(getByTestId('group-selector-dropdown'));
+      // Enforced group should be disabled to prevent selection
+      expect(getByTestId('panel-kibana.alert.rule.name')).toHaveAttribute('disabled');
+    });
+  });
 });

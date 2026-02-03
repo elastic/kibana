@@ -22,6 +22,7 @@ import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_
 import { DashboardMigrationTelemetryClient } from './dashboard_migrations_telemetry_client';
 import type { MigrationResources } from '../../common/task/retrievers/resource_retriever';
 import { nullifyMissingProperties } from '../../common/task/util/nullify_missing_properties';
+import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/model/common.gen';
 
 export interface DashboardMigrationTaskInput
   extends Pick<StoredDashboardMigrationDashboard, 'id' | 'original_dashboard'> {
@@ -37,9 +38,11 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
   DashboardMigrationTaskOutput
 > {
   private retriever: DashboardMigrationsRetriever;
+  protected readonly taskConcurrency = 3;
 
   constructor(
     public readonly migrationId: string,
+    protected readonly vendor: SiemMigrationVendor,
     protected readonly request: KibanaRequest,
     public readonly startedBy: AuthenticatedUser,
     public readonly abortController: AbortController,
@@ -47,7 +50,7 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
     protected readonly logger: Logger,
     protected readonly dependencies: SiemMigrationsClientDependencies
   ) {
-    super(migrationId, request, startedBy, abortController, data, logger, dependencies);
+    super(migrationId, vendor, request, startedBy, abortController, data, logger, dependencies);
     this.retriever = new DashboardMigrationsRetriever(this.migrationId, {
       data: this.data,
     });
@@ -59,6 +62,7 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
 
     const model = await this.actionsClientChat.createModel({
       connectorId,
+      migrationType: 'dashboards',
       migrationId: this.migrationId,
       abortController: this.abortController,
     });
@@ -68,7 +72,8 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
       this.dependencies.telemetry,
       this.logger,
       this.migrationId,
-      modelName
+      modelName,
+      this.vendor
     );
 
     const esqlKnowledgeBase = new EsqlKnowledgeBase(
@@ -85,6 +90,9 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
       dashboardMigrationsRetriever: this.retriever,
       logger: this.logger,
       telemetryClient,
+      inference: inferenceService,
+      request: this.request,
+      connectorId,
     });
 
     this.telemetry = telemetryClient;

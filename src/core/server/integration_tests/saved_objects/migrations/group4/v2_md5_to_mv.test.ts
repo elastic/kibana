@@ -19,7 +19,7 @@ import {
   getKibanaMigratorTestKit,
   readLog,
   startElasticsearch,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 import { createType } from '../test_utils';
 import '../jest_matchers';
 

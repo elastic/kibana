@@ -14,8 +14,6 @@ import type { DonutChartProps } from './donutchart';
 import { DonutChart } from './donutchart';
 import { DraggableLegend } from './draggable_legend';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
-import { v4 as uuidv4 } from 'uuid';
 
 jest.mock('@elastic/charts', () => {
   const actual = jest.requireActual('@elastic/charts');
@@ -73,8 +71,7 @@ describe('DonutChart', () => {
     totalCount: parsedMockAlertsData?.open?.total,
     legendItems: (['critical', 'high', 'medium', 'low'] as Severity[]).map((d) => ({
       color: testColors[d],
-      dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuidv4()}-${d}`),
-      timelineId: undefined,
+      scopeId: undefined,
       field: 'kibana.alert.severity',
       value: d,
     })),
@@ -133,30 +130,26 @@ describe('DonutChart', () => {
     expect((DraggableLegend as unknown as jest.Mock).mock.calls[0][0].legendItems).toEqual([
       {
         color: '#EF6550',
-        dataProviderId: 'draggable-legend-item-test-uuid-critical',
         field: 'kibana.alert.severity',
-        timelineId: undefined,
+        scopeId: undefined,
         value: 'critical',
       },
       {
         color: '#EE9266',
-        dataProviderId: 'draggable-legend-item-test-uuid-high',
         field: 'kibana.alert.severity',
-        timelineId: undefined,
+        scopeId: undefined,
         value: 'high',
       },
       {
         color: '#F3B689',
-        dataProviderId: 'draggable-legend-item-test-uuid-medium',
         field: 'kibana.alert.severity',
-        timelineId: undefined,
+        scopeId: undefined,
         value: 'medium',
       },
       {
         color: '#F8D9B2',
-        dataProviderId: 'draggable-legend-item-test-uuid-low',
         field: 'kibana.alert.severity',
-        timelineId: undefined,
+        scopeId: undefined,
         value: 'low',
       },
     ]);

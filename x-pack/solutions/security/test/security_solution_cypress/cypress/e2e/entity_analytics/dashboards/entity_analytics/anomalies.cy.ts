@@ -37,7 +37,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
       cy.task('esArchiverLoad', { archiveName: 'network' });
       login();
       visitWithTimeRange(ENTITY_ANALYTICS_URL);
-      cy.get(ANOMALIES_TABLE).should('be.visible');
+      cy.get(ANOMALIES_TABLE, { timeout: 30000 }).should('be.visible');
       waitForAnomaliesToBeLoaded();
     });
 

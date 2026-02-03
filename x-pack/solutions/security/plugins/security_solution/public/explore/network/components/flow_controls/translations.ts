@@ -48,3 +48,10 @@ export const BIDIRECTIONAL = i18n.translate(
     defaultMessage: 'Bidirectional',
   }
 );
+
+export const FLOW_TARGET = i18n.translate(
+  'xpack.securitySolution.components.flowControls.ariaLabel',
+  {
+    defaultMessage: 'Flow target',
+  }
+);

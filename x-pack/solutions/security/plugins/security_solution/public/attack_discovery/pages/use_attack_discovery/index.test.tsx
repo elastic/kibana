@@ -6,6 +6,7 @@
  */
 
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
+import { API_VERSIONS, ATTACK_DISCOVERY_GENERATE } from '@kbn/elastic-assistant-common';
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 
@@ -81,6 +82,58 @@ describe('useAttackDiscovery', () => {
     );
 
     expect(result.current.isLoading).toBe(false);
+  });
+
+  it('calls POST with the public API route', async () => {
+    (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({});
+    const { result } = renderHook(
+      () =>
+        useAttackDiscovery({
+          connectorId: 'test-id',
+          setLoadingConnectorId,
+          size: 20,
+        }),
+      {
+        wrapper: queryWrapper,
+      }
+    );
+
+    await act(async () => {
+      await result.current.fetchAttackDiscoveries();
+    });
+
+    expect(mockedUseKibana.services.http.post as jest.Mock).toHaveBeenCalledWith(
+      ATTACK_DISCOVERY_GENERATE,
+      expect.objectContaining({
+        version: API_VERSIONS.public.v1,
+      })
+    );
+  });
+
+  it('calls POST using the public API version', async () => {
+    (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({});
+    const { result } = renderHook(
+      () =>
+        useAttackDiscovery({
+          connectorId: 'test-id',
+          setLoadingConnectorId,
+          size: SIZE,
+        }),
+      {
+        wrapper: queryWrapper,
+      }
+    );
+
+    await act(async () => {
+      await result.current.fetchAttackDiscoveries();
+    });
+
+    expect(mockedUseKibana.services.http.post as jest.Mock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        version: API_VERSIONS.public.v1,
+      })
+    );
   });
 
   it('handles fetch errors correctly', async () => {

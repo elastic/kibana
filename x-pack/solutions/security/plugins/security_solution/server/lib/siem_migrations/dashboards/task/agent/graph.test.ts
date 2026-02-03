@@ -14,7 +14,7 @@ import { MockEsqlKnowledgeBase } from '../../../common/task/util/__mocks__/mocks
 import { MockDashboardMigrationsRetriever } from '../retrievers/__mocks__/mocks';
 import { getDashboardMigrationAgent } from './graph';
 import type { OriginalDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 jest.mock(
@@ -56,6 +56,16 @@ const setupAgent = (responses: NodeResponse[]) => {
     dashboardMigrationsRetriever: mockRetriever,
     logger,
     telemetryClient: mockTelemetryClient,
+    inference: {
+      getClient: jest.fn(),
+      getChatModel: jest.fn(),
+      getConnectorList: jest.fn(),
+      getDefaultConnector: jest.fn(),
+      getConnectorById: jest.fn(),
+      ...model,
+    },
+    request: httpServerMock.createKibanaRequest(),
+    connectorId: 'test-connector',
   });
   return graph;
 };

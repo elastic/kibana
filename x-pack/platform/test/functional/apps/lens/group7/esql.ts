@@ -9,7 +9,8 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 // Maximum number of initial ESQL columns loaded
 // This is a temporary limit to avoid overwhelming the UI with too many columns
-const MAX_NUM_OF_INITIAL_ESQL_COLUMNS = 5;
+// Should be syncronized with MAX_NUM_OF_COLUMNS
+const MAX_NUM_OF_INITIAL_ESQL_COLUMNS = 10;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header, common, timePicker, lens } = getPageObjects([
@@ -58,6 +59,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [panel] = await dashboard.getDashboardPanels();
       await dashboardPanelActions.clickInlineEdit(panel);
       await dashboard.waitForRenderComplete();
+      // Verify ES|QL editor IS visible in Dashboard inline edit mode
+      await testSubjects.existOrFail('InlineEditingESQLEditor');
 
       await monacoEditor.setCodeEditorValue('from logstash-*');
       await testSubjects.click('ESQLEditor-run-query-button');

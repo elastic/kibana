@@ -7,6 +7,7 @@
 
 .mapToolbarOverlay__button,
 .mapToolbarOverlay__buttonGroup {
+  @include euiBottomShadowLarge;
   position: relative;
   transition: transform $euiAnimSpeedNormal ease-in-out, background $euiAnimSpeedNormal ease-in-out;
 
@@ -28,6 +29,17 @@
   // The buttons functionality are just applied once, so they shouldn't stay highlighted.
   .mapToolbarOverlay__buttonIcon-empty:focus:not(:hover) {
     background: none;
+  }
+}
+
+.mapToolbarOverlay__button {
+  @include size($euiSizeXL);
+  overflow: hidden;
+
+  .euiButtonIcon {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
   }
 }
 

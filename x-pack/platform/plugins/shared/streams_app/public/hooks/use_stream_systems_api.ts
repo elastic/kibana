@@ -7,22 +7,19 @@
 
 import { useAbortController } from '@kbn/react-hooks';
 import type { Streams, System } from '@kbn/streams-schema';
-import type { IdentifiedSystemsEvent } from '@kbn/streams-plugin/server/routes/internal/streams/systems/types';
 import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
+import type { SystemIdentificationTaskResult } from '@kbn/streams-plugin/server/routes/internal/streams/systems/route';
 import { useKibana } from './use_kibana';
+import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
 
 interface StreamSystemsApi {
-  upsertQuery: (
-    systemName: string,
-    request: Pick<System, 'filter' | 'description'>
-  ) => Promise<void>;
-  identifySystems: (
-    connectorId: string,
-    to: string,
-    from: string
-  ) => Promise<IdentifiedSystemsEvent>;
+  getSystemIdentificationStatus: () => Promise<SystemIdentificationTaskResult>;
+  scheduleSystemIdentificationTask: (connectorId: string) => Promise<void>;
+  cancelSystemIdentificationTask: () => Promise<void>;
+  acknowledgeSystemIdentificationTask: () => Promise<void>;
   addSystemsToStream: (systems: System[]) => Promise<StorageClientBulkResponse>;
-  removeSystemsFromStream: (systemNames: string[]) => Promise<StorageClientBulkResponse>;
+  removeSystemsFromStream: (systems: Pick<System, 'name'>[]) => Promise<StorageClientBulkResponse>;
+  upsertSystem: (system: System) => Promise<void>;
 }
 
 export function useStreamSystemsApi(definition: Streams.all.Definition): StreamSystemsApi {
@@ -32,72 +29,118 @@ export function useStreamSystemsApi(definition: Streams.all.Definition): StreamS
         streams: { streamsRepositoryClient },
       },
     },
+    services: { telemetryClient },
   } = useKibana();
 
   const { signal } = useAbortController();
 
   return {
-    identifySystems: async (connectorId: string, to: string, from: string) => {
-      return await streamsRepositoryClient.fetch(
-        'POST /internal/streams/{name}/systems/_identify',
+    getSystemIdentificationStatus: async () => {
+      return await streamsRepositoryClient.fetch('GET /internal/streams/{name}/systems/_status', {
+        signal,
+        params: {
+          path: { name: definition.name },
+        },
+      });
+    },
+    scheduleSystemIdentificationTask: async (connectorId: string) => {
+      const now = Date.now();
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_task', {
+        signal,
+        params: {
+          path: { name: definition.name },
+          body: {
+            action: 'schedule',
+            to: new Date(now).toISOString(),
+            from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
+            connectorId,
+          },
+        },
+      });
+    },
+    cancelSystemIdentificationTask: async () => {
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_task', {
+        signal,
+        params: {
+          path: { name: definition.name },
+          body: {
+            action: 'cancel',
+          },
+        },
+      });
+    },
+    acknowledgeSystemIdentificationTask: async () => {
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_task', {
+        signal,
+        params: {
+          path: { name: definition.name },
+          body: {
+            action: 'acknowledge',
+          },
+        },
+      });
+    },
+    addSystemsToStream: async (systems: System[]) => {
+      const response = await streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/systems/_bulk',
         {
           signal,
           params: {
-            path: { name: definition.name },
-            query: {
-              connectorId,
-              to,
-              from,
+            path: {
+              name: definition.name,
+            },
+            body: {
+              operations: systems.map((system) => ({
+                index: { system },
+              })),
             },
           },
         }
       );
-    },
-    addSystemsToStream: async (systems: System[]) => {
-      return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_bulk', {
-        signal,
-        params: {
-          path: {
-            name: definition.name,
-          },
-          body: {
-            operations: systems.map((system) => ({
-              index: {
-                system,
-              },
-            })),
-          },
-        },
+
+      telemetryClient.trackFeaturesSaved({
+        count: systems.length,
+        stream_name: definition.name,
+        stream_type: getStreamTypeFromDefinition(definition),
       });
+
+      return response;
     },
-    removeSystemsFromStream: async (systemNames: string[]) => {
-      return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_bulk', {
-        signal,
-        params: {
-          path: {
-            name: definition.name,
+    removeSystemsFromStream: async (systems: Pick<System, 'name'>[]) => {
+      const response = await streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/systems/_bulk',
+        {
+          signal,
+          params: {
+            path: {
+              name: definition.name,
+            },
+            body: {
+              operations: systems.map((system) => ({
+                delete: { system: { name: system.name } },
+              })),
+            },
           },
-          body: {
-            operations: systemNames.map((system) => ({
-              delete: {
-                system: {
-                  name: system,
-                },
-              },
-            })),
-          },
-        },
+        }
+      );
+
+      telemetryClient.trackFeaturesDeleted({
+        count: systems.length,
+        stream_name: definition.name,
+        stream_type: getStreamTypeFromDefinition(definition),
       });
+
+      return response;
     },
-    upsertQuery: async (systemName, request) => {
+    upsertSystem: async (system: System) => {
       await streamsRepositoryClient.fetch('PUT /internal/streams/{name}/systems/{systemName}', {
         signal,
         params: {
           path: {
             name: definition.name,
-            systemName,
+            systemName: system.name,
           },
-          body: request,
+          body: system,
         },
       });
     },

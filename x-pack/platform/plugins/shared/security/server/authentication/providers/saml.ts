@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { isInternalURL } from '@kbn/std';
 
 import type { AuthenticationProviderOptions } from './base';
-import { BaseAuthenticationProvider } from './base';
+import { BaseAuthenticationProvider, ELASTIC_CLOUD_SSO_REALM_NAME } from './base';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
@@ -19,6 +20,7 @@ import {
 } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage, InvalidGrantError } from '../../errors';
+import type { UiamServicePublic } from '../../uiam';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -117,6 +119,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private readonly useRelayStateDeepLink: boolean;
 
+  /**
+   * Indicates if we should use UIAM service for this SAML provider.
+   */
+  private readonly useUiam: boolean;
+
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
     samlOptions?: Readonly<{ realm?: string; useRelayStateDeepLink?: boolean }>
@@ -125,6 +132,33 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     this.realm = samlOptions?.realm;
     this.useRelayStateDeepLink = samlOptions?.useRelayStateDeepLink ?? false;
+
+    // Switch SAML authentication provider to UIAM in case it's enabled, and we're using Elastic Cloud SSO realm.
+    this.useUiam = !!options.uiam && this.realm === ELASTIC_CLOUD_SSO_REALM_NAME;
+  }
+
+  /**
+   * Determines whether the intermediate session state should be invalidated after a successful login.
+   *
+   * For SAML authentication, multiple login attempts can occur concurrently (e.g., when a user opens
+   * multiple tabs and each initiates a SAML handshake). Each login attempt generates a unique requestId
+   * that is stored in the `requestIdMap` within the provider state. When a SAML response is received
+   * and successfully processed, the corresponding requestId is removed from the map.
+   *
+   * If there are remaining requestIds in the state after a successful login, it indicates that other
+   * pending SAML login attempts are still in progress. In this case, the intermediate session should
+   * NOT be invalidated, as it needs to persist to handle the responses for those outstanding requests.
+   *
+   * Only when all requestIds have been processed and removed from the map (i.e., the map is empty or
+   * doesn't exist) should the intermediate session be invalidated.
+   *
+   * @param state Optional state object associated with the provider.
+   * @returns `true` if the intermediate session should be invalidated (no pending requests remain),
+   *          `false` if there are remaining requestIds and the session must be preserved.
+   */
+  public shouldInvalidateIntermediateSessionAfterLogin(state?: unknown) {
+    const samlState = state as ProviderState | undefined;
+    return !(samlState?.requestIdMap && Object.keys(samlState.requestIdMap).length > 0);
   }
 
   /**
@@ -239,7 +273,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Invalidates SAML access token if it exists.
+   * Invalidates SAML/UIAM access token if it exists.
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
@@ -266,7 +300,19 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return DeauthenticationResult.notHandled();
     }
 
-    if (state?.accessToken || isIdPInitiatedSLORequest || isSPInitiatedSLOResponse) {
+    // When the provider is in UIAM mode, the UIAM service is responsible for invalidating the user session tokens.
+    // Additionally, when in UIAM mode, SAML Single Logout (SLO) is not supported. Therefore, the code should never
+    // reach the `else if` branch below. However, even if it does, it will result in a no-op call to Elasticsearch.
+    if (state && this.isUiamToken(state.accessToken)) {
+      try {
+        await this.options.uiam.invalidateSessionTokens(state.accessToken!, state.refreshToken!);
+      } catch (err) {
+        this.logger.error(
+          () => `Failed to deauthenticate UIAM user: ${getDetailedErrorMessage(err)}`
+        );
+        return DeauthenticationResult.failed(err);
+      }
+    } else if (state?.accessToken || isIdPInitiatedSLORequest || isSPInitiatedSLOResponse) {
       try {
         // It may _theoretically_ (highly unlikely in practice though) happen that when user receives
         // logout response they may already have a new SAML session (isSPInitiatedSLOResponse == true
@@ -367,6 +413,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       refresh_token: string;
       realm: string;
       authentication: AuthenticationInfo;
+      in_response_to?: string;
     };
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
@@ -383,10 +430,24 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         },
       })) as any;
     } catch (err) {
+      let inResponseToRequestId;
+      if (err instanceof errors.ResponseError) {
+        const body = (err as errors.ResponseError).meta.body as
+          | { error: Record<string, string> }
+          | undefined;
+        inResponseToRequestId =
+          body?.error?.['security.saml.unsolicited_in_response_to'] ?? undefined;
+      }
+
       this.logger.error(
-        `Failed to log in with SAML response, ${
-          !isIdPInitiatedLogin ? `current requestIds: ${stateRequestIds}, ` : ''
-        } error: ${getDetailedErrorMessage(err)}`
+        [
+          'Failed to log in with SAML response',
+          inResponseToRequestId
+            ? `SP-initiated, unsolicited InResponseTo: ${inResponseToRequestId}`
+            : 'IDP-initiated',
+          state ? `current requestIds: [${stateRequestIds}]` : 'no state',
+          getDetailedErrorMessage(err),
+        ].join(', ')
       );
 
       // Since we don't know upfront what realm is targeted by the Identity Provider initiated login
@@ -424,7 +485,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     let remainingRequestIdMap = stateRequestIdMap;
 
     if (!isIdPInitiatedLogin) {
-      const inResponseToRequestId = this.parseRequestIdFromSAMLResponse(samlResponse);
+      const inResponseToRequestId = result.in_response_to;
       this.logger.debug(`Login was performed with requestId: ${inResponseToRequestId}`);
 
       if (stateRequestIds.length && inResponseToRequestId) {
@@ -449,7 +510,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         `${this.options.basePath.get(request)}/`,
       {
         user: this.authenticationInfoToAuthenticatedUser(result.authentication),
-        userProfileGrant: { type: 'accessToken', accessToken: result.access_token },
+        userProfileGrant: this.isUiamToken(result.access_token)
+          ? this.options.uiam.getUserProfileGrant(result.access_token)
+          : { type: 'accessToken', accessToken: result.access_token },
         state: {
           accessToken: result.access_token,
           refreshToken: result.refresh_token,
@@ -460,16 +523,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     );
   }
 
-  private parseRequestIdFromSAMLResponse(samlResponse: string): string | null {
-    const samlResponseBuffer = Buffer.from(samlResponse, 'base64');
-    const samlResponseString = samlResponseBuffer.toString('utf-8');
-    const inResponseToRequestIdMatch = samlResponseString.match(/InResponseTo="([a-z0-9_]*)"/);
-
-    return inResponseToRequestIdMatch ? inResponseToRequestIdMatch[1] : null;
-  }
-
   private updateRemainingRequestIds(
-    requestIdToRemove: string | null,
+    requestIdToRemove: string | undefined,
     remainingRequestIds: Record<RequestId, { redirectURL: string }>
   ): [boolean, Record<RequestId, { redirectURL: string }>] {
     if (requestIdToRemove) {
@@ -493,7 +548,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
   /**
    * Validates whether user retrieved using session is the same as the user defined in the SAML payload.
-   * If we can successfully exchange this SAML payload to access and refresh tokens, then we'll
+   * If we can successfully exchange this SAML payload for access and refresh tokens, then we'll
    * invalidate tokens from the existing session and use the new ones instead.
    *
    * The tokens are stored in the state and user is redirected to the default Kibana location, unless
@@ -566,10 +621,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
+    const authHeaders: Record<string, string> | undefined = this.isUiamToken(accessToken)
+      ? this.options.uiam.getAuthenticationHeaders(accessToken)
+      : { authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString() };
+
     try {
-      const authHeaders = {
-        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via state.');
@@ -598,8 +654,30 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     let refreshTokenResult: RefreshTokenResult;
+
     try {
-      refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
+      if (this.isUiamToken(state.refreshToken)) {
+        this.logger.debug('SAML provider is in UIAM mode, calling UIAM service to refresh tokens.');
+
+        const { accessToken, refreshToken } = await this.options.uiam.refreshSessionTokens(
+          state.refreshToken
+        );
+
+        const uiamAuthenticatedUser = await this.getUser(
+          request,
+          this.options.uiam.getAuthenticationHeaders(accessToken)!
+        );
+
+        this.logger.debug('SAML provider successfully refreshed tokens via UIAM service.');
+
+        refreshTokenResult = {
+          accessToken,
+          refreshToken,
+          authenticationInfo: uiamAuthenticatedUser,
+        };
+      } else {
+        refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
+      }
     } catch (err) {
       // When user has neither valid access nor refresh token, the only way to resolve this issue is to get new
       // SAML LoginResponse and exchange it for a new access/refresh token pair. To do that we initiate a new SAML
@@ -629,6 +707,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         authHeaders: {
           authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
         },
+        ...(this.isUiamToken(accessToken) && {
+          userProfileGrant: this.options.uiam.getUserProfileGrant(accessToken),
+        }),
         state: { accessToken, refreshToken, realm: this.realm || state.realm },
       }
     );
@@ -807,5 +888,22 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       // initial handshake, but is essential when both access and refresh tokens are expired.
       { state: state ? state : null }
     );
+  }
+
+  /**
+   * Determines whether the provided token is a UIAM token. Generally, we shouldn't rely on the
+   * shape of the UIAM tokens to trigger UIAM-specific logic, but this is necessary for the
+   * transition period while we support both SAML and UIAM tokens at the same time.
+   * @param token ES native or UIAM access or refresh token.
+   */
+  private isUiamToken(token?: string): this is { options: { uiam: UiamServicePublic } } {
+    const isUiamToken = !!token?.startsWith('essu_');
+    if (isUiamToken && !this.useUiam) {
+      this.logger.error('Detected UIAM token, but the provider is not configured to use UIAM.');
+    } else if (!isUiamToken && this.useUiam) {
+      this.logger.warn('Detected non-UIAM token, but the provider is configured to use UIAM.');
+    }
+
+    return this.useUiam && isUiamToken;
   }
 }

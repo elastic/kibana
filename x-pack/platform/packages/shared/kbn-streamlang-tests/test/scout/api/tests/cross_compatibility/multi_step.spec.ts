@@ -13,6 +13,10 @@ import type {
   AppendProcessor,
   DateProcessor,
   GrokProcessor,
+  RemoveProcessor,
+  ConvertProcessor,
+  ReplaceProcessor,
+  MathProcessor,
 } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -26,7 +30,7 @@ apiTest.describe(
       async ({ testBed, esql }) => {
         // Realistic web server log processing pipeline covering core operators and processors:
         // Operators tested: eq, neq, lt, lte, gt, gte, range, exists
-        // Processors tested: grok, date, set, append, rename
+        // Processors tested: grok, date, set, append, rename, remove, convert, replace
         // Note: contains, startsWith, endsWith have ES|QL syntax conflicts in CASE expressions
         const streamlangDSL: StreamlangDSL = {
           steps: [
@@ -161,7 +165,17 @@ apiTest.describe(
               where: { field: 'status_code', exists: true },
             } as RenameProcessor,
 
+            // Step 16a: Convert status code to string for consistent formatting
+            {
+              action: 'convert',
+              from: 'http.response.status_code',
+              to: 'http.response.status_code_str',
+              type: 'string',
+              where: { field: 'http.response.status_code', exists: true },
+            } as ConvertProcessor,
+
             // Step 17: Set default device type to desktop for all documents (testing exists operator)
+            // Note: This must happen BEFORE user agent sanitization (Step 18b)
             {
               action: 'set',
               to: 'device.type',
@@ -170,6 +184,7 @@ apiTest.describe(
             } as SetProcessor,
 
             // Step 18: Override device type to mobile for specific user agent (testing eq operator)
+            // Note: This must happen BEFORE user agent sanitization (Step 18b)
             {
               action: 'set',
               to: 'device.type',
@@ -179,6 +194,25 @@ apiTest.describe(
                 eq: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) Mobile Safari/15.0',
               },
             } as SetProcessor,
+
+            // Step 18b: Sanitize user agent - remove version numbers and normalize
+            // Note: This happens AFTER device type detection to preserve original user agent for matching
+            {
+              action: 'replace',
+              from: 'user_agent',
+              pattern: '\\/[\\d\\.]+',
+              replacement: '',
+              where: { field: 'user_agent', exists: true },
+            } as ReplaceProcessor,
+
+            // Step 18c: Remove temporary processing fields after conversion
+            // Unconditional removal to actually drop the field (not just nullify it)
+            // ignore_missing: true to avoid errors when field doesn't exist
+            {
+              action: 'remove',
+              from: 'http_version',
+              ignore_missing: true,
+            } as RemoveProcessor,
 
             // Step 19: Tag requests to API endpoints (testing eq operator)
             {
@@ -219,6 +253,44 @@ apiTest.describe(
               value: 'medium',
               where: { field: 'response_size', range: { gt: 1000, lte: 5000 } },
             } as SetProcessor,
+
+            // Step 24: Calculate response time in seconds using math processor
+            // Note: Using * 0.001 instead of / 1000 to force floating-point arithmetic
+            // (JavaScript/TinyMath doesn't preserve .0 suffix, so 1000.0 becomes 1000)
+            {
+              action: 'math',
+              expression: 'response_time_ms * 0.001',
+              to: 'response_time_sec',
+              where: { field: 'response_time_ms', exists: true },
+            } as MathProcessor,
+
+            // Step 25: Calculate throughput (bytes per second) using math processor
+            // Note: Multiply response_size by 1000/response_time_ms to get bytes per second
+            // Using 1000.0 pattern but JS loses .0, so we use multiply by decimal
+            {
+              action: 'math',
+              expression: 'response_size * 1000 / response_time_ms',
+              to: 'throughput_bytes_per_sec',
+              where: { field: 'response_time_ms', gt: 0 },
+            } as MathProcessor,
+
+            // Step 27: Clean up referer field - remove query parameters for privacy
+            {
+              action: 'replace',
+              from: 'referer',
+              pattern: '\\?.*$',
+              replacement: '',
+              where: { field: 'referer', exists: true },
+            } as ReplaceProcessor,
+
+            // Step 28: Remove temporary timestamp field after date conversion
+            // Unconditional removal to actually drop the field (not just nullify it)
+            // ignore_missing: true to avoid errors when field doesn't exist
+            {
+              action: 'remove',
+              from: 'timestamp',
+              ignore_missing: true,
+            } as RemoveProcessor,
           ],
         };
 
@@ -277,15 +349,17 @@ apiTest.describe(
         ];
 
         // Required mapping for ES|QL (pre-map all fields that will be referenced)
+        // Note: timestamp and http_version are included because they're extracted by GROK and referenced
+        // in where clauses, but they will be removed by remove processors later
         const mappingDoc = {
           log_type: 'access',
           message: '',
-          timestamp: '',
+          timestamp: '', // Extracted by GROK, converted to @timestamp, then removed
           '@timestamp': '2024-01-01T00:00:00.000Z', // Must be datetime type
           client_ip: '',
           method: '',
           path: '',
-          http_version: '1.1', // Grok extracts as string
+          http_version: '1.1', // Extracted by GROK, removed later
           status_code: 200, // Grok extracts as long
           response_size: 1000, // Grok extracts as long
           referer: '',
@@ -296,10 +370,13 @@ apiTest.describe(
           'traffic.source': '',
           'device.type': '',
           'size.category': '',
+          response_time_sec: 0.1, // Math processor output: response_time_ms * 0.001
+          throughput_bytes_per_sec: 10000, // Math processor output: response_size * 1000 / response_time_ms
           tags: [''],
           'source.ip': '',
           'http.request.method': '',
           'http.response.status_code': 200, // Gets assigned from status_code (number)
+          'http.response.status_code_str': '200', // Converted to string
         };
 
         await testBed.ingest('ingest-multi-step', docs, processors);
@@ -469,6 +546,18 @@ apiTest.describe(
         expect(smallIngestDocs).toHaveLength(smallEsqlDocs.length);
         expect(mediumIngestDocs).toHaveLength(mediumEsqlDocs.length);
 
+        // *** TEST SECTION: MATH PROCESSOR VERIFICATION ***
+        // Test math processor: response_time_sec = response_time_ms * 0.001
+        // Document 1 has response_time_ms = 150, so response_time_sec should be 0.15
+        expect(doc1Ingest?.response_time_sec).toBe(0.15);
+        expect(doc1Esql?.response_time_sec).toBe(0.15);
+
+        // Test math processor: throughput = response_size * 1000 / response_time_ms
+        // Document 1 has response_size = 1234, response_time_ms = 150
+        // throughput = 1234 * 1000 / 150 = 8226 (integer division)
+        expect(doc1Ingest?.throughput_bytes_per_sec).toBe(8226);
+        expect(doc1Esql?.throughput_bytes_per_sec).toBe(8226);
+
         // *** TEST SECTION: COMMON FIELDS VERIFICATION ***
         // Verify common fields across all processed documents
         const processedIngestDocs = ingestResult.filter((doc) => doc['source.ip']);
@@ -487,6 +576,14 @@ apiTest.describe(
           // All should have renamed fields (ECS compliance)
           expect(doc['http.response.status_code']).toBeDefined();
           expect(typeof doc['http.response.status_code']).toBe('number');
+
+          // Verify convert processor: status code string version should exist
+          expect(doc['http.response.status_code_str']).toBeDefined();
+          expect(typeof doc['http.response.status_code_str']).toBe('string');
+
+          // Verify remove processor: temporary fields should be removed
+          expect(doc.http_version).toBeUndefined();
+          expect(doc.timestamp).toBeUndefined();
         }
 
         // Instead of conditionally checking each ESQL document, filter to only those with source.ip
@@ -509,6 +606,28 @@ apiTest.describe(
         expect(validEsqlDocs.every((doc) => doc['http.response.status_code'] !== undefined)).toBe(
           true
         );
+
+        // Verify convert processor: status code string version should exist
+        expect(
+          validEsqlDocs.every((doc) => doc['http.response.status_code_str'] !== undefined)
+        ).toBe(true);
+        expect(
+          validEsqlDocs.every((doc) => typeof doc['http.response.status_code_str'] === 'string')
+        ).toBe(true);
+
+        // Verify remove processor: temporary fields should be removed
+        expect(validEsqlDocs.every((doc) => doc.http_version === undefined)).toBe(true);
+        expect(validEsqlDocs.every((doc) => doc.timestamp === undefined)).toBe(true);
+
+        // Verify replace processor: user agent should have version numbers removed
+        // Example: "Mozilla/5.0" should become "Mozilla" (version removed)
+        const doc1ForReplaceCheck = validEsqlDocs.find(
+          (doc) => doc['source.ip'] === '192.168.1.100'
+        );
+        expect(doc1ForReplaceCheck).toBeDefined();
+        expect(doc1ForReplaceCheck?.user_agent).toBeDefined();
+        // User agent should not contain version patterns like "/5.0" or "/1.1"
+        expect(doc1ForReplaceCheck!.user_agent).not.toMatch(/\/[\d\.]+/);
       }
     );
   }

@@ -115,9 +115,6 @@ export const getThemeSettings = (
       // Cast to a mutable array to satisfy the `UiSettingsParams.options` type
       options: SUPPORTED_THEME_NAMES as Writable<typeof SUPPORTED_THEME_NAMES>,
       optionLabels: {
-        amsterdam: i18n.translate('core.ui_settings.params.themeName.options.amsterdam', {
-          defaultMessage: 'Amsterdam',
-        }),
         borealis: i18n.translate('core.ui_settings.params.themeName.options.borealis', {
           defaultMessage: 'Borealis',
         }),

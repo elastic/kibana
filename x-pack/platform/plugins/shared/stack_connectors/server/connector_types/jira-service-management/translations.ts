@@ -13,17 +13,3 @@ export const UNKNOWN_ERROR = i18n.translate(
     defaultMessage: 'unknown error',
   }
 );
-
-export const JIRA_SERVICE_MANAGEMENT_NAME = i18n.translate(
-  'xpack.stackConnectors.jiraServiceManagement.name',
-  {
-    defaultMessage: 'Jira Service Management',
-  }
-);
-
-export const MESSAGE_NON_EMPTY = i18n.translate(
-  'xpack.stackConnectors.jiraServiceManagement.nonEmptyMessageField',
-  {
-    defaultMessage: 'must be populated with a value other than just whitespace',
-  }
-);

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { RULES_PANEL_BTN, TRANSLATED_RULES_PAGE } from '../screens/security_header';
+import { MIGRATIONS_PANEL_BTN, TRANSLATED_RULES_PAGE } from '../screens/security_header';
 import {
+  FOOTER_LAUNCHPAD,
   openNavigationPanel,
   RULES_PANEL_BTN as RULES_PANEL_BTN_SERVERLESS,
   TRANSLATED_RULES_PAGE as TRANSLATED_RULES_PAGE_SERVERLESS,
@@ -17,11 +18,19 @@ import { bedrockConnectorAPIPayload } from './api_calls/connectors';
 export const navigateToTranslatedRulesPage = () => {
   if (Cypress.env('IS_SERVERLESS')) {
     openNavigationPanel(RULES_PANEL_BTN_SERVERLESS);
+    cy.get(FOOTER_LAUNCHPAD).click();
     cy.get(TRANSLATED_RULES_PAGE_SERVERLESS).click();
   } else {
-    openNavigationPanel(RULES_PANEL_BTN);
+    openNavigationPanel(MIGRATIONS_PANEL_BTN);
     cy.get(TRANSLATED_RULES_PAGE).click();
   }
+};
+
+export const goToTranslatedDashboardsPageFromOnboarding = () => {
+  toggleMigrateDashboardsCard();
+  cy.get(SELECTORS.DASHBOARD_MIGRATIONS_GROUP_PANEL).within(() => {
+    cy.get(SELECTORS.VIEW_DASHBOARDS_BTN).click();
+  });
 };
 
 export const toggleSiemMigrationsCard = () => {
@@ -46,10 +55,20 @@ export const toggleMigrateRulesCard = () => {
   cy.get(SELECTORS.ONBOARDING_SIEM_MIGRATION_CARDS.MIGRATE_RULES).click();
 };
 
+export const toggleMigrateDashboardsCard = () => {
+  cy.get(SELECTORS.ONBOARDING_SIEM_MIGRATION_CARDS.MIGRATE_DASHBOARDS).click();
+};
+
 export const openUploadRulesFlyout = () => {
   toggleMigrateRulesCard();
   cy.get(SELECTORS.UPLOAD_RULES_BTN).click();
   cy.get(SELECTORS.UPLOAD_RULES_FLYOUT).should('exist');
+};
+
+export const openUploadDashboardsFlyout = () => {
+  toggleMigrateDashboardsCard();
+  cy.get(SELECTORS.UPLOAD_DASHBOARDS_BTN).click();
+  cy.get(SELECTORS.UPLOAD_DASHBOARDS_FLYOUT).should('exist');
 };
 
 export const saveDefaultMigrationName = () => {
@@ -63,13 +82,32 @@ export const uploadRules = (splunkRulesJSON: object) => {
     fileName: 'rules.json',
     mimeType: 'text/plain',
   });
-  cy.get(SELECTORS.UPLOAD_RULES_FILE_BTN).should('not.be.disabled').click();
+  cy.get(SELECTORS.UPLOAD_FILE_BTN).should('not.be.disabled').click();
+};
+
+export const uploadDashboards = (splunkDashboardsJSON: object) => {
+  cy.get(SELECTORS.UPLOAD_DASHBOARDS_FILE_PICKER).selectFile({
+    contents: Cypress.Buffer.from(JSON.stringify(splunkDashboardsJSON)),
+    fileName: 'rules.json',
+    mimeType: 'text/plain',
+  });
+  cy.get(SELECTORS.UPLOAD_FILE_BTN).should('not.be.disabled').click();
 };
 
 export const startMigrationFromFlyout = () => {
   cy.get(SELECTORS.START_MIGRATION_FROM_FLYOUT_BTN).should('not.be.disabled');
   cy.get(SELECTORS.START_MIGRATION_FROM_FLYOUT_BTN).click();
+  cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).should('not.be.disabled');
+  cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).click();
   cy.get(SELECTORS.UPLOAD_RULES_FLYOUT).should('not.exist');
+};
+
+export const startDashboardMigrationFromFlyout = () => {
+  cy.get(SELECTORS.START_MIGRATION_FROM_FLYOUT_BTN).should('not.be.disabled');
+  cy.get(SELECTORS.START_MIGRATION_FROM_FLYOUT_BTN).click();
+  cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).should('not.be.disabled');
+  cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).click();
+  cy.get(SELECTORS.UPLOAD_DASHBOARDS_FLYOUT).should('not.exist');
 };
 
 export const saveUpdatedTranslatedRuleQuery = () => {
@@ -95,7 +133,7 @@ export const editTranslatedRuleByRow = (rowNum: number) => {
 };
 
 export const openReprocessDialog = () => {
-  cy.get(SELECTORS.REPROCESS_FAILED_RULES_BTN).click();
+  cy.get(SELECTORS.REPROCESS_FAILED_ITEMS_BTN).click();
 };
 
 export const reprocessWithoutPrebuiltRulesMatching = () => {
@@ -111,6 +149,11 @@ export const reprocessWithoutPrebuiltRulesMatching = () => {
     'aria-checked',
     'false'
   );
+  cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).click();
+};
+
+export const reprocessDashboards = () => {
+  cy.get(SELECTORS.START_MIGRATION_MODAL.MODAL).should('be.visible');
   cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).click();
 };
 

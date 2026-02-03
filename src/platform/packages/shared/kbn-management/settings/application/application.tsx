@@ -142,7 +142,7 @@ export const SettingsApplication = () => {
             ))}
           </EuiTabs>
           <EuiSpacer size="xl" />
-          <EuiCallOut title={selectedTab.callOutTitle} iconType="warning">
+          <EuiCallOut announceOnMount={false} title={selectedTab.callOutTitle} iconType="warning">
             <p>{selectedTab.callOutText}</p>
           </EuiCallOut>
         </>

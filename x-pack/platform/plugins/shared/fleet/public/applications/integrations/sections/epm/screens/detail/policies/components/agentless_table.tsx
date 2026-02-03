@@ -46,6 +46,7 @@ export const AgentlessPackagePoliciesTable = ({
   packagePoliciesTotal,
   refreshPackagePolicies,
   pagination,
+  from,
 }: {
   isLoading: boolean;
   packagePolicies: Array<{
@@ -56,6 +57,7 @@ export const AgentlessPackagePoliciesTable = ({
   packagePoliciesTotal: number;
   refreshPackagePolicies: () => void;
   pagination: ReturnType<typeof usePagination>;
+  from?: 'installed-integrations';
 }) => {
   const core = useStartServices();
   const { notifications } = core;
@@ -154,13 +156,14 @@ export const AgentlessPackagePoliciesTable = ({
               defaultMessage: 'Integration policy',
             }),
             render(_, { agentPolicies, packagePolicy }) {
+              const editHref = getHref('integration_policy_edit', {
+                packagePolicyId: packagePolicy.id,
+              });
               return (
                 <EuiLink
                   className="eui-textTruncate"
                   data-test-subj="agentlessIntegrationNameLink"
-                  href={getHref('integration_policy_edit', {
-                    packagePolicyId: packagePolicy.id,
-                  })}
+                  href={from ? `${editHref}?from=${from}` : editHref}
                 >
                   {packagePolicy.name}
                 </EuiLink>
@@ -197,7 +200,7 @@ export const AgentlessPackagePoliciesTable = ({
                         href={`${getHref('upgrade_package_policy', {
                           policyId: agentPolicies[0].id,
                           packagePolicyId: packagePolicy.id,
-                        })}?from=integrations-policy-list`}
+                        })}?from=${from || 'integrations-policy-list'}`}
                         data-test-subj="integrationPolicyUpgradeBtn"
                         isDisabled={!canWriteIntegrationPolicies}
                       >
@@ -309,6 +312,7 @@ export const AgentlessPackagePoliciesTable = ({
               packagePolicy: InMemoryPackagePolicy;
             }) {
               const agentPolicy = agentPolicies[0]; // TODO: handle multiple agent policies
+              const upgradeFrom = from || 'integrations-policy-list';
               return (
                 <PackagePolicyActionsMenu
                   agentPolicies={agentPolicies}
@@ -319,14 +323,21 @@ export const AgentlessPackagePoliciesTable = ({
                       ? `${getHref('upgrade_package_policy', {
                           policyId: agentPolicy.id,
                           packagePolicyId: packagePolicy.id,
-                        })}?from=integrations-policy-list`
+                        })}?from=${upgradeFrom}`
                       : undefined
                   }
+                  from={from}
                 />
               );
             },
           },
         ]}
+        tableCaption={i18n.translate(
+          'xpack.fleet.epm.packageDetails.integrationList.agentlessPoliciesTableCaption',
+          {
+            defaultMessage: 'Agentless integration policies',
+          }
+        )}
         loading={isLoading}
         data-test-subj="integrationPolicyTable"
         pagination={{

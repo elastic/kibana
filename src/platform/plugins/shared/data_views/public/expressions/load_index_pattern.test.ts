@@ -12,14 +12,16 @@ import { getFunctionDefinition } from './load_index_pattern';
 
 describe('indexPattern expression function', () => {
   let getStartDependencies: () => Promise<IndexPatternLoadStartDependencies>;
+  let toSpec: jest.Mock;
 
   beforeEach(() => {
+    toSpec = jest.fn(() => ({
+      title: 'value',
+    }));
     getStartDependencies = jest.fn().mockResolvedValue({
       indexPatterns: {
         get: (id: string) => ({
-          toSpec: () => ({
-            title: 'value',
-          }),
+          toSpec,
         }),
       },
     });
@@ -27,7 +29,29 @@ describe('indexPattern expression function', () => {
 
   test('returns serialized index pattern', async () => {
     const indexPatternDefinition = getFunctionDefinition({ getStartDependencies });
-    const result = await indexPatternDefinition().fn(null, { id: '1' }, {} as any);
+    const result = await indexPatternDefinition().fn(
+      null,
+      {
+        id: '1',
+        // default value for includeFields
+        includeFields: true,
+      },
+      {} as any
+    );
+    expect(toSpec).toHaveBeenCalledWith(true);
+    expect(result.type).toEqual('index_pattern');
+    expect(result.value.title).toEqual('value');
+  });
+
+  test('excludes fields', async () => {
+    const indexPatternDefinition = getFunctionDefinition({ getStartDependencies });
+    const result = await indexPatternDefinition().fn(
+      null,
+      { id: '1', includeFields: false },
+      {} as any
+    );
+
+    expect(toSpec).toHaveBeenCalledWith(false);
     expect(result.type).toEqual('index_pattern');
     expect(result.value.title).toEqual('value');
   });

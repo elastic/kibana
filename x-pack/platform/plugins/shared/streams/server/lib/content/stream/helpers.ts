@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { intersectionBy } from 'lodash';
+import { intersectionBy, omit } from 'lodash';
 import type { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID, isIncludeAll } from '@kbn/content-packs-schema';
-import type { FieldDefinition } from '@kbn/streams-schema';
+import { type FieldDefinition } from '@kbn/streams-schema';
 import { ContentPackIncludeError } from '../error';
 import { baseFields } from '../../streams/component_templates/logs_layer';
 
@@ -75,14 +75,18 @@ export function getFields(
   include: ContentPackIncludedObjects
 ): FieldDefinition {
   if (isIncludeAll(include) || include.objects.mappings) {
-    return Object.keys(entry.request.stream.ingest.wired.fields)
-      .filter((key) => !baseFields[key])
-      .reduce((fields, key) => {
-        fields[key] = entry.request.stream.ingest.wired.fields[key];
-        return fields;
-      }, {} as FieldDefinition);
+    return entry.request.stream.ingest.wired.fields;
   }
   return {};
+}
+
+export function withoutBaseFields(fields: FieldDefinition): FieldDefinition {
+  return Object.keys(fields)
+    .filter((key) => !baseFields[key])
+    .reduce((filtered, key) => {
+      filtered[key] = omit(fields[key], 'from');
+      return filtered;
+    }, {} as FieldDefinition);
 }
 
 export function scopeContentPackStreams({

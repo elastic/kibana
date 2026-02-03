@@ -29,41 +29,31 @@ import type { SearchSessionsMgmtAPI } from '../../../lib/api';
 import type { IClickActionDescriptor } from './types';
 import type { OnActionDismiss } from './types';
 import type { UISession } from '../../../types';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../constants';
 
 interface RenameButtonProps {
   searchSession: UISession;
   api: SearchSessionsMgmtAPI;
-  hasBackgroundSearchEnabled: boolean;
 }
 
 const RenameDialog = ({
   onActionDismiss,
   ...props
 }: RenameButtonProps & { onActionDismiss: OnActionDismiss }) => {
-  const { api, searchSession, hasBackgroundSearchEnabled } = props;
+  const { api, searchSession } = props;
   const { id, name: originalName } = searchSession;
   const [isLoading, setIsLoading] = useState(false);
   const [newName, setNewName] = useState(originalName);
 
   const modalTitleId = useGeneratedHtmlId();
 
-  const title = i18n.translate('data.mgmt.searchSessions.renameModal.title', {
-    defaultMessage: 'Edit search session name',
-  });
   const bgsTitle = i18n.translate('data.mgmt.searchSessions.renameModal.backgroundSearchTitle', {
     defaultMessage: 'Edit background search name',
   });
-
   const confirm = i18n.translate('data.mgmt.searchSessions.renameModal.renameButton', {
     defaultMessage: 'Save',
   });
   const cancel = i18n.translate('data.mgmt.searchSessions.renameModal.cancelButton', {
     defaultMessage: 'Cancel',
-  });
-
-  const label = i18n.translate('data.mgmt.searchSessions.renameModal.searchSessionNameInputLabel', {
-    defaultMessage: 'Search session name',
   });
   const bgsLabel = i18n.translate(
     'data.mgmt.searchSessions.renameModal.backgroundSearchNameInputLabel',
@@ -81,15 +71,14 @@ const RenameDialog = ({
       initialFocus="[name=newName]"
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>
-          {hasBackgroundSearchEnabled ? bgsTitle : title}
-        </EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>{bgsTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <EuiForm>
-          <EuiFormRow label={hasBackgroundSearchEnabled ? bgsLabel : label}>
+          <EuiFormRow label={bgsLabel}>
             <EuiFieldText
+              data-test-subj="editNameInput"
               name="newName"
               placeholder={originalName}
               value={newName}
@@ -105,6 +94,7 @@ const RenameDialog = ({
         </EuiButtonEmpty>
 
         <EuiButton
+          data-test-subj="confirmEditName"
           disabled={!isNewNameValid}
           onClick={async () => {
             if (!isNewNameValid) return;
@@ -133,15 +123,7 @@ export const createRenameActionDescriptor = (
   onClick: async () => {
     const ref = core.overlays.openModal(
       toMountPoint(
-        <RenameDialog
-          hasBackgroundSearchEnabled={core.featureFlags.getBooleanValue(
-            BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-            false
-          )}
-          onActionDismiss={() => ref?.close()}
-          api={api}
-          searchSession={uiSession}
-        />,
+        <RenameDialog onActionDismiss={() => ref?.close()} api={api} searchSession={uiSession} />,
         core
       )
     );

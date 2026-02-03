@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 
 import type { GetAutoUpgradeAgentsStatusResponse } from '../../../common/types';
 
@@ -63,18 +63,26 @@ export const useGetAgentPoliciesQuery = (
 
 export const useBulkGetAgentPoliciesQuery = (
   ids: string[],
-  options?: { full?: boolean; ignoreMissing?: boolean }
+  options?: { full?: boolean; ignoreMissing?: boolean; enabled?: boolean }
 ) => {
-  return useQuery<BulkGetAgentPoliciesResponse, RequestError>(['agentPolicies', ids], () =>
-    sendRequestForRq<BulkGetAgentPoliciesResponse>({
-      path: agentPolicyRouteService.getBulkGetPath(),
-      method: 'post',
-      body: JSON.stringify({ ids, full: options?.full }),
-      version: API_VERSIONS.public.v1,
-    })
+  return useQuery<BulkGetAgentPoliciesResponse, RequestError>(
+    ['agentPolicies', ids],
+    () =>
+      sendRequestForRq<BulkGetAgentPoliciesResponse>({
+        path: agentPolicyRouteService.getBulkGetPath(),
+        method: 'post',
+        body: JSON.stringify({ ids, full: options?.full }),
+        version: API_VERSIONS.public.v1,
+      }),
+    {
+      enabled: options?.enabled,
+    }
   );
 };
 
+/**
+ * @deprecated use sendBulkGetAgentPoliciesForRq instead
+ */
 export const sendBulkGetAgentPolicies = (
   ids: string[],
   options?: { full?: boolean; ignoreMissing?: boolean }
@@ -231,6 +239,15 @@ export const sendDeleteAgentPolicy = (body: DeleteAgentPolicyRequest['body']) =>
   });
 };
 
+export const sendDeleteAgentPolicyForRq = (body: DeleteAgentPolicyRequest['body']) => {
+  return sendRequestForRq<DeleteAgentPolicyResponse>({
+    path: agentPolicyRouteService.getDeletePath(),
+    method: 'post',
+    body: JSON.stringify(body),
+    version: API_VERSIONS.public.v1,
+  });
+};
+
 export function useDeleteAgentPolicyMutation() {
   const queryClient = useQueryClient();
 
@@ -270,10 +287,14 @@ export const useGetListOutputsForPolicies = (body?: GetListAgentPolicyOutputsReq
 };
 
 export const useGetInfoOutputsForPolicy = (agentPolicyId: string | undefined) => {
-  return useConditionalRequest<GetAgentPolicyOutputsResponse>({
-    path: agentPolicyId ? agentPolicyRouteService.getInfoOutputsPath(agentPolicyId) : undefined,
-    method: 'get',
-    shouldSendRequest: !!agentPolicyId,
-    version: API_VERSIONS.public.v1,
-  } as SendConditionalRequestConfig);
+  return useQuery({
+    queryKey: ['get_info_outputs_for_policy', agentPolicyId],
+    enabled: !!agentPolicyId,
+    queryFn: () =>
+      sendRequestForRq<GetAgentPolicyOutputsResponse>({
+        path: agentPolicyId ? agentPolicyRouteService.getInfoOutputsPath(agentPolicyId) : '',
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+      }),
+  });
 };

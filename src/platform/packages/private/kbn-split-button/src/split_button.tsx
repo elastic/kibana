@@ -8,11 +8,11 @@
  */
 
 import { EuiButton, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
-import type { IconType, UseEuiTheme } from '@elastic/eui';
+import type { EuiButtonProps, IconType, UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import React from 'react';
 
-type SplitButtonProps = React.ComponentProps<typeof EuiButton> & {
+export type SplitButtonProps = React.ComponentProps<typeof EuiButton> & {
   isMainButtonLoading?: boolean;
   isMainButtonDisabled?: boolean;
   iconOnly?: boolean;
@@ -22,6 +22,7 @@ type SplitButtonProps = React.ComponentProps<typeof EuiButton> & {
   secondaryButtonIcon: IconType;
   secondaryButtonAriaLabel?: string;
   secondaryButtonTitle?: string;
+  secondaryButtonFill?: boolean;
   onSecondaryButtonClick?: React.MouseEventHandler<HTMLButtonElement>;
 };
 
@@ -39,6 +40,7 @@ export const SplitButton = ({
   secondaryButtonIcon,
   secondaryButtonAriaLabel,
   secondaryButtonTitle,
+  secondaryButtonFill,
   onSecondaryButtonClick,
 
   // Primary button props
@@ -56,7 +58,7 @@ export const SplitButton = ({
 
   const areButtonsDisabled = disabled || isDisabled;
 
-  const commonMainButtonProps = {
+  const commonMainButtonProps: EuiButtonProps = {
     css: styles.mainButton,
     style: {
       borderRightColor: borderColor,
@@ -65,7 +67,6 @@ export const SplitButton = ({
     size,
     isDisabled: areButtonsDisabled || isMainButtonDisabled,
     isLoading: isLoading || isMainButtonLoading,
-    'data-icon': iconType,
     ...mainButtonProps,
     'data-test-subj': mainButtonProps['data-test-subj'],
   };
@@ -83,10 +84,9 @@ export const SplitButton = ({
       <EuiButtonIcon
         css={styles.secondaryButton}
         data-test-subj={mainButtonProps['data-test-subj'] + `-secondary-button`}
-        data-icon={secondaryButtonIcon}
         aria-label={secondaryButtonAriaLabel}
+        display={secondaryButtonFill ? 'fill' : 'base'}
         title={secondaryButtonTitle}
-        display="base"
         color={color}
         size={size}
         iconType={secondaryButtonIcon}

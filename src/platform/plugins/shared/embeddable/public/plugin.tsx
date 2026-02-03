@@ -21,20 +21,24 @@ import { EmbeddableStateTransfer } from './state_transfer';
 import { setKibanaServices } from './kibana_services';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
-import { EnhancementsRegistry } from '../common/enhancements/registry';
 import type {
   EmbeddableSetup,
   EmbeddableSetupDependencies,
   EmbeddableStart,
   EmbeddableStartDependencies,
 } from './types';
-import { getTransforms, hasTransforms, registerTransforms } from './transforms_registry';
+import {
+  registerLegacyURLTransform,
+  hasLegacyURLTransform,
+  getLegacyURLTransform,
+} from './transforms_registry';
+import { enhancementsPersistableState } from '../common/bwc/enhancements/enhancements_persistable_state';
+import { transformEnhancementsOut } from '../common/bwc/enhancements/transform_enhancements_out';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
   private appList?: ReadonlyMap<string, PublicAppInfo>;
   private appListSubscription?: Subscription;
-  private enhancementsRegistry = new EnhancementsRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -44,10 +48,9 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       registerReactEmbeddableFactory,
       registerAddFromLibraryType,
-      registerTransforms,
-      registerEnhancement: this.enhancementsRegistry.registerEnhancement,
-      transformEnhancementsIn: this.enhancementsRegistry.transformIn,
-      transformEnhancementsOut: this.enhancementsRegistry.transformOut,
+      registerLegacyURLTransform,
+      transformEnhancementsIn: enhancementsPersistableState.extract,
+      transformEnhancementsOut,
     };
   }
 
@@ -76,9 +79,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
               storage
             )
           : this.stateTransferService,
-      getTransforms,
-      hasTransforms,
-      getEnhancement: this.enhancementsRegistry.getEnhancement,
+      hasLegacyURLTransform,
+      getLegacyURLTransform,
     };
 
     setKibanaServices(core, embeddableStart, deps);

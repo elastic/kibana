@@ -29,7 +29,7 @@ export interface DiscoverMainProps {
 export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
   const services = useDiscoverServices();
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
-  const { chrome, docLinks, data, spaces, history } = services;
+  const { chrome, docLinks, spaces, history } = services;
 
   /**
    * Adhoc data views functionality
@@ -40,13 +40,6 @@ export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);
   }, [chrome, docLinks]);
-
-  useEffect(() => {
-    return () => {
-      // clear session when navigating away from discover main
-      data.search.session.clear();
-    };
-  }, [data.search.session]);
 
   // TODO: Move this higher up in the component tree
   useSavedSearchAliasMatchRedirect({ discoverSession, spaces, history });

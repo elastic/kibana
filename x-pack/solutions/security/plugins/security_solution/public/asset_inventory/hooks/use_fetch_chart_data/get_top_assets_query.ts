@@ -31,6 +31,7 @@ export const getTopAssetsQuery = ({ query, sort }: UseTopAssetsOptions, indexPat
               field: ASSET_FIELDS.ENTITY_SUB_TYPE,
               order: { entityId: 'desc' },
               size: 10,
+              missing: 'Uncategorized',
             },
             aggs: {
               entityId: {

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,7 +16,7 @@ import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_
  * Response button that opens Response section in the left panel
  */
 export const ResponseButton: React.FC = () => {
-  const { navigateToLeftPanel: goToResponseTab } = useNavigateToLeftPanel({
+  const goToResponseTab = useNavigateToLeftPanel({
     tab: LeftPanelResponseTab,
   });
 

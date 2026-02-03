@@ -164,6 +164,10 @@ export function AddDataPanel({
               data-test-subj="AddDataPanelDismissButton"
               iconType="cross"
               onClick={onDismiss}
+              aria-label={i18n.translate(
+                'xpack.observabilityShared.addDataPabel.dismissButtonAriaLabel',
+                { defaultMessage: 'Dismiss panel' }
+              )}
             />
           )}
         </EuiFlexGroup>

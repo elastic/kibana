@@ -27,7 +27,7 @@ const PanelRT = rt.intersection([
     dataViewId: rt.string,
     fieldName: rt.string,
     title: rt.union([rt.string, rt.undefined]),
-    selectedOptions: rt.array(rt.string),
+    selectedOptions: rt.array(rt.union([rt.string, rt.number])),
   }),
 ]);
 

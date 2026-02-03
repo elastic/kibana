@@ -389,6 +389,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
 
   const $panelWidthS = `calc(max(20%, 225px))`;
   const $panelWidthM = `calc(max(30%, 300px))`;
+  const $panelWidthL = `calc(max(35%, 400px))`;
 
   const dvTableCss = css({
     thead: {
@@ -400,6 +401,16 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
     },
     '.euiTableRow > .euiTableRowCell': {
       borderTop: 0,
+    },
+    '& .dvMap__wrapper': {
+      minWidth: 0,
+      height: '240px',
+      [useEuiMinBreakpoint('s')]: {
+        minWidth: $panelWidthM,
+      },
+      [useEuiMinBreakpoint('m')]: {
+        minWidth: $panelWidthL,
+      },
     },
     [useEuiMinBreakpoint('s')]: {
       '& .columnHeader__title': {
@@ -440,11 +451,12 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
         },
       },
       '& .dvTopValues__wrapper': {
-        minWidth: 'fit-content',
+        minWidth: $panelWidthM,
+        maxWidth: $panelWidthL,
       },
       '& .dvPanel__wrapper': {
         '&.dvPanel--compressed': {
-          width: $panelWidthS,
+          minWidth: $panelWidthS,
         },
         '&.dvPanel--uniform': {
           minWidth: $panelWidthS,
@@ -456,10 +468,6 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
       '& .dvPanel__wrapper:last-child': {
         margin: `${euiTheme.size.xs} 0 ${euiTheme.size.m} 0`,
-      },
-
-      '& .dvMap__wrapper': {
-        height: '240px',
       },
       '& .dvText__wrapper': {
         minWidth: $panelWidthS,
@@ -490,7 +498,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
           data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
         >
           <EuiInMemoryTable<T>
-            message={message}
+            noItemsMessage={message}
             css={dvTableCss}
             items={items}
             itemId={FIELD_NAME}
@@ -502,6 +510,11 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
             data-test-subj={`dataVisualizerTable-${loading ? 'loading' : 'loaded'}`}
             rowProps={(item) => ({
               'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
+            })}
+            tableCaption={i18n.translate('xpack.dataVisualizer.dataGrid.tableCaption', {
+              defaultMessage:
+                'Field statistics table showing {count, plural, one {# field} other {# fields}} with their types, document counts, distinct values, and value distributions.',
+              values: { count: items.length },
             })}
           />
         </div>

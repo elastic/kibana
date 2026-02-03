@@ -24,10 +24,10 @@ import type {
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
   FormBasedLayer,
-} from '@kbn/lens-plugin/public';
-import type { TextBasedLayer } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
-import type { LensApiState } from '../schema';
-import type { Filter, Query } from '@kbn/es-query';
+} from '@kbn/lens-common';
+import type { TextBasedLayer } from '@kbn/lens-common';
+import type { LensApiState, MetricState } from '../schema';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { LensAttributes } from '../types';
 import type { LensApiFilterType } from '../schema/filter';
 
@@ -147,13 +147,16 @@ describe('buildDatasourceStates', () => {
           type: 'esql',
           query: 'from test | limit 10',
         },
-        metric: {
-          operation: 'value',
-          label: 'test',
-          column: 'test',
-          fit: false,
-          alignments: { labels: 'left', value: 'left' },
-        },
+        metrics: [
+          {
+            type: 'primary',
+            operation: 'value',
+            label: 'test',
+            column: 'test',
+            fit: false,
+            alignments: { labels: 'left', value: 'left' },
+          },
+        ],
         sampling: 1,
         ignore_global_filters: false,
       },
@@ -272,6 +275,7 @@ describe('buildDatasetState', () => {
 
     const result = buildDatasetState(
       textBasedLayer,
+      'layer_0',
       {},
       [],
       [
@@ -280,8 +284,7 @@ describe('buildDatasetState', () => {
           id: 'my-index',
           name: 'indexpattern-datasource-layer-layer_0',
         },
-      ],
-      'layer_0'
+      ]
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -298,7 +301,7 @@ describe('buildDatasetState', () => {
       columnOrder: [],
     } as FormBasedLayer;
 
-    const result = buildDatasetState(formBasedLayer, {}, [], [], 'layer_0');
+    const result = buildDatasetState(formBasedLayer, 'layer_0', {}, [], []);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "id": "my-dataview-id",
@@ -316,13 +319,14 @@ describe('buildDatasetState', () => {
 
     const result = buildDatasetState(
       formBasedLayer,
+      'layer_1',
       {
         'my-adhoc-dataview-id': {
-          id: 'test-id',
+          index: 'test-id',
           title: 'my-adhoc-dataview-id',
           timeFieldName: '@timestamp',
         },
-      },
+      } as Record<string, unknown>,
       [],
       [
         {
@@ -330,8 +334,7 @@ describe('buildDatasetState', () => {
           id: 'my-adhoc-dataview-id',
           name: 'indexpattern-datasource-layer-layer_1',
         },
-      ],
-      'layer_1'
+      ]
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -370,7 +373,7 @@ describe('generateLayer', () => {
       type: 'metric',
       sampling: 0.5,
       ignore_global_filters: true,
-    } as LensApiState;
+    } as MetricState;
 
     const result = generateLayer('layer_1', options);
 
@@ -389,7 +392,7 @@ describe('generateLayer', () => {
   test('generates layer with default values', () => {
     const options = {
       type: 'metric',
-    } as LensApiState;
+    } as MetricState;
 
     const result = generateLayer('layer_0', options);
 
@@ -415,48 +418,31 @@ describe('filtersAndQueryToLensState', () => {
         type: 'esql',
         query: 'from test | limit 10',
       },
-      metric: {
-        operation: 'value',
-        label: 'test',
-        column: 'test',
-        fit: false,
-        alignments: { labels: 'left', value: 'left' },
-      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'value',
+          label: 'test',
+          column: 'test',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+        },
+      ],
       sampling: 1,
       ignore_global_filters: false,
       filters: [
         { language: 'kuery', query: 'category: "shoes"' },
         { language: 'lucene', query: 'price > 100' },
       ] as LensApiFilterType[],
-      query: { language: 'kuery', query: 'status: "active"' } as LensApiFilterType,
     };
 
     const result = filtersAndQueryToLensState(apiState);
 
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "filters": Array [
-          Object {
-            "meta": Object {},
-            "query": Object {
-              "language": "kuery",
-              "query": "category: \\"shoes\\"",
-            },
-          },
-          Object {
-            "meta": Object {},
-            "query": Object {
-              "language": "lucene",
-              "query": "price > 100",
-            },
-          },
-        ],
-        "query": Object {
-          "language": "kuery",
-          "query": "status: \\"active\\"",
-        },
-      }
-    `);
+    expect(result.query).toEqual({ esql: 'from test | limit 10' });
+    expect(result.filters).toHaveLength(2);
+    for (const [index, filter] of Object.entries(result.filters ?? [])) {
+      expect(filter).toEqual({ meta: {}, ...apiState.filters?.[index as unknown as number] });
+    }
   });
 
   test('handles missing filters and query gracefully', () => {
@@ -467,20 +453,23 @@ describe('filtersAndQueryToLensState', () => {
         type: 'esql',
         query: 'from test | limit 10',
       },
-      metric: {
-        operation: 'value',
-        label: 'test',
-        column: 'test',
-        fit: false,
-        alignments: { labels: 'left', value: 'left' },
-      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'value',
+          label: 'test',
+          column: 'test',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+        },
+      ],
       sampling: 1,
       ignore_global_filters: false,
     };
 
     const result = filtersAndQueryToLensState(apiState);
 
-    expect(result).toMatchInlineSnapshot(`Object {}`);
+    expect(result.query).toEqual({ esql: 'from test | limit 10' });
   });
 });
 
@@ -509,12 +498,10 @@ describe('filtersAndQueryToApiFormat', () => {
         "filters": Array [
           Object {
             "language": "kuery",
-            "meta": Object {},
             "query": "category: \\"electronics\\"",
           },
           Object {
             "language": "lucene",
-            "meta": Object {},
             "query": "price:[100 TO *]",
           },
         ],
@@ -527,7 +514,7 @@ describe('filtersAndQueryToApiFormat', () => {
   });
 
   test('handles non-string query gracefully', () => {
-    const lensState: LensAttributes = {
+    const lensState = {
       state: {
         filters: [] as Filter[],
         query: { language: 'kuery', query: { bool: { must: [] } } } as Query,
@@ -536,11 +523,16 @@ describe('filtersAndQueryToApiFormat', () => {
 
     const result = filtersAndQueryToApiFormat(lensState);
 
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "filters": Array [],
-        "query": undefined,
-      }
-    `);
+    expect(result).toEqual({});
+  });
+
+  test('should not include filters if empty and query if ES|QL', () => {
+    const lensState = {
+      state: { filters: [] as Filter[], query: { esql: 'FROM ...' } as AggregateQuery },
+    } as LensAttributes;
+
+    const result = filtersAndQueryToApiFormat(lensState);
+
+    expect(result).toEqual({});
   });
 });

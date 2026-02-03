@@ -1,0 +1,292 @@
+{
+  "lastModified": "2026-01-30T09:08:43.358Z",
+  "sha1": "6f0b1f9a483f5404fe85a1bc9a0717f80fd673f1",
+  "tests": [
+    {
+      "id": "01827b5a57152a5-eaaf5032684392c",
+      "title": "Set up Profiling Resources and Data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 11,
+        "column": 16
+      }
+    },
+    {
+      "id": "d98c57e1953dc47-aec54210c2810f2",
+      "title": "Differential Functions page show gained performance when comparison data has less samples than baseline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/differential_functions/differential_functions.spec.ts",
+        "line": 20,
+        "column": 7
+      }
+    },
+    {
+      "id": "d98c57e1953dc47-e98cbdab8d1ec4f",
+      "title": "Differential Functions page show lost performance when comparison data has more samples than baseline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/differential_functions/differential_functions.spec.ts",
+        "line": 66,
+        "column": 7
+      }
+    },
+    {
+      "id": "d98c57e1953dc47-ce1e51bfb71094b",
+      "title": "Differential Functions page adds kql filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/differential_functions/differential_functions.spec.ts",
+        "line": 104,
+        "column": 7
+      }
+    },
+    {
+      "id": "1b328b6212635cc-c818742761ad34b",
+      "title": "Flamegraph page opens flamegraph page and shows chart when WebGL is available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/flamegraph/flamegraph.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "1b328b6212635cc-d965561cd176846",
+      "title": "Flamegraph page displays WebGL warning when WebGL is not available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/flamegraph/flamegraph.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    },
+    {
+      "id": "44123cecfea96cf-a490e16215fa2ba",
+      "title": "Functions page opens /topN page when navigating to /functions page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "44123cecfea96cf-b54e4b2da09157c",
+      "title": "Functions page validates and interacts with TopN functions table and its content and actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "44123cecfea96cf-28db990655994b4",
+      "title": "Functions page shows function details when action button is clicked on the table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
+        "line": 50,
+        "column": 7
+      }
+    },
+    {
+      "id": "44123cecfea96cf-d2413e2dd1b3e6e",
+      "title": "Functions page adds kql filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "44123cecfea96cf-f8c131d07e37a2d",
+      "title": "Functions page accesses settings page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
+        "line": 115,
+        "column": 7
+      }
+    },
+    {
+      "id": "44123cecfea96cf-3ae31564b9d6ca4",
+      "title": "Functions page navigates to differential functions tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
+        "line": 125,
+        "column": 7
+      }
+    },
+    {
+      "id": "44123cecfea96cf-99b16c3ffe76602",
+      "title": "Functions page accesses frame information window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
+        "line": 140,
+        "column": 7
+      }
+    },
+    {
+      "id": "44123cecfea96cf-942f2ecbbb7c5dc",
+      "title": "Functions page accesses settings modal and updates CO2 settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
+        "line": 151,
+        "column": 7
+      }
+    },
+    {
+      "id": "e2da91fd632ab33-6a3f8a608897db9",
+      "title": "Home page opens Profiling UI when user has privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/home/home.spec.ts",
+        "line": 19,
+        "column": 7
+      }
+    },
+    {
+      "id": "e2da91fd632ab33-49af245124c6c66",
+      "title": "Home page navigates through the tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/home/home.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    },
+    {
+      "id": "b9e0526c7514a6f-6c222ce2b7c614d",
+      "title": "Settings page opens setting page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/settings/settings.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "b9e0526c7514a6f-2fbfbbd77c430b0",
+      "title": "Settings page updates values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/settings/settings.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "98843aa33e8d554-fa37d28186e1665",
+      "title": "Storage explorer page loads storage explorer with real data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "98843aa33e8d554-86ca10f6a422863",
+      "title": "Storage explorer page Host agent breakdown tab displays host agent details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "98843aa33e8d554-45172bb362490e8",
+      "title": "Storage explorer page Summary stats tab will still load with kuery",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
+        "line": 51,
+        "column": 7
+      }
+    },
+    {
+      "id": "98843aa33e8d554-1aa8dab6b101396",
+      "title": "Storage explorer page Data breakdown tab displays correct values per index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
+        "line": 62,
+        "column": 7
+      }
+    }
+  ]
+}

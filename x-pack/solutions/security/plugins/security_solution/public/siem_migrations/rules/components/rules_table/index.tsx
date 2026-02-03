@@ -44,7 +44,6 @@ import * as i18n from './translations';
 import type { RulesFilterOptions, RuleMigrationStats, RuleMigrationSettings } from '../../types';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
-import { SiemTranslatedRulesTour } from '../tours/translation_guide';
 import { UpdateIndexPatternForm } from './update_index_pattern';
 import { EmptyMigration, SearchField } from '../../../common/components';
 import {
@@ -197,7 +196,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     const { mutateAsync: installMigrationRule } = useInstallMigrationRule(migrationId);
     const { mutateAsync: installMigrationRules } = useInstallMigrationRules(
-      migrationId,
+      migrationStats,
       translationStats
     );
     const { mutateAsync: updateIndexPattern } = useUpdateIndexPattern({
@@ -219,6 +218,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
           ids: selectedMigrationRules.map((rule) => rule.id),
         });
         setTableLoading(false);
+        setSelectedMigrationRules([]);
       },
       [migrationId, updateIndexPattern, selectedMigrationRules, setTableLoading]
     );
@@ -272,9 +272,9 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const { startMigration, isLoading: isStarting } = useStartMigration(refetchData);
     const onStartMigrationWithSettings = useCallback(
       (settings: RuleMigrationSettings) => {
-        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, settings);
+        startMigration(migrationStats, SiemMigrationRetryFilter.FAILED, settings);
       },
-      [migrationId, startMigration]
+      [migrationStats, startMigration]
     );
     const { modal: reprocessMigrationModal, showModal: showReprocessMigrationModal } =
       useStartRulesMigrationModal({
@@ -377,9 +377,8 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       <>
         {reprocessMigrationModal}
 
-        {!isStatsLoading && translationStats?.rules.total && <SiemTranslatedRulesTour />}
-
         <EuiSkeletonLoading
+          data-test-subj="migrationRulesTableSkeleton"
           isLoading={isStatsLoading}
           loadingContent={
             <>
@@ -453,6 +452,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   itemId={'id'}
                   data-test-subj={'rules-translation-table'}
                   columns={rulesColumns}
+                  tableCaption={i18n.RULES_MIGRATION_TABLE_CAPTION}
                 />
               </>
             )

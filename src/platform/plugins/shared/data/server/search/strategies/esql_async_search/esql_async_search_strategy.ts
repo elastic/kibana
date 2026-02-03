@@ -91,6 +91,7 @@ export const esqlAsyncSearchStrategyProvider = (
       {
         method: 'GET',
         path: `/_query/async/${id}`,
+        // FIXME: the drop_null_columns param shouldn't be needed here once https://github.com/elastic/elasticsearch/issues/138439 is resolved
         querystring: { ...params, drop_null_columns: request.params?.dropNullColumns },
       },
       {
@@ -218,7 +219,11 @@ export const esqlAsyncSearchStrategyProvider = (
       logger.debug(`extend ${id} by ${keepAlive}`);
       try {
         await esClient.asCurrentUser.transport.request(
-          { method: 'GET', path: `/_query/async/${id}`, body: { id, keep_alive: keepAlive } },
+          {
+            method: 'GET',
+            path: `/_query/async/${id}`,
+            querystring: { id, keep_alive: keepAlive },
+          },
           { ...options.transport, signal: options.abortSignal, meta: true }
         );
       } catch (e) {

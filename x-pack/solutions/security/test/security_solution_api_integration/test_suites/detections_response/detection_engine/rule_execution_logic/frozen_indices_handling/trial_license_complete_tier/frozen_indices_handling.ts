@@ -9,11 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import type { CreateRuleProps } from '@kbn/security-solution-test-api-clients/supertest/detections.gen';
 
+import { deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import { dataGeneratorFactory } from '../../../../utils';
-import {
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { moveIndexToFrozenDataTier } from '../../../../utils/frozen_data_tier';
 

@@ -64,7 +64,12 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, te
     <>
       {platinumPluginDetected && (
         <>
-          <EuiCallOut title={i18n.PLATINUM_WARNING} color="primary" iconType="lock">
+          <EuiCallOut
+            announceOnMount={false}
+            title={i18n.PLATINUM_WARNING}
+            color="primary"
+            iconType="lock"
+          >
             <FormattedMessage
               id="xpack.securitySolution.markdown.premiumPluginLinkPrefix"
               defaultMessage="To use these interactive markdown features, you must {link}."
@@ -89,7 +94,12 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, te
       )}
       {markdownParseResult !== null && (
         <>
-          <EuiCallOut title={i18n.INVALID_MARKDOWN} color="danger" iconType="error">
+          <EuiCallOut
+            announceOnMount={false}
+            title={i18n.INVALID_MARKDOWN}
+            color="danger"
+            iconType="error"
+          >
             {markdownParseResult}
           </EuiCallOut>
           <EuiSpacer size="s" />

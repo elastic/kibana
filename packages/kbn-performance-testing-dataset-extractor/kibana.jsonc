@@ -1,6 +1,8 @@
 {
   "type": "test-helper",
   "id": "@kbn/performance-testing-dataset-extractor",
-  "devOnly": true,
-  "owner": "@elastic/kibana-performance-testing"
+  "owner": "@elastic/kibana-performance-testing",
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
 }

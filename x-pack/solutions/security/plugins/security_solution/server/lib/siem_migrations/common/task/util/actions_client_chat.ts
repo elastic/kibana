@@ -15,6 +15,7 @@ export type ChatModel = InferenceChatModel;
 
 interface CreateModelParams {
   migrationId: string;
+  migrationType: string;
   connectorId: string;
   abortController: AbortController;
 }
@@ -27,6 +28,7 @@ export class ActionsClientChat {
 
   public async createModel({
     migrationId,
+    migrationType,
     connectorId,
     abortController,
   }: CreateModelParams): Promise<ChatModel> {
@@ -45,7 +47,10 @@ export class ActionsClientChat {
         disableStreaming: true,
         // Set a hard limit of 50 concurrent requests
         maxConcurrency: 50,
-        telemetryMetadata: { pluginId: TELEMETRY_SIEM_MIGRATION_ID, aggregateBy: migrationId },
+        telemetryMetadata: {
+          pluginId: `${TELEMETRY_SIEM_MIGRATION_ID}_${migrationType}`,
+          aggregateBy: migrationId,
+        },
         signal: abortController.signal,
       },
     });

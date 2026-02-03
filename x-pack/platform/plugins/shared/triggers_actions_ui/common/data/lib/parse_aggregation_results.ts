@@ -114,17 +114,18 @@ export const parseAggregationResults = ({
     const sourceFields: { [key: string]: string[] } = {};
     if (generateSourceFieldsFromHits) {
       sourceFieldsParams.forEach((field) => {
-        const fieldsSet: string[] = [];
+        const fields: string[] = [];
         const hits = groupBucket?.topHitsAgg?.hits?.hits ?? [];
         hits.forEach((hit: SearchHit<{ [key: string]: string }>) => {
           const sourceField = get(hit._source, field.label);
           if (sourceField) {
-            fieldsSet.push(sourceField);
+            fields.push(sourceField);
           }
         });
-        if (fieldsSet.length > 0) {
-          const isArray = Array.isArray(fieldsSet);
-          sourceFields[field.label] = Array.from(isArray ? fieldsSet.flat() : fieldsSet);
+        if (fields.length > 0) {
+          const isArray = Array.isArray(fields);
+          const fieldsSet = new Set<string>(isArray ? fields.flat() : fields);
+          sourceFields[field.label] = Array.from(fieldsSet);
         }
       });
     }

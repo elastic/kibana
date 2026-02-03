@@ -13,7 +13,6 @@ import type { ColumnHeaderOptions } from '../../../../../../common/types/timelin
 
 jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-  useEnableExperimental: jest.fn(() => jest.fn()),
 }));
 
 describe('useTimelineColumns', () => {

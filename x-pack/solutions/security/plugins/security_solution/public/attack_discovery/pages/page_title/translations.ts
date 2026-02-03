@@ -13,3 +13,11 @@ export const ATTACK_DISCOVERY_PAGE_TITLE = i18n.translate(
     defaultMessage: 'Attack discovery',
   }
 );
+
+export const ATTACK_DISCOVERY_ANNOUNCEMENT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.pageTitle.announcementTooltip',
+  {
+    defaultMessage:
+      'The Attack Discovery page will be moved under enhanced experience in a new section: Detections -> Attacks',
+  }
+);

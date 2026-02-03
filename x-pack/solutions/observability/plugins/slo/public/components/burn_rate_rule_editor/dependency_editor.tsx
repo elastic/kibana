@@ -21,8 +21,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { isRight } from 'fp-ts/Either';
 import type { SloRule } from '../../hooks/use_fetch_slos_with_burn_rate_rules';
-import type { Dependency } from '../../../common/types';
-import { DependencyRT } from '../../../common/types';
+import type { Dependency } from '../../../common/burn_rate_rule/types';
+import { DependencyRT } from '../../../common/burn_rate_rule/types';
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,

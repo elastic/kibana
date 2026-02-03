@@ -74,7 +74,7 @@ describe('getNodeStack', () => {
   } as Partial<WorkflowYaml>;
 
   it('should return the correct stack for secondThenTestConnectorStep', () => {
-    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
     const nodeStack = workflowGraph.getNodeStack('secondThenTestConnectorStep');
     expect(nodeStack).toEqual([
       'enterForeach_testForeachStep',
@@ -84,13 +84,13 @@ describe('getNodeStack', () => {
   });
 
   it('should return the correct stack for ifStepLevel', () => {
-    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
     const nodeStack = workflowGraph.getNodeStack('ifStepLevel');
     expect(nodeStack).toEqual(['enterCondition_if_ifStepLevel', 'enterThen_if_ifStepLevel']);
   });
 
   it('should return empty stack for ifStepLevel', () => {
-    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
     const nodeStack = workflowGraph.getNodeStack('notInStackStep');
     expect(nodeStack).toEqual([]);
   });

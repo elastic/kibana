@@ -6,14 +6,18 @@
  */
 
 import type { Writable } from '@kbn/utility-types';
-import type { MapAttributes } from '../content_management';
+import type { StoredMapAttributes } from '../../server';
 import type { JoinDescriptor, LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 import { SOURCE_TYPES } from '../constants';
 
 // enforce type property on joins. It's possible older saved-objects do not have this correctly filled in
 // e.g. sample-data was missing the right.type field.
 // This is just to be safe.
-export function addTypeToTermJoin({ attributes }: { attributes: MapAttributes }): MapAttributes {
+export function addTypeToTermJoin({
+  attributes,
+}: {
+  attributes: StoredMapAttributes;
+}): StoredMapAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }

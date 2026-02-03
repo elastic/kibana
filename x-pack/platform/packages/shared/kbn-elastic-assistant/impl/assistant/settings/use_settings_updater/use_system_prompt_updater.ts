@@ -11,7 +11,7 @@ import type { ApiConfig, FindPromptsResponse, PromptResponse } from '@kbn/elasti
 import { PromptTypeEnum } from '@kbn/elastic-assistant-common';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
-import type { InfiniteData, QueryObserverResult } from '@tanstack/react-query';
+import type { InfiniteData, QueryObserverResult } from '@kbn/react-query';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { AIConnector } from '../../../connectorland/connector_selector';
 import { getConversationApiConfig } from '../../use_conversation/helpers';

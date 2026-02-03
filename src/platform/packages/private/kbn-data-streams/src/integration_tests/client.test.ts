@@ -14,24 +14,24 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import type { DataStreamDefinition } from '../types';
-import * as mappings from '../mappings';
+import { mappings, type MappingsDefinition } from '@kbn/es-mappings';
 
 describe('DataStreamClient', () => {
   let esServer: EsTestCluster;
   let logger: Logger;
-  interface MyTestDoc {
-    '@timestamp': string;
-    mappedField: string;
-  }
-  const testDataStream: DataStreamDefinition<MyTestDoc> = {
+
+  const myTestDocMappings = {
+    properties: {
+      '@timestamp': mappings.date(),
+      mappedField: mappings.keyword(),
+    },
+  } satisfies MappingsDefinition;
+
+  const testDataStream: DataStreamDefinition<typeof myTestDocMappings> = {
     name: 'test-data-stream',
+    version: 1,
     template: {
-      mappings: {
-        properties: {
-          '@timestamp': mappings.date(),
-          mappedField: mappings.keyword(),
-        },
-      },
+      mappings: myTestDocMappings,
     },
   };
 
@@ -62,14 +62,18 @@ describe('DataStreamClient', () => {
   });
 
   describe('operations', () => {
-    let client: DataStreamClient<MyTestDoc, {}>;
+    let client: DataStreamClient<typeof myTestDocMappings, {}>;
     beforeEach(async () => {
       const elasticsearchClient = esServer.getClient();
-      client = await DataStreamClient.initialize({
+      const initializedClient = await DataStreamClient.initialize({
         logger,
         elasticsearchClient,
-        dataStreams: testDataStream,
+        dataStream: testDataStream,
       });
+      if (!initializedClient) {
+        throw new Error('Failed to initialize DataStreamClient');
+      }
+      client = initializedClient;
     });
 
     test('basic index and search', async () => {
@@ -92,8 +96,6 @@ describe('DataStreamClient', () => {
       });
     });
 
-    // it('searches (basic)', async () => {});
-
     // TODO: Add more thorough tests, for ex. for search runtime mappings
   });
 
@@ -110,7 +112,7 @@ describe('DataStreamClient', () => {
       expect(indexTemplate.index_template._meta).toEqual({
         previousVersions: [],
         userAgent: '@kbn/data-streams',
-        version: '057071d3cd930dc4ebaa1aaa5c18360b8d7912cc',
+        version: 1,
         managed: true,
       });
       expect(indexTemplate.index_template.data_stream).toEqual({
@@ -138,6 +140,16 @@ describe('DataStreamClient', () => {
       });
     }
 
+    it('does not accept version numbers less than 1', async () => {
+      await expect(
+        DataStreamClient.initialize({
+          logger,
+          elasticsearchClient: esServer.getClient(),
+          dataStream: { ...testDataStream, version: 0 },
+        })
+      ).rejects.toThrow('Template version must be greater than 0');
+    });
+
     it('sets up a data stream as expected', async () => {
       const elasticsearchClient = esServer.getClient();
       expect(
@@ -148,7 +160,7 @@ describe('DataStreamClient', () => {
       const client = await DataStreamClient.initialize({
         logger,
         elasticsearchClient,
-        dataStreams: testDataStream,
+        dataStream: testDataStream,
       });
 
       expect(client).toBeInstanceOf(DataStreamClient);
@@ -161,17 +173,19 @@ describe('DataStreamClient', () => {
 
     it('is idempotent', async () => {
       const elasticsearchClient = esServer.getClient();
-      const ps: Promise<DataStreamClient<any, any>>[] = [];
+      const ps: Promise<DataStreamClient<any, any> | undefined>[] = [];
       for (const _ of [1, 2, 3])
         ps.push(
           DataStreamClient.initialize({
             logger,
             elasticsearchClient,
-            dataStreams: testDataStream,
+            dataStream: testDataStream,
           })
         );
 
-      const clients = await Promise.all(ps);
+      const clients = (await Promise.all(ps)).filter(
+        (c): c is DataStreamClient<any, any> => c !== undefined
+      );
 
       expect(clients).toEqual([
         expect.any(DataStreamClient),
@@ -181,12 +195,12 @@ describe('DataStreamClient', () => {
       await assertStateOfIndexTemplate();
     });
 
-    test('(basic) updates mappings and settings as expected', async () => {
+    test('updates mappings and settings as expected when a new version is deployed', async () => {
       const elasticsearchClient = esServer.getClient();
       await DataStreamClient.initialize({
         logger,
         elasticsearchClient,
-        dataStreams: testDataStream,
+        dataStream: testDataStream,
       });
 
       await assertStateOfIndexTemplate();
@@ -208,23 +222,26 @@ describe('DataStreamClient', () => {
         dynamic: 'false',
       });
 
-      const nextDefinition: DataStreamDefinition<MyTestDoc & { newField: string }> = {
+      const nextMappings = {
+        ...myTestDocMappings,
+        properties: {
+          ...myTestDocMappings.properties,
+          newField: mappings.text(),
+        },
+      } satisfies MappingsDefinition;
+
+      const nextDefinition: DataStreamDefinition<typeof nextMappings> = {
         ...testDataStream,
+        version: 2,
         template: {
-          mappings: {
-            ...testDataStream.template.mappings,
-            properties: {
-              ...testDataStream.template.mappings!.properties,
-              newField: mappings.text(),
-            },
-          },
+          mappings: nextMappings,
         },
       };
 
       await DataStreamClient.initialize({
         logger,
         elasticsearchClient,
-        dataStreams: nextDefinition,
+        dataStream: nextDefinition,
       });
 
       const {
@@ -234,9 +251,9 @@ describe('DataStreamClient', () => {
       });
 
       expect(indexTemplate.index_template._meta).toEqual({
-        previousVersions: ['057071d3cd930dc4ebaa1aaa5c18360b8d7912cc'],
+        previousVersions: [1],
         userAgent: '@kbn/data-streams',
-        version: '2a84370ea6cfb20521959213e604ebcd1314dede',
+        version: 2,
         managed: true,
       });
 
@@ -268,6 +285,43 @@ describe('DataStreamClient', () => {
         ...nextDefinition.template.mappings,
         dynamic: 'false',
       });
+    });
+
+    test('does not update if the version remains the same', async () => {
+      const elasticsearchClient = esServer.getClient();
+
+      const getIndexTemplateSpy = jest.spyOn(elasticsearchClient.indices, 'getIndexTemplate');
+      const putIndexTemplateSpy = jest.spyOn(elasticsearchClient.indices, 'putIndexTemplate');
+      const createDataStreamSpy = jest.spyOn(elasticsearchClient.indices, 'createDataStream');
+      const putMappingSpy = jest.spyOn(elasticsearchClient.indices, 'putMapping');
+
+      await DataStreamClient.initialize({
+        logger,
+        elasticsearchClient,
+        dataStream: testDataStream,
+      });
+
+      const sameVersionMappings = {
+        properties: { somethingElse: mappings.text() },
+      } satisfies MappingsDefinition;
+
+      await DataStreamClient.initialize({
+        logger,
+        elasticsearchClient,
+        dataStream: {
+          ...testDataStream,
+          version: 1, // same version as initial deployment
+          template: {
+            ...testDataStream.template,
+            mappings: sameVersionMappings, // some new mappings
+          },
+        },
+      });
+
+      expect(getIndexTemplateSpy).toHaveBeenCalledTimes(2);
+      expect(putIndexTemplateSpy).toHaveBeenCalledTimes(1); // Index template not updated when version is same
+      expect(createDataStreamSpy).toHaveBeenCalledTimes(1);
+      expect(putMappingSpy).toHaveBeenCalledTimes(0); // Mappings are not applied to write index when version is not incremented
     });
   });
 });

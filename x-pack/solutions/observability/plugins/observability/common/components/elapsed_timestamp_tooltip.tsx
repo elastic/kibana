@@ -46,7 +46,7 @@ export function ElapsedTimestampTooltip({ time }: Props) {
 
   return (
     <EuiToolTip content={absoluteTimeLabel}>
-      <>{timeDisplay}</>
+      <span tabIndex={0}>{timeDisplay}</span>
     </EuiToolTip>
   );
 }

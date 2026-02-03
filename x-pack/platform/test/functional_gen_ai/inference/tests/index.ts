@@ -8,14 +8,19 @@
 import { getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { chatCompleteSuite } from './chat_complete';
+import { productDocsBaseInstallationSuite } from './product_docs_base';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
   describe('Inference plugin - API integration tests', async () => {
-    getAvailableConnectors().forEach((connector) => {
+    const connectors = getAvailableConnectors();
+    connectors.forEach((connector) => {
       describe(`Connector ${connector.id}`, () => {
         chatCompleteSuite(connector, providerContext);
       });
     });
+
+    const firstConnector = connectors[0];
+    productDocsBaseInstallationSuite(firstConnector, providerContext);
   });
 }

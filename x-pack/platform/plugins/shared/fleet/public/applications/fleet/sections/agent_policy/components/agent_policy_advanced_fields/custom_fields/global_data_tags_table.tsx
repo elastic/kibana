@@ -453,7 +453,13 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
         </EuiPanel>
       ) : (
         <>
-          <EuiBasicTable items={items} columns={columns} />
+          <EuiBasicTable
+            items={items}
+            columns={columns}
+            tableCaption={i18n.translate('xpack.fleet.globalDataTagsTable.tableCaption', {
+              defaultMessage: 'Custom fields included on this policy',
+            })}
+          />
           <EuiFlexGroup justifyContent="flexStart">
             <EuiFlexItem grow={false}>
               <EuiButton

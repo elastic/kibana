@@ -7,21 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublishingSubject, SerializedPanelState } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { apiHasParentApi, apiHasUniqueId } from '@kbn/presentation-publishing';
 import type { BehaviorSubject, Observable } from 'rxjs';
 import { combineLatest, isObservable, map, of, switchMap } from 'rxjs';
 import type { CanAddNewPanel } from './can_add_new_panel';
 import { apiCanAddNewPanel } from './can_add_new_panel';
+import type { CanAddNewSection } from './can_add_new_section';
 
-export interface PanelPackage<SerializedStateType extends object = object> {
+export interface PanelPackage<SerializedState extends object = object> {
   panelType: string;
   maybePanelId?: string;
 
   /**
    * The serialized state of this panel.
    */
-  serializedState?: SerializedPanelState<SerializedStateType>;
+  serializedState?: SerializedState;
 }
 
 export interface PresentationContainer<ApiType extends unknown = unknown> extends CanAddNewPanel {
@@ -68,8 +69,19 @@ export const apiIsPresentationContainer = (api: unknown | null): api is Presenta
     apiCanAddNewPanel(api) &&
       typeof (api as PresentationContainer)?.removePanel === 'function' &&
       typeof (api as PresentationContainer)?.replacePanel === 'function' &&
-      typeof (api as PresentationContainer)?.addNewPanel === 'function' &&
       apiPublishesChildren(api)
+  );
+};
+
+export interface HasSections extends CanAddNewSection {
+  getPanelSection: (uuid: string) => string | undefined;
+  panelSection$: (uuid: string) => Observable<string | undefined>;
+}
+
+export const apiHasSections = (api: unknown): api is HasSections => {
+  return (
+    typeof (api as HasSections)?.getPanelSection === 'function' &&
+    typeof (api as HasSections)?.panelSection$ === 'function'
   );
 };
 
@@ -131,6 +143,7 @@ export const combineCompatibleChildrenApis = <ApiType extends unknown, Publishin
       const compatibleChildren: Array<Observable<PublishingSubjectType>> = [];
       for (const child of Object.values(children)) {
         if (isCompatible(child) && isObservable(child[observableKey]))
+          // @ts-expect-error upgrade typescript v5.9.3
           compatibleChildren.push(child[observableKey] as BehaviorSubject<PublishingSubjectType>);
       }
 

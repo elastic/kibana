@@ -1,0 +1,127 @@
+env:
+  ELASTIC_PR_COMMENTS_ENABLED: 'true'
+  ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+  GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-entity-store-performance-from-pr
+
+steps:
+  - group: 'Notify if missing labels'
+    if: "build.env('GITHUB_PR_LABELS') !~ /ci:entity-store-performance/"
+
+    steps:
+      - command: |
+          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+            --message "Entity store performance tests require the \`ci:entity-store-performance\` label. Please add the label and trigger the job through the checkbox again." \
+            --context "entity-store-performance-job" \
+            --clear-previous
+        label: Comment missing labels
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        timeout_in_minutes: 5
+
+  - group: 'Entity Store Performance Tests'
+    if: "build.env('GITHUB_PR_LABELS') =~ /ci:entity-store-performance/"
+
+    steps:
+      - command: .buildkite/scripts/lifecycle/pre_build.sh
+        label: Pre-Build
+        timeout_in_minutes: 10
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+      - command: |
+          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+            --message "Entity store performance tests started at: $BUILDKITE_BUILD_URL" \
+            --context "entity-store-performance-job" \
+            --clear-previous
+        label: Comment with job URL
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        timeout_in_minutes: 5
+
+      - wait: ~
+
+      - command: .buildkite/scripts/steps/build_kibana.sh
+        label: Build Kibana Distribution
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          machineType: n2-standard-8
+          preemptible: true
+          diskSizeGb: 125
+        if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+        timeout_in_minutes: 90
+        key: build
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
+        env:
+          ES_ZONE_COUNT: 2
+          ES_HOT_TIER_MEMORY_SIZE: 8192
+        label: 'Build and Deploy to Cloud'
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+          preemptible: true
+        timeout_in_minutes: 30
+        depends_on: build
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - wait: ~
+
+      - command: .buildkite/scripts/steps/entity_store_performance/run_performance_tests_orchestrator.sh
+        label: 'Run Entity Store Performance Tests'
+        env:
+          # SECURITY_DOCS_GEN_BRANCH: branch-name # Optional: checkout a specific branch from security-documents-generator repo (default: main branch)
+          # SECURITY_DOCS_GEN_PR: 123 # Optional: checkout a specific PR from security-documents-generator repo (alternative to SECURITY_DOCS_GEN_BRANCH)
+          PERF_INTERVAL: 100
+          PERF_COUNT: 1
+          PERF_SAMPLING_INTERVAL: 1
+          PERF_DATA_FILE: standard
+          # PERF_NO_TRANSFORMS: true # Optional: set to "true" to disable transforms (default: false)
+          # Optional: Baseline comparison configuration
+          PERF_BASELINE_FILE: baselines/baseline-v1_0 # Optional: specific baseline file to use
+          PERF_DEGRADATION_THRESHOLD: 35 # Optional: degradation threshold % (default: 25)
+          PERF_WARNING_THRESHOLD: 25 # Optional: warning threshold % (default: 15)
+          PERF_IMPROVEMENT_THRESHOLD: 30 # Optional: improvement threshold % (default: 15)
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        timeout_in_minutes: 60
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 1
+
+      - wait: ~
+
+      - command: .buildkite/scripts/lifecycle/post_build.sh
+        label: Post-Build
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2

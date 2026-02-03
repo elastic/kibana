@@ -13,7 +13,6 @@ import {
   EuiPopoverTitle,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useCallback } from 'react';
@@ -29,7 +28,6 @@ import { usePrivilegedAccessDetectionIntegration } from '../../../privileged_use
 
 export const PrivilegedAccessInfoPopover = () => {
   const { docLinks } = useKibana().services;
-  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
   const entityAnalyticsLinks = docLinks.links.securitySolution.entityAnalytics;
   const state = useIntegrationLinkState(ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH);
@@ -50,14 +48,7 @@ export const PrivilegedAccessInfoPopover = () => {
   const button = <EuiButtonIcon iconType="info" onClick={togglePopover} aria-label={'oi'} />;
 
   return (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      className={css`
-        padding-left: ${euiTheme.size.s};
-      `}
-    >
+    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
       <EuiPopoverTitle>
         <EuiTitle size="xs">
           <h4>

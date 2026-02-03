@@ -1669,7 +1669,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.body.item.ssl.key).to.equal('KEY');
       });
 
-      it('should not store secrets if there is no fleet server', async function () {
+      it('should store secrets if there is no fleet server', async function () {
         await disableOutputSecrets();
         await clearAgents();
 
@@ -1689,10 +1689,10 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(Object.keys(res.body.item)).not.to.contain('secrets');
+        expect(Object.keys(res.body.item)).to.contain('secrets');
         expect(Object.keys(res.body.item)).to.contain('ssl');
-        expect(Object.keys(res.body.item.ssl)).to.contain('key');
-        expect(res.body.item.ssl.key).to.equal('KEY');
+        expect(Object.keys(res.body.item.ssl)).not.to.contain('key');
+        expect(res.body.item.secrets.ssl.key.id).to.be.a('string');
       });
 
       it('should allow to create a new elasticsearch output with ssl values', async function () {

@@ -147,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
           await a11y.testAppSnapshot();
         });
 
-        it.skip('create pivot transform configuration step JSON editor', async () => {
+        it('create pivot transform configuration step JSON editor', async () => {
           await transform.testExecution.logTestStep('displays the JSON pivot configuration');
           await transform.wizard.assertAdvancedPivotEditorSwitchExists();
           await transform.wizard.enableAdvancedPivotEditor();

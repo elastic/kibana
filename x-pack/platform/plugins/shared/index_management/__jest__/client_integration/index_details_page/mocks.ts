@@ -17,8 +17,8 @@ export const testIndexMock: Index = {
   replica: '2',
   documents: 1,
   documents_deleted: 0,
-  size: '20kb',
-  primary_size: '10kb',
+  size: 20480,
+  primary_size: 10240,
   isFrozen: false,
   aliases: 'none',
   hidden: false,
@@ -115,5 +115,11 @@ export const testIndexStats = {
         deleted: 0,
       },
     },
+  },
+};
+
+export const testUserStartPrivilegesResponse = {
+  privileges: {
+    canManageIndex: true,
   },
 };

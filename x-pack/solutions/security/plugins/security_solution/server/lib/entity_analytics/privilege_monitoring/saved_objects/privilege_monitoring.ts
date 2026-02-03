@@ -23,6 +23,8 @@ export interface PrivilegedMonitoringEngineDescriptor {
   };
 }
 
+export const MAX_PER_PAGE = 10_000;
+
 export class PrivilegeMonitoringEngineDescriptorClient {
   constructor(private readonly deps: PrivilegeMonitoringEngineDescriptorDependencies) {}
 
@@ -83,6 +85,7 @@ export class PrivilegeMonitoringEngineDescriptorClient {
     return this.deps.soClient.find<PrivilegedMonitoringEngineDescriptor>({
       type: privilegeMonitoringTypeName,
       namespaces: [this.deps.namespace],
+      perPage: MAX_PER_PAGE,
     });
   }
 

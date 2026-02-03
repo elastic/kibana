@@ -41,7 +41,9 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           hasActiveFilters={type === 'all'}
           numFilters={
             userActionsStats && userActionsStats.total > 0
-              ? userActionsStats.total - userActionsStats.totalDeletions
+              ? userActionsStats.total -
+                userActionsStats.totalDeletions -
+                userActionsStats.totalHiddenCommentUpdates
               : 0
           }
           isLoading={isLoading}
@@ -58,9 +60,8 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           isSelected={type === 'user'}
           hasActiveFilters={type === 'user'}
           numFilters={
-            userActionsStats && userActionsStats.totalComments > 0
-              ? userActionsStats.totalComments - userActionsStats.totalCommentDeletions
-              : 0
+            (userActionsStats?.totalCommentCreations ?? 0) -
+            (userActionsStats?.totalCommentDeletions ?? 0)
           }
           isLoading={isLoading}
           isDisabled={isLoading}

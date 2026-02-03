@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import { useFilesContext } from '@kbn/shared-ux-file-context';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { Owner } from '../../common/constants/types';
 import type { ServerError } from '../types';
@@ -27,20 +27,23 @@ const getTotalFromFileList = (data: { files: FileJSON[]; total: number }): { tot
 
 interface GetCaseFileStatsParams {
   caseId: string;
+  searchTerm?: string;
 }
 
 export const useGetCaseFileStats = ({
   caseId,
+  searchTerm,
 }: GetCaseFileStatsParams): UseQueryResult<{ total: number }> => {
   const { owner } = useCasesContext();
   const { showErrorToast } = useCasesToast();
   const { client: filesClient } = useFilesContext();
 
   return useQuery(
-    casesQueriesKeys.caseFileStats(caseId),
+    casesQueriesKeys.caseFileStats(caseId, { searchTerm }),
     () => {
       return filesClient.list({
         kind: constructFileKindIdByOwner(owner[0] as Owner),
+        ...(searchTerm && { name: `*${searchTerm}*` }),
         page: 1,
         perPage: 1,
         meta: { caseIds: [caseId] },

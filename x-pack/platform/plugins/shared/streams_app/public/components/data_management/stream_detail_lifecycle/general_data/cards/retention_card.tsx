@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   Streams,
+  isDisabledLifecycle,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
   isRoot,
 } from '@kbn/streams-schema';
 import React from 'react';
+import { EuiButton } from '@elastic/eui';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { getTimeSizeAndUnitLabel } from '../../helpers/format_size_units';
 import { IlmLink } from '../ilm_link';
@@ -68,21 +69,29 @@ export const RetentionCard = ({
         })
       );
       data = <IlmLink lifecycle={lifecycle} />;
-    } else {
-      const formattedRetention =
-        isDslLifecycle(lifecycle) && getTimeSizeAndUnitLabel(lifecycle.dsl.data_retention);
-      const isForeverRetention = formattedRetention === undefined;
+    } else if (isDslLifecycle(lifecycle)) {
+      const formattedRetention = getTimeSizeAndUnitLabel(lifecycle.dsl.data_retention);
+      const isIndefiniteRetention = formattedRetention === undefined;
 
       baseSubtitles.push(
-        isForeverRetention
-          ? i18n.translate('xpack.streams.streamDetailLifecycle.retention.forever', {
-              defaultMessage: 'Forever',
+        isIndefiniteRetention
+          ? i18n.translate('xpack.streams.streamDetailLifecycle.retention.indefinite', {
+              defaultMessage: 'Indefinite',
             })
           : i18n.translate('xpack.streams.streamDetailLifecycle.retention.custom', {
               defaultMessage: 'Custom period',
             })
       );
       data = formattedRetention ?? '∞';
+    } else if (isDisabledLifecycle(lifecycle)) {
+      baseSubtitles.push(
+        i18n.translate('xpack.streams.streamDetailLifecycle.retention.disabled', {
+          defaultMessage: 'Disabled',
+        })
+      );
+      data = '∞';
+    } else {
+      data = '—';
     }
 
     const subtitles = retentionOrigin ? [...baseSubtitles, retentionOrigin] : baseSubtitles;
@@ -106,25 +115,26 @@ export const RetentionCard = ({
     <BaseMetricCard
       title={title}
       actions={
-        <EuiButtonEmpty
+        <EuiButton
           data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
           size="s"
+          color="text"
           onClick={openEditModal}
           disabled={!definition.privileges.lifecycle}
-          iconType="pencil"
           aria-label={i18n.translate(
-            'xpack.streams.entityDetailViewWithoutParams.editDataRetentionAriaLabel',
+            'xpack.streams.entityDetailViewWithoutParams.editDataRetentionMethodAriaLabel',
             {
-              defaultMessage: 'Edit data retention',
+              defaultMessage: 'Edit retention method',
             }
           )}
         >
-          {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
-            defaultMessage: 'Edit data retention',
+          {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetentionMethod', {
+            defaultMessage: 'Edit retention method',
           })}
-        </EuiButtonEmpty>
+        </EuiButton>
       }
       metrics={metrics}
+      data-test-subj="retentionCard"
     />
   );
 };

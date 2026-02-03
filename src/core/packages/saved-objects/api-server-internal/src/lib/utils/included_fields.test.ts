@@ -22,6 +22,7 @@ describe('getRootFields', () => {
         "coreMigrationVersion",
         "typeMigrationVersion",
         "managed",
+        "accessControl",
         "updated_at",
         "updated_by",
         "created_at",

@@ -38,6 +38,12 @@ import {
   patchUpdateResetCustomFieldsCasesRequest,
   patchNewCustomFieldConfAdded,
   patchCustomFieldConfRemoved,
+  getExtractObservablesUserActions,
+  patchSyncAlertsCasesRequest,
+  getSyncAlertsUserActions,
+  patchExtractObservablesCasesRequest,
+  patchBothSettingsCasesRequest,
+  getBothSettingsUserActions,
 } from '../mocks';
 import { AttachmentType } from '../../../../common/types/domain';
 
@@ -280,6 +286,33 @@ describe('UserActionPersister', () => {
           isMock: false,
         })
       );
+    });
+
+    it('creates the correct user actions when sync alerts settings is changed', async () => {
+      expect(
+        persister.buildUserActions({
+          updatedCases: patchSyncAlertsCasesRequest,
+          user: testUser,
+        })
+      ).toEqual(getSyncAlertsUserActions({ isMock: false }));
+    });
+
+    it('creates the correct user actions when extract observables settings is changed', async () => {
+      expect(
+        persister.buildUserActions({
+          updatedCases: patchExtractObservablesCasesRequest,
+          user: testUser,
+        })
+      ).toEqual(getExtractObservablesUserActions({ isMock: false }));
+    });
+
+    it('creates the correct user actions when both settings are changed', async () => {
+      expect(
+        persister.buildUserActions({
+          updatedCases: patchBothSettingsCasesRequest,
+          user: testUser,
+        })
+      ).toEqual(getBothSettingsUserActions({ isMock: false }));
     });
 
     describe('customFields', () => {

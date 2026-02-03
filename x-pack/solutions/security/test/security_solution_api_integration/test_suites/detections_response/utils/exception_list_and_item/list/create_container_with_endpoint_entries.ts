@@ -15,8 +15,8 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { waitFor } from '@kbn/detections-response-ftr-services';
 import { createExceptionListItem } from '../item/create_exception_list_item';
-import { waitFor } from '../../../../../config/services/detections_response';
 import { createExceptionList } from './create_exception_list';
 
 /**
@@ -40,7 +40,6 @@ export const createContainerWithEndpointEntries = async (
   }
 
   // create the endpoint exception list container
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
     description: 'endpoint description',
     list_id: 'endpoint_list',

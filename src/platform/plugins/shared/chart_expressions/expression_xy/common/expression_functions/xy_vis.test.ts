@@ -127,6 +127,7 @@ describe('xyVis', () => {
         {
           ...rest,
           ...restLayerArgs,
+          xScaleType: 'ordinal',
           addTimeMarker: true,
           referenceLines: [],
         },
@@ -311,8 +312,8 @@ describe('xyVis', () => {
       {
         ...rest,
         ...restLayerArgs,
+        xScaleType: 'ordinal',
         referenceLines: [],
-
         isHistogram: true,
         xAxisConfig: {
           type: 'xAxisConfig',
@@ -350,6 +351,7 @@ describe('xyVis', () => {
               type,
               ...restLayerArgs,
               isHistogram: true,
+              xScaleType: 'ordinal',
             },
           ],
         },

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 import { identifyDependencyUsageWithCruiser as identifyDependencyUsage } from './cruiser.ts';
 import { cruise } from 'dependency-cruiser';
 
@@ -114,16 +113,12 @@ describe('identifyDependencyUsage', () => {
     const [, configWithDepth2] = (cruise as jest.Mock).mock.calls[0];
     const [, configWithDepth1] = (cruise as jest.Mock).mock.calls[1];
 
-    const solutionsFolders = KIBANA_SOLUTIONS.flatMap((solution) => [
-      `x-pack/solutions/${solution}/plugins`,
-      `x-pack/solutions/${solution}/packages`,
-    ]).join('|');
     expect(configWithDepth2.collapse).toMatchInlineSnapshot(
-      `"^(${solutionsFolders}|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|test)/([^/]+)/([^/]+)"`
+      `"^(x-pack/solutions/observability/plugins|x-pack/solutions/observability/packages|x-pack/solutions/security/plugins|x-pack/solutions/security/packages|x-pack/solutions/search/plugins|x-pack/solutions/search/packages|x-pack/solutions/workplaceai/plugins|x-pack/solutions/workplaceai/packages|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|test)/([^/]+)/([^/]+)"`
     );
 
     expect(configWithDepth1.collapse).toMatchInlineSnapshot(
-      `"^(${solutionsFolders}|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|test)/([^/]+)|^node_modules/(@[^/]+/[^/]+|[^/]+)"`
+      `"^(x-pack/solutions/observability/plugins|x-pack/solutions/observability/packages|x-pack/solutions/security/plugins|x-pack/solutions/security/packages|x-pack/solutions/search/plugins|x-pack/solutions/search/packages|x-pack/solutions/workplaceai/plugins|x-pack/solutions/workplaceai/packages|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|test)/([^/]+)|^node_modules/(@[^/]+/[^/]+|[^/]+)"`
     );
   });
 

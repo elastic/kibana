@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
-import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
+import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Reference } from '@kbn/content-management-utils';
 import type { ReferencedPanelAttributes, ReferencedPanelAttributesWithReferences } from './helpers';
 
 export class ReferencedPanelManager {
@@ -47,22 +48,22 @@ export class ReferencedPanelManager {
 
   // This method adds the panel type to the map, so that we can fetch the panel later and it links the panel uid to the panelId.
   addReferencedPanel({
-    dashboard,
+    dashboardId,
+    references,
     panel,
   }: {
-    dashboard: SavedObjectsFindResult<DashboardAttributes>;
+    dashboardId: string;
+    references: Reference[];
     panel: DashboardPanel;
   }) {
     const { uid, type } = panel;
     if (!uid) return;
 
-    const panelReference = dashboard.references.find(
-      (r) => r.name.includes(uid) && r.type === type
-    );
+    const panelReference = references.find((r) => r.name.includes(uid) && r.type === type);
     // A reference of the panel was not found
     if (!panelReference) {
       this.logger.error(
-        `Reference for panel of type ${type} and uid ${uid} was not found in dashboard with id ${dashboard.id}`
+        `Reference for panel of type ${type} and uid ${uid} was not found in dashboard with id ${dashboardId}`
       );
       return;
     }

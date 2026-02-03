@@ -85,8 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
     await esSupertest.put('/_cluster/settings').send(addLogging).expect(200);
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/233551
-  describe.skip('Session Lifespan cleanup', () => {
+  describe('Session Lifespan cleanup', () => {
     beforeEach(async () => {
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
       await addESDebugLoggingSettings();
@@ -131,12 +130,9 @@ export default function ({ getService }: FtrProviderContext) {
     it('should properly clean up session expired because of lifespan when providers override global session config', async function () {
       this.timeout(100000);
 
-      const [samlDisableSessionCookie, samlOverrideSessionCookie, samlFallbackSessionCookie] =
-        await Promise.all([
-          loginWithSAML('saml_disable'),
-          loginWithSAML('saml_override'),
-          loginWithSAML('saml_fallback'),
-        ]);
+      const samlDisableSessionCookie = await loginWithSAML('saml_disable');
+      const samlOverrideSessionCookie = await loginWithSAML('saml_override');
+      const samlFallbackSessionCookie = await loginWithSAML('saml_fallback');
 
       const response = await supertest
         .post('/internal/security/login')

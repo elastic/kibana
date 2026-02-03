@@ -191,6 +191,12 @@ export const GroupByExpression = ({
                   value,
                 };
               })}
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.common.expressionItems.groupByType.groupBySelectAriaLabel',
+                {
+                  defaultMessage: 'Group by',
+                }
+              )}
             />
           </EuiFlexItem>
 

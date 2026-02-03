@@ -7,8 +7,9 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { Adapters } from '@kbn/inspector-plugin/public';
+import type { LensInspectorAdapters } from '@kbn/lens-common';
 import { getLensInspectorService } from '../../lens_inspector_service';
-import type { LensEmbeddableStartServices, LensInspectorAdapters } from '../types';
+import type { LensEmbeddableStartServices } from '../types';
 
 export function initializeInspector(services: LensEmbeddableStartServices): {
   api: LensInspectorAdapters;

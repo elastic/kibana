@@ -262,7 +262,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
     const indexPattern = await this.getIndexPattern();
-    const searchSource = await this.makeSearchSource(requestMeta, 0);
+    const { searchSource, fetchOptions } = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       totalEntities: {
@@ -301,6 +301,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       onWarning: (warning: SearchResponseWarning) => {
         warnings.push(warning);
       },
+      fetchOptions,
     });
 
     const { featureCollection } = convertToGeoJson(resp, TIME_SERIES_ID_FIELD_NAME);
@@ -357,7 +358,8 @@ export class ESGeoLineSource extends AbstractESAggSource {
     //
     // Fetch entities
     //
-    const entitySearchSource = await this.makeSearchSource(requestMeta, 0);
+    const { searchSource: entitySearchSource, fetchOptions: entityFetchOptions } =
+      await this.makeSearchSource(requestMeta, 0);
     entitySearchSource.setField('trackTotalHits', false);
     const splitField = getField(indexPattern, this._descriptor.splitField);
     const cardinalityAgg = { precision_threshold: MAX_TERMS_TRACKS };
@@ -398,6 +400,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       onWarning: (warning: SearchResponseWarning) => {
         warnings.push(warning);
       },
+      fetchOptions: entityFetchOptions,
     });
     const entityBuckets: Array<{ key: string; doc_count: number }> = _.get(
       entityResp,
@@ -432,7 +435,8 @@ export class ESGeoLineSource extends AbstractESAggSource {
     }
     const tracksSearchFilters = { ...requestMeta };
     delete tracksSearchFilters.buffer;
-    const tracksSearchSource = await this.makeSearchSource(tracksSearchFilters, 0);
+    const { searchSource: tracksSearchSource, fetchOptions: tracksFetchOptions } =
+      await this.makeSearchSource(tracksSearchFilters, 0);
     tracksSearchSource.setField('trackTotalHits', false);
     tracksSearchSource.setField('aggs', {
       tracks: {
@@ -468,6 +472,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       onWarning: (warning: SearchResponseWarning) => {
         warnings.push(warning);
       },
+      fetchOptions: tracksFetchOptions,
     });
     const { featureCollection, numTrimmedTracks } = convertToGeoJson(
       tracksResp,

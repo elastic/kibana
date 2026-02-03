@@ -98,8 +98,10 @@ components:
         - execute
         - upload
         - scan
+        - runscript
+        - cancel
       minLength: 1
-      description: The command to be executed (cannot be an empty string)
+      description: The command for the response action
 
     Commands:
       type: array
@@ -240,85 +242,105 @@ components:
         note:
           type: string
 
+    ResponseActionDetails:
+       type: object
+       required:
+         - command
+       properties:
+         id:
+           type: string
+           format: uuid
+           description: The response action ID
+         command:
+           $ref: '#/components/schemas/Command'
+         agentType:
+           $ref: '#/components/schemas/AgentTypes'
+         isExpired:
+           type: boolean
+           description: Whether the response action is expired
+         isComplete:
+           type: boolean
+           description: Whether the response action is complete
+         wasSuccessful:
+           type: boolean
+           description: Whether the response action was successful
+         status:
+           type: string
+           description: The response action status
+         startedAt:
+           type: string
+           format: date-time
+           description: The response action start time
+         completedAt:
+           type: string
+           format: date-time
+           description: The response action completion time
+         createdBy:
+           type: string
+           description: The user who created the response action
+         agents:
+           type: array
+           description: The agent IDs for the hosts that the response action was sent to
+           items:
+             type: string
+             format: uuid
+         parameters:
+           type: object
+           description: The parameters of the response action. Content different depending on the response action command
+         hosts:
+           type: object
+           description: An object containing the host names associated with the agent IDs the response action was sent to
+           additionalProperties:
+             type: object
+             format: uuid
+             properties:
+               name:
+                 type: string
+                 description: The host name
+         agentState:
+           type: object
+           description: The state of the response action for each agent ID that it was sent to
+           additionalProperties:
+             type: object
+             format: uuid
+             properties:
+               isCompleted:
+                 type: boolean
+                 description: Whether the response action is completed for the agent ID
+               wasSuccessful:
+                 type: boolean
+                 description: Whether the response action was successful for the agent ID
+               completedAt:
+                 type: string
+                 description: The date and time the response action was completed for the agent ID
+         outputs:
+           type: object
+           description: |
+             The outputs of the response action for each agent ID that it was sent to. Content different depending on the
+             response action command and will only be present for agents that have responded to the response action
+           additionalProperties:
+             type: object
+             title: Agent ID
+             description: The agent id
+             format: uuid
+             required: [ type, content ]
+             properties:
+               type:
+                 type: string
+                 enum: [ json, text ]
+               content:
+                 description: The response action output content for the agent ID. Exact format depends on the response action command.
+                 oneOf:
+                   - type: object
+                   - type: string
+
+
+
     ResponseActionCreateSuccessResponse:
       type: object
       properties:
         data:
-          type: object
-          description: The created response action details
-          properties:
-            id:
-              type: string
-              description: The response action ID
-            command:
-              type: string
-              description: The response action command
-            agentType:
-              type: string
-              description: The response action agent type
-            isExpired:
-              type: boolean
-              description: Whether the response action is expired
-            isComplete:
-              type: boolean
-              description: Whether the response action is complete
-            wasSuccessful:
-              type: boolean
-              description: Whether the response action was successful
-            status:
-              type: string
-              description: The response action status
-            startedAt:
-              type: string
-              description: The response action start time
-            createdBy:
-              type: string
-              description: The user who created the response action
-            agents:
-              type: object
-              description: The agent IDs for the hosts that the response action was sent to
-            parameters:
-              type: object
-              description: The parameters of the response action. Content different depending on the response action command
-            hosts:
-              type: object
-              description: An object containing the host names associated with the agent IDs the response action was sent to
-              additionalProperties:
-                type: object
-                properties:
-                  name:
-                    type: string
-                    description: The host name
-            agentState:
-              type: object
-              description: The state of the response action for each agent ID that it was sent to
-              additionalProperties:
-                type: object
-                properties:
-                  isCompleted:
-                    type: boolean
-                    description: Whether the response action is completed for the agent ID
-                  wasSuccessful:
-                    type: boolean
-                    description: Whether the response action was successful for the agent ID
-                  completedAt:
-                    type: string
-                    description: The date and time the response action was completed for the agent ID
-            outputs:
-              type: object
-              description: The outputs of the response action for each agent ID that it was sent to
-              additionalProperties:
-                type: object
-                required: [ type, content ]
-                properties:
-                  type:
-                    type: string
-                    enum: [ json, text ]
-                  content:
-                    description: The response action output content for the agent ID. Exact format depends on the response action command.
-                    oneOf:
-                      - type: object
-                      - type: string
+          $ref: '#/components/schemas/ResponseActionDetails'
       example:
         data:
           id: "233db9ea-6733-4849-9226-5a7039c7161d"

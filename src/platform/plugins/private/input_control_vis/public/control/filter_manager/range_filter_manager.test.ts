@@ -10,10 +10,8 @@
 import expect from '@kbn/expect';
 
 import { RangeFilterManager } from './range_filter_manager';
-import type {
-  FilterManager as QueryFilterManager,
-  DataViewsContract,
-} from '@kbn/data-plugin/public';
+import type { FilterManager as QueryFilterManager } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { RangeFilter, RangeFilterMeta } from '@kbn/es-query';
 

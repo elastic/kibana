@@ -31,9 +31,17 @@ import {
 const mockProps: GenericEntityPanelProps = {
   entityDocId: 'entity_doc_id_test',
   scopeId: 'scope_id_test',
+  isEngineMetadataExist: true,
 };
 
 const defaultEntityData = {
+  _id: '1',
+  _source: {
+    entity: { id: 'entity-123-test', EngineMetadata: { Type: 'host' } },
+  },
+};
+
+const defaultEntityDataNoEngineMetadata = {
   _id: '1',
   _source: {
     entity: { id: 'entity-123-test' },
@@ -182,6 +190,25 @@ describe('GenericEntityPanel', () => {
     );
 
     expect(queryByTestId('generic-right-flyout-error-prompt')).toBeInTheDocument();
+  });
+
+  it('renders error state, empty engineMetadata ', () => {
+    mockUseGetGenericEntity.mockReturnValue({
+      getGenericEntity: {
+        isLoading: false,
+        isError: false,
+        data: defaultEntityDataNoEngineMetadata,
+      },
+    });
+    const { queryByTestId } = render(
+      <TestProviders>
+        <GenericEntityPanel {...mockProps} isEngineMetadataExist={false} />
+      </TestProviders>
+    );
+
+    expect(
+      queryByTestId('generic-right-flyout-error-prompt-missing-engineMetadataType')
+    ).toBeInTheDocument();
   });
 
   it(`renders footer without 'show full entity details' text when not in preview mode`, () => {

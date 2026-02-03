@@ -8,10 +8,10 @@
 import { PathReporter } from 'io-ts/PathReporter';
 import { mapValues } from 'lodash';
 import { isLeft } from 'fp-ts/Either';
+import { FieldMetadata } from '../../../../common/fields_metadata/models/field_metadata';
 import { fieldsMetadataDictionaryRT } from '../../../../common/fields_metadata';
 import { FieldsMetadataDictionary } from '../../../../common/fields_metadata/models/fields_metadata_dictionary';
 import type { AnyFieldName, OtelFieldName, FieldMetadataPlain } from '../../../../common';
-import { FieldMetadata } from '../../../../common';
 import type { TOtelFields } from '../../../../common/fields_metadata/types';
 
 // Helper function to convert structured semconv fields to FieldMetadataPlain format
@@ -80,7 +80,13 @@ export class OtelFieldsRepository {
   }
 
   getByName(fieldName: OtelFieldName | AnyFieldName): FieldMetadata | undefined {
-    // Strip OTel prefixes before looking up the field
+    // First, try to find the field directly (handles native prefixed fields)
+    const directMatch = this.otelFields[fieldName as OtelFieldName];
+    if (directMatch) {
+      return directMatch;
+    }
+
+    // If not found, strip OTel prefixes and try again (handles base fields with prefix lookups)
     const strippedFieldName = stripOtelPrefixes(fieldName as string);
     return this.otelFields[strippedFieldName as OtelFieldName];
   }

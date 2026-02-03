@@ -137,6 +137,7 @@ describe('bulkCreate', () => {
               "totalAlerts": 0,
               "totalComment": 0,
               "totalEvents": 0,
+              "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -184,6 +185,7 @@ describe('bulkCreate', () => {
               "totalAlerts": 0,
               "totalComment": 0,
               "totalEvents": 0,
+              "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -262,6 +264,7 @@ describe('bulkCreate', () => {
               "status": "open",
               "tags": Array [],
               "title": "My Case",
+              "total_observables": 0,
               "updated_at": null,
               "updated_by": null,
             },
@@ -303,6 +306,7 @@ describe('bulkCreate', () => {
               "status": "open",
               "tags": Array [],
               "title": "My Case",
+              "total_observables": 0,
               "updated_at": null,
               "updated_by": null,
             },

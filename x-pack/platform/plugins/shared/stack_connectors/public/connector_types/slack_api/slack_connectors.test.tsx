@@ -6,150 +6,252 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { render, screen, waitFor } from '@testing-library/react';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 
-import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
+import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { SlackActionFieldsComponents as SlackActionFields } from './slack_connectors';
-import { useValidChannels } from './use_valid_channels';
+import userEvent from '@testing-library/user-event';
+import { serializer } from './form_serializer';
+import { deserializer } from './form_deserializer';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
+
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
   __esModule: true,
   useKibana: jest.fn(() => ({
     services: mockUseKibanaReturnValue,
   })),
 }));
-jest.mock('./use_valid_channels');
-
-(useKibana as jest.Mock).mockImplementation(() => ({
-  services: {
-    docLinks: {
-      links: {
-        alerting: { slackApiAction: 'url' },
-      },
-    },
-    notifications: {
-      toasts: {
-        addSuccess: jest.fn(),
-        addDanger: jest.fn(),
-      },
-    },
-  },
-}));
-
-const useValidChannelsMock = useValidChannels as jest.Mock;
 
 describe('SlackActionFields renders', () => {
   const onSubmit = jest.fn();
+
   beforeEach(() => {
-    useValidChannelsMock.mockClear();
-    onSubmit.mockClear();
     jest.clearAllMocks();
-    useValidChannelsMock.mockImplementation(() => ({
-      channels: [],
-      isLoading: false,
-      resetChannelsToValidate: jest.fn(),
-    }));
   });
 
-  it('all connector fields is rendered for web_api type', async () => {
+  describe('creating new connector', () => {
     const actionConnector = {
-      secrets: {
-        token: 'some token',
-      },
+      secrets: {},
       config: {},
       id: 'test',
-      actionTypeId: '.slack',
+      actionTypeId: '.slack_api',
       name: 'slack',
       isDeprecated: false,
     };
 
-    render(
-      <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
-        <SlackActionFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
-      </ConnectorFormTestProvider>
-    );
+    it('all connector fields is rendered for web_api type', async () => {
+      render(
+        <ConnectorFormTestProvider
+          connector={actionConnector}
+          onSubmit={onSubmit}
+          serializer={serializer}
+          deserializer={deserializer}
+        >
+          <SlackActionFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
 
-    expect(screen.getByTestId('secrets.token-input')).toBeInTheDocument();
-    expect(screen.getByTestId('secrets.token-input')).toHaveValue('some token');
-  });
-
-  it('connector validation succeeds when connector config is valid for Web API type', async () => {
-    const actionConnector = {
-      secrets: {
-        token: 'some token',
-      },
-      id: 'test',
-      actionTypeId: '.slack',
-      name: 'slack',
-      config: {},
-      isDeprecated: false,
-    };
-
-    // Simulate that user just type a channel ID
-    useValidChannelsMock.mockImplementation(() => ({
-      channels: ['my-channel'],
-      isLoading: false,
-      resetChannelsToValidate: jest.fn(),
-    }));
-
-    render(
-      <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
-        <SlackActionFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
-      </ConnectorFormTestProvider>
-    );
-    await waitForComponentToUpdate();
-    act(() => {
-      screen.getByTestId('form-test-provide-submit').click();
+      expect(screen.getByTestId('secrets.token-input')).toBeInTheDocument();
+      expect(screen.getByTestId('config.allowedChannels-input')).toBeInTheDocument();
     });
 
-    await waitFor(() => {
-      expect(onSubmit).toBeCalledTimes(1);
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          secrets: {
-            token: 'some token',
+    it('creates a new connector correctly', async () => {
+      render(
+        <ConnectorFormTestProvider
+          connector={actionConnector}
+          onSubmit={onSubmit}
+          serializer={serializer}
+          deserializer={deserializer}
+        >
+          <SlackActionFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      expect(screen.getByTestId('secrets.token-input')).toBeInTheDocument();
+      expect(screen.getByTestId('config.allowedChannels-input')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('secrets.token-input'));
+      await userEvent.paste('some token');
+
+      await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+      await userEvent.type(screen.getByTestId('comboBoxSearchInput'), '#general{enter}');
+
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledTimes(1);
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            ...actionConnector,
+            secrets: {
+              token: 'some token',
+            },
+            config: {
+              allowedChannels: [{ name: '#general' }],
+            },
           },
-          config: {
-            allowedChannels: ['my-channel'],
+          isValid: true,
+        });
+      });
+    });
+
+    it('can create a connector without allowed channels', async () => {
+      render(
+        <ConnectorFormTestProvider
+          connector={actionConnector}
+          onSubmit={onSubmit}
+          serializer={serializer}
+          deserializer={deserializer}
+        >
+          <SlackActionFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      expect(screen.getByTestId('secrets.token-input')).toBeInTheDocument();
+      expect(screen.getByTestId('config.allowedChannels-input')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('secrets.token-input'));
+      await userEvent.paste('some token');
+
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledTimes(1);
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            ...actionConnector,
+            secrets: {
+              token: 'some token',
+            },
+            config: {
+              allowedChannels: [],
+            },
           },
-          id: 'test',
-          actionTypeId: '.slack',
-          name: 'slack',
-          isDeprecated: false,
-        },
-        isValid: true,
+          isValid: true,
+        });
+      });
+    });
+
+    it('validates allowed channels correctly', async () => {
+      render(
+        <ConnectorFormTestProvider
+          connector={actionConnector}
+          onSubmit={onSubmit}
+          serializer={serializer}
+          deserializer={deserializer}
+        >
+          <SlackActionFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      expect(screen.getByTestId('secrets.token-input')).toBeInTheDocument();
+      expect(screen.getByTestId('config.allowedChannels-input')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('secrets.token-input'));
+      await userEvent.paste('some token');
+
+      await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+      await userEvent.type(screen.getByTestId('comboBoxSearchInput'), 'general{enter}');
+
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledTimes(1);
+        expect(onSubmit).toBeCalledWith(expect.objectContaining({ isValid: false }));
       });
     });
   });
 
-  it('connector validation should failed when allowedChannels is empty', async () => {
+  describe('editing connector', () => {
     const actionConnector = {
       secrets: {
         token: 'some token',
       },
+      config: { allowedChannels: [{ id: 'channel-id', name: '#test' }] },
       id: 'test',
-      actionTypeId: '.slack',
+      actionTypeId: '.slack_api',
       name: 'slack',
-      config: {},
       isDeprecated: false,
     };
 
-    render(
-      <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
-        <SlackActionFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
-      </ConnectorFormTestProvider>
-    );
-    await waitForComponentToUpdate();
-    act(() => {
-      screen.getByTestId('form-test-provide-submit').click();
+    it('renders correctly the values of the connector', async () => {
+      render(
+        <ConnectorFormTestProvider
+          connector={actionConnector}
+          onSubmit={onSubmit}
+          serializer={serializer}
+          deserializer={deserializer}
+        >
+          <SlackActionFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      expect(screen.getByTestId('secrets.token-input')).toHaveValue('some token');
+      expect(screen.getByText('#test')).toBeInTheDocument();
     });
 
-    await waitFor(() => {
-      expect(onSubmit).toBeCalledTimes(1);
-      expect(onSubmit).toBeCalledWith(expect.objectContaining({ isValid: false }));
+    it('changes the values correctly and preserve the id of the channel', async () => {
+      render(
+        <ConnectorFormTestProvider
+          connector={actionConnector}
+          onSubmit={onSubmit}
+          serializer={serializer}
+          deserializer={deserializer}
+        >
+          <SlackActionFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await userEvent.clear(screen.getByTestId('secrets.token-input'));
+      await userEvent.click(screen.getByTestId('secrets.token-input'));
+      await userEvent.paste('token updated');
+
+      await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+      await userEvent.type(screen.getByTestId('comboBoxSearchInput'), '#new-channel{enter}');
+
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledTimes(1);
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            ...actionConnector,
+            secrets: {
+              token: 'token updated',
+            },
+            config: {
+              allowedChannels: [{ id: 'channel-id', name: '#test' }, { name: '#new-channel' }],
+            },
+          },
+          isValid: true,
+        });
+      });
     });
   });
 });

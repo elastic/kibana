@@ -9,7 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
 import type { Logger } from '@kbn/core/server';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { CasesAnalyticsRetryService } from './cases_analytics_retry_service';
-import type { BackoffFactory } from '../../common/retry_service/types';
+import type { BackoffFactory } from '@kbn/response-ops-retry-service';
 
 describe('CasesAnalyticsRetryService', () => {
   const nextBackOff = jest.fn();

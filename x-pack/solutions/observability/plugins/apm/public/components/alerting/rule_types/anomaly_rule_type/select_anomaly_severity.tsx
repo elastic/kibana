@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { getSeverityColor } from '../../../../../common/anomaly_detection';
 import type { AnomalyAlertSeverityType } from '../../../../../common/rules/apm_rule_types';
@@ -31,6 +32,9 @@ export function SelectAnomalySeverity({ onChange, value }: Props) {
     <EuiSuperSelect
       hasDividers
       style={{ width: 200 }}
+      aria-label={i18n.translate('xpack.apm.alerts.anomalySeverity.selectAriaLabel', {
+        defaultMessage: 'Anomaly severity',
+      })}
       options={ANOMALY_ALERT_SEVERITY_TYPES.map((option) => ({
         value: option.type,
         inputDisplay: <AnomalySeverity type={option.type} />,

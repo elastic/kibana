@@ -258,6 +258,12 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
 
               openPreviewPanel(previewPanelProps);
             }}
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonAriaLabel',
+              {
+                defaultMessage: 'Preview vulnerability details',
+              }
+            )}
           />
         ),
       },
@@ -365,6 +371,12 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
             onChange={onTableChange}
             data-test-subj={'securitySolutionFlyoutVulnerabilitiesFindingsTable'}
             sorting={sorting}
+            tableCaption={i18n.translate(
+              'xpack.securitySolution.flyout.left.insights.vulnerability.findingsTableCaption',
+              {
+                defaultMessage: 'List of vulnerability findings',
+              }
+            )}
           />
         </EuiPanel>
       </>

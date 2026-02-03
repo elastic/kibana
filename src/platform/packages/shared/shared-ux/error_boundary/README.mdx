@@ -9,14 +9,60 @@ date: 2023-10-03
 
 ## Description
 
-This package exports `KibanaErrorBoundary` and `KibanaSectionErrorBoundary` components.
+This package exports error boundary components to handle rendering errors gracefully:
 
-- `KibanaErrorBoundary` is designed to capture rendering errors by blocking the main part of the UI.
-- `KibanaSectionErrorBoundary` is designed to capture errors at a more granular level.
+- `KibanaErrorBoundary` - Captures rendering errors at the page level and blocks the main UI
+- `KibanaSectionErrorBoundary` - Captures errors at a granular section level with optional automatic retry capability
 
 In general, it's best to use `KibanaErrorBoundary` and block the whole page. If it is acceptable to assume the risk of allowing users to interact with a UI that has an error state, then using `KibanaSectionErrorBoundary` may be an acceptable alternative, but this must be judged on a case-by-case basis.
 
 ## API
+
+### KibanaErrorBoundary
+
+Page-level error boundary that captures rendering errors and blocks the main UI until refresh.
+
+```tsx
+<KibanaErrorBoundary>
+  <YourApp />
+</KibanaErrorBoundary>
+```
+
+**Props:**
+
+- `children` (ReactNode, required) - Child components to render and protect
+
+### KibanaSectionErrorBoundary
+
+Section-level error boundary that captures errors without blocking the entire page. Supports optional automatic retry with fresh component state.
+
+```tsx
+// Without retries (default)
+<KibanaSectionErrorBoundary sectionName="Dashboard Panel">
+  <YourComponent />
+</KibanaSectionErrorBoundary>
+
+// With automatic retry attempts
+<KibanaSectionErrorBoundary sectionName="Dashboard Panel" maxRetries={3}>
+  <YourComponent />
+</KibanaSectionErrorBoundary>
+```
+
+**Props:**
+
+- `sectionName` (string, required) - Name of the section for error messaging
+- `maxRetries` (number, optional, default: 0) - Number of times to automatically remount children when an error occurs. When > 0, the section will attempt to recover by remounting with fresh state before showing the error prompt.
+- `children` (ReactNode, required) - Child components to render and protect
+
+**Retry Behavior:**
+When `maxRetries > 0`, if an error is caught, the component will:
+
+1. Automatically remount children with a fresh Fragment key (forcing fresh component state)
+2. Increment retry counter
+3. If another error occurs and retries are exhausted, show the error prompt
+4. If no error occurs during retry, render normally
+
+This is useful for components that may have transient errors that resolve with fresh state, or where component state corruption could be recovered by remounting.
 
 ## EUI Promotion Status
 

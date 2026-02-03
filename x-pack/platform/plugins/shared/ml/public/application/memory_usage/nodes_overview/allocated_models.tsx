@@ -68,7 +68,9 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
 
         return (
           <EuiToolTip content={reason ? reason : ''}>
-            <EuiBadge color={isFailed ? 'danger' : 'hollow'}>{routingState}</EuiBadge>
+            <EuiBadge tabIndex={0} color={isFailed ? 'danger' : 'hollow'}>
+              {routingState}
+            </EuiBadge>
           </EuiToolTip>
         );
       },
@@ -125,7 +127,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
                 })
           }
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.allocationHeader', {
               defaultMessage: 'Allocation',
             })}
@@ -180,7 +182,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate(
               'xpack.ml.trainedModels.nodesList.modelsList.throughputLastMinuteHeader',
               {
@@ -213,7 +215,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
             />
           }
         >
-          <EuiFlexGroup gutterSize={'xs'}>
+          <EuiFlexGroup tabIndex={0} gutterSize={'xs'}>
             <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
               <span css={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 <FormattedMessage
@@ -306,6 +308,12 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       })}
       onTableChange={() => {}}
       data-test-subj={'mlNodesAllocatedModels'}
+      tableCaption={i18n.translate(
+        'xpack.ml.trainedModels.nodesList.modelsList.allocatedModelsTableCaption',
+        {
+          defaultMessage: 'Allocated machine learning models',
+        }
+      )}
     />
   );
 };

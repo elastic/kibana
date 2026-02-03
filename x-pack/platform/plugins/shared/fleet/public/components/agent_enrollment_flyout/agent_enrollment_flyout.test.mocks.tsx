@@ -89,6 +89,12 @@ jest.mock(
   }
 );
 
+jest.mock('../../applications/fleet/components/fleet_server_instructions/advanced_tab', () => {
+  return {
+    AdvancedTab: jest.fn(() => <div data-test-subj="advanced-tab">Advanced Tab</div>),
+  };
+});
+
 /**
  * These steps functions use hooks inside useMemo which is not compatible with jest currently
  */

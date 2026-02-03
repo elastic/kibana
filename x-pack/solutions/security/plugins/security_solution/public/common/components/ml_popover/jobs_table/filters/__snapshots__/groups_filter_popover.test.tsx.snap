@@ -2,7 +2,7 @@
 
 exports[`GroupsFilterPopover renders correctly against snapshot 1`] = `
 <EuiPopover
-  anchorPosition="downCenter"
+  anchorPosition="downLeft"
   button={
     <EuiFilterButton
       data-test-subj="groups-filter-popover-button"
@@ -18,7 +18,7 @@ exports[`GroupsFilterPopover renders correctly against snapshot 1`] = `
   }
   closePopover={[Function]}
   display="inline-block"
-  hasArrow={true}
+  hasArrow={false}
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"

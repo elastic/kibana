@@ -32,8 +32,8 @@ export function QualityIssues() {
         data-test-subj="datasetQualityDetailsFiltersContainer"
       >
         <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
-          <EuiTitle size="xxs">
-            <h4>{issuesTableName}</h4>
+          <EuiTitle size="xs">
+            <span>{issuesTableName}</span>
           </EuiTitle>
           <EuiIconTip content={overviewQualityIssueSectionTitleTooltip} color="subdued" size="m" />
           <EuiBetaBadge

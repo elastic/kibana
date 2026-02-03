@@ -21,7 +21,7 @@ interface Deps {
   authz: AuthorizationServiceSetup;
   spaces?: SpacesPluginSetup;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-  getTypeRegistry: () => Promise<ISavedObjectTypeRegistry>;
+  getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
 export const setupSpacesClient = ({
@@ -51,6 +51,7 @@ export const setupSpacesClient = ({
           checkPrivileges: authz.checkSavedObjectsPrivilegesWithRequest(request),
           errors: SavedObjectsClient.errors,
           getCurrentUser: () => getCurrentUser(request),
+          typeRegistry: getTypeRegistry(),
         })
       : undefined;
     return new SecureSpacesClientWrapper(
@@ -60,7 +61,7 @@ export const setupSpacesClient = ({
       audit.asScoped(request),
       SavedObjectsClient.errors,
       securityExtension,
-      getTypeRegistry
+      () => Promise.resolve(getTypeRegistry())
     );
   });
 };

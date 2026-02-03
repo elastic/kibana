@@ -23,12 +23,13 @@ export function cli() {
         openProfile: Boolean(flags['open-profile']),
         grep: flags.grep,
         runs: flags.runs ? Number(flags.runs) : undefined,
+        configFromCwd: Boolean(flags['config-from-cwd']),
       });
     },
     {
       flags: {
         string: ['config', 'left', 'right', 'grep', 'runs'],
-        boolean: ['profile', 'open-profile'],
+        boolean: ['profile', 'open-profile', 'config-from-cwd'],
         help: `--config           Location (glob) of benchmark config files
       --left            Git ref for baseline (defaults to current working directory)
       --right           Git ref to compare against
@@ -36,6 +37,7 @@ export function cli() {
       --open-profile    After merging, open each merged profile in speedscope
       --grep            Filter benchmarks by (case-insensitive) substring(s); can repeat
       --runs            Number of runs, overrides # of runs in config
+      --config-from-cwd Use process.cwd() for config file path instead of workspace root
       `,
       } as const,
     }

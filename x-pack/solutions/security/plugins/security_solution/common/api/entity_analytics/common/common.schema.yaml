@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Entity Analytics Common Schema
   description: Common schema for Entity Analytics
-  version: '1'
+  version: "1"
 paths: {}
 components:
   schemas:
@@ -49,21 +49,20 @@ components:
       type: object
       properties:
         host:
-          $ref: '#/components/schemas/EntityAfterKey'
+          $ref: "#/components/schemas/EntityAfterKey"
         user:
-          $ref: '#/components/schemas/EntityAfterKey'
+          $ref: "#/components/schemas/EntityAfterKey"
         service:
-          $ref: '#/components/schemas/EntityAfterKey'
+          $ref: "#/components/schemas/EntityAfterKey"
         generic:
-          $ref: '#/components/schemas/EntityAfterKey'
+          $ref: "#/components/schemas/EntityAfterKey"
       example:
         host:
-          'host.name': 'example.host'
+          "host.name": "example.host"
         user:
-          'user.name': 'example_user_name'
+          "user.name": "example_user_name"
         service:
-          'service.name': 'example_service_name'
-
+          "service.name": "example_service_name"
 
     DataViewId:
       description: The identifier of the Kibana data view to be used when generating risk scores.
@@ -82,7 +81,7 @@ components:
 
     KibanaDate:
       type: string
-      example: '2017-07-21T17:32:28Z'
+      example: "2017-07-21T17:32:28Z"
 
     DateRange:
       description: Defines the time period on which risk inputs will be filtered.
@@ -92,9 +91,9 @@ components:
         - end
       properties:
         start:
-          $ref: '#/components/schemas/KibanaDate'
+          $ref: "#/components/schemas/KibanaDate"
         end:
-          $ref: '#/components/schemas/KibanaDate'
+          $ref: "#/components/schemas/KibanaDate"
 
     IdentifierType:
       type: string
@@ -127,7 +126,7 @@ components:
           description: The risk category of the risk input document.
         description:
           type: string
-          example: 'Generated from Detection Engine Rule: Malware Prevention Alert'
+          example: "Generated from Detection Engine Rule: Malware Prevention Alert"
           description: A human-readable description of the risk input document.
         risk_score:
           type: number
@@ -137,7 +136,7 @@ components:
           description: The weighted risk score of the risk input document.
         timestamp:
           type: string
-          example: '2017-07-21T17:32:28Z'
+          example: "2017-07-21T17:32:28Z"
           description: The @timestamp of the risk input document.
         contribution_score:
           type: number
@@ -151,16 +150,16 @@ components:
     EntityRiskLevels:
       type: string
       enum:
-        - 'Unknown'
-        - 'Low'
-        - 'Moderate'
-        - 'High'
-        - 'Critical'
+        - "Unknown"
+        - "Low"
+        - "Moderate"
+        - "High"
+        - "Critical"
 
     EntityRiskScoreRecord:
       type: object
       required:
-        - '@timestamp'
+        - "@timestamp"
         - id_field
         - id_value
         - calculated_level
@@ -171,22 +170,22 @@ components:
         - inputs
         - notes
       properties:
-        '@timestamp':
+        "@timestamp":
           type: string
-          format: 'date-time'
-          example: '2017-07-21T17:32:28Z'
+          format: "date-time"
+          example: "2017-07-21T17:32:28Z"
           description: The time at which the risk score was calculated.
         id_field:
           type: string
-          example: 'host.name'
+          example: "host.name"
           description: The identifier field defining this risk score. Coupled with `id_value`, uniquely identifies the entity being scored.
         id_value:
           type: string
-          example: 'example.host'
+          example: "example.host"
           description: The identifier value defining this risk score. Coupled with `id_field`, uniquely identifies the entity being scored.
         calculated_level:
-          $ref: '#/components/schemas/EntityRiskLevels'
-          example: 'Critical'
+          $ref: "#/components/schemas/EntityRiskLevels"
+          example: "Critical"
           description: Lexical description of the entity's risk.
         calculated_score:
           type: number
@@ -209,7 +208,7 @@ components:
           type: array
           description: A list of the highest-risk documents contributing to this risk score. Useful for investigative purposes.
           items:
-            $ref: '#/components/schemas/RiskScoreInput'
+            $ref: "#/components/schemas/RiskScoreInput"
         category_2_score:
           type: number
           format: double
@@ -223,7 +222,30 @@ components:
           type: number
           format: double
         criticality_level:
-          $ref: '../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
+          $ref: "../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel"
+
+        modifiers:
+          type: array
+          description: A list of modifiers that were applied to the risk score calculation.
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              subtype:
+                type: string
+              modifier_value:
+                type: number
+                format: double
+              contribution:
+                type: number
+                format: double
+              metadata:
+                type: object
+                additionalProperties: true
+            required:
+              - type
+              - contribution
 
     RiskScoreEntityIdentifierWeights:
       type: number
@@ -245,55 +267,55 @@ components:
     RiskScoreWeight:
       oneOf:
         - allOf:
-            - $ref: '#/components/schemas/RiskScoreWeightGlobalShared'
+            - $ref: "#/components/schemas/RiskScoreWeightGlobalShared"
             - type: object
               required:
                 - host
               properties:
                 host:
-                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                  $ref: "#/components/schemas/RiskScoreEntityIdentifierWeights"
                 user:
-                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                  $ref: "#/components/schemas/RiskScoreEntityIdentifierWeights"
                 service:
-                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                  $ref: "#/components/schemas/RiskScoreEntityIdentifierWeights"
                 generic:
-                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                  $ref: "#/components/schemas/RiskScoreEntityIdentifierWeights"
 
         - allOf:
-            - $ref: '#/components/schemas/RiskScoreWeightGlobalShared'
+            - $ref: "#/components/schemas/RiskScoreWeightGlobalShared"
             - type: object
               required:
                 - user
               properties:
                 host:
-                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                  $ref: "#/components/schemas/RiskScoreEntityIdentifierWeights"
                 user:
-                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                  $ref: "#/components/schemas/RiskScoreEntityIdentifierWeights"
                 service:
-                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                  $ref: "#/components/schemas/RiskScoreEntityIdentifierWeights"
                 generic:
-                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                  $ref: "#/components/schemas/RiskScoreEntityIdentifierWeights"
         - allOf:
-            - $ref: '#/components/schemas/RiskScoreWeightGlobalShared'
+            - $ref: "#/components/schemas/RiskScoreWeightGlobalShared"
             - type: object
               required:
                 - service
               properties:
                 host:
-                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                  $ref: "#/components/schemas/RiskScoreEntityIdentifierWeights"
                 user:
-                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                  $ref: "#/components/schemas/RiskScoreEntityIdentifierWeights"
                 service:
-                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                  $ref: "#/components/schemas/RiskScoreEntityIdentifierWeights"
                 generic:
-                  $ref: '#/components/schemas/RiskScoreEntityIdentifierWeights'
+                  $ref: "#/components/schemas/RiskScoreEntityIdentifierWeights"
     RiskScoreWeights:
-      description: 'A list of weights to be applied to the scoring calculation.'
+      description: "A list of weights to be applied to the scoring calculation."
       type: array
       items:
-        $ref: '#/components/schemas/RiskScoreWeight'
+        $ref: "#/components/schemas/RiskScoreWeight"
       example:
-        - type: 'global_identifier'
+        - type: "global_identifier"
           host: 0.5
           user: 0.1
           service: 0.4

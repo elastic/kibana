@@ -15,7 +15,7 @@ import {
 } from '../../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { SIEM_DASHBOARD_MIGRATION_DASHBOARDS_PATH } from '../../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { authz } from '../../../common/api/util/authz';
+import { authz } from '../util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
 import type { CreateMigrationItemInput } from '../../../common/data/siem_migrations_data_item_client';
 import { DashboardResourceIdentifier } from '../../../../../../common/siem_migrations/dashboards/resources';
@@ -86,28 +86,28 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
               })
             );
 
-            await dashboardMigrationsClient.data.items.create(items);
-
-            await siemMigrationAuditLogger.logAddDashboards({
-              migrationId,
-              count: originalDashboardsCount,
-            });
-
             const resourceIdentifier = new DashboardResourceIdentifier(
               items[0].original_dashboard.vendor
             );
-            const extractedResources = await resourceIdentifier.fromOriginals(
-              items.map((dash) => dash.original_dashboard)
-            );
+
+            const [, extractedResources] = await Promise.all([
+              siemMigrationAuditLogger.logAddDashboards({
+                migrationId,
+                count: originalDashboardsCount,
+              }),
+              resourceIdentifier.fromOriginals(items.map((dash) => dash.original_dashboard)),
+            ]);
 
             const resources = extractedResources.map((resource) => ({
               ...resource,
               migration_id: migrationId,
             }));
 
-            if (resources.length > 0) {
-              await dashboardMigrationsClient.data.resources.create(resources);
-            }
+            await Promise.all([
+              dashboardMigrationsClient.data.items.create(items),
+              dashboardMigrationsClient.data.resources.create(resources),
+            ]);
+
             return res.ok();
           } catch (error) {
             logger.error(`Error creating dashboards for migration ID ${migrationId}: ${error}`);

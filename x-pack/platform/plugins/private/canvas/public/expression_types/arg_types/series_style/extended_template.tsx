@@ -9,13 +9,12 @@ import type { FunctionComponent, ChangeEvent } from 'react';
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
-import immutable from 'object-path-immutable';
+import { set, del } from 'object-path-immutable';
 import { get } from 'lodash';
 import type { ResolvedArgProps, ResolvedLabels } from '../../arg';
 import type { ExpressionAstExpression } from '../../../../types';
 import { ArgTypesStrings } from '../../../../i18n';
 
-const { set, del } = immutable;
 const { SeriesStyle: strings } = ArgTypesStrings;
 
 export interface Arguments {
@@ -146,6 +145,7 @@ ExtendedTemplate.displayName = 'SeriesStyleArgAdvancedInput';
 ExtendedTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   typeInstance: PropTypes.object,
   resolved: PropTypes.shape({
     labels: PropTypes.array.isRequired,

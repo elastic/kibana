@@ -164,14 +164,15 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
       setSearchTerm(value.trim());
     }, []);
 
-    const { mutateAsync: installMigrationDashboards } = useInstallMigrationDashboards(migrationId);
+    const { mutateAsync: installMigrationDashboards } =
+      useInstallMigrationDashboards(migrationStats);
 
     const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
     const onStartMigrationWithSettings = useCallback(
       (settings: MigrationSettingsBase) => {
-        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, settings);
+        startMigration(migrationStats, SiemMigrationRetryFilter.FAILED, settings);
       },
-      [migrationId, startMigration]
+      [migrationStats, startMigration]
     );
     const { modal: reprocessMigrationModal, showModal: showReprocessMigrationModal } =
       useStartDashboardsMigrationModal({
@@ -320,6 +321,7 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
                 <EuiBasicTable<DashboardMigrationDashboard>
+                  tableCaption={i18n.DASHBOARDS_MIGRATION_TABLE_CAPTION}
                   loading={false}
                   items={migrationDashboards}
                   pagination={pagination}

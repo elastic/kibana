@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { TestBed } from '@kbn/test-jest-helpers';
+import { screen, fireEvent } from '@testing-library/react';
 import type { Phase } from '../../../common/types';
-import { createFormToggleAction } from './form_toggle_action';
 
-export const createReadonlyActions = (testBed: TestBed, phase: Phase) => {
-  const { exists } = testBed;
+export const createReadonlyActions = (phase: Phase) => {
   const toggleSelector = `${phase}-readonlySwitch`;
   return {
-    readonlyExists: () => exists(toggleSelector),
-    toggleReadonly: createFormToggleAction(testBed, toggleSelector),
+    readonlyExists: () => Boolean(screen.queryByTestId(toggleSelector)),
+    toggleReadonly: () => fireEvent.click(screen.getByTestId(toggleSelector)),
   };
 };

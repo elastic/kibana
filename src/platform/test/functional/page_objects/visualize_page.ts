@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { VisualizeConstants } from '@kbn/visualizations-plugin/common/constants';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { FtrService } from '../ftr_provider_context';
 

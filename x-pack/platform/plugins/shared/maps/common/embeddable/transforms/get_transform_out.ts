@@ -6,21 +6,29 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
-import type { StoredMapEmbeddableState } from './types';
-import { MAP_SAVED_OBJECT_REF_NAME } from './get_transform_in';
-import type { MapByValueState } from '../types';
-import { injectReferences } from '../../migrations/references';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
+import { transformMapAttributesOut } from '../../content_management/transform_map_attributes_out';
+import type { MapByValueState } from '../types';
+import { MAP_SAVED_OBJECT_REF_NAME } from './get_transform_in';
+import type { StoredMapEmbeddableState } from './types';
 
-export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['transformOut']) {
-  function transformOut(state: StoredMapEmbeddableState, references?: Reference[]) {
+export function getTransformOut(
+  transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
+) {
+  function transformOut(
+    storedState: StoredMapEmbeddableState,
+    panelReferences?: Reference[],
+    containerReferences?: Reference[]
+  ) {
+    const state = transformTitlesOut(storedState);
     const enhancementsState = state.enhancements
-      ? transformEnhancementsOut(state.enhancements, references ?? [])
+      ? transformEnhancementsOut(state.enhancements, panelReferences ?? [])
       : undefined;
 
     // by ref
-    const savedObjectRef = (references ?? []).find(
+    const savedObjectRef = (panelReferences ?? []).find(
       (ref) => MAP_SAVED_OBJECT_TYPE === ref.type && ref.name === MAP_SAVED_OBJECT_REF_NAME
     );
     if (savedObjectRef) {
@@ -36,10 +44,15 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
       return {
         ...state,
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
-        attributes: injectReferences({
-          attributes: (state as MapByValueState).attributes,
-          references: references ?? [],
-        }).attributes,
+        attributes: transformMapAttributesOut(
+          (state as MapByValueState).attributes,
+          (targetName: string) => {
+            const panelRef = (panelReferences ?? []).find(({ name }) => name === targetName);
+            if (panelRef) return panelRef;
+
+            return (containerReferences ?? []).find(({ name }) => name === targetName);
+          }
+        ),
       };
     }
 

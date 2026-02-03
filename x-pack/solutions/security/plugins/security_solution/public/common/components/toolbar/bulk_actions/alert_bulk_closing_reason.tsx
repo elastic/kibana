@@ -21,7 +21,6 @@ export const closingReasons: EuiSelectableOption<{
   { label: i18n.CLOSING_REASON_FALSE_POSITIVE, key: AlertClosingReasonValues.false_positive },
   { label: i18n.CLOSING_REASON_TRUE_POSITIVE, key: AlertClosingReasonValues.true_positive },
   { label: i18n.CLOSING_REASON_BENIGN_POSITIVE, key: AlertClosingReasonValues.benign_positive },
-  { label: i18n.CLOSING_REASON_AUTOMATED_CLOSURE, key: AlertClosingReasonValues.automated_closure },
   { label: i18n.CLOSING_REASON_OTHER, key: AlertClosingReasonValues.other },
 ];
 

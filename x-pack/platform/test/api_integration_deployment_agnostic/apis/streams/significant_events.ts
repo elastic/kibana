@@ -59,6 +59,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             routing: [],
             fields: {},
           },
+          failure_store: { inherit: {} },
         },
       };
 
@@ -67,7 +68,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream,
           ...emptyAssets,
         }).then((response) => expect(response).to.have.property('acknowledged', true));
-        await alertingApi.deleteRules({ roleAuthc });
+      });
+
+      afterEach(async () => {
+        await deleteStream(apiClient, STREAM_NAME);
       });
 
       it('updates the queries', async () => {
@@ -192,6 +196,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             processing: { steps: [] },
             settings: {},
             classic: {},
+            failure_store: { inherit: {} },
           },
         },
         ...emptyAssets,
@@ -242,6 +247,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         streamDefinition = await getStream(apiClient, indexName);
+
         expect(streamDefinition.queries.length).to.eql(1);
         expect(streamDefinition.queries[0]).to.eql({
           id: 'aaa',
@@ -250,6 +256,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await clean();
+        await deleteStream(apiClient, indexName);
       });
     });
   });

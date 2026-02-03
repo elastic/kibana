@@ -35,6 +35,7 @@ import { ConfigValidator } from './config_validator';
 import { type CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import { AdvancedSettings } from './advanced_settings';
 import { getLookbackInterval, getTopNBuckets } from '../../../common/util/alerts';
+import { AnomalyKqlFilter } from './anomaly_kql_filter';
 
 export type MlAnomalyAlertTriggerProps =
   RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams> & {
@@ -57,6 +58,10 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   } = useKibana();
 
   const [newJobUrl, setNewJobUrl] = useState<string | undefined>(undefined);
+
+  const [savedFilterForNonBucketTypes, setSavedFilterForNonBucketTypes] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -137,6 +142,25 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
     [jobsAndGroupIds]
   );
 
+  useEffect(
+    function handleFilterPreservationAcrossResultTypes() {
+      const isBucketType = ruleParams.resultType === ML_ANOMALY_RESULT_TYPE.BUCKET;
+
+      if (isBucketType) {
+        if (ruleParams.kqlQueryString) {
+          setSavedFilterForNonBucketTypes(ruleParams.kqlQueryString);
+          setRuleParams('kqlQueryString', null);
+        }
+      } else {
+        if (savedFilterForNonBucketTypes && !ruleParams.kqlQueryString) {
+          setRuleParams('kqlQueryString', savedFilterForNonBucketTypes);
+        }
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [ruleParams.resultType]
+  );
+
   useMount(function setDefaults() {
     const { jobSelection, ...rest } = ruleParams;
     if (Object.keys(rest).length === 0) {
@@ -196,8 +220,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         createJobUrl={newJobUrl}
         jobsAndGroupIds={jobsAndGroupIds}
         adJobsApiService={adJobsApiService}
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        onChange={useCallback(onAlertParamChange('jobSelection'), [])}
+        onChange={onAlertParamChange('jobSelection')}
         errors={Array.isArray(errors.jobSelection) ? errors.jobSelection : []}
         shouldUseDropdownJobCreate
       />
@@ -211,19 +234,23 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       <ResultTypeSelector
         value={ruleParams.resultType}
         availableOption={availableResultTypes}
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        onChange={useCallback(onAlertParamChange('resultType'), [])}
+        onChange={onAlertParamChange('resultType')}
       />
-      <SeverityControl
-        value={ruleParams.severity}
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        onChange={useCallback(onAlertParamChange('severity'), [])}
+      <EuiSpacer size="m" />
+      <SeverityControl value={ruleParams.severity} onChange={onAlertParamChange('severity')} />
+      <AnomalyKqlFilter
+        value={ruleParams.kqlQueryString}
+        onChange={onAlertParamChange('kqlQueryString')}
+        jobConfigs={jobConfigs}
+        resultType={ruleParams.resultType}
+        jobId={ruleParams.jobSelection?.jobIds?.[0]}
+        errors={Array.isArray(errors.kqlQueryString) ? errors.kqlQueryString : []}
+        disabled={ruleParams.resultType === ML_ANOMALY_RESULT_TYPE.BUCKET}
       />
       <EuiSpacer size="m" />
       <InterimResultsControl
         value={ruleParams.includeInterim}
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        onChange={useCallback(onAlertParamChange('includeInterim'), [])}
+        onChange={onAlertParamChange('includeInterim')}
       />
       <EuiSpacer size="m" />
       <AdvancedSettings

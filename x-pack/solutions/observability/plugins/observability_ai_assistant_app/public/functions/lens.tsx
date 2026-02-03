@@ -7,11 +7,12 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { i18n } from '@kbn/i18n';
-import { LensAttributesBuilder, XYChart, XYDataLayer } from '@kbn/lens-embeddable-utils';
-import type { LensEmbeddableInput, LensPublicStart } from '@kbn/lens-plugin/public';
+import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import type { LensByValueInput, LensPublicStart } from '@kbn/lens-plugin/public';
 import React, { useState } from 'react';
+import type { AsyncState } from 'react-use/lib/useAsync';
 import useAsync from 'react-use/lib/useAsync';
-import type { Assign } from 'utility-types';
 import type {
   RegisterRenderFunctionDefinition,
   RenderFunction,
@@ -41,7 +42,7 @@ function Lens({
   timeField,
 }: {
   indexPattern: string;
-  xyDataLayer: XYDataLayer;
+  xyDataLayer: LensSeriesLayer;
   start: string;
   end: string;
   lens: LensPublicStart;
@@ -57,26 +58,38 @@ function Lens({
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 
-  if (!dataViewAsync.value) {
+  const lensEmbeddableInputAsync: AsyncState<LensByValueInput | undefined> = useAsync(async () => {
+    if (!dataViewAsync.value) {
+      return;
+    }
+
+    const lensBuilder = new LensConfigBuilder(dataViews);
+    return (await lensBuilder.build(
+      {
+        dataset: {
+          index: dataViewAsync.value.name,
+          timeFieldName: dataViewAsync.value.timeFieldName,
+        },
+        chartType: 'xy',
+        title: '',
+        layers: [xyDataLayer],
+      },
+      {
+        embeddable: true,
+        timeRange: {
+          from: start,
+          to: end,
+          type: 'relative' as const,
+        },
+      }
+    )) as LensByValueInput;
+  });
+
+  if (!dataViewAsync.value || !lensEmbeddableInputAsync.value) {
     return <EuiLoadingSpinner />;
   }
 
-  const attributes = new LensAttributesBuilder({
-    visualization: new XYChart({
-      layers: [xyDataLayer],
-      dataView: dataViewAsync.value,
-    }),
-  }).build();
-
-  const lensEmbeddableInput: Assign<LensEmbeddableInput, { attributes: typeof attributes }> = {
-    id: indexPattern,
-    attributes,
-    timeRange: {
-      from: start,
-      to: end,
-      mode: 'relative' as const,
-    },
-  };
+  const lensEmbeddableInput = lensEmbeddableInputAsync.value;
 
   return (
     <>
@@ -144,24 +157,18 @@ export function registerLensRenderFunction({
     ({
       arguments: { layers, indexPattern, breakdown, seriesType, start, end, timeField },
     }: Parameters<RenderFunction<LensFunctionArguments, {}>>[0]) => {
-      const xyDataLayer = new XYDataLayer({
-        data: layers.map((layer) => ({
+      const xyDataLayer: LensSeriesLayer = {
+        type: 'series',
+        seriesType: seriesType as LensSeriesLayer['seriesType'],
+        breakdown: breakdown ? { type: 'topValues', size: 10, field: breakdown.field } : undefined,
+        yAxis: layers.map((layer) => ({
           type: 'formula',
           value: layer.formula,
           label: layer.label,
-          format: layer.format,
-          filter: {
-            language: 'kql',
-            query: layer.filter ?? '',
-          },
+          format: layer.format.id,
+          filter: layer.filter ?? '',
         })),
-        options: {
-          seriesType,
-          breakdown: breakdown
-            ? { type: 'top_values', params: { size: 10 }, field: breakdown.field }
-            : undefined,
-        },
-      });
+      };
 
       if (!timeField) return;
 

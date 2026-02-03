@@ -321,6 +321,10 @@ export const ALERT_ADDED_TO_CASE = i18n.translate('xpack.cases.common.alertAdded
   defaultMessage: 'added to case',
 });
 
+export const EVENTS = i18n.translate('xpack.cases.common.eventsLabel', {
+  defaultMessage: 'Events',
+});
+
 export const SELECT_CASE_TITLE = i18n.translate('xpack.cases.common.allCases.caseModal.title', {
   defaultMessage: 'Select case',
 });
@@ -363,14 +367,22 @@ export const CASE_ALERT_SUCCESS_TOAST = (title: string, quantity: number = 1) =>
 export const CASE_ALERT_SUCCESS_SYNC_TEXT = i18n.translate(
   'xpack.cases.actions.caseAlertSuccessSyncText',
   {
-    defaultMessage: 'The alert statuses are synched with the case status.',
+    defaultMessage: "Alert statuses were synced with the case's status.",
   }
 );
 
 export const CASE_ALERT_SUCCESS_OBSERVABLES_TEXT = i18n.translate(
   'xpack.cases.actions.caseAlertSuccessObservablesText',
   {
-    defaultMessage: 'Observables are extracted and added to the case.',
+    defaultMessage: 'Observables were extracted and added to the case.',
+  }
+);
+
+export const CASE_ALERT_SUCCESS_SYNC_AND_EXTRACT_TEXT = i18n.translate(
+  'xpack.cases.actions.caseAlertSuccessSyncAndExtractText',
+  {
+    defaultMessage:
+      "Alert statuses were synced with the case's status and observables were extracted and added to the case.",
   }
 );
 

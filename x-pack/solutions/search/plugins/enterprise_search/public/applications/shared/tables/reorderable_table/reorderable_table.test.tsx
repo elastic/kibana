@@ -52,6 +52,9 @@ describe('ReorderableTable', () => {
         additionalProps: {},
         disableDragging: false,
         rowIndex: 0,
+        ariaRowindex: 2,
+        errors: undefined,
+        rowIdentifier: undefined,
       });
     });
 
@@ -127,6 +130,9 @@ describe('ReorderableTable', () => {
         item: { id: 1 },
         additionalProps: {},
         leftAction: expect.anything(),
+        ariaRowindex: 4,
+        errors: undefined,
+        rowIdentifier: undefined,
       });
     });
 
@@ -165,6 +171,9 @@ describe('ReorderableTable', () => {
         columns,
         item: { id: 1 },
         additionalProps: {},
+        ariaRowindex: 2,
+        errors: undefined,
+        rowIdentifier: undefined,
       });
     });
 

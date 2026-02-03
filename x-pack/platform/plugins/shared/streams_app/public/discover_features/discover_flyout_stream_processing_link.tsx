@@ -5,29 +5,40 @@
  * 2.0.
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { type DataTableRecord } from '@kbn/discover-utils';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { EuiLoadingSpinner, EuiLink, EuiIcon, EuiFlexGroup, EuiText } from '@elastic/eui';
+import {
+  EuiLoadingSpinner,
+  EuiLink,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiToolTip,
+  useEuiTheme,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { CoreStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import type { StreamsAppLocator } from '../../common/locators';
+import { css } from '@emotion/react';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../common/url_schema/common';
+import type { StreamsAppLocator, StreamsAppLocatorParams } from '../../common/locators';
 import { useResolvedDefinitionName } from './use_resolved_definition_name';
 
 export interface DiscoverFlyoutStreamProcessingLinkProps {
+  dataView: DataView;
   doc: DataTableRecord;
-  streamsRepositoryClient: StreamsRepositoryClient;
-  coreApplication: CoreStart['application'];
+  fieldFormats: FieldFormatsStart;
   locator: StreamsAppLocator;
+  streamsRepositoryClient: StreamsRepositoryClient;
 }
 
 export function DiscoverFlyoutStreamProcessingLink({
-  streamsRepositoryClient,
   doc,
   locator,
-  coreApplication,
+  streamsRepositoryClient,
 }: DiscoverFlyoutStreamProcessingLinkProps) {
+  const { euiTheme } = useEuiTheme();
   const { value, loading, error } = useResolvedDefinitionName({
     streamsRepositoryClient,
     doc,
@@ -42,34 +53,58 @@ export function DiscoverFlyoutStreamProcessingLink({
     managementTab: 'processing',
     pageState: {
       v: 1,
-      dataSources: [
-        {
-          type: 'kql-samples',
-          enabled: true,
-          name: i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
-            defaultMessage: 'Discover document',
-          }),
-          query: {
-            language: 'kuery',
-            query: `_id: ${doc.raw._id}`,
-          },
-        },
-      ],
+      dataSources: [getTargetDataSource(doc, value)],
     },
+  } as StreamsAppLocatorParams);
+
+  const message = i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
+    defaultMessage: 'Parse content in Streams',
   });
 
   return (
-    <RedirectAppLinks coreStart={{ application: coreApplication }}>
-      <EuiLink href={href}>
+    <EuiLink href={href}>
+      <EuiToolTip content={message} display="block">
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiIcon type="sparkles" size="s" />
-          <EuiText size="xs">
-            {i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
-              defaultMessage: 'Parse content in Streams',
-            })}
+          <EuiIcon
+            type="sparkles"
+            size="s"
+            css={css`
+              margin-left: ${euiTheme.size.s};
+            `}
+          />
+          <EuiText size="xs" className="eui-textTruncate">
+            {message}
           </EuiText>
         </EuiFlexGroup>
-      </EuiLink>
-    </RedirectAppLinks>
+      </EuiToolTip>
+    </EuiLink>
   );
 }
+
+const getTargetDataSource = (doc: DataTableRecord, streamName: string) => {
+  const baseDataSource = {
+    enabled: true,
+    name: i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink.customSamplesName', {
+      defaultMessage: 'Discover document from {streamName}',
+      values: { streamName },
+    }),
+  };
+
+  if (doc.raw._id) {
+    return {
+      ...baseDataSource,
+      type: 'kql-samples',
+      query: {
+        language: 'kuery',
+        query: `_id: ${doc.raw._id}`,
+      },
+    };
+  }
+
+  return {
+    ...baseDataSource,
+    type: 'custom-samples',
+    documents: [doc.flattened],
+    storageKey: `${CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX}${streamName}__discover-document`,
+  };
+};

@@ -9,13 +9,11 @@ import expect from '@kbn/expect';
 
 import { PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING } from '@kbn/security-solution-plugin/server/lib/entity_analytics/privilege_monitoring/engine/elasticsearch/mappings';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { enablePrivmonSetting } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const entityAnalyticsApi = getService('entityAnalyticsApi');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
 
   const logWhenNot200 = (res: any) => {
     if (res.status !== 200) {
@@ -32,8 +30,6 @@ export default ({ getService }: FtrProviderContext) => {
         index: indexName,
         mappings: { properties: PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING },
       });
-
-      await enablePrivmonSetting(kibanaServer);
     });
 
     after(async () => {

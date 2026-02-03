@@ -106,11 +106,16 @@ export class PluginsService
   }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
     const config = await firstValueFrom(this.config$);
 
+    const airgapped = await firstValueFrom(
+      this.coreContext.configService.atPath<boolean>('airgapped')
+    ).catch(() => false);
+
     const { error$, plugin$ } = discover({
       config,
       coreContext: this.coreContext,
       instanceInfo: {
         uuid: environment.instanceUuid,
+        airgapped,
       },
       nodeInfo: {
         roles: node.roles,

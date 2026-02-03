@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { MutableRefObject } from 'react';
 
 import type { Column } from '../reorderable_table/types';
 import type { ItemWithAnID } from '../types';
@@ -22,6 +23,7 @@ interface GetUpdatedColumnProps<Item extends ItemWithAnID> {
   canRemoveLastItem?: boolean;
   isLoading?: boolean;
   lastItemWarning?: string;
+  prevFocusRef?: MutableRefObject<HTMLElement | null>;
   uneditableItems?: Item[];
 }
 
@@ -34,6 +36,7 @@ export const getUpdatedColumns = <Item extends ItemWithAnID>({
   isLoading = false,
   lastItemWarning,
   uneditableItems,
+  prevFocusRef,
 }: GetUpdatedColumnProps<Item>): Array<Column<Item>> => {
   return [
     ...columns.map((column) => {
@@ -61,6 +64,7 @@ export const getUpdatedColumns = <Item extends ItemWithAnID>({
           lastItemWarning={lastItemWarning}
           uneditableItems={uneditableItems}
           item={item}
+          prevFocusRef={prevFocusRef}
         />
       ),
     },

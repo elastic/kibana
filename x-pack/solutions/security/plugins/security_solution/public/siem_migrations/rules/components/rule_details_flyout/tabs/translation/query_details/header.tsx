@@ -15,14 +15,20 @@ interface QueryHeaderProps {
 
 export const QueryHeader: React.FC<QueryHeaderProps> = React.memo(({ title, tooltip }) => {
   return (
-    <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+    <EuiFlexGroup data-test-subj="queryHeader" direction="row" gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiTitle size="xxs">
+        <EuiTitle data-test-subj="headerTitle" size="xxs">
           <h3>{title}</h3>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIconTip content={tooltip} type="question" size="s" color="subdued" />
+        <EuiIconTip
+          content={tooltip}
+          type="question"
+          size="s"
+          color="subdued"
+          anchorProps={{ 'data-test-subj': 'headerIconTip' }}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

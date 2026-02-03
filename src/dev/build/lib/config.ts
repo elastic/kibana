@@ -18,8 +18,7 @@ import {
   type PluginPackage,
   getPluginPackagesFilter,
 } from '@kbn/repo-packages';
-import { type ModuleGroup } from '@kbn/projects-solutions-groups';
-
+import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { VersionInfo } from './version_info';
 import { getVersionInfo } from './version_info';
 import type { PlatformName, PlatformArchitecture } from './platform';
@@ -277,7 +276,7 @@ export class Config {
     return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
   }
 
-  getPrivateSolutionPackagesFromRepo(project: ModuleGroup) {
+  getPrivateSolutionPackagesFromRepo(project: KibanaSolution) {
     return getPackages(this.repoRoot).filter(
       (p) => p.group === project && p.visibility === 'private'
     );

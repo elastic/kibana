@@ -22,6 +22,7 @@ export const combineFindAttackDiscoveryFilters = ({
   alertIds,
   connectorNames,
   end,
+  executionUuid,
   ids,
   search,
   start,
@@ -30,6 +31,7 @@ export const combineFindAttackDiscoveryFilters = ({
   alertIds?: string[];
   connectorNames?: string[];
   end?: string;
+  executionUuid?: string;
   ids?: string[];
   search?: string;
   start?: string;
@@ -65,6 +67,7 @@ export const combineFindAttackDiscoveryFilters = ({
     ...(alertIds && alertIds.length > 0
       ? [`(${alertIds.map((id) => `${ALERT_ATTACK_DISCOVERY_ALERT_IDS}: "${id}"`).join(' OR ')})`]
       : []),
+    ...(executionUuid ? [`kibana.alert.rule.execution.uuid: "${executionUuid}"`] : []),
     ...(start ? [`@timestamp >= "${start}"`] : []),
     ...(end ? [`@timestamp <= "${end}"`] : []),
   ];

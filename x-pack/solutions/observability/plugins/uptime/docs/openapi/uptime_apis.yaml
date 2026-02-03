@@ -9,7 +9,7 @@ info:
 tags:
   - name: uptime
     x-displayName: Uptime
-    # description:
+    description: Uptime APIs enable you to view and update uptime monitoring settings.
     externalDocs:
       url: https://www.elastic.co/docs/solutions/observability/uptime
       description: Uptime monitoring

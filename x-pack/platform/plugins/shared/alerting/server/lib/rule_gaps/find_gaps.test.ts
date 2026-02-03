@@ -291,6 +291,37 @@ describe('findGapsSearchAfter', () => {
     );
   });
 
+  it('should handle failedAutoFillAttemptsLessThan filter field', async () => {
+    mockEventLogClient.findEventsBySavedObjectIdsSearchAfter.mockResolvedValue({
+      total: 0,
+      data: [],
+      search_after: undefined,
+      pit_id: 'test-pit-id',
+    });
+
+    await findGapsSearchAfter({
+      eventLogClient: mockEventLogClient,
+      logger: mockLogger,
+      params: {
+        ruleIds: ['test-rule'],
+        perPage: 10,
+        sortField: 'kibana.alert.rule.gap.total_gap_duration_ms',
+        sortOrder: 'asc',
+        start: '2024-01-01',
+        end: '2024-01-02',
+        failedAutoFillAttemptsLessThan: 5,
+      },
+    });
+
+    expect(mockEventLogClient.findEventsBySavedObjectIdsSearchAfter).toHaveBeenCalledWith(
+      'alert',
+      ['test-rule'],
+      expect.objectContaining({
+        filter: expect.stringContaining('kibana.alert.rule.gap.failed_auto_fill_attempts < 5'),
+      })
+    );
+  });
+
   it('should handle errors and log them', async () => {
     const error = new Error('Test error');
     mockEventLogClient.findEventsBySavedObjectIdsSearchAfter.mockRejectedValue(error);

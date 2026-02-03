@@ -45,6 +45,7 @@ import { AddExceptionFlyout } from '../add_exception_flyout';
 import * as i18n from './translations';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import type { Rule } from '../../../rule_management/logic/types';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const StyledText = styled(EuiText)`
   font-style: italic;
@@ -97,7 +98,8 @@ const ExceptionsViewerComponent = ({
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
   const toasts = useToasts();
-  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+  const [{ hasIndexWrite }] = useUserData();
+  const canEditExceptions = useUserPrivileges().rulesPrivileges.exceptions.edit;
   const exceptionListsToQuery = useMemo(
     () =>
       rule != null && rule.exceptions_list != null
@@ -459,8 +461,8 @@ const ExceptionsViewerComponent = ({
 
   // User privileges checks
   useEffect((): void => {
-    setReadOnly(isViewReadOnly || !canUserCRUD || !hasIndexWrite);
-  }, [setReadOnly, isViewReadOnly, canUserCRUD, hasIndexWrite]);
+    setReadOnly(isViewReadOnly || !canEditExceptions || !hasIndexWrite);
+  }, [setReadOnly, isViewReadOnly, hasIndexWrite, canEditExceptions]);
 
   useEffect(() => {
     if (exceptionListsToQuery.length > 0) {

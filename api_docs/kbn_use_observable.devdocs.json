@@ -1,0 +1,385 @@
+{
+  "id": "@kbn/use-observable",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/use-observable",
+        "id": "def-public.useObservable",
+        "type": "Function",
+        "tags": [],
+        "label": "useObservable",
+        "description": [],
+        "signature": [
+          "(observable$: ",
+          {
+            "pluginId": "@kbn/use-observable",
+            "scope": "public",
+            "docId": "kibKbnUseObservablePluginApi",
+            "section": "def-public.ValueObservable",
+            "text": "ValueObservable"
+          },
+          "<T>) => T"
+        ],
+        "path": "src/platform/packages/shared/react/use_observable/src/use_observable.tsx",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/use-observable",
+            "id": "def-public.useObservable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "observable$",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/use-observable",
+                "scope": "public",
+                "docId": "kibKbnUseObservablePluginApi",
+                "section": "def-public.ValueObservable",
+                "text": "ValueObservable"
+              },
+              "<T>"
+            ],
+            "path": "src/platform/packages/shared/react/use_observable/src/use_observable.tsx",
+            "lineNumber": 24,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/use-observable",
+        "id": "def-public.useObservable",
+        "type": "Function",
+        "tags": [],
+        "label": "useObservable",
+        "description": [],
+        "signature": [
+          "(observable$: ",
+          {
+            "pluginId": "@kbn/use-observable",
+            "scope": "public",
+            "docId": "kibKbnUseObservablePluginApi",
+            "section": "def-public.Observable",
+            "text": "Observable"
+          },
+          "<T>, initialValue: T) => T"
+        ],
+        "path": "src/platform/packages/shared/react/use_observable/src/use_observable.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/use-observable",
+            "id": "def-public.useObservable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "observable$",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/use-observable",
+                "scope": "public",
+                "docId": "kibKbnUseObservablePluginApi",
+                "section": "def-public.Observable",
+                "text": "Observable"
+              },
+              "<T>"
+            ],
+            "path": "src/platform/packages/shared/react/use_observable/src/use_observable.tsx",
+            "lineNumber": 25,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/use-observable",
+            "id": "def-public.useObservable.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "initialValue",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/react/use_observable/src/use_observable.tsx",
+            "lineNumber": 25,
+            "columnNumber": 62,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/use-observable",
+        "id": "def-public.useObservable",
+        "type": "Function",
+        "tags": [],
+        "label": "useObservable",
+        "description": [],
+        "signature": [
+          "(observable$: ",
+          {
+            "pluginId": "@kbn/use-observable",
+            "scope": "public",
+            "docId": "kibKbnUseObservablePluginApi",
+            "section": "def-public.Observable",
+            "text": "Observable"
+          },
+          "<T>) => T | undefined"
+        ],
+        "path": "src/platform/packages/shared/react/use_observable/src/use_observable.tsx",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/use-observable",
+            "id": "def-public.useObservable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "observable$",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/use-observable",
+                "scope": "public",
+                "docId": "kibKbnUseObservablePluginApi",
+                "section": "def-public.Observable",
+                "text": "Observable"
+              },
+              "<T>"
+            ],
+            "path": "src/platform/packages/shared/react/use_observable/src/use_observable.tsx",
+            "lineNumber": 26,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/use-observable",
+        "id": "def-public.useObservable",
+        "type": "Function",
+        "tags": [],
+        "label": "useObservable",
+        "description": [],
+        "signature": [
+          "(observable$: ",
+          {
+            "pluginId": "@kbn/use-observable",
+            "scope": "public",
+            "docId": "kibKbnUseObservablePluginApi",
+            "section": "def-public.Observable",
+            "text": "Observable"
+          },
+          "<T>, initialValue: T | undefined) => T | undefined"
+        ],
+        "path": "src/platform/packages/shared/react/use_observable/src/use_observable.tsx",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/use-observable",
+            "id": "def-public.useObservable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "observable$",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/use-observable",
+                "scope": "public",
+                "docId": "kibKbnUseObservablePluginApi",
+                "section": "def-public.Observable",
+                "text": "Observable"
+              },
+              "<T>"
+            ],
+            "path": "src/platform/packages/shared/react/use_observable/src/use_observable.tsx",
+            "lineNumber": 27,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/use-observable",
+            "id": "def-public.useObservable.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "initialValue",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "src/platform/packages/shared/react/use_observable/src/use_observable.tsx",
+            "lineNumber": 27,
+            "columnNumber": 62,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/use-observable",
+        "id": "def-public.Observable",
+        "type": "Interface",
+        "tags": [],
+        "label": "Observable",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/use-observable",
+            "scope": "public",
+            "docId": "kibKbnUseObservablePluginApi",
+            "section": "def-public.Observable",
+            "text": "Observable"
+          },
+          "<T>"
+        ],
+        "path": "src/platform/packages/shared/react/use_observable/src/use_observable.tsx",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/use-observable",
+            "id": "def-public.Observable.subscribe",
+            "type": "Function",
+            "tags": [],
+            "label": "subscribe",
+            "description": [],
+            "signature": [
+              "(listener: (value: T) => void) => { unsubscribe: () => void; }"
+            ],
+            "path": "src/platform/packages/shared/react/use_observable/src/use_observable.tsx",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/use-observable",
+                "id": "def-public.Observable.subscribe.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "listener",
+                "description": [],
+                "signature": [
+                  "(value: T) => void"
+                ],
+                "path": "src/platform/packages/shared/react/use_observable/src/use_observable.tsx",
+                "lineNumber": 15,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/use-observable",
+        "id": "def-public.ValueObservable",
+        "type": "Interface",
+        "tags": [],
+        "label": "ValueObservable",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/use-observable",
+            "scope": "public",
+            "docId": "kibKbnUseObservablePluginApi",
+            "section": "def-public.ValueObservable",
+            "text": "ValueObservable"
+          },
+          "<T> extends ",
+          {
+            "pluginId": "@kbn/use-observable",
+            "scope": "public",
+            "docId": "kibKbnUseObservablePluginApi",
+            "section": "def-public.Observable",
+            "text": "Observable"
+          },
+          "<T>"
+        ],
+        "path": "src/platform/packages/shared/react/use_observable/src/use_observable.tsx",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/use-observable",
+            "id": "def-public.ValueObservable.getValue",
+            "type": "Function",
+            "tags": [],
+            "label": "getValue",
+            "description": [],
+            "signature": [
+              "() => T"
+            ],
+            "path": "src/platform/packages/shared/react/use_observable/src/use_observable.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

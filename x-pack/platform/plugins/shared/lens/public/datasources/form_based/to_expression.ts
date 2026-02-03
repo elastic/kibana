@@ -22,19 +22,21 @@ import type {
 } from '@kbn/expressions-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { getESQLForLayer } from './to_esql';
-import { convertToAbsoluteDateRange } from '../../utils';
-import type { DateRange } from '../../../common/types';
-import type { GenericIndexPatternColumn } from './form_based';
-import { operationDefinitionMap } from './operations';
-import type { FormBasedPrivateState, FormBasedLayer } from './types';
 import type {
   DateHistogramIndexPatternColumn,
+  DateRange,
+  FormBasedLayer,
+  FormBasedPrivateState,
+  FormattedIndexPatternColumn,
+  GenericIndexPatternColumn,
+  IndexPattern,
+  IndexPatternMap,
   RangeIndexPatternColumn,
-} from './operations/definitions';
-import type { FormattedIndexPatternColumn } from './operations/definitions/column_types';
+} from '@kbn/lens-common';
+import { isEsqlQuerySuccess, generateEsqlQuery } from './generate_esql_query';
+import { convertToAbsoluteDateRange } from '../../utils';
+import { operationDefinitionMap } from './operations';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
-import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
 import { resolveTimeShift } from './time_shift_utils';
 import { getSamplingValue } from './utils';
@@ -175,12 +177,15 @@ function getExpressionForLayer(
 
     // esql mode variables
     const lensESQLEnabled = featureFlags.getBooleanValue('lens.enable_esql', false);
-    const canUseESQL = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL; // read from a setting
-    const esqlLayer =
-      canUseESQL &&
-      getESQLForLayer(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant);
+    const canUseESQL: boolean = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL;
 
-    if (!esqlLayer) {
+    // Only generate ES|QL query when ES|QL mode is enabled
+    const esqlLayer = canUseESQL
+      ? generateEsqlQuery(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant)
+      : undefined;
+    const isFormBasedEsqlMode = canUseESQL && !!esqlLayer && isEsqlQuerySuccess(esqlLayer);
+
+    if (!isFormBasedEsqlMode) {
       esAggEntries.forEach(([colId, col], index) => {
         const def = operationDefinitionMap[col.operationType];
         if (def.input !== 'fullReference' && def.input !== 'managedReference') {
@@ -359,7 +364,9 @@ function getExpressionForLayer(
 
       esAggsIdMap = updatedEsAggsIdMap;
     } else {
-      esAggsIdMap = esqlLayer.esAggsIdMap;
+      // generateEsqlQuery returns the full column data but typed with the minimal common OriginalColumn.
+      // The runtime objects have all properties needed by the local OriginalColumn type.
+      esAggsIdMap = esqlLayer.esAggsIdMap as unknown as Record<string, OriginalColumn[]>;
     }
 
     const columnsWithFormatters = columnEntries.filter(
@@ -479,7 +486,7 @@ function getExpressionForLayer(
       )
       .filter((field): field is string => Boolean(field));
 
-    const dataAST = esqlLayer
+    const dataAST = isFormBasedEsqlMode
       ? buildExpressionFunction('esql', {
           query: esqlLayer.esql,
           timeField: allDateHistogramFields[0],
@@ -489,7 +496,7 @@ function getExpressionForLayer(
           index: buildExpression([
             buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(
               'indexPatternLoad',
-              { id: indexPattern.id }
+              { id: indexPattern.id, includeFields: false }
             ),
           ]),
           aggs,
@@ -511,7 +518,7 @@ function getExpressionForLayer(
           function: 'lens_map_to_columns',
           arguments: {
             idMap: [JSON.stringify(esAggsIdMap)],
-            isTextBased: [!!esqlLayer],
+            isTextBased: [isFormBasedEsqlMode],
           },
         },
         ...expressions,

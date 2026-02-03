@@ -13,8 +13,8 @@ import React, { useCallback, useMemo, useReducer } from 'react';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
-import type { QueryClient } from '@tanstack/react-query';
-import { QueryClientProvider } from '@tanstack/react-query';
+import type { QueryClient } from '@kbn/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import type {
   CasesFeaturesAllRequired,
   CasesFeatures,
@@ -133,6 +133,10 @@ export const CasesProvider: FC<
       permissions.reopenCase,
       permissions.createComment,
       permissions.assign,
+      // Interim bug fix until we refactor this code to avoid passing objects in deps
+      // Need to revisit the re-rendering strategy in general as disabling exhaustive-deps is an anti-pattern
+      features.alerts?.all,
+      features.alerts?.read,
     ]
   );
 

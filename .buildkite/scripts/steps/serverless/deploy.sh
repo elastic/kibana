@@ -5,7 +5,13 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-KIBANA_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:pr-$BUILDKITE_PULL_REQUEST-${BUILDKITE_COMMIT:0:12}"
+if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+  PR_NUMBER="$GITHUB_PR_NUMBER"
+else
+  PR_NUMBER="$BUILDKITE_PULL_REQUEST"
+fi
+
+KIBANA_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:pr-$PR_NUMBER-${BUILDKITE_COMMIT:0:12}"
 
 deploy() {
   PROJECT_TYPE=$1
@@ -20,6 +26,9 @@ deploy() {
     ;;
     security)
       PROJECT_TYPE_LABEL='Security'
+    ;;
+    workplaceai)
+      PROJECT_TYPE_LABEL='Workplace AI'
     ;;
   esac
 
@@ -38,7 +47,7 @@ deploy() {
     esac
   fi
 
-  PROJECT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST-$PROJECT_TYPE$PRODUCT_TIER_NAME"
+  PROJECT_NAME="kibana-pr-$PR_NUMBER-$PROJECT_TYPE$PRODUCT_TIER_NAME"
   VAULT_KEY_NAME="$PROJECT_NAME"
   is_pr_with_label "ci:project-persist-deployment" && PROJECT_NAME="keep_$PROJECT_NAME"
   PROJECT_CREATE_CONFIGURATION='{
@@ -162,16 +171,16 @@ $KIBANA_IMAGE
 
 ### Kibana pull request
 
-$BUILDKITE_PULL_REQUEST
+$PR_NUMBER
 
 ### Further details
 
-Caused by the GitHub label 'ci:project-deploy-observability' in https://github.com/elastic/kibana/pull/$BUILDKITE_PULL_REQUEST
+Caused by the GitHub label 'ci:project-deploy-observability' in https://github.com/elastic/kibana/pull/$PR_NUMBER
 EOF
 
   GH_TOKEN="$GITHUB_TOKEN" \
   gh issue create \
-    --title "[Deploy Serverless Kibana] for user $GITHUB_PR_TRIGGER_USER with PR kibana@pr-$BUILDKITE_PULL_REQUEST" \
+    --title "[Deploy Serverless Kibana] for user $GITHUB_PR_TRIGGER_USER with PR kibana@pr-$PR_NUMBER" \
     --body-file "${GITHUB_ISSUE}" \
     --label 'deploy-custom-kibana-serverless' \
     --repo 'elastic/observability-test-environments'
@@ -181,6 +190,7 @@ is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
 is_pr_with_label "ci:project-deploy-security" && deploy "security"
 is_pr_with_label "ci:project-deploy-ai4soc" && deploy "security" "ai_soc"
 is_pr_with_label "ci:project-deploy-log_essentials" && deploy "observability" "logs_essentials"
+is_pr_with_label "ci:project-deploy-workplace_ai" && deploy "workplaceai"
 if is_pr_with_label "ci:project-deploy-observability" ; then
   # Only deploy observability if the PR is targeting main
   if [[ "$BUILDKITE_PULL_REQUEST_BASE_BRANCH" == "main" ]]; then

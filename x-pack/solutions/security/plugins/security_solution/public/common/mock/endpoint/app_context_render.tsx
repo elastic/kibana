@@ -21,10 +21,10 @@ import {
   renderHook as reactRenderHook,
 } from '@testing-library/react';
 import type { Action, Reducer, Store } from 'redux';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from '@kbn/fleet-plugin/common';
-import type { UseBaseQueryResult } from '@tanstack/react-query';
+import type { UseBaseQueryResult } from '@kbn/react-query';
 import ReactDOM from 'react-dom';
 import type { DeepReadonly } from 'utility-types';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';

@@ -27,6 +27,8 @@ const createRulesClientMock = () => {
     disableRule: jest.fn(),
     enableRule: jest.fn(),
     updateRuleApiKey: jest.fn(),
+    bulkMuteInstances: jest.fn(),
+    bulkUnmuteInstances: jest.fn(),
     muteAll: jest.fn(),
     unmuteAll: jest.fn(),
     muteInstance: jest.fn(),
@@ -66,6 +68,13 @@ const createRulesClientMock = () => {
     bulkFillGapsByRuleIds: jest.fn(),
     getRuleTypesByQuery: jest.fn(),
     getTemplate: jest.fn(),
+    findTemplates: jest.fn(),
+    createGapAutoFillScheduler: jest.fn(),
+    getGapAutoFillScheduler: jest.fn(),
+    updateGapAutoFillScheduler: jest.fn(),
+    deleteGapAutoFillScheduler: jest.fn(),
+    findGapAutoFillSchedulerLogs: jest.fn(),
+    getContext: jest.fn(),
   };
   return mocked;
 };

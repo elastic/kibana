@@ -282,8 +282,3 @@ export const updateSampleSize = actionCreator<{
   id: string;
   sampleSize: number;
 }>('UPDATE_SAMPLE_SIZE');
-
-export const setConfirmingNoteId = actionCreator<{
-  id: string;
-  confirmingNoteId: string | null | undefined;
-}>('SET_CONFIRMING_NOTE_ID');

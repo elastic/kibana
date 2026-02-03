@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiToolTip } fro
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
 import React from 'react';
+import { css } from '@emotion/react';
 import { SearchSessionStatus } from '../../../../../common';
 import { dateString } from '../lib/date_string';
 import type { UISession } from '../types';
@@ -184,7 +185,9 @@ export const StatusIndicator = (props: StatusIndicatorProps) => {
 
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+          <EuiFlexItem grow={false} css={iconCss}>
+            {icon}
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <TableText
               color={statusDef.textColor}
@@ -205,3 +208,7 @@ export const StatusIndicator = (props: StatusIndicatorProps) => {
   // Exception has been caught
   return <TableText>{props.session.status}</TableText>;
 };
+
+const iconCss = css`
+  line-height: 1;
+`;

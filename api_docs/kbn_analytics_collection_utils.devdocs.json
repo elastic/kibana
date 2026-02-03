@@ -32,6 +32,8 @@
           "() => boolean"
         ],
         "path": "src/platform/packages/private/analytics/utils/analytics_collection_utils/src/is_synthetics_monitor.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

@@ -54,7 +54,6 @@ export const SearchSynonymsOverview = () => {
         <KibanaPageTemplate.Header
           pageTitle={PLUGIN_TITLE}
           restrictWidth
-          color="primary"
           rightSideItems={[
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>

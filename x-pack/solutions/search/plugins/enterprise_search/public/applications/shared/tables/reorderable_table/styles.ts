@@ -29,9 +29,6 @@ export const reorderableTableStyles = (euiTheme: EuiThemeComputed<{}>) =>
 
     // Row
     '.reorderableTableRow': {
-      '> .euiFlexGroup > .euiFlexItem': {
-        margin: `${euiTheme.size.m} 0`,
-      },
       backgroundColor: euiTheme.colors.emptyShade,
       borderTop: euiTheme.border.thin,
     },
@@ -40,4 +37,9 @@ export const reorderableTableStyles = (euiTheme: EuiThemeComputed<{}>) =>
     '.unorderableRows .reorderableTableRow': {
       backgroundColor: euiTheme.colors.lightestShade,
     },
+  });
+
+export const bodyRowItemStyles = (euiTheme: EuiThemeComputed<{}>) =>
+  css({
+    margin: `${euiTheme.size.m} 0`,
   });

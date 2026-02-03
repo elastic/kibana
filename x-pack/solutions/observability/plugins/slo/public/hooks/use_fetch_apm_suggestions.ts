@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import moment from 'moment';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { useKibana } from './use_kibana';

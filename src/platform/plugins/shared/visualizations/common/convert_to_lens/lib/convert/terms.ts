@@ -9,8 +9,9 @@
 
 import { BUCKET_TYPES } from '@kbn/data-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import type { DataType, TermsParams } from '../../types';
-import { getFieldNameFromField, isColumnWithMeta } from '../utils';
+import type { DataType } from '@kbn/lens-common';
+import type { TermsParams } from '../../types';
+import { getFieldNameFromField, isColumnMetric, isColumnWithMeta } from '../utils';
 import { convertToSchemaConfig } from '../../../vis_schemas';
 import { convertMetricToColumns } from '../metrics';
 import type { CommonBucketConverterArgs, TermsColumn } from './types';
@@ -45,7 +46,7 @@ const getOrderByWithAgg = ({
       aggs,
       visType,
     });
-    if (!orderMetricColumn) {
+    if (!orderMetricColumn || !isColumnMetric(orderMetricColumn[0])) {
       return null;
     }
     return {
@@ -61,7 +62,7 @@ const getOrderByWithAgg = ({
     return false;
   });
 
-  if (!orderAgg) {
+  if (!orderAgg || !isColumnMetric(orderAgg)) {
     return null;
   }
 

@@ -19,7 +19,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
     class="euiText emotion-euiText-m"
@@ -43,7 +43,7 @@ Array [
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
@@ -86,7 +86,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
     class="euiText eui-textLeft emotion-euiText-m"
@@ -154,7 +154,7 @@ Array [
         >
           Elasticsearch Service Console
           <span
-            class="emotion-EuiExternalLinkIcon"
+            class="css-1j75qc1"
             data-euiicon-type="popout"
             role="presentation"
           />
@@ -173,7 +173,7 @@ Array [
         >
           Logs and metrics
           <span
-            class="emotion-EuiExternalLinkIcon"
+            class="css-1j75qc1"
             data-euiicon-type="popout"
             role="presentation"
           />
@@ -192,7 +192,7 @@ Array [
         >
           the documentation page.
           <span
-            class="emotion-EuiExternalLinkIcon"
+            class="css-1j75qc1"
             data-euiicon-type="popout"
             role="presentation"
           />
@@ -206,7 +206,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
     class="euiText eui-textLeft emotion-euiText-m"
@@ -237,7 +237,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
     class="euiText emotion-euiText-m"

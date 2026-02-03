@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import type { OperatorOption } from '@kbn/securitysolution-list-utils';
@@ -50,18 +50,19 @@ export const OperatorComponent: React.FC<OperatorState> = ({
         : getOperators(selectedField),
     [operatorOptions, selectedField]
   );
-  const selectedOptionsMemo = useMemo(
+  const selectedOptionsFromProps = useMemo(
     (): OperatorOption[] => (operator ? [operator] : []),
     [operator]
   );
+  const [selectedOptions, setSelectedOptions] = useState([operator]);
   const { comboOptions, labels, selectedComboOptions } = useMemo(
     (): GetGenericComboBoxPropsReturn =>
       getGenericComboBoxProps<OperatorOption>({
         getLabel,
         options: optionsMemo,
-        selectedOptions: selectedOptionsMemo,
+        selectedOptions,
       }),
-    [optionsMemo, selectedOptionsMemo, getLabel]
+    [optionsMemo, selectedOptions, getLabel]
   );
 
   const handleValuesChange = useCallback(
@@ -69,10 +70,20 @@ export const OperatorComponent: React.FC<OperatorState> = ({
       const newValues: OperatorOption[] = newOptions.map(
         ({ label }) => optionsMemo[labels.indexOf(label)]
       );
-      onChange(newValues);
+      setSelectedOptions(newValues);
+
+      if (newValues.length > 0) {
+        onChange(newValues);
+      }
     },
     [labels, onChange, optionsMemo]
   );
+
+  const handleOnBlur = useCallback(() => {
+    if (selectedOptions.length === 0) {
+      setSelectedOptions(selectedOptionsFromProps);
+    }
+  }, [selectedOptions, selectedOptionsFromProps]);
 
   const inputWidth = useMemo(() => {
     return { width: `${operatorInputWidth}px` };
@@ -84,6 +95,7 @@ export const OperatorComponent: React.FC<OperatorState> = ({
       options={comboOptions}
       selectedOptions={selectedComboOptions}
       onChange={handleValuesChange}
+      onBlur={handleOnBlur}
       isLoading={isLoading}
       isDisabled={isDisabled}
       isClearable={isClearable}

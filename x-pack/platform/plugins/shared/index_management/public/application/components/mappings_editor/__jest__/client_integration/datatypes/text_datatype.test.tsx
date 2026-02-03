@@ -5,48 +5,34 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import React from 'react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
 
-import type { MappingsEditorTestBed } from '../helpers';
-import { componentHelpers, kibanaVersion } from '../helpers';
+import { WithAppDependencies, kibanaVersion } from '../helpers/setup_environment';
+import { MappingsEditor } from '../../../mappings_editor';
 import { getFieldConfig } from '../../../lib';
+import { defaultTextParameters } from './fixtures';
+import type { TestMappings } from './text_datatype.helpers';
+import {
+  getLatestMappings,
+  onChangeHandler,
+  openFieldEditor,
+  selectAnalyzer,
+  submitForm,
+  toggleAdvancedSettings,
+  toggleUseSameSearchAnalyzer,
+  updateFieldName,
+} from './text_datatype.helpers';
 
-const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
-// Parameters automatically added to the text datatype when saved (with the default values)
-export const defaultTextParameters = {
-  type: 'text',
-  eager_global_ordinals: false,
-  fielddata: false,
-  index: true,
-  index_options: 'positions',
-  index_phrases: false,
-  norms: true,
-  store: false,
-};
+// substantial helpers extracted to `text_datatype.helpers.tsx`
 
 describe('Mappings editor: text datatype', () => {
-  /**
-   * Variable to store the mappings data forwarded to the consumer component
-   */
-  let data: any;
-  let onChangeHandler: jest.Mock = jest.fn();
-  let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
-  let testBed: MappingsEditorTestBed;
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
-  beforeEach(() => {
-    onChangeHandler = jest.fn();
-    getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
-  });
-
   test('initial view and default parameters values', async () => {
     const defaultMappings = {
       properties: {
@@ -56,36 +42,33 @@ describe('Mappings editor: text datatype', () => {
       },
     };
 
-    await act(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
-    });
-    testBed.component.update();
+    const Component = WithAppDependencies(MappingsEditor, {});
+    render(
+      <I18nProvider>
+        <Component value={defaultMappings} onChange={onChangeHandler} indexSettings={{}} />
+      </I18nProvider>
+    );
 
-    const {
-      component,
-      exists,
-      actions: { startEditField, updateFieldName, getToggleValue, updateFieldAndCloseFlyout },
-    } = testBed;
+    await screen.findByTestId('mappingsEditor');
 
-    // Open the flyout to edit the field
-    await startEditField('myField');
+    const flyout = await openFieldEditor();
 
-    // Update the name of the field
-    await updateFieldName('updatedField');
+    updateFieldName(flyout, 'updatedField');
 
     // It should have searchable ("index" param) active by default
     const indexFieldConfig = getFieldConfig('index');
-    expect(getToggleValue('indexParameter.formRowToggle')).toBe(indexFieldConfig.defaultValue);
+    const indexParameterSection = within(flyout).getByTestId('indexParameter');
+    const indexToggle = within(indexParameterSection).getByTestId('formRowToggle');
+    expect(indexToggle.getAttribute('aria-checked')).toBe(String(indexFieldConfig.defaultValue));
 
     if (kibanaVersion.major < 7) {
-      expect(exists('boostParameterToggle')).toBe(true);
+      expect(within(flyout).queryByTestId('boostParameterToggle')).toBeInTheDocument();
     } else {
       // Since 8.x the boost parameter is deprecated
-      expect(exists('boostParameterToggle')).toBe(false);
+      expect(within(flyout).queryByTestId('boostParameterToggle')).not.toBeInTheDocument();
     }
 
-    // Save the field and close the flyout
-    await updateFieldAndCloseFlyout();
+    await submitForm(flyout);
 
     // It should have the default parameters values added
     const updatedMappings = {
@@ -96,330 +79,529 @@ describe('Mappings editor: text datatype', () => {
       },
     };
 
-    ({ data } = await getMappingsEditorData(component));
-    expect(data).toEqual(updatedMappings);
+    expect(getLatestMappings()).toEqual(updatedMappings);
   });
 
-  test('analyzer parameter: default values', async () => {
-    const defaultMappings = {
+  describe('analyzer parameter', () => {
+    const defaultMappingsWithAnalyzer = {
       _meta: {},
       _source: {},
       properties: {
         myField: {
           type: 'text',
-          // Should have 2 dropdown selects:
-          // The first one set to 'language' and the second one set to 'french
           search_quote_analyzer: 'french',
         },
       },
     };
 
-    await act(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
-    });
-    testBed.component.update();
-
-    const {
-      component,
-      find,
-      exists,
-      form: { selectCheckBox, setSelectValue },
-      actions: {
-        startEditField,
-        updateFieldName,
-        getCheckboxValue,
-        showAdvancedSettings,
-        updateFieldAndCloseFlyout,
-      },
-    } = testBed;
-    const fieldToEdit = 'myField';
-    const newFieldName = 'updatedField';
-
-    // Start edit, update the name only, and save to have all the default values
-    await startEditField(fieldToEdit);
-    await showAdvancedSettings();
-    await updateFieldName(newFieldName);
-    await updateFieldAndCloseFlyout();
-
-    expect(exists('mappingsEditorFieldEdit')).toBe(false);
-
-    ({ data } = await getMappingsEditorData(component));
-
-    let updatedMappings: any = {
-      ...defaultMappings,
-      properties: {
-        updatedField: {
-          ...defaultMappings.properties.myField,
-          ...defaultTextParameters,
-        },
-      },
-    };
-    expect(data).toEqual(updatedMappings);
-
-    // Re-open the edit panel
-    await startEditField(newFieldName);
-    await showAdvancedSettings();
-
-    // When no analyzer is defined, defaults to "Index default"
-    let indexAnalyzerValue = find('indexAnalyzer.select').props().value;
-    expect(indexAnalyzerValue).toEqual('index_default');
-
-    const searchQuoteAnalyzerSelects = find('searchQuoteAnalyzer.select');
-
-    expect(searchQuoteAnalyzerSelects.length).toBe(2);
-    expect(searchQuoteAnalyzerSelects.at(0).props().value).toBe('language');
-    expect(searchQuoteAnalyzerSelects.at(1).props().value).toBe(
-      defaultMappings.properties.myField.search_quote_analyzer
-    );
-
-    // When no "search_analyzer" is defined, the checkBox should be checked
-    let isUseSameAnalyzerForSearchChecked = getCheckboxValue(
-      'useSameAnalyzerForSearchCheckBox.input'
-    );
-    expect(isUseSameAnalyzerForSearchChecked).toBe(true);
-
-    // And the search analyzer select should not exist
-    expect(exists('searchAnalyzer')).toBe(false);
-
-    // Uncheck the "Use same analyzer for search" checkbox and make sure the dedicated select appears
-    await act(async () => {
-      selectCheckBox('useSameAnalyzerForSearchCheckBox.input', false);
-    });
-    component.update();
-
-    expect(exists('searchAnalyzer.select')).toBe(true);
-
-    let searchAnalyzerValue = find('searchAnalyzer.select').props().value;
-    expect(searchAnalyzerValue).toEqual('index_default');
-
-    await act(async () => {
-      // Change the value of the 3 analyzers
-      setSelectValue('indexAnalyzer.select', 'standard', false);
-      setSelectValue('searchAnalyzer.select', 'simple', false);
-      setSelectValue(find('searchQuoteAnalyzer.select').at(0), 'whitespace', false);
+    afterEach(() => {
+      // Ensure flyout is closed after each test
+      const flyout = screen.queryByTestId('mappingsEditorFieldEdit');
+      if (flyout) {
+        const closeButton = within(flyout).queryByTestId('euiFlyoutCloseButton');
+        if (closeButton) {
+          fireEvent.click(closeButton);
+        }
+      }
     });
 
-    await updateFieldAndCloseFlyout();
+    test('should apply default values and show correct initial analyzers', async () => {
+      const Component = WithAppDependencies(MappingsEditor, {});
+      render(
+        <I18nProvider>
+          <Component
+            value={defaultMappingsWithAnalyzer}
+            onChange={onChangeHandler}
+            indexSettings={{}}
+          />
+        </I18nProvider>
+      );
 
-    updatedMappings = {
-      ...updatedMappings,
-      properties: {
-        updatedField: {
-          ...updatedMappings.properties.updatedField,
-          analyzer: 'standard',
-          search_analyzer: 'simple',
-          search_quote_analyzer: 'whitespace',
+      await screen.findByTestId('mappingsEditor');
+
+      const newFieldName = 'updatedField';
+
+      // Edit field, change name, and save to apply defaults
+      const flyout = await openFieldEditor();
+      await toggleAdvancedSettings(flyout);
+      updateFieldName(flyout, newFieldName);
+      await submitForm(flyout);
+
+      // Verify default parameters were added
+      const updatedMappings = {
+        ...defaultMappingsWithAnalyzer,
+        properties: {
+          updatedField: {
+            ...defaultMappingsWithAnalyzer.properties.myField,
+            ...defaultTextParameters,
+          },
         },
-      },
-    };
+      };
 
-    ({ data } = await getMappingsEditorData(component));
-    expect(data).toEqual(updatedMappings);
+      expect(getLatestMappings()).toEqual(updatedMappings);
 
-    // Re-open the flyout and make sure the select have the correct updated value
-    await startEditField(newFieldName);
-    await showAdvancedSettings();
+      // Re-open and verify initial analyzer states
+      const flyoutReopened = await openFieldEditor();
+      await toggleAdvancedSettings(flyoutReopened);
 
-    isUseSameAnalyzerForSearchChecked = getCheckboxValue('useSameAnalyzerForSearchCheckBox.input');
-    expect(isUseSameAnalyzerForSearchChecked).toBe(false);
+      // indexAnalyzer should default to "Index default"
+      const indexAnalyzerHarness = new EuiSuperSelectTestHarness('indexAnalyzer');
+      expect(indexAnalyzerHarness.getSelected()).toContain('Index default');
 
-    indexAnalyzerValue = find('indexAnalyzer.select').props().value;
-    searchAnalyzerValue = find('searchAnalyzer.select').props().value;
-    const searchQuoteAnalyzerValue = find('searchQuoteAnalyzer.select').props().value;
+      // searchQuoteAnalyzer should show 'french' language
+      const allSelects = within(flyoutReopened).getAllByTestId('select');
+      const frenchAnalyzerSelect = allSelects.find(
+        (el) =>
+          el.tagName === 'SELECT' &&
+          (el as HTMLSelectElement).value ===
+            defaultMappingsWithAnalyzer.properties.myField.search_quote_analyzer
+      ) as HTMLSelectElement;
+      expect(frenchAnalyzerSelect).toHaveValue('french');
 
-    expect(indexAnalyzerValue).toBe('standard');
-    expect(searchAnalyzerValue).toBe('simple');
-    expect(searchQuoteAnalyzerValue).toBe('whitespace');
-  });
+      // "Use same analyzer for search" should be checked
+      expect(within(flyoutReopened).getByRole('checkbox')).toBeChecked();
 
-  test('analyzer parameter: custom analyzer (external plugin)', async () => {
-    const defaultMappings = {
-      _meta: {},
-      _source: {},
-      properties: {
-        myField: {
-          type: 'text',
-          analyzer: 'myCustomIndexAnalyzer',
-          search_analyzer: 'myCustomSearchAnalyzer',
-          search_quote_analyzer: 'myCustomSearchQuoteAnalyzer',
-        },
-      },
-    };
+      // searchAnalyzer should not exist when checkbox is checked
+      expect(within(flyoutReopened).queryByTestId('searchAnalyzer')).not.toBeInTheDocument();
+    }, 20000);
 
-    let updatedMappings: any = {
-      ...defaultMappings,
-      properties: {
-        myField: {
-          ...defaultMappings.properties.myField,
-          ...defaultTextParameters,
-        },
-      },
-    };
+    test('should toggle search analyzer visibility when unchecking checkbox', async () => {
+      const Component = WithAppDependencies(MappingsEditor, {});
+      render(
+        <I18nProvider>
+          <Component
+            value={defaultMappingsWithAnalyzer}
+            onChange={onChangeHandler}
+            indexSettings={{}}
+          />
+        </I18nProvider>
+      );
 
-    await act(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+      await screen.findByTestId('mappingsEditor');
+
+      // Open field editor with advanced settings
+      const flyout = await openFieldEditor();
+      await toggleAdvancedSettings(flyout);
+
+      // Verify "use same analyzer" checkbox is checked initially
+      let useSameAnalyzerCheckbox = within(flyout).getByRole('checkbox');
+      expect(useSameAnalyzerCheckbox).toBeChecked();
+      expect(within(flyout).queryByTestId('searchAnalyzer')).not.toBeInTheDocument();
+
+      // Uncheck the checkbox
+      toggleUseSameSearchAnalyzer(flyout);
+
+      await waitFor(() => {
+        expect(within(flyout).queryByTestId('searchAnalyzer')).toBeInTheDocument();
+      });
+
+      // Verify both analyzers are present with 'Index default' selected
+      const indexAnalyzerHarness = new EuiSuperSelectTestHarness('indexAnalyzer');
+      const searchAnalyzerHarness = new EuiSuperSelectTestHarness('searchAnalyzer');
+      expect(indexAnalyzerHarness.getSelected()).toContain('Index default');
+      expect(searchAnalyzerHarness.getSelected()).toContain('Index default');
+
+      // Verify checkbox is now unchecked
+      useSameAnalyzerCheckbox = within(flyout).getByRole('checkbox');
+      expect(useSameAnalyzerCheckbox).not.toBeChecked();
     });
-    testBed.component.update();
 
-    const {
-      find,
-      exists,
-      component,
-      form: { setInputValue, setSelectValue },
-      actions: { startEditField, showAdvancedSettings, updateFieldAndCloseFlyout },
-    } = testBed;
-    const fieldToEdit = 'myField';
+    test('should update and persist indexAnalyzer value', async () => {
+      const Component = WithAppDependencies(MappingsEditor, {});
+      render(
+        <I18nProvider>
+          <Component
+            value={defaultMappingsWithAnalyzer}
+            onChange={onChangeHandler}
+            indexSettings={{}}
+          />
+        </I18nProvider>
+      );
 
-    await startEditField(fieldToEdit);
-    await showAdvancedSettings();
+      await screen.findByTestId('mappingsEditor');
 
-    expect(exists('indexAnalyzer-custom')).toBe(true);
-    expect(exists('searchAnalyzer-custom')).toBe(true);
-    expect(exists('searchQuoteAnalyzer-custom')).toBe(true);
+      let flyout = await openFieldEditor();
+      await toggleAdvancedSettings(flyout);
+      updateFieldName(flyout, 'updatedField');
 
-    const indexAnalyzerValue = find('indexAnalyzer-custom.input').props().value;
-    const searchAnalyzerValue = find('searchAnalyzer-custom.input').props().value;
-    const searchQuoteAnalyzerValue = find('searchQuoteAnalyzer-custom.input').props().value;
+      await selectAnalyzer(flyout, 'indexAnalyzer', 'standard');
+      await submitForm(flyout);
 
-    expect(indexAnalyzerValue).toBe(defaultMappings.properties.myField.analyzer);
-    expect(searchAnalyzerValue).toBe(defaultMappings.properties.myField.search_analyzer);
-    expect(searchQuoteAnalyzerValue).toBe(defaultMappings.properties.myField.search_quote_analyzer);
+      const updatedMappings = {
+        ...defaultMappingsWithAnalyzer,
+        properties: {
+          updatedField: {
+            ...defaultMappingsWithAnalyzer.properties.myField,
+            ...defaultTextParameters,
+            analyzer: 'standard',
+          },
+        },
+      };
 
-    const updatedIndexAnalyzer = 'newCustomIndexAnalyzer';
-    const updatedSearchAnalyzer = 'whitespace';
+      expect(getLatestMappings()).toEqual(updatedMappings);
 
-    await act(async () => {
+      // Re-open and verify value persisted
+      flyout = await openFieldEditor();
+      await toggleAdvancedSettings(flyout);
+      const indexAnalyzerHarnessFinal = new EuiSuperSelectTestHarness('indexAnalyzer');
+      expect(indexAnalyzerHarnessFinal.getSelected()).toContain('Standard');
+    });
+
+    test('should update and persist searchAnalyzer value', async () => {
+      const Component = WithAppDependencies(MappingsEditor, {});
+      render(
+        <I18nProvider>
+          <Component
+            value={defaultMappingsWithAnalyzer}
+            onChange={onChangeHandler}
+            indexSettings={{}}
+          />
+        </I18nProvider>
+      );
+
+      await screen.findByTestId('mappingsEditor');
+
+      let flyout = await openFieldEditor();
+      await toggleAdvancedSettings(flyout);
+      updateFieldName(flyout, 'updatedField');
+
+      toggleUseSameSearchAnalyzer(flyout);
+      expect(within(flyout).queryByTestId('searchAnalyzer')).toBeInTheDocument();
+
+      await selectAnalyzer(flyout, 'searchAnalyzer', 'simple');
+      await submitForm(flyout);
+
+      const updatedMappings = {
+        ...defaultMappingsWithAnalyzer,
+        properties: {
+          updatedField: {
+            ...defaultMappingsWithAnalyzer.properties.myField,
+            ...defaultTextParameters,
+            search_analyzer: 'simple',
+          },
+        },
+      };
+
+      expect(getLatestMappings()).toEqual(updatedMappings);
+
+      // Re-open and verify value persisted
+      flyout = await openFieldEditor();
+      await toggleAdvancedSettings(flyout);
+      // searchAnalyzer should be visible since we saved with search_analyzer set
+      await waitFor(() => {
+        expect(within(flyout).queryByTestId('searchAnalyzer')).toBeInTheDocument();
+      });
+      const searchAnalyzerHarnessFinal = new EuiSuperSelectTestHarness('searchAnalyzer');
+      expect(searchAnalyzerHarnessFinal.getSelected()).toContain('Simple');
+    });
+
+    test('should update and persist searchQuoteAnalyzer value', async () => {
+      const Component = WithAppDependencies(MappingsEditor, {});
+      render(
+        <I18nProvider>
+          <Component
+            value={defaultMappingsWithAnalyzer}
+            onChange={onChangeHandler}
+            indexSettings={{}}
+          />
+        </I18nProvider>
+      );
+
+      await screen.findByTestId('mappingsEditor');
+
+      let flyout = await openFieldEditor();
+      await toggleAdvancedSettings(flyout);
+      updateFieldName(flyout, 'updatedField');
+
+      // Change searchQuoteAnalyzer from language (french) to built-in (whitespace)
+      await selectAnalyzer(flyout, 'searchQuoteAnalyzer', 'whitespace');
+
+      await submitForm(flyout);
+
+      const updatedMappings = {
+        ...defaultMappingsWithAnalyzer,
+        properties: {
+          updatedField: {
+            ...defaultMappingsWithAnalyzer.properties.myField,
+            ...defaultTextParameters,
+            search_quote_analyzer: 'whitespace',
+          },
+        },
+      };
+
+      expect(getLatestMappings()).toEqual(updatedMappings);
+
+      // Re-open and verify value persisted
+      flyout = await openFieldEditor();
+      await toggleAdvancedSettings(flyout);
+      // Wait for SuperSelect to appear (it should be in built-in mode since we saved 'whitespace')
+      const searchQuoteAnalyzerHarnessFinal = await waitFor(() => {
+        const harness = new EuiSuperSelectTestHarness('searchQuoteAnalyzer');
+        expect(harness.getElement()).toBeInTheDocument();
+        return harness;
+      });
+      expect(searchQuoteAnalyzerHarnessFinal.getSelected()).toContain('Whitespace');
+    }, 9000);
+
+    test('analyzer parameter: custom analyzer (external plugin)', async () => {
+      const defaultMappings: TestMappings = {
+        _meta: {},
+        _source: {},
+        properties: {
+          myField: {
+            type: 'text',
+            analyzer: 'myCustomIndexAnalyzer',
+            search_analyzer: 'myCustomSearchAnalyzer',
+            search_quote_analyzer: 'myCustomSearchQuoteAnalyzer',
+          },
+        },
+      };
+
+      let updatedMappings: TestMappings = {
+        ...defaultMappings,
+        properties: {
+          myField: {
+            ...defaultMappings.properties.myField,
+            ...defaultTextParameters,
+          },
+        },
+      };
+
+      const Component = WithAppDependencies(MappingsEditor, {});
+      render(
+        <I18nProvider>
+          <Component value={defaultMappings} onChange={onChangeHandler} indexSettings={{}} />
+        </I18nProvider>
+      );
+
+      await screen.findByTestId('mappingsEditor');
+
+      const editButton = screen.getByTestId('editFieldButton');
+      fireEvent.click(editButton);
+
+      const flyout = await screen.findByTestId('mappingsEditorFieldEdit');
+
+      const advancedToggle = within(flyout).getByTestId('toggleAdvancedSetting');
+      fireEvent.click(advancedToggle);
+
+      await waitFor(() => {
+        const advancedSettings = within(flyout).getByTestId('advancedSettings');
+        expect(advancedSettings.style.display).not.toBe('none');
+      });
+
+      expect(within(flyout).queryByTestId('indexAnalyzer-custom')).toBeInTheDocument();
+      expect(within(flyout).queryByTestId('searchAnalyzer-custom')).toBeInTheDocument();
+      expect(within(flyout).queryByTestId('searchQuoteAnalyzer-custom')).toBeInTheDocument();
+
+      // TextField doesn't forward data-test-subj to the input element (similar to CheckBoxField)
+      // Query by value instead
+      const allTextInputs = within(flyout).getAllByRole<HTMLInputElement>('textbox');
+      const indexAnalyzerCustom = allTextInputs.find(
+        (inp) => inp.value === String(defaultMappings.properties.myField.analyzer)
+      );
+      const searchAnalyzerCustom = allTextInputs.find(
+        (inp) => inp.value === String(defaultMappings.properties.myField.search_analyzer)
+      );
+      const searchQuoteAnalyzerCustom = allTextInputs.find(
+        (inp) => inp.value === String(defaultMappings.properties.myField.search_quote_analyzer)
+      );
+
+      expect(indexAnalyzerCustom).toHaveValue(String(defaultMappings.properties.myField.analyzer));
+      expect(searchAnalyzerCustom).toHaveValue(
+        String(defaultMappings.properties.myField.search_analyzer)
+      );
+      expect(searchQuoteAnalyzerCustom).toHaveValue(
+        String(defaultMappings.properties.myField.search_quote_analyzer)
+      );
+
+      const updatedIndexAnalyzer = 'newCustomIndexAnalyzer';
+      const updatedSearchAnalyzer = 'whitespace';
+
       // Change the index analyzer to another custom one
-      setInputValue('indexAnalyzer-custom.input', updatedIndexAnalyzer);
-    });
+      fireEvent.change(indexAnalyzerCustom!, { target: { value: updatedIndexAnalyzer } });
 
-    await act(async () => {
       // Change the search analyzer to a built-in analyzer
-      find('searchAnalyzer-toggleCustomButton').simulate('click');
-    });
-    component.update();
+      const searchAnalyzerToggleButton = within(flyout).getByTestId(
+        'searchAnalyzer-toggleCustomButton'
+      );
+      fireEvent.click(searchAnalyzerToggleButton);
 
-    await act(async () => {
-      setSelectValue('searchAnalyzer.select', updatedSearchAnalyzer, false);
-    });
+      // After toggling, the searchAnalyzer becomes a select with default value 'index_default'
+      await waitFor(() => {
+        const textInputsAfterToggle = within(flyout).queryAllByRole<HTMLInputElement>('textbox');
+        const stillHasCustomSearchAnalyzer = textInputsAfterToggle.some(
+          (inp) => inp.value === defaultMappings.properties.myField.search_analyzer
+        );
+        expect(stillHasCustomSearchAnalyzer).toBe(false);
+      });
+      await selectAnalyzer(flyout, 'searchAnalyzer', 'whitespace');
 
-    await act(async () => {
       // Change the searchQuote to use built-in analyzer
       // By default it means using the "index default"
-      find('searchQuoteAnalyzer-toggleCustomButton').simulate('click');
-    });
+      const searchQuoteAnalyzerToggleButton = within(flyout).getByTestId(
+        'searchQuoteAnalyzer-toggleCustomButton'
+      );
+      fireEvent.click(searchQuoteAnalyzerToggleButton);
 
-    await updateFieldAndCloseFlyout();
+      // Allow SuperSelect to appear after toggle
 
-    ({ data } = await getMappingsEditorData(component));
+      const searchQuoteHarness = new EuiSuperSelectTestHarness('searchQuoteAnalyzer');
+      expect(searchQuoteHarness.getElement()).toBeInTheDocument();
+      // Should show "Index default" initially
+      expect(searchQuoteHarness.getSelected()).toContain('Index default');
 
-    updatedMappings = {
-      ...updatedMappings,
-      properties: {
-        myField: {
-          ...updatedMappings.properties.myField,
-          analyzer: updatedIndexAnalyzer,
-          search_analyzer: updatedSearchAnalyzer,
-          search_quote_analyzer: undefined, // Index default means not declaring the analyzer
-        },
-      },
-    };
+      const updateButton = within(flyout).getByTestId('editFieldUpdateButton');
+      fireEvent.click(updateButton);
 
-    expect(data).toEqual(updatedMappings);
-  });
+      // Allow form submission to complete
 
-  test('analyzer parameter: custom analyzer (from index settings)', async () => {
-    const indexSettings = {
-      analysis: {
-        analyzer: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          customAnalyzer_1: {},
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          customAnalyzer_2: {},
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          customAnalyzer_3: {},
-        },
-      },
-    };
-
-    const customAnalyzers = Object.keys(indexSettings.analysis.analyzer);
-
-    const defaultMappings = {
-      properties: {
-        myField: {
-          type: 'text',
-          analyzer: customAnalyzers[0],
-        },
-      },
-    };
-
-    let updatedMappings: any = {
-      ...defaultMappings,
-      properties: {
-        myField: {
-          ...defaultMappings.properties.myField,
-          ...defaultTextParameters,
-        },
-      },
-    };
-
-    await act(async () => {
-      testBed = setup({
-        value: defaultMappings,
-        onChange: onChangeHandler,
-        indexSettings,
+      await waitFor(() => {
+        expect(onChangeHandler).toHaveBeenCalled();
       });
-    });
-    testBed.component.update();
 
-    const {
-      component,
-      find,
-      form: { setSelectValue },
-      actions: { startEditField, showAdvancedSettings, updateFieldAndCloseFlyout },
-    } = testBed;
-    const fieldToEdit = 'myField';
-
-    await startEditField(fieldToEdit);
-    await showAdvancedSettings();
-
-    // It should have 2 selects
-    const indexAnalyzerSelects = find('indexAnalyzer.select');
-
-    expect(indexAnalyzerSelects.length).toBe(2);
-    expect(indexAnalyzerSelects.at(0).props().value).toBe('custom');
-    expect(indexAnalyzerSelects.at(1).props().value).toBe(
-      defaultMappings.properties.myField.analyzer
-    );
-
-    // Access the list of option of the second dropdown select
-    const subSelectOptions = indexAnalyzerSelects
-      .at(1)
-      .find('option')
-      .map((wrapper) => wrapper.text());
-
-    expect(subSelectOptions).toEqual(customAnalyzers);
-
-    await act(async () => {
-      // Change the custom analyzer dropdown to another one from the index settings
-      setSelectValue(find('indexAnalyzer.select').at(1), customAnalyzers[2], false);
-    });
-    component.update();
-
-    await updateFieldAndCloseFlyout();
-
-    ({ data } = await getMappingsEditorData(component));
-
-    updatedMappings = {
-      ...updatedMappings,
-      properties: {
-        myField: {
-          ...updatedMappings.properties.myField,
-          analyzer: customAnalyzers[2],
+      updatedMappings = {
+        ...updatedMappings,
+        properties: {
+          myField: {
+            ...updatedMappings.properties.myField,
+            analyzer: updatedIndexAnalyzer,
+            search_analyzer: updatedSearchAnalyzer,
+            search_quote_analyzer: undefined, // Index default means not declaring the analyzer
+          },
         },
-      },
-    };
+      };
 
-    expect(data).toEqual(updatedMappings);
+      const [callData] = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1];
+      const actualMappings = callData.getData();
+      expect(actualMappings).toEqual(updatedMappings);
+    });
+
+    test('analyzer parameter: custom analyzer (from index settings)', async () => {
+      const indexSettings = {
+        analysis: {
+          analyzer: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            customAnalyzer_1: {
+              type: 'custom',
+              tokenizer: 'standard',
+            },
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            customAnalyzer_2: {
+              type: 'custom',
+              tokenizer: 'standard',
+            },
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            customAnalyzer_3: {
+              type: 'custom',
+              tokenizer: 'standard',
+            },
+          },
+        },
+      };
+
+      const customAnalyzers = Object.keys(indexSettings.analysis.analyzer);
+
+      const defaultMappings: TestMappings = {
+        properties: {
+          myField: {
+            type: 'text',
+            analyzer: customAnalyzers[0],
+          },
+        },
+      };
+
+      let updatedMappings: TestMappings = {
+        ...defaultMappings,
+        properties: {
+          myField: {
+            ...defaultMappings.properties.myField,
+            ...defaultTextParameters,
+          },
+        },
+      };
+
+      const Component = WithAppDependencies(MappingsEditor, {});
+      render(
+        <I18nProvider>
+          <Component
+            value={defaultMappings}
+            onChange={onChangeHandler}
+            indexSettings={indexSettings}
+          />
+        </I18nProvider>
+      );
+
+      await screen.findByTestId('mappingsEditor');
+
+      const editButton = screen.getByTestId('editFieldButton');
+      fireEvent.click(editButton);
+
+      const flyout = await screen.findByTestId('mappingsEditorFieldEdit');
+
+      const advancedToggle = within(flyout).getByTestId('toggleAdvancedSetting');
+      fireEvent.click(advancedToggle);
+
+      await waitFor(() => {
+        const advancedSettings = within(flyout).getByTestId('advancedSettings');
+        expect(advancedSettings.style.display).not.toBe('none');
+      });
+
+      // The field has a custom analyzer from index settings, so indexAnalyzer should render
+      // as a native select (not SuperSelect) that lists the custom analyzers
+      await waitFor(() => {
+        const selects = within(flyout).queryAllByTestId('select') as HTMLSelectElement[];
+        const customAnalyzerSelect = selects.find(
+          (sel) => sel.value === defaultMappings.properties.myField.analyzer
+        );
+        expect(customAnalyzerSelect).toBeTruthy();
+      });
+
+      // Find the sub-select (native select) for the custom analyzer
+      const allControls = within(flyout).queryAllByTestId('select') as Array<
+        HTMLInputElement | HTMLSelectElement
+      >;
+      const customAnalyzerSelect = allControls.find(
+        (el) =>
+          el.tagName === 'SELECT' &&
+          el.getAttribute('data-test-subj') === 'select' &&
+          (el as HTMLSelectElement).value === String(defaultMappings.properties.myField.analyzer)
+      ) as HTMLSelectElement;
+
+      expect(customAnalyzerSelect).toBeDefined();
+      expect(customAnalyzerSelect).toHaveValue(String(defaultMappings.properties.myField.analyzer));
+
+      // Access the list of option of the custom analyzer select
+      const subSelectOptions = Array.from(customAnalyzerSelect.options).map(
+        (option) => (option as HTMLOptionElement).text
+      );
+
+      expect(subSelectOptions).toEqual(customAnalyzers);
+
+      // Change the custom analyzer dropdown to another one from the index settings
+      fireEvent.change(customAnalyzerSelect, { target: { value: customAnalyzers[2] } });
+
+      const updateButton = within(flyout).getByTestId('editFieldUpdateButton');
+      fireEvent.click(updateButton);
+
+      // Allow form submission to complete
+
+      await waitFor(() => {
+        expect(onChangeHandler).toHaveBeenCalled();
+      });
+
+      updatedMappings = {
+        ...updatedMappings,
+        properties: {
+          myField: {
+            ...updatedMappings.properties.myField,
+            analyzer: customAnalyzers[2],
+          },
+        },
+      };
+
+      const [callData] = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1];
+      const actualMappings = callData.getData();
+      expect(actualMappings).toEqual(updatedMappings);
+    });
   });
 });

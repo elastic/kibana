@@ -12,6 +12,7 @@ import { render, screen, within, waitFor, act } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
 import { TestComponent } from './test_component';
+import { flushPopoverTimers } from './flush_popover_timers';
 import { basicMock } from '../mocks/basic_navigation';
 import { observabilityMock } from '../mocks/observability';
 import { securityMock } from '../mocks/security';
@@ -26,7 +27,19 @@ const appsItemId = basicMock.navItems.primaryItems[2].id;
 // Security mock reusable IDs
 const resultExplorerItemId = securityMock.navItems.primaryItems[11].sections?.[2].items[0].id;
 
+// Test ID helpers
+const logoId = `kbnChromeNav-logo`;
+const primaryItemId = (id: string) => `kbnChromeNav-primaryItem-${id}`;
+const secondaryItemId = (id: string) => `kbnChromeNav-secondaryItem-${id}`;
+const moreMenuId = 'kbnChromeNav-moreMenuTrigger';
+const popoverId = (label: string) => `side-nav-popover-${label}`;
+const popoverItemId = (id: string) => `kbnChromeNav-popoverItem-${id}`;
+const nestedMenuItemId = (id: string) => `kbnChromeNav-nestedMenuItem-${id}`;
+const sidePanelId = /\bkbnChromeNav-sidePanel\b/;
+
 describe('Expanded mode', () => {
+  let user: ReturnType<typeof userEvent.setup>;
+
   beforeAll(() => {
     // Mock the client height for the primary menu item
     mockClientHeight(mockMenuItemHeight);
@@ -34,6 +47,13 @@ describe('Expanded mode', () => {
     jest.mock('../utils/get_style_property', () => ({
       getStyleProperty: jest.fn(() => mockExpandedMenuGap),
     }));
+  });
+
+  beforeEach(() => {
+    user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+      pointerEventsCheck: 0,
+    });
   });
 
   it('should render the side navigation', () => {
@@ -55,9 +75,7 @@ describe('Expanded mode', () => {
         <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
       );
 
-      const solutionLogo = screen.getByRole('link', {
-        name: 'Solution homepage',
-      });
+      const solutionLogo = screen.getByTestId(logoId);
 
       // The label is NOT wrapped with `<EuiScreenReaderOnly />` in expanded mode
       // See: https://eui.elastic.co/docs/utilities/accessibility/#screen-reader-only
@@ -78,15 +96,12 @@ describe('Expanded mode', () => {
           <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
         );
 
-        const appsLink = screen.getByRole('link', {
-          name: 'Apps',
-        });
+        const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
 
-        await userEvent.hover(appsLink);
+        await user.hover(appsLink);
+        flushPopoverTimers();
 
-        const popover = await screen.findByRole('dialog', {
-          name: 'Apps',
-        });
+        const popover = await screen.findByTestId(popoverId('Apps'));
 
         expect(popover).toBeInTheDocument();
       });
@@ -107,14 +122,13 @@ describe('Expanded mode', () => {
           />
         );
 
-        const appsLink = screen.getByRole('link', {
-          name: 'Apps',
-        });
+        const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
 
         expect(appsLink).toHaveAttribute('aria-current', 'page');
         expect(appsLink).toHaveAttribute('data-highlighted', 'true');
 
-        await userEvent.hover(appsLink);
+        await user.hover(appsLink);
+        flushPopoverTimers();
 
         const popover = screen.queryByRole('dialog', {
           name: 'Apps',
@@ -140,18 +154,14 @@ describe('Expanded mode', () => {
           />
         );
 
-        const appsLink = screen.getByRole('link', {
-          name: 'Apps',
-        });
+        const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
         const expectedHref = basicMock.navItems.primaryItems[2].href;
 
         expect(appsLink).toHaveAttribute('href', expectedHref);
 
-        await userEvent.click(appsLink);
+        await user.click(appsLink);
 
-        const sidePanel = await screen.findByRole('region', {
-          name: 'Side panel for Apps',
-        });
+        const sidePanel = await screen.findByTestId(sidePanelId);
 
         expect(sidePanel).toBeInTheDocument();
       });
@@ -167,23 +177,19 @@ describe('Expanded mode', () => {
           <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
         );
 
-        const appsLink = screen.getByRole('link', {
-          name: 'Apps',
-        });
+        const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
 
         act(() => {
           appsLink.focus();
         });
 
-        await userEvent.keyboard('{enter}');
+        const popover = await screen.findByTestId(popoverId('Apps'));
 
-        const popover = await screen.findByRole('dialog', {
-          name: 'Apps',
-        });
+        expect(popover).toBeInTheDocument();
 
-        const overviewLink = within(popover).getByRole('link', {
-          name: 'Overview',
-        });
+        await user.keyboard('{Enter}');
+
+        const overviewLink = within(popover).getByTestId(popoverItemId('apps_overview'));
 
         expect(overviewLink).toHaveFocus();
       });
@@ -199,13 +205,12 @@ describe('Expanded mode', () => {
           <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
         );
 
-        const dashboardsLink = screen.getByRole('link', {
-          name: 'Dashboards',
-        });
+        const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
 
-        await userEvent.hover(dashboardsLink);
+        await user.hover(dashboardsLink);
+        flushPopoverTimers();
 
-        const popover = screen.queryByRole('dialog');
+        const popover = screen.queryByTestId(popoverId('Apps'));
 
         expect(popover).not.toBeInTheDocument();
       });
@@ -222,18 +227,14 @@ describe('Expanded mode', () => {
           <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
         );
 
-        const dashboardsLink = screen.getByRole('link', {
-          name: 'Dashboards',
-        });
+        const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
         const expectedHref = basicMock.navItems.primaryItems[0].href;
 
         expect(dashboardsLink).toHaveAttribute('href', expectedHref);
 
-        await userEvent.click(dashboardsLink);
+        await user.click(dashboardsLink);
 
-        const sidePanel = screen.queryByRole('region', {
-          name: /Side panel/,
-        });
+        const sidePanel = screen.queryByTestId(sidePanelId);
 
         expect(sidePanel).not.toBeInTheDocument();
       });
@@ -249,9 +250,7 @@ describe('Expanded mode', () => {
           <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
         );
 
-        const dashboardsLink = screen.getByRole('link', {
-          name: 'Dashboards',
-        });
+        const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
         const expectedHref = basicMock.navItems.primaryItems[0].href;
 
         expect(dashboardsLink).toHaveAttribute('href', expectedHref);
@@ -260,11 +259,9 @@ describe('Expanded mode', () => {
           dashboardsLink.focus();
         });
 
-        await userEvent.keyboard('{enter}');
+        await user.keyboard('{enter}');
 
-        const sidePanel = screen.queryByRole('region', {
-          name: /Side panel/,
-        });
+        const sidePanel = screen.queryByTestId(sidePanelId);
 
         expect(sidePanel).not.toBeInTheDocument();
       });
@@ -285,11 +282,10 @@ describe('Expanded mode', () => {
           />
         );
 
-        const dashboardsLink = screen.getByRole('link', {
-          name: 'Dashboards',
-        });
+        const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
 
-        await userEvent.hover(dashboardsLink);
+        await user.hover(dashboardsLink);
+        flushPopoverTimers();
 
         const tooltip = await screen.findByRole('tooltip');
         const betaIcon = tooltip.querySelector('[data-euiicon-type="beta"]');
@@ -315,11 +311,10 @@ describe('Expanded mode', () => {
           />
         );
 
-        const casesLink = screen.getByRole('link', {
-          name: 'Cases',
-        });
+        const casesLink = screen.getByTestId(primaryItemId('cases'));
 
-        await userEvent.hover(casesLink);
+        await user.hover(casesLink);
+        flushPopoverTimers();
 
         const tooltip = await screen.findByRole('tooltip');
         const flaskIcon = tooltip.querySelector('[data-euiicon-type="flask"]');
@@ -346,9 +341,7 @@ describe('Expanded mode', () => {
           />
         );
 
-        const moreButton = await screen.findByRole('button', {
-          name: 'More',
-        });
+        const moreButton = await screen.findByTestId(moreMenuId);
 
         expect(moreButton).toBeInTheDocument();
       });
@@ -368,15 +361,12 @@ describe('Expanded mode', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
-          name: 'More',
-        });
+        const moreButton = await screen.findByTestId(moreMenuId);
 
-        await userEvent.hover(moreButton);
+        await user.hover(moreButton);
+        flushPopoverTimers();
 
-        const popover = await screen.findByRole('dialog', {
-          name: 'More',
-        });
+        const popover = await screen.findByTestId(popoverId('More'));
 
         await within(popover).findAllByRole('link');
 
@@ -394,8 +384,7 @@ describe('Expanded mode', () => {
        * - AND I should be redirected to that item’s href
        * AND I should see a side panel with that submenu
        */
-      // TODO: fix; fails in CI
-      it.skip('should open side panel when clicking submenu item inside "More" popover', async () => {
+      it('should open side panel when clicking submenu item inside "More" popover', async () => {
         render(
           <TestComponent
             isCollapsed={false}
@@ -404,21 +393,16 @@ describe('Expanded mode', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
-          name: 'More',
-        });
+        const moreButton = await screen.findByTestId(moreMenuId);
 
-        await userEvent.hover(moreButton);
+        await user.hover(moreButton);
+        flushPopoverTimers();
 
-        const popover = await screen.findByRole('dialog', {
-          name: 'More',
-        });
+        const popover = await screen.findByTestId(popoverId('More'));
 
-        const mlButton = within(popover).getByRole('button', {
-          name: 'Machine learning',
-        });
+        const mlButton = within(popover).getByTestId(secondaryItemId('ml-overview'));
 
-        await userEvent.click(mlButton);
+        await user.click(mlButton);
 
         expect(popover).toBeInTheDocument();
 
@@ -428,15 +412,13 @@ describe('Expanded mode', () => {
 
         expect(mlHeading).toBeInTheDocument();
 
-        let anomalyExplorerLink = await within(popover).findByRole('link', {
-          name: 'Anomaly explorer',
-        });
+        let anomalyExplorerLink = await within(popover).findByTestId(
+          nestedMenuItemId('anomaly-explorer')
+        );
 
-        await userEvent.click(anomalyExplorerLink);
+        await user.click(anomalyExplorerLink);
 
-        const sidePanel = await screen.findByRole('region', {
-          name: 'Side panel for Machine learning',
-        });
+        const sidePanel = await screen.findByTestId(sidePanelId);
 
         expect(sidePanel).toBeInTheDocument();
 
@@ -472,25 +454,22 @@ describe('Expanded mode', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
-          name: 'More',
+        const moreButton = await screen.findByTestId(moreMenuId);
+
+        await user.hover(moreButton);
+        flushPopoverTimers();
+
+        const popover = await screen.findByTestId(popoverId('More'));
+
+        const coverageLink = within(popover).getByTestId(secondaryItemId('coverage'));
+
+        await user.click(coverageLink);
+
+        await waitFor(() => {
+          expect(popover).not.toBeInTheDocument();
         });
 
-        await userEvent.hover(moreButton);
-
-        const popover = await screen.findByRole('dialog', {
-          name: 'More',
-        });
-
-        const coverageLink = within(popover).getByRole('link', {
-          name: 'Coverage',
-        });
-
-        await userEvent.click(coverageLink);
-
-        const sidePanel = screen.queryByRole('region', {
-          name: /Side panel/,
-        });
+        const sidePanel = screen.queryByTestId(sidePanelId);
 
         expect(sidePanel).not.toBeInTheDocument();
       });
@@ -515,17 +494,13 @@ describe('Expanded mode', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
-          name: 'More',
-        });
+        const moreButton = await screen.findByTestId(moreMenuId);
 
         expect(moreButton).toHaveAttribute('data-highlighted', 'true');
 
-        await userEvent.hover(moreButton);
+        await user.hover(moreButton);
 
-        const popover = await screen.findByRole('dialog', {
-          name: 'More',
-        });
+        const popover = await screen.findByTestId(popoverId('More'));
 
         expect(popover).toBeInTheDocument();
 
@@ -535,15 +510,15 @@ describe('Expanded mode', () => {
 
         expect(mlButton).toHaveAttribute('data-highlighted', 'true');
 
-        await userEvent.click(mlButton);
+        await user.click(mlButton);
 
         const mlHeader = await within(popover).findByText('Machine learning');
 
         expect(mlHeader).toBeInTheDocument();
 
-        const resultExplorerLink = await within(popover).findByRole('link', {
-          name: 'Result explorer',
-        });
+        const resultExplorerLink = await within(popover).findByTestId(
+          nestedMenuItemId('result-explorer')
+        );
 
         const expectedSubItemHref =
           securityMock.navItems.primaryItems[11].sections?.[2].items[0].href;

@@ -7,15 +7,14 @@
 
 import React from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DescriptionListColumns } from './description_list_columns';
 import type { PlaygroundsListEmptyStateProps } from './types';
+import { PlaygroundDeprecationNotice } from '../playground_deprecation_notice';
 
-export const PlaygroundsListEmptyStateBody = ({
-  onNewPlayground,
-}: PlaygroundsListEmptyStateProps) => {
+export const PlaygroundsListEmptyStateBody = ({ CTAContent }: PlaygroundsListEmptyStateProps) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiText>
@@ -26,25 +25,13 @@ export const PlaygroundsListEmptyStateBody = ({
           />
         </p>
       </EuiText>
-      <EuiFlexItem grow={false}>
-        <span>
-          <EuiButton
-            data-test-subj="newPlaygroundButton"
-            fill
-            iconType="plusInCircle"
-            fullWidth={false}
-            onClick={onNewPlayground}
-          >
-            <FormattedMessage
-              id="xpack.searchPlayground.playgroundsList.emptyPrompt.cta.text"
-              defaultMessage="New Playground"
-            />
-          </EuiButton>
-        </span>
-      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{CTAContent}</EuiFlexItem>
       <EuiHorizontalRule />
       <EuiFlexItem>
         <DescriptionListColumns />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <PlaygroundDeprecationNotice />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

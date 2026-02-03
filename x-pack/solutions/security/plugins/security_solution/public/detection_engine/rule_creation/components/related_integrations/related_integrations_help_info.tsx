@@ -10,6 +10,7 @@ import useToggle from 'react-use/lib/useToggle';
 import { EuiLink, EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../common/lib/kibana';
+import { RELATED_INTEGRATIONS_HELP_ARIA_LABEL } from './translations';
 
 /**
  * Theme doesn't expose width variables. Using provided size variables will require
@@ -25,7 +26,11 @@ export function RelatedIntegrationsHelpInfo(): JSX.Element {
   const { docLinks } = useKibana().services;
 
   const button = (
-    <EuiButtonIcon iconType="question" onClick={togglePopover} aria-label="Open help popover" />
+    <EuiButtonIcon
+      iconType="question"
+      onClick={togglePopover}
+      aria-label={RELATED_INTEGRATIONS_HELP_ARIA_LABEL}
+    />
   );
 
   return (

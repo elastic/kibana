@@ -18,6 +18,7 @@ import { getAgentPolicySavedObjectType } from './agent_policy';
 import { appContextService } from '.';
 import { getPackagePolicySavedObjectType, packagePolicyService } from './package_policy';
 import { mapPackagePolicySavedObjectToPackagePolicy } from './package_policies';
+import { getSpaceForPackagePolicy } from './spaces/helpers';
 
 export async function backfillPackagePolicySupportsAgentless(esClient: ElasticsearchClient) {
   const apSavedObjectType = await getAgentPolicySavedObjectType();
@@ -82,7 +83,7 @@ export async function backfillPackagePolicySupportsAgentless(esClient: Elasticse
       packagePoliciesToUpdate,
       (packagePolicy: PackagePolicy) => {
         const soClient = appContextService.getInternalUserSOClientForSpaceId(
-          packagePolicy.spaceIds?.[0]
+          getSpaceForPackagePolicy(packagePolicy)
         );
         return packagePolicyService.update(
           soClient,

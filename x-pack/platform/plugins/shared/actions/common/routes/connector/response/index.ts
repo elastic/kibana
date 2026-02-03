@@ -8,26 +8,29 @@
 // Latest
 export type {
   ConnectorResponse,
-  AllConnectorsResponse,
+  GetAllConnectorsResponse,
   ConnectorExecuteResponse,
 } from './types/latest';
+
 export {
   connectorResponseSchema,
-  allConnectorsResponseSchema,
-  connectorTypesResponseSchema,
+  getAllConnectorsResponseSchema,
+  connectorTypeResponseSchema,
   connectorExecuteResponseSchema,
 } from './schemas/latest';
 
-// v1
 export type {
   ConnectorResponse as ConnectorResponseV1,
-  AllConnectorsResponse as AllConnectorsResponseV1,
-  ConnectorTypesResponse as ConnectorTypesResponseV1,
+  GetAllConnectorsResponse as GetAllConnectorsResponseV1,
+  ConnectorTypeResponse as ConnectorTypeResponseV1,
+  GetAllConnectorTypesResponse as GetAllConnectorTypesResponseV1,
   ConnectorExecuteResponse as ConnectorExecuteResponseV1,
 } from './types/v1';
+
 export {
   connectorResponseSchema as connectorResponseSchemaV1,
-  allConnectorsResponseSchema as connectorWithExtraFindDataSchemaV1,
-  connectorTypesResponseSchema as connectorTypesResponseSchemaV1,
+  getAllConnectorsResponseSchema as getAllConnectorsResponseSchemaV1,
+  connectorTypeResponseSchema as connectorTypeResponseSchemaV1,
+  getAllConnectorTypesResponseSchema as getAllConnectorTypesResponseSchemaV1,
   connectorExecuteResponseSchema as connectorExecuteResponseSchemaV1,
 } from './schemas/v1';

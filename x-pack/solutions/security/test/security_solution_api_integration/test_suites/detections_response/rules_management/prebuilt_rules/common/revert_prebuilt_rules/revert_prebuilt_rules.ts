@@ -7,10 +7,7 @@
 import expect from 'expect';
 import { BulkRevertSkipReasonEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import {
-  deleteAllRules,
-  waitForRulePartialFailure,
-} from '../../../../../../config/services/detections_response';
+import { deleteAllRules, waitForRulePartialFailure } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
@@ -75,6 +72,8 @@ export default ({ getService }: FtrProviderContext): void => {
                   rule_source: {
                     is_customized: false,
                     type: 'external',
+                    customized_fields: [],
+                    has_base_version: true,
                   },
                   description: nonCustomizedPrebuiltRule.description, // Modified field should be set to its original asset value
                   revision: ++customizedPrebuiltRule.revision, // We increment the revision number during reversion
@@ -122,6 +121,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 is_customized: false,
                 type: 'external',
+                customized_fields: [],
+                has_base_version: true,
               },
               exceptions_list: [
                 expect.objectContaining({
@@ -163,6 +164,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 is_customized: false,
                 type: 'external',
+                customized_fields: [],
+                has_base_version: true,
               },
               actions: [
                 expect.objectContaining({
@@ -216,6 +219,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 is_customized: false,
                 type: 'external',
+                customized_fields: [],
+                has_base_version: true,
               },
               execution_summary: body.execution_summary,
             })
@@ -242,6 +247,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 is_customized: false,
                 type: 'external',
+                customized_fields: [],
+                has_base_version: true,
               },
               enabled: true,
             }),

@@ -40,7 +40,9 @@ export const podCpuUsage: TSVBMetricModelCreator = (
             { id: 'cpu_with', name: 'with_limit', field: 'avg-cpu-with' },
             { id: 'cpu_without', name: 'without_limit', field: 'avg-cpu-without' },
           ],
-          script: 'params.with_limit > 0.0 ? params.with_limit : params.without_limit',
+          script:
+            '(params.with_limit != null && params.with_limit > 0.0) ? params.with_limit : params.without_limit',
+          gap_policy: 'insert_zeros',
         },
       ],
     },

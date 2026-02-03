@@ -13,10 +13,3 @@ export const ERROR_NETWORK_DETAILS = i18n.translate(
     defaultMessage: `An error has occurred on network details search`,
   }
 );
-
-export const FAIL_NETWORK_DETAILS = i18n.translate(
-  'xpack.securitySolution.networkDetails.failSearchDescription',
-  {
-    defaultMessage: `Failed to run search on network details`,
-  }
-);

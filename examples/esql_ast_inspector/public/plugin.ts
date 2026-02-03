@@ -42,7 +42,7 @@ export class ESQLASTInspectorPlugin
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/README.md',
+          href: 'https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-esql-language/parser/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

@@ -7,9 +7,13 @@
 
 import {
   STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
-  STREAMS_AI_GROK_SUGGESTION_LATENCY_EVENT_TYPE,
-  STREAMS_ASSET_CLICK_EVENT_TYPE,
-  STREAMS_ASSET_COUNT_EVENT_TYPE,
+  STREAMS_AI_DISSECT_SUGGESTION_ACCEPTED_EVENT_TYPE,
+  STREAMS_ATTACHMENT_CLICK_EVENT_TYPE,
+  STREAMS_ATTACHMENT_COUNT_EVENT_TYPE,
+  STREAMS_ATTACHMENT_LINKED_EVENT_TYPE,
+  STREAMS_ATTACHMENT_UNLINKED_EVENT_TYPE,
+  STREAMS_ATTACHMENT_FLYOUT_OPENED_EVENT_TYPE,
+  STREAMS_ATTACHMENT_FLYOUT_ACTION_EVENT_TYPE,
   STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
   STREAMS_PROCESSING_SAVED_EVENT_TYPE,
   STREAMS_RETENTION_CHANGED_EVENT_TYPE,
@@ -17,12 +21,18 @@ import {
   STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
   STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
+  STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
+  STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
+  STREAMS_TAB_VISITED_EVENT_TYPE,
 } from './constants';
 import {
   streamsAIGrokSuggestionAcceptedSchema,
-  streamsAIGrokSuggestionLatencySchema,
-  streamsAssetClickEventSchema,
-  streamsAssetCountSchema,
+  streamsAIDissectSuggestionAcceptedSchema,
+  streamsAttachmentClickEventSchema,
+  streamsAttachmentCountSchema,
+  streamsAttachmentLinkChangedSchema,
+  streamsAttachmentFlyoutOpenedSchema,
+  streamsAttachmentFlyoutActionSchema,
   streamsChildStreamCreatedSchema,
   streamsProcessingSavedSchema,
   streamsRetentionChangedSchema,
@@ -30,26 +40,49 @@ import {
   streamsSignificantEventsCreatedSchema,
   streamsSignificantEventsSuggestionsGeneratedSchema,
   wiredStreamsStatusChangedSchema,
+  streamsFeatureIdentificationSavedSchema,
+  streamsFeatureIdentificationDeletedSchema,
+  streamsTabVisitedSchema,
 } from './schemas';
 
-const streamsAssetCountEventType = {
-  eventType: STREAMS_ASSET_COUNT_EVENT_TYPE,
-  schema: streamsAssetCountSchema,
+const streamsAttachmentCountEventType = {
+  eventType: STREAMS_ATTACHMENT_COUNT_EVENT_TYPE,
+  schema: streamsAttachmentCountSchema,
 };
 
-const streamsAssetClickEventType = {
-  eventType: STREAMS_ASSET_CLICK_EVENT_TYPE,
-  schema: streamsAssetClickEventSchema,
+const streamsAttachmentClickEventType = {
+  eventType: STREAMS_ATTACHMENT_CLICK_EVENT_TYPE,
+  schema: streamsAttachmentClickEventSchema,
 };
 
-const streamsAIGrokSuggestionLatencyEventType = {
-  eventType: STREAMS_AI_GROK_SUGGESTION_LATENCY_EVENT_TYPE,
-  schema: streamsAIGrokSuggestionLatencySchema,
+const streamsAttachmentLinkedEventType = {
+  eventType: STREAMS_ATTACHMENT_LINKED_EVENT_TYPE,
+  schema: streamsAttachmentLinkChangedSchema,
+};
+
+const streamsAttachmentUnlinkedEventType = {
+  eventType: STREAMS_ATTACHMENT_UNLINKED_EVENT_TYPE,
+  schema: streamsAttachmentLinkChangedSchema,
+};
+
+const streamsAttachmentFlyoutOpenedEventType = {
+  eventType: STREAMS_ATTACHMENT_FLYOUT_OPENED_EVENT_TYPE,
+  schema: streamsAttachmentFlyoutOpenedSchema,
+};
+
+const streamsAttachmentFlyoutActionEventType = {
+  eventType: STREAMS_ATTACHMENT_FLYOUT_ACTION_EVENT_TYPE,
+  schema: streamsAttachmentFlyoutActionSchema,
 };
 
 const streamsAIGrokSuggestionAcceptedEventType = {
   eventType: STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
   schema: streamsAIGrokSuggestionAcceptedSchema,
+};
+
+const streamsAIDissectSuggestionAcceptedEventType = {
+  eventType: STREAMS_AI_DISSECT_SUGGESTION_ACCEPTED_EVENT_TYPE,
+  schema: streamsAIDissectSuggestionAcceptedSchema,
 };
 
 const streamsProcessingSavedEventType = {
@@ -82,16 +115,35 @@ const streamsSignificantEventsCreatedEventType = {
   schema: streamsSignificantEventsCreatedSchema,
 };
 
+const streamsFeatureIdentificationSavedEventType = {
+  eventType: STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
+  schema: streamsFeatureIdentificationSavedSchema,
+};
+
+const streamsFeatureIdentificationDeletedEventType = {
+  eventType: STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
+  schema: streamsFeatureIdentificationDeletedSchema,
+};
+
 const wiredStreamsStatusChangedEventType = {
   eventType: STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
   schema: wiredStreamsStatusChangedSchema,
 };
 
+const streamsTabVisitedEventType = {
+  eventType: STREAMS_TAB_VISITED_EVENT_TYPE,
+  schema: streamsTabVisitedSchema,
+};
+
 export {
-  streamsAssetCountEventType,
-  streamsAssetClickEventType,
-  streamsAIGrokSuggestionLatencyEventType,
+  streamsAttachmentCountEventType,
+  streamsAttachmentClickEventType,
+  streamsAttachmentLinkedEventType,
+  streamsAttachmentUnlinkedEventType,
+  streamsAttachmentFlyoutOpenedEventType,
+  streamsAttachmentFlyoutActionEventType,
   streamsAIGrokSuggestionAcceptedEventType,
+  streamsAIDissectSuggestionAcceptedEventType,
   streamsProcessingSavedEventType,
   streamsRetentionChangedEventType,
   streamsChildStreamCreatedEventType,
@@ -99,4 +151,7 @@ export {
   streamsSignificantEventsSuggestionsGeneratedEventType,
   streamsSignificantEventsCreatedEventType,
   wiredStreamsStatusChangedEventType,
+  streamsFeatureIdentificationSavedEventType,
+  streamsFeatureIdentificationDeletedEventType,
+  streamsTabVisitedEventType,
 };

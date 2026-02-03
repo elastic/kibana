@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { resolvePathVariables } from '../../../../../../common/utils/resolve_path_variables';
 import { PROTECTION_UPDATES_NOTE_ROUTE } from '../../../../../../../common/endpoint/constants';
 import { useKibana } from '../../../../../../common/lib/kibana';

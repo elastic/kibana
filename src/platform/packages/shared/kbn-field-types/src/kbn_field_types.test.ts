@@ -77,6 +77,7 @@ describe('utils/kbn_field_types', () => {
         KBN_FIELD_TYPES.CONFLICT,
         KBN_FIELD_TYPES.DATE,
         KBN_FIELD_TYPES.DATE_RANGE,
+        KBN_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
         KBN_FIELD_TYPES.GEO_POINT,
         KBN_FIELD_TYPES.GEO_SHAPE,
         KBN_FIELD_TYPES.HISTOGRAM,
@@ -84,10 +85,12 @@ describe('utils/kbn_field_types', () => {
         KBN_FIELD_TYPES.IP_RANGE,
         KBN_FIELD_TYPES.MURMUR3,
         KBN_FIELD_TYPES.NESTED,
+        KBN_FIELD_TYPES.NULL,
         KBN_FIELD_TYPES.NUMBER,
         KBN_FIELD_TYPES.NUMBER_RANGE,
         KBN_FIELD_TYPES.OBJECT,
         KBN_FIELD_TYPES.STRING,
+        KBN_FIELD_TYPES.TDIGEST,
         KBN_FIELD_TYPES.UNKNOWN,
       ]);
     });

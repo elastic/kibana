@@ -20,8 +20,7 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-// Failing: See https://github.com/elastic/kibana/issues/227166
-describe.skip(
+describe(
   'Response console',
   {
     env: {
@@ -124,7 +123,7 @@ describe.skip(
 
         cy.getByTestSubj('scan-actionFailure')
           .should('exist')
-          .contains('File path or folder was not found (404)');
+          .contains('File path or folder was not found');
       });
     });
   }

@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/autoops-promotion-callout",
+  "owner": "@elastic/kibana-management",
+  "group": "platform",
+  "visibility": "shared"
+}

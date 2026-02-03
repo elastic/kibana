@@ -12,12 +12,12 @@ import type { Owner } from '../../../common/constants/types';
 
 const CAI_CASES_INDEX_NAME_BASE = '.internal.cases';
 export function getCasesDestinationIndexName(spaceId: string, owner: Owner) {
-  return `${CAI_CASES_INDEX_NAME_BASE}.${spaceId}-${owner}`.toLowerCase();
+  return `${CAI_CASES_INDEX_NAME_BASE}.${owner}-${spaceId}`.toLowerCase();
 }
 
 const CAI_CASES_INDEX_ALIAS_BASE = '.cases';
 export function getCasesDestinationIndexAlias(spaceId: string, owner: Owner) {
-  return `${CAI_CASES_INDEX_ALIAS_BASE}.${spaceId}-${owner}`.toLowerCase();
+  return `${CAI_CASES_INDEX_ALIAS_BASE}.${owner}-${spaceId}`.toLowerCase();
 }
 
 export const CAI_CASES_INDEX_VERSION = 1;
@@ -50,12 +50,8 @@ export const CAI_CASES_SOURCE_INDEX = ALERTING_CASES_SAVED_OBJECT_INDEX;
 
 const CAI_CASES_BACKFILL_TASK_ID = 'cai_cases_backfill_task';
 export const getCAICasesBackfillTaskId = (spaceId: string, owner: Owner): string => {
-  return `${CAI_CASES_BACKFILL_TASK_ID}-${spaceId}-${owner}`;
+  return `${CAI_CASES_BACKFILL_TASK_ID}-${owner}-${spaceId}`;
 };
-
-const CAI_CASES_SYNCHRONIZATION_TASK_ID_BASE = 'cai_cases_synchronization_task';
-export const getCAICasesSynchronizationTaskId = (spaceId: string, owner: Owner) =>
-  `${CAI_CASES_SYNCHRONIZATION_TASK_ID_BASE}-${spaceId}-${owner}`;
 
 export const getCasesSynchronizationSourceQuery = (
   lastSyncAt: Date,

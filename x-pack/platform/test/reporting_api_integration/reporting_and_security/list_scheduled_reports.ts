@@ -127,5 +127,41 @@ export default function ({ getService }: FtrProviderContext) {
         expect(report.payload).to.have.property('title');
       }
     });
+
+    it('should search reports by title when a search string is provided', async () => {
+      const res = await reportingAPI.listScheduledReports(
+        reportingAPI.MANAGE_REPORTING_USER_USERNAME,
+        reportingAPI.MANAGE_REPORTING_USER_PASSWORD,
+        'PDF'
+      );
+
+      expect(res.total).to.eql(2);
+
+      for (const report of res.data) {
+        expect(report.payload.title).to.equal(pdfPayload.title);
+      }
+    });
+
+    it('should search reports by author when a search string is provided', async () => {
+      let res = await reportingAPI.listScheduledReports(
+        reportingAPI.MANAGE_REPORTING_USER_USERNAME,
+        reportingAPI.MANAGE_REPORTING_USER_PASSWORD,
+        reportingAPI.REPORTING_USER_USERNAME
+      );
+
+      for (const report of res.data) {
+        expect(report.created_by).to.equal(reportingAPI.REPORTING_USER_USERNAME);
+      }
+
+      res = await reportingAPI.listScheduledReports(
+        reportingAPI.MANAGE_REPORTING_USER_USERNAME,
+        reportingAPI.MANAGE_REPORTING_USER_PASSWORD,
+        reportingAPI.MANAGE_REPORTING_USER_USERNAME
+      );
+
+      for (const report of res.data) {
+        expect(report.created_by).to.equal(reportingAPI.MANAGE_REPORTING_USER_USERNAME);
+      }
+    });
   });
 }

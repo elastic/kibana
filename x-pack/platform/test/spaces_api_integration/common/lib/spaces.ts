@@ -19,3 +19,24 @@ export const SPACES = {
     spaceId: 'default',
   },
 };
+
+export const SPACE_1 = {
+  id: 'space_1',
+  name: 'Space 1',
+  description: 'This is the first test space',
+  disabledFeatures: [],
+};
+
+export const SPACE_2 = {
+  id: 'space_2',
+  name: 'Space 2',
+  description: 'This is the second test space',
+  disabledFeatures: [],
+};
+
+export const SPACE_3 = {
+  id: 'space_3',
+  name: 'Space 3',
+  description: 'This is the third test space',
+  disabledFeatures: [],
+};

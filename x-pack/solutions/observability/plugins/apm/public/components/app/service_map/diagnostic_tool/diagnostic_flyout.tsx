@@ -33,8 +33,7 @@ import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import type { DiagnosticFormState } from './types';
 import type { ServiceMapDiagnosticResponse } from '../../../../../common/service_map_diagnostic_types';
-import { FORBIDDEN_SERVICE_NAMES } from '../../../../../common/service_map/get_service_map_nodes';
-
+import { FORBIDDEN_SERVICE_NAMES } from '../../../../../common/service_map/constants';
 interface DiagnosticFlyoutProps {
   onClose: () => void;
   isOpen: boolean;
@@ -129,12 +128,16 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
 
   if (!isOpen) return null;
 
+  const flyoutTitle = i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.title', {
+    defaultMessage: 'Diagnostic tool',
+  });
+
   return (
     <EuiFlyoutResizable
+      aria-label={flyoutTitle}
       ownFocus
       onClose={onClose}
       size="m"
-      style={{ zIndex: 1001 }}
       maxWidth={1000}
       data-test-subj="diagnosticFlyout"
     >
@@ -142,11 +145,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
         <EuiFlexGroup justifyContent="flexStart" alignItems="baseline" gutterSize="s">
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2>
-                {i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.title', {
-                  defaultMessage: 'Diagnostic tool',
-                })}
-              </h2>
+              <h2>{flyoutTitle}</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -169,6 +168,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
 
         {hasForbiddenNames && (
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.apm.serviceMap.diagnosticFlyout.forbiddenServiceNamesTitle',
               {

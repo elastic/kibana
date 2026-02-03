@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import SemVer from 'semver/classes/semver';
+import '@testing-library/jest-dom';
 
 import { idForWarning, WarningFlyoutStep } from './warning_step';
 import type {
@@ -18,6 +18,7 @@ import type {
 import type { IndexWarning } from '@kbn/reindex-service-plugin/common';
 import type { ReindexState } from '../../../use_reindex';
 import { LoadingState } from '../../../../../../types';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 const kibanaVersion = new SemVer('8.0.0');
 
@@ -77,11 +78,15 @@ describe('WarningFlyoutStep', () => {
   };
 
   it('renders', () => {
-    expect(shallow(<WarningFlyoutStep {...defaultProps} />)).toMatchSnapshot();
+    renderWithI18n(<WarningFlyoutStep {...defaultProps} />);
+
+    expect(screen.getByTestId('closeReindexButton')).toBeInTheDocument();
+    expect(screen.getByTestId('startReindexingButton')).toBeEnabled();
+    expect(screen.queryByText('Accept changes')).not.toBeInTheDocument();
   });
 
   if (kibanaVersion.major === 7) {
-    it('does not allow proceeding until all are checked', () => {
+    it('does not allow proceeding until all are checked', async () => {
       const defaultPropsWithWarnings = {
         ...defaultProps,
         warnings: [
@@ -94,19 +99,21 @@ describe('WarningFlyoutStep', () => {
           },
         ] as IndexWarning[],
       };
-      const wrapper = mount(
-        <I18nProvider>
-          <WarningFlyoutStep {...defaultPropsWithWarnings} />
-        </I18nProvider>
-      );
-      const button = wrapper.find('EuiButton');
+      renderWithI18n(<WarningFlyoutStep {...defaultPropsWithWarnings} />);
 
-      button.simulate('click');
+      const button = screen.getByTestId('startReindexingButton');
+      expect(button).toBeDisabled();
+
+      fireEvent.click(button);
       expect(defaultPropsWithWarnings.confirm).not.toHaveBeenCalled();
 
       // first warning (indexSetting)
-      wrapper.find(`input#${idForWarning(1)}`).simulate('change');
-      button.simulate('click');
+      const checkbox = document.getElementById(idForWarning(0));
+      expect(checkbox).not.toBeNull();
+      fireEvent.click(checkbox!);
+
+      await waitFor(() => expect(button).toBeEnabled());
+      fireEvent.click(button);
 
       expect(defaultPropsWithWarnings.confirm).toHaveBeenCalled();
     });

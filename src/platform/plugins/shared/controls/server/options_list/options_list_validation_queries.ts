@@ -10,7 +10,7 @@
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { get, isEmpty } from 'lodash';
 
-import type { OptionsListSelection } from '../../common/options_list/options_list_selections';
+import type { OptionsListSelection } from '@kbn/controls-schemas';
 import { getSelectionAsFieldType } from '../../common/options_list/options_list_selections';
 import type { OptionsListRequestBody } from '../../common/options_list/types';
 import type { OptionsListValidationAggregationBuilder } from './types';

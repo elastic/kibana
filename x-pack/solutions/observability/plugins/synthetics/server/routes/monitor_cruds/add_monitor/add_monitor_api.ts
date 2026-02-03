@@ -37,7 +37,7 @@ import {
   DEFAULT_NAMESPACE_STRING,
 } from '../../../../common/constants/monitor_defaults';
 import { triggerTestNow } from '../../synthetics_service/test_now_monitor';
-import { DefaultAlertService } from '../../default_alerts/default_alert_service';
+import { DefaultRuleService } from '../../default_alerts/default_alert_service';
 import type { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
 import { formatKibanaNamespace } from '../../../../common/formatters';
@@ -227,17 +227,13 @@ export class AddEditMonitorAPI {
   }
 
   initDefaultAlerts(name: string) {
-    const { server, savedObjectsClient, context, request } = this.routeContext;
-    const { gettingStarted } = request.query;
-    if (!gettingStarted) {
-      return;
-    }
+    const { server, savedObjectsClient, context } = this.routeContext;
 
     try {
       // we do this async, so we don't block the user, error handling will be done on the UI via separate api
-      const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
+      const defaultAlertService = new DefaultRuleService(context, server, savedObjectsClient);
       defaultAlertService
-        .setupDefaultAlerts()
+        .setupDefaultRules()
         .then(() => {
           server.logger.debug(`Successfully created default alert for monitor: ${name}`);
         })

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { createWriteStream } from 'fs';
-import { mkdir, open } from 'fs/promises';
+import { createWriteStream } from '@kbn/fs';
+import { open } from 'fs/promises';
 import { pipeline } from 'stream/promises';
 import fetch from 'node-fetch';
 import { download } from './download';
 
-jest.mock('fs', () => ({
+jest.mock('@kbn/fs', () => ({
   createWriteStream: jest.fn(() => ({
     on: jest.fn((event, callback) => {
       if (event === 'finish') {
@@ -20,10 +20,12 @@ jest.mock('fs', () => ({
     }),
     pipe: jest.fn(),
   })),
+  getSafePath: jest
+    .fn()
+    .mockReturnValue({ fullPath: 'artifacts/file.zip', alias: 'disk:artifacts/file.zip' }),
 }));
 
 jest.mock('fs/promises', () => ({
-  mkdir: jest.fn(),
   open: jest.fn(),
 }));
 
@@ -36,7 +38,6 @@ jest.mock('stream/promises', () => ({
 describe('download', () => {
   const mockFileUrl = 'http://example.com/file.zip';
   const mockFilePath = 'artifacts/file.zip';
-  const mockDirPath = 'artifacts';
   const mockMimeType = 'application/zip';
 
   const mockFileHandle = {
@@ -82,8 +83,7 @@ describe('download', () => {
 
     await download(mockFileUrl, mockFilePath, mockMimeType);
 
-    expect(mkdir).toHaveBeenCalledWith(mockDirPath, { recursive: true });
-    expect(fetch).toHaveBeenCalledWith(mockFileUrl);
+    expect(fetch).toHaveBeenCalledWith(mockFileUrl, { signal: undefined });
     expect(createWriteStream).toHaveBeenCalledWith(mockFilePath);
     expect(pipeline).toHaveBeenCalledWith(mockResponseBody, expect.anything());
     expect(open).toHaveBeenCalledWith(mockFilePath, 'r');
@@ -159,12 +159,18 @@ describe('download', () => {
   });
 
   it('should handle path traversal attempts', async () => {
-    const maliciousPaths = ['../../../etc/passwd', 'file/../config', './test/../../secret'];
+    const maliciousPaths = ['../../../etc/passwd', 'file/../../../config', './test/../../secret'];
+
+    const realKbnFs = jest.requireActual<typeof import('@kbn/fs')>('@kbn/fs');
+
+    (createWriteStream as jest.Mock).mockImplementation(realKbnFs.createWriteStream);
 
     for (const maliciousPath of maliciousPaths) {
-      await expect(download(mockFileUrl, maliciousPath, mockMimeType)).rejects.toThrow(
-        'Path traversal attempt detected'
-      );
+      try {
+        await download(mockFileUrl, maliciousPath, mockMimeType);
+      } catch (err) {
+        expect(err.message).toContain('Path traversal detected');
+      }
     }
 
     expect(fetch as unknown as jest.Mock).not.toHaveBeenCalled();

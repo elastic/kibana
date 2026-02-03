@@ -33,21 +33,27 @@ jest.mock('../../../../common/utils/integrations', () => ({
 }));
 
 const uninstalledOktaIntegration = {
-  name: 'entityanalytics_okta',
-  title: 'Okta',
-  version: '1.0.0',
-  description: 'Okta integration for entity analytics',
-  icons: [{ type: 'eui', src: 'logoOkta' }],
-  status: 'not_installed',
+  packageInfo: {
+    name: 'entityanalytics_okta',
+    title: 'Okta',
+    version: '1.0.0',
+    description: 'Okta integration for entity analytics',
+    icons: [{ type: 'eui', src: 'logoOkta' }],
+    status: 'not_installed',
+  },
+  hasDataStreams: false,
 };
 
 const installedAdIntegration = {
-  name: 'entityanalytics_ad',
-  title: 'Active Directory',
-  version: '2.0.0',
-  description: 'Active Directory integration for entity analytics',
-  icons: [{ type: 'eui', src: 'logoWindows' }],
-  status: 'installed',
+  packageInfo: {
+    name: 'entityanalytics_ad',
+    title: 'Active Directory',
+    version: '2.0.0',
+    description: 'Active Directory integration for entity analytics',
+    icons: [{ type: 'eui', src: 'logoWindows' }],
+    status: 'installed',
+  },
+  hasDataStreams: true,
 };
 
 const mockIntegrations = [uninstalledOktaIntegration, installedAdIntegration];
@@ -107,7 +113,10 @@ describe('IntegrationCards', () => {
       uninstalledOktaIntegration,
       {
         ...installedAdIntegration,
-        status: 'not_installed',
+        packageInfo: {
+          ...installedAdIntegration.packageInfo,
+          status: 'not_installed',
+        },
       },
     ];
 
@@ -127,7 +136,10 @@ describe('IntegrationCards', () => {
   it('render the installation status when status is installed', async () => {
     const installedIntegration = {
       ...uninstalledOktaIntegration,
-      status: 'installed',
+      packageInfo: {
+        ...uninstalledOktaIntegration.packageInfo,
+        status: 'installed',
+      },
     };
 
     mockUseEntityAnalyticsIntegrations.mockReturnValue([installedIntegration]);

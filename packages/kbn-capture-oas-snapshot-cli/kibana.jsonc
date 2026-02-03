@@ -2,5 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/capture-oas-snapshot-cli",
   "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
   "devOnly": true
 }

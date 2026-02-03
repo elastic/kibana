@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 import { css, cx } from '@emotion/css';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { useUserData } from '../../../../detections/components/user_info';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { CoverageOverviewRuleListHeader } from './shared_components/popover_list_header';
 import { CoverageOverviewMitreTechniquePanel } from './technique_panel';
@@ -29,6 +28,7 @@ import * as i18n from './translations';
 import { RuleLink } from '../../components/rules_table/use_columns';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import { getNumOfCoveredSubtechniques } from '../../../rule_management/model/coverage_overview/mitre_subtechnique';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export interface CoverageOverviewMitreTechniquePanelPopoverProps {
   technique: CoverageOverviewMitreTechnique;
@@ -37,19 +37,16 @@ export interface CoverageOverviewMitreTechniquePanelPopoverProps {
 const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
   technique,
 }: CoverageOverviewMitreTechniquePanelPopoverProps) => {
-  const [{ loading: userInfoLoading, canUserCRUD }] = useUserData();
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const isEnableButtonDisabled = useMemo(
-    () => !canUserCRUD || technique.disabledRules.length === 0,
-    [canUserCRUD, technique.disabledRules.length]
+    () => !canEditRules || technique.disabledRules.length === 0,
+    [canEditRules, technique.disabledRules.length]
   );
 
-  const isEnableButtonLoading = useMemo(
-    () => isLoading || userInfoLoading,
-    [isLoading, userInfoLoading]
-  );
+  const isEnableButtonLoading = isLoading;
 
   const {
     state: {

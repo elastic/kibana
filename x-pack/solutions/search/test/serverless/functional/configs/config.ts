@@ -44,9 +44,6 @@ export default createTestConfig({
     searchPlayground: {
       pathname: '/app/search_playground',
     },
-    elasticsearchStart: {
-      pathname: '/app/elasticsearch/start',
-    },
     elasticsearchIndices: {
       pathname: '/app/elasticsearch/indices',
     },
@@ -61,6 +58,9 @@ export default createTestConfig({
     },
     searchQueryRules: {
       pathname: '/app/elasticsearch/query_rules',
+    },
+    searchGettingStarted: {
+      pathname: '/app/elasticsearch/getting_started',
     },
   },
 });

@@ -6,10 +6,10 @@
  */
 
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import type { MapAttributes } from '../../common/content_management';
 import { extractReferences } from '../../common/migrations/references';
+import type { StoredMapAttributes } from '../saved_objects/types';
 
-export function extract(state: EmbeddableStateWithType & { attributes?: MapAttributes }) {
+export function extract(state: EmbeddableStateWithType & { attributes?: StoredMapAttributes }) {
   // by-reference embeddable
   if (!state.attributes) {
     // No references to extract for by-reference embeddable since all references are stored with by-reference saved object

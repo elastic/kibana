@@ -28,15 +28,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(
         await (await testSubjects.find(`lnsLayerAddButton-annotations`)).getAttribute('disabled')
       ).to.be('true');
+
+      // click add layer button again to close the popup
+      await testSubjects.click('lnsLayerAddButton');
     });
 
     it('should add manual annotation layer with static date and allow edition', async () => {
       await lens.removeLayer();
+      await lens.ensureLayerTabIsActive();
       await lens.dragFieldToWorkspace('@timestamp', 'xyVisChart');
 
       await lens.createLayer('annotations');
 
-      expect((await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length).to.eql(2);
+      await lens.assertLayerCount(2);
+      // switch to the annotation tab
+      await lens.ensureLayerTabIsActive(1);
       expect(
         await (
           await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
@@ -73,9 +79,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should add query annotation layer and allow edition', async () => {
       await lens.removeLayer(1);
+      await lens.assertLayerCount(1);
       await lens.createLayer('annotations');
 
-      expect((await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length).to.eql(2);
+      await lens.assertLayerCount(2);
+      // switch to the annotation tab
+      await lens.ensureLayerTabIsActive(1);
       expect(
         await (
           await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
@@ -153,9 +162,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await lens.createLayer('annotations', ANNOTATION_GROUP_TITLE);
 
-        await retry.try(async () => {
-          expect(await lens.getLayerCount()).to.be(2);
-        });
+        await lens.assertLayerCount(2);
 
         await lens.save(SECOND_VIS_TITLE);
       });
@@ -169,9 +176,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           navigateToVisualize: false,
         });
 
-        await retry.try(async () => {
-          expect(await lens.getLayerCount()).to.be(1);
-        });
+        await lens.assertLayerCount(1);
       });
 
       // TODO check various saving configurations (linked layer, clean by-ref, revert)

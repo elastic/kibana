@@ -4,7 +4,12 @@
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
-      "pretty": "__flag__"
+      "pretty": "__flag__",
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ]
     },
     "methods": [
       "POST"

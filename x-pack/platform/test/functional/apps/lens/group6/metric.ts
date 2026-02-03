@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -18,12 +19,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
 
   const inspectorTrendlineData = [
-    ['2015-09-19 06:00', '-'],
-    ['2015-09-19 09:00', '-'],
-    ['2015-09-19 12:00', '-'],
-    ['2015-09-19 15:00', '-'],
-    ['2015-09-19 18:00', '-'],
-    ['2015-09-19 21:00', '-'],
+    ['2015-09-19 06:00', NULL_LABEL],
+    ['2015-09-19 09:00', NULL_LABEL],
+    ['2015-09-19 12:00', NULL_LABEL],
+    ['2015-09-19 15:00', NULL_LABEL],
+    ['2015-09-19 18:00', NULL_LABEL],
+    ['2015-09-19 21:00', NULL_LABEL],
     ['2015-09-20 00:00', '6,011.351'],
     ['2015-09-20 03:00', '5,849.901'],
     ['2015-09-20 06:00', '5,722.622'],
@@ -41,26 +42,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ];
 
   const inspectorExpectedTrenlineDataWithBreakdown = [
-    ['97.220.3.248', '2015-09-19 06:00', '-'],
-    ['97.220.3.248', '2015-09-19 09:00', '-'],
-    ['97.220.3.248', '2015-09-19 12:00', '-'],
-    ['97.220.3.248', '2015-09-19 15:00', '-'],
-    ['97.220.3.248', '2015-09-19 18:00', '-'],
-    ['97.220.3.248', '2015-09-19 21:00', '-'],
-    ['97.220.3.248', '2015-09-20 00:00', '-'],
-    ['97.220.3.248', '2015-09-20 03:00', '-'],
-    ['97.220.3.248', '2015-09-20 06:00', '-'],
-    ['97.220.3.248', '2015-09-20 09:00', '-'],
-    ['97.220.3.248', '2015-09-20 12:00', '-'],
-    ['97.220.3.248', '2015-09-20 15:00', '-'],
-    ['97.220.3.248', '2015-09-20 18:00', '-'],
-    ['97.220.3.248', '2015-09-20 21:00', '-'],
-    ['97.220.3.248', '2015-09-21 00:00', '-'],
-    ['97.220.3.248', '2015-09-21 03:00', '-'],
-    ['97.220.3.248', '2015-09-21 06:00', '-'],
+    ['97.220.3.248', '2015-09-19 06:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-19 09:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-19 12:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-19 15:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-19 18:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-19 21:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-20 00:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-20 03:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-20 06:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-20 09:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-20 12:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-20 15:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-20 18:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-20 21:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-21 00:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-21 03:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-21 06:00', NULL_LABEL],
     ['97.220.3.248', '2015-09-21 09:00', '19,755'],
-    ['97.220.3.248', '2015-09-21 12:00', '-'],
-    ['97.220.3.248', '2015-09-21 15:00', '-'],
+    ['97.220.3.248', '2015-09-21 12:00', NULL_LABEL],
+    ['97.220.3.248', '2015-09-21 15:00', NULL_LABEL],
   ];
 
   const clickMetric = async (title: string) => {
@@ -101,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.openDimensionEditor(
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
       );
-      await testSubjects.click('lnsMetric_supporting_visualization_trendline');
+      await testSubjects.click('lnsMetric_background_chart_line');
       await lens.closeDimensionEditor();
 
       await inspector.open('lnsApp_inspectButton');
@@ -117,7 +118,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsMetric_breakdownByDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
+        keepOpen: true,
       });
+      await lens.setTermsNumberOfValues(5); // Default is 9
+      await lens.closeDimensionEditor();
 
       await lens.waitForVisualization('mtrVis');
       const data = await lens.getMetricVisualizationData();
@@ -194,7 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
       );
 
-      await testSubjects.click('lnsMetric_supporting_visualization_panel');
+      await testSubjects.click('lnsMetric_background_chart_none');
       await lens.closeDimensionEditor();
 
       await lens.waitForVisualization('mtrVis');
@@ -216,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
       );
 
-      await testSubjects.click('lnsMetric_supporting_visualization_trendline');
+      await testSubjects.click('lnsMetric_background_chart_line');
 
       await lens.waitForVisualization('mtrVis');
 
@@ -235,7 +239,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
       );
 
-      await testSubjects.click('lnsMetric_supporting_visualization_panel');
+      await testSubjects.click('lnsMetric_background_chart_none');
 
       await lens.waitForVisualization('mtrVis');
 

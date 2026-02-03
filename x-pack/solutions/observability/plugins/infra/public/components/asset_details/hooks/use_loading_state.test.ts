@@ -88,6 +88,7 @@ describe('useLoadingState', () => {
   beforeEach(() => {
     subscription = new Subscription();
     jest.useFakeTimers();
+    // @ts-expect-error upgrade typescript v5.9.3
     waitUntilNextSessionCompletesMock$.mockReturnValue(of(SearchSessionState.None));
     mockRequestTimeContext();
     mockUseKibana();

@@ -64,7 +64,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result.formattedString).toBe('"I\'m multiline\n*&%$#@"');
+    expect(result.formattedString).toBe('"I\'m multiline\n*&%$\\#|@"');
     expect(result.withFormula).toBe(false);
   });
 

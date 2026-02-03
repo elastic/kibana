@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState, useEffect } from 'react';
-import type { IngestStreamLifecycle } from '@kbn/streams-schema';
+import type { IngestStreamLifecycleAll, IngestStreamLifecycleDSL } from '@kbn/streams-schema';
 import { isDslLifecycle } from '@kbn/streams-schema';
 import {
   EuiButton,
@@ -22,9 +22,9 @@ import { useBoolean } from '@kbn/react-hooks';
 import { parseDuration } from '../../helpers/helpers';
 
 interface Props {
-  initialValue: IngestStreamLifecycle;
+  initialValue: IngestStreamLifecycleAll;
   isDisabled: boolean;
-  setLifecycle: (lifecycle: IngestStreamLifecycle) => void;
+  setLifecycle: (lifecycle: IngestStreamLifecycleDSL) => void;
   setSaveButtonDisabled: (isDisabled: boolean) => void;
 }
 
@@ -87,6 +87,8 @@ export function DslField({ initialValue, isDisabled, setLifecycle, setSaveButton
         data-test-subj="streamsAppDslModalDaysField"
         value={isDisabled && existingRetention ? existingRetention?.value : retentionValue}
         onChange={(e) => {
+          // Ignore changes when disabled to prevent updating lifecycle state in read-only mode
+          if (isDisabled) return;
           setRetentionValue(e.target.value);
         }}
         disabled={isDisabled}
@@ -120,6 +122,7 @@ export function DslField({ initialValue, isDisabled, setLifecycle, setSaveButton
                     closeUnitMenu();
                     setSelectedUnit(unit);
                   }}
+                  data-test-subj={`streamsAppDslModalUnitOption-${unit.value}`}
                 >
                   {unit.name}
                 </EuiContextMenuItem>

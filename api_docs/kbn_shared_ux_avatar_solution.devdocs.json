@@ -24,6 +24,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/avatar/solution/src/solution_avatar.tsx",
+        "lineNumber": 47,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/avatar/solution/src/solution_avatar.tsx",
+            "lineNumber": 47,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -69,6 +73,8 @@
           "IconTypeProps"
         ],
         "path": "src/platform/packages/shared/shared-ux/avatar/solution/src/solution_avatar.tsx",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/monaco';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type YAML from 'yaml';
+import type { Scalar, YAMLMap } from 'yaml';
+import type { monaco } from '@kbn/monaco';
+import type { ExecutionContext } from '../execution_context/build_execution_context';
 
 /**
  * Context information for hover providers
@@ -29,7 +33,7 @@ export interface HoverContext {
   /** Step context if we're inside a workflow step */
   stepContext?: StepContext;
   /** Parameter context if we're inside a parameter */
-  parameterContext?: ParameterContext;
+  parameterContext?: ParameterContext | null;
 }
 
 /**
@@ -48,14 +52,12 @@ export interface StepContext {
   stepName: string;
   /** Type of the step */
   stepType: string;
-  /** Index of the step in the steps array */
-  stepIndex: number;
   /** Whether we're inside the 'with' block */
   isInWithBlock: boolean;
   /** YAML node for the entire step */
-  stepNode: any;
+  stepNode: YAMLMap;
   /** YAML node for the type field */
-  typeNode: any;
+  typeNode: Scalar<unknown>;
 }
 
 /**
@@ -123,11 +125,6 @@ export interface MonacoConnectorHandler {
   generateHoverContent(context: HoverContext): Promise<monaco.IMarkdownString | null>;
 
   /**
-   * Generate floating action buttons for the connector
-   */
-  generateActions(context: ActionContext): Promise<ActionInfo[]>;
-
-  /**
    * Get examples for the connector type
    */
   getExamples(connectorType: string): ConnectorExamples | null;
@@ -144,6 +141,8 @@ export interface MonacoConnectorHandler {
 export interface ProviderConfig {
   /** Function to get the current YAML document */
   getYamlDocument: () => YAML.Document | null;
+  /** Function to get the current execution context (for template expression hover) */
+  getExecutionContext?: () => ExecutionContext | null;
   /** Additional configuration options */
   options?: Record<string, any>;
 }
@@ -166,4 +165,11 @@ export interface MonacoHandlerRegistry {
 
   /** Clear all handlers */
   clear(): void;
+}
+
+export interface ConnectorInfo {
+  name: string;
+  description: string;
+  documentation?: string;
+  examples?: ConnectorExamples;
 }

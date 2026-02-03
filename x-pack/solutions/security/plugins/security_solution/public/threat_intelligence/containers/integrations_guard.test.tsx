@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { IntegrationsGuard } from './integrations_guard';
-import { EMPTY_PAGE_SECURITY_TEMPLATE, TestProvidersComponent } from '../mocks/test_providers';
+import { TestProvidersComponent } from '../mocks/test_providers';
 import type { Integration } from '../hooks/use_integrations';
 import { useIntegrations } from '../hooks/use_integrations';
 import { useIntegrationsPageLink } from '../hooks/use_integrations_page_link';
 import { useTIDocumentationLink } from '../hooks/use_documentation_link';
 import { useIndicatorsTotalCount } from '../modules/indicators/hooks/use_total_count';
 import { INSTALLATION_STATUS, THREAT_INTELLIGENCE_CATEGORY } from '../utils/filter_integrations';
-import { LOADING_LOGO_TEST_ID } from './test_ids';
-import { EMPTY_PROMPT_TEST_ID } from '../modules/empty_page/empty_page';
+import { EMPTY_PAGE_WRAPPER_TEST_ID, LOADING_LOGO_WRAPPER_TEST_ID } from './test_ids';
 
 jest.mock('../modules/indicators/hooks/use_total_count');
 jest.mock('../hooks/use_integrations_page_link');
 jest.mock('../hooks/use_documentation_link');
 jest.mock('../hooks/use_integrations');
-jest.mock('./security_solution_plugin_template_wrapper');
+jest.mock('../../app/home/template_wrapper', () => ({
+  SecuritySolutionTemplateWrapper: () => <div />,
+}));
 
 describe('IntegrationsGuard', () => {
   it('should render loading when indicator count and integrations are being loaded', async () => {
@@ -51,8 +52,7 @@ describe('IntegrationsGuard', () => {
       }
     );
 
-    expect(getByTestId(LOADING_LOGO_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(EMPTY_PAGE_SECURITY_TEMPLATE)).toBeInTheDocument();
+    expect(getByTestId(LOADING_LOGO_WRAPPER_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render loading when indicator only is loading', async () => {
@@ -80,8 +80,7 @@ describe('IntegrationsGuard', () => {
       }
     );
 
-    expect(getByTestId(LOADING_LOGO_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(EMPTY_PAGE_SECURITY_TEMPLATE)).toBeInTheDocument();
+    expect(getByTestId(LOADING_LOGO_WRAPPER_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render loading when integrations only are loading', async () => {
@@ -110,8 +109,7 @@ describe('IntegrationsGuard', () => {
       }
     );
 
-    expect(getByTestId(LOADING_LOGO_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(EMPTY_PAGE_SECURITY_TEMPLATE)).toBeInTheDocument();
+    expect(getByTestId(LOADING_LOGO_WRAPPER_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render empty page when no indicators are found and no ti integrations are installed', async () => {
@@ -138,8 +136,7 @@ describe('IntegrationsGuard', () => {
         wrapper: TestProvidersComponent,
       }
     );
-    expect(getByTestId(EMPTY_PROMPT_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(EMPTY_PAGE_SECURITY_TEMPLATE)).toBeInTheDocument();
+    expect(getByTestId(EMPTY_PAGE_WRAPPER_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render indicators table when we have some indicators', async () => {

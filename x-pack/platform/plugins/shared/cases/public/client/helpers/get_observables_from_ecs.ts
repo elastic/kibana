@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { i18n } from '@kbn/i18n';
 import { castArray } from 'lodash';
 import type { ObservablePost } from '../../../common/types/api';
@@ -15,6 +14,7 @@ import {
   OBSERVABLE_TYPE_IPV4,
   OBSERVABLE_TYPE_IPV6,
   OBSERVABLE_TYPE_HOSTNAME,
+  OBSERVABLE_TYPE_AGENT_ID,
 } from '../../../common/constants/observables';
 
 export const getIPType = (ip: string): 'IPV4' | 'IPV6' => {
@@ -39,21 +39,13 @@ const HASH_FIELDS = [
 // https://www.elastic.co/docs/reference/ecs/ecs-hash
 const HASH_PARENTS = ['dll', 'file', 'process'] as const;
 
-export const getHashValues = (ecsData: Ecs): string[] => {
-  const res: string[] = [];
-
-  HASH_PARENTS.forEach((parent) => {
-    HASH_FIELDS.forEach((field) => {
-      const value = ecsData[parent]?.hash?.[field];
-      if (value) {
-        res.push(...castArray(value));
-      }
-    });
-  });
-
-  return res;
-};
-
+export type Maybe<T> = T | null;
+export interface FlattedEcsData {
+  field: string;
+  value?: Maybe<string[]>;
+}
+export const getHashFields = (): string[] =>
+  HASH_PARENTS.map((parent) => HASH_FIELDS.map((field) => `${parent}.hash.${field}`)).flat();
 export const processObservable = (
   observablesMap: Map<string, ObservablePost>,
   value: string,
@@ -71,91 +63,85 @@ export const processObservable = (
   });
 };
 
-export const getObservablesFromEcs = (ecsData: Ecs): ObservablePost[] => {
+// helper function to get observables from array of flattened ECS data
+export const getObservablesFromEcs = (ecsDataArray: FlattedEcsData[][]): ObservablePost[] => {
   const observablesMap = new Map<string, ObservablePost>();
 
   const description = i18n.translate('xpack.cases.caseView.observables.autoExtract.description', {
     defaultMessage: 'Auto extracted observable',
   });
+  const hashFields = getHashFields();
+  for (const ecsData of ecsDataArray) {
+    for (const datum of ecsData) {
+      if (datum.value) {
+        // Source IP
+        if (datum.field === 'source.ip') {
+          const ips = castArray(datum.value);
+          ips.forEach((ip) => {
+            const ipType = getIPType(ip);
+            processObservable(
+              observablesMap,
+              ip,
+              ipType === 'IPV4' ? OBSERVABLE_TYPE_IPV4.key : OBSERVABLE_TYPE_IPV6.key,
+              description
+            );
+          });
+        }
 
-  // Source IP
-  if (ecsData.source?.ip) {
-    const ips = castArray(ecsData.source.ip);
-    ips.forEach((ip) => {
-      const ipType = getIPType(ip);
-      processObservable(
-        observablesMap,
-        ip,
-        ipType === 'IPV4' ? OBSERVABLE_TYPE_IPV4.key : OBSERVABLE_TYPE_IPV6.key,
-        description
-      );
-    });
+        // Destination IP
+        if (datum.field === 'destination.ip') {
+          const ips = castArray(datum.value);
+          ips.forEach((ip) => {
+            const ipType = getIPType(ip);
+            processObservable(
+              observablesMap,
+              ip,
+              ipType === 'IPV4' ? OBSERVABLE_TYPE_IPV4.key : OBSERVABLE_TYPE_IPV6.key,
+              description
+            );
+          });
+        }
+        // Host name
+        if (datum.field === 'host.name') {
+          const hostnames = castArray(datum.value);
+          hostnames.forEach((name) => {
+            if (name) {
+              processObservable(observablesMap, name, OBSERVABLE_TYPE_HOSTNAME.key, description);
+            }
+          });
+        }
+
+        // File hash
+        if (hashFields.includes(datum.field)) {
+          const hashValues = castArray(datum.value);
+          hashValues.forEach((hash) => {
+            processObservable(observablesMap, hash, OBSERVABLE_TYPE_FILE_HASH.key, description);
+          });
+        }
+        // File path
+        if (datum.field === 'file.path') {
+          const paths = castArray(datum.value);
+          paths.forEach((path) => {
+            processObservable(observablesMap, path, OBSERVABLE_TYPE_FILE_PATH.key, description);
+          });
+        }
+        // Domain
+        if (datum.field === 'dns.question.name') {
+          const names = castArray(datum.value);
+          names.forEach((name) => {
+            processObservable(observablesMap, name, OBSERVABLE_TYPE_DOMAIN.key, description);
+          });
+        }
+        // Agent ID
+        if (datum.field === 'agent.id') {
+          const agentIds = castArray(datum.value);
+          agentIds.forEach((agentId) => {
+            processObservable(observablesMap, agentId, OBSERVABLE_TYPE_AGENT_ID.key, description);
+          });
+        }
+      }
+    }
   }
-
-  // Destination IP
-  if (ecsData.destination?.ip) {
-    const ips = castArray(ecsData.destination.ip);
-
-    ips.forEach((ip) => {
-      const ipType = getIPType(ip);
-      processObservable(
-        observablesMap,
-        ip,
-        ipType === 'IPV4' ? OBSERVABLE_TYPE_IPV4.key : OBSERVABLE_TYPE_IPV6.key,
-        description
-      );
-    });
-  }
-
-  // Host name
-  if (ecsData.host?.name) {
-    const hostnames = castArray(ecsData.host.name);
-    hostnames.forEach((name) => {
-      processObservable(observablesMap, name, OBSERVABLE_TYPE_HOSTNAME.key, description);
-    });
-  }
-
-  // File hash
-  const hashValues = getHashValues(ecsData);
-  if (hashValues.length > 0) {
-    hashValues.forEach((hash) => {
-      processObservable(observablesMap, hash, OBSERVABLE_TYPE_FILE_HASH.key, description);
-    });
-  }
-
-  // File path
-  if (ecsData.file?.path) {
-    const paths = castArray(ecsData.file.path);
-    paths.forEach((path) => {
-      processObservable(observablesMap, path, OBSERVABLE_TYPE_FILE_PATH.key, description);
-    });
-  }
-
-  // Domain;
-  if (ecsData.dns?.question?.name) {
-    const names = castArray(ecsData.dns.question.name);
-    names.forEach((name) => {
-      processObservable(observablesMap, name, OBSERVABLE_TYPE_DOMAIN.key, description);
-    });
-  }
-
-  // URL
-  // TODO - Pending review
-
-  // Email
-  // TODO - Pending review
-  // email.from.address, or email.sender.address??
-  // if (ecsData.email?.from?.address) {
-  //   const addresses = castArray(ecsData.email?.from?.address);
-  // addresses.forEach(address => {
-  //   observablesMap.set(address, {
-  //      typeKey: OBSERVABLE_TYPE_EMAIL.key,
-  //      value: address,
-  //      description,
-  //    });
-  // });
-  //   );
-  // }
 
   // remove duplicates of key type and value pairs
   return Array.from(observablesMap.values());

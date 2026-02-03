@@ -12,6 +12,8 @@ import type { CloudProvider, CloudConnector } from '../../../common/types/models
 
 import { cloudConnectorService } from '../../services';
 
+import { packagePolicyService } from '../../services';
+
 import { registerRoutes } from '.';
 import {
   createCloudConnectorHandler,
@@ -19,6 +21,7 @@ import {
   getCloudConnectorHandler,
   updateCloudConnectorHandler,
   deleteCloudConnectorHandler,
+  getCloudConnectorUsageHandler,
 } from './handlers';
 
 // Mock dependencies
@@ -29,6 +32,7 @@ jest.mock('../../services/app_context', () => ({
         info: jest.fn(),
         error: jest.fn(),
         warn: jest.fn(),
+        debug: jest.fn(),
       }),
     }),
     getConfig: jest.fn().mockReturnValue({
@@ -47,6 +51,9 @@ jest.mock('../../services', () => ({
     update: jest.fn(),
     delete: jest.fn(),
   },
+  packagePolicyService: {
+    list: jest.fn(),
+  },
 }));
 
 describe('Cloud Connector API', () => {
@@ -55,6 +62,7 @@ describe('Cloud Connector API', () => {
   const mockCloudConnectorService = cloudConnectorService as jest.Mocked<
     typeof cloudConnectorService
   >;
+  const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -63,6 +71,13 @@ describe('Cloud Connector API', () => {
         internalSoClient: {
           create: jest.fn(),
           find: jest.fn(),
+        },
+      }),
+      core: Promise.resolve({
+        elasticsearch: {
+          client: {
+            asInternalUser: {},
+          },
         },
       }),
     } as any;
@@ -105,7 +120,10 @@ describe('Cloud Connector API', () => {
           id: 'test-id',
           name: 'test-connector',
           cloudProvider: 'aws' as CloudProvider,
-          vars: {},
+          vars: {
+            role_arn: { value: 'arn:aws:iam::123456789012:role/test', type: 'text' },
+            external_id: { value: { id: 'test-secret-id', isSecretRef: true }, type: 'password' },
+          },
           packagePolicyCount: 1,
           created_at: '2023-01-01T00:00:00.000Z',
           updated_at: '2023-01-01T00:00:00.000Z',
@@ -120,6 +138,60 @@ describe('Cloud Connector API', () => {
             vars: {
               role_arn: { value: 'arn:aws:iam::123:role/TestRole', type: 'text' },
               external_id: { value: { isSecretRef: true, id: 'secret-123' }, type: 'password' },
+            },
+          },
+        });
+
+        await createCloudConnectorHandler(context, request, response);
+
+        expect(response.ok).toHaveBeenCalledWith({
+          body: { item: mockCloudConnector },
+        });
+      });
+
+      it('should accept valid Azure cloud provider', async () => {
+        const mockCloudConnector: CloudConnector = {
+          id: 'test-id',
+          name: 'test-connector',
+          cloudProvider: 'azure' as CloudProvider,
+          vars: {
+            tenant_id: {
+              value: { id: 'azure-tenant-secret', isSecretRef: true },
+              type: 'password',
+            },
+            client_id: {
+              value: { id: 'azure-client-secret', isSecretRef: true },
+              type: 'password',
+            },
+            azure_credentials_cloud_connector_id: {
+              value: 'azure-connector-123',
+              type: 'text',
+            },
+          },
+          packagePolicyCount: 1,
+          created_at: '2023-01-01T00:00:00.000Z',
+          updated_at: '2023-01-01T00:00:00.000Z',
+        };
+
+        mockCloudConnectorService.create.mockResolvedValue(mockCloudConnector);
+
+        const request = httpServerMock.createKibanaRequest({
+          body: {
+            name: 'test-connector',
+            cloudProvider: 'azure',
+            vars: {
+              tenant_id: {
+                value: { id: 'azure-tenant-secret', isSecretRef: true },
+                type: 'password',
+              },
+              client_id: {
+                value: { id: 'azure-client-secret', isSecretRef: true },
+                type: 'password',
+              },
+              azure_credentials_cloud_connector_id: {
+                value: 'azure-connector-123',
+                type: 'text',
+              },
             },
           },
         });
@@ -153,7 +225,10 @@ describe('Cloud Connector API', () => {
             id: 'test-id',
             name: 'test-connector',
             cloudProvider: 'aws' as CloudProvider,
-            vars: {},
+            vars: {
+              role_arn: { value: 'arn:aws:iam::123456789012:role/test', type: 'text' },
+              external_id: { value: { id: 'test-secret-id', isSecretRef: true }, type: 'password' },
+            },
             packagePolicyCount: 1,
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',
@@ -179,7 +254,7 @@ describe('Cloud Connector API', () => {
   });
 
   describe('CREATE Cloud Connector', () => {
-    it('should create cloud connector successfully', async () => {
+    it('should create AWS cloud connector successfully', async () => {
       const mockCloudConnector: CloudConnector = {
         id: 'test-id',
         name: 'test-connector',
@@ -228,7 +303,71 @@ describe('Cloud Connector API', () => {
       });
     });
 
-    it('should handle missing required variables', async () => {
+    it('should create Azure cloud connector successfully', async () => {
+      const mockCloudConnector: CloudConnector = {
+        id: 'test-id',
+        name: 'test-connector',
+        cloudProvider: 'azure' as CloudProvider,
+        vars: {
+          tenant_id: {
+            value: { isSecretRef: true, id: 'tenant-secret-123' },
+            type: 'password' as const,
+          },
+          client_id: {
+            value: { isSecretRef: true, id: 'client-secret-456' },
+            type: 'password' as const,
+          },
+          azure_credentials_cloud_connector_id: {
+            value: 'azure-connector-789',
+            type: 'text' as const,
+          },
+        },
+        packagePolicyCount: 1,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+      };
+
+      mockCloudConnectorService.create.mockResolvedValue(mockCloudConnector);
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'test-connector',
+          cloudProvider: 'azure',
+          vars: {
+            tenant_id: { value: { isSecretRef: true, id: 'tenant-secret-123' }, type: 'password' },
+            client_id: { value: { isSecretRef: true, id: 'client-secret-456' }, type: 'password' },
+            azure_credentials_cloud_connector_id: {
+              value: 'azure-connector-789',
+              type: 'text',
+            },
+          },
+        },
+      });
+
+      await createCloudConnectorHandler(context, request, response);
+
+      expect(mockCloudConnectorService.create).toHaveBeenCalledWith(
+        expect.any(Object), // internalSoClient
+        {
+          name: 'test-connector',
+          cloudProvider: 'azure' as CloudProvider,
+          vars: {
+            tenant_id: { value: { isSecretRef: true, id: 'tenant-secret-123' }, type: 'password' },
+            client_id: { value: { isSecretRef: true, id: 'client-secret-456' }, type: 'password' },
+            azure_credentials_cloud_connector_id: {
+              value: 'azure-connector-789',
+              type: 'text',
+            },
+          },
+        }
+      );
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: mockCloudConnector },
+      });
+    });
+
+    it('should handle missing required AWS variables', async () => {
       const error = new Error('AWS package policy must contain role_arn variable');
       mockCloudConnectorService.create.mockRejectedValue(error);
 
@@ -249,6 +388,35 @@ describe('Cloud Connector API', () => {
         statusCode: 400,
         body: {
           message: 'AWS package policy must contain role_arn variable',
+        },
+      });
+    });
+
+    it('should handle missing required Azure variables', async () => {
+      const error = new Error('Azure package policy must contain tenant_id variable');
+      mockCloudConnectorService.create.mockRejectedValue(error);
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'test-connector',
+          cloudProvider: 'azure' as CloudProvider,
+          vars: {
+            // Missing tenant_id
+            client_id: { value: { isSecretRef: true, id: 'client-secret-456' }, type: 'password' },
+            azure_credentials_cloud_connector_id: {
+              value: 'azure-connector-789',
+              type: 'text',
+            },
+          },
+        },
+      });
+
+      await createCloudConnectorHandler(context, request, response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          message: 'Azure package policy must contain tenant_id variable',
         },
       });
     });
@@ -345,7 +513,7 @@ describe('Cloud Connector API', () => {
   });
 
   describe('GET Cloud Connector by ID', () => {
-    it('should get cloud connector by ID successfully', async () => {
+    it('should get AWS cloud connector by ID successfully', async () => {
       const mockCloudConnector: CloudConnector = {
         id: 'connector-123',
         name: 'aws-connector',
@@ -376,6 +544,51 @@ describe('Cloud Connector API', () => {
       expect(mockCloudConnectorService.getById).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
         'connector-123'
+      );
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: mockCloudConnector },
+      });
+    });
+
+    it('should get Azure cloud connector by ID successfully', async () => {
+      const mockCloudConnector: CloudConnector = {
+        id: 'connector-456',
+        name: 'azure-connector',
+        namespace: '*',
+        cloudProvider: 'azure' as CloudProvider,
+        vars: {
+          tenant_id: {
+            value: { isSecretRef: true, id: 'azure-tenant-id-secret' },
+            type: 'password' as const,
+          },
+          client_id: {
+            value: { isSecretRef: true, id: 'azure-client-id-secret' },
+            type: 'password' as const,
+          },
+          azure_credentials_cloud_connector_id: {
+            value: 'azure-connector-id',
+            type: 'text' as const,
+          },
+        },
+        packagePolicyCount: 2,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+      };
+
+      mockCloudConnectorService.getById.mockResolvedValue(mockCloudConnector);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: {
+          cloudConnectorId: 'connector-456',
+        },
+      });
+
+      await getCloudConnectorHandler(context, request, response);
+
+      expect(mockCloudConnectorService.getById).toHaveBeenCalledWith(
+        expect.any(Object), // internalSoClient
+        'connector-456'
       );
 
       expect(response.ok).toHaveBeenCalledWith({
@@ -425,7 +638,7 @@ describe('Cloud Connector API', () => {
   });
 
   describe('UPDATE Cloud Connector', () => {
-    it('should update cloud connector name successfully', async () => {
+    it('should update AWS cloud connector name successfully', async () => {
       const mockUpdatedConnector: CloudConnector = {
         id: 'connector-123',
         name: 'updated-aws-connector',
@@ -469,7 +682,58 @@ describe('Cloud Connector API', () => {
       });
     });
 
-    it('should update cloud connector vars successfully', async () => {
+    it('should update Azure cloud connector name successfully', async () => {
+      const mockUpdatedConnector: CloudConnector = {
+        id: 'connector-456',
+        name: 'updated-azure-connector',
+        namespace: '*',
+        cloudProvider: 'azure' as CloudProvider,
+        vars: {
+          tenant_id: {
+            value: { isSecretRef: true, id: 'azure-tenant-id-secret' },
+            type: 'password' as const,
+          },
+          client_id: {
+            value: { isSecretRef: true, id: 'azure-client-id-secret' },
+            type: 'password' as const,
+          },
+          azure_credentials_cloud_connector_id: {
+            value: 'azure-connector-id',
+            type: 'text' as const,
+          },
+        },
+        packagePolicyCount: 2,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T02:00:00.000Z',
+      };
+
+      mockCloudConnectorService.update.mockResolvedValue(mockUpdatedConnector);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: {
+          cloudConnectorId: 'connector-456',
+        },
+        body: {
+          name: 'updated-azure-connector',
+        },
+      });
+
+      await updateCloudConnectorHandler(context, request, response);
+
+      expect(mockCloudConnectorService.update).toHaveBeenCalledWith(
+        expect.any(Object), // internalSoClient
+        'connector-456',
+        {
+          name: 'updated-azure-connector',
+        }
+      );
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: mockUpdatedConnector },
+      });
+    });
+
+    it('should update AWS cloud connector vars successfully', async () => {
       const updatedVars = {
         role_arn: { value: 'arn:aws:iam::123456789012:role/UpdatedRole', type: 'text' as const },
         external_id: {
@@ -515,7 +779,60 @@ describe('Cloud Connector API', () => {
       });
     });
 
-    it('should update both name and vars successfully', async () => {
+    it('should update Azure cloud connector vars successfully', async () => {
+      const updatedVars = {
+        tenant_id: {
+          value: { isSecretRef: true, id: 'updated-tenant-secret' },
+          type: 'password' as const,
+        },
+        client_id: {
+          value: { isSecretRef: true, id: 'updated-client-secret' },
+          type: 'password' as const,
+        },
+        azure_credentials_cloud_connector_id: {
+          value: 'updated-azure-connector-id',
+          type: 'text' as const,
+        },
+      };
+
+      const mockUpdatedConnector: CloudConnector = {
+        id: 'connector-456',
+        name: 'azure-connector',
+        namespace: '*',
+        cloudProvider: 'azure' as CloudProvider,
+        vars: updatedVars,
+        packagePolicyCount: 2,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T02:00:00.000Z',
+      };
+
+      mockCloudConnectorService.update.mockResolvedValue(mockUpdatedConnector);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: {
+          cloudConnectorId: 'connector-456',
+        },
+        body: {
+          vars: updatedVars,
+        },
+      });
+
+      await updateCloudConnectorHandler(context, request, response);
+
+      expect(mockCloudConnectorService.update).toHaveBeenCalledWith(
+        expect.any(Object), // internalSoClient
+        'connector-456',
+        {
+          vars: updatedVars,
+        }
+      );
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: mockUpdatedConnector },
+      });
+    });
+
+    it('should update both AWS name and vars successfully', async () => {
       const updatedVars = {
         role_arn: {
           value: 'arn:aws:iam::123456789012:role/FullyUpdatedRole',
@@ -557,6 +874,61 @@ describe('Cloud Connector API', () => {
         'connector-123',
         {
           name: 'fully-updated-connector',
+          vars: updatedVars,
+        }
+      );
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: mockUpdatedConnector },
+      });
+    });
+
+    it('should update both Azure name and vars successfully', async () => {
+      const updatedVars = {
+        tenant_id: {
+          value: { isSecretRef: true, id: 'fully-updated-tenant' },
+          type: 'password' as const,
+        },
+        client_id: {
+          value: { isSecretRef: true, id: 'fully-updated-client' },
+          type: 'password' as const,
+        },
+        azure_credentials_cloud_connector_id: {
+          value: 'fully-updated-azure-id',
+          type: 'text' as const,
+        },
+      };
+
+      const mockUpdatedConnector: CloudConnector = {
+        id: 'connector-456',
+        name: 'fully-updated-azure-connector',
+        namespace: '*',
+        cloudProvider: 'azure' as CloudProvider,
+        vars: updatedVars,
+        packagePolicyCount: 2,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T02:00:00.000Z',
+      };
+
+      mockCloudConnectorService.update.mockResolvedValue(mockUpdatedConnector);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: {
+          cloudConnectorId: 'connector-456',
+        },
+        body: {
+          name: 'fully-updated-azure-connector',
+          vars: updatedVars,
+        },
+      });
+
+      await updateCloudConnectorHandler(context, request, response);
+
+      expect(mockCloudConnectorService.update).toHaveBeenCalledWith(
+        expect.any(Object), // internalSoClient
+        'connector-456',
+        {
+          name: 'fully-updated-azure-connector',
           vars: updatedVars,
         }
       );
@@ -678,6 +1050,7 @@ describe('Cloud Connector API', () => {
 
       expect(mockCloudConnectorService.delete).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
+        expect.any(Object), // esClient
         'connector-123',
         false // default force value
       );
@@ -707,6 +1080,7 @@ describe('Cloud Connector API', () => {
 
       expect(mockCloudConnectorService.delete).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
+        expect.any(Object), // esClient
         'connector-123',
         true
       );
@@ -736,6 +1110,7 @@ describe('Cloud Connector API', () => {
 
       expect(mockCloudConnectorService.delete).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
+        expect.any(Object), // esClient
         'connector-123',
         'true' // Handler will pass the string value
       );
@@ -760,6 +1135,7 @@ describe('Cloud Connector API', () => {
 
       expect(mockCloudConnectorService.delete).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
+        expect.any(Object), // esClient
         'connector-123',
         false
       );
@@ -806,6 +1182,7 @@ describe('Cloud Connector API', () => {
 
       expect(mockCloudConnectorService.delete).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
+        expect.any(Object), // esClient
         undefined,
         false
       );
@@ -829,6 +1206,7 @@ describe('Cloud Connector API', () => {
 
       expect(mockCloudConnectorService.delete).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
+        expect.any(Object), // esClient
         'connector-123',
         false // should default to false
       );
@@ -854,6 +1232,7 @@ describe('Cloud Connector API', () => {
 
       expect(mockCloudConnectorService.delete).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
+        expect.any(Object), // esClient
         'connector-123',
         false
       );
@@ -918,6 +1297,496 @@ describe('Cloud Connector API', () => {
           summary: 'Delete cloud connector (supports force deletion)',
         })
       );
+    });
+  });
+
+  describe('GET /cloud_connectors with kuery filter', () => {
+    it('should filter by kuery query parameter', async () => {
+      const mockConnectors: CloudConnector[] = [
+        {
+          id: 'connector-1',
+          name: 'AWS Connector',
+          namespace: '*',
+          cloudProvider: 'aws' as CloudProvider,
+          vars: {
+            role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' },
+            external_id: { value: { id: 'secret-id', isSecretRef: true }, type: 'password' },
+          },
+          packagePolicyCount: 1,
+          created_at: '2023-01-01T00:00:00.000Z',
+          updated_at: '2023-01-01T00:00:00.000Z',
+        },
+        {
+          id: 'connector-2',
+          name: 'Azure Connector',
+          namespace: '*',
+          cloudProvider: 'azure' as CloudProvider,
+          vars: {
+            tenant_id: { value: { id: 'secret-tenant', isSecretRef: true }, type: 'password' },
+            client_id: { value: { id: 'secret-client', isSecretRef: true }, type: 'password' },
+            azure_credentials_cloud_connector_id: {
+              value: 'secret-cc',
+              type: 'text',
+            },
+          },
+          packagePolicyCount: 1,
+          created_at: '2023-01-01T00:00:00.000Z',
+          updated_at: '2023-01-01T00:00:00.000Z',
+        },
+      ];
+
+      // Mock service to return filtered connectors
+      mockCloudConnectorService.getList.mockResolvedValue(mockConnectors);
+
+      const request = httpServerMock.createKibanaRequest({
+        query: { kuery: 'fleet-cloud-connector.attributes.cloudProvider: "azure"' },
+      });
+
+      await getCloudConnectorsHandler(context, request, response);
+
+      // Verify service was called with kuery filter
+      expect(mockCloudConnectorService.getList).toHaveBeenCalledWith(
+        expect.any(Object), // internalSoClient
+        expect.objectContaining({
+          kuery: 'fleet-cloud-connector.attributes.cloudProvider: "azure"',
+        })
+      );
+
+      // Verify response
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          items: mockConnectors,
+        },
+      });
+    });
+
+    it('should return all connectors when kuery not specified', async () => {
+      const mockConnectors: CloudConnector[] = [
+        {
+          id: 'connector-1',
+          name: 'AWS Connector',
+          namespace: '*',
+          cloudProvider: 'aws' as CloudProvider,
+          vars: {
+            role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' },
+            external_id: { value: { id: 'secret-id', isSecretRef: true }, type: 'password' },
+          },
+          packagePolicyCount: 1,
+          created_at: '2023-01-01T00:00:00.000Z',
+          updated_at: '2023-01-01T00:00:00.000Z',
+        },
+        {
+          id: 'connector-2',
+          name: 'Azure Connector',
+          namespace: '*',
+          cloudProvider: 'azure' as CloudProvider,
+          vars: {
+            tenant_id: { value: { id: 'secret-tenant', isSecretRef: true }, type: 'password' },
+            client_id: { value: { id: 'secret-client', isSecretRef: true }, type: 'password' },
+            azure_credentials_cloud_connector_id: {
+              value: 'secret-cc',
+              type: 'text',
+            },
+          },
+          packagePolicyCount: 1,
+          created_at: '2023-01-01T00:00:00.000Z',
+          updated_at: '2023-01-01T00:00:00.000Z',
+        },
+      ];
+
+      // Mock service to return all connectors
+      mockCloudConnectorService.getList.mockResolvedValue(mockConnectors);
+
+      const request = httpServerMock.createKibanaRequest({
+        query: {}, // No kuery specified
+      });
+
+      await getCloudConnectorsHandler(context, request, response);
+
+      // Verify service was called without kuery filter
+      expect(mockCloudConnectorService.getList).toHaveBeenCalledWith(
+        expect.any(Object), // internalSoClient
+        expect.objectContaining({
+          // Should not have kuery property
+        })
+      );
+
+      // Verify response contains all connectors
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          items: mockConnectors,
+        },
+      });
+    });
+
+    it('should handle AWS kuery filter', async () => {
+      const mockAwsConnectors: CloudConnector[] = [
+        {
+          id: 'connector-1',
+          name: 'AWS Connector 1',
+          namespace: '*',
+          cloudProvider: 'aws' as CloudProvider,
+          vars: {
+            role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole1', type: 'text' },
+            external_id: { value: { id: 'secret-id-1', isSecretRef: true }, type: 'password' },
+          },
+          packagePolicyCount: 1,
+          created_at: '2023-01-01T00:00:00.000Z',
+          updated_at: '2023-01-01T00:00:00.000Z',
+        },
+        {
+          id: 'connector-2',
+          name: 'AWS Connector 2',
+          namespace: '*',
+          cloudProvider: 'aws' as CloudProvider,
+          vars: {
+            role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole2', type: 'text' },
+            external_id: { value: { id: 'secret-id-2', isSecretRef: true }, type: 'password' },
+          },
+          packagePolicyCount: 1,
+          created_at: '2023-01-01T00:00:00.000Z',
+          updated_at: '2023-01-01T00:00:00.000Z',
+        },
+      ];
+
+      mockCloudConnectorService.getList.mockResolvedValue(mockAwsConnectors);
+
+      const request = httpServerMock.createKibanaRequest({
+        query: { kuery: 'fleet-cloud-connector.attributes.cloudProvider: "aws"' },
+      });
+
+      await getCloudConnectorsHandler(context, request, response);
+
+      expect(mockCloudConnectorService.getList).toHaveBeenCalledWith(
+        expect.any(Object), // internalSoClient
+        expect.objectContaining({
+          kuery: 'fleet-cloud-connector.attributes.cloudProvider: "aws"',
+        })
+      );
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          items: mockAwsConnectors,
+        },
+      });
+    });
+
+    it('should handle empty result when filtering by non-existent cloud provider', async () => {
+      mockCloudConnectorService.getList.mockResolvedValue([]);
+
+      const request = httpServerMock.createKibanaRequest({
+        query: { kuery: 'fleet-cloud-connector.attributes.cloudProvider: "gcp"' },
+      });
+
+      await getCloudConnectorsHandler(context, request, response);
+
+      expect(mockCloudConnectorService.getList).toHaveBeenCalledWith(
+        expect.any(Object), // internalSoClient
+        expect.objectContaining({
+          kuery: 'fleet-cloud-connector.attributes.cloudProvider: "gcp"',
+        })
+      );
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          items: [],
+        },
+      });
+    });
+  });
+
+  describe('GET /cloud_connectors/{cloudConnectorId}/usage', () => {
+    it('should return usage items for a cloud connector', async () => {
+      const mockCloudConnector: CloudConnector = {
+        id: 'connector-123',
+        name: 'test-connector',
+        cloudProvider: 'aws' as CloudProvider,
+        vars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' },
+          external_id: { value: { id: 'secret-id', isSecretRef: true }, type: 'password' },
+        },
+        packagePolicyCount: 2,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+      };
+
+      mockCloudConnectorService.getById.mockResolvedValue(mockCloudConnector);
+
+      mockPackagePolicyService.list.mockResolvedValue({
+        items: [
+          {
+            id: 'policy-1',
+            name: 'CSPM Policy',
+            package: {
+              name: 'cloud_security_posture',
+              title: 'Cloud Security Posture',
+              version: '1.0.0',
+            },
+            policy_ids: ['agent-policy-1'],
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-02T00:00:00.000Z',
+          },
+          {
+            id: 'policy-2',
+            name: 'Asset Inventory Policy',
+            package: {
+              name: 'asset_inventory',
+              title: 'Asset Inventory',
+              version: '2.0.0',
+            },
+            policy_ids: ['agent-policy-2'],
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-02T00:00:00.000Z',
+          },
+        ],
+        total: 2,
+        page: 1,
+        perPage: 10,
+      } as any);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: { cloudConnectorId: 'connector-123' },
+        query: {},
+      });
+
+      await getCloudConnectorUsageHandler(context, request, response);
+
+      expect(mockCloudConnectorService.getById).toHaveBeenCalledWith(
+        expect.any(Object),
+        'connector-123'
+      );
+
+      expect(mockPackagePolicyService.list).toHaveBeenCalledWith(expect.any(Object), {
+        page: 1,
+        perPage: 10,
+        kuery: 'fleet-package-policies.attributes.cloud_connector_id:"connector-123"',
+      });
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          items: [
+            {
+              id: 'policy-1',
+              name: 'CSPM Policy',
+              package: {
+                name: 'cloud_security_posture',
+                title: 'Cloud Security Posture',
+                version: '1.0.0',
+              },
+              policy_ids: ['agent-policy-1'],
+              created_at: '2023-01-01T00:00:00.000Z',
+              updated_at: '2023-01-02T00:00:00.000Z',
+            },
+            {
+              id: 'policy-2',
+              name: 'Asset Inventory Policy',
+              package: {
+                name: 'asset_inventory',
+                title: 'Asset Inventory',
+                version: '2.0.0',
+              },
+              policy_ids: ['agent-policy-2'],
+              created_at: '2023-01-01T00:00:00.000Z',
+              updated_at: '2023-01-02T00:00:00.000Z',
+            },
+          ],
+          total: 2,
+          page: 1,
+          perPage: 10,
+        },
+      });
+    });
+
+    it('should return 400 when cloud connector does not exist', async () => {
+      const error = new Error('Cloud connector not found');
+      mockCloudConnectorService.getById.mockRejectedValue(error);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: { cloudConnectorId: 'non-existent-id' },
+        query: {},
+      });
+
+      await getCloudConnectorUsageHandler(context, request, response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          message: 'Cloud connector not found',
+        },
+      });
+    });
+
+    it('should support pagination parameters', async () => {
+      const mockCloudConnector: CloudConnector = {
+        id: 'connector-123',
+        name: 'test-connector',
+        cloudProvider: 'aws' as CloudProvider,
+        vars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' },
+          external_id: { value: { id: 'secret-id', isSecretRef: true }, type: 'password' },
+        },
+        packagePolicyCount: 25,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+      };
+
+      mockCloudConnectorService.getById.mockResolvedValue(mockCloudConnector);
+      mockPackagePolicyService.list.mockResolvedValue({
+        items: [],
+        total: 25,
+        page: 3,
+        perPage: 5,
+      } as any);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: { cloudConnectorId: 'connector-123' },
+        query: { page: 3, perPage: 5 },
+      });
+
+      await getCloudConnectorUsageHandler(context, request, response);
+
+      expect(mockPackagePolicyService.list).toHaveBeenCalledWith(expect.any(Object), {
+        page: 3,
+        perPage: 5,
+        kuery: 'fleet-package-policies.attributes.cloud_connector_id:"connector-123"',
+      });
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          items: [],
+          total: 25,
+          page: 3,
+          perPage: 5,
+        },
+      });
+    });
+
+    it('should return empty items when no policies use the connector', async () => {
+      const mockCloudConnector: CloudConnector = {
+        id: 'connector-123',
+        name: 'test-connector',
+        cloudProvider: 'aws' as CloudProvider,
+        vars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' },
+          external_id: { value: { id: 'secret-id', isSecretRef: true }, type: 'password' },
+        },
+        packagePolicyCount: 0,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+      };
+
+      mockCloudConnectorService.getById.mockResolvedValue(mockCloudConnector);
+      mockPackagePolicyService.list.mockResolvedValue({
+        items: [],
+        total: 0,
+        page: 1,
+        perPage: 10,
+      } as any);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: { cloudConnectorId: 'connector-123' },
+        query: {},
+      });
+
+      await getCloudConnectorUsageHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          items: [],
+          total: 0,
+          page: 1,
+          perPage: 10,
+        },
+      });
+    });
+
+    it('should handle package policy service errors', async () => {
+      const mockCloudConnector: CloudConnector = {
+        id: 'connector-123',
+        name: 'test-connector',
+        cloudProvider: 'aws' as CloudProvider,
+        vars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' },
+          external_id: { value: { id: 'secret-id', isSecretRef: true }, type: 'password' },
+        },
+        packagePolicyCount: 0,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+      };
+
+      mockCloudConnectorService.getById.mockResolvedValue(mockCloudConnector);
+      mockPackagePolicyService.list.mockRejectedValue(new Error('Database error'));
+
+      const request = httpServerMock.createKibanaRequest({
+        params: { cloudConnectorId: 'connector-123' },
+        query: {},
+      });
+
+      await getCloudConnectorUsageHandler(context, request, response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          message: 'Database error',
+        },
+      });
+    });
+
+    it('should handle policies without package information', async () => {
+      const mockCloudConnector: CloudConnector = {
+        id: 'connector-123',
+        name: 'test-connector',
+        cloudProvider: 'aws' as CloudProvider,
+        vars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' },
+          external_id: { value: { id: 'secret-id', isSecretRef: true }, type: 'password' },
+        },
+        packagePolicyCount: 1,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+      };
+
+      mockCloudConnectorService.getById.mockResolvedValue(mockCloudConnector);
+      mockPackagePolicyService.list.mockResolvedValue({
+        items: [
+          {
+            id: 'policy-1',
+            name: 'Policy Without Package',
+            package: undefined,
+            policy_ids: ['agent-policy-1'],
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-02T00:00:00.000Z',
+          },
+        ],
+        total: 1,
+        page: 1,
+        perPage: 10,
+      } as any);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: { cloudConnectorId: 'connector-123' },
+        query: {},
+      });
+
+      await getCloudConnectorUsageHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          items: [
+            {
+              id: 'policy-1',
+              name: 'Policy Without Package',
+              package: undefined,
+              policy_ids: ['agent-policy-1'],
+              created_at: '2023-01-01T00:00:00.000Z',
+              updated_at: '2023-01-02T00:00:00.000Z',
+            },
+          ],
+          total: 1,
+          page: 1,
+          perPage: 10,
+        },
+      });
     });
   });
 });

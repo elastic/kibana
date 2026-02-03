@@ -21,7 +21,7 @@ export const executionTranslations = Object.freeze({
 
   mustBeNumber: (argName: string): string => {
     return i18n.translate('xpack.securitySolution.console.commandValidation.mustBeNumber', {
-      defaultMessage: 'Argument --${argName} value must be a number',
+      defaultMessage: 'Argument --{argName} value must be a number',
       values: { argName },
     });
   },

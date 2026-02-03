@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { LensPartitionVisualizationState } from '@kbn/lens-common';
 import type { XYState } from '../../../../../public';
-import type { PieVisualizationState } from '../../../../types';
 import type { LensAttributes } from '../../../../../server/content_management/v1/types';
 import {
   convertPartitionToLegendStats,
-  type DeprecatedLegendValuePieVisualizationState,
+  type DeprecatedLegendValueLensPartitionVisualizationState,
 } from './partition';
 import { convertXYToLegendStats, type DeprecatedLegendValueXYState } from './xy';
 
@@ -47,8 +47,8 @@ export function getUpdatedVisualizationState(
 
   if (visualizationType === 'lnsPie' && state?.visualization) {
     const visState = state.visualization as
-      | PieVisualizationState
-      | DeprecatedLegendValuePieVisualizationState;
+      | LensPartitionVisualizationState
+      | DeprecatedLegendValueLensPartitionVisualizationState;
     return convertPartitionToLegendStats(visState);
   }
 

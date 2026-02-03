@@ -20,6 +20,8 @@ import type {
 import type { AIAssistantService } from '../ai_assistant_service';
 import { appContextService } from '../services/app_context';
 
+let hasLoggedProfileUidError = false;
+
 export interface IRequestContextFactory {
   create(
     context: RequestHandlerContext,
@@ -68,6 +70,13 @@ export class RequestContextFactory implements IRequestContextFactory {
       let contextUser = coreContext.security.authc.getCurrentUser();
 
       if (contextUser && !contextUser?.profile_uid) {
+        // In some serverless/versioned Elasticsearch environments, `with_profile_uid` is unsupported,
+        // and API-key authenticated users may not have roles/username in the same way as realm users.
+        // Use stable fallbacks to avoid hard failures and noisy logs.
+        if (contextUser.authentication_type === 'api_key' && contextUser.api_key?.id) {
+          return { ...contextUser, profile_uid: contextUser.api_key.id };
+        }
+
         try {
           const users = await coreContext.elasticsearch.client.asCurrentUser.security.getUser({
             username: contextUser.username,
@@ -78,7 +87,16 @@ export class RequestContextFactory implements IRequestContextFactory {
             contextUser = { ...contextUser, profile_uid: users[contextUser.username].profile_uid };
           }
         } catch (e) {
-          this.logger.error(`Failed to get user profile_uid: ${e}`);
+          if (!hasLoggedProfileUidError) {
+            hasLoggedProfileUidError = true;
+            this.logger.warn(
+              `Failed to get user profile_uid; continuing without it. This can occur on some Elasticsearch versions/serverless deployments. ${e}`
+            );
+          }
+        }
+
+        if (contextUser && !contextUser.profile_uid && contextUser.username) {
+          contextUser = { ...contextUser, profile_uid: contextUser.username };
         }
       }
 
@@ -92,6 +110,8 @@ export class RequestContextFactory implements IRequestContextFactory {
       core: coreContext,
       userProfile: coreStart.userProfile,
       actions: startPlugins.actions,
+      rulesClient,
+      frameworkAlerts: plugins.alerting.frameworkAlerts,
       auditLogger: coreStart.security.audit?.asScoped(request),
       logger: this.logger,
       eventLogIndex,
@@ -113,6 +133,12 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       checkPrivileges: () => {
         return startPlugins.security.authz.checkPrivilegesWithRequest(request);
+      },
+      /**
+       * Test purpose only.
+       */
+      updateAnonymizationFields: async () => {
+        return this.assistantService.createDefaultAnonymizationFields(getSpaceId());
       },
       llmTasks: startPlugins.llmTasks,
       inference: startPlugins.inference,
@@ -213,7 +239,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           licensing: context.licensing,
           logger: this.logger,
           currentUser,
-          contentReferencesEnabled: params?.contentReferencesEnabled,
+          assistantInterruptsEnabled: params?.assistantInterruptsEnabled,
         });
       }),
 

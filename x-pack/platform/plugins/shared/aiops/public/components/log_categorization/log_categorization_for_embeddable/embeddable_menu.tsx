@@ -25,8 +25,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RandomSampler } from '../sampling_menu';
 import { SamplingPanel } from '../sampling_menu/sampling_panel';
-import type { MinimumTimeRangeOption } from './minimum_time_range';
 import { MINIMUM_TIME_RANGE } from './minimum_time_range';
+import type { MinimumTimeRangeOption } from '../../../../common/embeddables/pattern_analysis/types';
 
 interface Props {
   randomSampler: RandomSampler;

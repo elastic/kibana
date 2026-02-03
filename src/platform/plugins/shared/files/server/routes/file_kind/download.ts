@@ -47,6 +47,10 @@ export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req,
       return invalidExtensionResponse;
     }
 
+    if (file.data.size === 0) {
+      return res.noContent();
+    }
+
     const body: Response = await file.downloadContent();
     const fileHttpResponseOptions = getFileHttpResponseOptions(file);
 

@@ -108,5 +108,17 @@ export const createEngineStatusService = (
     });
   };
 
-  return { get, disable, scheduleNow: _scheduleNow };
+  const getCurrentUserCount = async () => {
+    const esClient = dataClient.deps.clusterClient.asCurrentUser;
+    return esClient.count({
+      index: dataClient.index,
+      query: {
+        term: {
+          'user.is_privileged': true,
+        },
+      },
+    });
+  };
+
+  return { get, disable, scheduleNow: _scheduleNow, getCurrentUserCount };
 };

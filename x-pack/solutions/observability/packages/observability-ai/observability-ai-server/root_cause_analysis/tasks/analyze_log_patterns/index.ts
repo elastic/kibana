@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
+import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import {
   P_VALUE_SIGNIFICANCE_HIGH,
   P_VALUE_SIGNIFICANCE_MEDIUM,
@@ -57,7 +57,7 @@ export async function analyzeLogPatterns({
   kbEntries,
 }: {
   entity: Record<string, string>;
-  allAnalysis: Array<{ index: string | string[]; analysis: TruncatedDocumentAnalysis }>;
+  allAnalysis: Array<{ index: string | string[]; analysis: FormattedDocumentAnalysis }>;
   system: string;
   cutoff?: LogPatternCutOff;
   kbEntries: ScoredKnowledgeBaseEntry[];

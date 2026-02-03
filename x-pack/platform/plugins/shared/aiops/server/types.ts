@@ -9,9 +9,11 @@ import type { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 
 export interface AiopsPluginSetupDeps {
   data: PluginSetup;
+  embeddable: EmbeddableSetup;
   licensing: LicensingPluginSetup;
   cases?: CasesServerSetup;
   usageCollection?: UsageCollectionSetup;

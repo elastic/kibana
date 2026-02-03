@@ -103,6 +103,7 @@ describe('open in discover action', () => {
       timeRange: {},
       filters: [],
       query: undefined,
+      esqlControls: null,
       columns: [],
     };
 
@@ -142,6 +143,7 @@ describe('open in discover action', () => {
       timeRange: {},
       filters: [{ meta: { type: 'range' } }],
       query: undefined,
+      esqlControls: null,
       columns: [],
     };
 

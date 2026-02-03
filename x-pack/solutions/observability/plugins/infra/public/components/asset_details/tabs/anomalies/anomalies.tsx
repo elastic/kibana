@@ -49,10 +49,11 @@ export const Anomalies = () => {
         <FeatureFeedbackButton
           data-test-subj="infraMLHostFlyoutFeedbackLink"
           formUrl={INFRA_ML_FLYOUT_FEEDBACK_LINK}
+          sanitizedPath={document.location.pathname}
           kibanaVersion={kibanaVersion}
           isCloudEnv={isCloudEnv}
           isServerlessEnv={isServerlessEnv}
-          nodeType={'host'}
+          nodeType="host"
         />
       </div>
     </div>

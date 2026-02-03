@@ -19,8 +19,6 @@ export const FIELD_INPUT_PARENT =
 
 export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';
 
-export const EXCEPTION_FLYOUT_LOADING_SPINNER = '[data-test-subj="loadingAddExceptionFlyout"]';
-
 export const OPERATOR_INPUT =
   '[data-test-subj="operatorAutocompleteComboBox"] [data-test-subj="comboBoxInput"]';
 
@@ -127,13 +125,6 @@ export const EXCEPTION_CARD_ITEM_NAME = '[data-test-subj="exceptionItemCardHeade
 export const EXCEPTION_CARD_ITEM_CONDITIONS =
   '[data-test-subj="exceptionItemCardConditions-condition"]';
 
-// Affected Rules
-export const EXCEPTION_CARD_ITEM_AFFECTED_RULES =
-  '[data-test-subj="exceptionItemCardMetaInfo-affectedRulesButton"]';
-
-export const EXCEPTION_CARD_ITEM_AFFECTED_RULES_MENU_ITEM =
-  'div.euiContextMenuPanel button.euiContextMenuItem';
-
 // Exception flyout components
 export const EXCEPTION_ITEM_NAME_INPUT = 'input[data-test-subj="exceptionFlyoutNameInput"]';
 
@@ -155,17 +146,6 @@ export const OS_INPUT = '[data-test-subj="osSelectionDropdown"] [data-test-subj=
 export const EXCEPTION_COMMENTS_ACCORDION_BTN = '[data-test-subj="exceptionItemCommentsAccordion"]';
 
 export const EXCEPTION_COMMENT_TEXT_AREA = '[data-test-subj="newExceptionItemCommentTextArea"]';
-
-export const EXCEPTION_ITEM_VIEWER_CONTAINER_SHOW_COMMENTS_BTN =
-  '[data-test-subj="exceptionsViewerCommentAccordion"]';
-
-export const EXCEPTION_ITEM_COMMENTS_CONTAINER =
-  '[data-test-subj="exceptionsViewerCommentAccordion"] li';
-
-export const EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT =
-  '[data-test-subj="exceptionsViewerCommentAccordion"] li div.euiCommentEvent__body';
-
-export const EXCEPTION_ITEM_COMMENT_COPY_BTN = '[data-test-subj="clipboard"]';
 
 // Shared Exception List Management Page
 export const MANAGE_EXCEPTION_CREATE_BUTTON_MENU =
@@ -238,25 +218,11 @@ export const LINKED_RULES_BADGE = '[data-test-subj="exceptionListCardLinkedRules
 
 export const MANAGE_RULES_SAVE = '[data-test-subj="manageListRulesSaveButton"]';
 
-export const LINK_RULES_FLYOUT_LINK_SWITCH = '[data-test-subj="ruleActionLinkRuleSwitch"]';
-
 export const EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU =
   '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuEmptyButton"]';
 
 export const EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM =
   '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuMenuPanel"] .euiContextMenuItem';
-
-export const EXCEPTION_LIST_DETAIL_MENU_ITEMS =
-  '[data-test-subj="exceptionListManagementRightSideMenuItemsMenuActionsButtonIcon"]';
-
-export const EXCEPTION_LIST_DETAIL_EXPORT_BTN =
-  '[data-test-subj="exceptionListManagementRightSideMenuItemsMenuActionsActionItem1"]';
-
-export const EXCEPTION_LIST_DETAIL_DUPLICATE_BTN =
-  '[data-test-subj="exceptionListManagementRightSideMenuItemsMenuActionsActionItem3"]';
-
-export const EXCEPTION_LIST_DETAIL_DELETE_BTN =
-  '[data-test-subj="exceptionListManagementRightSideMenuItemsMenuActionsActionItem3"]';
 
 // Exception card in Shared List Detail Page
 export const EXCEPTION_ITEM_HEADER_ACTION_MENU =
@@ -271,8 +237,3 @@ export const EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE =
 export const EXECPTION_ITEM_CARD_HEADER_TITLE = '[data-test-subj="exceptionItemCardHeaderTitle"]';
 
 export const EMPTY_EXCEPTIONS_VIEWER = '[data-test-subj="emptyViewerState"]';
-
-export const EXCEPTIONS_ITEM_ERROR_CALLOUT = '[data-test-subj="addExceptionErrorCallOut"]';
-
-export const EXCEPTIONS_ITEM_ERROR_DISMISS_BUTTON =
-  '[data-test-subj="addExceptionErrorDismissButton"]';

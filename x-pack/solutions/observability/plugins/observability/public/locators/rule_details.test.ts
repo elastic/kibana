@@ -38,9 +38,7 @@ describe('RuleDetailsLocator', () => {
     });
     expect(location.path).toEqual(
       `${RULES_PATH}/${mockedRuleId}?tabId=alerts&searchBarParams=(` +
-        `controlConfigs:!((fieldName:kibana.alert.status,hideActionBar:!t,hideExists:!t,persist:!t,selectedOptions:!(active)` +
-        `,title:Status),(fieldName:kibana.alert.rule.name,hideExists:!t,title:Rule),(fieldName:kibana.alert.group.value,title:Group)` +
-        `,(fieldName:tags,title:Tags)),kuery:'',rangeFrom:now-15m,rangeTo:now)`
+        `controlConfigs:!((displaySettings:(hideActionBar:!t,hideExists:!t),fieldName:kibana.alert.status,persist:!t,selectedOptions:!(active),title:Status),(displaySettings:(hideExists:!t),fieldName:kibana.alert.rule.name,title:Rule),(fieldName:kibana.alert.group.value,title:Group),(fieldName:tags,title:Tags)),kuery:'',rangeFrom:now-15m,rangeTo:now)`
     );
   });
 
@@ -54,9 +52,7 @@ describe('RuleDetailsLocator', () => {
     });
     expect(location.path).toEqual(
       `${RULES_PATH}/${mockedRuleId}?tabId=alerts&searchBarParams=(` +
-        `controlConfigs:!((fieldName:kibana.alert.status,hideActionBar:!t,hideExists:!t,persist:!t,selectedOptions:!(active)` +
-        `,title:Status),(fieldName:kibana.alert.rule.name,hideExists:!t,title:Rule),(fieldName:kibana.alert.group.value,title:Group)` +
-        `,(fieldName:tags,title:Tags)),kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom)`
+        `controlConfigs:!((displaySettings:(hideActionBar:!t,hideExists:!t),fieldName:kibana.alert.status,persist:!t,selectedOptions:!(active),title:Status),(displaySettings:(hideExists:!t),fieldName:kibana.alert.rule.name,title:Rule),(fieldName:kibana.alert.group.value,title:Group),(fieldName:tags,title:Tags)),kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom)`
     );
   });
 

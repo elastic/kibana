@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FieldDescriptor } from '@kbn/data-plugin/server';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
 import type { SyntheticsEsClient } from '../lib';
 

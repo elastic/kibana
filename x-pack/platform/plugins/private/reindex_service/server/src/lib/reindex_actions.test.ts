@@ -20,9 +20,7 @@ import { getMockVersionInfo } from '@kbn/upgrade-assistant-pkg-server/src/__fixt
 
 const { currentMajor } = getMockVersionInfo();
 
-jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
-  getRollupJobByIndexName: jest.fn(),
-}));
+const getRollupJobByIndexNameMock = jest.fn();
 
 describe('ReindexActions', () => {
   let client: jest.Mocked<any>;
@@ -48,7 +46,13 @@ describe('ReindexActions', () => {
       ) as any,
     };
     clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    actions = reindexActionsFactory(client, clusterClient.asCurrentUser, log);
+    actions = reindexActionsFactory(
+      client,
+      clusterClient.asCurrentUser,
+      log,
+      getRollupJobByIndexNameMock,
+      true
+    );
   });
 
   describe('createReindexOp', () => {
@@ -73,6 +77,25 @@ describe('ReindexActions', () => {
         errorMessage: null,
         runningReindexCount: null,
       });
+      expect(getRollupJobByIndexNameMock).toHaveBeenCalled();
+    });
+
+    it("rollup apis aren't called when disabled", async () => {
+      const rollupJobsMock = jest.fn();
+
+      actions = reindexActionsFactory(
+        client,
+        clusterClient.asCurrentUser,
+        log,
+        rollupJobsMock,
+        false
+      );
+
+      await actions.createReindexOp({
+        indexName: 'myIndex',
+        newIndexName: `reindexed-v${currentMajor}-myIndex`,
+      });
+      expect(rollupJobsMock).not.toHaveBeenCalled();
     });
   });
 

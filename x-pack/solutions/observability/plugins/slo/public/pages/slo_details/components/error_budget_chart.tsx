@@ -12,6 +12,7 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { ChartData } from '../../../typings/slo';
+import { getSloChartState, isSloFailed } from '../utils/is_slo_failed';
 import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import type { TimeBounds } from '../types';
 import { WideChart } from './wide_chart';
@@ -35,34 +36,55 @@ export interface Props {
   data: ChartData[];
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
-  hideMetadata?: boolean;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function ErrorBudgetChart({ data, isLoading, slo, hideMetadata = false, onBrushed }: Props) {
+export function ErrorBudgetChart({ data, isLoading, slo, onBrushed }: Props) {
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
-  const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
-  let errorBudgetTimeRemainingFormatted;
-  if (slo.budgetingMethod === 'timeslices' && slo.timeWindow.type === 'calendarAligned') {
-    const totalSlices =
-      toMinutes(toDuration(slo.timeWindow.duration)) /
-      toMinutes(toDuration(slo.objective.timesliceWindow!));
-    const errorBudgetRemainingInMinute =
-      slo.summary.errorBudget.remaining * (slo.summary.errorBudget.initial * totalSlices);
+  const isSloFailedStatus = isSloFailed(slo.summary.status);
+  const lastErrorBudgetRemaining = data.at(-1)?.value;
 
-    errorBudgetTimeRemainingFormatted = formatTime(
-      errorBudgetRemainingInMinute >= 0 ? errorBudgetRemainingInMinute : 0
-    );
-  }
+  const errorBudgetTimeRemainingFormatted = (() => {
+    if (
+      slo.budgetingMethod === 'timeslices' &&
+      slo.timeWindow.type === 'calendarAligned' &&
+      lastErrorBudgetRemaining !== undefined
+    ) {
+      const totalSlices =
+        toMinutes(toDuration(slo.timeWindow.duration)) /
+        toMinutes(toDuration(slo.objective.timesliceWindow!));
+      const errorBudgetRemainingInMinute =
+        lastErrorBudgetRemaining * (slo.summary.errorBudget.initial * totalSlices);
+
+      return formatTime(errorBudgetRemainingInMinute >= 0 ? errorBudgetRemainingInMinute : 0);
+    }
+    return undefined;
+  })();
+
   return (
     <>
-      {!hideMetadata && (
-        <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
+      <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiStat
+            titleColor={isSloFailedStatus ? 'danger' : 'success'}
+            title={
+              lastErrorBudgetRemaining
+                ? numeral(lastErrorBudgetRemaining).format(percentFormat)
+                : '-'
+            }
+            titleSize="s"
+            description={i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.remaining', {
+              defaultMessage: 'Remaining',
+            })}
+            reverse
+          />
+        </EuiFlexItem>
+        {errorBudgetTimeRemainingFormatted ? (
           <EuiFlexItem grow={false}>
             <EuiStat
-              titleColor={isSloFailed ? 'danger' : 'success'}
-              title={numeral(slo.summary.errorBudget.remaining).format(percentFormat)}
+              titleColor={isSloFailedStatus ? 'danger' : 'success'}
+              title={errorBudgetTimeRemainingFormatted}
               titleSize="s"
               description={i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.remaining', {
                 defaultMessage: 'Remaining',
@@ -70,32 +92,15 @@ export function ErrorBudgetChart({ data, isLoading, slo, hideMetadata = false, o
               reverse
             />
           </EuiFlexItem>
-          {errorBudgetTimeRemainingFormatted ? (
-            <EuiFlexItem grow={false}>
-              <EuiStat
-                titleColor={isSloFailed ? 'danger' : 'success'}
-                title={errorBudgetTimeRemainingFormatted}
-                titleSize="s"
-                description={i18n.translate(
-                  'xpack.slo.sloDetails.errorBudgetChartPanel.remaining',
-                  {
-                    defaultMessage: 'Remaining',
-                  }
-                )}
-                reverse
-              />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      )}
-
+        ) : null}
+      </EuiFlexGroup>
       <EuiFlexItem>
         <WideChart
           chart="area"
           id={i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.chartTitle', {
             defaultMessage: 'Error budget remaining',
           })}
-          state={isSloFailed ? 'error' : 'success'}
+          state={getSloChartState(slo.summary.status)}
           data={data}
           isLoading={isLoading}
           onBrushed={onBrushed}

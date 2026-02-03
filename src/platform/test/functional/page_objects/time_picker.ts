@@ -100,6 +100,18 @@ export class TimePickerPageObject extends FtrService {
     await this.testSubjects.click(`superDatePickerCommonlyUsed_${option}`);
   }
 
+  /**
+   * Sets recently used time (including custom ranges)
+   * @param option a custom recently used time range (example: "Sep 20, 2015 @ 00:00:00.000 to Sep 20, 2015 @ 23:50:13.253")
+   */
+  async setRecentlyUsedTime(option: string) {
+    await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 5000 });
+    await this.testSubjects.click('superDatePickerToggleQuickMenuButton');
+    const panel = await this.testSubjects.find('superDatePickerQuickMenu');
+    const buttonByOptionText = await panel.findByXpath(`.//button[text()='${option}']`);
+    await buttonByOptionText?.click();
+  }
+
   public async inputValue(dataTestSubj: string, value: string) {
     if (this.browser.isFirefox) {
       const input = await this.testSubjects.find(dataTestSubj);

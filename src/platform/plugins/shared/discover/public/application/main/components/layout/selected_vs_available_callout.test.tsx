@@ -11,15 +11,23 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
+import { internalStateActions } from '../../state_management/redux';
 
 describe('SelectedVSAvailableCallout', () => {
   it('should render the callout if in ES|QL mode and the selected columns are less than the available ones', async () => {
-    const stateContainer = getDiscoverStateMock({});
-    stateContainer.appState.update({ query: { esql: 'select *' } });
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: toolkit.getCurrentTab().id,
+        appState: { query: { esql: 'select *' } },
+      })
+    );
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
     const component = mountWithIntl(
-      <DiscoverTestProvider stateContainer={stateContainer}>
+      <DiscoverToolkitTestProvider toolkit={toolkit}>
         <SelectedVSAvailableCallout
           esqlQueryColumns={
             [
@@ -30,30 +38,36 @@ describe('SelectedVSAvailableCallout', () => {
           }
           selectedColumns={['bytes']}
         />
-      </DiscoverTestProvider>
+      </DiscoverToolkitTestProvider>
     );
     expect(component.find('[data-test-subj="dscSelectedColumnsCallout"]').exists()).toBe(true);
   });
 
   it('should not render the callout if not in ES|QL mode', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
     const component = mountWithIntl(
-      <DiscoverTestProvider stateContainer={getDiscoverStateMock({})}>
+      <DiscoverToolkitTestProvider toolkit={toolkit}>
         <SelectedVSAvailableCallout esqlQueryColumns={undefined} selectedColumns={['bytes']} />
-      </DiscoverTestProvider>
+      </DiscoverToolkitTestProvider>
     );
     expect(component.find('[data-test-subj="dscSelectedColumnsCallout"]').exists()).toBe(false);
   });
 
   it('should not render the callout if in ES|QL mode but the selected columns are equal with the available ones', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
     const component = mountWithIntl(
-      <DiscoverTestProvider stateContainer={getDiscoverStateMock({})}>
+      <DiscoverToolkitTestProvider toolkit={toolkit}>
         <SelectedVSAvailableCallout
           esqlQueryColumns={
             [{ id: '2', name: 'bytes', meta: { type: 'number' } }] as DatatableColumn[]
           }
           selectedColumns={['bytes']}
         />
-      </DiscoverTestProvider>
+      </DiscoverToolkitTestProvider>
     );
     expect(component.find('[data-test-subj="dscSelectedColumnsCallout"]').exists()).toBe(false);
   });

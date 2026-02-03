@@ -9,21 +9,21 @@ import { shallow, mount } from 'enzyme';
 import React from 'react';
 
 import { AuthSsh } from './auth_ssh';
-import { CellActionsWrapper } from '../../../../../../common/components/drag_and_drop/cell_actions_wrapper';
+import { CellActionsRenderer } from '../../../../../../common/components/cell_actions/cell_actions_renderer';
 
-jest.mock('../../../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+jest.mock('../../../../../../common/components/cell_actions/cell_actions_renderer', () => {
   return {
-    CellActionsWrapper: jest.fn(),
+    CellActionsRenderer: jest.fn(),
   };
 });
 
-const MockedCellActionsWrapper = jest.fn(({ children }) => {
-  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+const MockedCellActionsRenderer = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-renderer">{children}</div>;
 });
 
 describe('AuthSsh', () => {
   beforeEach(() => {
-    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+    (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
   });
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
@@ -128,7 +128,7 @@ describe('AuthSsh', () => {
         />
       );
 
-      expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+      expect(MockedCellActionsRenderer).toHaveBeenCalledWith(
         expect.objectContaining({
           scopeId: 'some_scope',
         }),

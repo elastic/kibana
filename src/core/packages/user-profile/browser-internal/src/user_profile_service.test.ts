@@ -14,7 +14,7 @@ import {
 
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-browser';
 import { UserProfileService } from './user_profile_service';
 
@@ -23,11 +23,11 @@ const createStubContract = (): CoreUserProfileDelegateContract => {
 };
 
 describe('UserProfileService', () => {
-  let coreContext: ReturnType<typeof mockCoreContext.create>;
+  let coreContext: ReturnType<typeof coreContextMock.create>;
   let service: UserProfileService;
 
   beforeEach(() => {
-    coreContext = mockCoreContext.create();
+    coreContext = coreContextMock.create();
     service = new UserProfileService(coreContext);
 
     convertUserProfileAPIMock.mockReset();

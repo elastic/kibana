@@ -1,0 +1,114 @@
+openapi: 3.0.0
+info:
+  title: Common Endpoint Scripts Library schemas
+  version: '2023-10-31'
+paths: {}
+components:
+  schemas:
+    EndpointScriptPlatform:
+      type: string
+      enum:
+        - linux
+        - macos
+        - windows
+
+    EndpointScriptTags:
+      type: string
+      enum:
+        - remediationAction
+        - dataCollection
+        - networkDiagnostics
+        - networkAction
+        - systemInventory
+        - forensicCollection
+        - threatHunting
+        - discovery
+        - systemManagement
+        - userManagement
+        - troubleshooting
+
+    EndpointScript:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426655440000
+        name:
+          type: string
+          example: Collect host data
+        platform:
+          type: array
+          items:
+            $ref: '#/components/schemas/EndpointScriptPlatform'
+        tags:
+          type: array
+          description: Tags that categorize the script
+          items:
+            $ref: '#/components/schemas/EndpointScriptTags'
+        fileName:
+          type: string
+          description: Name of the script file that was uploaded
+          example: collect_host_data.sh
+        fileSize:
+          type: integer
+          description: Size of the script file that was uploaded in bytes
+          example: 12345
+        fileHash:
+          type: string
+          description: SHA256 hash of the script file that was uploaded
+          example: abf573681eb54aac5e05e35bf186d4d31abe45ecf242461490523f11d2a8fbb8
+        requiresInput:
+          type: boolean
+        downloadUri:
+          type: string
+          description: URI to download the script file. Note that this is the relative path and does not include the space (if applicable)
+          example: /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+        description:
+          type: string
+          description: Description of the script and its purpose/functionality
+          example: Collects host data for investigation
+        instructions:
+          type: string
+          description: Instructions for using the script, including details around its supported input arguments
+        example:
+          type: string
+        pathToExecutable:
+          type: string
+          description: >
+            The relative path to the file included in the archive that should be executed once its contents
+            are extracted. Applicable only for scripts uploaded as an archive (.zip file for example).
+        createdBy:
+          type: string
+          example: elastic
+        createdAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+          example: admin
+        updatedAt:
+          type: string
+          format: date-time
+        version:
+          type: string
+
+
+    ScriptsApiResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/EndpointScript'
+      example:
+        data:
+          id: 123e4567-e89b-12d3-a456-426655440000
+          name: Collect host data
+          platform: [ linux, macos ]
+          fileName: collect_host_data.sh
+          fileSize: 12345
+          fileHash: abf573681eb54aac5e05e35bf186d4d31abe45ecf242461490523f11d2a8fbb8
+          requiresInput: false
+          downloadUri: /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+          description: Collects host data for investigation
+          instructions: Collects host data for investigation
+          example: ./collect_host_data.sh --help

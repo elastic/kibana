@@ -1,0 +1,716 @@
+{
+  "lastModified": "2026-01-30T09:09:05.817Z",
+  "sha1": "27359edb644efe10fa392b11fe175435adb081d2",
+  "tests": [
+    {
+      "id": "f44f18cc703276d-178a4921f7b18d0",
+      "title": "Alerting Rules helpers should fetch alert with 'alerting.rules.get'",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/alerting_rules.spec.ts",
+        "line": 46,
+        "column": 10
+      }
+    },
+    {
+      "id": "f44f18cc703276d-33ca8fa92624a9c",
+      "title": "Alerting Rules helpers should update alert with 'alerting.rules.update'",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/alerting_rules.spec.ts",
+        "line": 54,
+        "column": 10
+      }
+    },
+    {
+      "id": "f44f18cc703276d-73b7d633c4103c0",
+      "title": "Alerting Rules helpers should enable/disable rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/alerting_rules.spec.ts",
+        "line": 62,
+        "column": 10
+      }
+    },
+    {
+      "id": "f44f18cc703276d-b40ee20740b3d69",
+      "title": "Alerting Rules helpers should find rule with 'alerting.rules.find'",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/alerting_rules.spec.ts",
+        "line": 78,
+        "column": 10
+      }
+    },
+    {
+      "id": "f44f18cc703276d-96731296a9891c1",
+      "title": "Alerting Rules helpers should mute/unmute rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/alerting_rules.spec.ts",
+        "line": 91,
+        "column": 10
+      }
+    },
+    {
+      "id": "f44f18cc703276d-ff05561b9156a5c",
+      "title": "Alerting Rules helpers should mute/unmute alert for rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/alerting_rules.spec.ts",
+        "line": 109,
+        "column": 10
+      }
+    },
+    {
+      "id": "f44f18cc703276d-5221ee78cdc80b3",
+      "title": "Alerting Rules helpers should snooze/unsnooze rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/alerting_rules.spec.ts",
+        "line": 129,
+        "column": 10
+      }
+    },
+    {
+      "id": "fce093fbca08710-6e904464520b5be",
+      "title": "Cases Helpers should fetch case with 'cases.get'",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "fce093fbca08710-90abc09aa216d42",
+      "title": "Cases Helpers should update case with a new severity with 'cases.update'",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
+        "line": 44,
+        "column": 10
+      }
+    },
+    {
+      "id": "fce093fbca08710-5408585221b6fe5",
+      "title": "Cases Helpers should add a new connector to a case",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
+        "line": 61,
+        "column": 10
+      }
+    },
+    {
+      "id": "fce093fbca08710-ce6612540863f1f",
+      "title": "Cases Helpers should delete multiple cases",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
+        "line": 79,
+        "column": 10
+      }
+    },
+    {
+      "id": "fce093fbca08710-867e650994dc709",
+      "title": "Cases Helpers should delete cases by tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
+        "line": 99,
+        "column": 10
+      }
+    },
+    {
+      "id": "fce093fbca08710-f9fa16a32a85b71",
+      "title": "Cases Helpers should post and find a comment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
+        "line": 126,
+        "column": 10
+      }
+    },
+    {
+      "id": "fce093fbca08710-e2cb6fcca5c3e88",
+      "title": "Cases Helpers should post an alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
+        "line": 147,
+        "column": 10
+      }
+    },
+    {
+      "id": "fce093fbca08710-c6649d9e4143889",
+      "title": "Cases Helpers should search for a case by category",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
+        "line": 160,
+        "column": 10
+      }
+    },
+    {
+      "id": "ac287aee91a2e9c-f534a82c1ec5149",
+      "title": "Data Views API Service should get all data views with getAll()",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
+        "line": 44,
+        "column": 10
+      }
+    },
+    {
+      "id": "ac287aee91a2e9c-be676318898c619",
+      "title": "Data Views API Service should get a single data view by ID with get()",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    },
+    {
+      "id": "ac287aee91a2e9c-3f46260460f1aec",
+      "title": "Data Views API Service should handle get() for non-existent data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
+        "line": 66,
+        "column": 10
+      }
+    },
+    {
+      "id": "ac287aee91a2e9c-47d7bba7f59f2c1",
+      "title": "Data Views API Service should delete a data view with delete()",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
+        "line": 75,
+        "column": 10
+      }
+    },
+    {
+      "id": "ac287aee91a2e9c-dc3283d3803eb09",
+      "title": "Data Views API Service should handle delete() for non-existent data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
+        "line": 100,
+        "column": 10
+      }
+    },
+    {
+      "id": "ac287aee91a2e9c-926ee551afecbf6",
+      "title": "Data Views API Service should find data views with a predicate using find()",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
+        "line": 109,
+        "column": 10
+      }
+    },
+    {
+      "id": "ac287aee91a2e9c-7ba205abc502386",
+      "title": "Data Views API Service should return empty array when find() predicate matches nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
+        "line": 165,
+        "column": 10
+      }
+    },
+    {
+      "id": "ac287aee91a2e9c-c76c896477bb9a2",
+      "title": "Data Views API Service should delete a data view by title with deleteByTitle()",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
+        "line": 177,
+        "column": 10
+      }
+    },
+    {
+      "id": "ac287aee91a2e9c-cbc50b9173dd0ee",
+      "title": "Data Views API Service should return 200 when deleteByTitle() is called with non-existent title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
+        "line": 206,
+        "column": 10
+      }
+    },
+    {
+      "id": "ac287aee91a2e9c-3b690cd4f7735a5",
+      "title": "Data Views API Service should delete only the first matching data view when multiple have same title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
+        "line": 218,
+        "column": 10
+      }
+    },
+    {
+      "id": "ac287aee91a2e9c-e5bcf554ead858d",
+      "title": "Data Views API Service should handle multiple data views operations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
+        "line": 269,
+        "column": 10
+      }
+    },
+    {
+      "id": "ac287aee91a2e9c-a53a3ef77df8551",
+      "title": "Data Views API Service should not throw error when deleting already deleted data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
+        "line": 325,
+        "column": 10
+      }
+    },
+    {
+      "id": "ac287aee91a2e9c-658dfffd4fad26c",
+      "title": "Data Views API Service should handle deleteByTitle() when called twice",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
+        "line": 353,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-0db434f3b0a7c11",
+      "title": "Fleet Integration Management should install a custom integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 25,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-4fbf626746dcffc",
+      "title": "Fleet Integration Management should delete an integration and return status code",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 31,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-3f9dd1df7ce971d",
+      "title": "Fleet Integration Management should handle delete of non-existent integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 41,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-a1fbb9043d34cc7",
+      "title": "Fleet Agent Policies Management should get agent policies with query parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 67,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-2993bae6be1562a",
+      "title": "Fleet Agent Policies Management should create an agent policy with additional parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 78,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-edd65cbcfec5424",
+      "title": "Fleet Agent Policies Management should update an agent policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 98,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-b897c3ef548d7b5",
+      "title": "Fleet Agent Policies Management should bulk get agent policies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 123,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-2633914e42ffea8",
+      "title": "Fleet Agent Policies Management should delete an agent policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 149,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-1e4a39abe840169",
+      "title": "Fleet Agent Policies Management should delete an agent policy with force flag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 163,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-041513758093b5d",
+      "title": "Fleet Outputs Management should get all outputs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 189,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-1ceeea1f4f18b0a",
+      "title": "Fleet Outputs Management should get a specific output by ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 197,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-57aec8b030a14c4",
+      "title": "Fleet Outputs Management should create an output with additional parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 211,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-9b6ecdc71c30d07",
+      "title": "Fleet Outputs Management should delete an output",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 232,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-2045e266f5c3994",
+      "title": "Fleet Server Hosts Management should get fleet server hosts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 263,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-0dd9cd554941f9e",
+      "title": "Fleet Server Hosts Management should create a fleet server host with parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 270,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-6a7a56d10bb14d9",
+      "title": "Fleet Server Hosts Management should delete a fleet server host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 287,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-e7f6e669552d63a",
+      "title": "Fleet Agent Management should setup fleet agents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 305,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-015134015804081",
+      "title": "Fleet Agent Management should get agents with query parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 311,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-688642bba3fe0dc",
+      "title": "Fleet Agent Management should handle delete of non-existent agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 321,
+        "column": 10
+      }
+    },
+    {
+      "id": "1ac39428f850160-a28714e7d3e9305",
+      "title": "Fleet API Error Handling should handle bulk get with non-existent policy IDs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity",
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
+        "line": 332,
+        "column": 10
+      }
+    },
+    {
+      "id": "fe047b1920cdb73-7e93077b7f1a2c8",
+      "title": "SAML Auth fixture should create a session for 'admin' role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlSecurity",
+        "@svlSecurityEssentials",
+        "@svlSecurityEase",
+        "@svlOblt",
+        "@svlLogsEssentials",
+        "@svlSearch"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/auth/saml_login.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "fe047b1920cdb73-c842fa63ffb17a2",
+      "title": "SAML Auth fixture should create API Key for 'admin' role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlSecurity",
+        "@svlSecurityEssentials",
+        "@svlSecurityEase",
+        "@svlOblt",
+        "@svlLogsEssentials",
+        "@svlSearch"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/auth/saml_login.spec.ts",
+        "line": 19,
+        "column": 10
+      }
+    }
+  ]
+}

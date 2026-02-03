@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AttackDiscoveryApiSchedule } from '@kbn/elastic-assistant-common';
 import { useGetAttackDiscoverySchedule } from './use_get_schedule';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../../common/hooks/use_app_toasts.mock';
@@ -27,9 +28,31 @@ describe('useGetAttackDiscoverySchedule', () => {
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
 
-    getAttackDiscoveryScheduleMock.mockReturnValue(
-      {} as unknown as jest.Mocked<ReturnType<typeof getAttackDiscoverySchedule>>
-    );
+    // Mock API response in snake_case format (will be transformed by the hook)
+    const mockApiResponse: AttackDiscoveryApiSchedule = {
+      id: 'schedule-1',
+      name: 'Test Schedule',
+      created_by: 'test-user',
+      updated_by: 'test-user',
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+      enabled: true,
+      params: {
+        alerts_index_pattern: 'test-*',
+        api_config: {
+          name: 'test-config',
+          actionTypeId: 'test-action',
+          connectorId: 'test-connector',
+        },
+        size: 100,
+        query: { query: '*', language: 'kuery' },
+        filters: [],
+      },
+      schedule: { interval: '1h' },
+      actions: [],
+    };
+
+    getAttackDiscoveryScheduleMock.mockResolvedValue(mockApiResponse);
   });
 
   it('should invoke `getAttackDiscoverySchedule`', async () => {

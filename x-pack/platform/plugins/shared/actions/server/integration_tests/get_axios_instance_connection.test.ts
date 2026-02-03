@@ -1,0 +1,803 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import * as proxy from 'proxy';
+
+import { readFileSync as fsReadFileSync } from 'fs';
+import { resolve as pathResolve, join as pathJoin } from 'path';
+import http from 'http';
+import https from 'https';
+import axios, { AxiosError } from 'axios';
+import { duration as momentDuration } from 'moment';
+import getPort from 'get-port';
+
+import { ByteSizeValue } from '@kbn/config-schema';
+import type { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal';
+import type { ActionsConfig } from '../config';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import { getActionsConfigurationUtilities } from '../actions_config';
+import { resolveCustomHosts } from '../lib/custom_host_settings';
+import {
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+} from '../../common';
+import { getFips } from 'crypto';
+import { getAxiosInstanceWithAuth } from '../lib/get_axios_instance';
+import { AuthTypeRegistry, registerAuthTypes } from '../auth_types';
+import type { NormalizedAuthType } from '@kbn/connector-specs';
+import { PFX } from '@kbn/connector-specs/src/auth_types/pfx';
+import { CRT } from '@kbn/connector-specs/src/auth_types/crt';
+
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+
+const CERT_DIR = '../../../../../../../../src/platform/packages/shared/kbn-dev-utils/certs';
+const MOCK_CERT_DIR = '../mock_certs';
+
+const KIBANA_CRT_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.crt'));
+const KIBANA_KEY_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.key'));
+const KIBANA_P12_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.p12'));
+const CA_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'ca.crt'));
+
+const UNAUTHORIZED_CA_FILE = pathResolve(
+  __filename,
+  pathJoin(MOCK_CERT_DIR, 'unauthorized_ca.crt')
+);
+const UNAUTHORIZED_CRT_FILE = pathResolve(__filename, pathJoin(MOCK_CERT_DIR, 'unauthorized.crt'));
+const UNAUTHORIZED_KEY_FILE = pathResolve(__filename, pathJoin(MOCK_CERT_DIR, 'unauthorized.key'));
+
+const KIBANA_KEY = fsReadFileSync(KIBANA_KEY_FILE, 'utf8');
+const KIBANA_KEY_B64 = Buffer.from(KIBANA_KEY).toString('base64');
+const KIBANA_CRT = fsReadFileSync(KIBANA_CRT_FILE, 'utf8');
+const KIBANA_CRT_B64 = Buffer.from(KIBANA_CRT).toString('base64');
+const KIBANA_P12 = fsReadFileSync(KIBANA_P12_FILE);
+const KIBANA_P12_B64 = Buffer.from(KIBANA_P12).toString('base64');
+const CA = fsReadFileSync(CA_FILE, 'utf8');
+const CA_B64 = Buffer.from(CA).toString('base64');
+
+const UNAUTHORIZED_KEY = fsReadFileSync(UNAUTHORIZED_KEY_FILE);
+const UNAUTHORIZED_KEY_B64 = Buffer.from(UNAUTHORIZED_KEY).toString('base64');
+const UNAUTHORIZED_CRT = fsReadFileSync(UNAUTHORIZED_CRT_FILE);
+const UNAUTHORIZED_CRT_B64 = Buffer.from(UNAUTHORIZED_CRT).toString('base64');
+const UNAUTHORIZED_CA = fsReadFileSync(UNAUTHORIZED_CA_FILE);
+const UNAUTHORIZED_CA_B64 = Buffer.from(UNAUTHORIZED_CA).toString('base64');
+
+const Auth = 'elastic:changeme';
+const AuthB64 = Buffer.from(Auth).toString('base64');
+
+const authTypeRegistry = new AuthTypeRegistry();
+registerAuthTypes(authTypeRegistry);
+
+// remove this when PFX and CRT is re-enabled in the exports
+authTypeRegistry.register(PFX as NormalizedAuthType);
+authTypeRegistry.register(CRT as NormalizedAuthType);
+
+describe('get preconfigured axios instance', () => {
+  let testServer: http.Server | https.Server | null;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let savedAxiosDefaultsAdapter: any;
+
+  beforeEach(() => {
+    // needed to prevent the dreaded Error: Cross origin http://localhost forbidden
+    // see: https://github.com/axios/axios/issues/1754#issuecomment-572778305
+    savedAxiosDefaultsAdapter = axios.defaults.adapter;
+    axios.defaults.adapter = 'http';
+  });
+
+  afterEach(() => {
+    axios.defaults.adapter = savedAxiosDefaultsAdapter;
+  });
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  afterEach(() => {
+    testServer?.close();
+    testServer = null;
+  });
+
+  describe('http', () => {
+    test('it works', async () => {
+      const { url, server } = await createServer({ useHttps: false });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
+      const res = await axiosInstance.get(url);
+      expect(res.status).toBe(200);
+    });
+  });
+
+  describe('https', () => {
+    test('it fails with self-signed cert and no overrides', async () => {
+      const { url, server } = await createServer({ useHttps: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
+
+      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"self-signed certificate in certificate chain"`
+      );
+    });
+
+    test('it works with verificationMode "none" config', async () => {
+      const { url, server } = await createServer({ useHttps: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig({
+        ssl: {
+          verificationMode: 'none',
+        },
+      });
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
+      const res = await axiosInstance.get(url);
+      expect(res.status).toBe(200);
+    });
+
+    test('it works with verificationMode "none" for custom host config', async () => {
+      const { url, server } = await createServer({ useHttps: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig({
+        customHostSettings: [{ url, ssl: { verificationMode: 'none' } }],
+      });
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
+      const res = await axiosInstance.get(url);
+      expect(res.status).toBe(200);
+    });
+
+    test('it works with ca in custom host config', async () => {
+      const { url, server } = await createServer({ useHttps: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig({
+        customHostSettings: [{ url, ssl: { certificateAuthoritiesData: CA } }],
+      });
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
+      const res = await axiosInstance.get(url);
+      expect(res.status).toBe(200);
+    });
+
+    test('it fails with incorrect ca in custom host config', async () => {
+      const { url, server } = await createServer({ useHttps: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig({
+        customHostSettings: [{ url, ssl: { certificateAuthoritiesData: KIBANA_CRT } }],
+      });
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
+      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"self-signed certificate in certificate chain"`
+      );
+    });
+
+    test('it works with incorrect ca in custom host config but verificationMode "none"', async () => {
+      const { url, server } = await createServer({ useHttps: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig({
+        customHostSettings: [
+          {
+            url,
+            ssl: {
+              certificateAuthoritiesData: CA,
+              verificationMode: 'none',
+            },
+          },
+        ],
+      });
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
+      const res = await axiosInstance.get(url);
+      expect(res.status).toBe(200);
+    });
+
+    test('it works with incorrect ca in custom host config but verificationMode config "full"', async () => {
+      const { url, server } = await createServer({ useHttps: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig({
+        ssl: {
+          verificationMode: 'none',
+        },
+        customHostSettings: [
+          {
+            url,
+            ssl: {
+              certificateAuthoritiesData: CA,
+            },
+          },
+        ],
+      });
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
+      const res = await axiosInstance.get(url);
+      expect(res.status).toBe(200);
+    });
+
+    test('it fails with no matching custom host settings', async () => {
+      const { url, server } = await createServer({ useHttps: true });
+      const otherUrl = 'https://example.com';
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig({
+        customHostSettings: [{ url: otherUrl, ssl: { verificationMode: 'none' } }],
+      });
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
+      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"self-signed certificate in certificate chain"`
+      );
+    });
+
+    test('it fails cleanly with a garbage CA 1', async () => {
+      const { url, server } = await createServer({ useHttps: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig({
+        customHostSettings: [{ url, ssl: { certificateAuthoritiesData: 'garbage' } }],
+      });
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
+      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"self-signed certificate in certificate chain"`
+      );
+    });
+
+    test('it fails cleanly with a garbage CA 2', async () => {
+      const { url, server } = await createServer({ useHttps: true });
+      testServer = server;
+
+      const badCa = '-----BEGIN CERTIFICATE-----\ngarbage\n-----END CERTIFICATE-----\n';
+      const configurationUtilities = getACUfromConfig({
+        customHostSettings: [{ url, ssl: { certificateAuthoritiesData: badCa } }],
+      });
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
+      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"self-signed certificate in certificate chain"`
+      );
+    });
+
+    test('it works with cert, key, and ca in SSL overrides', async () => {
+      const { url, server } = await createServer({ useHttps: true, requestCert: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: {
+          authType: 'crt_certificate',
+          crt: KIBANA_CRT_B64,
+          key: KIBANA_KEY_B64,
+          ca: CA_B64,
+        },
+      });
+      const res = await axiosInstance.get(url);
+      expect(res.status).toBe(200);
+    });
+
+    test('it fails with cert and key but no ca in SSL overrides', async () => {
+      const { url, server } = await createServer({ useHttps: true, requestCert: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: {
+          authType: 'crt_certificate',
+          crt: KIBANA_CRT_B64,
+          key: KIBANA_KEY_B64,
+        },
+      });
+
+      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"self-signed certificate in certificate chain"`
+      );
+    });
+
+    if (getFips() !== 1) {
+      test('it works with pfx and passphrase in SSL overrides', async () => {
+        const { url, server } = await createServer({ useHttps: true, requestCert: true });
+        testServer = server;
+
+        const configurationUtilities = getACUfromConfig();
+        const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+          authTypeRegistry,
+          configurationUtilities,
+          logger,
+        });
+
+        const axiosInstance = await getAxiosInstanceFn({
+          connectorId: '1',
+          secrets: {
+            authType: 'pfx_certificate',
+            pfx: KIBANA_P12_B64,
+            passphrase: 'storepass',
+          },
+        });
+
+        const res = await axiosInstance.get(url);
+        expect(res.status).toBe(200);
+      });
+
+      test('it fails with pfx but no passphrase in SSL overrides', async () => {
+        const { url, server } = await createServer({ useHttps: true, requestCert: true });
+        testServer = server;
+
+        const configurationUtilities = getACUfromConfig();
+        const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+          authTypeRegistry,
+          configurationUtilities,
+          logger,
+        });
+
+        const axiosInstance = await getAxiosInstanceFn({
+          connectorId: '1',
+          secrets: {
+            authType: 'pfx_certificate',
+            pfx: KIBANA_P12_B64,
+          },
+        });
+        await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"mac verify failure"`
+        );
+      });
+    }
+
+    test('it fails with a client-side certificate issued by an invalid ca', async () => {
+      const { url, server } = await createServer({ useHttps: true, requestCert: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: {
+          authType: 'crt_certificate',
+          crt: UNAUTHORIZED_CRT_B64,
+          key: UNAUTHORIZED_KEY_B64,
+          ca: UNAUTHORIZED_CA_B64,
+        },
+      });
+
+      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"self-signed certificate in certificate chain"`
+      );
+    });
+
+    test('it fails when requesting a client-side cert and none is provided', async () => {
+      const { url, server } = await createServer({ useHttps: true, requestCert: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: {
+          authType: 'none',
+        },
+      });
+      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"self-signed certificate in certificate chain"`
+      );
+    });
+  });
+
+  // targetHttps, proxyHttps, and proxyAuth should all range over [false, true], but
+  // currently the true versions are not passing
+  describe(`proxy`, () => {
+    for (const targetHttps of [false]) {
+      for (const targetAuth of [false, true]) {
+        for (const proxyHttps of [false]) {
+          for (const proxyAuth of [false]) {
+            const targetLabel = testLabel('target', targetHttps, targetAuth);
+            const proxyLabel = testLabel('proxy', proxyHttps, proxyAuth);
+            const testName = `${targetLabel} :: ${proxyLabel}`;
+
+            const opts = { targetHttps, targetAuth, proxyHttps, proxyAuth };
+
+            test(`basic;                     ${testName}`, async () => await basicProxyTest(opts));
+
+            if (targetAuth) {
+              test(`wrong target password;     ${testName}`, async () =>
+                await wrongTargetPasswordProxyTest(opts));
+
+              test(`missing target password;   ${testName}`, async () =>
+                await missingTargetPasswordProxyTest(opts));
+            }
+          }
+        }
+      }
+    }
+  });
+});
+
+async function basicProxyTest(opts: RunTestOptions) {
+  await runWithSetup(opts, async (target, proxyInstance, axiosDefaults) => {
+    const configurationUtilities = getACUfromConfig({
+      proxyUrl: proxyInstance.url,
+      ssl: { verificationMode: 'none' },
+      customHostSettings: [{ url: target.url, ssl: { certificateAuthoritiesData: CA } }],
+    });
+
+    const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+      authTypeRegistry,
+      configurationUtilities,
+      logger,
+    });
+    const axiosInstance = await getAxiosInstanceFn({
+      connectorId: '1',
+      secrets: { authType: 'none' },
+    });
+
+    const res = await axiosInstance.get(axiosDefaults.url);
+    expect(res.status).toBe(200);
+  });
+}
+
+async function wrongTargetPasswordProxyTest(opts: RunTestOptions) {
+  await runWithSetup(
+    { ...opts, err: new AxiosError('Request failed with status code 403') },
+    async (target, proxyInstance) => {
+      const configurationUtilities = getACUfromConfig({
+        proxyUrl: proxyInstance.url,
+        ssl: { verificationMode: 'none' },
+        customHostSettings: [{ url: target.url, ssl: { certificateAuthoritiesData: CA } }],
+      });
+
+      const wrongUrl = manglePassword(target.url);
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
+      await axiosInstance.get(wrongUrl);
+    }
+  );
+}
+
+async function missingTargetPasswordProxyTest(opts: RunTestOptions) {
+  await runWithSetup(
+    { ...opts, err: new AxiosError('Request failed with status code 401') },
+    async (target, proxyInstance, axiosDefaults) => {
+      const configurationUtilities = getACUfromConfig({
+        proxyUrl: proxyInstance.url,
+        ssl: { verificationMode: 'none' },
+        customHostSettings: [{ url: target.url, ssl: { certificateAuthoritiesData: CA } }],
+      });
+
+      const anonUrl = removePassword(target.url);
+      const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+      const axiosInstance = await getAxiosInstanceFn({
+        connectorId: '1',
+        secrets: { authType: 'none' },
+      });
+      await axiosInstance.get(anonUrl);
+    }
+  );
+}
+
+interface RunTestOptions {
+  targetHttps: boolean;
+  targetAuth: boolean;
+  proxyHttps: boolean;
+  proxyAuth: boolean;
+  err?: AxiosError;
+}
+
+type Test = (
+  target: CreateServerResult,
+  proxy: CreateProxyResult,
+  axiosDefaults: {
+    url: string;
+    configurationUtilities: ActionsConfigurationUtilities;
+  }
+) => Promise<void>;
+
+async function runWithSetup(opts: RunTestOptions, fn: Test) {
+  const target = await createServer({
+    useHttps: opts.targetHttps,
+    requireAuth: opts.targetAuth,
+  });
+
+  const proxyInstance = await createProxy({
+    useHttps: opts.proxyHttps,
+    requireAuth: opts.proxyAuth,
+  });
+
+  const axiosDefaults = {
+    url: target.url,
+    configurationUtilities: getACUfromConfig({
+      proxyUrl: proxyInstance.url,
+    }),
+  };
+
+  try {
+    await fn(target, proxyInstance, axiosDefaults);
+  } catch (err) {
+    if (opts.err) {
+      expect(err.message).toMatch(opts.err.message);
+    } else {
+      expect(err).toBeUndefined();
+    }
+  }
+
+  target.server.close();
+  proxyInstance.server.close();
+}
+
+function testLabel(type: string, tls: boolean, auth: boolean) {
+  return `${type} https ${tls ? 'X' : '-'} auth ${auth ? 'X' : '-'}`;
+}
+
+function manglePassword(url: string) {
+  const parsed = new URL(url);
+  parsed.password = `nope-${parsed.password}-nope`;
+  return parsed.toString();
+}
+
+function removePassword(url: string) {
+  const parsed = new URL(url);
+  parsed.username = '';
+  parsed.password = '';
+  return parsed.toString();
+}
+
+const TlsOptions = {
+  cert: KIBANA_CRT,
+  key: KIBANA_KEY,
+  ca: CA,
+};
+
+interface CreateServerOptions {
+  useHttps: boolean;
+  requireAuth?: boolean;
+  requestCert?: boolean;
+}
+
+interface CreateServerResult {
+  url: string;
+  server: http.Server | https.Server;
+}
+
+async function createServer(options: CreateServerOptions): Promise<CreateServerResult> {
+  const { useHttps, requireAuth = false, requestCert = false } = options;
+  const port = await getPort();
+  const url = `http${useHttps ? 's' : ''}://${requireAuth ? `${Auth}@` : ''}localhost:${port}`;
+
+  function requestHandler(req: http.IncomingMessage, res: http.ServerResponse) {
+    if (requireAuth) {
+      const auth = req.headers.authorization;
+      if (auth == null) {
+        res.setHeader('WWW-Authenticate', 'Basic');
+        res.writeHead(401);
+        res.end('authorization required');
+        return;
+      }
+      if (auth !== `Basic ${AuthB64}`) {
+        res.writeHead(403);
+        res.end('not authorized');
+        return;
+      }
+    }
+
+    res.writeHead(200);
+    res.end('http: just testing that a connection could be made');
+  }
+
+  let server: http.Server | https.Server;
+  if (!useHttps) {
+    server = http.createServer(requestHandler);
+  } else {
+    server = https.createServer({ ...TlsOptions, requestCert }, requestHandler);
+  }
+  server.unref();
+
+  const readySignal = createReadySignal<CreateServerResult>();
+  server.listen(port, 'localhost', () => {
+    readySignal.signal({ url, server });
+  });
+
+  return readySignal.wait();
+}
+
+interface CreateProxyOptions {
+  useHttps: boolean;
+  requireAuth?: boolean;
+}
+
+interface CreateProxyResult {
+  url: string;
+  server: http.Server | https.Server;
+}
+
+type AuthenticateCallback = (err: null | Error, authenticated: boolean) => void;
+
+interface IAuthenticate {
+  authenticate(req: http.IncomingMessage, callback: AuthenticateCallback): void;
+}
+
+async function createProxy(options: CreateProxyOptions): Promise<CreateProxyResult> {
+  const { useHttps, requireAuth = false } = options;
+  const port = await getPort();
+  const url = getUrl(useHttps, requireAuth, port);
+  let proxyServer: http.Server | https.Server;
+
+  if (!useHttps) {
+    proxyServer = http.createServer();
+  } else {
+    proxyServer = https.createServer(TlsOptions);
+  }
+  proxyServer.unref();
+
+  proxy.createProxy(proxyServer);
+  if (requireAuth) {
+    (proxyServer as unknown as IAuthenticate).authenticate = (req, callback) => {
+      const auth = req.headers['proxy-authorization'];
+      callback(null, auth === `Basic ${AuthB64}`);
+    };
+  }
+
+  const readySignal = createReadySignal<CreateProxyResult>();
+
+  proxyServer.listen(port, 'localhost', () => {
+    readySignal.signal({ server: proxyServer, url });
+  });
+
+  return readySignal.wait();
+}
+
+function getUrl(useHttps: boolean, requiresAuth: boolean, port: number) {
+  return `http${useHttps ? 's' : ''}://${requiresAuth ? `${Auth}@` : ''}localhost:${port}`;
+}
+
+const BaseActionsConfig: ActionsConfig = {
+  allowedHosts: ['*'],
+  enabledActionTypes: ['*'],
+  preconfiguredAlertHistoryEsIndex: false,
+  preconfigured: {},
+  proxyUrl: undefined,
+  proxyHeaders: undefined,
+  ssl: {
+    proxyVerificationMode: 'full',
+    verificationMode: 'full',
+  },
+  proxyBypassHosts: undefined,
+  proxyOnlyHosts: undefined,
+  maxResponseContentLength: ByteSizeValue.parse('1mb'),
+  responseTimeout: momentDuration(1000 * 30),
+  customHostSettings: undefined,
+  enableFooterInEmail: true,
+  microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+  microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+};
+
+function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {
+  const resolvedConfig = resolveCustomHosts(logger, { ...BaseActionsConfig, ...config });
+  return getActionsConfigurationUtilities(resolvedConfig);
+}

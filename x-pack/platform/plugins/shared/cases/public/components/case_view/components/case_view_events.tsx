@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+
 import { type CaseUI } from '../../../../common';
-import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
-import { CaseViewTabs } from '../case_view_tabs';
 import type { CaseViewProps } from '../types';
 
 import { AttachmentType, type EventAttachment } from '../../../../common/types/domain';
@@ -43,8 +43,12 @@ export const CaseViewEvents = ({
   }
 
   return (
-    <EuiFlexItem data-test-subj="case-view-events">
-      <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.EVENTS} />
+    <EuiFlexItem
+      css={css`
+        width: 100%;
+      `}
+      data-test-subj="case-view-events"
+    >
       <EventsTable events={events} />
     </EuiFlexItem>
   );

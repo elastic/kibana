@@ -71,6 +71,9 @@ export interface WaterfallSpan {
   child?: { id: string[] };
 }
 
+/**
+ * @deprecated Use Error instead
+ */
 export interface WaterfallError {
   id: string;
   timestamp: TimestampUs;
@@ -78,6 +81,7 @@ export interface WaterfallError {
   transaction?: { id?: string };
   parent?: { id?: string };
   span?: { id?: string };
+  eventName?: string;
   error: {
     id: string;
     log?: {

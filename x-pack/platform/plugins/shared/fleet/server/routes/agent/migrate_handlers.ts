@@ -20,6 +20,7 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
   TypeOf<typeof MigrateSingleAgentRequestSchema.body>
 > = async (context, request, response) => {
   const [coreContext] = await Promise.all([context.core, context.fleet]);
+
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
   const options = request.body;

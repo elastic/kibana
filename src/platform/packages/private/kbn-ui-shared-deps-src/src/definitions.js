@@ -134,18 +134,20 @@ const externals = {
   '@kbn/rison': '__kbnSharedDeps__.KbnRison',
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',
-  '@tanstack/react-query': '__kbnSharedDeps__.ReactQuery',
+  '@kbn/react-query': '__kbnSharedDeps__.ReactQuery',
   '@tanstack/react-query-devtools': '__kbnSharedDeps__.ReactQueryDevtools',
   '@kbn/code-editor': '__kbnSharedDeps__.KbnCodeEditor',
-  '@kbn/esql-ast': '__kbnSharedDeps__.KbnEsqlAst',
+  '@kbn/esql-language': '__kbnSharedDeps__.KbnEsqlAst',
   '@kbn/ebt-tools': '__kbnSharedDeps__.KbnEbtTools',
   '@elastic/apm-rum-core': '__kbnSharedDeps__.ElasticApmRumCore',
   '@kbn/react-kibana-context-common': '__kbnSharedDeps__.KbnReactKibanaContextCommon',
   '@kbn/react-kibana-context-root': '__kbnSharedDeps__.KbnReactKibanaContextRoot',
   '@kbn/react-kibana-context-render': '__kbnSharedDeps__.KbnReactKibanaContextRender',
   '@kbn/react-kibana-context-theme': '__kbnSharedDeps__.KbnReactKibanaContextTheme',
+  '@kbn/react-kibana-context-env': '__kbnSharedDeps__.KbnReactKibanaContextEnv',
   '@kbn/shared-ux-router': '__kbnSharedDeps__.KbnSharedUxRouter',
   '@kbn/react-kibana-mount': '__kbnSharedDeps__.KbnReactKibanaMount',
+  '@kbn/visualizations-common': '__kbnSharedDeps__.KbnVisualizationsCommon',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

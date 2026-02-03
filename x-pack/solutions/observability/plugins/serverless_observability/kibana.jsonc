@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/serverless-observability",
-  "owner": ["@elastic/obs-ux-management-team"],
+  "owner": ["@elastic/obs-presentation-team"],
   "group": "observability",
   "visibility": "private",
   "description": "Serverless customizations for observability.",

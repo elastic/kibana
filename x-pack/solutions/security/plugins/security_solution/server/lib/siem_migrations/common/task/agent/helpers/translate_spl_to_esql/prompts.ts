@@ -22,6 +22,12 @@ Here are some context for you to reference for your task, read it carefully as y
 <splunk_query>
 {splunk_query}
 </splunk_query>
+<index_mapping>
+The following is the mapping for the target index. Use this to ensure field names in your ES|QL query match the actual fields available in the index:
+\`\`\`json
+{index_mapping}
+\`\`\`
+</index_mapping>
 <placeholders_syntax>
 If you encounter any placeholders for macros or lookups in the SPL query, leave them as-is in the ES|QL query output. They are markers that need to be preserved.
 They are wrapped in brackets ("[]") and always start with "macro:" or "lookup:". Mention all placeholders you left in the final summary.
@@ -58,6 +64,7 @@ Go through each step and part of the splunk_query while following the below guid
 <guidelines>
 - Analyze the SPL query and identify the key components.
 - Do NOT translate the field names of the SPL query.
+- If index mapping is provided, use it to ensure the field names in your ES|QL query match the actual fields available in the index. Only use fields that exist in the mapping.
 - Always start the resulting ES|QL query with "FROM {index_pattern}". We will set the correct index pattern later on, so do not mention anything about index patterns in the summary.
 - Always remember to leave placeholders defined in the placeholders_syntax context as they are, don't replace them.
 - Always remember to translate any lookup (that are not inside a placeholder) using the lookup_syntax rules above.
@@ -69,6 +76,7 @@ Go through each step and part of the splunk_query while following the below guid
   - Inside SPL language code blocks, Please add a line break before each pipe (|) character in the query.
   - Make sure the Markdown is formatted correctly and the values properly escaped.
 - Don't add any other information or explanation before or after these two outputs.
+- Always use the provided index pattern {index_pattern} in the output, do not use a different index pattern. This is very important.
 </output_format>
 
 <example_output>

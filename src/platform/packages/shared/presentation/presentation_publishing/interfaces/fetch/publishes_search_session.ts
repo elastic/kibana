@@ -11,6 +11,7 @@ import type { PublishingSubject } from '../../publishing_subject';
 
 export interface PublishesSearchSession {
   searchSessionId$: PublishingSubject<string | undefined>;
+  requestSearchSessionId?: () => Promise<string | undefined>;
 }
 
 export const apiPublishesSearchSession = (

@@ -6,6 +6,7 @@
  */
 
 import { AUTHENTICATION } from '../../../common/lib/authentication';
+import { createSpaces, deleteSpaces } from '../../../common/lib/space_test_utils';
 import { SPACES } from '../../../common/lib/spaces';
 import { getTestSuiteFactory } from '../../../common/suites/get.agnostic';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
@@ -19,14 +20,23 @@ export default function getSpaceTestSuite(context: DeploymentAgnosticFtrProvider
     nonExistantSpaceId,
   } = getTestSuiteFactory(context);
 
+  const spacesService = context.getService('spaces');
+  const isServerless = context.getService('config').get('serverless');
+
   describe('get', () => {
+    before(async () => {
+      await createSpaces(spacesService, isServerless);
+    });
+
+    after(async () => {
+      await deleteSpaces(spacesService);
+    });
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
         otherSpaceId: SPACES.SPACE_1.spaceId,
         users: {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
@@ -42,7 +52,6 @@ export default function getSpaceTestSuite(context: DeploymentAgnosticFtrProvider
         otherSpaceId: SPACES.DEFAULT.spaceId,
         users: {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
@@ -58,7 +67,6 @@ export default function getSpaceTestSuite(context: DeploymentAgnosticFtrProvider
         otherSpaceId: SPACES.DEFAULT.spaceId,
         users: {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_3_ALL_USER,
@@ -78,18 +86,6 @@ export default function getSpaceTestSuite(context: DeploymentAgnosticFtrProvider
           default: {
             statusCode: 403,
             response: createExpectRbacForbidden(scenario.spaceId),
-          },
-        },
-      });
-
-      getTest(`superuser`, {
-        currentSpaceId: scenario.spaceId,
-        spaceId: scenario.spaceId,
-        user: scenario.users.superuser,
-        tests: {
-          default: {
-            statusCode: 200,
-            response: createExpectResults(scenario.spaceId),
           },
         },
       });

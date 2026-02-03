@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { WorkflowsEmptyState } from './workflows_empty_state';
 
 // Mock useKibana hook
@@ -34,8 +34,7 @@ describe('WorkflowsEmptyState', () => {
     renderWithIntl(<WorkflowsEmptyState />);
 
     expect(screen.getByText('Get Started with Workflows')).toBeInTheDocument();
-    expect(screen.getByText(/Workflows let you automate and orchestrate/)).toBeInTheDocument();
-    expect(screen.getByText(/Start by creating a workflow/)).toBeInTheDocument();
+    expect(screen.getByText(/Workflows let you automate repetitive tasks/)).toBeInTheDocument();
   });
 
   it('renders the create button when user can create workflows', () => {

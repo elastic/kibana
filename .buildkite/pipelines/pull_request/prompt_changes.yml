@@ -4,7 +4,8 @@ steps:
     agents:
       machineType: n2-standard-2
       preemptible: true
-      diskSizeGb: 85
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
+      diskSizeGb: 115
     timeout_in_minutes: 10
     retry:
       automatic:

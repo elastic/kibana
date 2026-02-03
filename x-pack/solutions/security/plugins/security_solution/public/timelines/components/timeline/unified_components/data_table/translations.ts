@@ -44,27 +44,6 @@ export const LOADING = i18n.translate('xpack.securitySolution.timeline.footer.lo
   defaultMessage: 'Loading',
 });
 
-export const TOTAL_COUNT_OF_EVENTS = i18n.translate(
-  'xpack.securitySolution.timeline.dataTable.footer.totalCountOfEvents',
-  {
-    defaultMessage: 'events',
-  }
-);
-
-export const AUTO_REFRESH_ACTIVE = i18n.translate(
-  'xpack.securitySolution.timeline.dataTable.footer.autoRefreshActiveDescription',
-  {
-    defaultMessage: 'Auto-Refresh Active',
-  }
-);
-
-export const LOADING_EVENTS = i18n.translate(
-  'xpack.securitySolution.timeline.dataTable.footer.loadingEventsDataLabel',
-  {
-    defaultMessage: 'Loading Events',
-  }
-);
-
 export const TIMELINE_UNIFIED_DATA_TABLE_CONTEXT_ERROR = i18n.translate(
   'xpack.securitySolution.timeline.dataTable.timelineContextError',
   {

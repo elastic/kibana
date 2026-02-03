@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EuiDelayRender } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useState } from 'react';
-import { EuiDelayRender } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import { TRACE_ID_FIELD } from '@kbn/discover-utils';
+import { useGetGenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
+import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
 import { TraceWaterfallTourStep } from './full_screen_waterfall_tour_step';
+import { OPEN_IN_DISCOVER_LABEL, OPEN_IN_DISCOVER_ARIA_LABEL } from '../../common/constants';
 
 interface Props {
   traceId: string;
@@ -38,25 +41,26 @@ const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace
 });
 
 export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
-  const { data } = getUnifiedDocViewerServices();
+  const { data, discoverShared } = getUnifiedDocViewerServices();
+  const { indexes } = useDataSourcesContext();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
-  const getParentApi = useCallback(
-    () => ({
-      getSerializedStateForChild: () => ({
-        rawState: {
-          traceId,
-          rangeFrom,
-          rangeTo,
-          docId,
-          mode: 'summary',
-        },
-      }),
-    }),
-    [docId, rangeFrom, rangeTo, traceId]
-  );
+
+  const FocusedTraceWaterfall = discoverShared.features.registry.getById(
+    'observability-focused-trace-waterfall'
+  )?.render;
+
+  const { generateDiscoverLink } = useGetGenerateDiscoverLink({
+    indexPattern: indexes.apm.traces,
+  });
+
+  const openInDiscoverLink = useMemo(() => {
+    return generateDiscoverLink({ [TRACE_ID_FIELD]: traceId });
+  }, [generateDiscoverLink, traceId]);
 
   const actionId = 'traceWaterfallFullScreenAction';
+
+  if (!FocusedTraceWaterfall) return null;
 
   return (
     <>
@@ -83,14 +87,29 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
             label: fullScreenButtonLabel,
             ariaLabel: fullScreenButtonLabel,
             id: actionId,
+            dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
           },
+          ...(openInDiscoverLink
+            ? [
+                {
+                  icon: 'discoverApp',
+                  label: OPEN_IN_DISCOVER_LABEL,
+                  ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
+                  href: openInDiscoverLink,
+                  dataTestSubj: 'unifiedDocViewerObservabilityTracesOpenInDiscoverButton',
+                },
+              ]
+            : []),
         ]}
       >
-        <EmbeddableRenderer
-          type="APM_TRACE_WATERFALL_EMBEDDABLE"
-          getParentApi={getParentApi}
-          hidePanelChrome
-        />
+        {docId ? (
+          <FocusedTraceWaterfall
+            traceId={traceId}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            docId={docId}
+          />
+        ) : null}
         <EuiDelayRender delay={500}>
           <TraceWaterfallTourStep
             actionId={actionId}

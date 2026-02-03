@@ -6,15 +6,14 @@
  */
 
 import type React from 'react';
-import type { IconType } from '@elastic/eui';
 import type { TimelineModel } from '../../store/model';
 import type {
-  RowRendererId,
-  ResolvedTimeline,
-  TimelineType,
-  TimelineStatus,
-  TemplateTimelineType,
   Note,
+  ResolvedTimeline,
+  RowRendererId,
+  TemplateTimelineType,
+  TimelineStatus,
+  TimelineType,
 } from '../../../../common/api/timeline';
 
 /** The users who added a timeline to favorites */
@@ -32,17 +31,6 @@ export interface TimelineResultNote {
   timelineId?: string | null;
   updated?: number | null;
   updatedBy?: string | null;
-}
-
-export interface TimelineActionsOverflowColumns {
-  width: string;
-  actions: Array<{
-    name: string;
-    icon: IconType;
-    onClick?: (timeline: OpenTimelineResult) => void;
-    description: string;
-    render?: (timeline: OpenTimelineResult) => JSX.Element;
-  }>;
 }
 
 /** The results of the query run by the OpenTimeline component */
@@ -226,8 +214,6 @@ export interface UpdateTimeline {
   ruleAuthor?: string;
   preventSettingQuery?: boolean;
 }
-
-export type DispatchUpdateTimeline = (args: UpdateTimeline) => void;
 
 export enum TimelineTabsStyle {
   tab = 'tab',

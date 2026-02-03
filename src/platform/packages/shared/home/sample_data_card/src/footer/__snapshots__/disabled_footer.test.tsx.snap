@@ -2,13 +2,14 @@
 
 exports[`install footer should render 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexEnd-stretch-row"
 >
   <div
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <span
       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      id="generated-id-wrapper"
     >
       <button
         aria-label="Add Data Set Name"

@@ -11,6 +11,7 @@ servers:
 tags:
   - name: task manager
     x-displayName: Task manager
+    description: Task manager APIs enable you to check the health of the Kibana task manager, which is used by features such as alerting, actions, and reporting to run mission critical work as persistent background tasks.
     externalDocs:
       url: https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management
       description: Task manager
@@ -214,12 +215,6 @@ components:
                     "p99": 2079
                   },
                   "security:endpoint-diagnostics": {
-                    "p50": 2525,
-                    "p90": 2525,
-                    "p95": 2525,
-                    "p99": 2525
-                  },
-                  "logs-data-telemetry": {
                     "p50": 2525,
                     "p90": 2525,
                     "p95": 2525,
@@ -457,12 +452,6 @@ components:
                       "p99": 78
                     },
                     "security:endpoint-diagnostics": {
-                      "p50": 6,
-                      "p90": 6,
-                      "p95": 6,
-                      "p99": 6
-                    },
-                    "logs-data-telemetry": {
                       "p50": 6,
                       "p90": 6,
                       "p95": 6,
@@ -711,12 +700,6 @@ components:
                       "status": "OK"
                     },
                     "security:endpoint-diagnostics": {
-                      "Success": 100,
-                      "RetryScheduled": 0,
-                      "Failed": 0,
-                      "status": "OK"
-                    },
-                    "logs-data-telemetry": {
                       "Success": 100,
                       "RetryScheduled": 0,
                       "Failed": 0,
@@ -1021,13 +1004,6 @@ components:
                     }
                   },
                   "fleet:unenroll-inactive-agents-task": {
-                    "count": 1,
-                    "cost": 2,
-                    "status": {
-                      "idle": 1
-                    }
-                  },
-                  "logs-data-telemetry": {
                     "count": 1,
                     "cost": 2,
                     "status": {

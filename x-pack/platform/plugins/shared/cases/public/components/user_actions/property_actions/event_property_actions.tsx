@@ -25,6 +25,7 @@ const EventPropertyActionsComponent: React.FC<Props> = ({ isLoading, totalEvents
   const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
     onDelete,
   });
+  const buttonRef = React.useRef<HTMLAnchorElement>(null);
 
   const propertyActions = useMemo(() => {
     const showRemoveEventIcon = permissions.delete;
@@ -47,13 +48,18 @@ const EventPropertyActionsComponent: React.FC<Props> = ({ isLoading, totalEvents
 
   return (
     <>
-      <UserActionPropertyActions isLoading={isLoading} propertyActions={propertyActions} />
+      <UserActionPropertyActions
+        isLoading={isLoading}
+        propertyActions={propertyActions}
+        buttonRef={buttonRef}
+      />
       {showDeletionModal ? (
         <DeleteAttachmentConfirmationModal
           title={i18n.REMOVE_EVENTS(totalEvents)}
           confirmButtonText={i18n.REMOVE}
           onCancel={onCancel}
           onConfirm={onConfirm}
+          focusButtonRef={buttonRef}
         />
       ) : null}
     </>

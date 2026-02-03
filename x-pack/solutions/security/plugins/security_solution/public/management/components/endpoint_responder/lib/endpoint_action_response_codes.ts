@@ -11,6 +11,11 @@ const CODES = Object.freeze({
   // -----------------------------------------------------------------
   // GET-FILE CODES
   // -----------------------------------------------------------------
+  'ra_get-file_error_canceled': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.canceled',
+    { defaultMessage: 'Response action was canceled' }
+  ),
+
   /** file not found */
   'ra_get-file_error_not-found': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.getFile.notFound',
@@ -71,6 +76,12 @@ const CODES = Object.freeze({
     { defaultMessage: 'Endpoint timed out while attempting to connect to upload API' }
   ),
 
+  /** not enough free disk space to complete the action as per endpoint advanced policy */
+  'ra_get-file_error_not-enough-free-space': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.notEnoughFreeSpace',
+    { defaultMessage: 'Not enough free disk space to process the action' }
+  ),
+
   // -----------------------------------------------------------------
   // SUSPEND-PROCESS CODES
   // -----------------------------------------------------------------
@@ -84,8 +95,8 @@ const CODES = Object.freeze({
   ),
 
   /**
-   * Code will be used when the provided process can not be killed (for stability reasons).
-   * Example: This occurs if you try to kill Endpoint Security
+   * Code will be used when the provided process can not be suspended (for stability reasons).
+   * Example: This occurs if you try to suspend Endpoint Security
    */
   'ra_suspend-process_error_not-permitted': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.suspendProcess.notPermittedSuccess',
@@ -127,6 +138,11 @@ const CODES = Object.freeze({
   // -----------------------------------------------------------------
   // EXECUTE CODES
   // -----------------------------------------------------------------
+
+  ra_execute_error_canceled: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.execute.canceled',
+    { defaultMessage: 'Response action was canceled' }
+  ),
 
   // Dev:
   // Something interrupted preparing the zip: file read error, zip error. I think these should be rare,
@@ -219,6 +235,11 @@ const CODES = Object.freeze({
   // UPLOAD CODES
   // -----------------------------------------------------------------
 
+  ra_upload_error_canceled: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.upload.canceled',
+    { defaultMessage: 'Response action was canceled' }
+  ),
+
   // Dev:
   // generic failure (rare corner case, software bug, etc)
   ra_upload_error_failure: i18n.translate(
@@ -228,7 +249,7 @@ const CODES = Object.freeze({
 
   // Dev:
   // File with the given name already exists and overwrite was not allowed.
-  'ra_upload_already-exists': i18n.translate(
+  'ra_upload_error_already-exists': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.upload.fileAlreadyExists',
     {
       defaultMessage:
@@ -270,9 +291,26 @@ const CODES = Object.freeze({
     { defaultMessage: 'Failed to save file to disk or validate its integrity' }
   ),
 
+  // Dev:
+  // Fleet upload API was unreachable or misconfigured
+  'ra_upload_error_upload-api-unreachable': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.upload.uploadApiUnreachable',
+    { defaultMessage: 'Failed to retrieve the file. File upload api (fleet-server) is unreachable' }
+  ),
+
+  /** not enough free disk space to complete the action as per endpoint advanced policy */
+  'ra_upload_error_not-enough-free-space': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.upload.notEnoughFreeSpace',
+    { defaultMessage: 'Not enough free disk space to process the action' }
+  ),
   // -----------------------------------------------------------------
   // SCAN CODES
   // -----------------------------------------------------------------
+
+  ra_scan_error_canceled: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.scan.canceled',
+    { defaultMessage: 'Response action was canceled' }
+  ),
 
   'ra_scan_error_invalid-input': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.invalidInput',
@@ -280,10 +318,10 @@ const CODES = Object.freeze({
   ),
 
   // Dev:
-  // file path not found failure (404)
+  // local disk path not found failure
   'ra_scan_error_not-found': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.notFound',
-    { defaultMessage: 'File path or folder was not found (404)' }
+    { defaultMessage: 'File path or folder was not found' }
   ),
 
   // Dev:
@@ -294,10 +332,90 @@ const CODES = Object.freeze({
   ),
 
   // Dev:
+  // an error happened while scanning files, scan was not completed
+  ra_scan_error_processing: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.scan.processingError',
+    { defaultMessage: 'An error occurred while processing the scan' }
+  ),
+
+  // Dev:
+  // scan was interrupted, for example: system shutdown, endpoint service stop/restart.
+  // Endpoint does not track yet scan progress, that's why it can't resume
+  'ra_scan_error_processing-interrupted': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.scan.processingInterrupted',
+    { defaultMessage: 'The scan was interrupted' }
+  ),
+
+  // Dev:
   // scan success/completed
   ra_scan_success_done: i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.success',
     { defaultMessage: 'Scan complete' }
+  ),
+
+  // -----------------------------------------------------------------
+  // MEMORY-DUMP CODES
+  // -----------------------------------------------------------------
+  'ra_memory-dump_error_canceled': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.canceled',
+    { defaultMessage: 'Response action was canceled' }
+  ),
+  'ra_memory-dump_error_failure': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.failure',
+    { defaultMessage: 'Unknown failure while capturing memory dump' }
+  ),
+  'ra_memory-dump_success_done': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.done',
+    { defaultMessage: 'Memory dump complete' }
+  ),
+  'ra_memory-dump_error_invalid-input': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.invalidInput',
+    { defaultMessage: 'The request provided for memory dump is invalid' }
+  ),
+
+  // DEV: process with pid or entity_id not foud
+  'ra_memory-dump_error_not-found': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.notFound',
+    { defaultMessage: 'The process for memory dump was not found' }
+  ),
+
+  // DEV: not permitted to dump protected process memory. Endpoint honors the OS system protection model
+  // thus protected processes are not allowed to dump memory.
+  'ra_memory-dump_error_not-permitted': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.notPermitted',
+    { defaultMessage: 'Memory dump not permitted on protected processes' }
+  ),
+
+  // DEV: too many queued memory dump requests
+  'ra_memory-dump_error_queue-full': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.queueFull',
+    { defaultMessage: 'Too many memory-dump requests in queue' }
+  ),
+
+  'ra_memory-dump_error_io': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.ioError',
+    { defaultMessage: 'A disk input/output error has occurred' }
+  ),
+
+  // DEV: A catch-all placeholder to indicate that action failed during processing memory dump with
+  // a rare not generally expected code.
+  'ra_memory-dump_error_processing': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.processingError',
+    { defaultMessage: 'Memory dump failed during processing' }
+  ),
+
+  // DEV: processing interrupted by stop/shutdown/reboot. Action has been interrupted or could have
+  // been just in the queue before shutdown. Nonetheless, since in this case all processes are gone,
+  // action will fail
+  'ra_memory-dump_error_processing-interrupted': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.processingInterruptedError',
+    { defaultMessage: 'Memory dump action was interrupted' }
+  ),
+
+  // DEV: Fail early when disk space falls below free space threshold set via advanced Endpoint policy
+  'ra_memory-dump_error_not-enough-free-space': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.insufficientDiskSpaceError',
+    { defaultMessage: 'Host does not have sufficient disk space to capture a memory dump' }
   ),
 });
 

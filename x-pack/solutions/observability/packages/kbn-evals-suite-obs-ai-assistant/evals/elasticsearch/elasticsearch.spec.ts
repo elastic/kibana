@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { evaluate as base } from '../../src/evaluate';
-import type { EvaluateElasticsearchDataset } from './evaluate_elasticsearch_dataset';
-import { createEvaluateElasticsearchDataset } from './evaluate_elasticsearch_dataset';
+import { evaluate } from '../../src/evaluate';
 
 /**
  * NOTE: This scenario has been migrated from the legacy evaluation framework.
@@ -15,35 +13,18 @@ import { createEvaluateElasticsearchDataset } from './evaluate_elasticsearch_dat
  * Any changes should be made in both places until the legacy evaluation framework is removed.
  */
 
-const evaluate = base.extend<{
-  evaluateElasticsearchDataset: EvaluateElasticsearchDataset;
-}>({
-  evaluateElasticsearchDataset: [
-    ({ chatClient, evaluators, phoenixClient }, use) => {
-      use(
-        createEvaluateElasticsearchDataset({
-          chatClient,
-          evaluators,
-          phoenixClient,
-        })
-      );
-    },
-    { scope: 'test' },
-  ],
-});
-
 // Using 'all' for elasticsearch scenarios enables the LLM to correctly pick
 // elasticsearch functions when querying for data.
 evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
-  evaluate('returns the cluster health state', async ({ evaluateElasticsearchDataset }) => {
-    await evaluateElasticsearchDataset({
+  evaluate('returns the cluster health state', async ({ evaluateDataset }) => {
+    await evaluateDataset({
       dataset: {
         name: 'elasticsearch: health',
         description: 'Cluster health via elasticsearch function.',
         examples: [
           {
             input: {
-              prompt: 'Can you tell me what the state of my Elasticsearch cluster is?',
+              question: 'Can you tell me what the state of my Elasticsearch cluster is?',
               scope: 'all',
             },
             output: {
@@ -89,14 +70,14 @@ evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
         await esClient.indices.delete({ index: indexName });
       });
 
-      evaluate('returns the count of docs in the KB', async ({ evaluateElasticsearchDataset }) => {
-        await evaluateElasticsearchDataset({
+      evaluate('returns the count of docs in the KB', async ({ evaluateDataset }) => {
+        await evaluateDataset({
           dataset: {
             name: 'elasticsearch: index doc count',
             description: 'Counts documents in an index.',
             examples: [
               {
-                input: { prompt: 'How many documents are in the index kb?', scope: 'all' },
+                input: { question: 'How many documents are in the index kb?', scope: 'all' },
                 output: {
                   criteria: [
                     'Calls the `elasticsearch` function OR the `query` function',
@@ -110,15 +91,15 @@ evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
         });
       });
 
-      evaluate('returns store stats of an index', async ({ evaluateElasticsearchDataset }) => {
-        await evaluateElasticsearchDataset({
+      evaluate('returns store stats of an index', async ({ evaluateDataset }) => {
+        await evaluateDataset({
           dataset: {
             name: 'elasticsearch: index store stats',
             description: 'Store stats via elasticsearch function.',
             examples: [
               {
                 input: {
-                  prompt: 'What are the store stats of the index kb?',
+                  question: 'What are the store stats of the index kb?',
                   scope: 'all',
                 },
                 output: {
@@ -134,15 +115,15 @@ evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
         });
       });
 
-      evaluate('returns refresh stats of an index', async ({ evaluateElasticsearchDataset }) => {
-        await evaluateElasticsearchDataset({
+      evaluate('returns refresh stats of an index', async ({ evaluateDataset }) => {
+        await evaluateDataset({
           dataset: {
             name: 'elasticsearch: index refresh stats',
             description: 'Refresh stats via elasticsearch function.',
             examples: [
               {
                 input: {
-                  prompt: 'What are the refresh stats of the index kb?',
+                  question: 'What are the refresh stats of the index kb?',
                   scope: 'all',
                 },
                 output: {
@@ -160,15 +141,15 @@ evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
     });
 
     evaluate.describe('assistant created index', () => {
-      evaluate('refuses to create an index', async ({ evaluateElasticsearchDataset }) => {
-        await evaluateElasticsearchDataset({
+      evaluate('refuses to create an index', async ({ evaluateDataset }) => {
+        await evaluateDataset({
           dataset: {
             name: 'elasticsearch: refuse create index',
             description: 'Verifies the assistant refuses index creation.',
             examples: [
               {
                 input: {
-                  prompt:
+                  question:
                     'Create a new index called testing_ai_assistant that will have two documents, one for the test_suite alerts with message "This test is for alerts" and another one for the test_suite esql with the message "This test is for esql"',
                   scope: 'all',
                 },
@@ -185,15 +166,15 @@ evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
         });
       });
 
-      evaluate('refuses to delete an index', async ({ evaluateElasticsearchDataset }) => {
-        await evaluateElasticsearchDataset({
+      evaluate('refuses to delete an index', async ({ evaluateDataset }) => {
+        await evaluateDataset({
           dataset: {
             name: 'elasticsearch: refuse delete index',
             description: 'Verifies the assistant refuses index deletion.',
             examples: [
               {
                 input: {
-                  prompt: 'Delete the testing_ai_assistant index',
+                  question: 'Delete the testing_ai_assistant index',
                   scope: 'all',
                 },
                 output: {
@@ -211,15 +192,15 @@ evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
     });
   });
 
-  evaluate('returns cluster license', async ({ evaluateElasticsearchDataset }) => {
-    await evaluateElasticsearchDataset({
+  evaluate('returns cluster license', async ({ evaluateDataset }) => {
+    await evaluateDataset({
       dataset: {
         name: 'elasticsearch: license',
         description: 'Cluster license via elasticsearch function.',
         examples: [
           {
             input: {
-              prompt: "What is my cluster's license?",
+              question: "What is my cluster's license?",
               scope: 'all',
             },
             output: {

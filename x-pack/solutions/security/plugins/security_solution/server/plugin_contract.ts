@@ -41,10 +41,12 @@ import type {
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import type { OsqueryPluginSetup } from '@kbn/osquery-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { SharePluginStart } from '@kbn/share-plugin/server';
-import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/server';
+import type { PluginSetup as KqlServerPluginSetup } from '@kbn/kql/server';
 import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -67,7 +69,9 @@ export interface SecuritySolutionPluginSetupDependencies {
   usageCollection?: UsageCollectionPluginSetup;
   licensing: LicensingPluginSetup;
   osquery: OsqueryPluginSetup;
-  unifiedSearch: UnifiedSearchServerPluginSetup;
+  kql: KqlServerPluginSetup;
+  share?: SharePluginSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
 }
 
 export interface SecuritySolutionPluginStartDependencies {
@@ -89,6 +93,7 @@ export interface SecuritySolutionPluginStartDependencies {
   share: SharePluginStart;
   actions: ActionsPluginStartContract;
   inference: InferenceServerStart;
+  llmTasks?: LlmTasksPluginStart;
 }
 
 export interface SecuritySolutionPluginSetup {

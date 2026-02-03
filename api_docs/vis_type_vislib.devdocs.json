@@ -33,6 +33,8 @@
           "\"visualization:heatmap:maxBuckets\""
         ],
         "path": "src/platform/plugins/private/vis_types/vislib/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

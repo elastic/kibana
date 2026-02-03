@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import { getPrivilegedMonitorUsersIndex } from '../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
 import type {
@@ -14,7 +15,6 @@ import type {
   EntityAnalyticsConfig,
   RiskEngineConfiguration,
 } from '../types';
-import { calculateRiskScores } from './calculate_risk_scores';
 import type { CalculationResults } from './calculate_and_persist_risk_scores';
 import { calculateAndPersistRiskScores } from './calculate_and_persist_risk_scores';
 import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
@@ -25,6 +25,7 @@ import { scheduleLatestTransformNow } from '../utils/transforms';
 import { calculateScoresWithESQL } from './calculate_esql_risk_scores';
 import type { ResetToZeroDependencies } from './reset_to_zero';
 import { resetToZero } from './reset_to_zero';
+import { createPrivilegedUsersCrudService } from '../privilege_monitoring/users/privileged_users_crud';
 
 export type RiskEngineConfigurationWithDefaults = RiskEngineConfiguration & {
   alertSampleSizePerShard: number;
@@ -42,7 +43,7 @@ export interface RiskScoreService {
   refreshRiskScoreIndex: () => Promise<void>;
   resetToZero: (
     deps: Pick<ResetToZeroDependencies, 'refresh' | 'entityType' | 'excludedEntities'>
-  ) => Promise<void>;
+  ) => Promise<{ scoresWritten: number }>;
 }
 
 export interface RiskScoreServiceFactoryParams {
@@ -54,6 +55,7 @@ export interface RiskScoreServiceFactoryParams {
   spaceId: string;
   refresh?: 'wait_for';
   experimentalFeatures: ExperimentalFeatures;
+  uiSettingsClient: IUiSettingsClient;
 }
 
 export const riskScoreServiceFactory = ({
@@ -64,60 +66,69 @@ export const riskScoreServiceFactory = ({
   riskScoreDataClient,
   spaceId,
   experimentalFeatures,
-}: RiskScoreServiceFactoryParams): RiskScoreService => ({
-  calculateScores: (params) => {
-    const calculate = experimentalFeatures.disableESQLRiskScoring
-      ? calculateRiskScores
-      : calculateScoresWithESQL;
-    return calculate({
-      ...params,
-      assetCriticalityService,
-      esClient,
-      logger,
-      experimentalFeatures,
-    });
-  },
-  calculateAndPersistScores: (params) =>
-    calculateAndPersistRiskScores({
-      ...params,
-      assetCriticalityService,
-      esClient,
-      logger,
-      riskScoreDataClient,
-      spaceId,
-      experimentalFeatures,
-    }),
-  getConfigurationWithDefaults: async (entityAnalyticsConfig: EntityAnalyticsConfig) => {
-    const savedObjectConfig = await riskEngineDataClient.getConfiguration();
+  uiSettingsClient,
+}: RiskScoreServiceFactoryParams): RiskScoreService => {
+  const privmonUserCrudService = createPrivilegedUsersCrudService({
+    index: getPrivilegedMonitorUsersIndex(spaceId),
+    esClient,
+    logger,
+  });
+  return {
+    calculateScores: async (params) => {
+      return calculateScoresWithESQL({
+        ...params,
+        assetCriticalityService,
+        privmonUserCrudService,
+        esClient,
+        logger,
+        experimentalFeatures,
+        filters: params.filters || [],
+      });
+    },
+    calculateAndPersistScores: (params) =>
+      calculateAndPersistRiskScores({
+        ...params,
+        assetCriticalityService,
+        privmonUserCrudService,
+        esClient,
+        logger,
+        riskScoreDataClient,
+        spaceId,
+        experimentalFeatures,
+      }),
+    getConfigurationWithDefaults: async (entityAnalyticsConfig: EntityAnalyticsConfig) => {
+      const savedObjectConfig = await riskEngineDataClient.getConfiguration();
 
-    if (!savedObjectConfig) {
-      return null;
-    }
+      if (!savedObjectConfig) {
+        return null;
+      }
 
-    const alertSampleSizePerShard =
-      savedObjectConfig.alertSampleSizePerShard ??
-      entityAnalyticsConfig.riskEngine.alertSampleSizePerShard;
+      const alertSampleSizePerShard =
+        savedObjectConfig.alertSampleSizePerShard ??
+        entityAnalyticsConfig.riskEngine.alertSampleSizePerShard;
 
-    return {
-      ...savedObjectConfig,
-      alertSampleSizePerShard,
-    };
-  },
-  resetToZero: async (
-    deps: Pick<ResetToZeroDependencies, 'refresh' | 'entityType' | 'excludedEntities'>
-  ) => {
-    await resetToZero({
-      ...deps,
-      esClient,
-      dataClient: riskScoreDataClient,
-      spaceId,
-      assetCriticalityService,
-      logger,
-    });
-  },
+      return {
+        ...savedObjectConfig,
+        alertSampleSizePerShard,
+      };
+    },
+    resetToZero: async (
+      deps: Pick<ResetToZeroDependencies, 'refresh' | 'entityType' | 'excludedEntities'>
+    ) => {
+      const results = await resetToZero({
+        ...deps,
+        esClient,
+        dataClient: riskScoreDataClient,
+        spaceId,
+        assetCriticalityService,
+        logger,
+      });
+      return results;
+    },
 
-  getRiskInputsIndex: async (params) => riskScoreDataClient.getRiskInputsIndex(params),
-  scheduleLatestTransformNow: () =>
-    scheduleLatestTransformNow({ namespace: spaceId, esClient, logger }),
-  refreshRiskScoreIndex: () => riskScoreDataClient.refreshRiskScoreIndex(),
-});
+    getRiskInputsIndex: async (params) => riskScoreDataClient.getRiskInputsIndex(params),
+    scheduleLatestTransformNow: () =>
+      scheduleLatestTransformNow({ namespace: spaceId, esClient, logger }),
+    refreshRiskScoreIndex: () => riskScoreDataClient.refreshRiskScoreIndex(),
+  };
+};

@@ -9,7 +9,8 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { BulkActionSkipResult } from '@kbn/alerting-plugin/common';
+import type { BulkActionSkipResult, GapFillStatus } from '@kbn/alerting-plugin/common';
+import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -43,7 +44,6 @@ import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
 import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import type { ConfigType } from '../../../../../../config';
 import { checkAlertSuppressionBulkEditSupport } from '../../../logic/bulk_actions/check_alert_suppression_bulk_edit_support';
 import { bulkScheduleRuleGapFilling } from './bulk_schedule_rule_gap_filling';
 
@@ -75,21 +75,23 @@ const validateBulkAction = (
     };
   }
 
-  // Validate that ids and gap range params are not used together
-  if (body?.ids && (body.gaps_range_start || body.gaps_range_end)) {
+  const ruleExecutionGapBodyParamsSet = new Set([
+    Array.isArray(body.gap_fill_statuses) && body.gap_fill_statuses.length > 0,
+    Boolean(body.gaps_range_start),
+    Boolean(body.gaps_range_end),
+  ]);
+
+  if (ruleExecutionGapBodyParamsSet.size > 1) {
     return {
-      body: `Cannot use both ids and gaps_range_start/gaps_range_end in request payload.`,
+      body: `gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.`,
       statusCode: 400,
     };
   }
 
-  // Validate that both gap range params are provided if any is used
-  if (
-    (body.gaps_range_start && !body.gaps_range_end) ||
-    (!body.gaps_range_start && body.gaps_range_end)
-  ) {
+  // Validate that ids and gap range params are not used together
+  if (body?.ids && ruleExecutionGapBodyParamsSet.has(true)) {
     return {
-      body: `Both gaps_range_start and gaps_range_end must be provided together.`,
+      body: `Cannot use both ids and gaps_range_start/gaps_range_end in request payload.`,
       statusCode: 400,
     };
   }
@@ -97,10 +99,39 @@ const validateBulkAction = (
   return undefined;
 };
 
+const prepareGapParams = ({
+  gapFillStatuses,
+  gapsRangeStart,
+  gapsRangeEnd,
+}: {
+  gapFillStatuses: GapFillStatus[] | undefined;
+  gapsRangeStart: string | undefined;
+  gapsRangeEnd: string | undefined;
+}): {
+  gapRange: { start: string; end: string } | undefined;
+  gapFillStatuses: GapFillStatus[] | undefined;
+} => {
+  const hasGapStatuses = Array.isArray(gapFillStatuses) && gapFillStatuses.length > 0;
+
+  if (gapsRangeStart && gapsRangeEnd && hasGapStatuses) {
+    return {
+      gapRange: {
+        start: gapsRangeStart,
+        end: gapsRangeEnd,
+      },
+      gapFillStatuses,
+    };
+  }
+
+  return {
+    gapRange: undefined,
+    gapFillStatuses: undefined,
+  };
+};
+
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml'],
-  config: ConfigType
+  ml: SetupPlugins['ml']
 ) => {
   router.versioned
     .post({
@@ -108,7 +139,7 @@ export const performBulkActionRoute = (
       path: DETECTION_ENGINE_RULES_BULK_ACTION,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [{ anyRequired: [RULES_API_READ, RULES_API_ALL] }],
         },
       },
       options: {
@@ -128,7 +159,6 @@ export const performBulkActionRoute = (
           },
         },
       },
-
       async (
         context,
         request,
@@ -187,16 +217,11 @@ export const performBulkActionRoute = (
           });
 
           const query = body.query !== '' ? body.query : undefined;
-          let gapRange;
-
-          // If gap range params are present, set up the gap range parameter
-          if (body.gaps_range_start && body.gaps_range_end) {
-            gapRange = {
-              start: body.gaps_range_start,
-              end: body.gaps_range_end,
-            };
-          }
-
+          const gapParams = prepareGapParams({
+            gapFillStatuses: body.gap_fill_statuses,
+            gapsRangeStart: body.gaps_range_start,
+            gapsRangeEnd: body.gaps_range_end,
+          });
           const fetchRulesOutcome = await fetchRulesByQueryOrIds({
             rulesClient,
             query,
@@ -205,7 +230,8 @@ export const performBulkActionRoute = (
               body.action === BulkActionTypeEnum.edit
                 ? MAX_RULES_TO_BULK_EDIT
                 : MAX_RULES_TO_PROCESS_TOTAL,
-            gapRange,
+            gapRange: gapParams.gapRange,
+            gapFillStatuses: gapParams.gapFillStatuses,
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);
@@ -349,7 +375,6 @@ export const performBulkActionRoute = (
               const suppressionSupportError = await checkAlertSuppressionBulkEditSupport({
                 editActions: body.edit,
                 licensing: ctx.licensing,
-                experimentalFeatures: config.experimentalFeatures,
               });
 
               if (suppressionSupportError) {

@@ -13,7 +13,7 @@ import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../../rules_client.mock';
 import { RecoveredActionGroup } from '../../../../../../common';
 import type { RegistryAlertTypeWithAuth } from '../../../../../authorization';
-import type { AsApiContract } from '../../../../lib';
+import type { TypesRulesResponseBody } from '../../../../../../common/routes/rule/apis/list_types/external';
 
 const rulesClient = rulesClientMock.create();
 
@@ -48,6 +48,7 @@ describe('ruleTypesRoute', () => {
         ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        internallyManaged: false,
         isExportable: true,
         ruleTaskTimeout: '10m',
         recoveryActionGroup: RecoveredActionGroup,
@@ -66,12 +67,7 @@ describe('ruleTypesRoute', () => {
         validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
-    const expectedResult: Array<
-      AsApiContract<Omit<RegistryAlertTypeWithAuth, 'validLegacyConsumers' | 'solution'>> & {
-        fieldsForAAD: [];
-        has_fields_for_a_a_d: boolean;
-      }
-    > = [
+    const expectedResponseBody: Readonly<TypesRulesResponseBody> = [
       {
         id: '1',
         name: 'name',
@@ -85,6 +81,7 @@ describe('ruleTypesRoute', () => {
         default_schedule_interval: '10m',
         does_set_recovery_context: false,
         minimum_license_required: 'basic',
+        is_internally_managed: false,
         is_exportable: true,
         rule_task_timeout: '10m',
         recovery_action_group: RecoveredActionGroup,
@@ -131,6 +128,7 @@ describe('ruleTypesRoute', () => {
             "has_fields_for_a_a_d": true,
             "id": "1",
             "is_exportable": true,
+            "is_internally_managed": false,
             "minimum_license_required": "basic",
             "name": "name",
             "producer": "test",
@@ -147,7 +145,7 @@ describe('ruleTypesRoute', () => {
     expect(rulesClient.listRuleTypes).toHaveBeenCalledTimes(1);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: expectedResult,
+      body: expectedResponseBody,
     });
   });
 

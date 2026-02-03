@@ -28,8 +28,8 @@ import {
   NewBucketButton,
 } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
+import type { RangeTypeLens } from '@kbn/lens-common';
 import { useDebounceWithOptions } from '../../../../../shared_components';
-import type { RangeTypeLens } from './ranges';
 import { isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import { LabelInput } from '../shared_components';
@@ -117,7 +117,9 @@ export const RangePopover = ({
               }}
               append={
                 <EuiToolTip content={lteTooltipContent}>
-                  <EuiText size="s">{lteAppendLabel}</EuiText>
+                  <EuiText tabIndex={0} size="s">
+                    {lteAppendLabel}
+                  </EuiText>
                 </EuiToolTip>
               }
               onKeyDown={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
@@ -155,7 +157,9 @@ export const RangePopover = ({
               }}
               prepend={
                 <EuiToolTip content={ltTooltipContent}>
-                  <EuiText size="s">{ltPrependLabel}</EuiText>
+                  <EuiText tabIndex={0} size="s">
+                    {ltPrependLabel}
+                  </EuiText>
                 </EuiToolTip>
               }
               compressed

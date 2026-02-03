@@ -11,24 +11,34 @@ import { packagePolicyService } from '../package_policy';
 
 import { incrementPackageName, incrementPackagePolicyCopyName } from './package_policy_name_helper';
 
+jest.mock('..', () => ({
+  appContextService: {
+    getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
+  },
+}));
+
 describe('Package policy name helper', () => {
   describe('increment package name', () => {
     it('should return 1 if no existing policies', async () => {
-      packagePolicyService.list = jest.fn().mockResolvedValue(undefined);
-      const newName = await incrementPackageName(savedObjectsClientMock.create(), 'apache');
+      packagePolicyService.list = jest.fn().mockResolvedValue({ items: [] });
+      const newName = await incrementPackageName(savedObjectsClientMock.create(), 'apache', [
+        'default',
+      ]);
       expect(newName).toEqual('apache-1');
     });
 
     it('should return 11 if max policy name is 10', async () => {
       packagePolicyService.list = jest.fn().mockResolvedValue({
         items: [
-          { name: 'apache-1' },
-          { name: 'aws-11' },
-          { name: 'apache-10' },
-          { name: 'apache-9' },
+          { name: 'apache-1', spaceIds: ['default'] },
+          { name: 'aws-11', spaceIds: ['default'] },
+          { name: 'apache-10', spaceIds: ['default'] },
+          { name: 'apache-9', spaceIds: ['default'] },
         ],
       });
-      const newName = await incrementPackageName(savedObjectsClientMock.create(), 'apache');
+      const newName = await incrementPackageName(savedObjectsClientMock.create(), 'apache', [
+        'default',
+      ]);
       expect(newName).toEqual('apache-11');
     });
   });

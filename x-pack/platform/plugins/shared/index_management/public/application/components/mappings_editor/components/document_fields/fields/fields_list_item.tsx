@@ -306,7 +306,7 @@ function FieldListItemComponent(
               {isShadowed && (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={i18nTexts.fieldIsShadowedLabel}>
-                    <EuiBadge color="warning" data-test-subj="isShadowedIndicator">
+                    <EuiBadge color="warning" data-test-subj="isShadowedIndicator" tabIndex={0}>
                       {i18n.translate('xpack.idxMgmt.mappingsEditor.shadowedBadgeLabel', {
                         defaultMessage: 'Shadowed',
                       })}

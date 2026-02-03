@@ -5,17 +5,24 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiPanel } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiIconTip,
+  EuiButtonEmpty,
+  EuiPanel,
+} from '@elastic/eui';
 import styled from '@emotion/styled';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { TryItButton } from '../../../../components/try_it_button';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import type { InfraFormatter } from '../../../../common/inventory/types';
 import { Timeline } from './timeline/timeline';
+import { KubernetesDashboardLink } from '../../../../components/kubernetes_dashboard_promotion/kubernetes_dashboard_promotion';
+import { useKubernetesDashboardPromotion } from '../../../../hooks/use_kubernetes_dashboard_promotion';
 
 const showHistory = i18n.translate('xpack.infra.showHistory', {
   defaultMessage: 'Show history',
@@ -29,40 +36,37 @@ interface Props {
   formatter: InfraFormatter;
   view: string;
   nodeType: InventoryItemType;
+  loading: boolean;
 }
 
-const LOCAL_STORAGE_KEY = 'inventoryUI:k8sDashboardClicked';
-const KubernetesButton = () => {
-  const [clicked, setClicked] = useLocalStorage<boolean>(LOCAL_STORAGE_KEY, false);
-  const clickedRef = useRef<boolean | undefined>(clicked);
+const RelatedDashboards = () => {
   return (
-    <TryItButton
-      color={clickedRef.current ? 'primary' : 'accent'}
-      label={i18n.translate('xpack.infra.bottomDrawer.kubernetesDashboardsLink', {
-        defaultMessage: 'Kubernetes dashboards',
-      })}
-      data-test-subj="inventory-kubernetesDashboard-link"
-      link={{
-        app: 'dashboards',
-        hash: '/list',
-        search: {
-          _g: '()',
-          s: 'kubernetes tag:(Managed)',
-        },
-      }}
-      onClick={() => {
-        if (!clickedRef.current) {
-          setClicked(true);
-        }
-      }}
-      hideBadge={clickedRef.current}
-    />
+    <EuiText size="s">
+      {i18n.translate('xpack.infra.bottomDrawer.relatedDashboardsTextLabel', {
+        defaultMessage: 'Related Dashboards',
+      })}{' '}
+      <EuiIconTip
+        content={i18n.translate('xpack.infra.bottomDrawer.relatedDashboardsTooltip', {
+          defaultMessage: 'We found these dashboards related to your query',
+        })}
+        type="question"
+        aria-label={i18n.translate('xpack.infra.bottomDrawer.relatedDashboardsTooltipAriaLabel', {
+          defaultMessage: 'Learn why these dashboards are related',
+        })}
+      />
+    </EuiText>
   );
 };
-export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => {
-  const { timelineOpen, changeTimelineOpen } = useWaffleOptionsContext();
 
+export const BottomDrawer = ({ interval, formatter, view, nodeType, loading }: Props) => {
+  const { timelineOpen, changeTimelineOpen } = useWaffleOptionsContext();
   const [isOpen, setIsOpen] = useState(Boolean(timelineOpen));
+
+  const { hasEcsSchema, hasSemconvSchema, hasEcsK8sIntegration, hasSemconvK8sIntegration } =
+    useKubernetesDashboardPromotion(nodeType);
+
+  const showEcsK8sButton = !loading && hasEcsSchema && hasEcsK8sIntegration;
+  const showSemconvK8sButton = !loading && hasSemconvSchema && hasSemconvK8sIntegration;
 
   useEffect(() => {
     if (isOpen !== timelineOpen) setIsOpen(Boolean(timelineOpen));
@@ -76,9 +80,21 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
   }, [isOpen, trackDrawerOpen, changeTimelineOpen]);
 
   if (view === 'table') {
-    return nodeType === 'pod' ? (
+    return nodeType === 'pod' && (showEcsK8sButton || showSemconvK8sButton) ? (
       <BottomPanel hasBorder={false} hasShadow={false} borderRadius="none" paddingSize="s">
-        <KubernetesButton />
+        <EuiFlexGroup responsive={false} justifyContent="flexStart" alignItems="center">
+          <RelatedDashboards />
+          {showEcsK8sButton && (
+            <EuiFlexItem grow={false}>
+              <KubernetesDashboardLink integrationType="ecs" />
+            </EuiFlexItem>
+          )}
+          {showSemconvK8sButton && (
+            <EuiFlexItem grow={false}>
+              <KubernetesDashboardLink integrationType="semconv" />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </BottomPanel>
     ) : null;
   }
@@ -97,10 +113,20 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
               {isOpen ? hideHistory : showHistory}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {nodeType === 'pod' && (
-            <EuiFlexItem grow={false}>
-              <KubernetesButton />
-            </EuiFlexItem>
+          {nodeType === 'pod' && (showEcsK8sButton || showSemconvK8sButton) && (
+            <>
+              <RelatedDashboards />
+              {showEcsK8sButton && (
+                <EuiFlexItem grow={false}>
+                  <KubernetesDashboardLink integrationType="ecs" />
+                </EuiFlexItem>
+              )}
+              {showSemconvK8sButton && (
+                <EuiFlexItem grow={false}>
+                  <KubernetesDashboardLink integrationType="semconv" />
+                </EuiFlexItem>
+              )}
+            </>
           )}
         </EuiFlexGroup>
       </StickyPanel>

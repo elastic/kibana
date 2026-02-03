@@ -122,6 +122,7 @@ export function MobileFilters() {
               fullWidth
               isLoading={status === FETCH_STATUS.LOADING}
               prepend={label}
+              aria-label={label}
               options={toSelectOptions(selectOptions)}
               value={filters?.[key]}
               onChange={(e) => {

@@ -139,7 +139,11 @@ const ConnectorsFormComponent: React.FC<Props> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="edit-connector-fields-form-flex-item">
-          <ConnectorFieldsForm connector={currentActionConnector} key={connectorId} />
+          <ConnectorFieldsForm
+            connector={currentActionConnector}
+            key={connectorId}
+            isInSidebarForm={true}
+          />
         </EuiFlexItem>
         <EuiSpacer size="s" />
         <EuiFlexItem>

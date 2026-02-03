@@ -23,6 +23,8 @@
         "label": "coreInternalLifecycleMock",
         "description": [],
         "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,6 +53,8 @@
               "; }"
             ],
             "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -115,6 +119,8 @@
               ">; }"
             ],
             "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -163,6 +169,8 @@
               ">; }"
             ],
             "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -179,6 +187,8 @@
         "label": "coreLifecycleMock",
         "description": [],
         "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -193,6 +203,8 @@
               "() => CorePrebootMockType"
             ],
             "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -209,6 +221,8 @@
               "({ pluginStartDeps, pluginStartContract, }?: { pluginStartDeps?: object | undefined; pluginStartContract?: any; }) => CoreSetupMockType"
             ],
             "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -224,6 +238,8 @@
                   "{ pluginStartDeps?: object | undefined; pluginStartContract?: any; }"
                 ],
                 "path": "src/core/packages/lifecycle/server-mocks/src/core_setup.mock.ts",
+                "lineNumber": 44,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -250,6 +266,8 @@
               ">"
             ],
             "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

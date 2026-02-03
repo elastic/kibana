@@ -52,7 +52,7 @@ function getPropertyLabel({ fieldName, label }: Partial<IStickyProperty>) {
     return (
       <PropertyLabel>
         <EuiToolTip content={<TooltipFieldName>{fieldName}</TooltipFieldName>}>
-          <span>{label}</span>
+          <span tabIndex={0}>{label}</span>
         </EuiToolTip>
       </PropertyLabel>
     );
@@ -65,7 +65,7 @@ function getPropertyValue({ val, truncated = false }: Partial<IStickyProperty>) 
   if (truncated) {
     return (
       <EuiToolTip content={String(val)}>
-        <PropertyValueTruncated>{String(val)}</PropertyValueTruncated>
+        <PropertyValueTruncated tabIndex={0}>{String(val)}</PropertyValueTruncated>
       </EuiToolTip>
     );
   }

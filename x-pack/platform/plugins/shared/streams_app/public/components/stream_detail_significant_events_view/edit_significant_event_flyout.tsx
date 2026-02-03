@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
-import { useTimefilter } from '../../hooks/use_timefilter';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useKibana } from '../../hooks/use_kibana';
+import type { AIFeatures } from '../../hooks/use_ai_features';
 import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
 import type { Flow, SaveData } from './add_significant_event_flyout/types';
 import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
@@ -26,6 +26,9 @@ export const EditSignificantEventFlyout = ({
   setQueryToEdit,
   systems,
   refresh,
+  refreshSystems,
+  generateOnMount,
+  aiFeatures,
 }: {
   refresh: () => void;
   setQueryToEdit: React.Dispatch<React.SetStateAction<StreamQueryKql | undefined>>;
@@ -37,25 +40,32 @@ export const EditSignificantEventFlyout = ({
   definition: Streams.all.GetResponse;
   isEditFlyoutOpen: boolean;
   setIsEditFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  refreshSystems: () => void;
+  generateOnMount: boolean;
+  aiFeatures: AIFeatures | null;
 }) => {
   const {
     core: { notifications },
     services: { telemetryClient },
   } = useKibana();
-  const {
-    timeState: { start, end },
-  } = useTimefilter();
 
-  const { upsertQuery, bulk } = useSignificantEventsApi({
+  const { upsertQuery, bulk, acknowledgeGenerationTask } = useSignificantEventsApi({
     name: definition.stream.name,
-    start,
-    end,
   });
+
+  const onCloseFlyout = () => {
+    setIsEditFlyoutOpen(false);
+    setQueryToEdit(undefined);
+    setSelectedSystems([]);
+  };
 
   return isEditFlyoutOpen ? (
     <AddSignificantEventFlyout
-      definition={definition.stream}
+      generateOnMount={generateOnMount}
+      refreshSystems={refreshSystems}
+      definition={definition}
       query={queryToEdit}
+      aiFeatures={aiFeatures}
       onSave={async (data: SaveData) => {
         const streamType = getStreamTypeFromDefinition(definition.stream);
 
@@ -69,12 +79,15 @@ export const EditSignificantEventFlyout = ({
                     { defaultMessage: `Saved significant event query successfully` }
                   ),
                 });
+
+                onCloseFlyout();
+                refresh();
+
                 telemetryClient.trackSignificantEventsCreated({
                   count: 1,
+                  stream_name: definition.stream.name,
                   stream_type: streamType,
                 });
-                setIsEditFlyoutOpen(false);
-                refresh();
               },
               (error) => {
                 notifications.showErrorDialog({
@@ -88,20 +101,32 @@ export const EditSignificantEventFlyout = ({
             );
             break;
           case 'multiple':
-            await bulk(data.queries.map((query) => ({ index: query }))).then(
-              () => {
+            await bulk(
+              data.queries.map((query) => ({
+                index: query,
+              }))
+            ).then(
+              async () => {
+                // Acknowledge the task after successful save
+                await acknowledgeGenerationTask().catch(() => {
+                  // Ignore errors - task acknowledgment is not critical
+                });
+
                 notifications.toasts.addSuccess({
                   title: i18n.translate(
                     'xpack.streams.significantEvents.savedMultiple.successfullyToastTitle',
                     { defaultMessage: `Saved significant events queries successfully` }
                   ),
                 });
+
+                onCloseFlyout();
+                refresh();
+
                 telemetryClient.trackSignificantEventsCreated({
                   count: data.queries.length,
+                  stream_name: definition.stream.name,
                   stream_type: streamType,
                 });
-                setIsEditFlyoutOpen(false);
-                refresh();
               },
               (error) => {
                 notifications.showErrorDialog({
@@ -116,11 +141,7 @@ export const EditSignificantEventFlyout = ({
             break;
         }
       }}
-      onClose={() => {
-        setIsEditFlyoutOpen(false);
-        setQueryToEdit(undefined);
-        setSelectedSystems([]);
-      }}
+      onClose={onCloseFlyout}
       initialFlow={initialFlow}
       initialSelectedSystems={selectedSystems}
       systems={systems}

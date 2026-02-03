@@ -13,6 +13,7 @@ import { ErrorReporter } from './error_reporter';
 import type { ParsedUsageCollection } from '../ts_parser';
 export interface TelemetryRoot {
   config: TelemetryRC;
+  configChanged?: boolean;
   parsedCollections?: ParsedUsageCollection[];
   mapping?: TelemetrySchemaObject;
   upstreamMapping?: TelemetrySchemaObject;
@@ -22,11 +23,13 @@ export interface TelemetryRoot {
 export interface TaskContext {
   reporter: ErrorReporter;
   roots: TelemetryRoot[];
+  baselineSha?: string;
 }
 
-export function createTaskContext(): TaskContext {
+export function createTaskContext(baselineSha?: string): TaskContext {
   const reporter = new ErrorReporter();
   return {
+    baselineSha,
     roots: [],
     reporter,
   };

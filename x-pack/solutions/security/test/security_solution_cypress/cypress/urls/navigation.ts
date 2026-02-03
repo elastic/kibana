@@ -37,7 +37,6 @@ export const NETWORK_URL = '/app/security/network/events';
 export const OVERVIEW_URL = '/app/security/overview';
 
 export const ENTITY_ANALYTICS_URL = '/app/security/entity_analytics';
-export const KUBERNETES_URL = '/app/security/kubernetes';
 
 export const THREAT_INTELLIGENCE_URL = '/app/security/threat_intelligence';
 export const INDICATORS_URL = '/app/security/threat_intelligence/indicators';
@@ -101,6 +100,7 @@ export const ADVANCED_SETTINGS_URL = '/app/management/kibana/settings';
 export const ENTITY_ANALYTICS_DASHBOARD_URL = '/app/security/entity_analytics';
 export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL =
   '/app/security/entity_analytics_privileged_user_monitoring';
+export const ENTITY_ANALYTICS_THREAT_HUNTING_URL = '/app/security/entity_analytics_threat_hunting';
 
 // Asset Inventory
 export const ASSET_INVENTORY_URL = '/app/security/asset_inventory';
@@ -113,5 +113,3 @@ export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
 // Alerting
 export const STACK_RULES_URL = 'app/management/insightsAndAlerting/triggersActions/rules';
 export const MAINTENANCE_WINDOW_URL = 'app/management/insightsAndAlerting/maintenanceWindows';
-
-export const SIEM_MIGRATIONS_TRANSLATED_RULES_URL = 'app/security/siem_migrations/rules';

@@ -14,7 +14,8 @@ import {
   type HealthDiagnosticQueryStats,
 } from './health_diagnostic_service.types';
 import { unflatten } from '../helpers';
-import type { AnyObject } from '../types';
+import type { AnyObject, Nullable } from '../types';
+import { generateDEK, encryptDEKWithRSA, encryptField } from './encryption';
 
 export function shouldExecute(startDate: Date, endDate: Date, interval: Interval): boolean {
   const nextDate = intervalFromDate(startDate, interval);
@@ -66,9 +67,31 @@ export function emptyStat(name: string, now: Date): HealthDiagnosticQueryStats {
 export async function applyFilterlist(
   data: unknown[],
   rules: Record<string, Action>,
-  salt: string
+  salt: string,
+  query?: Pick<HealthDiagnosticQuery, 'encryptionKeyId'>,
+  encryptionPublicKeys?: Record<string, string>
 ): Promise<unknown[]> {
   const filteredResult: unknown[] = [];
+
+  const hasEncryptAction = Object.values(rules).some((action) => action === Action.ENCRYPT);
+  let dek: Nullable<Buffer>;
+  let encryptedDEK: Nullable<Buffer>;
+  let keyId: string | undefined;
+
+  if (hasEncryptAction) {
+    if (!query?.encryptionKeyId) {
+      throw new Error('encryptionKeyId is required when filterlist contains encrypt actions');
+    }
+    if (!encryptionPublicKeys || !encryptionPublicKeys[query.encryptionKeyId]) {
+      throw new Error(`Public key not found for encryptionKeyId: ${query.encryptionKeyId}`);
+    }
+
+    // same DEK for all the data
+    keyId = query.encryptionKeyId;
+    const publicKey = encryptionPublicKeys[keyId];
+    dek = generateDEK();
+    encryptedDEK = encryptDEKWithRSA(dek, publicKey);
+  }
 
   const applyFilterToDoc = async (doc: unknown): Promise<Record<string, unknown>> => {
     const filteredDoc: Record<string, unknown> = {};
@@ -77,6 +100,51 @@ export async function applyFilterlist(
       await processPath(doc, filteredDoc, keys, path, 0);
     }
     return filteredDoc;
+  };
+
+  const processFieldValue = async (value: unknown, action: Action): Promise<unknown> => {
+    if (action === Action.MASK) {
+      return maskValue(String(value), salt);
+    } else if (action === Action.ENCRYPT) {
+      if (!dek || !encryptedDEK || !keyId) {
+        throw new Error('Encryption configuration not initialized');
+      }
+      return encryptField(String(value), dek, encryptedDEK, keyId);
+    } else if (action === Action.KEEP) {
+      return value;
+    } else {
+      throw new Error(`Unknown action: ${action}`);
+    }
+  };
+
+  const processArrayField = async (
+    nextValue: unknown[],
+    dst: Record<string, unknown>,
+    key: string,
+    keys: string[],
+    fullPath: string,
+    keyIndex: number
+  ): Promise<void> => {
+    if (!dst[key]) {
+      dst[key] = [];
+    }
+    const dstArray = dst[key] as unknown[];
+
+    for (let i = 0; i < nextValue.length; i++) {
+      const item = nextValue[i];
+      if (item && typeof item === 'object') {
+        if (!dstArray[i]) {
+          dstArray[i] = {};
+        }
+        await processPath(
+          item,
+          dstArray[i] as Record<string, unknown>,
+          keys,
+          fullPath,
+          keyIndex + 1
+        );
+      }
+    }
   };
 
   const processPath = async (
@@ -95,31 +163,13 @@ export async function applyFilterlist(
 
     if (keyIndex === keys.length - 1) {
       const value = srcObj[key];
-      dst[key] = rules[fullPath] === Action.MASK ? await maskValue(String(value), salt) : value;
+      const action = rules[fullPath];
+      dst[key] = await processFieldValue(value, action);
     } else {
       const nextValue = srcObj[key];
 
       if (Array.isArray(nextValue)) {
-        if (!dst[key]) {
-          dst[key] = [];
-        }
-        const dstArray = dst[key] as unknown[];
-
-        for (let i = 0; i < nextValue.length; i++) {
-          const item = nextValue[i];
-          if (item && typeof item === 'object') {
-            if (!dstArray[i]) {
-              dstArray[i] = {};
-            }
-            await processPath(
-              item,
-              dstArray[i] as Record<string, unknown>,
-              keys,
-              fullPath,
-              keyIndex + 1
-            );
-          }
-        }
+        await processArrayField(nextValue, dst, key, keys, fullPath, keyIndex);
       } else if (nextValue && typeof nextValue === 'object') {
         dst[key] ??= {};
         await processPath(

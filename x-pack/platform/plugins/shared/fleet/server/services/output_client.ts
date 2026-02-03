@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-
 import type { FleetAuthz } from '../../common';
 
 import { OutputUnauthorizedError } from '../errors';
@@ -22,19 +20,19 @@ export interface OutputClientInterface {
 }
 
 export class OutputClient implements OutputClientInterface {
-  constructor(private soClient: SavedObjectsClientContract, private authz: FleetAuthz) {}
+  constructor(private authz: FleetAuthz) {}
 
   async getDefaultDataOutputId() {
     if (!this.authz.fleet.readSettings && !this.authz.fleet.readAgentPolicies) {
       throw new OutputUnauthorizedError();
     }
-    return outputService.getDefaultDataOutputId(this.soClient);
+    return outputService.getDefaultDataOutputId();
   }
 
   async get(outputId: string) {
     if (!this.authz.fleet.readSettings && !this.authz.fleet.readAgentPolicies) {
       throw new OutputUnauthorizedError();
     }
-    return outputService.get(this.soClient, outputId);
+    return outputService.get(outputId);
   }
 }

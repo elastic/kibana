@@ -51,8 +51,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     }).expect(200);
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/231420
-  describe.skip('Knowledge management tab', () => {
+  describe('Knowledge management tab', () => {
     before(async () => {
       await clearKnowledgeBase(es);
       await deployTinyElserAndSetupKb(getService);
@@ -248,6 +247,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await testSubjects.click(ui.pages.kbManagementTab.newEntryButton);
         await testSubjects.exists(ui.pages.kbManagementTab.bulkImportEntryButton);
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportEntryButton);
+        await testSubjects.exists(ui.pages.kbManagementTab.bulkImportFlyout);
+        await testSubjects.exists(ui.pages.kbManagementTab.bulkImportSaveButton);
+        await testSubjects.exists(ui.pages.kbManagementTab.bulkImportFilePicker);
       }
 
       async function uploadBulkImportFile(content: string) {
@@ -256,14 +258,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         log.debug(`File saved to: ${tempFilePath}`);
 
         try {
-          await common.setFileInputPath(tempFilePath);
-          // Wait for the file to be processed and save button to be enabled
-          await retry.waitFor('save button to be enabled after file upload', async () => {
-            const saveButton = await testSubjects.find(
-              ui.pages.kbManagementTab.bulkImportSaveButton
-            );
-            return await saveButton.isEnabled();
-          });
+          const filePicker = await testSubjects.find(ui.pages.kbManagementTab.bulkImportFilePicker);
+          await filePicker.type(tempFilePath);
+          await testSubjects.waitForEnabled(ui.pages.kbManagementTab.bulkImportSaveButton);
         } catch (error) {
           log.debug(`Error uploading file: ${error}`);
           throw error;
@@ -305,9 +302,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await uploadBulkImportFile(entries.map((entry) => JSON.stringify(entry)).join('\n'));
 
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportSaveButton);
-
-        const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle);
-        const toastText = await toast.getVisibleText();
+        await testSubjects.waitForDeleted(ui.pages.kbManagementTab.bulkImportFlyout);
+        const toastText = await toasts.getTitleAndDismiss();
         expect(toastText).to.eql('Successfully imported ' + entries.length + ' items');
 
         const finalCount = await getKnowledgeBaseEntryCount();

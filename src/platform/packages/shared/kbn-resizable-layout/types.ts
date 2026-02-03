@@ -32,3 +32,14 @@ export enum ResizableLayoutDirection {
    */
   Vertical = 'vertical',
 }
+
+export enum ResizableLayoutOrder {
+  /**
+   * Start order (left or top)
+   */
+  Start = 'start',
+  /**
+   * End order (right or bottom)
+   */
+  End = 'end',
+}

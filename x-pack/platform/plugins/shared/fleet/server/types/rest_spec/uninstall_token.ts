@@ -33,7 +33,7 @@ const UninstallTokenMetadataSchema = schema.object({
   policy_id: schema.string(),
   policy_name: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   created_at: schema.string(),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
 });
 
 export const GetUninstallTokensMetadataResponseSchema = ListResponseSchema(

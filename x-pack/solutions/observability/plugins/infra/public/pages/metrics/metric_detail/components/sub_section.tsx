@@ -34,7 +34,6 @@ export const SubSection: FunctionComponent<React.PropsWithChildren<SubSectionPro
   const childrenWithProps = Children.map(children, (child) => {
     if (isValidElement(child)) {
       return cloneElement(child, {
-        // @ts-expect-error upgrade typescript v4.9.5
         metric,
         id,
         onChangeRangeTime,

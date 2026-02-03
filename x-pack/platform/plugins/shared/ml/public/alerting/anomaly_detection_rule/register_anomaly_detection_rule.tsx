@@ -11,6 +11,8 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { lazy } from 'react';
+import { fromKueryExpression } from '@kbn/es-query';
+import { validateCustomFilterFields } from '@kbn/ml-anomaly-utils';
 import type { MlCapabilities } from '../../../common/types/capabilities';
 import type { MlCoreSetup } from '../../plugin';
 import { ML_ALERT_TYPES } from '../../../common';
@@ -50,6 +52,7 @@ export function registerAnomalyDetectionRule(
           resultType: new Array<string>(),
           topNBuckets: new Array<string>(),
           lookbackInterval: new Array<string>(),
+          kqlQueryString: new Array<string>(),
         } as Record<keyof MlAnomalyDetectionAlertParams, string[]>,
       };
 
@@ -110,6 +113,33 @@ export function registerAnomalyDetectionRule(
         );
       }
 
+      if (ruleParams.kqlQueryString) {
+        // Validate KQL syntax
+        try {
+          fromKueryExpression(ruleParams.kqlQueryString);
+        } catch (e) {
+          validationResult.errors.kqlQueryString.push(
+            i18n.translate('xpack.ml.alertTypes.anomalyDetection.customFilter.syntaxError', {
+              defaultMessage: 'Custom filter must be valid KQL syntax.',
+            })
+          );
+        }
+
+        // Validate field allowlist if syntax is valid and result type is specified
+        if (
+          validationResult.errors.kqlQueryString.length === 0 &&
+          ruleParams.resultType !== undefined
+        ) {
+          const fieldValidationError = validateCustomFilterFields(
+            ruleParams.kqlQueryString,
+            ruleParams.resultType
+          );
+          if (fieldValidationError) {
+            validationResult.errors.kqlQueryString.push(fieldValidationError);
+          }
+        }
+      }
+
       return validationResult;
     },
     requiresAppContext: false,
@@ -126,14 +156,14 @@ export function registerAnomalyDetectionRule(
 '{{#context.topInfluencers.length}}'
   Top influencers:
   '{{#context.topInfluencers}}'
-    '{{influencer_field_name}}' = '{{influencer_field_value}}' ['{{score}}']
+    '{{influencer_field_name}}-' '{{influencer_field_value}}' ['{{score}}']
   '{{/context.topInfluencers}}'
 '{{/context.topInfluencers.length}}'
 
 '{{#context.topRecords.length}}'
   Top records:
   '{{#context.topRecords}}'
-    '{{function}}'('{{field_name}}') '{{by_field_value}}''{{over_field_value}}''{{partition_field_value}}' ['{{score}}']. Typical: '{{typical}}', Actual: '{{actual}}'
+    '{{function}}' '{{field_name}}-' '{{by_field_value}}{{over_field_value}}{{partition_field_value}}' ['{{score}}']. Typical: '{{typical}}', Actual: '{{actual}}'.
   '{{/context.topRecords}}'
 '{{/context.topRecords.length}}'
 

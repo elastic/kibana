@@ -11,11 +11,11 @@ import type {
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import type { Case } from '@kbn/cases-plugin/common';
-import { API_VERSIONS } from '../../common/constants';
-import type { SavedQuerySOFormData } from '../../public/saved_queries/form/use_saved_query_form';
-import type { LiveQueryDetailsItem } from '../../public/actions/use_live_query_details';
-import type { PackSavedObject, PackItem } from '../../public/packs/types';
-import type { SavedQuerySO } from '../../public/routes/saved_queries/list';
+import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
+import type { SavedQuerySOFormData } from '@kbn/osquery-plugin/public/saved_queries/form/use_saved_query_form';
+import type { LiveQueryDetailsItem } from '@kbn/osquery-plugin/public/actions/use_live_query_details';
+import type { PackSavedObject, PackItem } from '@kbn/osquery-plugin/public/packs/types';
+import type { SavedQuerySO } from '@kbn/osquery-plugin/public/routes/saved_queries/list';
 import { generateRandomStringName } from './integrations';
 import { request } from './common';
 import { ServerlessRoleName } from '../support/roles';

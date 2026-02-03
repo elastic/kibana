@@ -5,64 +5,39 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { screen, fireEvent, within, waitFor } from '@testing-library/react';
 
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { setupEnvironment } from './helpers';
 import { API_BASE_PATH } from './helpers/constants';
-import type { ComponentTemplateCreateTestBed } from './helpers/component_template_create.helpers';
-import { setup } from './helpers/component_template_create.helpers';
+import {
+  completeStep,
+  renderComponentTemplateCreate,
+} from './helpers/component_template_create.helpers';
 import { serializeAsESLifecycle } from '../../../../../../common/lib';
+import { runPendingTimersUntil } from '../../../../../../__jest__/helpers/fake_timers';
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    // Mocking CodeEditor, which uses React Monaco under the hood
-    CodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
-        }}
-      />
-    ),
-  };
-});
-
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-
-  return {
-    ...original,
-    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
-    // which does not produce a valid component wrapper
-    EuiComboBox: (props: any) => (
-      <input
-        data-test-subj="mockComboBox"
-        onChange={(syntheticEvent: any) => {
-          props.onChange([syntheticEvent['0']]);
-        }}
-      />
-    ),
-  };
-});
+jest.mock('@kbn/code-editor');
 
 describe('<ComponentTemplateCreate />', () => {
-  let testBed: ComponentTemplateCreateTestBed;
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
-  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
+  beforeAll(() => {
+    jest.spyOn(breadcrumbService, 'setBreadcrumbs');
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const env = setupEnvironment();
+    httpSetup = env.httpSetup;
+    httpRequestsMockHelpers = env.httpRequestsMockHelpers;
+  });
 
   describe('On component mount', () => {
     beforeEach(async () => {
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-
-      testBed.component.update();
+      renderComponentTemplateCreate(httpSetup);
+      await screen.findByTestId('pageTitle');
     });
 
     test('updates the breadcrumbs to component templates', () => {
@@ -72,141 +47,119 @@ describe('<ComponentTemplateCreate />', () => {
     });
 
     test('should set the correct page header', async () => {
-      const { exists, find } = testBed;
-
       // Verify page title
-      expect(exists('pageTitle')).toBe(true);
-      expect(find('pageTitle').text()).toEqual('Create component template');
+      expect(screen.getByTestId('pageTitle')).toBeInTheDocument();
+      expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create component template');
 
       // Verify documentation link
-      expect(exists('documentationLink')).toBe(true);
-      expect(find('documentationLink').text()).toBe('Component Templates docs');
+      expect(screen.getByTestId('documentationLink')).toBeInTheDocument();
+      expect(screen.getByTestId('documentationLink')).toHaveTextContent('Component Templates docs');
     });
 
     describe('Step: Logistics', () => {
       test('should toggle the metadata field', async () => {
-        const { exists, component, actions } = testBed;
-
         // Meta editor should be hidden by default
-        // Since the editor itself is mocked, we checked for the mocked element
-        expect(exists('metaEditor')).toBe(false);
+        expect(screen.queryByTestId('metaEditor')).not.toBeInTheDocument();
 
-        await act(async () => {
-          actions.toggleMetaSwitch();
-        });
+        // Find the switch by test ID and click it directly
+        const metaToggle = screen.getByTestId('metaToggle');
+        // The switch might be a button or input - try clicking the element directly
+        fireEvent.click(metaToggle);
 
-        component.update();
-
-        expect(exists('metaEditor')).toBe(true);
+        await screen.findByTestId('metaEditor');
+        expect(screen.getByTestId('metaEditor')).toBeInTheDocument();
       });
 
       test('should toggle the data retention field', async () => {
-        const { exists, component, form } = testBed;
+        expect(screen.queryByTestId('valueDataRetentionField')).not.toBeInTheDocument();
 
-        expect(exists('valueDataRetentionField')).toBe(false);
+        const lifecycleSwitchRow = screen.getByTestId('dataRetentionToggle');
+        const lifecycleSwitch = within(lifecycleSwitchRow).getByRole('switch');
+        fireEvent.click(lifecycleSwitch);
 
-        await act(async () => {
-          form.toggleEuiSwitch('dataRetentionToggle.input');
-        });
-        component.update();
-
-        expect(exists('valueDataRetentionField')).toBe(true);
+        await runPendingTimersUntil(() => screen.queryByTestId('valueDataRetentionField') !== null);
+        expect(screen.getByTestId('valueDataRetentionField')).toBeInTheDocument();
       });
 
       describe('Validation', () => {
         test('should require a name', async () => {
-          const { form, actions, component, find } = testBed;
+          // Submit logistics step without any values
+          fireEvent.click(screen.getByTestId('nextButton'));
 
-          await act(async () => {
-            // Submit logistics step without any values
-            actions.clickNextButton();
-          });
-
-          component.update();
-
-          // Verify name is required
-          expect(form.getErrorsMessages()).toEqual(['A component template name is required.']);
-          expect(find('nextButton').props().disabled).toEqual(true);
+          await screen.findByText('A component template name is required.');
+          expect(screen.getByTestId('nextButton')).toBeDisabled();
         });
       });
     });
+  });
 
-    describe('Step: Review and submit', () => {
-      const COMPONENT_TEMPLATE_NAME = 'comp-1';
-      const SETTINGS = { number_of_shards: 1 };
-      const ALIASES = { my_alias: {} };
-      const LIFECYCLE = {
-        enabled: true,
-        value: 2,
-        unit: 'd',
-      };
+  describe('Step: Review and submit', () => {
+    const COMPONENT_TEMPLATE_NAME = 'comp-1';
+    const SETTINGS = { number_of_shards: 1 };
+    const ALIASES = { my_alias: {} };
+    const LIFECYCLE = {
+      enabled: true,
+      value: 2,
+      unit: 'd',
+    };
 
-      const BOOLEAN_MAPPING_FIELD = {
-        name: 'boolean_datatype',
-        type: 'boolean',
-      };
+    const BOOLEAN_MAPPING_FIELD = {
+      name: 'boolean_datatype',
+      type: 'boolean',
+    };
 
-      beforeEach(async () => {
-        await act(async () => {
-          testBed = await setup(httpSetup);
-        });
+    beforeEach(async () => {
+      renderComponentTemplateCreate(httpSetup);
+      await screen.findByTestId('pageTitle');
 
-        const { actions, component } = testBed;
-
-        component.update();
-
-        // Complete step 1 (logistics)
-        await actions.completeStepLogistics({
-          name: COMPONENT_TEMPLATE_NAME,
-          lifecycle: LIFECYCLE,
-        });
-
-        // Complete step 2 (index settings)
-        await actions.completeStepSettings(SETTINGS);
-
-        // Complete step 3 (mappings)
-        await actions.completeStepMappings([BOOLEAN_MAPPING_FIELD]);
-
-        // Complete step 4 (aliases)
-        await actions.completeStepAliases(ALIASES);
+      // Complete step 1 (logistics)
+      await completeStep.logistics({
+        name: COMPONENT_TEMPLATE_NAME,
+        lifecycle: LIFECYCLE,
       });
 
-      test('should render the review content', () => {
-        const { find, exists, actions } = testBed;
-        // Verify page header
-        expect(exists('stepReview')).toBe(true);
-        expect(find('stepReview.title').text()).toEqual(
-          `Review details for '${COMPONENT_TEMPLATE_NAME}'`
-        );
+      // Complete step 2 (index settings)
+      await completeStep.settings(JSON.stringify(SETTINGS));
 
-        // Verify 2 tabs exist
-        expect(find('stepReview.content').find('button.euiTab').length).toBe(2);
-        expect(
-          find('stepReview.content')
-            .find('button.euiTab')
-            .map((t) => t.text())
-        ).toEqual(['Summary', 'Request']);
+      // Complete step 3 (mappings)
+      await completeStep.mappings([BOOLEAN_MAPPING_FIELD]);
 
-        // Summary tab should render by default
-        expect(exists('stepReview.summaryTab')).toBe(true);
-        expect(exists('stepReview.requestTab')).toBe(false);
+      // Complete step 4 (aliases)
+      await completeStep.aliases(JSON.stringify(ALIASES));
 
-        // Navigate to request tab and verify content
-        actions.selectReviewTab('request');
+      await screen.findByTestId('stepReview');
+    });
 
-        expect(exists('stepReview.summaryTab')).toBe(false);
-        expect(exists('stepReview.requestTab')).toBe(true);
+    test('should render the review content', async () => {
+      // Verify page header
+      expect(screen.getByTestId('stepReview')).toBeInTheDocument();
+      expect(screen.getByTestId('stepReview')).toHaveTextContent(
+        `Review details for '${COMPONENT_TEMPLATE_NAME}'`
+      );
+
+      // Verify 2 tabs exist
+      const reviewContent = screen.getByTestId('stepReview');
+      const tabs = within(reviewContent).getAllByRole('tab');
+      expect(tabs).toHaveLength(2);
+      expect(tabs.map((t) => t.textContent)).toEqual(['Summary', 'Request']);
+
+      // Summary tab should render by default
+      expect(screen.getByTestId('summaryTab')).toBeInTheDocument();
+      expect(screen.queryByTestId('requestTab')).not.toBeInTheDocument();
+
+      // Navigate to request tab and verify content
+      fireEvent.click(screen.getByRole('tab', { name: 'Request' }));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('summaryTab')).not.toBeInTheDocument();
       });
+      expect(screen.getByTestId('requestTab')).toBeInTheDocument();
+    });
 
-      test('should send the correct payload when submitting the form', async () => {
-        const { actions, component } = testBed;
+    test('should send the correct payload when submitting the form', async () => {
+      fireEvent.click(screen.getByTestId('nextButton'));
 
-        await act(async () => {
-          actions.clickNextButton();
-        });
-
-        component.update();
-
+      await waitFor(() => {
         expect(httpSetup.post).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}/component_templates`,
           expect.objectContaining({
@@ -229,27 +182,21 @@ describe('<ComponentTemplateCreate />', () => {
           })
         );
       });
+    });
 
-      test('should surface API errors if the request is unsuccessful', async () => {
-        const { component, actions, find, exists } = testBed;
+    test('should surface API errors if the request is unsuccessful', async () => {
+      const error = {
+        statusCode: 409,
+        error: 'Conflict',
+        message: `There is already a template with name '${COMPONENT_TEMPLATE_NAME}'`,
+      };
 
-        const error = {
-          statusCode: 409,
-          error: 'Conflict',
-          message: `There is already a template with name '${COMPONENT_TEMPLATE_NAME}'`,
-        };
+      httpRequestsMockHelpers.setCreateComponentTemplateResponse(undefined, error);
 
-        httpRequestsMockHelpers.setCreateComponentTemplateResponse(undefined, error);
+      fireEvent.click(screen.getByTestId('nextButton'));
 
-        await act(async () => {
-          actions.clickNextButton();
-        });
-
-        component.update();
-
-        expect(exists('saveComponentTemplateError')).toBe(true);
-        expect(find('saveComponentTemplateError').text()).toContain(error.message);
-      });
+      expect(await screen.findByTestId('saveComponentTemplateError')).toBeInTheDocument();
+      expect(screen.getByTestId('saveComponentTemplateError')).toHaveTextContent(error.message);
     });
   });
 });

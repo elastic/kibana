@@ -23,7 +23,7 @@ export interface DatetimeSchemaCellRendererProps {
 
 /**
  * Renders the value of a field of type date (when the schema is 'datetime').
- * Component used in the AI for SOC alert summary table.
+ * Component used in EASE alert summary table.
  */
 export const DatetimeSchemaCellRenderer = memo(
   ({ alert, field }: DatetimeSchemaCellRendererProps) => {

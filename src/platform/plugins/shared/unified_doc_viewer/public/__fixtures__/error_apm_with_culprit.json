@@ -1,0 +1,821 @@
+{
+  "_index": "metrics-us-east-1:.ds-logs-apm.error-default-2025.10.27-001648",
+  "_id": "uJQAMZoBB4di4biPPQe8",
+  "_version": 1,
+  "_source": {
+    "kubernetes": {
+      "node": {
+        "name": "ip-10-104-154-154.ec2.internal"
+      },
+      "pod": {
+        "uid": "685039cf-6c4f-4474-a966-b8e0b8a0adc9",
+        "name": "kb-background-tasks-kb-698cbdc55c-fvlmd"
+      },
+      "namespace": "project-ecd51766d8f04eeab413d8953e7bab7f"
+    },
+    "parent": {
+      "id": "0de2cfe9852db73f"
+    },
+    "agent": {
+      "activation_method": "require",
+      "name": "nodejs",
+      "version": "4.13.0"
+    },
+    "process": {
+      "args": [
+        "/usr/share/kibana/node/glibc-217/bin/node",
+        "/usr/share/kibana/src/cli/dist",
+        "--ops.cGroupOverrides.cpuPath=/",
+        "--ops.cGroupOverrides.cpuAcctPath=/",
+        "--node.roles=[\"background_tasks\"]",
+        "--profiler.signal=SIGUSR1"
+      ],
+      "parent": {
+        "pid": 1
+      },
+      "pid": 8,
+      "title": "/usr/share/kibana/bin/../node/glibc-217/bin/node"
+    },
+    "error": {
+      "exception": [
+        {
+          "stacktrace": [
+            {
+              "exclude_from_grouping": false,
+              "library_frame": true,
+              "abs_path": "/usr/share/kibana/node_modules/@elastic/transport/lib/Transport.js",
+              "filename": "node_modules/@elastic/transport/lib/Transport.js",
+              "line": {
+                "number": 533,
+                "context": "                    throw new errors_1.ResponseError(result, errorOptions);"
+              },
+              "function": "_request",
+              "context": {
+                "pre": [
+                  "                }",
+                  "                if (!ignoreStatusCode && statusCode >= 400) {"
+                ],
+                "post": [
+                  "                }",
+                  "                else {"
+                ]
+              }
+            },
+            {
+              "exclude_from_grouping": false,
+              "library_frame": true,
+              "abs_path": "node:internal/process/task_queues",
+              "filename": "node:internal/process/task_queues",
+              "line": {
+                "number": 105
+              },
+              "function": "processTicksAndRejections"
+            },
+            {
+              "exclude_from_grouping": false,
+              "library_frame": true,
+              "abs_path": "/usr/share/kibana/node_modules/@elastic/transport/lib/Transport.js",
+              "filename": "node_modules/@elastic/transport/lib/Transport.js",
+              "line": {
+                "number": 631,
+                "context": "                    response = await this._request(params, options, otelSpan);"
+              },
+              "function": "<anonymous>",
+              "context": {
+                "pre": [
+                  "                let response;",
+                  "                try {"
+                ],
+                "post": [
+                  "                }",
+                  "                catch (err) {"
+                ]
+              }
+            },
+            {
+              "exclude_from_grouping": false,
+              "library_frame": true,
+              "abs_path": "/usr/share/kibana/node_modules/@elastic/transport/lib/Transport.js",
+              "filename": "node_modules/@elastic/transport/lib/Transport.js",
+              "line": {
+                "number": 627,
+                "context": "            return await this[symbols_1.kOtelTracer].startActiveSpan(params.meta.name, { attributes, kind: api_1.SpanKind.CLIENT }, async (otelSpan) => {"
+              },
+              "function": "request",
+              "context": {
+                "pre": [
+                  "                }",
+                  "            }"
+                ],
+                "post": [
+                  "                var _5;",
+                  "                let response;"
+                ]
+              }
+            }
+          ],
+          "module": "@elastic/transport",
+          "handled": true,
+          "message": "index_not_found_exception\n\tRoot causes:\n\t\tindex_not_found_exception: no such index [winlogbeat-*]",
+          "type": "ResponseError (index_not_found_exception)"
+        }
+      ],
+      "culprit": "_request (node_modules/@elastic/transport/lib/Transport.js)",
+      "custom": {
+        "reason": "no such index [winlogbeat-*]",
+        "security_input_index": [
+          "endgame-*",
+          "logs-crowdstrike.fdr*",
+          "logs-endpoint.events.process-*",
+          "logs-m365_defender.event-*",
+          "logs-sentinel_one_cloud_funnel.*",
+          "logs-system.security*",
+          "logs-windows.forwarded*",
+          "logs-windows.sysmon_operational-*",
+          "winlogbeat-*"
+        ],
+        "security_params": {
+          "severity": "medium",
+          "timestampOverride": "event.ingested",
+          "note": "## Triage and analysis\n\n### Investigating Disable Windows Firewall Rules via Netsh\n\nThe Windows Defender Firewall is a native component which provides host-based, two-way network traffic filtering for a device, and blocks unauthorized network traffic flowing into or out of the local device.\n\nAttackers can disable the Windows firewall or its rules to enable lateral movement and command and control activity.\n\nThis rule identifies patterns related to disabling the Windows firewall or its rules using the `netsh.exe` utility.\n\n#### Possible investigation steps\n\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Contact the user to check if they are aware of the operation.\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Investigate other alerts associated with the user/host",
+          "author": [
+            "Elastic"
+          ],
+          "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  process.name : \"netsh.exe\" and\n  (\n    (process.args : \"disable\" and process.args : \"firewall\" and process.args : \"set\") or\n    (process.args : \"advfirewall\" and process.args : \"off\" and process.args : \"state\")\n  )\n",
+          "description": "Identifies use of the netsh.exe to disable or weaken the local firewall. Attackers will use this command line tool to disable the firewall during troubleshooting or to enable network mobility.",
+          "index": [
+            "endgame-*",
+            "logs-crowdstrike.fdr*",
+            "logs-endpoint.events.process-*",
+            "logs-m365_defender.event-*",
+            "logs-sentinel_one_cloud_funnel.*",
+            "logs-system.security*",
+            "logs-windows.forwarded*",
+            "logs-windows.sysmon_operational-*",
+            "winlogbeat-*"
+          ],
+          "language": "eql",
+          "type": "eql",
+          "version": 315,
+          "relatedIntegrations": [
+            {
+              "package": "endpoint",
+              "version": "^9.0.0"
+            },
+            {
+              "package": "windows",
+              "version": "^2.5.0"
+            },
+            {
+              "package": "system",
+              "version": "^1.64.0"
+            },
+            {
+              "package": "m365_defender",
+              "version": "^2.22.0"
+            },
+            {
+              "package": "sentinel_one_cloud_funnel",
+              "version": "^1.9.0"
+            },
+            {
+              "package": "crowdstrike",
+              "version": "^1.51.0"
+            }
+          ],
+          "license": "Elastic License v2",
+          "immutable": true,
+          "outputIndex": "",
+          "ruleSource": {
+            "isCustomized": false,
+            "type": "external"
+          },
+          "requiredFields": [
+            {
+              "ecs": true,
+              "name": "event.type",
+              "type": "keyword"
+            },
+            {
+              "ecs": true,
+              "name": "host.os.type",
+              "type": "keyword"
+            },
+            {
+              "ecs": true,
+              "name": "process.args",
+              "type": "keyword"
+            },
+            {
+              "ecs": true,
+              "name": "process.name",
+              "type": "keyword"
+            }
+          ],
+          "maxSignals": 100,
+          "setup": "",
+          "from": "now-9m",
+          "threat": [
+            {
+              "framework": "MITRE ATT&CK",
+              "technique": [
+                {
+                  "reference": "https://attack.mitre.org/techniques/T1562/",
+                  "name": "Impair Defenses",
+                  "subtechnique": [
+                    {
+                      "reference": "https://attack.mitre.org/techniques/T1562/004/",
+                      "name": "Disable or Modify System Firewall",
+                      "id": "T1562.004"
+                    }
+                  ],
+                  "id": "T1562"
+                }
+              ],
+              "tactic": {
+                "reference": "https://attack.mitre.org/tactics/TA0005/",
+                "name": "Defense Evasion",
+                "id": "TA0005"
+              }
+            }
+          ],
+          "riskScore": 47,
+          "to": "now",
+          "ruleId": "4b438734-3793-4fda-bd42-ceeada0be8f9"
+        },
+        "security_merge_strategy": "missingFields",
+        "type": "index_not_found_exception",
+        "status": 404
+      },
+      "id": "1c2102b818f2422c93caee6c16102462",
+      "grouping_key": "e6000a07c5a7ef94063bbe2514479ab6"
+    },
+    "message": "index_not_found_exception\n\tRoot causes:\n\t\tindex_not_found_exception: no such index [winlogbeat-*]",
+    "labels": {
+      "orchestrator_target": "production",
+      "alerting_rule_name": "Disable Windows Firewall Rules via Netsh",
+      "alerting_rule_consumer": "siem",
+      "cloud_region": "us-east-1",
+      "security_immutable": "true",
+      "orchestrator_channel": "default",
+      "plugins": "alerting",
+      "security_from": "now-9m",
+      "serverless": "security",
+      "cloud_provider": "aws",
+      "orchestrator_cluster_name": "prd-awsuse1-cp-app-8",
+      "orchestrator_deploymentslice": "production-ds-3",
+      "environment": "production",
+      "alerting_rule_id": "4ee3de1b-0820-45a4-a508-3db168236630",
+      "alerting_rule_tags": "Domain: Endpoint, OS: Windows, Use Case: Threat Detection, Tactic: Defense Evasion, Resources: Investigation Guide, Data Source: Elastic Endgame, Data Source: Elastic Defend, Data Source: Windows Security Event Logs, Data Source: Microsoft Defender for Endpoint, Data Source: Sysmon, Data Source: SentinelOne, Data Source: Crowdstrike",
+      "security_rule_status": "running",
+      "alerting_rule_params": "{\"author\":[\"Elastic\"],\"description\":\"Identifies use of the netsh.exe to disable or weaken the local firewall. Attackers will use this command line tool to disable the firewall during troubleshooting or to enable network mobility.\",\"note\":\"## Triage and analysis\\n\\n### Investigating Disable Windows Firewall Rules via Netsh\\n\\nThe Windows Defender Firewall is a native component which provides host-based, two-way network traffic filtering for a device, and blocks unauthorized network traffic flowing into or out of the local device.\\n\\nAttackers can disable the Windows firewall or its rules to enable lateral movement and command and control activity.\\n\\nThis rule identifies patterns related to disabling the Windows firewall or its rules using the `netsh.exe` utility.\\n\\n#### Possible investigation steps\\n\\n- Identify the user account that performed the action and whether it should perform this kind of action.\\n- Contact the user to check if they are aware of the operation.\\n- Investigate the process execution cha",
+      "security_rule_id": "4b438734-3793-4fda-bd42-ceeada0be8f9",
+      "alerting_rule_type_id": "siem.eqlRule",
+      "orchestrator_environment": "production",
+      "alerting_rule_space_id": "default",
+      "security_to": "now"
+    },
+    "observer": {
+      "hostname": "elastic-agent-apm-server-c956678cc-9gbwh",
+      "type": "apm-server",
+      "version": "8.19.4"
+    },
+    "trace": {
+      "id": "1e6edcce216f6e881139b0bf4229a5fb"
+    },
+    "@timestamp": "2025-10-29T17:24:49.564Z",
+    "data_stream": {
+      "namespace": "default",
+      "type": "logs",
+      "dataset": "apm.error"
+    },
+    "numeric_labels": {
+      "security_max_signals": 100
+    },
+    "service": {
+      "node": {
+        "name": "ip-10-104-154-154.ec2.internal"
+      },
+      "environment": "production",
+      "framework": {
+        "name": "hapi",
+        "version": "21.4.3"
+      },
+      "name": "kibana",
+      "runtime": {
+        "name": "node",
+        "version": "22.17.1"
+      },
+      "language": {
+        "name": "javascript"
+      },
+      "version": "9.3.0"
+    },
+    "host": {
+      "hostname": "ip-10-104-154-154.ec2.internal",
+      "os": {
+        "platform": "linux"
+      },
+      "ip": [
+        "100.65.233.78"
+      ],
+      "name": "ip-10-104-154-154.ec2.internal",
+      "architecture": "arm64"
+    },
+    "event": {
+      "dataset": "apm.error"
+    },
+    "transaction": {
+      "name": "siem.eqlRule execution",
+      "id": "3ca9438e01e97151",
+      "type": "task-run",
+      "sampled": true
+    },
+    "span": {
+      "id": "3ca9438e01e97151"
+    },
+    "timestamp": {
+      "us": 1761758689564000
+    }
+  },
+  "fields": {
+    "transaction.name.text": [
+      "siem.eqlRule execution"
+    ],
+    "labels.alerting_rule_consumer": [
+      "siem"
+    ],
+    "error.custom.security_params.author": [
+      "Elastic"
+    ],
+    "error.custom.security_params.requiredFields.ecs": [
+      true,
+      true,
+      true,
+      true
+    ],
+    "error.custom.security_params.description": [
+      "Identifies use of the netsh.exe to disable or weaken the local firewall. Attackers will use this command line tool to disable the firewall during troubleshooting or to enable network mobility."
+    ],
+    "error.custom.security_params.ruleSource.type": [
+      "external"
+    ],
+    "process.parent.pid": [
+      1
+    ],
+    "host.hostname": [
+      "ip-10-104-154-154.ec2.internal"
+    ],
+    "service.language.name": [
+      "javascript"
+    ],
+    "error.exception.stacktrace.context.post": [
+      "                }",
+      "                else {",
+      "                }",
+      "                catch (err) {",
+      "                var _5;",
+      "                let response;"
+    ],
+    "error.custom.security_params.threat.technique.subtechnique.id": [
+      "T1562.004"
+    ],
+    "transaction.id": [
+      "3ca9438e01e97151"
+    ],
+    "error.custom.security_params.threat.technique.subtechnique.name": [
+      "Disable or Modify System Firewall"
+    ],
+    "error.custom.security_params.requiredFields.name": [
+      "event.type",
+      "host.os.type",
+      "process.args",
+      "process.name"
+    ],
+    "agent.name.text": [
+      "nodejs"
+    ],
+    "agent.name": [
+      "nodejs"
+    ],
+    "labels.orchestrator_environment": [
+      "production"
+    ],
+    "error.custom.security_params.threat.technique.subtechnique.reference": [
+      "https://attack.mitre.org/techniques/T1562/004/"
+    ],
+    "labels.alerting_rule_space_id": [
+      "default"
+    ],
+    "error.custom.security_params.threat.framework": [
+      "MITRE ATT&CK"
+    ],
+    "service.language.name.text": [
+      "javascript"
+    ],
+    "service.runtime.version": [
+      "22.17.1"
+    ],
+    "span.id": [
+      "3ca9438e01e97151"
+    ],
+    "labels.alerting_rule_type_id": [
+      "siem.eqlRule"
+    ],
+    "labels.environment": [
+      "production"
+    ],
+    "host.architecture": [
+      "arm64"
+    ],
+    "labels.security_from": [
+      "now-9m"
+    ],
+    "kubernetes.node.name.text": [
+      "ip-10-104-154-154.ec2.internal"
+    ],
+    "labels.alerting_rule_tags": [
+      "Domain: Endpoint, OS: Windows, Use Case: Threat Detection, Tactic: Defense Evasion, Resources: Investigation Guide, Data Source: Elastic Endgame, Data Source: Elastic Defend, Data Source: Windows Security Event Logs, Data Source: Microsoft Defender for Endpoint, Data Source: Sysmon, Data Source: SentinelOne, Data Source: Crowdstrike"
+    ],
+    "observer.version": [
+      "8.19.4"
+    ],
+    "labels.alerting_rule_params": [
+      "{\"author\":[\"Elastic\"],\"description\":\"Identifies use of the netsh.exe to disable or weaken the local firewall. Attackers will use this command line tool to disable the firewall during troubleshooting or to enable network mobility.\",\"note\":\"## Triage and analysis\\n\\n### Investigating Disable Windows Firewall Rules via Netsh\\n\\nThe Windows Defender Firewall is a native component which provides host-based, two-way network traffic filtering for a device, and blocks unauthorized network traffic flowing into or out of the local device.\\n\\nAttackers can disable the Windows firewall or its rules to enable lateral movement and command and control activity.\\n\\nThis rule identifies patterns related to disabling the Windows firewall or its rules using the `netsh.exe` utility.\\n\\n#### Possible investigation steps\\n\\n- Identify the user account that performed the action and whether it should perform this kind of action.\\n- Contact the user to check if they are aware of the operation.\\n- Investigate the process execution cha"
+    ],
+    "service.name.text": [
+      "kibana"
+    ],
+    "error.custom.security_input_index": [
+      "endgame-*",
+      "logs-crowdstrike.fdr*",
+      "logs-endpoint.events.process-*",
+      "logs-m365_defender.event-*",
+      "logs-sentinel_one_cloud_funnel.*",
+      "logs-system.security*",
+      "logs-windows.forwarded*",
+      "logs-windows.sysmon_operational-*",
+      "winlogbeat-*"
+    ],
+    "transaction.name": [
+      "siem.eqlRule execution"
+    ],
+    "error.custom.security_params.from": [
+      "now-9m"
+    ],
+    "error.custom.security_params.threat.technique.name": [
+      "Impair Defenses"
+    ],
+    "error.culprit": [
+      "_request (node_modules/@elastic/transport/lib/Transport.js)"
+    ],
+    "labels.orchestrator_deploymentslice": [
+      "production-ds-3"
+    ],
+    "error.custom.security_params.ruleSource.isCustomized": [
+      false
+    ],
+    "error.exception.type": [
+      "ResponseError (index_not_found_exception)"
+    ],
+    "error.exception.stacktrace.line.number": [
+      533,
+      105,
+      631,
+      627
+    ],
+    "service.node.name": [
+      "ip-10-104-154-154.ec2.internal"
+    ],
+    "error.custom.reason": [
+      "no such index [winlogbeat-*]"
+    ],
+    "error.custom.security_params.threat.technique.id": [
+      "T1562"
+    ],
+    "transaction.sampled": [
+      true
+    ],
+    "service.node.name.text": [
+      "ip-10-104-154-154.ec2.internal"
+    ],
+    "error.exception.stacktrace.function": [
+      "_request",
+      "processTicksAndRejections",
+      "<anonymous>",
+      "request"
+    ],
+    "host.ip": [
+      "100.65.233.78"
+    ],
+    "error.custom.security_params.setup": [
+      ""
+    ],
+    "labels.security_rule_id": [
+      "4b438734-3793-4fda-bd42-ceeada0be8f9"
+    ],
+    "error.exception.stacktrace.abs_path": [
+      "/usr/share/kibana/node_modules/@elastic/transport/lib/Transport.js",
+      "node:internal/process/task_queues",
+      "/usr/share/kibana/node_modules/@elastic/transport/lib/Transport.js",
+      "/usr/share/kibana/node_modules/@elastic/transport/lib/Transport.js"
+    ],
+    "error.custom.security_params.query": [
+      "process where host.os.type == \"windows\" and event.type == \"start\" and\n  process.name : \"netsh.exe\" and\n  (\n    (process.args : \"disable\" and process.args : \"firewall\" and process.args : \"set\") or\n    (process.args : \"advfirewall\" and process.args : \"off\" and process.args : \"state\")\n  )\n"
+    ],
+    "error.exception.stacktrace.exclude_from_grouping": [
+      false,
+      false,
+      false,
+      false
+    ],
+    "service.environment": [
+      "production"
+    ],
+    "labels.serverless": [
+      "security"
+    ],
+    "error.custom.security_params.license": [
+      "Elastic License v2"
+    ],
+    "labels.security_rule_status": [
+      "running"
+    ],
+    "labels.security_to": [
+      "now"
+    ],
+    "error.custom.security_params.note": [
+      "## Triage and analysis\n\n### Investigating Disable Windows Firewall Rules via Netsh\n\nThe Windows Defender Firewall is a native component which provides host-based, two-way network traffic filtering for a device, and blocks unauthorized network traffic flowing into or out of the local device.\n\nAttackers can disable the Windows firewall or its rules to enable lateral movement and command and control activity.\n\nThis rule identifies patterns related to disabling the Windows firewall or its rules using the `netsh.exe` utility.\n\n#### Possible investigation steps\n\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Contact the user to check if they are aware of the operation.\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Investigate other alerts associated with the user/host"
+    ],
+    "labels.orchestrator_cluster_name": [
+      "prd-awsuse1-cp-app-8"
+    ],
+    "observer.hostname": [
+      "elastic-agent-apm-server-c956678cc-9gbwh"
+    ],
+    "service.framework.name.text": [
+      "hapi"
+    ],
+    "error.custom.security_params.language": [
+      "eql"
+    ],
+    "@timestamp": [
+      "2025-10-29T17:24:49.564Z"
+    ],
+    "service.version": [
+      "9.3.0"
+    ],
+    "host.os.platform": [
+      "linux"
+    ],
+    "data_stream.dataset": [
+      "apm.error"
+    ],
+    "error.custom.security_params.ruleId": [
+      "4b438734-3793-4fda-bd42-ceeada0be8f9"
+    ],
+    "error.grouping_name": [
+      "index_not_found_exception\n\tRoot causes:\n\t\tindex_not_found_exception: no such index [winlogbeat-*]"
+    ],
+    "error.custom.security_merge_strategy": [
+      "missingFields"
+    ],
+    "error.custom.security_params.threat.tactic.id": [
+      "TA0005"
+    ],
+    "error.exception.message": [
+      "index_not_found_exception\n\tRoot causes:\n\t\tindex_not_found_exception: no such index [winlogbeat-*]"
+    ],
+    "error.custom.security_params.severity": [
+      "medium"
+    ],
+    "host.name.text": [
+      "ip-10-104-154-154.ec2.internal"
+    ],
+    "error.exception.stacktrace.filename": [
+      "node_modules/@elastic/transport/lib/Transport.js",
+      "node:internal/process/task_queues",
+      "node_modules/@elastic/transport/lib/Transport.js",
+      "node_modules/@elastic/transport/lib/Transport.js"
+    ],
+    "process.pid": [
+      8
+    ],
+    "process.title.text": [
+      "/usr/share/kibana/bin/../node/glibc-217/bin/node"
+    ],
+    "error.custom.security_params.relatedIntegrations.package": [
+      "endpoint",
+      "windows",
+      "system",
+      "m365_defender",
+      "sentinel_one_cloud_funnel",
+      "crowdstrike"
+    ],
+    "error.custom.status": [
+      404
+    ],
+    "error.custom.security_params.riskScore": [
+      47
+    ],
+    "error.custom.security_params.to": [
+      "now"
+    ],
+    "kubernetes.namespace": [
+      "project-ecd51766d8f04eeab413d8953e7bab7f"
+    ],
+    "processor.event": [
+      "error"
+    ],
+    "error.custom.security_params.maxSignals": [
+      100
+    ],
+    "labels.cloud_provider": [
+      "aws"
+    ],
+    "host.name": [
+      "ip-10-104-154-154.ec2.internal"
+    ],
+    "labels.alerting_rule_name": [
+      "Disable Windows Firewall Rules via Netsh"
+    ],
+    "error.custom.security_params.threat.tactic.name": [
+      "Defense Evasion"
+    ],
+    "error.exception.stacktrace.context.pre": [
+      "                }",
+      "                if (!ignoreStatusCode && statusCode >= 400) {",
+      "                let response;",
+      "                try {",
+      "                }",
+      "            }"
+    ],
+    "error.custom.security_params.type": [
+      "eql"
+    ],
+    "agent.activation_method": [
+      "require"
+    ],
+    "service.runtime.name.text": [
+      "node"
+    ],
+    "error.exception.module": [
+      "@elastic/transport"
+    ],
+    "data_stream.type": [
+      "logs"
+    ],
+    "error.custom.security_params.threat.technique.reference": [
+      "https://attack.mitre.org/techniques/T1562/"
+    ],
+    "labels.orchestrator_channel": [
+      "default"
+    ],
+    "timestamp.us": [
+      1761758689564000
+    ],
+    "observer.type": [
+      "apm-server"
+    ],
+    "agent.version": [
+      "4.13.0"
+    ],
+    "parent.id": [
+      "0de2cfe9852db73f"
+    ],
+    "process.title": [
+      "/usr/share/kibana/bin/../node/glibc-217/bin/node"
+    ],
+    "labels.cloud_region": [
+      "us-east-1"
+    ],
+    "error.grouping_key": [
+      "e6000a07c5a7ef94063bbe2514479ab6"
+    ],
+    "kubernetes.node.name": [
+      "ip-10-104-154-154.ec2.internal"
+    ],
+    "kubernetes.pod.name.text": [
+      "kb-background-tasks-kb-698cbdc55c-fvlmd"
+    ],
+    "labels.security_immutable": [
+      "true"
+    ],
+    "service.framework.version": [
+      "21.4.3"
+    ],
+    "error.exception.stacktrace.library_frame": [
+      true,
+      true,
+      true,
+      true
+    ],
+    "error.custom.type": [
+      "index_not_found_exception"
+    ],
+    "kubernetes.pod.uid": [
+      "685039cf-6c4f-4474-a966-b8e0b8a0adc9"
+    ],
+    "error.custom.security_params.index": [
+      "endgame-*",
+      "logs-crowdstrike.fdr*",
+      "logs-endpoint.events.process-*",
+      "logs-m365_defender.event-*",
+      "logs-sentinel_one_cloud_funnel.*",
+      "logs-system.security*",
+      "logs-windows.forwarded*",
+      "logs-windows.sysmon_operational-*",
+      "winlogbeat-*"
+    ],
+    "trace.id": [
+      "1e6edcce216f6e881139b0bf4229a5fb"
+    ],
+    "error.custom.security_params.timestampOverride": [
+      "event.ingested"
+    ],
+    "labels.orchestrator_target": [
+      "production"
+    ],
+    "kubernetes.pod.name": [
+      "kb-background-tasks-kb-698cbdc55c-fvlmd"
+    ],
+    "error.exception.stacktrace.line.context": [
+      "                    throw new errors_1.ResponseError(result, errorOptions);",
+      "                    response = await this._request(params, options, otelSpan);",
+      "            return await this[symbols_1.kOtelTracer].startActiveSpan(params.meta.name, { attributes, kind: api_1.SpanKind.CLIENT }, async (otelSpan) => {"
+    ],
+    "service.name": [
+      "kibana"
+    ],
+    "service.framework.name": [
+      "hapi"
+    ],
+    "data_stream.namespace": [
+      "default"
+    ],
+    "service.runtime.name": [
+      "node"
+    ],
+    "error.custom.security_params.requiredFields.type": [
+      "keyword",
+      "keyword",
+      "keyword",
+      "keyword"
+    ],
+    "process.args": [
+      "/usr/share/kibana/node/glibc-217/bin/node",
+      "/usr/share/kibana/src/cli/dist",
+      "--ops.cGroupOverrides.cpuPath=/",
+      "--ops.cGroupOverrides.cpuAcctPath=/",
+      "--node.roles=[\"background_tasks\"]",
+      "--profiler.signal=SIGUSR1"
+    ],
+    "error.exception.handled": [
+      true
+    ],
+    "message": [
+      "index_not_found_exception\n\tRoot causes:\n\t\tindex_not_found_exception: no such index [winlogbeat-*]"
+    ],
+    "error.custom.security_params.immutable": [
+      true
+    ],
+    "serverless.project.id": [
+      "ecd51766d8f04eeab413d8953e7bab7f"
+    ],
+    "transaction.type": [
+      "task-run"
+    ],
+    "error.custom.security_params.version": [
+      315
+    ],
+    "labels.alerting_rule_id": [
+      "4ee3de1b-0820-45a4-a508-3db168236630"
+    ],
+    "error.custom.security_params.relatedIntegrations.version": [
+      "^9.0.0",
+      "^2.5.0",
+      "^1.64.0",
+      "^2.22.0",
+      "^1.9.0",
+      "^1.51.0"
+    ],
+    "error.custom.security_params.outputIndex": [
+      ""
+    ],
+    "error.id": [
+      "1c2102b818f2422c93caee6c16102462"
+    ],
+    "labels.plugins": [
+      "alerting"
+    ],
+    "error.custom.security_params.threat.tactic.reference": [
+      "https://attack.mitre.org/tactics/TA0005/"
+    ],
+    "numeric_labels.security_max_signals": [
+      100
+    ],
+    "event.dataset": [
+      "apm.error"
+    ]
+  }
+}

@@ -78,8 +78,8 @@ const DraggableLegendComponent: React.FC<{
     >
       <EuiText size="xs">
         <EuiFlexGroup direction="column" gutterSize="none">
-          {legendItems.map((item) => (
-            <EuiFlexItem key={item.dataProviderId} grow={false}>
+          {legendItems.map((item, idx) => (
+            <EuiFlexItem key={idx} grow={false} data-test-subj={`legend-item-${idx}`}>
               <DraggableLegendItem legendItem={item} isInlineActions={isInlineActions} />
               <EuiSpacer data-test-subj="draggable-legend-spacer" size="s" />
             </EuiFlexItem>

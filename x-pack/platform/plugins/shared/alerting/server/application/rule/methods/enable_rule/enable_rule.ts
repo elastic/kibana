@@ -108,6 +108,22 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     throw error;
   }
 
+  const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
+  const { autoRecoverAlerts: isLifecycleAlert } = ruleType;
+  const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
+
+  if (isLifecycleAlert && context.alertsService) {
+    try {
+      await context.alertsService.clearAlertFlappingHistory({
+        indices,
+        ruleIds: [id],
+      });
+    } catch (error) {
+      // Don't throw if we can't clear the flapping history for whatever reason
+      context.logger.error(`Failure to clear flapping history from rule ${id} - ${error.message}`);
+    }
+  }
+
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.ENABLE,

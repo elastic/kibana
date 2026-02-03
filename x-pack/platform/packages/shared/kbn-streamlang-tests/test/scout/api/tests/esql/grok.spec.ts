@@ -556,4 +556,42 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       );
     }
   );
+
+  apiTest(
+    'should parse Android log line with regex pattern containing escaped dot',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ testBed, esql }) => {
+      const indexName = 'stream-e2e-test-grok-android-log';
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'grok',
+            from: 'message',
+            patterns: [
+              '(?<timestamp>\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3})\\s+(?<pid>\\d+)\\s+(?<tid>\\d+)\\s+(?<level>\\w+)\\s+(?<tag>\\w+):\\s+(?<log_message>.*)',
+            ],
+          } as GrokProcessor,
+        ],
+      };
+      const { query } = transpile(streamlangDSL);
+      const docs = [
+        {
+          message:
+            '11-06 13:43:41.377  1702 17633 W ActivityManager: getRunningAppProcesses: caller 10113 does not hold REAL_GET_TASKS; limiting output',
+        },
+      ];
+      await testBed.ingest(indexName, docs);
+      const esqlResult = await esql.queryOnIndex(indexName, query);
+      expect(esqlResult.documents).toHaveLength(1);
+      expect(esqlResult.documents[0]).toHaveProperty('timestamp', '11-06 13:43:41.377');
+      expect(esqlResult.documents[0]).toHaveProperty('pid', '1702');
+      expect(esqlResult.documents[0]).toHaveProperty('tid', '17633');
+      expect(esqlResult.documents[0]).toHaveProperty('level', 'W');
+      expect(esqlResult.documents[0]).toHaveProperty('tag', 'ActivityManager');
+      expect(esqlResult.documents[0]).toHaveProperty(
+        'log_message',
+        'getRunningAppProcesses: caller 10113 does not hold REAL_GET_TASKS; limiting output'
+      );
+    }
+  );
 });

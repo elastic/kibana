@@ -10,7 +10,7 @@ import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { Query } from '@kbn/data-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { act } from 'react-dom/test-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
@@ -18,6 +18,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import Expressions from './custom_threshold_rule_expression';
 import type { AlertParams, CustomThresholdPrefillOptions } from './types';
+import type { KqlPluginStart } from '@kbn/kql/public';
 
 jest.mock('../../utils/kibana_react');
 jest.mock('../rule_condition_chart/rule_condition_chart', () => ({
@@ -75,6 +76,7 @@ describe('Expression', () => {
           metadata={metadata}
           dataViews={dataViewMock}
           onChangeMetaData={jest.fn()}
+          kql={{} as KqlPluginStart}
         />
       </QueryClientProvider>
     );
@@ -155,7 +157,7 @@ describe('Expression', () => {
         ],
         comparator: COMPARATORS.GREATER_THAN,
         threshold: [100],
-        timeSize: 1,
+        timeSize: 5,
         timeUnit: 'm',
       },
     ]);

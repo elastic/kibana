@@ -157,6 +157,7 @@ export const MetricItemIcon = ({
               </>
             )}
             <EuiCallOut
+              announceOnMount
               title={
                 latestPing?.error?.message ? (
                   latestPing?.error?.message

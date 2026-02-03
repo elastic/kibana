@@ -28,8 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await home.addSampleDataSet('flights');
       await common.navigateToApp('dashboard');
-      await dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode('[Flights] Global Flight Dashboard');
     });
 
     after(async () => {
@@ -75,14 +74,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
       await testSubjects.click('control-editor-save');
       await a11y.testAppSnapshot();
-    });
-
-    it('Controls setting panel', async () => {
-      await dashboardControls.openControlsMenu();
-      await testSubjects.click('controls-settings-button');
-      await testSubjects.click('control-group-validate-selections');
-      await a11y.testAppSnapshot();
-      await testSubjects.click('control-group-editor-save');
     });
 
     it('Dashboard with options and range control panel popovers', async () => {

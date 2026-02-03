@@ -95,6 +95,10 @@ const strings = {
     i18n.translate('xpack.canvas.varConfig.titleTooltip', {
       defaultMessage: 'Add variables to store and edit common values',
     }),
+  getTableCaption: () =>
+    i18n.translate('xpack.canvas.varConfig.tableCaption', {
+      defaultMessage: 'Canvas variables list',
+    }),
 };
 
 export const VarConfig: FC<Props> = ({
@@ -189,7 +193,7 @@ export const VarConfig: FC<Props> = ({
               position="left"
               className="canvasArg__tooltip"
             >
-              <span>{strings.getTitle()}</span>
+              <span tabIndex={0}>{strings.getTitle()}</span>
             </EuiToolTip>
           }
           extraAction={
@@ -219,6 +223,7 @@ export const VarConfig: FC<Props> = ({
                 pagination={false}
                 sorting={true}
                 compressed
+                tableCaption={strings.getTableCaption()}
               />
             </div>
           )}

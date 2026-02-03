@@ -270,6 +270,7 @@ export const KibanaInstances: React.FC<Props> = (props: Props) => {
             customRenderResponse.componentToRender = (
               <Fragment>
                 <EuiCallOut
+                  announceOnMount={false}
                   title={i18n.translate(
                     'xpack.monitoring.kibana.instances.metricbeatMigration.detectedNodeTitle',
                     {
@@ -375,7 +376,7 @@ function prepareLastSeenTimestamp(lastSeenTimestampRaw: string, dateFormat: stri
   if (shouldShowRelativeTime) {
     return (
       <EuiToolTip position="top" content={formattedTimestamp}>
-        <span>{relativeTime}</span>
+        <span tabIndex={0}>{relativeTime}</span>
       </EuiToolTip>
     );
   }

@@ -14,13 +14,6 @@ export const COPY_TO_CLIPBOARD = i18n.translate(
   }
 );
 
-export const DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY = i18n.translate(
-  'xpack.securitySolution.dragAndDrop.draggableKeyboardInstructionsNotDraggingScreenReaderOnly',
-  {
-    defaultMessage: 'Press enter for options, or press space to begin dragging.',
-  }
-);
-
 export const FIELD = i18n.translate('xpack.securitySolution.dragAndDrop.fieldLabel', {
   defaultMessage: 'Field',
 });

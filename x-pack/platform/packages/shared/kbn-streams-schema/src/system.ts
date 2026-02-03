@@ -7,16 +7,21 @@
 
 import { conditionSchema, type Condition } from '@kbn/streamlang';
 import { z } from '@kbn/zod';
-import { streamObjectNameSchema } from './shared/stream_object_name';
 
 export interface System {
+  type: 'system';
   name: string;
   description: string;
   filter: Condition;
 }
 
 export const systemSchema: z.Schema<System> = z.object({
-  name: streamObjectNameSchema,
+  type: z.literal('system'),
+  name: z.string(),
   description: z.string(),
   filter: conditionSchema,
 });
+
+export function isSystem(system: any): system is System {
+  return systemSchema.safeParse(system).success;
+}

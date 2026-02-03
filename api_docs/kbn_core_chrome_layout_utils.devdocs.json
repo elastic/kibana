@@ -1,0 +1,798 @@
+{
+  "id": "@kbn/core-chrome-layout-utils",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.getHighContrastBorder",
+        "type": "Function",
+        "tags": [],
+        "label": "getHighContrastBorder",
+        "description": [
+          "\nHelper function to get container border styles for high contrast mode.\nIn high contrast mode, renders a solid border. Otherwise, renders based on color mode.\n"
+        ],
+        "signature": [
+          "(euiThemeContext: ",
+          "UseEuiTheme",
+          "<{}>) => string"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.getHighContrastBorder.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "euiThemeContext",
+            "description": [
+              "- EUI theme context"
+            ],
+            "signature": [
+              "UseEuiTheme",
+              "<{}>"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "lineNumber": 20,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "CSS border string"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.getHighContrastSeparator",
+        "type": "Function",
+        "tags": [],
+        "label": "getHighContrastSeparator",
+        "description": [
+          "\nHelper function to get separator border styles for high contrast mode.\nIn high contrast mode, renders a real border. Otherwise, renders a pseudo-element with subdued styling.\n"
+        ],
+        "signature": [
+          "(euiThemeContext: ",
+          "UseEuiTheme",
+          "<{}>, options?: ",
+          "HighContrastSeparatorOptions",
+          ") => string"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+        "lineNumber": 53,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.getHighContrastSeparator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "euiThemeContext",
+            "description": [],
+            "signature": [
+              "UseEuiTheme",
+              "<{}>"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.getHighContrastSeparator.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Configuration options for the separator"
+            ],
+            "signature": [
+              "HighContrastSeparatorOptions"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "CSS string for the separator"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.getScrollContainer",
+        "type": "Function",
+        "tags": [],
+        "label": "getScrollContainer",
+        "description": [
+          "\nGets the main scroll container element for the application."
+        ],
+        "signature": [
+          "() => HTMLElement"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [
+          "The scroll container element (either the app scroll container or document.documentElement for window scroll)"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.getScrollDimensions",
+        "type": "Function",
+        "tags": [],
+        "label": "getScrollDimensions",
+        "description": [
+          "\nGets all scroll dimensions of a container at once for efficiency."
+        ],
+        "signature": [
+          "(container?: HTMLElement) => { scrollTop: number; scrollHeight: number; clientHeight: number; }"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 112,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.getScrollDimensions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "container",
+            "description": [
+              "- The container to measure. Defaults to the main application scroll container"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An object with scrollTop, scrollHeight, and clientHeight"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.getScrollPosition",
+        "type": "Function",
+        "tags": [],
+        "label": "getScrollPosition",
+        "description": [
+          "\nGets the current scroll position of a container."
+        ],
+        "signature": [
+          "(container?: HTMLElement) => number"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.getScrollPosition.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "container",
+            "description": [
+              "- The container to measure. Defaults to the main application scroll container"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 56,
+            "columnNumber": 35,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The current vertical scroll position in pixels"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.getViewportBoundaries",
+        "type": "Function",
+        "tags": [],
+        "label": "getViewportBoundaries",
+        "description": [
+          "\nGets the vertical boundaries of a scroll container's viewport.\nUseful for checking if elements are visible within the viewport."
+        ],
+        "signature": [
+          "(container?: HTMLElement) => { top: number; bottom: number; }"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.getViewportBoundaries.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "container",
+            "description": [
+              "- The container to measure. Defaults to the main application scroll container"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An object with top and bottom pixel values relative to the document"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.getViewportHeight",
+        "type": "Function",
+        "tags": [],
+        "label": "getViewportHeight",
+        "description": [
+          "\nGets the visible height of a scroll container's viewport."
+        ],
+        "signature": [
+          "(container?: HTMLElement) => number"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.getViewportHeight.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "container",
+            "description": [
+              "- The container to measure. Defaults to the main application scroll container"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 31,
+            "columnNumber": 35,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The viewport height in pixels"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.isAtBottomOfPage",
+        "type": "Function",
+        "tags": [],
+        "label": "isAtBottomOfPage",
+        "description": [
+          "\nDetects if a scroll container has reached the bottom of its scrollable area."
+        ],
+        "signature": [
+          "(container?: HTMLElement) => boolean"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 147,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.isAtBottomOfPage.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "container",
+            "description": [
+              "- The container to check. Defaults to the main application scroll container"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 147,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "true if the container is scrolled to the bottom, false otherwise"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.scrollBy",
+        "type": "Function",
+        "tags": [],
+        "label": "scrollBy",
+        "description": [
+          "\nScrolls a container by a relative amount."
+        ],
+        "signature": [
+          "(opts: { top: number; behavior?: ScrollBehavior | undefined; }, container?: HTMLElement) => void"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 129,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.scrollBy.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 130,
+            "columnNumber": 9,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-layout-utils",
+                "id": "def-public.scrollBy.$1.top",
+                "type": "number",
+                "tags": [],
+                "label": "top",
+                "description": [],
+                "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "lineNumber": 131,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-chrome-layout-utils",
+                "id": "def-public.scrollBy.$1.behavior",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "behavior",
+                "description": [],
+                "signature": [
+                  "ScrollBehavior | undefined"
+                ],
+                "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "lineNumber": 132,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.scrollBy.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "container",
+            "description": [
+              "- The container to scroll. Defaults to the main application scroll container"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.scrollTo",
+        "type": "Function",
+        "tags": [],
+        "label": "scrollTo",
+        "description": [
+          "\nScrolls a container to a specific vertical position."
+        ],
+        "signature": [
+          "(opts: { top: number; behavior?: ScrollBehavior | undefined; }, container?: HTMLElement) => void"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.scrollTo.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 68,
+            "columnNumber": 9,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-layout-utils",
+                "id": "def-public.scrollTo.$1.top",
+                "type": "number",
+                "tags": [],
+                "label": "top",
+                "description": [],
+                "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "lineNumber": 69,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-chrome-layout-utils",
+                "id": "def-public.scrollTo.$1.behavior",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "behavior",
+                "description": [],
+                "signature": [
+                  "ScrollBehavior | undefined"
+                ],
+                "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "lineNumber": 70,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.scrollTo.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "container",
+            "description": [
+              "- The container to scroll. Defaults to the main application scroll container"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.scrollToBottom",
+        "type": "Function",
+        "tags": [],
+        "label": "scrollToBottom",
+        "description": [
+          "\nScrolls a container to the bottom."
+        ],
+        "signature": [
+          "(opts?: { behavior?: ScrollBehavior | undefined; }, container?: HTMLElement) => void"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 98,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.scrollToBottom.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 99,
+            "columnNumber": 9,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-layout-utils",
+                "id": "def-public.scrollToBottom.$1.behavior",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "behavior",
+                "description": [],
+                "signature": [
+                  "ScrollBehavior | undefined"
+                ],
+                "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "lineNumber": 100,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.scrollToBottom.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "container",
+            "description": [
+              "- The container to scroll. Defaults to the main application scroll container"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.scrollToTop",
+        "type": "Function",
+        "tags": [],
+        "label": "scrollToTop",
+        "description": [
+          "\nScrolls a container to the top."
+        ],
+        "signature": [
+          "(opts?: { behavior?: ScrollBehavior | undefined; }, container?: HTMLElement) => void"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 83,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.scrollToTop.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 84,
+            "columnNumber": 9,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-layout-utils",
+                "id": "def-public.scrollToTop.$1.behavior",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "behavior",
+                "description": [],
+                "signature": [
+                  "ScrollBehavior | undefined"
+                ],
+                "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "lineNumber": 85,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.scrollToTop.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "container",
+            "description": [
+              "- The container to scroll. Defaults to the main application scroll container"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.HighContrastSeparatorOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "HighContrastSeparatorOptions",
+        "description": [],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.HighContrastSeparatorOptions.side",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "side",
+            "description": [
+              "The side to place the border separator ('top' or 'bottom'). Default: 'bottom'"
+            ],
+            "signature": [
+              "\"top\" | \"bottom\" | undefined"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.HighContrastSeparatorOptions.width",
+            "type": "string",
+            "tags": [],
+            "label": "width",
+            "description": [
+              "Width of the separator line. Default: theme.size.xl"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.HighContrastSeparatorOptions.left",
+            "type": "string",
+            "tags": [],
+            "label": "left",
+            "description": [
+              "Left position for the separator. Default: '0'"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.HighContrastSeparatorOptions.right",
+            "type": "string",
+            "tags": [],
+            "label": "right",
+            "description": [
+              "Right position for the separator. Default: '0'"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.ScrollContainer",
+        "type": "Type",
+        "tags": [],
+        "label": "ScrollContainer",
+        "description": [],
+        "signature": [
+          "HTMLElement"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

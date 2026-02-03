@@ -30,9 +30,9 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import * as i18nAuth from '../../common/auth/translations';
 import DashboardLink from './dashboard_link';
-import { OpenAiProviderType } from '../../../common/openai/constants';
 import * as i18n from './translations';
 import {
   azureAiConfig,
@@ -278,7 +278,15 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                         // a row and add a new one, the stale values will appear
                         readDefaultValueOnForm={!item.isNew}
                         componentProps={{
-                          euiFieldProps: { readOnly, ['data-test-subj']: 'openAIHeadersKeyInput' },
+                          euiFieldProps: {
+                            readOnly,
+                            ['data-test-subj']: 'openAIHeadersKeyInput',
+                            inputRef: (input: HTMLInputElement | null) => {
+                              if (!readOnly && item.isNew && input) {
+                                input.focus();
+                              }
+                            },
+                          },
                         }}
                       />
                     </EuiFlexItem>

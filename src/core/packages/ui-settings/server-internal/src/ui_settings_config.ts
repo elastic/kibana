@@ -19,9 +19,6 @@ const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => 
 ];
 
 export const defaultThemeSchema = schema.oneOf([
-  // TODO: Remove amsterdam theme
-  // https://github.com/elastic/eui-private/issues/170
-  schema.literal('amsterdam'),
   schema.literal('borealis'),
   // Allow experimental themes
   schema.string(),
@@ -29,6 +26,7 @@ export const defaultThemeSchema = schema.oneOf([
 
 const configSchema = schema.object({
   overrides: schema.object({}, { unknowns: 'allow' }),
+  globalOverrides: schema.object({}, { unknowns: 'allow' }),
   publicApiEnabled: offeringBasedSchema({ serverless: schema.boolean({ defaultValue: false }) }),
   experimental: schema.maybe(
     schema.object({

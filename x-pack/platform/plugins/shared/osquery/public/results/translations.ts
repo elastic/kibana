@@ -21,3 +21,7 @@ export const ERROR_ALL_RESULTS = i18n.translate('xpack.osquery.results.errorSear
 export const FAIL_ALL_RESULTS = i18n.translate('xpack.osquery.results.failSearchDescription', {
   defaultMessage: `Failed to fetch results`,
 });
+
+export const PAGINATION_LIMIT_TITLE = i18n.translate('xpack.osquery.results.paginationLimitTitle', {
+  defaultMessage: 'Results limit reached',
+});

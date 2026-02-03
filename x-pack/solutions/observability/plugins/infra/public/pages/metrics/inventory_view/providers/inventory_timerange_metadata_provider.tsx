@@ -22,7 +22,7 @@ export const InventoryTimeRangeMetadataProvider = ({ children }: { children: Rea
     };
   }, [currentTimeRange.from, currentTimeRange.to]);
 
-  if (nodeType !== 'host') {
+  if (nodeType !== 'host' && nodeType !== 'pod') {
     return <>{children}</>;
   }
 
@@ -32,6 +32,7 @@ export const InventoryTimeRangeMetadataProvider = ({ children }: { children: Rea
       kuery={filterQuery.query}
       start={start}
       end={end}
+      isInventoryView
     >
       {children}
     </TimeRangeMetadataProvider>

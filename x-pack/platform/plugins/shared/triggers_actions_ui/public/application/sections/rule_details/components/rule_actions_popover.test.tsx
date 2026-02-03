@@ -9,6 +9,7 @@ import * as React from 'react';
 import { RuleActionsPopover } from './rule_actions_popover';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { Rule } from '../../../..';
+import userEvent from '@testing-library/user-event';
 
 describe('rule_actions_popover', () => {
   const onDeleteMock = jest.fn();
@@ -55,6 +56,7 @@ describe('rule_actions_popover', () => {
           onApiKeyUpdate={onApiKeyUpdateMock}
           onEnableDisable={onEnableDisableMock}
           onRunRule={onRunRuleMock}
+          isInternallyManaged={false}
         />
       </IntlProvider>
     );
@@ -78,6 +80,7 @@ describe('rule_actions_popover', () => {
           onApiKeyUpdate={onApiKeyUpdateMock}
           onEnableDisable={onEnableDisableMock}
           onRunRule={onRunRuleMock}
+          isInternallyManaged={false}
         />
       </IntlProvider>
     );
@@ -106,6 +109,7 @@ describe('rule_actions_popover', () => {
           onApiKeyUpdate={onApiKeyUpdateMock}
           onEnableDisable={onEnableDisableMock}
           onRunRule={onRunRuleMock}
+          isInternallyManaged={false}
         />
       </IntlProvider>
     );
@@ -123,6 +127,7 @@ describe('rule_actions_popover', () => {
       expect(screen.queryByText('Disable')).not.toBeInTheDocument();
     });
   });
+
   it('enables the rule', async () => {
     const rule = mockRule({ enabled: false });
     render(
@@ -133,6 +138,7 @@ describe('rule_actions_popover', () => {
           onApiKeyUpdate={onApiKeyUpdateMock}
           onEnableDisable={onEnableDisableMock}
           onRunRule={onRunRuleMock}
+          isInternallyManaged={false}
         />
       </IntlProvider>
     );
@@ -161,6 +167,7 @@ describe('rule_actions_popover', () => {
           onApiKeyUpdate={onApiKeyUpdateMock}
           onEnableDisable={onEnableDisableMock}
           onRunRule={onRunRuleMock}
+          isInternallyManaged={false}
         />
       </IntlProvider>
     );
@@ -189,6 +196,7 @@ describe('rule_actions_popover', () => {
           onApiKeyUpdate={onApiKeyUpdateMock}
           onEnableDisable={onEnableDisableMock}
           onRunRule={onRunRuleMock}
+          isInternallyManaged={false}
         />
       </IntlProvider>
     );
@@ -205,5 +213,30 @@ describe('rule_actions_popover', () => {
     await waitFor(() => {
       expect(screen.queryByText('Run rule')).not.toBeInTheDocument();
     });
+  });
+
+  it('should render update API key panel item only when isInternallyManaged is true', async () => {
+    const rule = mockRule();
+    render(
+      <IntlProvider locale="en">
+        <RuleActionsPopover
+          rule={rule}
+          onDelete={onDeleteMock}
+          onApiKeyUpdate={onApiKeyUpdateMock}
+          onEnableDisable={onEnableDisableMock}
+          onRunRule={onRunRuleMock}
+          isInternallyManaged={true}
+        />
+      </IntlProvider>
+    );
+
+    const actionButton = await screen.findByTestId('ruleActionsButton');
+    userEvent.click(actionButton);
+
+    expect(await screen.findByTestId('updateAPIKeyButtonInternallyManaged')).toBeInTheDocument();
+    expect(screen.queryByTestId('disableButtonInternallyManaged')).toBeInTheDocument();
+    expect(screen.queryByTestId('disableButton')).toBeNull();
+    expect(screen.queryByTestId('runRuleButton')).toBeNull();
+    expect(screen.queryByTestId('deleteRuleButton')).toBeNull();
   });
 });

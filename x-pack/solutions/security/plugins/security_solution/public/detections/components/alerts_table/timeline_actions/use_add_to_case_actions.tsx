@@ -18,8 +18,8 @@ import type { AlertTableContextMenuItem } from '../types';
 export interface UseAddToCaseActions {
   onMenuItemClick: () => void;
   ariaLabel?: string;
-  ecsData?: Ecs;
-  nonEcsData?: TimelineNonEcsData[];
+  ecsData: Ecs;
+  nonEcsData: TimelineNonEcsData[];
   onSuccess?: () => Promise<void>;
   refetch?: (() => void) | undefined;
 }
@@ -92,8 +92,8 @@ export const useAddToCaseActions = ({
 
   const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal(selectCaseArgs);
   const observables = useMemo(
-    () => (ecsData ? casesUi.helpers.getObservablesFromEcs(ecsData) : undefined),
-    [ecsData, casesUi.helpers]
+    () => casesUi.helpers.getObservablesFromEcs(nonEcsData ? [nonEcsData] : []),
+    [casesUi.helpers, nonEcsData]
   );
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`

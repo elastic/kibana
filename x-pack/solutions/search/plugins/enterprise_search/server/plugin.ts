@@ -13,7 +13,7 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { ENTERPRISE_SEARCH_APP_ID } from '@kbn/deeplinks-search';
+import { ENTERPRISE_SEARCH_APP_ID, SEARCH_GETTING_STARTED } from '@kbn/deeplinks-search';
 
 import {
   ENTERPRISE_SEARCH_HOME_PLUGIN,
@@ -26,7 +26,6 @@ import {
   SEARCH_PRODUCT_NAME,
   SEARCH_INDICES,
   SEARCH_HOMEPAGE,
-  SEARCH_INDICES_START,
   SEARCH_INDEX_MANAGEMENT,
   SEARCH_APPS_TITLE,
 } from '../common/constants';
@@ -98,8 +97,8 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       ENTERPRISE_SEARCH_HOME_PLUGIN.ID,
       ENTERPRISE_SEARCH_DATA_PLUGIN.ID,
       SEARCH_HOMEPAGE,
+      SEARCH_GETTING_STARTED,
       SEARCH_INDICES,
-      SEARCH_INDICES_START,
       SEARCH_INDEX_MANAGEMENT,
     ];
 

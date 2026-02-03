@@ -8,9 +8,9 @@
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { configValidator, getConnectorType } from '.';
-import type { Config, Secrets } from '../../../common/inference/types';
+import type { Config, Secrets } from '@kbn/connector-schemas/inference';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { DEFAULT_PROVIDER, DEFAULT_TASK_TYPE } from '../../../common/inference/constants';
+import { DEFAULT_PROVIDER, DEFAULT_TASK_TYPE } from '@kbn/connector-schemas/inference';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { InferencePutResponse } from '@elastic/elasticsearch/lib/api/types';
 

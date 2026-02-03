@@ -12,7 +12,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import { withSpaceUrl } from '../../spaces';
+import { withSpaceUrl } from '../spaces';
 import { countDownTest } from '../count_down_test';
 
 /**

@@ -21,6 +21,7 @@ const createActionTypeRegistryMock = () => {
     getUtils: jest.fn(),
     getActionKibanaPrivileges: jest.fn(),
     hasSubFeature: jest.fn(),
+    isDeprecated: jest.fn(),
   };
   return mocked;
 };

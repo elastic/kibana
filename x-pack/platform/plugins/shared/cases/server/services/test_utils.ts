@@ -132,6 +132,7 @@ export const basicESCaseFields: CasePersistedAttributes = {
   assignees: [],
   total_alerts: -1,
   total_comments: -1,
+  total_events: -1,
   category: null,
 };
 
@@ -167,6 +168,7 @@ export const basicCaseFields: CaseAttributes = {
   category: null,
   customFields: [],
   observables: [],
+  total_observables: 0,
   incremental_id: undefined,
 };
 

@@ -55,16 +55,6 @@ export const MY_CHANGES_AND_FINAL_UPDATES_EXPLANATION = i18n.translate(
   }
 );
 
-export const MY_CHANGES_IN_RULE_UPGRADE_WORKFLOW_EXPLANATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.myChangesInRuleUpdateWorkflowOnlyExplanation',
-  {
-    defaultMessage: 'View the changes you made in the {finalUpdateSectionLabel} section.',
-    values: {
-      finalUpdateSectionLabel: FINAL_UPDATE,
-    },
-  }
-);
-
 export const MERGED_CHANGES_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.mergedChangesTitle',
   {
@@ -103,5 +93,12 @@ export const DIFF_FORMAT_AND_COLORS_EXPLANATION = i18n.translate(
   {
     defaultMessage:
       "Differences are shown in JSON and color-coded or bolded. Lines that are highlighted in green were added. Lines that are highlighted in red were removed. Text that's bolded was changed.",
+  }
+);
+
+export const VERSION_COMPARISON_HELP_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.versionComparisonHelpAriaLabel',
+  {
+    defaultMessage: 'Version comparison help',
   }
 );

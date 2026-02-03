@@ -19,7 +19,6 @@ const omittedProps = [
   'connectionPool',
   'transport',
   'serializer',
-  'helpers',
   'acceptedParams',
 ] as Array<PublicKeys<Client>>;
 
@@ -57,6 +56,7 @@ export interface ClientApiMockInstance<T, Y extends any[]> extends jest.MockInst
   ): this;
 }
 
+// Helper to create a jest mock function with response helpers
 const createMockedApi = <
   T = unknown,
   Y extends [any, TransportRequestOptions] = [any, TransportRequestOptions]
@@ -122,67 +122,179 @@ const createMockedApi = <
   return mock;
 };
 
+// Build a shape of the Elasticsearch client once, using a hoisted real client instance
 // use jest.requireActual() to prevent weird errors when people mock @elastic/elasticsearch
 const { Client: UnmockedClient } = jest.requireActual('@elastic/elasticsearch');
-const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedApi<Client> => {
-  // we mimic 'reflection' on a concrete instance of the client to generate the mocked functions.
-  const client = new UnmockedClient({
-    node: 'http://127.0.0.1',
-  });
 
-  const getAllPropertyDescriptors = (obj: Record<string, any>) => {
-    const descriptors = Object.entries(Object.getOwnPropertyDescriptors(obj));
-    let prototype = Object.getPrototypeOf(obj);
-    while (prototype != null && prototype !== Object.prototype) {
-      descriptors.push(...Object.entries(Object.getOwnPropertyDescriptors(prototype)));
-      prototype = Object.getPrototypeOf(prototype);
+type ShapeNode = { type: 'method' } | { type: 'object'; props: Record<string, ShapeNode> };
+
+let cachedShape: ShapeNode | null = null;
+
+function getAllPropertyDescriptors(obj: Record<string, any>) {
+  const map: Record<string, PropertyDescriptor> = {};
+  let cur: any = obj;
+  while (cur && cur !== Object.prototype) {
+    const descs = Object.getOwnPropertyDescriptors(cur);
+    for (const [k, d] of Object.entries(descs)) {
+      if (!(k in map)) map[k] = d;
     }
-    return descriptors;
-  };
+    cur = Object.getPrototypeOf(cur);
+  }
+  return map;
+}
 
-  const mockify = (obj: Record<string, any>, omitted: string[] = []) => {
-    // the @elastic/elasticsearch::Client uses prototypical inheritance
-    // so we have to crawl up the prototype chain and get all descriptors
-    // to find everything that we should be mocking
-    const descriptors = getAllPropertyDescriptors(obj);
-    descriptors
-      .filter(([key]) => !omitted.includes(key))
-      .forEach(([key, descriptor]) => {
-        if (typeof descriptor.value === 'function') {
-          const mock = createMockedApi();
-          mock.mockImplementation(() => res ?? createSuccessTransportRequestPromise({}));
-          obj[key] = mock;
-        } else if (typeof obj[key] === 'object' && obj[key] != null) {
-          mockify(obj[key], omitted);
-        }
-      });
-  };
+function buildShapeRecursive(obj: any, isTopLevel: boolean, seen: WeakSet<object>): ShapeNode {
+  const props: Record<string, ShapeNode> = {};
+  const descriptors = getAllPropertyDescriptors(obj);
+  for (const [key, desc] of Object.entries(descriptors)) {
+    if (key === 'constructor') continue;
+    if (isTopLevel && (omittedProps as string[]).includes(key)) continue;
 
-  mockify(client, omittedProps as string[]);
+    let value: any;
+    if ('value' in desc) value = (desc as any).value;
+    else if (typeof desc.get === 'function') {
+      try {
+        value = desc.get.call(obj);
+      } catch {
+        value = undefined;
+      }
+    }
 
-  client.close = jest.fn().mockReturnValue(Promise.resolve());
-  client.child = jest.fn().mockImplementation(() => createInternalClientMock());
+    if (typeof value === 'function') {
+      props[key] = { type: 'method' };
+    } else if (value && typeof value === 'object') {
+      if (seen.has(value)) continue;
+      seen.add(value);
+      props[key] = buildShapeRecursive(value, false, seen);
+    }
+  }
+  return { type: 'object', props };
+}
 
-  const mockGetter = (obj: Record<string, any>, propertyName: string) => {
-    Object.defineProperty(obj, propertyName, {
+function getClientShape(): ShapeNode {
+  if (cachedShape) return cachedShape;
+  const client = new UnmockedClient({ node: 'http://127.0.0.1' });
+  try {
+    const shape = buildShapeRecursive(client, true, new WeakSet());
+    cachedShape = shape;
+    return shape;
+  } finally {
+    try {
+      // ensure we close the actual client instance (ignore errors)
+      void client.close();
+    } catch {
+      // ignore
+    }
+  }
+}
+
+function buildLazyMockFromShape(shape: ShapeNode, res: Promise<unknown>): any {
+  if (shape.type !== 'object') return {};
+  const target: Record<string, any> = {};
+
+  const defineLazyMethod = (obj: Record<string, any>, key: string) => {
+    Object.defineProperty(obj, key, {
       configurable: true,
-      enumerable: false,
-      get: () => jest.fn(),
-      set: undefined,
+      enumerable: true,
+      get() {
+        const fn = createMockedApi();
+        fn.mockImplementation(() => res);
+        Object.defineProperty(obj, key, {
+          value: fn,
+          configurable: true,
+          enumerable: true,
+          writable: true,
+        });
+        return fn;
+      },
+      set(value) {
+        Object.defineProperty(obj, key, {
+          value,
+          configurable: true,
+          enumerable: true,
+          writable: true,
+        });
+      },
     });
   };
 
-  // `on`, `off`, and `once` are properties without a setter.
-  // We can't `client.diagnostic.on = jest.fn()` because the following error will be thrown:
-  // TypeError: Cannot set property on of #<Client> which has only a getter
-  mockGetter(client.diagnostic, 'on');
-  mockGetter(client.diagnostic, 'off');
-  mockGetter(client.diagnostic, 'once');
-  client.transport = {
-    request: jest.fn(),
+  const defineLazyObject = (obj: Record<string, any>, key: string, childShape: ShapeNode) => {
+    Object.defineProperty(obj, key, {
+      configurable: true,
+      enumerable: true,
+      get() {
+        const child = buildLazyMockFromShape(childShape, res);
+        Object.defineProperty(obj, key, {
+          value: child,
+          configurable: true,
+          enumerable: true,
+          writable: true,
+        });
+        return child;
+      },
+    });
   };
 
-  return client as DeeplyMockedApi<Client>;
+  for (const [key, node] of Object.entries(shape.props)) {
+    if (node.type === 'method') {
+      defineLazyMethod(target, key);
+    } else if (node.type === 'object') {
+      defineLazyObject(target, key, node);
+    }
+  }
+
+  // Special cases based on prior behavior
+  Object.defineProperty(target, 'diagnostic', {
+    configurable: true,
+    enumerable: false,
+    get() {
+      const d: any = {};
+      for (const k of ['on', 'off', 'once']) {
+        Object.defineProperty(d, k, {
+          configurable: true,
+          enumerable: false,
+          get: () => jest.fn(),
+        });
+      }
+      Object.defineProperty(target, 'diagnostic', {
+        value: d,
+        configurable: true,
+        enumerable: false,
+        writable: true,
+      });
+      return d;
+    },
+  });
+
+  Object.defineProperty(target, 'transport', {
+    configurable: true,
+    enumerable: true,
+    get() {
+      const t = { request: jest.fn() } as any;
+      Object.defineProperty(target, 'transport', {
+        value: t,
+        configurable: true,
+        enumerable: true,
+        writable: true,
+      });
+      return t;
+    },
+  });
+
+  return target;
+}
+
+const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedApi<Client> => {
+  const shape = getClientShape();
+  const mockClient: any = buildLazyMockFromShape(
+    shape,
+    res ?? Object.freeze(createSuccessTransportRequestPromise({}))
+  );
+
+  mockClient.close = jest.fn().mockReturnValue(Promise.resolve());
+  mockClient.child = jest.fn().mockImplementation(() => createInternalClientMock());
+
+  return mockClient as DeeplyMockedApi<Client>;
 };
 
 export type ElasticsearchClientMock = DeeplyMockedApi<ElasticsearchClient>;
@@ -226,7 +338,7 @@ const createCustomClusterClientMock = () => {
   const mock: CustomClusterClientMock = lazyObject({
     asInternalUser: createClientMock(),
     asScoped: jest.fn().mockReturnValue(createScopedClusterClientMock()),
-    close: jest.fn().mockResolvedValue(Promise.resolve()),
+    close: jest.fn().mockReturnValue(Promise.resolve()),
   });
 
   return mock;

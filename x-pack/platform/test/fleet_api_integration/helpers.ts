@@ -210,6 +210,32 @@ export async function enableActionSecrets(providerContext: FtrProviderContext) {
     });
   }
 }
+export async function disableActionSecrets(providerContext: FtrProviderContext) {
+  const settingsSO = await providerContext
+    .getService('kibanaServer')
+    .savedObjects.get({ type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, id: 'fleet-default-settings' })
+    .catch((err) => {});
+
+  if (settingsSO) {
+    await providerContext.getService('kibanaServer').savedObjects.update({
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      id: 'fleet-default-settings',
+      attributes: {
+        action_secret_storage_requirements_met: false,
+      },
+      overwrite: false,
+    });
+  } else {
+    await providerContext.getService('kibanaServer').savedObjects.create({
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      id: 'fleet-default-settings',
+      attributes: {
+        action_secret_storage_requirements_met: false,
+      },
+      overwrite: true,
+    });
+  }
+}
 
 export const generateNAgentPolicies = async (
   supertest: SuperTestAgent,

@@ -16,11 +16,19 @@
       "taskManager",
       "actions",
       "workflowsExecutionEngine",
+      "workflowsExtensions",
       "features",
       "security",
       "triggersActionsUi",
       "spaces",
-      "embeddable"
+      "esUiShared",
+      "stackConnectors",
+      "data",
+      "dataViews",
+      "fieldFormats",
+      "unifiedSearch",
+      "embeddable",
+      "licensing"
     ],
     "optionalPlugins": [
       "alerting",

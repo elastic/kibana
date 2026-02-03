@@ -1,7 +1,0 @@
-{
-  "name": "@kbn/apm-synthtrace-client",
-  "version": "1.0.0",
-  "description": "Elastic APM trace data generator",
-  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
-  "private": true
-}

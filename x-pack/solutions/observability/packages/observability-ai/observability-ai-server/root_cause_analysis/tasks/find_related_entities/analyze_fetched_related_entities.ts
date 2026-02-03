@@ -8,9 +8,9 @@
 import type {
   DocumentAnalysis,
   FieldPatternResultWithChanges,
-  TruncatedDocumentAnalysis,
+  FormattedDocumentAnalysis,
 } from '@kbn/ai-tools';
-import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
+import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { dateRangeQuery, kqlQuery } from '@kbn/es-query';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
@@ -33,7 +33,7 @@ import type { RelatedEntityKeywordSearch } from './write_keyword_searches_for_re
 export interface RelatedEntityFromSearchResults {
   entity: { [x: string]: string };
   highlight: Record<string, string[]>;
-  analysis: TruncatedDocumentAnalysis;
+  analysis: FormattedDocumentAnalysis;
 }
 
 function getPromptForFoundEntity({ entity, analysis, highlight }: RelatedEntityFromSearchResults) {
@@ -54,7 +54,7 @@ function getInputPromptBase({
   kbEntries,
 }: {
   entity: Record<string, string>;
-  analysis: TruncatedDocumentAnalysis;
+  analysis: FormattedDocumentAnalysis;
   ownPatterns: FieldPatternResultWithChanges[];
   patternsFromOtherEntities: FieldPatternResultWithChanges[];
   searches: RelatedEntityKeywordSearch[];
@@ -208,7 +208,7 @@ export async function analyzeFetchedRelatedEntities({
   index: string | string[];
   entity: Record<string, string>;
   analysis: {
-    truncated: TruncatedDocumentAnalysis;
+    truncated: FormattedDocumentAnalysis;
     full: DocumentAnalysis;
   };
   ownPatterns: FieldPatternResultWithChanges[];
@@ -399,9 +399,10 @@ export async function analyzeFetchedRelatedEntities({
                     allValuesFromEntity.includes(value) ||
                     allValuesFromEntity.some((valueFromEntity) => {
                       return (
-                        typeof valueFromEntity === 'string' &&
-                        typeof value === 'string' &&
-                        (value.includes(valueFromEntity) || valueFromEntity.includes(value))
+                        typeof valueFromEntity.value === 'string' &&
+                        typeof value.value === 'string' &&
+                        (value.value.includes(valueFromEntity.value) ||
+                          valueFromEntity.value.includes(value.value))
                       );
                     })
                   );
@@ -417,7 +418,7 @@ export async function analyzeFetchedRelatedEntities({
             groupingField,
             key: groupValue,
             highlight: hit.highlight!,
-            analysis: sortAndTruncateAnalyzedFields(analysisWithRelevantValues),
+            analysis: formatDocumentAnalysis(analysisWithRelevantValues),
           };
         });
       })

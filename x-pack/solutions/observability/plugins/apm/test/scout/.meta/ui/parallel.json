@@ -1,0 +1,1701 @@
+{
+  "lastModified": "2026-01-30T09:08:21.348Z",
+  "sha1": "1e823b26e510a88f22ce0c8ac3b25a92a42037af",
+  "tests": [
+    {
+      "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
+      "title": "Ingest data to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 22,
+        "column": 16
+      }
+    },
+    {
+      "id": "93959537d8145bf-c60ed75f55e6428",
+      "title": "Alerts Can create, trigger and view an 'Error count' alert from service inventory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
+        "line": 26,
+        "column": 7
+      }
+    },
+    {
+      "id": "46d5bf3a83bad53-38155892fd0d2dd",
+      "title": "Service Dependencies Tab Renders expected content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependencies_inventory.spec.ts",
+        "line": 19,
+        "column": 7
+      }
+    },
+    {
+      "id": "46d5bf3a83bad53-2331752fe58ccdf",
+      "title": "Service Dependencies Tab Links to dependency overview when clicking on a dependency in dependencies table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependencies_inventory.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "46d5bf3a83bad53-687b33005f642a9",
+      "title": "Service Dependencies Tab Has no detectable a11y violations on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependencies_inventory.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "715f0d1ddbfcb97-85d448363fd9129",
+      "title": "Dependency Operation Detail Page Renders expected content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "715f0d1ddbfcb97-f7b0d96dece645a",
+      "title": "Dependency Operation Detail Page Links back to dependency operations list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "715f0d1ddbfcb97-06d232cd9fc2cc2",
+      "title": "Dependency Operation Detail Page Investigate trace popup opens when clicking 'Investigate trace' button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "715f0d1ddbfcb97-34dbdca01ee3f92",
+      "title": "Dependency Operation Detail Page Span link flyout opens when clicking 'Span links' button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    },
+    {
+      "id": "715f0d1ddbfcb97-fe96886a2c0edec",
+      "title": "Dependency Operation Detail Page Has no detectable a11y violations on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
+        "line": 83,
+        "column": 7
+      }
+    },
+    {
+      "id": "75905db3a2fb127-fd427b8f21c8b2a",
+      "title": "Dependency Operations Tab Is accessible from the default tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "75905db3a2fb127-9b8afb3ac2292a8",
+      "title": "Dependency Operations Tab Renders expected content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    },
+    {
+      "id": "75905db3a2fb127-c622def3e60d938",
+      "title": "Dependency Operations Tab Links to dependency operation detail when clicking on an operation in operations table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "75905db3a2fb127-1b95674ff2d0e64",
+      "title": "Dependency Operations Tab Has no a11y violations on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
+        "line": 72,
+        "column": 7
+      }
+    },
+    {
+      "id": "62b2db8d856f987-971a688a3ab1268",
+      "title": "Dependency Overview Tab Is the default tab when navigating to a dependency's details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_overview.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "62b2db8d856f987-e756ae6bd9bdfe8",
+      "title": "Dependency Overview Tab Renders expected content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_overview.spec.ts",
+        "line": 33,
+        "column": 7
+      }
+    },
+    {
+      "id": "62b2db8d856f987-cd07a9c0a873dbe",
+      "title": "Dependency Overview Tab Links to service overview when clicking on a service in upstream services table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_overview.spec.ts",
+        "line": 56,
+        "column": 7
+      }
+    },
+    {
+      "id": "62b2db8d856f987-5b70f29e776bf09",
+      "title": "Dependency Overview Tab Has no detectable a11y violations on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_overview.spec.ts",
+        "line": 76,
+        "column": 7
+      }
+    },
+    {
+      "id": "6aea55e0d666272-0a78a9a7b06133d",
+      "title": "Service Dependencies Tab Is accessible from the default tab",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/service_dependencies.spec.ts",
+        "line": 19,
+        "column": 7
+      }
+    },
+    {
+      "id": "6aea55e0d666272-38155892fd0d2dd",
+      "title": "Service Dependencies Tab Renders expected content",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/service_dependencies.spec.ts",
+        "line": 42,
+        "column": 7
+      }
+    },
+    {
+      "id": "6aea55e0d666272-2331752fe58ccdf",
+      "title": "Service Dependencies Tab Links to dependency overview when clicking on a dependency in dependencies table",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/service_dependencies.spec.ts",
+        "line": 56,
+        "column": 7
+      }
+    },
+    {
+      "id": "6aea55e0d666272-687b33005f642a9",
+      "title": "Service Dependencies Tab Has no detectable a11y violations on load",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/service_dependencies.spec.ts",
+        "line": 75,
+        "column": 7
+      }
+    },
+    {
+      "id": "af825f933b77021-1da22281c743a19",
+      "title": "Errors shows \"No errors found\" message when a service has no errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "af825f933b77021-999ed6267f6f416",
+      "title": "Errors shows errors charts and table when a service has errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
+        "line": 37,
+        "column": 7
+      }
+    },
+    {
+      "id": "af825f933b77021-c863a598422ad69",
+      "title": "Errors shows error details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "af825f933b77021-a156737805534f0",
+      "title": "Errors shows zero occurrences for non-existent error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
+        "line": 138,
+        "column": 7
+      }
+    },
+    {
+      "id": "af825f933b77021-fdc7cc5a95a02a5",
+      "title": "Errors redirects to error details page when clicking on an error in the list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
+        "line": 156,
+        "column": 7
+      }
+    },
+    {
+      "id": "af825f933b77021-3cb67ca73e9c74d",
+      "title": "Errors filters errors table results when typing in the search input",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
+        "line": 177,
+        "column": 7
+      }
+    },
+    {
+      "id": "4918e092a0b8903-d077d1deb960c5c",
+      "title": "Service Groups When navigating to service groups",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_groups/service_groups.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "0d134541f1c6605-c9e5c18b97827e4",
+      "title": "Service inventory renders page with selected date range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
+        "line": 20,
+        "column": 7
+      }
+    },
+    {
+      "id": "0d134541f1c6605-4b430080d829f58",
+      "title": "Service inventory loads the service overview for a service when clicking on it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    },
+    {
+      "id": "0d134541f1c6605-b2261999afe14e2",
+      "title": "Service inventory shows the correct environment when changing the environment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "0d134541f1c6605-eb4017d5ced9479",
+      "title": "Service inventory shows the filtered services when using the service name fast filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
+    {
+      "id": "d7c92033c6be650-e93404c0871603d",
+      "title": "Service overview alerts tab Is accessible from the default tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/alerts_tab.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "d7c92033c6be650-adbef92ea733168",
+      "title": "Service overview alerts tab Shows alerts search bar, table, query bar and filter controls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/alerts_tab.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "d7c92033c6be650-253b48eacd70d1d",
+      "title": "Service overview alerts tab Has no detectable a11y violations on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/alerts_tab.spec.ts",
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "id": "9b7bac9a7589b4d-d035aadde3cc9a4",
+      "title": "Service overview - header filters Filtering by transaction type - changes url when selecting different value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "9b7bac9a7589b4d-4ed45060815dbc2",
+      "title": "Service overview - header filters Filtering by searchbar - filters by transaction.name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "id": "cb58639e51a0de4-ed228fc3a182ff9",
+      "title": "Service Overview - Components renders all components on the service overview page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_components.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "cb58639e51a0de4-77e4dacd9ec3227",
+      "title": "Service Overview - Components hides dependencies tab and instances table for RUM service",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_components.spec.ts",
+        "line": 66,
+        "column": 7
+      }
+    },
+    {
+      "id": "706f8d4e7639190-4cfc35cb1fc466a",
+      "title": "Service Overview - EDOT Services adservice service renders all components",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_edot.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "706f8d4e7639190-1d06e47218b35e3",
+      "title": "Service Overview - EDOT Services adservice service instances table has data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_edot.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "706f8d4e7639190-1efa7ff298bf143",
+      "title": "Service Overview - EDOT Services adservice service errors table shows errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_edot.spec.ts",
+        "line": 70,
+        "column": 7
+      }
+    },
+    {
+      "id": "706f8d4e7639190-0dafb7bdd3ea630",
+      "title": "Service Overview - EDOT Services adservice service can navigate to errors tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_edot.spec.ts",
+        "line": 90,
+        "column": 7
+      }
+    },
+    {
+      "id": "706f8d4e7639190-ca67eee1ccffca8",
+      "title": "Service Overview - EDOT Services adservice service icons show metadata details on click",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_edot.spec.ts",
+        "line": 109,
+        "column": 7
+      }
+    },
+    {
+      "id": "db759c2ef161e71-4f73ad856a2ac5e",
+      "title": "Service Overview - Error Details OTEL service navigates to errors page from overview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "db759c2ef161e71-579342af023fbe2",
+      "title": "Service Overview - Error Details OTEL service clicking error in overview table navigates to error detail page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "db759c2ef161e71-a59ec4532a910cd",
+      "title": "Service Overview - Error Details OTEL service error detail page shows error distribution chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    },
+    {
+      "id": "db759c2ef161e71-5c09c4b0fdd3510",
+      "title": "Service Overview - Error Details EDOT service navigates to errors page from overview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
+        "line": 89,
+        "column": 7
+      }
+    },
+    {
+      "id": "db759c2ef161e71-8d13045625788a3",
+      "title": "Service Overview - Error Details EDOT service clicking error in overview table navigates to error detail page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
+        "line": 111,
+        "column": 7
+      }
+    },
+    {
+      "id": "db759c2ef161e71-6440419d72a1502",
+      "title": "Service Overview - Error Details EDOT service error detail page shows error distribution chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
+        "line": 139,
+        "column": 7
+      }
+    },
+    {
+      "id": "a560eb92c8d9503-a92e7d2de172ed8",
+      "title": "Service Overview - Filters persists transaction type when clicking Transactions tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "a560eb92c8d9503-242f7d75bd2096c",
+      "title": "Service Overview - Filters persists transaction type when clicking View transactions link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "a560eb92c8d9503-92d71e4fd09a66e",
+      "title": "Service Overview - Filters filters by environment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
+        "line": 63,
+        "column": 7
+      }
+    },
+    {
+      "id": "a560eb92c8d9503-9066aca30f30156",
+      "title": "Service Overview - Filters changes comparison window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
+        "line": 84,
+        "column": 7
+      }
+    },
+    {
+      "id": "a560eb92c8d9503-e2d199eec073488",
+      "title": "Service Overview - Filters refresh button refreshes data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
+        "line": 104,
+        "column": 7
+      }
+    },
+    {
+      "id": "a560eb92c8d9503-0b6ae46692ea4c0",
+      "title": "Service Overview - Filters updates data when changing time range and clicking update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
+        "line": 121,
+        "column": 7
+      }
+    },
+    {
+      "id": "a193bb7a321f948-ec63a550aa7dbd9",
+      "title": "Service Overview - Mobile Services clicking android service redirects to mobile service overview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "a193bb7a321f948-49d8078d8cc534f",
+      "title": "Service Overview - Mobile Services clicking iOS service redirects to mobile service overview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "a193bb7a321f948-9cf60ddd6ae1844",
+      "title": "Service Overview - Mobile Services mobile service overview renders all components",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
+        "line": 61,
+        "column": 7
+      }
+    },
+    {
+      "id": "a193bb7a321f948-f997b78899c9454",
+      "title": "Service Overview - Mobile Services accessing mobile service from apm route redirects to mobile route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
+        "line": 84,
+        "column": 7
+      }
+    },
+    {
+      "id": "c294db70d3c7d88-164cb14459d95d2",
+      "title": "Service Overview - Navigation clicking service in inventory navigates to service overview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_navigation.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "c294db70d3c7d88-cefad6a03ba20e3",
+      "title": "Service Overview - Navigation clicking go service navigates to correct service overview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_navigation.spec.ts",
+        "line": 42,
+        "column": 7
+      }
+    },
+    {
+      "id": "c294db70d3c7d88-42e9c12c8b5ff32",
+      "title": "Service Overview - Navigation clicking transaction navigates to transactions tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_navigation.spec.ts",
+        "line": 62,
+        "column": 7
+      }
+    },
+    {
+      "id": "c294db70d3c7d88-4fe04a669511275",
+      "title": "Service Overview - Navigation clicking error navigates to error details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_navigation.spec.ts",
+        "line": 87,
+        "column": 7
+      }
+    },
+    {
+      "id": "af7800463b95398-2099639e51a70fd",
+      "title": "Service Overview - OTEL Services sendotlp service renders all components",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "af7800463b95398-440a68ebf880b6b",
+      "title": "Service Overview - OTEL Services sendotlp service instances table has data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "af7800463b95398-0e0a547e5a41850",
+      "title": "Service Overview - OTEL Services sendotlp service transaction type persistence",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
+        "line": 70,
+        "column": 7
+      }
+    },
+    {
+      "id": "af7800463b95398-8022353af35383b",
+      "title": "Service Overview - OTEL Services sendotlp service errors table shows errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
+        "line": 100,
+        "column": 7
+      }
+    },
+    {
+      "id": "af7800463b95398-2a678269b3986a8",
+      "title": "Service Overview - OTEL Services sendotlp service can navigate to errors tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
+        "line": 120,
+        "column": 7
+      }
+    },
+    {
+      "id": "af7800463b95398-9bd4e2ca06d6463",
+      "title": "Service Overview - OTEL Services sendotlp service icons show metadata details on click",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
+        "line": 139,
+        "column": 7
+      }
+    },
+    {
+      "id": "7d6cee3ae724a96-9d3f0bbc0244058",
+      "title": "Service Overview - Transaction Details OTEL service navigates to transaction detail page from overview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "7d6cee3ae724a96-3fcc33cac54c004",
+      "title": "Service Overview - Transaction Details OTEL service transaction detail page shows waterfall",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "id": "7d6cee3ae724a96-c3d2bc44566d645",
+      "title": "Service Overview - Transaction Details OTEL service clicking waterfall accordion shows transaction details flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
+        "line": 63,
+        "column": 7
+      }
+    },
+    {
+      "id": "7d6cee3ae724a96-69b4de3c1d406f2",
+      "title": "Service Overview - Transaction Details EDOT service navigates to transaction detail page from overview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
+        "line": 99,
+        "column": 7
+      }
+    },
+    {
+      "id": "7d6cee3ae724a96-4f937fd1715b737",
+      "title": "Service Overview - Transaction Details EDOT service transaction detail page shows waterfall",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
+        "line": 127,
+        "column": 7
+      }
+    },
+    {
+      "id": "7d6cee3ae724a96-cfdd8724397bd20",
+      "title": "Service Overview - Transaction Details EDOT service clicking waterfall accordion shows transaction details flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
+        "line": 149,
+        "column": 7
+      }
+    },
+    {
+      "id": "89c8ff66ee766e0-93d765a7c716612",
+      "title": "Agent Configuration Viewer should not be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_configuration.spec.ts",
+        "line": 12,
+        "column": 7
+      }
+    },
+    {
+      "id": "89c8ff66ee766e0-09b8159d2323da0",
+      "title": "Agent Configuration APM All Privileges Without Write Settings should not be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_configuration.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    },
+    {
+      "id": "89c8ff66ee766e0-9ba74430ee8ac12",
+      "title": "Agent Configuration Privileged user should be able to configure, create and delete an agent configuration with all services and production environment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_configuration.spec.ts",
+        "line": 32,
+        "column": 7
+      }
+    },
+    {
+      "id": "df2473acd821008-2c7791699f57a60",
+      "title": "Agent Explorer Viewer should be able to view the agent list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
+        "line": 12,
+        "column": 7
+      }
+    },
+    {
+      "id": "df2473acd821008-b66f5a8295933ce",
+      "title": "Agent Explorer Editor should be able to access agent explorer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
+        "line": 26,
+        "column": 7
+      }
+    },
+    {
+      "id": "df2473acd821008-a96eed7edb57f36",
+      "title": "Agent Explorer APM Read Privileges With Write Settings should be able to access agent explorer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "df2473acd821008-be4130d8df990d7",
+      "title": "Agent Explorer APM All Privileges Without Write Settings should be able to view agent explorer but with limited functionality",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
+        "line": 60,
+        "column": 7
+      }
+    },
+    {
+      "id": "f43f55c4b87ada1-d4bc402fe5eb1ce",
+      "title": "Agent Keys Viewer should see missing privileges message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_keys.spec.ts",
+        "line": 12,
+        "column": 7
+      }
+    },
+    {
+      "id": "f43f55c4b87ada1-71dabd3e9acc532",
+      "title": "Agent Keys Admin User should be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_keys.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    },
+    {
+      "id": "01ea78763124721-b5f438e39d8d665",
+      "title": "Anomaly Detection Viewer should not be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
+        "line": 13,
+        "column": 7
+      }
+    },
+    {
+      "id": "01ea78763124721-33d6a15705dd230",
+      "title": "Anomaly Detection Privileged User should be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
+        "line": 23,
+        "column": 7
+      }
+    },
+    {
+      "id": "01ea78763124721-c5bb5d1bcaddc75",
+      "title": "Anomaly Detection Admin should be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "01ea78763124721-9785a7919050c13",
+      "title": "Anomaly Detection APM Read Privileges With Write Settings should be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
+        "line": 61,
+        "column": 7
+      }
+    },
+    {
+      "id": "01ea78763124721-46465c39e998aa3",
+      "title": "Anomaly Detection APM All Privileges Without Write Settings should not be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
+        "line": 86,
+        "column": 7
+      }
+    },
+    {
+      "id": "b1d9732f2022f52-1d041dd11a76a98",
+      "title": "Custom links template validation Create custom link with template URL and filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "b1d9732f2022f52-244e245a602c0a7",
+      "title": "Custom links template validation Verify template variables are populated correctly in custom link URLs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
+        "line": 59,
+        "column": 7
+      }
+    },
+    {
+      "id": "b1d9732f2022f52-8c63ceeb998a13d",
+      "title": "Custom links template validation Delete custom link with template URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
+        "line": 87,
+        "column": 7
+      }
+    },
+    {
+      "id": "b1d9732f2022f52-ac6bad5f389c557",
+      "title": "Custom links template validation Open transaction and validate the default url when creating a custom link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
+        "line": 107,
+        "column": 7
+      }
+    },
+    {
+      "id": "b1d9732f2022f52-5f08fd317b97702",
+      "title": "Custom links template validation Delete custom link created from transaction details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
+        "line": 181,
+        "column": 7
+      }
+    },
+    {
+      "id": "a2babb42e998789-794ce71f366cded",
+      "title": "Custom links Viewer should show disabled create button and no edit button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links.spec.ts",
+        "line": 14,
+        "column": 7
+      }
+    },
+    {
+      "id": "a2babb42e998789-c6e98077141d93f",
+      "title": "Custom links Privileged User should be able to create custom link and delete the created custom link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "d7e8e912f1cfcc9-75b6a16cd11bf3c",
+      "title": "General Settings Viewer should not be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/general_settings.spec.ts",
+        "line": 12,
+        "column": 7
+      }
+    },
+    {
+      "id": "d7e8e912f1cfcc9-aeec9b7497f090c",
+      "title": "General Settings Privileged User should be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/general_settings.spec.ts",
+        "line": 26,
+        "column": 7
+      }
+    },
+    {
+      "id": "bbc57c9a34f643a-b116664ca4ec8e6",
+      "title": "Indices Viewer should not be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/indices.spec.ts",
+        "line": 13,
+        "column": 7
+      }
+    },
+    {
+      "id": "bbc57c9a34f643a-606d5d75c14092e",
+      "title": "Indices Privileged user should be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/indices.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "cde77c8f7532390-11cea7a9a84eac7",
+      "title": "Settings - Serverless Privileged User: The indices settings page is not available in serverless",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/serverless_settings.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "cde77c8f7532390-baeeb2b04e9cbc0",
+      "title": "Settings - Serverless Viewer: The agent configuration settings page is not available in serverless",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/serverless_settings.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "cde77c8f7532390-54b857ae9939d83",
+      "title": "Settings - Serverless Privileged User: The agent configuration settings page is not available in serverless",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/serverless_settings.spec.ts",
+        "line": 37,
+        "column": 7
+      }
+    },
+    {
+      "id": "bb77c5fe685c994-820ffa8139e87c1",
+      "title": "Service map renders page with selected date range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/sevice_map/service_map.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "bb77c5fe685c994-9d4b191090eb231",
+      "title": "Service map shows a detailed service map",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/sevice_map/service_map.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "bb77c5fe685c994-bebd132799161c0",
+      "title": "Service map shows empty state when there is no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/sevice_map/service_map.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "b823835fc8ed203-c0d7ecffab644e9",
+      "title": "Storage Explorer - Admin User user navigates and explores storage explorer functionality",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_functionality.spec.ts",
+        "line": 24,
+        "column": 7
+      }
+    },
+    {
+      "id": "c3f1c3da077a5f2-53f098b0f4c049f",
+      "title": "Storage Explorer - Viewer (No Permissions) displays permission denied message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_permissions.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "7cd820d5686e9ff-112d7e5de3e69a6",
+      "title": "Span links shows span links for producer-internal-only Span A",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "7cd820d5686e9ff-db2064659e35788",
+      "title": "Span links shows span links for producer-external-only Span B",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
+        "line": 79,
+        "column": 7
+      }
+    },
+    {
+      "id": "7cd820d5686e9ff-0bed012a7fd6b0e",
+      "title": "Span links shows span links flyout details on producer-consumer Transaction C",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
+        "line": 118,
+        "column": 7
+      }
+    },
+    {
+      "id": "7cd820d5686e9ff-0f5d62a5eefef8d",
+      "title": "Span links shows span links flyout details on consumer-multiple Transaction D",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
+        "line": 152,
+        "column": 7
+      }
+    },
+    {
+      "id": "7cd820d5686e9ff-db3108594a7760a",
+      "title": "Span links shows span links flyout details on consumer-multiple Span E",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
+        "line": 187,
+        "column": 7
+      }
+    },
+    {
+      "id": "ad2290db23c6832-8c21a2a9d893c81",
+      "title": "Span stacktrace shows APM agent generated stacktrace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_stacktrace.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "ad2290db23c6832-bb3eadfcab8a1cd",
+      "title": "Span stacktrace shows Otel generated stacktrace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_stacktrace.spec.ts",
+        "line": 46,
+        "column": 7
+      }
+    },
+    {
+      "id": "0ea21a81fd9bb15-025e43f8799c8ae",
+      "title": "Transaction details Renders the page with expected content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    },
+    {
+      "id": "0ea21a81fd9bb15-32f26083c909a43",
+      "title": "Transaction details Trace samples navigation persists across page reloads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
+        "line": 49,
+        "column": 7
+      }
+    },
+    {
+      "id": "0ea21a81fd9bb15-a7c84b743868348",
+      "title": "Transaction details Trace samples waterfall should not become stuck on loading state after page reload with empty data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
+        "line": 71,
+        "column": 7
+      }
+    },
+    {
+      "id": "0eb20a2c37ad5a7-34b642bb4b6141b",
+      "title": "Transactions Overview Viewer: Page has no detectable a11y violations on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transactions_overview/transactions_overview.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "0eb20a2c37ad5a7-85fcfc102dcd123",
+      "title": "Transactions Overview Viewer: Persists transaction type selected when navigating to Overview tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transactions_overview/transactions_overview.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    }
+  ]
+}

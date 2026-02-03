@@ -9,49 +9,42 @@
  * Mocking EuiSearchBar because its onChange is not firing during tests
  */
 import React from 'react';
-import type { EuiSearchBoxProps } from '@elastic/eui/src/components/search_bar/search_box';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
-import { act } from 'react-dom/test-utils';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { applicationServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
 
 import type { Index } from '../../../common';
 import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
-import { setupEnvironment } from '../helpers';
-import type { IndicesTestBed } from './indices_tab.helpers';
-import { setup } from './indices_tab.helpers';
+import { setupEnvironment } from '../helpers/setup_environment';
+import { renderHome } from '../helpers/render_home';
+import { httpService } from '../../../public/application/services/http';
+import { indexDataEnricher } from '../../../public/services';
+import {
+  createIndexTableActions,
+  createCreateIndexActions,
+  createDataStreamActions,
+} from '../helpers/actions/index_table_actions';
 import {
   createDataStreamBackingIndex,
   createDataStreamPayload,
   createNonDataStreamIndex,
-} from './data_streams_tab.helpers';
+} from '../helpers/actions/data_stream_actions';
 
-import { createMemoryHistory } from 'history';
 import {
   breadcrumbService,
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
 
-jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
-  return {
-    EuiSearchBox: (props: EuiSearchBoxProps) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockSearchBox'}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-          props.onSearch(event.target.value);
-        }}
-      />
-    ),
-  };
-});
 jest.mock('react-use/lib/useObservable', () => () => jest.fn());
 
 describe('<IndexManagementHome />', () => {
-  let testBed: IndicesTestBed;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   jest.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   beforeEach(() => {
+    jest.clearAllMocks();
     const mockEnvironment = setupEnvironment();
+    httpService.setup(httpServiceMock.createSetupContract());
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
   });
@@ -60,13 +53,9 @@ describe('<IndexManagementHome />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([]);
 
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
+      await renderHome(httpSetup);
 
-      const { component } = testBed;
-
-      component.update();
+      await screen.findByTestId('createIndexMessage');
     });
 
     test('updates the breadcrumbs to indices', () => {
@@ -76,7 +65,7 @@ describe('<IndexManagementHome />', () => {
     });
 
     test('toggles the include hidden button through URL hash correctly', () => {
-      const { actions } = testBed;
+      const actions = createIndexTableActions();
       expect(actions.getIncludeHiddenIndicesToggleStatus()).toBe(true);
       actions.clickIncludeHiddenIndicesToggle();
       expect(actions.getIncludeHiddenIndicesToggleStatus()).toBe(false);
@@ -101,34 +90,26 @@ describe('<IndexManagementHome />', () => {
         createDataStreamPayload({ name: 'dataStream1' })
       );
 
-      await act(async () => {
-        testBed = await setup(httpSetup, {
-          history: createMemoryHistory(),
-        });
-      });
-      testBed.component.update();
+      await renderHome(httpSetup);
+
+      await screen.findByTestId('indexTable');
     });
 
     test('navigates to the data stream in the Data Streams tab', async () => {
-      const {
-        findDataStreamDetailPanel,
-        findDataStreamDetailPanelTitle,
-        actions: { clickDataStreamAt, dataStreamLinkExistsAt },
-      } = testBed;
+      const tableActions = createIndexTableActions();
+      const dsActions = createDataStreamActions();
 
-      expect(dataStreamLinkExistsAt(0)).toBeTruthy();
-      await clickDataStreamAt(0);
+      expect(tableActions.dataStreamLinkExistsAt(0)).toBeTruthy();
+      await tableActions.clickDataStreamAt(0);
 
-      expect(findDataStreamDetailPanel().length).toBe(1);
-      expect(findDataStreamDetailPanelTitle()).toBe('dataStream1');
+      await screen.findByTestId('dataStreamDetailPanel');
+      expect(dsActions.findDataStreamDetailPanel()).toBeInTheDocument();
+      expect(dsActions.findDataStreamDetailPanelTitle()).toBe('dataStream1');
     });
 
     test(`doesn't show data stream link if the index doesn't have a data stream`, () => {
-      const {
-        actions: { dataStreamLinkExistsAt },
-      } = testBed;
-
-      expect(dataStreamLinkExistsAt(1)).toBeFalsy();
+      const tableActions = createIndexTableActions();
+      expect(tableActions.dataStreamLinkExistsAt(1)).toBeFalsy();
     });
   });
 
@@ -141,17 +122,17 @@ describe('<IndexManagementHome />', () => {
     );
 
     const application = applicationServiceMock.createStartContract();
-    testBed = await setup(httpSetup, {
-      history: createMemoryHistory(),
-      core: {
-        application,
+    await renderHome(httpSetup, {
+      appServicesContext: {
+        core: { application },
       },
     });
-    const { component, actions } = testBed;
 
-    component.update();
+    await screen.findByTestId('indexTable');
 
-    await actions.clickIndexNameAt(0);
+    const tableActions = createIndexTableActions();
+    await tableActions.clickIndexNameAt(0);
+
     expect(application.navigateToUrl).toHaveBeenCalledWith(
       '/app/management/data/index_management/indices/index_details?indexName=testIndex&includeHiddenIndices=true'
     );
@@ -166,17 +147,17 @@ describe('<IndexManagementHome />', () => {
     );
 
     const application = applicationServiceMock.createStartContract();
-    testBed = await setup(httpSetup, {
-      history: createMemoryHistory(),
-      core: {
-        application,
+    await renderHome(httpSetup, {
+      appServicesContext: {
+        core: { application },
       },
     });
-    const { component, actions } = testBed;
 
-    component.update();
+    await screen.findByTestId('indexTable');
 
-    await actions.clickIndexNameAt(0);
+    const tableActions = createIndexTableActions();
+    await tableActions.clickIndexNameAt(0);
+
     expect(application.navigateToUrl).toHaveBeenCalledWith(
       '/app/management/data/index_management/indices/index_details?indexName=test%25&includeHiddenIndices=true'
     );
@@ -185,29 +166,28 @@ describe('<IndexManagementHome />', () => {
   describe('empty list component', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([]);
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-      testBed.component.update();
+
+      await renderHome(httpSetup);
+
+      await screen.findByTestId('createIndexMessage');
     });
 
     test('renders the default empty list content', () => {
-      expect(testBed.exists('createIndexMessage')).toBe(true);
+      expect(screen.getByTestId('createIndexMessage')).toBeInTheDocument();
     });
 
     it('renders "no indices found" prompt for search', async () => {
-      const { find, component, exists } = testBed;
-      await act(async () => {
-        find('indicesSearch').simulate('change', { target: { value: 'non-existing-index' } });
+      const searchInput = screen.getByTestId('indicesSearch');
+      fireEvent.change(searchInput, { target: { value: 'non-existing-index' } });
+
+      await screen.findByTestId('noIndicesMessage');
+      expect(screen.getByTestId('noIndicesMessage')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('clearIndicesSearch'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('noIndicesMessage')).not.toBeInTheDocument();
       });
-      component.update();
-
-      expect(exists('noIndicesMessage')).toBe(true);
-
-      find('clearIndicesSearch').simulate('click');
-      component.update();
-
-      expect(exists('noIndicesMessage')).toBe(false);
     });
   });
 
@@ -230,20 +210,17 @@ describe('<IndexManagementHome />', () => {
       ]);
       httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexNameA, indexNameB] });
 
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
+      await renderHome(httpSetup);
 
-      const { component, find } = testBed;
-      component.update();
+      await screen.findByTestId('indexTable');
 
-      find('indexTableRowCheckbox')
-        .at(0)
-        .simulate('change', { target: { checked: true } });
+      // Select first index
+      const tableActions = createIndexTableActions();
+      await tableActions.selectIndexAt(0);
     });
 
     test('should be able to refresh index', async () => {
-      const { actions } = testBed;
+      const actions = createIndexTableActions();
 
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('refreshIndexMenuButton');
@@ -252,193 +229,221 @@ describe('<IndexManagementHome />', () => {
         `${API_BASE_PATH}/indices/refresh`,
         expect.anything()
       );
-      expect(httpSetup.post).toHaveBeenCalledWith(
-        `${API_BASE_PATH}/indices/reload`,
-        expect.anything()
-      );
+      await waitFor(() => {
+        expect(httpSetup.post).toHaveBeenCalledWith(
+          `${API_BASE_PATH}/indices/reload`,
+          expect.anything()
+        );
+      });
     });
 
     test('should be able to close an open index', async () => {
-      const { actions } = testBed;
+      const actions = createIndexTableActions();
 
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('closeIndexMenuButton');
 
-      // After the index is closed, we imediately do a reload. So we need to expect to see
+      // After the index is closed, we immediately do a reload. So we need to expect to see
       // a reload server call also.
       expect(httpSetup.post).toHaveBeenCalledWith(
         `${API_BASE_PATH}/indices/close`,
         expect.anything()
       );
-      expect(httpSetup.post).toHaveBeenCalledWith(
-        `${API_BASE_PATH}/indices/reload`,
-        expect.anything()
-      );
+      await waitFor(() => {
+        expect(httpSetup.post).toHaveBeenCalledWith(
+          `${API_BASE_PATH}/indices/reload`,
+          expect.anything()
+        );
+      });
     });
 
     test('should be able to open a closed index', async () => {
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-      const { component, find, actions } = testBed;
-
-      component.update();
-
-      find('indexTableRowCheckbox')
-        .at(1)
-        .simulate('change', { target: { checked: true } });
+      const actions = createIndexTableActions();
+      // Select the closed index (second one) - table already rendered from beforeEach
+      await actions.selectIndexAt(1);
 
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('openIndexMenuButton');
 
-      // After the index is opened, we imediately do a reload. So we need to expect to see
+      // After the index is opened, we immediately do a reload. So we need to expect to see
       // a reload server call also.
       expect(httpSetup.post).toHaveBeenCalledWith(
         `${API_BASE_PATH}/indices/open`,
         expect.anything()
       );
-      expect(httpSetup.post).toHaveBeenCalledWith(
-        `${API_BASE_PATH}/indices/reload`,
-        expect.anything()
-      );
+      await waitFor(() => {
+        expect(httpSetup.post).toHaveBeenCalledWith(
+          `${API_BASE_PATH}/indices/reload`,
+          expect.anything()
+        );
+      });
     });
 
     test('should be able to flush index', async () => {
-      const { actions } = testBed;
+      const actions = createIndexTableActions();
 
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('flushIndexMenuButton');
 
-      // After the index is flushed, we imediately do a reload. So we need to expect to see
+      // After the index is flushed, we immediately do a reload. So we need to expect to see
       // a reload server call also.
       expect(httpSetup.post).toHaveBeenCalledWith(
         `${API_BASE_PATH}/indices/flush`,
         expect.anything()
       );
-      expect(httpSetup.post).toHaveBeenCalledWith(
-        `${API_BASE_PATH}/indices/reload`,
-        expect.anything()
-      );
+      await waitFor(() => {
+        expect(httpSetup.post).toHaveBeenCalledWith(
+          `${API_BASE_PATH}/indices/reload`,
+          expect.anything()
+        );
+      });
     });
 
     test("should be able to clear an index's cache", async () => {
-      const { actions } = testBed;
+      const actions = createIndexTableActions();
 
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('clearCacheIndexMenuButton');
 
-      // After the index cache is cleared, we imediately do a reload. So we need to expect to see
+      // After the index cache is cleared, we immediately do a reload. So we need to expect to see
       // a reload server call also.
       expect(httpSetup.post).toHaveBeenCalledWith(
         `${API_BASE_PATH}/indices/clear_cache`,
         expect.anything()
       );
-      expect(httpSetup.post).toHaveBeenCalledWith(
-        `${API_BASE_PATH}/indices/reload`,
-        expect.anything()
-      );
+      await waitFor(() => {
+        expect(httpSetup.post).toHaveBeenCalledWith(
+          `${API_BASE_PATH}/indices/reload`,
+          expect.anything()
+        );
+      });
     });
 
     test('should be able to force merge an index', async () => {
-      const { actions, exists } = testBed;
+      const actions = createIndexTableActions();
 
       httpRequestsMockHelpers.setReloadIndicesResponse([{ ...indexMockA, isFrozen: false }]);
 
       // Open context menu
       await actions.clickManageContextMenuButton();
       // Check that the force merge action exists for the current index and merge it
-      expect(exists('forcemergeIndexMenuButton')).toBe(true);
+      expect(screen.queryByTestId('forcemergeIndexMenuButton')).toBeInTheDocument();
       await actions.clickContextMenuOption('forcemergeIndexMenuButton');
 
       await actions.clickModalConfirm();
 
-      // After the index force merged, we imediately do a reload. So we need to expect to see
+      // After the index force merged, we immediately do a reload. So we need to expect to see
       // a reload server call also.
       expect(httpSetup.post).toHaveBeenCalledWith(
         `${API_BASE_PATH}/indices/forcemerge`,
         expect.anything()
       );
-      expect(httpSetup.post).toHaveBeenCalledWith(
-        `${API_BASE_PATH}/indices/reload`,
-        expect.anything()
-      );
+      await waitFor(() => {
+        expect(httpSetup.post).toHaveBeenCalledWith(
+          `${API_BASE_PATH}/indices/reload`,
+          expect.anything()
+        );
+      });
     });
   });
 
   describe('Index stats', () => {
     const indexName = 'test';
 
-    beforeEach(async () => {
+    // Note: No beforeEach render here - each test manages its own render
+    // to avoid double-render issues with different configs
+
+    test('renders the table column with all index stats when enableIndexStats is true', async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
 
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
+      await renderHome(httpSetup);
 
-      const { component } = testBed;
+      await screen.findByTestId('indexTable');
 
-      component.update();
+      // Verify index name is rendered
+      expect(screen.getByTestId('indexTableCell-name')).toHaveTextContent('test');
+
+      // Verify stats columns are rendered (health, status are only shown when enableIndexStats is true)
+      expect(screen.getByTestId('indexTableCell-health')).toBeInTheDocument();
+      expect(screen.getByTestId('indexTableCell-status')).toHaveTextContent('open');
+      expect(screen.getByTestId('indexTableCell-primary')).toHaveTextContent('1');
+      expect(screen.getByTestId('indexTableCell-replica')).toHaveTextContent('1');
+      expect(screen.getByTestId('indexTableCell-documents')).toBeInTheDocument();
+      expect(screen.getByTestId('indexTableCell-size')).toHaveTextContent('156.00 KB');
     });
 
-    test('renders the table column with all index stats when enableIndexStats is true', () => {
-      const { table } = testBed;
-      const { tableCellsValues } = table.getMetaData('indexTable');
+    test('renders only size and docs count when enableIndexStats is false, enableSizeAndDocCount is true', async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
 
-      expect(tableCellsValues).toEqual([
-        ['', 'test', 'green', 'open', '1', '1', '10,000', '156kb', ''],
-      ]);
+      await renderHome(httpSetup, {
+        appServicesContext: {
+          config: {
+            enableLegacyTemplates: true,
+            enableIndexActions: true,
+            enableIndexStats: false,
+            enableSizeAndDocCount: true,
+          },
+        },
+      });
+
+      await screen.findByTestId('indexTable');
+
+      // Name should always be shown
+      expect(screen.getByTestId('indexTableCell-name')).toHaveTextContent('test');
+      // Size and docs should be shown
+      expect(screen.getByTestId('indexTableCell-documents')).toBeInTheDocument();
+      expect(screen.getByTestId('indexTableCell-size')).toHaveTextContent('156.00 KB');
+      // Health, status, primary, replica should NOT be shown (enableIndexStats is false)
+      expect(screen.queryByTestId('indexTableCell-health')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('indexTableCell-status')).not.toBeInTheDocument();
     });
 
-    describe('renders only size and docs count when enableIndexStats is false, enableSizeAndDocCount is true', () => {
-      beforeEach(async () => {
-        await act(async () => {
-          testBed = await setup(httpSetup, {
-            config: {
-              enableLegacyTemplates: true,
-              enableIndexActions: true,
-              enableIndexStats: false,
-              enableSizeAndDocCount: true,
-            },
-          });
-        });
+    test('renders no index stats when enableIndexStats is false, enableSizeAndDocCount is false', async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
 
-        const { component } = testBed;
-
-        component.update();
+      await renderHome(httpSetup, {
+        appServicesContext: {
+          config: {
+            enableLegacyTemplates: true,
+            enableIndexActions: true,
+            enableIndexStats: false,
+            enableSizeAndDocCount: false,
+          },
+        },
       });
 
-      test('hides some index stats information from table', async () => {
-        const { table } = testBed;
-        const { tableCellsValues } = table.getMetaData('indexTable');
+      await screen.findByTestId('indexTable');
 
-        expect(tableCellsValues).toEqual([['', 'test', '10,000', '156kb', '']]);
-      });
+      // Name should always be shown
+      expect(screen.getByTestId('indexTableCell-name')).toHaveTextContent('test');
+      // No stats columns should be shown
+      expect(screen.queryByTestId('indexTableCell-health')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('indexTableCell-status')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('indexTableCell-documents')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('indexTableCell-size')).not.toBeInTheDocument();
     });
 
-    describe('renders no index stats when enableIndexStats is false, enableSizeAndDocCount is false', () => {
-      beforeEach(async () => {
-        await act(async () => {
-          testBed = await setup(httpSetup, {
-            config: {
-              enableLegacyTemplates: true,
-              enableIndexActions: true,
-              enableIndexStats: false,
-              enableSizeAndDocCount: false,
-            },
-          });
-        });
-
-        const { component } = testBed;
-
-        component.update();
+    test('shows a warning callout when an index enricher fails', async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+      const originalEnrichers = [...indexDataEnricher.enrichers];
+      indexDataEnricher.add({
+        name: 'test enricher',
+        fn: async () => ({ source: 'test enricher', error: true }),
       });
 
-      test('hides all index stats information from table', async () => {
-        const { table } = testBed;
-        const { tableCellsValues } = table.getMetaData('indexTable');
+      try {
+        await renderHome(httpSetup);
 
-        expect(tableCellsValues).toEqual([['', 'test', '']]);
-      });
+        await screen.findByTestId('indexTable');
+        expect(screen.getByTestId('indexTableCell-name')).toHaveTextContent('test');
+
+        const callout = await screen.findByTestId('indicesEnrichmentErrorCallout');
+        expect(callout).toHaveTextContent('test enricher');
+      } finally {
+        // Restore enrichers to avoid polluting other tests.
+        (indexDataEnricher as any)._enrichers.length = 0;
+        originalEnrichers.forEach((enricher) => indexDataEnricher.add(enricher));
+      }
     });
   });
 
@@ -454,65 +459,76 @@ describe('<IndexManagementHome />', () => {
         },
       ]);
 
-      await act(async () => {
-        testBed = await setup(httpSetup, {
-          history: createMemoryHistory(),
-        });
-      });
-      testBed.component.update();
+      await renderHome(httpSetup);
+
+      await screen.findByTestId('indexTable');
     });
 
     test('shows the create index button', async () => {
-      const { exists } = testBed;
-
-      expect(exists('createIndexButton')).toBe(true);
+      expect(screen.getByTestId('createIndexButton')).toBeInTheDocument();
     });
 
     test('can open & close the create index modal', async () => {
-      const { exists, actions } = testBed;
+      const actions = createCreateIndexActions();
 
       await actions.clickCreateIndexButton();
 
-      expect(exists('createIndexNameFieldText')).toBe(true);
+      expect(screen.getByTestId('createIndexNameFieldText')).toBeInTheDocument();
 
       await actions.clickCreateIndexCancelButton();
 
-      expect(exists('createIndexNameFieldText')).toBe(false);
+      await waitFor(() => {
+        expect(screen.queryByTestId('createIndexNameFieldText')).not.toBeInTheDocument();
+      });
     });
 
     test('creating an index', async () => {
-      const { component, exists, find, actions } = testBed;
+      const actions = createCreateIndexActions();
 
       expect(httpSetup.get).toHaveBeenCalledTimes(1);
-      expect(httpSetup.get).toHaveBeenNthCalledWith(1, '/api/index_management/indices');
+      expect(httpSetup.get).toHaveBeenNthCalledWith(
+        1,
+        '/api/index_management/indices_get',
+        expect.anything()
+      );
 
       await actions.clickCreateIndexButton();
 
-      expect(exists('createIndexNameFieldText')).toBe(true);
-      await act(async () => {
-        find('createIndexNameFieldText').simulate('change', { target: { value: indexNameB } });
-      });
-      component.update();
+      expect(screen.getByTestId('createIndexNameFieldText')).toBeInTheDocument();
+      actions.setIndexName(indexNameB);
 
       await actions.selectIndexMode('indexModeLookupOption');
 
       await actions.clickCreateIndexSaveButton();
 
       // Saves the index with expected name
-      expect(httpSetup.put).toHaveBeenCalledWith(`${INTERNAL_API_BASE_PATH}/indices/create`, {
-        body: '{"indexName":"test-index-b","indexMode":"lookup"}',
+      await waitFor(() => {
+        expect(httpSetup.put).toHaveBeenCalledWith(`${INTERNAL_API_BASE_PATH}/indices/create`, {
+          body: '{"indexName":"test-index-b","indexMode":"lookup"}',
+        });
       });
-      // It refresh indices after saving
-      expect(httpSetup.get).toHaveBeenCalledTimes(2);
-      expect(httpSetup.get).toHaveBeenNthCalledWith(2, '/api/index_management/indices');
+      // It refreshes indices after saving; wait so the table's async state update settles (avoids act warnings).
+      await waitFor(() => {
+        expect(httpSetup.get).toHaveBeenCalledTimes(2);
+        expect(httpSetup.get).toHaveBeenNthCalledWith(
+          2,
+          '/api/index_management/indices_get',
+          expect.anything()
+        );
+      });
+
+      // Creating triggers modal state updates; wait for modal to close so updates don't land after test end.
+      await waitFor(() => {
+        expect(screen.queryByTestId('createIndexNameFieldText')).not.toBeInTheDocument();
+      });
     });
   });
 
   describe('extensions service', () => {
     it('displays an empty list content if set via extensions service', async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([]);
-      await act(async () => {
-        testBed = await setup(httpSetup, {
+      await renderHome(httpSetup, {
+        appServicesContext: {
           services: {
             extensionsService: {
               _emptyListContent: {
@@ -522,11 +538,10 @@ describe('<IndexManagementHome />', () => {
               },
             },
           },
-        });
+        },
       });
-      testBed.component.update();
 
-      expect(testBed.component.text()).toContain('Empty list content');
+      expect(await screen.findByText('Empty list content')).toBeInTheDocument();
     });
 
     it('renders additional columns registered via extensions service', async () => {
@@ -539,8 +554,8 @@ describe('<IndexManagementHome />', () => {
           },
         },
       ]);
-      await act(async () => {
-        testBed = await setup(httpSetup, {
+      await renderHome(httpSetup, {
+        appServicesContext: {
           services: {
             extensionsService: {
               _columns: [
@@ -562,16 +577,17 @@ describe('<IndexManagementHome />', () => {
               ],
             },
           },
-        });
+        },
       });
-      testBed.component.update();
 
-      const text = testBed.component.text();
-      expect(text).toContain('ILM column 1');
-      expect(text).toContain('hot phase');
-      expect(text).toContain('ILM column 2');
-      expect(text).toContain('ILM managed');
+      await screen.findByTestId('indexTable');
+
+      expect(screen.getByText('ILM column 1')).toBeInTheDocument();
+      expect(screen.getByText('hot phase')).toBeInTheDocument();
+      expect(screen.getByText('ILM column 2')).toBeInTheDocument();
+      expect(screen.getByText('ILM managed')).toBeInTheDocument();
     });
+
     it('renders to search_indices index details page', async () => {
       const indexName = 'search-index';
       httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
@@ -582,25 +598,75 @@ describe('<IndexManagementHome />', () => {
 
       const navigateToUrl = jest.fn();
       const url = `/app/elasticsearch/indices/index_details/${indexName}`;
-      testBed = await setup(httpSetup, {
-        core: {
-          application: { navigateToUrl },
-        },
-        history: createMemoryHistory(),
-        services: {
-          extensionsService: {
-            _indexDetailsPageRoute: {
-              renderRoute: () => {
-                return url;
+      await renderHome(httpSetup, {
+        appServicesContext: {
+          core: {
+            application: { navigateToUrl },
+          },
+          services: {
+            extensionsService: {
+              _indexDetailsPageRoute: {
+                renderRoute: () => {
+                  return url;
+                },
               },
             },
           },
         },
       });
-      testBed.component.update();
-      await testBed.actions.clickIndexNameAt(0);
+
+      await screen.findByTestId('indexTable');
+
+      const tableActions = createIndexTableActions();
+      await tableActions.clickIndexNameAt(0);
+
       expect(navigateToUrl).toHaveBeenCalledTimes(1);
       expect(navigateToUrl).toHaveBeenCalledWith(url);
+    });
+
+    it('applies enricher updates to indices via alias when applyToAliases is true', async () => {
+      const indexName = 'concrete-index';
+      const aliasName = 'my-alias';
+
+      httpRequestsMockHelpers.setLoadIndicesResponse([
+        { ...createNonDataStreamIndex(indexName), aliases: [aliasName] },
+      ]);
+
+      const originalEnrichers = [...indexDataEnricher.enrichers];
+      indexDataEnricher.add({
+        name: 'alias enricher',
+        fn: async () => ({
+          source: 'alias enricher',
+          applyToAliases: true,
+          indices: [{ name: aliasName, isRollupIndex: true }],
+        }),
+      });
+
+      try {
+        await renderHome(httpSetup, {
+          appServicesContext: {
+            services: {
+              extensionsService: {
+                _columns: [
+                  {
+                    fieldName: 'isRollupIndex',
+                    label: 'Rollup flag',
+                    order: 999,
+                    render: (index: Index) => (index.isRollupIndex ? <div>ROLLUP</div> : null),
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+        await screen.findByTestId('indexTable');
+        expect(await screen.findByText('ROLLUP')).toBeInTheDocument();
+      } finally {
+        // Restore enrichers to avoid polluting other tests.
+        (indexDataEnricher as any)._enrichers.length = 0;
+        originalEnrichers.forEach((enricher) => indexDataEnricher.add(enricher));
+      }
     });
   });
 });

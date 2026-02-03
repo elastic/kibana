@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const POST_SIEM_READINESS_TASK_API_PATH = '/api/siem_readiness/post_task';
-export const GET_LATEST_SIEM_READINESS_TASKS_API_PATH = '/api/siem_readiness/get_latest_tasks';
+export const GET_SIEM_READINESS_CATEGORIES_API_PATH = '/api/siem_readiness/get_categories';

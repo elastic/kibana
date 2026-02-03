@@ -17,7 +17,7 @@ import React, { useRef } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getBrushTimeBounds } from '../../../../utils/slo/duration';
 import type { TimeBounds } from '../../types';
-import { openInDiscover } from '../../utils/get_discover_link';
+import { openInDiscover } from '../../utils/discover_links/get_discover_link';
 import type { GetPreviewDataResponseResults } from './types';
 
 export interface Props {

@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { CloudProvider } from '@kbn/fleet-plugin/public';
 import { TABS } from './constants';
 
 export interface CloudConnectorTab {
@@ -21,7 +22,7 @@ export interface CloudConnectorTabsProps {
   selectedTabId: string;
   onTabClick: (tab: CloudConnectorTab) => void;
   isEditPage: boolean;
-  cloudProvider: string | undefined;
+  cloudProvider?: CloudProvider;
   cloudConnectorsCount: number;
 }
 
@@ -43,7 +44,10 @@ export const CloudConnectorTabs: React.FC<CloudConnectorTabsProps> = ({
               onTabClick(tab);
             }}
             isSelected={tab.id === selectedTabId}
-            disabled={tab.id === TABS.EXISTING_CONNECTION && !cloudConnectorsCount}
+            disabled={
+              (tab.id === TABS.EXISTING_CONNECTION && !cloudConnectorsCount) ||
+              (isEditPage && tab.id === TABS.NEW_CONNECTION)
+            }
           >
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorTabs.tab"
