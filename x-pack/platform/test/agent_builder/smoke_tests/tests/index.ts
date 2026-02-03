@@ -80,7 +80,10 @@ export default function (providerContext: FtrProviderContext) {
         }
 
         // Step 1: Enable CCM
-        log.info('Setting up Cloud Connected Mode (CCM) for EIS...');
+        const keyPreview = eisCcmApiKey.substring(0, 8);
+        log.info(
+          `Setting up Cloud Connected Mode (CCM) for EIS... (key starts with: ${keyPreview}...)`
+        );
         await es.transport.request({
           method: 'PUT',
           path: '/_inference/_ccm',
@@ -143,12 +146,29 @@ export default function (providerContext: FtrProviderContext) {
         }
       });
 
-      it('should have discovered and created connectors for EIS models', function () {
+      it('should have discovered and created connectors for EIS models', async function () {
         if (!eisCcmApiKey) {
           this.skip();
         }
         if (eisChatModels.length === 0) {
-          throw new Error('No EIS connectors created. Check CCM setup and EIS QA connectivity.');
+          // Fetch current endpoints for debugging
+          const response = await es.inference.get({ inference_id: '_all' });
+          const endpoints = response.endpoints as EisInferenceEndpoint[];
+          const chatCompletionEndpoints = endpoints.filter(
+            (ep) => ep.task_type === 'chat_completion'
+          );
+          const elasticEndpoints = endpoints.filter((ep) => ep.service === 'elastic');
+
+          const keyPreview = eisCcmApiKey ? eisCcmApiKey.substring(0, 8) : 'NOT_SET';
+          throw new Error(
+            `No EIS connectors created.\n` +
+              `CCM API key starts with: ${keyPreview}...\n` +
+              `Total endpoints: ${endpoints.length}\n` +
+              `Chat completion endpoints: ${chatCompletionEndpoints.length}\n` +
+              `Elastic service endpoints: ${elasticEndpoints.length}\n` +
+              `Endpoint services: ${[...new Set(endpoints.map((ep) => ep.service))].join(', ')}\n` +
+              `Check CCM setup and EIS QA connectivity.`
+          );
         }
         log.info(`✅ ${eisChatModels.length} EIS connectors ready for testing`);
       });
