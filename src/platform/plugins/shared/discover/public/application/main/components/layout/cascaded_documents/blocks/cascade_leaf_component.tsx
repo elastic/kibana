@@ -27,17 +27,18 @@ import {
 import type { CascadeRowCellNestedVirtualizationAnchorProps } from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord, SortOrder } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useDiscoverServices } from '../../../../../../hooks/use_discover_services';
 
 interface ESQLDataCascadeLeafCellProps
-  extends Omit<
+  extends Pick<
       UnifiedDataTableProps,
-      | 'columns'
-      | 'loadingState'
-      | 'onSetColumns'
-      | 'sampleSizeState'
-      | 'onUpdateSampleSize'
-      | 'expandedDoc'
-      | 'setExpandedDoc'
+      | 'dataGridDensityState'
+      | 'showTimeCol'
+      | 'dataView'
+      | 'showKeyboardShortcuts'
+      | 'renderDocumentView'
+      | 'externalCustomRenderers'
+      | 'onUpdateDataGridDensity'
     >,
     CascadeRowCellNestedVirtualizationAnchorProps<DataTableRecord> {
   cellData: DataTableRecord[];
@@ -224,7 +225,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
     dataGridDensityState,
     showTimeCol,
     dataView,
-    services,
     showKeyboardShortcuts,
     renderDocumentView,
     externalCustomRenderers,
@@ -233,6 +233,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
     getScrollOffset,
     onUpdateDataGridDensity,
   }: ESQLDataCascadeLeafCellProps) => {
+    const services = useDiscoverServices();
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
     const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(
       dataGridDensityState ?? DataGridDensity.COMPACT
