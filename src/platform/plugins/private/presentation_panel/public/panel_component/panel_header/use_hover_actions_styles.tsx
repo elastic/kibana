@@ -87,7 +87,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
 
   const containerStyles = useMemo(() => {
     const editModeOutline = `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseProminent}`;
-    const viewModeOutline = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`;
+    const viewModeOutline = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`;
 
     return css`
       // the border style can be overwritten by parents who define --hoverActionsBorderStyle; otherwise, default to either
