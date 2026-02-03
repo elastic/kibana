@@ -15,6 +15,7 @@ import { ParamsList } from './global_params/params_list';
 import { DataRetentionTab } from './data_retention';
 import { useSettingsBreadcrumbs } from './use_settings_breadcrumbs';
 import { ManagePrivateLocations } from './private_locations/manage_private_locations';
+import { Snippets } from './snippets/snippets';
 
 export const SettingsPage = () => {
   useSettingsBreadcrumbs();
@@ -25,6 +26,8 @@ export const SettingsPage = () => {
     switch (tabId) {
       case 'api-keys':
         return <ProjectAPIKeys />;
+      case 'snippets':
+        return <Snippets />;
       case 'private-locations':
         return <ManagePrivateLocations />;
       case 'data-retention':

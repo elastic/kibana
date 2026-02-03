@@ -11,6 +11,9 @@ import { EuiTabbedContent, EuiFormRow } from '@elastic/eui';
 import { CodeEditor } from './code_editor';
 import { ScriptRecorderFields } from './script_recorder_fields';
 import { ConfigKey, MonacoEditorLangId } from '../types';
+import { useSnippetsSuggestions } from '../../settings/snippets/use_snippets_suggestions';
+import { useGetSnippets } from '../../settings/snippets/hooks';
+import { useParamsSuggestions } from '../../settings/snippets/use_params_suggestions';
 
 enum SourceType {
   INLINE = 'syntheticsBrowserInlineConfig',
@@ -36,6 +39,9 @@ export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: Sou
     value.type === 'inline' ? SourceType.INLINE : SourceType.SCRIPT_RECORDER
   );
   const [config, setConfig] = useState<SourceConfig>(value);
+  const { snippets = [] } = useGetSnippets();
+  useSnippetsSuggestions({ snippets });
+  useParamsSuggestions();
 
   useEffect(() => {
     onChange(config);
@@ -97,6 +103,7 @@ export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: Sou
             })}
             id="javascript"
             languageId={MonacoEditorLangId.JAVASCRIPT}
+            // suggestionProvider={syntheticsSuggestionProvider}
             onChange={(code) => {
               setConfig((prevConfig) => ({ ...prevConfig, script: code }));
               onBlur(ConfigKey.SOURCE_INLINE);
