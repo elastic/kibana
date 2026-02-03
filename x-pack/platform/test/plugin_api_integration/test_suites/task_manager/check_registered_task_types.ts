@@ -231,6 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
         'security:trial-companion-milestone',
         'session_cleanup',
         'slo:bulk-delete-task',
+        'slo:health-scan-task',
         'slo:stale-instances-cleanup-task',
         'slo:temp-summary-cleanup-task',
         'streams_description_generation',
