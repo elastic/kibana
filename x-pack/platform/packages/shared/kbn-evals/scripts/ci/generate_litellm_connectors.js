@@ -206,6 +206,29 @@ async function fetchTeams(baseUrl, apiKey) {
   );
 }
 
+async function fetchModelInfoMappings(baseUrl, apiKey) {
+  // This endpoint returns the LiteLLM model table, including internal provider mappings
+  // (e.g. `litellm_params.model`). Some deployments may restrict it; treat as optional.
+  const info = await httpJsonMaybe(`${baseUrl}/model/info`, apiKey, {
+    allowStatuses: [401, 403, 404],
+  });
+
+  if (!info || !info.data || !Array.isArray(info.data)) {
+    return new Map();
+  }
+
+  const map = new Map();
+  for (const entry of info.data) {
+    if (!entry || typeof entry !== 'object') continue;
+    const publicName = entry.model_name;
+    const mapped = entry.litellm_params && entry.litellm_params.model;
+    if (typeof publicName === 'string' && typeof mapped === 'string' && publicName.length) {
+      map.set(publicName, mapped);
+    }
+  }
+  return map;
+}
+
 async function main() {
   const argv = parseArgs(process.argv.slice(2), {
     defaults: {
@@ -255,6 +278,7 @@ async function main() {
     die(`No models found for team_id=${teamId}. Unable to generate connectors.`);
   }
 
+  const modelInfoMappings = await fetchModelInfoMappings(baseUrl, apiKey);
   const chatUrl = `${baseUrl}/v1/chat/completions`;
   const connectors = {};
   const modelSet = new Set(modelNames.map((m) => String(m)));
@@ -274,7 +298,11 @@ async function main() {
     // Workaround: if a non-`-chat` sibling model exists, prefer it for the actual request model
     // while keeping the connector id stable (so CI-configured EVALUATION_CONNECTOR_ID stays valid).
     const fullModelSibling = fullModel.endsWith('-chat') ? fullModel.replace(/-chat$/, '') : null;
+    const mappedInternal = modelInfoMappings.get(fullModel);
+    const looksLikeLatestMapping =
+      typeof mappedInternal === 'string' && /-latest$/.test(mappedInternal.trim());
     const requestModel =
+      looksLikeLatestMapping &&
       fullModelSibling &&
       (modelSet.has(fullModelSibling) || modelSet.has(fullModelSibling.replace(modelPrefix, '')))
         ? fullModelSibling
