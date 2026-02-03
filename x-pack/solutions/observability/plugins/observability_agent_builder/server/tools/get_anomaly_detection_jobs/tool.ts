@@ -46,7 +46,7 @@ const getAnomalyDetectionJobsSchema = z.object({
     .max(20)
     .optional()
     .describe('Specific ML job IDs to query. Omit to include all jobs in this space.'),
-  limit: z
+  jobsLimit: z
     .number()
     .int()
     .min(1)
@@ -125,7 +125,7 @@ When to use:
     }> => {
       const {
         jobIds,
-        limit: jobsLimit,
+        jobsLimit,
         anomalyRecordsLimit,
         minAnomalyScore,
         includeExplanation,
