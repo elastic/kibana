@@ -24,6 +24,7 @@ export async function getToolHandler({
   logger,
   jobIds = [],
   jobsLimit,
+  minAnomalyScore,
   rangeStart,
   rangeEnd,
 }: {
@@ -34,6 +35,7 @@ export async function getToolHandler({
   logger: Logger;
   jobIds?: string[];
   jobsLimit: number;
+  minAnomalyScore: number;
   rangeStart: string;
   rangeEnd: string;
 }) {
@@ -71,6 +73,7 @@ export async function getToolHandler({
       const topAnomalies = await getTopAnomalyRecords({
         mlSystem,
         jobId: job.job_id,
+        minAnomalyScore,
         start: rangeStart,
         end: rangeEnd,
       });
@@ -101,11 +104,13 @@ export async function getToolHandler({
 async function getTopAnomalyRecords({
   mlSystem,
   jobId,
+  minAnomalyScore,
   start,
   end,
 }: {
   mlSystem: MlSystem;
   jobId: string;
+  minAnomalyScore: number;
   start: string;
   end: string;
 }) {
@@ -123,6 +128,11 @@ async function getTopAnomalyRecords({
             {
               range: {
                 timestamp: { gte: start, lte: end },
+              },
+            },
+            {
+              range: {
+                record_score: { gte: minAnomalyScore },
               },
             },
           ],

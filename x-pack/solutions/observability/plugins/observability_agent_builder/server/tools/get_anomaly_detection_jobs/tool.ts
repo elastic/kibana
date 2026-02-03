@@ -23,6 +23,7 @@ export const OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID =
   'observability.get_anomaly_detection_jobs';
 
 const DEFAULT_JOBS_LIMIT = 10;
+const DEFAULT_MIN_ANOMALY_SCORE = 50;
 const DEFAULT_TIME_RANGE = {
   start: 'now-24h',
   end: 'now',
@@ -51,6 +52,14 @@ const getAnomalyDetectionJobsSchema = z.object({
     .max(25)
     .default(DEFAULT_JOBS_LIMIT)
     .describe('Maximum number of jobs to return.'),
+  minAnomalyScore: z
+    .number()
+    .min(0)
+    .max(100)
+    .default(DEFAULT_MIN_ANOMALY_SCORE)
+    .describe(
+      'Minimum anomaly score threshold (0-100). Higher scores indicate more severe anomalies. Default is 50 to filter noise.'
+    ),
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
 });
 
@@ -86,7 +95,13 @@ When to use:
     ): Promise<{
       results: (GetAnomalyDetectionJobsToolResult | Omit<ErrorResult, 'tool_result_id'>)[];
     }> => {
-      const { jobIds, limit: jobsLimit, start: rangeStart, end: rangeEnd } = toolParams;
+      const {
+        jobIds,
+        limit: jobsLimit,
+        minAnomalyScore,
+        start: rangeStart,
+        end: rangeEnd,
+      } = toolParams;
       const scopedEsClient = esClient.asCurrentUser;
       const mlClient = scopedEsClient.ml;
 
@@ -99,6 +114,7 @@ When to use:
           logger,
           jobIds,
           jobsLimit,
+          minAnomalyScore,
           rangeStart,
           rangeEnd,
         });
