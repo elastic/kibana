@@ -1972,6 +1972,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/fixtures/es_archives/logstash_functional @elastic/appex-qa
 /x-pack/platform/test/fixtures/es_archives/event_log_legacy_ids @elastic/appex-qa
 /src/platform/test/functional/fixtures/kbn_archiver/stress_test.json @elastic/appex-qa
+/src/platform/test/functional/fixtures/kbn_archiver/stress_test_esql.json @elastic/appex-qa
 /src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view.json @elastic/appex-qa
 /src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern.json @elastic/appex-qa
 /src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb.json @elastic/appex-qa
