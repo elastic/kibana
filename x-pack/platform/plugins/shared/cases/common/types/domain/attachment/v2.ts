@@ -12,6 +12,12 @@ import { AttachmentRt } from './v1';
 
 /**
  * Payload for Unified Attachments
+ * - type: always required
+ * - metadata: always optional
+ * - Either attachmentId or data (or both) must be present
+ *   - attachmentId: for references to external entities (alerts, events, external references)
+ *   - data: for content/state (user comments, persistable state)
+ *   - Both: persistable state attachments use both (typeId -> attachmentId, state -> data)
  */
 export const UnifiedAttachmentPayloadRt = rt.intersection([
   rt.strict({
@@ -19,11 +25,21 @@ export const UnifiedAttachmentPayloadRt = rt.intersection([
   }),
   rt.exact(
     rt.partial({
-      attachmentId: rt.string,
-      data: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
       metadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
     })
   ),
+  rt.union([
+    rt.strict({
+      attachmentId: rt.string,
+      data: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
+    }),
+    rt.strict({
+      attachmentId: rt.string,
+    }),
+    rt.strict({
+      data: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
+    }),
+  ]),
 ]);
 
 /**

@@ -142,38 +142,89 @@ describe('Unified Attachments', () => {
       });
     });
 
-    it('accepts request without attachmentId', () => {
+    it('accepts request with only data', () => {
       const requestWithoutAttachmentId = {
-        type: 'lens',
+        type: 'user',
         data: {
-          attributes: {
-            title: 'My Visualization',
-          },
-        },
-        metadata: {
-          description: 'A test visualization',
+          content: 'My comment',
         },
       };
 
       const query = UnifiedAttachmentPayloadRt.decode(requestWithoutAttachmentId);
-
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: requestWithoutAttachmentId,
       });
     });
 
-    it('accepts request with only type', () => {
+    it('accepts request with only attachmentId', () => {
+      const requestWithOnlyAttachmentId = {
+        type: 'lens',
+        attachmentId: 'attachment-123',
+      };
+
+      const query = UnifiedAttachmentPayloadRt.decode(requestWithOnlyAttachmentId);
+
+      expect(query._tag).toBe('Right');
+      if (query._tag === 'Right') {
+        expect(query.right).toMatchObject(requestWithOnlyAttachmentId);
+        expect(query.right).not.toHaveProperty('metadata');
+      }
+    });
+
+    it('accepts request with attachmentId and metadata', () => {
+      const requestWithAttachmentIdAndMetadata = {
+        type: 'lens',
+        attachmentId: 'attachment-123',
+        metadata: {
+          description: 'A test visualization',
+        },
+      };
+
+      const query = UnifiedAttachmentPayloadRt.decode(requestWithAttachmentIdAndMetadata);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: requestWithAttachmentIdAndMetadata,
+      });
+    });
+    it('accepts request without metadata', () => {
+      const requestWithoutMetadata = {
+        type: 'lens',
+        attachmentId: 'attachment-123',
+        data: {
+          attributes: {
+            title: 'My Visualization',
+          },
+        },
+      };
+
+      const query = UnifiedAttachmentPayloadRt.decode(requestWithoutMetadata);
+
+      expect(query._tag).toBe('Right');
+      if (query._tag === 'Right') {
+        expect(query.right).toMatchObject({
+          type: 'lens',
+          attachmentId: 'attachment-123',
+          data: {
+            attributes: {
+              title: 'My Visualization',
+            },
+          },
+        });
+        // metadata should not be present when not provided
+        expect(query.right).not.toHaveProperty('metadata');
+      }
+    });
+
+    it('rejects request with neither attachmentId nor data', () => {
       const requestWithOnlyType = {
         type: 'lens',
       };
 
       const query = UnifiedAttachmentPayloadRt.decode(requestWithOnlyType);
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: requestWithOnlyType,
-      });
+      expect(query._tag).toBe('Left');
     });
   });
 
@@ -219,8 +270,58 @@ describe('Unified Attachments', () => {
       });
     });
 
-    it('accepts request without optional fields', () => {
-      const requestWithoutOptional = {
+    it('accepts request with only attachmentId', () => {
+      const requestWithOnlyAttachmentId = {
+        type: 'lens',
+        attachmentId: 'attachment-123',
+        created_at: '2019-11-25T22:32:30.608Z',
+        created_by: {
+          full_name: 'elastic',
+          email: 'testemail@elastic.co',
+          username: 'elastic',
+        },
+        updated_at: null,
+        updated_by: null,
+        pushed_at: null,
+        pushed_by: null,
+      };
+
+      const query = UnifiedAttachmentAttributesRt.decode(requestWithOnlyAttachmentId);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: requestWithOnlyAttachmentId,
+      });
+    });
+
+    it('accepts request with only data', () => {
+      const requestWithOnlyData = {
+        type: 'user',
+        data: {
+          content: 'My comment',
+        },
+        created_at: '2019-11-25T22:32:30.608Z',
+        created_by: {
+          full_name: 'elastic',
+          email: 'testemail@elastic.co',
+          username: 'elastic',
+        },
+        updated_at: null,
+        updated_by: null,
+        pushed_at: null,
+        pushed_by: null,
+      };
+
+      const query = UnifiedAttachmentAttributesRt.decode(requestWithOnlyData);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: requestWithOnlyData,
+      });
+    });
+
+    it('rejects request with neither attachmentId nor data', () => {
+      const requestWithoutRequired = {
         type: 'lens',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
@@ -234,12 +335,9 @@ describe('Unified Attachments', () => {
         pushed_by: null,
       };
 
-      const query = UnifiedAttachmentAttributesRt.decode(requestWithoutOptional);
+      const query = UnifiedAttachmentAttributesRt.decode(requestWithoutRequired);
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: requestWithoutOptional,
-      });
+      expect(query._tag).toBe('Left');
     });
   });
 
@@ -287,8 +385,62 @@ describe('Unified Attachments', () => {
       });
     });
 
-    it('accepts request without optional fields', () => {
-      const requestWithoutOptional = {
+    it('accepts request with only attachmentId', () => {
+      const requestWithOnlyAttachmentId = {
+        type: 'lens',
+        attachmentId: 'attachment-123',
+        created_at: '2019-11-25T22:32:30.608Z',
+        created_by: {
+          full_name: 'elastic',
+          email: 'testemail@elastic.co',
+          username: 'elastic',
+        },
+        updated_at: null,
+        updated_by: null,
+        pushed_at: null,
+        pushed_by: null,
+        id: 'attachment-id-123',
+        version: 'WzEwMCwxXQ==',
+      };
+
+      const query = UnifiedAttachmentRt.decode(requestWithOnlyAttachmentId);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: requestWithOnlyAttachmentId,
+      });
+    });
+
+    it('accepts request with only data', () => {
+      const requestWithOnlyData = {
+        type: 'user',
+        data: {
+          content: 'My comment',
+        },
+        created_at: '2019-11-25T22:32:30.608Z',
+        created_by: {
+          full_name: 'elastic',
+          email: 'testemail@elastic.co',
+          username: 'elastic',
+        },
+        updated_at: null,
+        updated_by: null,
+        pushed_at: null,
+        pushed_by: null,
+        id: 'attachment-id-123',
+        version: 'WzEwMCwxXQ==',
+      };
+
+      const query = UnifiedAttachmentRt.decode(requestWithOnlyData);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: requestWithOnlyData,
+      });
+    });
+
+    it('rejects request with neither attachmentId nor data', () => {
+      const requestWithoutRequired = {
         type: 'lens',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
@@ -304,12 +456,9 @@ describe('Unified Attachments', () => {
         version: 'WzEwMCwxXQ==',
       };
 
-      const query = UnifiedAttachmentRt.decode(requestWithoutOptional);
+      const query = UnifiedAttachmentRt.decode(requestWithoutRequired);
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: requestWithoutOptional,
-      });
+      expect(query._tag).toBe('Left');
     });
   });
 
@@ -317,6 +466,7 @@ describe('Unified Attachments', () => {
     it('accepts UnifiedAttachmentRt', () => {
       const unifiedAttachment = {
         type: 'lens',
+        attachmentId: 'attachment-123',
         created_at: '2019-11-25T22:32:30.608Z',
         created_by: {
           full_name: 'elastic',

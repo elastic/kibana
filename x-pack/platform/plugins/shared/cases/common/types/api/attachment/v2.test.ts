@@ -52,9 +52,10 @@ describe('Unified Attachments', () => {
       });
     });
 
-    it('accepts v2 unified attachment request without optional fields', () => {
+    it('accepts v2 unified attachment request with only attachmentId', () => {
       const v2Request = {
         type: 'lens',
+        attachmentId: 'attachment-123',
       };
 
       const query = CombinedAttachmentRequestRt.decode(v2Request);
@@ -63,6 +64,34 @@ describe('Unified Attachments', () => {
         _tag: 'Right',
         right: v2Request,
       });
+    });
+
+    it('accepts v2 unified attachment request with only data', () => {
+      const v2Request = {
+        type: 'user',
+        data: {
+          content: {
+            title: 'My comment',
+          },
+        },
+      };
+
+      const query = CombinedAttachmentRequestRt.decode(v2Request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: v2Request,
+      });
+    });
+
+    it('rejects v2 unified attachment request with neither attachmentId nor data', () => {
+      const v2Request = {
+        type: 'lens',
+      };
+
+      const query = CombinedAttachmentRequestRt.decode(v2Request);
+
+      expect(query._tag).toBe('Left');
     });
 
     it('removes foo:bar attributes from v1 request', () => {
@@ -117,6 +146,32 @@ describe('Unified Attachments', () => {
           },
         },
       });
+    });
+
+    it('accepts v1 request even with extra v2 fields (v1 type ignores extra fields)', () => {
+      const requestWithExtraFields = {
+        comment: 'This is a comment',
+        type: AttachmentType.user,
+        owner: 'cases',
+        attachmentId: 'attachment-123',
+        data: {
+          content: 'My comment',
+        },
+      };
+
+      const query = CombinedAttachmentRequestRt.decode(requestWithExtraFields);
+
+      expect(query._tag).toBe('Right');
+      if (query._tag === 'Right') {
+        // v1 type matches and strips extra fields
+        expect(query.right).toMatchObject({
+          comment: 'This is a comment',
+          type: AttachmentType.user,
+          owner: 'cases',
+        });
+        expect(query.right).not.toHaveProperty('attachmentId');
+        expect(query.right).not.toHaveProperty('data');
+      }
     });
   });
 
@@ -220,8 +275,11 @@ describe('Unified Attachments', () => {
           foo: 'bar',
         },
         {
-          type: 'lens',
+          type: 'user',
           attachmentId: 'attachment-123',
+          data: {
+            content: 'My comment',
+          },
           foo: 'bar',
         },
       ];
@@ -237,8 +295,11 @@ describe('Unified Attachments', () => {
             owner: 'cases',
           },
           {
-            type: 'lens',
+            type: 'user',
             attachmentId: 'attachment-123',
+            data: {
+              content: 'My comment',
+            },
           },
         ],
       });

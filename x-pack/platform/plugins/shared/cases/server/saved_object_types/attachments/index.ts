@@ -10,6 +10,9 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../common/constants';
 
 /**
+ * Saved object type for unified attachments
+ * This is the v2 version of the comments saved object type (CASE_COMMENT_SAVED_OBJECT).
+ *
  * The comments in the mapping indicate the additional properties that are stored in Elasticsearch but are not indexed.
  * Remove these comments when https://github.com/elastic/kibana/issues/152756 is resolved.
  */
