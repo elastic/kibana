@@ -31,15 +31,15 @@ export const apiTest = base.extend<{}, { profilingHelper: ProfilingHelper }>({
         );
 
         if (!apmPolicyData) {
-          await apiServices.fleet.agent_policies.create(
-            'Elastic APM',
-            'default',
-            false, // sysMonitoring
-            {
+          await apiServices.fleet.agent_policies.create({
+            policyName: 'Elastic APM',
+            policyNamespace: 'default',
+            sysMonitoring: false,
+            params: {
               id: APM_AGENT_POLICY_ID,
               description: 'Elastic APM agent policy created via Fleet API',
-            }
-          );
+            },
+          });
           log.info(`APM agent policy '${APM_AGENT_POLICY_ID}' is created`);
         } else {
           log.info(`APM agent policy '${APM_AGENT_POLICY_ID}' already exists`);

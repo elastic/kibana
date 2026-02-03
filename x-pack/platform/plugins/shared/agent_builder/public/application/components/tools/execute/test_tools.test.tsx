@@ -197,7 +197,7 @@ describe('ToolTestFlyout date-time picker', () => {
 
   it('converts date picker onChange to ISO string format', async () => {
     const newDate = '01/15/2024 10:30 AM';
-    const expectedIso = moment(newDate, 'MM/DD/YYYY hh:mm A').toISOString(); // Covert local date-time to ISO string
+    const expectedIso = moment(newDate, 'MM/DD/YYYY hh:mm A').toISOString(); // Convert local date-time to ISO string
 
     const { container } = renderComponent();
     const datePicker = await waitForDatePicker(container);

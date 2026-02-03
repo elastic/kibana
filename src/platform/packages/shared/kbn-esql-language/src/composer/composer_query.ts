@@ -886,6 +886,12 @@ export class ComposerQuery {
           case 'boolean': {
             return synth.bool(value);
           }
+          case 'object': {
+            if (Array.isArray(value)) {
+              return synth.list(value as synth.ListPrimitive[]);
+            }
+            break;
+          }
         }
       }
 

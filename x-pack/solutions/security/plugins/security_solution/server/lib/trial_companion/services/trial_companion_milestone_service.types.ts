@@ -11,7 +11,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { TrialCompanionMilestoneRepository } from './trial_companion_milestone_repository.types';
 import type { DetectorF } from '../types';
@@ -19,6 +19,7 @@ import type { DetectorF } from '../types';
 export interface TrialCompanionMilestoneServiceSetup {
   taskManager: TaskManagerSetupContract;
   enabled: boolean;
+  telemetry: AnalyticsServiceSetup;
 }
 
 export interface TrialCompanionMilestoneServiceStart {

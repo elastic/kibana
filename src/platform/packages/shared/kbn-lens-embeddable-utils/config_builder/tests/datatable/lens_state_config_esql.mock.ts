@@ -66,7 +66,7 @@ export const singleMetricESQLDatatableAttributes: LensAttributes = {
     needsRefresh: false,
   },
   visualizationType: 'lnsDatatable',
-  version: 1,
+  version: 2,
 };
 
 export const singleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
@@ -165,7 +165,7 @@ export const singleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
     },
   },
   visualizationType: 'lnsDatatable',
-  version: 1,
+  version: 2,
 };
 
 export const multipleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
@@ -317,7 +317,7 @@ export const multipleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
     },
   },
   visualizationType: 'lnsDatatable',
-  version: 1,
+  version: 2,
 };
 
 export const fullConfigESQLDatatableAttributes: LensAttributes = {
@@ -532,7 +532,7 @@ export const fullConfigESQLDatatableAttributes: LensAttributes = {
     },
   },
   visualizationType: 'lnsDatatable',
-  version: 1,
+  version: 2,
 };
 
 export const sortedByTransposedMetricColumnESQLDatatableAttributes: LensAttributes = {
@@ -683,5 +683,5 @@ export const sortedByTransposedMetricColumnESQLDatatableAttributes: LensAttribut
       },
     },
   },
-  version: 1,
+  version: 2,
 };
