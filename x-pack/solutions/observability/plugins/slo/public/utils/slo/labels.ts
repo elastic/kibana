@@ -34,7 +34,7 @@ export const INDICATOR_APM_LATENCY_DESCRIPTION = i18n.translate(
   'xpack.slo.indicators.apmLatency.description',
   {
     defaultMessage:
-      'An APM latency SLO defines a response-time objective for application requests and monitors compliance over time to detect performance degradation and error budget burn.',
+      'Define an SLO based on the latency of requests for your service so you can take action if your service is not handling requests quickly enough.',
   }
 );
 
@@ -46,7 +46,7 @@ export const INDICATOR_APM_AVAILABILITY_DESCRIPTION = i18n.translate(
   'xpack.slo.indicators.apmAvailability.description',
   {
     defaultMessage:
-      'An APM availability SLO defines an error-rate objective for application requests and monitors compliance over time to detect reliability issues and error budget burn.',
+      'Define an SLO based on % of successful requests for your service so you can take action if your service is not meeting your availability targets.',
   }
 );
 
