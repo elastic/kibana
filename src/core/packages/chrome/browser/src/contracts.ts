@@ -289,5 +289,5 @@ export interface ChromeStart {
   /**
    * Used only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers
    */
-  wrapInChromeProvider(component: ReactNode): ReactNode;
+  withProvider(component: ReactNode): ReactNode;
 }

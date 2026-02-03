@@ -515,7 +515,7 @@ export class ChromeService {
         return <Sidebar />;
       },
 
-      wrapInChromeProvider: (children: ReactNode) => {
+      withProvider: (children: ReactNode) => {
         // TODO: we can have more chrome context values here in the future
         return <SidebarServiceProvider value={{ sidebar }}>{children}</SidebarServiceProvider>;
       },

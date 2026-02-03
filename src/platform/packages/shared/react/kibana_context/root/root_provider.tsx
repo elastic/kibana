@@ -37,7 +37,7 @@ export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
   /** `CoreEnv` from core */
   coreEnv?: CoreEnv;
   /** Chrome service for wrapping children in Chrome context providers */
-  chrome?: Pick<ChromeStart, 'wrapInChromeProvider'>;
+  chrome?: Pick<ChromeStart, 'withProvider'>;
 }
 
 /**
@@ -62,7 +62,7 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
   ...props
 }) => {
   const hasEuiProvider = useIsNestedEuiProvider();
-  const wrappedChildren = chrome?.wrapInChromeProvider?.(children) ?? children;
+  const wrappedChildren = chrome?.withProvider?.(children) ?? children;
   const rootContextProvider = (
     <KibanaErrorBoundaryProvider analytics={props.analytics}>
       <SharedUXRouterContext.Provider value={{ services: { executionContext } }}>
