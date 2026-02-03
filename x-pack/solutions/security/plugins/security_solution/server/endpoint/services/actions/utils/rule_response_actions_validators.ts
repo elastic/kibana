@@ -231,7 +231,7 @@ const validateEndpointKillSuspendProcessResponseAction = ({ config, command }: P
     );
   }
 
-  if (!config.overwrite && !config.field.trim()) {
+  if (!config.overwrite && !(config.field ?? '').trim()) {
     throw new CustomHttpRequestError(
       `Invalid [${command}] response action configuration: 'field' is required when 'overwrite' is 'false'`,
       400
