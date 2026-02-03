@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/**/*",
     "../../../../../typings/**/*",
     ".storybook/**/*.ts",
     ".storybook/**/*.tsx",
