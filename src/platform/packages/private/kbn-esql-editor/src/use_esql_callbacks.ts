@@ -113,21 +113,44 @@ export const useEsqlCallbacks = ({
         // Check if there's a stale entry and clear it
         clearCacheWhenOld(esqlFieldsCache, `${queryToExecute} | limit 0`);
         const timeRange = data.query.timefilter.timefilter.getTime();
-        return (
-          (await memoizedFieldsFromESQL({
+        const [fields, dataView] = await Promise.all([
+          memoizedFieldsFromESQL({
             esqlQuery: queryToExecute,
             search: data.search.search,
             timeRange,
             signal: abortControllerRef.current.signal,
             variables: esqlService?.variablesService?.esqlVariables,
             dropNullColumns: true,
-          }).result) || []
+          }).result,
+          // Enrich fields with timeSeriesDimension for PromQL label suggestions.
+          getESQLAdHocDataview({
+            dataViewsService: data.dataViews,
+            query: queryToExecute,
+            http: core.http,
+          }).catch(() => undefined),
+        ]);
+
+        if (!dataView) {
+          return fields || [];
+        }
+
+        const dimensionFields = new Set(
+          dataView.fields
+            .filter(({ timeSeriesDimension }) => timeSeriesDimension)
+            .map(({ name }) => name)
         );
+
+        return (fields || []).map((field) => ({
+          ...field,
+          timeSeriesDimension: dimensionFields.has(field.name),
+        }));
       }
       return [];
     },
     [
+      core.http,
       data.query.timefilter.timefilter,
+      data.dataViews,
       data.search.search,
       esqlFieldsCache,
       memoizedFieldsFromESQL,
