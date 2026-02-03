@@ -858,12 +858,18 @@ export class Authenticator {
 
     let newSessionValue: Readonly<SessionValue> | null;
     if (!existingSessionValue) {
-      newSessionValue = await this.session.create(request, {
-        username: authenticationResult.user?.username,
-        userProfileId,
-        provider,
-        state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
-      });
+      const startTime = performance.now();
+
+      newSessionValue = await this.session.create(
+        request,
+        {
+          username: authenticationResult.user?.username,
+          userProfileId,
+          provider,
+          state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
+        },
+        authenticationResult.stateCookieOptions
+      );
 
       // Log successful `user_login` event if a new authenticated session was created or an existing session was overwritten and
       // the username or authentication provider changed. When username or authentication provider changes the session
