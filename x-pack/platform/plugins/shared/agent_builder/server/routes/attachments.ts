@@ -55,6 +55,20 @@ function isAttachmentReferencedInRounds(
   return false;
 }
 
+const hasClientId = (attachment: { client_id?: string; versions: Array<{ data: unknown }> }) => {
+  if (attachment.client_id) {
+    return true;
+  }
+
+  return attachment.versions.some((version) => {
+    if (!version?.data || typeof version.data !== 'object') {
+      return false;
+    }
+
+    return Boolean((version.data as { client_id?: string }).client_id);
+  });
+};
+
 export function registerAttachmentRoutes({
   router,
   getInternalServices,
@@ -409,6 +423,14 @@ export function registerAttachmentRoutes({
         }
 
         if (permanent) {
+          if (hasClientId(existing)) {
+            return response.conflict({
+              body: {
+                message: `Cannot permanently delete attachment '${attachmentId}' because it was created from flyout configuration`,
+              },
+            });
+          }
+
           // Check if attachment is referenced in rounds
           if (isAttachmentReferencedInRounds(attachmentId, conversation.rounds)) {
             return response.conflict({

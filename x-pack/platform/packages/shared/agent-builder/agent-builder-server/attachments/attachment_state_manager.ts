@@ -219,6 +219,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       version,
       type: attachment.type as AttachmentType,
       data: resolved ? { ...attachmentVersion, resolved } : attachmentVersion,
+      ...(resolved ? { raw_data: attachmentVersion.data } : {}),
     };
   }
 
@@ -484,7 +485,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       return data;
     }
 
-    return definition.resolve(
+    const resolved = definition.resolve(
       {
         id,
         type,
@@ -492,6 +493,38 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       },
       context
     );
+
+    if (resolved === undefined) {
+      return data;
+    }
+
+    const existingResolved = data?.data;
+    const isSameResolved =
+      existingResolved !== undefined &&
+      JSON.stringify(existingResolved) === JSON.stringify(resolved);
+
+    if (isSameResolved) {
+      return data;
+    }
+
+    const newVersionNumber = attachment.current_version + 1;
+    const newContentHash = hashContent(resolved);
+    const newTokens = estimateTokens(resolved);
+    const newVersion: AttachmentVersion = {
+      ...data!,
+      version: newVersionNumber,
+      data: resolved,
+      raw_data: data?.raw_data,
+      created_at: new Date().toISOString(),
+      content_hash: newContentHash,
+      estimated_tokens: newTokens,
+    };
+
+    attachment.versions.push(newVersion);
+    attachment.current_version = newVersionNumber;
+    this.dirty = true;
+
+    return newVersion;
   }
 
   getTotalTokenEstimate(): number {
