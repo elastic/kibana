@@ -17,13 +17,13 @@ export interface CreateOptions {
   throwIfExists?: boolean;
 }
 
-export const createIndex = (
+export const createIndex = async (
   esClient: EsClient,
   index: IndexName,
   options: CreateOptions = { throwIfExists: true }
 ) => {
   try {
-    esClient.indices.create({ index });
+    await esClient.indices.create({ index });
   } catch (error) {
     if (
       !options.throwIfExists &&
@@ -35,9 +35,8 @@ export const createIndex = (
   }
 };
 
-export const deleteIndex = (esClient: EsClient, index: IndexName) => {
+export const deleteIndex = (esClient: EsClient, index: IndexName) =>
   esClient.indices.delete({ index }, { ignore: [404] });
-};
 
 export const putComponentTemplate = (
   esClient: EsClient,
@@ -46,25 +45,22 @@ export const putComponentTemplate = (
   esClient.cluster.putComponentTemplate(request);
 };
 
-export const deleteComponentTemplate = (esClient: EsClient, name: Names) => {
+export const deleteComponentTemplate = (esClient: EsClient, name: Names) =>
   esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
-};
 
-export const putIndexTemplate = (esClient: EsClient, template: IndicesPutIndexTemplateRequest) => {
+export const putIndexTemplate = (esClient: EsClient, template: IndicesPutIndexTemplateRequest) =>
   esClient.indices.putIndexTemplate(template);
-};
 
-export const deleteIndexTemplate = (esClient: EsClient, name: Names) => {
+export const deleteIndexTemplate = (esClient: EsClient, name: Names) =>
   esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
-};
 
-export const createDataStream = (
+export const createDataStream = async (
   esClient: EsClient,
   name: IndexName,
   options: CreateOptions = { throwIfExists: true }
 ) => {
   try {
-    esClient.indices.createDataStream({ name });
+    await esClient.indices.createDataStream({ name });
   } catch (error) {
     if (
       !options.throwIfExists &&
@@ -76,6 +72,5 @@ export const createDataStream = (
   }
 };
 
-export const deleteDataStream = (esClient: EsClient, name: IndexName) => {
+export const deleteDataStream = (esClient: EsClient, name: IndexName) =>
   esClient.indices.deleteDataStream({ name }, { ignore: [404] });
-};
