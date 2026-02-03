@@ -220,6 +220,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
 
         // Add visualization attachments - resolve them inline as lens panels
         if (addVisualizationAttachments && addVisualizationAttachments.length > 0) {
+          let addedCount = 0;
           for (const attachmentId of addVisualizationAttachments) {
             try {
               // Resolve the visualization config from the attachment
@@ -243,14 +244,17 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
                   title: vizConfig.title,
                 },
               });
+              addedCount++;
             } catch (error) {
               logger.error(
-                `Error resolving visualization attachment "${attachmentId}": ${getErrorMessage(error)}`
+                `Error resolving visualization attachment "${attachmentId}": ${getErrorMessage(
+                  error
+                )}`
               );
             }
           }
           logger.debug(
-            `Added ${addVisualizationAttachments.length} visualization attachments to dashboard`
+            `Successfully added ${addedCount}/${addVisualizationAttachments.length} visualization attachments to dashboard`
           );
         }
 
