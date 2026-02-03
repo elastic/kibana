@@ -23,7 +23,7 @@ export async function update(
   const savedObject = await core.savedObjects.client.update<StoredMarkdownState>(
     MARKDOWN_SAVED_OBJECT_TYPE,
     id,
-    updateBody.data,
+    updateBody,
     {
       /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
       mergeAttributes: false,

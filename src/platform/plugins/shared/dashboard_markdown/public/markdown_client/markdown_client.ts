@@ -37,7 +37,7 @@ export const markdownClient = {
   create: async (markdownState: MarkdownState) => {
     return coreServices.http.post<MarkdownCreateResponseBody>(MARKDOWN_API_PATH, {
       version: MARKDOWN_API_VERSION,
-      body: JSON.stringify({ markdownState }),
+      body: JSON.stringify(markdownState),
     });
   },
   delete: async (id: string): Promise<DeleteResult> => {
@@ -86,9 +86,7 @@ export const markdownClient = {
       `${MARKDOWN_API_PATH}/${id}`,
       {
         version: MARKDOWN_API_VERSION,
-        body: JSON.stringify({
-          data: markdownState,
-        }),
+        body: JSON.stringify(markdownState),
       }
     );
     cache.delete(id);
