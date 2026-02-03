@@ -122,15 +122,19 @@ function buildVisualizationState(config: LensXYConfig): XYState {
               ...(yAxis.lineThickness ? { lineWidth: yAxis.lineThickness } : {}),
             })),
           } satisfies XYReferenceLineLayerConfig;
-        case 'series':
+        case 'series': {
+          const layerBreakdown = layer.breakdown
+            ? Array.isArray(layer.breakdown)
+              ? layer.breakdown
+              : [layer.breakdown]
+            : [];
           return {
             layerId: `layer_${i}`,
             layerType: 'data',
             xAccessor: `x_${ACCESSOR}${i}`,
-            ...(layer.breakdown
+            ...(layerBreakdown.length > 0
               ? {
-                  // TODO fix this to allow multi-terms in esql
-                  splitAccessors: [`${ACCESSOR}${i}_breakdown`],
+                  splitAccessors: layerBreakdown.map((_, breakdownIndex) => `${ACCESSOR}${i}_breakdown_${breakdownIndex}`),
                 }
               : {}),
             accessors: layer.yAxis.map((_, index) => `${ACCESSOR}${i}_${index}`),
@@ -140,6 +144,7 @@ function buildVisualizationState(config: LensXYConfig): XYState {
               color: yAxis.seriesColor,
             })),
           } as XYDataLayerConfig;
+        }
       }
     }),
   };
@@ -153,14 +158,21 @@ function hasFormatParams(yAxis: LensSeriesLayer['yAxis'][number]) {
 }
 
 function getValueColumns(layer: LensSeriesLayer, i: number) {
-  if (layer.breakdown && typeof layer.breakdown !== 'string') {
+  const layerBreakdown = layer.breakdown
+    ? Array.isArray(layer.breakdown)
+      ? layer.breakdown
+      : [layer.breakdown]
+    : [];
+
+  // For ES|QL queries, breakdown must be field names (strings)
+  if (layerBreakdown.some((bd) => typeof bd !== 'string')) {
     throw new Error('`breakdown` must be a field name when not using index source');
   }
 
   return [
-    ...(layer.breakdown
-      ? [getValueColumn(`${ACCESSOR}${i}_breakdown`, layer.breakdown as string)]
-      : []),
+    ...layerBreakdown.map((bd, breakdownIndex) =>
+      getValueColumn(`${ACCESSOR}${i}_breakdown_${breakdownIndex}`, bd as string)
+    ),
     ...getXValueColumn(layer.xAxis, i),
     ...layer.yAxis.map((yAxis, index) => {
       const params = hasFormatParams(yAxis)
@@ -239,12 +251,15 @@ function buildFormulaLayer(
     }
 
     if (layer.breakdown) {
-      const columnName = `${ACCESSOR}${i}_breakdown`;
-      const breakdownColumn = getBreakdownColumn({
-        options: layer.breakdown,
-        dataView,
+      const layerBreakdown = Array.isArray(layer.breakdown) ? layer.breakdown : [layer.breakdown];
+      layerBreakdown.forEach((breakdown, breakdownIndex) => {
+        const columnName = `${ACCESSOR}${i}_breakdown_${breakdownIndex}`;
+        const breakdownColumn = getBreakdownColumn({
+          options: breakdown,
+          dataView,
+        });
+        addLayerColumn(resultLayer, columnName, breakdownColumn, true);
       });
-      addLayerColumn(resultLayer, columnName, breakdownColumn, true);
     }
 
     return resultLayer;

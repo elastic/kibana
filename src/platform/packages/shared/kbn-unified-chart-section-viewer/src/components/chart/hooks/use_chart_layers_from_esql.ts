@@ -93,11 +93,7 @@ export const useChartLayersFromEsql = ({
         seriesType,
         xAxis,
         yAxis,
-        breakdown: hasDimensions
-          ? queryInfo.dimensions.length === 1
-            ? queryInfo.dimensions[0]
-            : DIMENSIONS_COLUMN
-          : undefined,
+        breakdown: hasDimensions ? queryInfo.dimensions : undefined,
       },
     ];
   }, [columns, queryInfo.dimensions, seriesType, color, unit]);
