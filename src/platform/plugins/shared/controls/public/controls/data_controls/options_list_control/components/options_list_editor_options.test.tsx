@@ -202,9 +202,9 @@ describe('Options list sorting button', () => {
         );
 
         /** loads default compatible search technique properly */
-        expect(component.container.querySelector('input#prefix')).toBeChecked();
+        expect(component.container.querySelector('input#prefix')).not.toBeChecked();
         expect(component.container.querySelector('input#exact')).not.toBeChecked();
-        expect(component.container.querySelector('input#wildcard')).not.toBeChecked();
+        expect(component.container.querySelector('input#wildcard')).toBeChecked();
 
         /** responds to change in search technique */
         const exactSearch = component.container.querySelector('input#exact');

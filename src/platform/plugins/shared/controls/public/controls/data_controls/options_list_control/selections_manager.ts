@@ -13,7 +13,7 @@ import type { OptionsListDSLControlState, OptionsListSelection } from '@kbn/cont
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 
-import { OPTIONS_LIST_DEFAULT_SORT } from './constants';
+import { OPTIONS_LIST_DEFAULT_SORT } from '@kbn/controls-constants';
 
 function areSelectedOptionsEqual(
   a: OptionsListSelection[] | undefined,
