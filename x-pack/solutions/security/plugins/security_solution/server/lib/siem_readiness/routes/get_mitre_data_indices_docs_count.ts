@@ -78,44 +78,25 @@ async function getIndicesDocumentCounts(
   esClient: ElasticsearchClient,
   indices: string[]
 ): Promise<IndexDocCount[]> {
-  // If indices is empty, return immediately to avoid ES calls
-  if (indices.length === 0) return [];
+  return Promise.all(
+    indices.map(async (index) => {
+      try {
+        const { count } = await esClient.count({
+          index,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+        });
 
-  const promises = indices.map(async (index): Promise<IndexDocCount> => {
-    try {
-      // Direct count call is more efficient than exists + count
-      const { count } = await esClient.count({
-        index,
-        ignore_unavailable: true, // Returns 0 if index doesn't exist
-        allow_no_indices: true,
-      });
-
-      return {
-        index,
-        docCount: count ?? 0,
-        exists: true, // Note: with ignore_unavailable, it's hard to distinguish "empty" vs "missing" without a second call
-      };
-    } catch (error) {
-      // Handle the case where the index truly doesn't exist or permissions are missing
-      const is404 = error.meta?.statusCode === 404;
-      return {
-        index,
-        docCount: 0,
-        exists: false,
-        error: is404 ? undefined : error.message,
-      };
-    }
-  });
-
-  const results = await Promise.allSettled(promises);
-  return results.map((res, idx) =>
-    res.status === 'fulfilled'
-      ? res.value
-      : {
-          index: indices[idx],
+        return { index, docCount: count ?? 0, exists: true };
+      } catch (error: unknown) {
+        const esError = error as { meta?: { statusCode?: number }; message?: string };
+        return {
+          index,
           docCount: 0,
           exists: false,
-          error: res.reason?.message,
-        }
+          error: esError.meta?.statusCode === 404 ? undefined : esError.message,
+        };
+      }
+    })
   );
 }

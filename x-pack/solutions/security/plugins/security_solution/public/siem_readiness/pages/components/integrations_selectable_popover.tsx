@@ -65,7 +65,7 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
       onChange={handleChange}
     >
       {(list, search) => (
-        <div style={{ width: `calc(${euiTheme.base} * 15)` }}>
+        <div style={{ width: '240px' }}>
           <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
           {list}
         </div>
@@ -135,7 +135,7 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
         onChange={handleChange}
       >
         {(list, search) => (
-          <div style={{ width: `calc(${euiTheme.base} * 15)` }}>
+          <div style={{ width: '240px' }}>
             <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
             {list}
           </div>
