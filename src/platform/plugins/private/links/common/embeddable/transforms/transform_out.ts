@@ -8,19 +8,21 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
+import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
 import type { LinksEmbeddableState, StoredLinksEmbeddableState } from '../types';
 import { type StoredLinksByValueState910, isLegacyState, transformLegacyState } from './bwc';
-import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
-import { injectReferences } from './references';
 import { getOptions } from './get_options';
+import { injectReferences } from './references';
 
 export function transformOut(
   storedState: LinksEmbeddableState | StoredLinksEmbeddableState | StoredLinksByValueState910,
   references?: Reference[]
 ) {
-  const state = isLegacyState(storedState)
+  const latestState = isLegacyState(storedState)
     ? transformLegacyState(storedState)
     : (storedState as StoredLinksEmbeddableState);
+  const state = transformTitlesOut(latestState);
 
   // inject saved object reference when by-reference
   const savedObjectRef = (references ?? []).find(

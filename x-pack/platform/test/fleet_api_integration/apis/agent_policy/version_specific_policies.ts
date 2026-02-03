@@ -49,7 +49,8 @@ export default function (providerContext: FtrProviderContext) {
       previousMinorVersion = `${previousMinor}.0`;
     });
 
-    describe('package level agent version condition', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/250457
+    describe.skip('package level agent version condition', () => {
       let agentPolicyWithPPId: string;
       let packagePolicyId: string;
       const agentId = `agent-${Date.now()}`;
@@ -167,7 +168,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('template level agent version condition', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/250460
+    describe.skip('template level agent version condition', () => {
       let agentPolicyWithPPId: string;
       let packagePolicyId: string;
       const agentId = `agent-${Date.now()}`;
