@@ -229,7 +229,8 @@ export async function createSingleCompileConfig(
   const pluginEntries = collectPluginEntries(repoRoot, outputRoot, plugins);
 
   // Create unified entry that imports and registers all plugins
-  const unifiedEntryPath = createUnifiedEntry(wrapperDir, pluginEntries);
+  // Uses relative paths for cache portability across machines
+  const unifiedEntryPath = createUnifiedEntry(wrapperDir, repoRoot, pluginEntries);
 
   if (log) {
     log.info(`Unified compilation: ${pluginEntries.length} bundles (core + ${plugins.length} plugins)`);
@@ -422,6 +423,17 @@ export async function createSingleCompileConfig(
             // Version includes hash of this config file for reliable invalidation
             // RSPack's buildDependencies may not trigger on TypeScript file changes
             version: `v8-${dist ? 'prod' : 'dev'}-${getConfigHash(repoRoot)}`,
+            // Use separate cache directories for dev vs dist to avoid stale cache issues
+            // Structure: .rspack-cache/dev or .rspack-cache/dist
+            // Clear all: rm -rf node_modules/.cache/.rspack-cache
+            storage: {
+              type: 'filesystem',
+              directory: Path.resolve(
+                repoRoot,
+                'node_modules/.cache/.rspack-cache',
+                dist ? 'dist' : 'dev'
+              ),
+            },
           }
         : false,
     },
@@ -485,15 +497,24 @@ const ENTRY_VERSION = 'v3';
 
 function createUnifiedEntry(
   wrapperDir: string,
+  repoRoot: string,
   pluginEntries: Array<{ id: string; path: string; bundleId: string }>
 ): string {
   const unifiedEntryPath = Path.join(wrapperDir, 'kibana-unified-entry.js');
 
-  // Create a hash that includes both plugin list AND config version
-  // This ensures regeneration when either plugins or config changes
+  // Convert absolute paths to relative paths for cache portability
+  // Entry wrapper is at target/.rspack-entry-wrappers/, so we need ../../ to reach repo root
+  const toRelativePath = (absolutePath: string): string => {
+    const relativePath = Path.relative(wrapperDir, absolutePath);
+    // Ensure forward slashes for consistency across platforms
+    return relativePath.replace(/\\/g, '/');
+  };
+
+  // Create a hash using RELATIVE paths so it's consistent across machines
+  // This allows cache reuse when the same plugins are present regardless of repo location
   const pluginListHash = crypto
     .createHash('md5')
-    .update(`${ENTRY_VERSION}\n${pluginEntries.map((e) => `${e.id}:${e.path}`).join('\n')}`)
+    .update(`${ENTRY_VERSION}\n${pluginEntries.map((e) => `${e.id}:${Path.relative(repoRoot, e.path)}`).join('\n')}`)
     .digest('hex');
 
   // Check if file exists and has the same hash (skip regeneration)
@@ -510,8 +531,9 @@ function createUnifiedEntry(
   const otherEntries = pluginEntries.filter(e => e.id !== 'core');
 
   // Generate SYNC imports for core (always needed first)
+  // Use relative paths for cache portability across machines
   const coreImports = coreEntries.map((entry, i) => {
-    return `import * as core_${i} from ${JSON.stringify(entry.path)};`;
+    return `import * as core_${i} from ${JSON.stringify(toRelativePath(entry.path))};`;
   }).join('\n');
 
   const coreRegistrations = coreEntries.map((entry, i) => {
@@ -520,8 +542,9 @@ function createUnifiedEntry(
 
   // Generate DIRECT async imports for each plugin (no zone chunks)
   // RSPack will naturally split based on import dependencies
+  // Use relative paths for cache portability
   const pluginImports = otherEntries.map((entry, i) => {
-    return `    import(${JSON.stringify(entry.path)}).then(m => registerPlugin('${entry.bundleId}', m))`;
+    return `    import(${JSON.stringify(toRelativePath(entry.path))}).then(m => registerPlugin('${entry.bundleId}', m))`;
   }).join(',\n');
 
   const content = `// Auto-generated unified entry for Kibana RSPack build
@@ -683,7 +706,7 @@ class PluginWatchPlugin {
           this.lastPluginHash = currentHash;
 
           // Regenerate unified entry (will update zone chunks too)
-          createUnifiedEntry(this.wrapperDir, pluginEntries);
+          createUnifiedEntry(this.wrapperDir, this.options.repoRoot, pluginEntries);
 
           // Update manifest list for watching
           this.pluginManifests = currentPlugins.map((p) =>
