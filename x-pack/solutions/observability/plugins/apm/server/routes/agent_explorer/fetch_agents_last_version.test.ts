@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-jest.mock('node-fetch');
 import Boom from '@hapi/boom';
 import { loggerMock } from '@kbn/logging-mocks';
 import { fetchAgentsLatestVersion } from './fetch_agents_latest_version';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fetchMock = require('node-fetch') as jest.Mock;
+const fetchMock = jest.spyOn(global, 'fetch');
 const logger = loggerMock.create();
 
 describe('ApmFetchAgentslatestsVersion', () => {
@@ -31,10 +29,10 @@ describe('ApmFetchAgentslatestsVersion', () => {
   describe('when url is defined', () => {
     it('should handle errors gracefully', async () => {
       fetchMock.mockResolvedValue({
-        text: () => 'Request Timeout',
+        text: async () => 'Request Timeout',
         status: 408,
         ok: false,
-      });
+      } as unknown as Response);
 
       const { data, error } = await fetchAgentsLatestVersion(logger, 'my-url');
 
@@ -45,12 +43,12 @@ describe('ApmFetchAgentslatestsVersion', () => {
 
     it('should return latest agents version', async () => {
       fetchMock.mockResolvedValue({
-        json: () => ({
+        json: async () => ({
           java: '1.1.0',
         }),
         status: 200,
         ok: true,
-      });
+      } as unknown as Response);
 
       const { data, error } = await fetchAgentsLatestVersion(logger, 'my-url');
 
