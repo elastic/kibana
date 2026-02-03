@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiCodeBlock, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +28,8 @@ interface Props {
   elasticsearchUrl: string;
   isCopyPrimaryAction: boolean;
   elasticAgentVersionInfo: ElasticAgentVersionInfo;
+  ingestionMode: IngestionMode;
+  onIngestionModeChange: (mode: IngestionMode) => void;
 }
 
 export function CommandSnippet({
@@ -36,6 +38,8 @@ export function CommandSnippet({
   elasticsearchUrl,
   isCopyPrimaryAction,
   elasticAgentVersionInfo,
+  ingestionMode,
+  onIngestionModeChange,
 }: Props) {
   const {
     services: { docLinks },
@@ -51,7 +55,6 @@ export function CommandSnippet({
     isEnabling,
     enableWiredStreams,
   } = useWiredStreamsStatus();
-  const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
   const useWiredStreams = ingestionMode === 'wired';
 
   const command = buildHelmCommand({
@@ -69,7 +72,7 @@ export function CommandSnippet({
         <>
           <WiredStreamsIngestionSelector
             ingestionMode={ingestionMode}
-            onChange={setIngestionMode}
+            onChange={onIngestionModeChange}
             streamsDocLink={docLinks?.links.observability.logsStreams}
             isWiredStreamsEnabled={isWiredStreamsEnabled}
             isEnabling={isEnabling}

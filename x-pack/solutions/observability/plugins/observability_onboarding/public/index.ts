@@ -9,6 +9,7 @@ import type {
   AnalyticsServiceStart,
   ApplicationStart,
   ChromeStart,
+  CoreStart,
   DocLinksStart,
   FeatureFlagsStart,
   HttpStart,
@@ -47,6 +48,8 @@ export interface ObservabilityOnboardingAppServices {
   application: ApplicationStart;
   http: HttpStart;
   notifications: NotificationsStart;
+  pricing: CoreStart['pricing'];
+  rendering: CoreStart['rendering'];
   share: SharePluginStart;
   context: AppContext;
   config: ConfigSchema;

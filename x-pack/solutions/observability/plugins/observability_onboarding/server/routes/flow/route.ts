@@ -416,11 +416,15 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       },
     });
 
+    const shouldWriteToLogsStreams =
+      writeToLogsStreams &&
+      installedIntegrations.some((integration) => integration.installSource === 'custom');
+
     return response.ok({
       headers: {
         'content-type': 'application/x-tar',
       },
-      body: generateAgentConfigTar(output, installedIntegrations, writeToLogsStreams),
+      body: generateAgentConfigTar(output, installedIntegrations, shouldWriteToLogsStreams),
     });
   },
 });
@@ -464,7 +468,7 @@ async function ensureInstalledIntegrations(
             (metricsEnabled || !input.type.endsWith('/metrics')),
           undefined, // prerelease
           undefined, // ignoreUnverified
-          writeToLogsStreams // injectWiredStreamsRouting
+          false // injectWiredStreamsRouting (only custom logs should route to /logs)
         );
 
         const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
