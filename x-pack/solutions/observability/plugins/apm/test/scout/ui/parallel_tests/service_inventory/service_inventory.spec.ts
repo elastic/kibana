@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 import { PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
 
