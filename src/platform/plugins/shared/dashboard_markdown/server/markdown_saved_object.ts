@@ -13,10 +13,6 @@ import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { markdownByValueEmbeddableSchema } from './schemas';
 import { APP_ICON, MARKDOWN_SAVED_OBJECT_TYPE } from '../common/constants';
 
-export type MarkdownSavedObjectAttributes = TypeOf<typeof markdownByValueEmbeddableSchema> & {
-  projectRouting?: string;
-};
-
 export const markdownSavedObjectType: SavedObjectsType = {
   name: MARKDOWN_SAVED_OBJECT_TYPE,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,

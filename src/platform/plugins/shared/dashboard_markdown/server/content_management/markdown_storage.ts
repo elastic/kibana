@@ -16,39 +16,31 @@ import type {
 import type { SavedObjectsFindResult } from '@kbn/core/server';
 
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../common/constants';
-
-import type { MarkdownItem } from '.';
-import { savedObjectToItem } from '.';
 import type { MarkdownState } from '..';
-import type { MarkdownSavedObjectAttributes } from '../markdown_saved_object';
+import { type MarkdownItem, savedObjectToItem } from './transform_utils';
 
 export class MarkdownStorage
-  implements
-    ContentStorage<
-      MarkdownState,
-      MarkdownItem,
-      MSearchConfig<MarkdownSavedObjectAttributes, MarkdownSavedObjectAttributes>
-    >
+  implements ContentStorage<MarkdownItem, MarkdownItem, MSearchConfig<MarkdownItem, MarkdownState>>
 {
   public async get(
     ctx: StorageContext,
     id: string,
     options?: object
-  ): Promise<{ item: MarkdownState; meta?: any }> {
+  ): Promise<{ item: MarkdownItem; meta?: any }> {
     throw new Error('Get not implemented.');
   }
   public async bulkGet(
     ctx: StorageContext,
     ids: string[],
     options?: object
-  ): Promise<{ hits: Array<{ item: MarkdownState; meta?: any }> }> {
+  ): Promise<{ hits: Array<{ item: MarkdownItem; meta?: any }> }> {
     throw new Error('Bulk get not implemented.');
   }
   public async create(
     ctx: StorageContext,
     data: object,
     options?: object
-  ): Promise<{ item: MarkdownState; meta?: any }> {
+  ): Promise<{ item: MarkdownItem; meta?: any }> {
     throw new Error('Create not implemented.');
   }
   public async update(
@@ -70,7 +62,7 @@ export class MarkdownStorage
     ctx: StorageContext,
     query: SearchQuery,
     options?: object
-  ): Promise<{ hits: MarkdownState[]; pagination: { total: number; cursor?: string } }> {
+  ): Promise<{ hits: MarkdownItem[]; pagination: { total: number; cursor?: string } }> {
     throw new Error('Search not implemented.');
   }
 
@@ -78,9 +70,7 @@ export class MarkdownStorage
   // only required for populating SavedObjectFinder in AddFromLibrary flyout
   mSearch = {
     savedObjectType: MARKDOWN_SAVED_OBJECT_TYPE,
-    toItemResult: (
-      ctx: StorageContext,
-      savedObject: SavedObjectsFindResult<MarkdownState>
-    ): MarkdownItem => savedObjectToItem(savedObject) as MarkdownItem,
+    toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult<MarkdownState>) =>
+      savedObjectToItem(savedObject) as MarkdownItem,
   };
 }

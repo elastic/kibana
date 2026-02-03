@@ -8,10 +8,10 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core/server';
-import type { MarkdownSavedObjectAttributes } from '../../markdown_saved_object';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { MarkdownUpdateRequestBody, MarkdownUpdateResponseBody } from './types';
 import { getMarkdownCRUResponseBody } from '../../saved_object_utils';
+import type { StoredMarkdownState } from '../..';
 
 export async function update(
   requestCtx: RequestHandlerContext,
@@ -20,7 +20,7 @@ export async function update(
 ): Promise<MarkdownUpdateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
-  const savedObject = await core.savedObjects.client.update<MarkdownSavedObjectAttributes>(
+  const savedObject = await core.savedObjects.client.update<StoredMarkdownState>(
     MARKDOWN_SAVED_OBJECT_TYPE,
     id,
     updateBody.data,

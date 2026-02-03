@@ -7,33 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import type { Reference } from '@kbn/content-management-utils/src/types';
-import type { MarkdownState } from '..';
-import type { MarkdownItem } from './types';
+import type { SavedObject } from '@kbn/core-saved-objects-api-server';
+import type { Reference, SOWithMetadata } from '@kbn/content-management-utils/src/types';
+import type { StoredMarkdownState } from '..';
 
-type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
-  references: SavedObjectReference[] | undefined;
-};
+export type MarkdownItem = SOWithMetadata<StoredMarkdownState>;
 
-interface PartialMarkdownItem {
-  attributes: Partial<MarkdownItem['attributes']>;
-  references: SavedObjectReference[] | undefined;
-}
+export function savedObjectToItem(savedObject: SavedObject<StoredMarkdownState>) {
+  const {
+    attributes,
+    references,
+    updated_at: updatedAt,
+    updated_by: updatedBy,
+    created_at: createdAt,
+    created_by: createdBy,
+    ...rest
+  } = savedObject;
 
-export function savedObjectToItem(
-  savedObject: SavedObject<MarkdownState> | PartialSavedObject<MarkdownState>
-): MarkdownItem | PartialMarkdownItem {
-  const { references, attributes, ...rest } = savedObject;
   return {
     ...rest,
+    ...attributes,
+    updatedBy,
+    updatedAt,
+    createdAt,
+    createdBy,
     attributes,
-    references: (references ?? []).filter(({ type }) => type === 'tag'),
+    references: references.filter(({ type }) => type === 'tag'),
   };
 }
 
-export function itemToAttributes(state: MarkdownState): {
-  attributes: MarkdownState;
+export function itemToAttributes(state: StoredMarkdownState): {
+  attributes: StoredMarkdownState;
   references: Reference[];
 } {
   return {
