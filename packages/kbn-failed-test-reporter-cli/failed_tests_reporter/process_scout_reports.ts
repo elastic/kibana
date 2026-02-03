@@ -36,25 +36,28 @@ const updateScoutHtmlReport = ({
   const failureCount = failure.failureCount ?? 0;
   const githubIssue = failure.githubIssue ? escape(failure.githubIssue) : undefined;
 
-  let updatedContent = fileContent.replace(
-    /id="failure-count">\d+</,
-    `id="failure-count">${failureCount}<`
-  );
-
+  let updatedContent = fileContent;
   if (githubIssue) {
+    const badgeHtml = `<span class="badge rounded-pill bg-danger" id="failure-count">${failureCount}</span>`;
+    const issueSectionHtml = `
+              <div id="github-issue-section">
+                <a id="github-issue-link" href="${githubIssue}" target="_blank">${githubIssue}</a>
+              </div>`;
+
+    updatedContent = updatedContent.replace(
+      /<strong>No failures found in tracked branches<\/strong>/,
+      '<strong>Failures in tracked branches</strong>:'
+    );
+
     updatedContent = updatedContent
-      .replace(/<div id="github-issue-section"[^>]*>/, '<div id="github-issue-section">')
-      .replace(
-        /<a id="github-issue-link"[^>]*>.*?<\/a>/,
-        `<a id="github-issue-link" href="${githubIssue}" target="_blank">${githubIssue}</a>`
-      );
-  } else {
-    updatedContent = updatedContent
-      .replace(
-        /<strong>Failures in tracked branches<\/strong>/,
-        '<strong>No failures found in tracked branches</strong>'
-      )
-      .replace(/<span class="badge rounded-pill bg-danger" id="failure-count">\d+<\/span>/, '');
+      .replace(/<span class="badge rounded-pill bg-danger" id="failure-count">.*?<\/span>/, '')
+      .replace(/<div id="github-issue-section">[\s\S]*?<\/div>/, '');
+
+    updatedContent = updatedContent.replace(
+      /<\/summary>/,
+      `</summary>
+              ${badgeHtml}${issueSectionHtml}`
+    );
   }
 
   if (updatedContent === fileContent) {

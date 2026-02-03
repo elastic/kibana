@@ -378,12 +378,8 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
         <div>
           <details>
             <summary>
-              <strong>Failures in tracked branches</strong>:
-              <span class="badge rounded-pill bg-danger" id="failure-count">0</span>
+              <strong>No failures found in tracked branches</strong>
             </summary>
-              <div id="github-issue-section" style="display: none;">
-                <a id="github-issue-link" href="" target="_blank"></a>
-              </div>
           </details>
         </div>
 
