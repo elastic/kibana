@@ -50,18 +50,25 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
           const functionCallBody = match?.[1];
 
           if (!functionCallBody) {
-            throw createInferenceInternalError(`Invalid function call syntax`);
+            // Don't fail the whole request on malformed tool-call blocks; just ignore them.
+            logger.debug('Invalid function call syntax; ignoring tool-use block');
+            return;
           }
 
-          const parsedFunctionCall = JSON.parse(functionCallBody) as {
-            name?: string;
-            input?: unknown;
-          };
+          let parsedFunctionCall: { name?: string; input?: unknown };
+          try {
+            parsedFunctionCall = JSON.parse(functionCallBody) as { name?: string; input?: unknown };
+          } catch (e) {
+            logger.debug('Failed to parse tool-use JSON; ignoring tool-use block');
+            return;
+          }
 
           logger.debug(() => 'Parsed function call:\n ' + JSON.stringify(parsedFunctionCall));
 
           if (!parsedFunctionCall.name) {
-            throw createInferenceInternalError(`Missing name for tool use`);
+            // Some upstream models occasionally emit incomplete tool-use JSON; don't 500.
+            logger.debug('Missing name for tool use; ignoring tool-use block');
+            return;
           }
           let input = parsedFunctionCall.input;
           if (typeof input === 'string') {

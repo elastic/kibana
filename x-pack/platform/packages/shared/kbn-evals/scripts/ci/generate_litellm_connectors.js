@@ -229,6 +229,12 @@ async function fetchModelInfoMappings(baseUrl, apiKey) {
   return map;
 }
 
+async function fetchModelGroupInfo(baseUrl, apiKey, modelGroup) {
+  // model_group/info returns capability metadata for a public model group, including its mode ("chat", "responses", etc.)
+  const url = `${baseUrl}/model_group/info?model_group=${encodeURIComponent(String(modelGroup))}`;
+  return await httpJsonMaybe(url, apiKey, { allowStatuses: [401, 403, 404] });
+}
+
 async function main() {
   const argv = parseArgs(process.argv.slice(2), {
     defaults: {
@@ -286,6 +292,14 @@ async function main() {
   for (const rawModelName of modelNames) {
     const modelName = String(rawModelName);
     const fullModel = modelName.startsWith(modelPrefix) ? modelName : `${modelPrefix}${modelName}`;
+
+    // Filter out non-chat models. Some model groups (e.g. Codex) are "responses" mode and will fail on /v1/chat/completions.
+    const modelGroupInfo = await fetchModelGroupInfo(baseUrl, apiKey, fullModel);
+    const mode = modelGroupInfo?.data?.[0]?.mode;
+    if (typeof mode === 'string' && mode !== 'chat') {
+      continue;
+    }
+
     const connectorId = `litellm-${sanitizeId(fullModel)}`;
     // Temporary normalization: LiteLLM can expose a *public model name* (aka a "model group")
     // like `llm-gateway/gpt-5.2-chat`, while internally routing that group to a provider-specific

@@ -996,7 +996,7 @@ describe('ES|QL query generation', () => {
         it('employees with pagination', async () => {
           await evaluateEsqlQuery({
             question:
-              'From employees, I want to sort the documents by salary, and then return 10 results per page, and then see the second page',
+              'From employees, I want to sort the documents by compensation, and then return 10 results per page, and then see the second page',
             criteria: [
               'The assistant should clearly mention that pagination is currently not supported in ES|QL',
               'IF the assistant decides to execute the query, it should correctly execute, and the Assistant should clearly mention pagination is not currently supported',
