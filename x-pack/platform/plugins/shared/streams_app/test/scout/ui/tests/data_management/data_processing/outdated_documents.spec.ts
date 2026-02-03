@@ -121,6 +121,7 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
     await pageObjects.datePicker.typeAbsoluteRange({
       from: oldDocumentsDateRange.from,
       to: oldDocumentsDateRange.to,
+      containerLocator: kqlDataSourceCard,
     });
     await pageObjects.datePicker.waitToBeHidden();
     await pageObjects.streams.closeFlyout();
@@ -155,6 +156,7 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
     await pageObjects.datePicker.typeAbsoluteRange({
       from: oldDocumentsDateRange.from,
       to: oldDocumentsDateRange.to,
+      containerLocator: kqlDataSourceCard,
     });
     await pageObjects.datePicker.waitToBeHidden();
     await pageObjects.streams.closeFlyout();
