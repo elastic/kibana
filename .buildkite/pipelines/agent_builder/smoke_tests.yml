@@ -1,6 +1,3 @@
-env:
-  FTR_GEN_AI: '1'
-  FTR_EIS_CCM: '1'
 steps:
   - label: '👨‍🔧 Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh
@@ -28,6 +25,8 @@ steps:
     command: .buildkite/scripts/steps/test/discover_eis_models.sh
     key: discover-eis-models
     timeout_in_minutes: 10
+    env:
+      FTR_EIS_CCM: '1'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -44,6 +43,8 @@ steps:
       buildkite-agent artifact download 'target/eis_models.json' . --step discover-eis-models || echo '{"models":[]}' > target/eis_models.json
       .buildkite/scripts/steps/test/ftr_configs.sh
     env:
+      FTR_GEN_AI: '1'
+      FTR_EIS_CCM: '1'
       FTR_CONFIG: 'x-pack/platform/test/agent_builder/smoke_tests/config.stateful.ts'
       FTR_CONFIG_GROUP_KEY: 'ftr-agent-builder-smoke-tests'
     label: Agent Builder API Smoke Tests
