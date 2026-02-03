@@ -34,7 +34,7 @@ export const createGetDocViewer =
             <UnifiedDocViewerObservabilityTracesOverview
               {...props}
               indexes={indexes}
-              actions={params.actions}
+              docViewActions={params.actions}
             />
           ),
         });
