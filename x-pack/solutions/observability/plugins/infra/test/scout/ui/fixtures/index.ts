@@ -9,7 +9,7 @@ import type {
   ObltPageObjects,
   ObltTestFixtures,
   ObltWorkerFixtures,
-  KibanaUrl,
+  ObltApiServicesFixture,
 } from '@kbn/scout-oblt';
 import {
   test as base,
@@ -20,32 +20,48 @@ import {
 import type { InfraDocument, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { Readable } from 'stream';
 import { InventoryPage } from './page_objects/inventory';
+import { AssetDetailsPage } from './page_objects/asset_details/asset_details';
+import { getInventoryViewsApiService, type InventoryViewApiService } from './apis/inventory_views';
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
     inventoryPage: InventoryPage;
+    assetDetailsPage: AssetDetailsPage;
   };
 }
 
-export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
+export interface ExtendedScoutWorkerFixtures extends ObltWorkerFixtures {
+  apiServices: ObltApiServicesFixture & {
+    inventoryViews: InventoryViewApiService;
+  };
+}
+
+export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFixtures>({
   pageObjects: async (
-    {
-      pageObjects,
-      page,
-      kbnUrl,
-    }: {
-      pageObjects: ExtendedScoutTestFixtures['pageObjects'];
-      page: ExtendedScoutTestFixtures['page'];
-      kbnUrl: KibanaUrl;
-    },
+    { pageObjects, page, kbnUrl },
     use: (pageObjects: ExtendedScoutTestFixtures['pageObjects']) => Promise<void>
   ) => {
     const extendedPageObjects = {
       ...pageObjects,
       inventoryPage: createLazyPageObject(InventoryPage, page, kbnUrl),
+      assetDetailsPage: createLazyPageObject(AssetDetailsPage, page, kbnUrl),
     };
 
     await use(extendedPageObjects);
+  },
+  apiServices: async (
+    { apiServices, kbnClient, log },
+    use: (apiServices: ExtendedScoutWorkerFixtures['apiServices']) => Promise<void>
+  ) => {
+    const extendedApiServices: ExtendedScoutWorkerFixtures['apiServices'] = {
+      ...apiServices,
+      inventoryViews: getInventoryViewsApiService({
+        kbnClient,
+        log,
+      }),
+    };
+
+    await use(extendedApiServices);
   },
 });
 
