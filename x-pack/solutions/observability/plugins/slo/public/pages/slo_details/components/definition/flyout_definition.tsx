@@ -35,7 +35,7 @@ import {
   toIndicatorTypeLabel,
   toTimeWindowLabel,
 } from '../../../../utils/slo/labels';
-import { SloFlyoutCard } from '../../shared_flyout/flyout_card';
+import { SloFlyoutPanel } from '../../shared_flyout/flyout_panel';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { SloDetailsDefinitionProps } from '.';
 
@@ -193,7 +193,7 @@ export function SloDetailsFlyoutDefinition({ slo }: SloDetailsDefinitionProps) {
           <EuiSpacer />
           <EuiFlexGroup direction="column" gutterSize="m">
             <EuiFlexItem css={euiContainerCSS('inline-size')}>
-              <SloFlyoutCard
+              <SloFlyoutPanel
                 title={i18n.translate('xpack.slo.flyoutDefinition.sloFlyoutCard.definitionLabel', {
                   defaultMessage: 'Definition',
                 })}
@@ -240,7 +240,7 @@ export function SloDetailsFlyoutDefinition({ slo }: SloDetailsDefinitionProps) {
                     }
                   `}
                 />
-              </SloFlyoutCard>
+              </SloFlyoutPanel>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiPanel hasShadow={false} hasBorder>
@@ -288,13 +288,13 @@ export function SloDetailsFlyoutDefinition({ slo }: SloDetailsDefinitionProps) {
               initialIsOpen
             >
               <EuiSpacer />
-              <SloFlyoutCard
+              <SloFlyoutPanel
                 title={i18n.translate('xpack.slo.flyoutDefinition.sloFlyoutCard.descriptionLabel', {
                   defaultMessage: 'Description',
                 })}
               >
                 <EuiText size="s">{slo.description}</EuiText>
-              </SloFlyoutCard>
+              </SloFlyoutPanel>
             </EuiAccordion>
           </EuiFlexItem>
         </>

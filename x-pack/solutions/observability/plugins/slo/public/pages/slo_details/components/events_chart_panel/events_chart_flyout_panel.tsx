@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getDiscoverLink } from '../../utils/discover_links/get_discover_link';
 import { useEventsChartPanel } from './hooks/use_events_chart_panel';
-import { SloFlyoutCard } from '../../shared_flyout/flyout_card';
+import { SloFlyoutPanel } from '../../shared_flyout/flyout_panel';
 import type { EventsChartPanelProps } from './types';
 
 export function EventsChartFlyoutPanel({ slo, range, onBrushed }: EventsChartPanelProps) {
@@ -20,7 +20,7 @@ export function EventsChartFlyoutPanel({ slo, range, onBrushed }: EventsChartPan
   const { getChart, getChartTitle } = useEventsChartPanel({ slo, range, onBrushed });
 
   return (
-    <SloFlyoutCard
+    <SloFlyoutPanel
       title={getChartTitle()}
       renderTooltip
       append={
@@ -37,11 +37,16 @@ export function EventsChartFlyoutPanel({ slo, range, onBrushed }: EventsChartPan
           })}
           data-test-subj="sloDetailDiscoverLink"
         >
-          <FormattedMessage id="xpack.slo.sloDetails.viewEventsLink" defaultMessage="View events" />
+          <EuiText size="xs">
+            <FormattedMessage
+              id="xpack.slo.sloDetails.viewEventsLink"
+              defaultMessage="View events"
+            />
+          </EuiText>
         </EuiLink>
       }
     >
       {getChart({ showLegend: false })}
-    </SloFlyoutCard>
+    </SloFlyoutPanel>
   );
 }
