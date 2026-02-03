@@ -47,10 +47,17 @@ export const useNavigation = (
     [items, activeItemId, logoId]
   );
 
+  // If there's no active item, use the first primary item with sections as the opener
+  const defaultOpenerNode = useMemo(() => {
+    if (primaryItem) return primaryItem;
+    // Find the first primary item that has sections
+    return items.primaryItems.find((item) => item.sections && item.sections.length > 0) || null;
+  }, [primaryItem, items.primaryItems]);
+
   const actualActiveItemId = activeItemId;
   const visuallyActivePageId = isLogoActive ? logoId : primaryItem?.id;
   const visuallyActiveSubpageId = secondaryItem?.id;
-  const openerNode = primaryItem;
+  const openerNode = defaultOpenerNode;
   const isSidePanelOpen = !isCollapsed && !!openerNode?.sections;
 
   const state: NavigationState = {

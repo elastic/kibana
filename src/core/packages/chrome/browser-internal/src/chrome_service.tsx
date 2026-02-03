@@ -114,9 +114,7 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation: ProjectNavigationService;
-  private readonly isSideNavCollapsed$ = new BehaviorSubject(
-    localStorage.getItem(IS_SIDENAV_COLLAPSED_KEY) === 'true'
-  );
+  private readonly isSideNavCollapsed$ = new BehaviorSubject(false);
   private readonly isFeedbackBtnVisible$ = new BehaviorSubject(false);
   private logger: Logger;
   private isServerless = false;
@@ -336,8 +334,9 @@ export class ChromeService {
     };
 
     const setIsSideNavCollapsed = (isCollapsed: boolean) => {
-      localStorage.setItem(IS_SIDENAV_COLLAPSED_KEY, JSON.stringify(isCollapsed));
-      this.isSideNavCollapsed$.next(isCollapsed);
+      // Navigation is always expanded, so we don't update the state
+      // localStorage.setItem(IS_SIDENAV_COLLAPSED_KEY, JSON.stringify(isCollapsed));
+      // this.isSideNavCollapsed$.next(isCollapsed);
     };
 
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
