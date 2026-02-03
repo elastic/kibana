@@ -75,25 +75,19 @@ export function createGetIndexInfoTool({
     description: dedent(`
       Discovers observability index patterns, fields, and field values in the user's Elasticsearch cluster.
 
-      <when_to_use>
-      ### When to use
+      **When to use:**
       - Before calling tools with "kqlFilter" param to discover valid fields and values 
       - To discover custom fields available beyond standard ECS or OTel fields
       - To understand which fields have data in the index
       - To understand the sample values and ranges for fields
-      </when_to_use>
 
-      <when_not_to_use>
-      ### When NOT to use
+      **When NOT to use:**
       - When you already know the field names and values you need
-      </when_not_to_use>
 
-      <examples>
-      ### Examples
+      **Examples:**
       - getIndexInfo(operation: "get-index-patterns" )
       - getIndexInfo(operation: "list-fields", index: "logs-*" )
       - getIndexInfo(operation: "get-field-values", index: "logs-*", fields: ["host.name"] )
-      </examples>
     `),
     schema: getIndexInfoSchema,
     tags: ['observability', 'index', 'fields'],
