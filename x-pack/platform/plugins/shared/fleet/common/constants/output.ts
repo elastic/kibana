@@ -31,11 +31,11 @@ export const SERVERLESS_DEFAULT_OUTPUT_ID = 'es-default-output';
 // Output IDs used for agentless policies:
 //  - For ECH, this is an output created by Fleet, see `ensureDefaultOutputs()` in
 //    `x-pack/plugins/fleet/server/services/output.ts`
-//  - For Serverless, this is the `es-default-output` output that is created from
-//    preconfiguration via project controller
+//  - For Serverless, this is the `es-internal-output` output that is created from
+//    preconfiguration via project controller with internal cluster URLs
 //  - Both are uneditable by users due to having `is_preconfigured: true` set
 export const ECH_AGENTLESS_OUTPUT_ID = 'es-agentless-output';
-export const SERVERLESS_AGENTLESS_OUTPUT_ID = SERVERLESS_DEFAULT_OUTPUT_ID;
+export const SERVERLESS_AGENTLESS_OUTPUT_ID = 'es-default-output-internal';
 
 export const LICENCE_FOR_PER_POLICY_OUTPUT = 'platinum';
 export const LICENCE_FOR_OUTPUT_PER_INTEGRATION = 'enterprise';

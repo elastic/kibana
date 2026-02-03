@@ -12,7 +12,6 @@ import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { useKibana } from '../../../hooks/use_kibana';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
@@ -42,9 +41,11 @@ import { StepsEditor } from './steps/steps_editor';
 import { RunSimulationButton } from './yaml_mode/run_simulation_button';
 import { YamlEditorWrapper } from './yaml_mode/yaml_editor_wrapper';
 import { useRequestPreviewFlyoutState } from '../request_preview_flyout/use_request_preview_flyout_state';
+import { useKibana } from '../../../hooks/use_kibana';
 import { buildUpsertStreamRequestPayload } from './utils';
 import { getUpsertFields } from './state_management/stream_enrichment_state_machine/utils';
 import { RequestPreviewFlyout } from '../request_preview_flyout';
+import { installDevConsoleHelpers, cleanupDevConsoleHelpers } from './dev_console_helpers';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -102,6 +103,23 @@ export function StreamDetailEnrichmentContentImpl() {
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
   const fieldsInSamples = useSimulatorSelector((state) => selectFieldsInSamples(state.context));
+
+  // Install dev console helpers for debugging suggestions
+  const simulatorRef = useStreamEnrichmentSelector((state) => state.context.simulatorRef);
+  const interactiveModeRef = useStreamEnrichmentSelector(
+    (state) => state.context.interactiveModeRef
+  );
+
+  useEffect(() => {
+    installDevConsoleHelpers(
+      () => simulatorRef.getSnapshot(),
+      () => interactiveModeRef?.getSnapshot() ?? null
+    );
+
+    return () => {
+      cleanupDevConsoleHelpers();
+    };
+  }, [simulatorRef, interactiveModeRef]);
 
   // Calculate schemaEditorFields with result property
   const schemaEditorFields = React.useMemo(() => {

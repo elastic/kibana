@@ -8,7 +8,11 @@
 import type { ConversationRound, ConverseInput, RoundInput } from '@kbn/agent-builder-common';
 import { createInternalError } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { getLatestVersion, hashContent } from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_ACTOR,
+  getLatestVersion,
+  hashContent,
+} from '@kbn/agent-builder-common/attachments';
 import type {
   AttachmentFormatContext,
   AttachmentStateManager,
@@ -67,7 +71,7 @@ const createFormatContext = (agentContext: AgentHandlerContext): AttachmentForma
 /**
  * Promote legacy per-round attachments into conversation-level versioned attachments.
  **/
-const mergeInputAttachmentsIntoAttachmentState = (
+const mergeInputAttachmentsIntoAttachmentState = async (
   attachmentStateManager: AttachmentStateManager,
   inputs: AttachmentInput[]
 ) => {
@@ -86,10 +90,14 @@ const mergeInputAttachmentsIntoAttachmentState = (
     if (input.id) {
       const existing = attachmentStateManager.get(input.id);
       if (existing) {
-        attachmentStateManager.update(input.id, {
-          data: input.data,
-          ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
-        });
+        await attachmentStateManager.update(
+          input.id,
+          {
+            data: input.data,
+            ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
+          },
+          ATTACHMENT_REF_ACTOR.user
+        );
         continue;
       }
     }
@@ -101,12 +109,15 @@ const mergeInputAttachmentsIntoAttachmentState = (
       continue;
     }
 
-    const created = attachmentStateManager.add({
-      ...(input.id ? { id: input.id } : {}),
-      type: input.type,
-      data: input.data,
-      ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
-    });
+    const created = await attachmentStateManager.add(
+      {
+        ...(input.id ? { id: input.id } : {}),
+        type: input.type,
+        data: input.data,
+        ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
+      },
+      ATTACHMENT_REF_ACTOR.user
+    );
 
     const latest = getLatestVersion(created);
     if (latest) {
@@ -132,11 +143,14 @@ export const prepareConversation = async ({
   // Promote any legacy per-round attachments into conversation-level versioned attachments.
   // We merge both previous rounds and next input, then strip per-round attachments so the LLM
   // only sees the v2 conversation-level attachments (via attachment presentation/tools).
-  const legacyInputs: AttachmentInput[] = [
-    ...(previousRounds.flatMap((r) => r.input.attachments ?? []) as AttachmentInput[]),
-    ...((nextInput.attachments ?? []) as AttachmentInput[]),
-  ];
-  mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, legacyInputs);
+  const previousAttachments = previousRounds.flatMap(
+    (round) => round.input.attachments ?? []
+  ) as AttachmentInput[];
+  const nextInputAttachments = (nextInput.attachments ?? []) as AttachmentInput[];
+
+  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, previousAttachments);
+  attachmentStateManager.clearAccessTracking();
+  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, nextInputAttachments);
 
   const strippedNextInput: ConverseInput = { ...nextInput, attachments: [] };
   const processedNextInput = await prepareRoundInput({
@@ -183,8 +197,38 @@ export const prepareConversation = async ({
     })
   );
 
-  const versionedAttachmentPresentation = prepareAttachmentPresentation(
-    attachmentStateManager.getAll()
+  const versionedAttachmentPresentation = await prepareAttachmentPresentation(
+    attachmentStateManager.getAll(),
+    undefined,
+    async (attachment, data) => {
+      const definition = attachmentsService.getTypeDefinition(attachment.type);
+      if (!definition) {
+        return undefined;
+      }
+
+      try {
+        const typeReadonly = definition.isReadonly ?? true;
+        const isReadonly = typeReadonly || attachment.readonly === true;
+        if (!isReadonly) {
+          return undefined;
+        }
+        const formatted = await definition.format(
+          {
+            id: attachment.id,
+            type: attachment.type,
+            data,
+          },
+          formatContext
+        );
+        if (!formatted.getRepresentation) {
+          return undefined;
+        }
+        const representation = await formatted.getRepresentation();
+        return representation.type === 'text' ? representation.value : undefined;
+      } catch {
+        return undefined;
+      }
+    }
   );
 
   return {
@@ -257,7 +301,9 @@ const prepareAttachment = async ({
 
     return {
       attachment,
-      representation: await formatted.getRepresentation(),
+      representation: formatted.getRepresentation
+        ? await formatted.getRepresentation()
+        : { type: 'text', value: JSON.stringify(attachment.data) },
       tools,
     };
   } catch (e) {

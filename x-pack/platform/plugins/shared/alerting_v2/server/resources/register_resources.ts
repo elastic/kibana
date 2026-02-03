@@ -6,13 +6,12 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getAlertEventsResourceDefinition } from './alert_events';
+import type { LoggerServiceContract } from '../lib/services/logger_service/logger_service';
 import { ResourceInitializer } from '../lib/services/resource_service/resource_initializer';
 import type { ResourceManagerContract } from '../lib/services/resource_service/resource_manager';
-import type { ResourceDefinition } from './types';
-import { getAlertTransitionsResourceDefinition } from './alert_transitions';
 import { getAlertActionsResourceDefinition } from './alert_actions';
-import type { LoggerServiceContract } from '../lib/services/logger_service/logger_service';
+import { getAlertEventsResourceDefinition } from './alert_events';
+import type { ResourceDefinition } from './types';
 
 export interface RegisterResourcesOptions {
   resourceManager: ResourceManagerContract;
@@ -35,9 +34,5 @@ export function initializeResources({
 }
 
 function getDataStreamResourceDefinitions(): ResourceDefinition[] {
-  return [
-    getAlertEventsResourceDefinition(),
-    getAlertTransitionsResourceDefinition(),
-    getAlertActionsResourceDefinition(),
-  ];
+  return [getAlertEventsResourceDefinition(), getAlertActionsResourceDefinition()];
 }

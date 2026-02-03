@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import type { QueryServiceContract } from './query_service';
+import type { IScopedSearchClient } from '@kbn/data-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import { createMockSearchClient } from '../../test_utils';
+import { createLoggerService } from '../logger_service/logger_service.mock';
+import { QueryService } from './query_service';
 
-export function createMockQueryService() {
-  type QueryServiceMock = jest.Mocked<QueryServiceContract>;
-  const queryService = {
-    executeQuery: jest.fn() as jest.MockedFunction<QueryServiceContract['executeQuery']>,
-    queryResponseToRecords: jest.fn() as jest.MockedFunction<
-      QueryServiceContract['queryResponseToRecords']
-    >,
-  } satisfies QueryServiceMock;
-
-  return queryService;
+export function createQueryService(): {
+  queryService: QueryService;
+  mockSearchClient: jest.Mocked<IScopedSearchClient>;
+  mockLogger: jest.Mocked<Logger>;
+} {
+  const mockSearchClient = createMockSearchClient();
+  const { loggerService, mockLogger } = createLoggerService();
+  const queryService = new QueryService(mockSearchClient, loggerService);
+  return { queryService, mockSearchClient, mockLogger };
 }

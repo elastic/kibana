@@ -11,8 +11,8 @@ import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { AppMenuItemSecondary } from '@kbn/discover-utils';
-import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
+import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
+import { AppMenuActionId } from '@kbn/discover-utils';
 import { ESQLRuleFormFlyout } from '@kbn/esql-rule-form/flyout';
 import { type Observable, type BehaviorSubject, filter, map, pairwise, startWith } from 'rxjs';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
@@ -25,10 +25,12 @@ export function CreateESQLRuleFlyout({
   discoverParams,
   services,
   stateContainer,
+  onClose,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
+  onClose: () => void;
 }) {
   const { dataView } = discoverParams;
   const timeField = getTimeField(dataView);
@@ -37,7 +39,6 @@ export function CreateESQLRuleFlyout({
   );
 
   const { http, dataViews, notifications } = services;
-  const [showFlyout, setShowFlyout] = useState(true);
   const [queryError, setQueryError] = useState<Error | undefined>(undefined);
 
   useEffect(() => {
@@ -60,7 +61,7 @@ export function CreateESQLRuleFlyout({
     };
   }, [stateContainer.appState$, stateContainer.dataState.data$.main$]);
 
-  return showFlyout ? (
+  return (
     <ESQLRuleFormFlyout
       defaultTimeField={timeField}
       services={{
@@ -69,10 +70,10 @@ export function CreateESQLRuleFlyout({
         notifications,
       }}
       query={query}
-      onClose={() => setShowFlyout(false)}
+      onClose={onClose}
       isQueryInvalid={Boolean(queryError)}
     />
-  ) : null;
+  );
 }
 
 export const getCreateRuleMenuItem = ({
@@ -83,35 +84,28 @@ export const getCreateRuleMenuItem = ({
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
-}): AppMenuItemSecondary => {
+}): DiscoverAppMenuItemType => {
   return {
-    id: AppMenuActionId.esqlRule,
-    type: AppMenuActionType.secondary,
+    id: AppMenuActionId.createRule,
+    order: 3,
     label: i18n.translate('discover.localMenu.ruleTitle', {
       defaultMessage: 'Create Rule',
     }),
-    description: i18n.translate('discover.localMenu.ruleDescription', {
-      defaultMessage: 'Create Rule',
-    }),
-    controlProps: {
-      label: i18n.translate('discover.localMenu.ruleTitle', {
-        defaultMessage: 'Create Rule',
-      }),
-      description: i18n.translate('discover.localMenu.ruleDescription', {
-        defaultMessage: 'Open flyout to create rule',
-      }),
-      testId: 'openRuleFlyoutButton',
-      onClick: async () => {
-        return (
-          <CreateESQLRuleFlyout
-            discoverParams={discoverParams}
-            services={services}
-            stateContainer={stateContainer}
-          />
-        );
-      },
-    },
+    iconType: 'bell',
     testId: 'discoverESQLRuleButton',
+    tooltipContent: i18n.translate('discover.localMenu.ruleDescription', {
+      defaultMessage: 'Create an ES|QL alerting rule',
+    }),
+    run: ({ context: { onFinishAction } }) => {
+      return (
+        <CreateESQLRuleFlyout
+          discoverParams={discoverParams}
+          services={services}
+          stateContainer={stateContainer}
+          onClose={onFinishAction}
+        />
+      );
+    },
   };
 };
 

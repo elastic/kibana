@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import type { RulesSavedObjectServiceContract } from './rules_saved_object_service';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { RulesSavedObjectService } from './rules_saved_object_service';
 
-export function createMockRulesSavedObjectService() {
-  type RulesSavedObjectServiceMock = jest.Mocked<RulesSavedObjectServiceContract>;
-  const rulesSavedObjectService = {
-    create: jest.fn() as jest.MockedFunction<RulesSavedObjectServiceContract['create']>,
-    get: jest.fn() as jest.MockedFunction<RulesSavedObjectServiceContract['get']>,
-    update: jest.fn() as jest.MockedFunction<RulesSavedObjectServiceContract['update']>,
-    delete: jest.fn() as jest.MockedFunction<RulesSavedObjectServiceContract['delete']>,
-    find: jest.fn() as jest.MockedFunction<RulesSavedObjectServiceContract['find']>,
-  } satisfies RulesSavedObjectServiceMock;
+export function createRulesSavedObjectService(): {
+  rulesSavedObjectService: RulesSavedObjectService;
+  mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+} {
+  const mockSavedObjectsClient = savedObjectsClientMock.create();
+  const mockSavedObjectsClientFactory = jest.fn().mockReturnValue(mockSavedObjectsClient);
+  const mockSpaces = spacesMock.createStart();
 
-  return rulesSavedObjectService;
+  const rulesSavedObjectService = new RulesSavedObjectService(
+    mockSavedObjectsClientFactory,
+    mockSpaces
+  );
+
+  return { rulesSavedObjectService, mockSavedObjectsClient };
 }

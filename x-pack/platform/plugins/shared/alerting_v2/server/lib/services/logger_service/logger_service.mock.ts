@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { LoggerServiceContract } from './logger_service';
+import type { Logger } from '@kbn/core/server';
+import { loggerMock } from '@kbn/logging-mocks';
+import { LoggerService } from './logger_service';
 
-export function createMockLoggerService() {
-  type LoggerServiceMock = jest.Mocked<LoggerServiceContract>;
-  const loggerService = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  } satisfies LoggerServiceMock;
-
-  return { loggerService };
+export function createLoggerService(): {
+  loggerService: LoggerService;
+  mockLogger: jest.Mocked<Logger>;
+} {
+  const mockLogger = loggerMock.create();
+  const loggerService = new LoggerService(mockLogger);
+  return { loggerService, mockLogger };
 }

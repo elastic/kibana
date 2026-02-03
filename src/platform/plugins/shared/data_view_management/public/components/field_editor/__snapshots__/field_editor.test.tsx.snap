@@ -972,6 +972,10 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               "value": "conflict",
             },
             Object {
+              "text": "null",
+              "value": "null",
+            },
+            Object {
               "text": "unknown",
               "value": "unknown",
             },

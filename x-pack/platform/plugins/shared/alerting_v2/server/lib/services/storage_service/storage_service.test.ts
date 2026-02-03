@@ -31,8 +31,16 @@ describe('StorageService', () => {
   describe('bulkIndexDocs', () => {
     const index = 'my-index';
     const mockDocs = [
-      { '@timestamp': '2024-01-01T00:00:00Z', rule_id: 'rule-1', alert_series_id: 'series-1' },
-      { '@timestamp': '2024-01-01T00:01:00Z', rule_id: 'rule-2', alert_series_id: 'series-2' },
+      {
+        '@timestamp': '2024-01-01T00:00:00Z',
+        rule: { id: 'rule-1', version: 1 },
+        group_hash: 'hash-1',
+      },
+      {
+        '@timestamp': '2024-01-01T00:01:00Z',
+        rule: { id: 'rule-2', version: 1 },
+        group_hash: 'hash-2',
+      },
     ];
 
     it('should return early when docs array is empty', async () => {
@@ -43,7 +51,7 @@ describe('StorageService', () => {
 
     it('should successfully bulk index documents', async () => {
       const mockBulkResponse = {
-        items: [{ index: { _id: '1', status: 201 } }, { index: { _id: '2', status: 201 } }],
+        items: [{ create: { _id: '1', status: 201 } }, { create: { _id: '2', status: 201 } }],
         errors: false,
       };
 
@@ -55,9 +63,9 @@ describe('StorageService', () => {
       expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockEsClient.bulk).toHaveBeenCalledWith({
         operations: [
-          { index: { _index: index } },
+          { create: { _index: index } },
           mockDocs[0],
-          { index: { _index: index } },
+          { create: { _index: index } },
           mockDocs[1],
         ],
         refresh: 'wait_for',
@@ -66,7 +74,7 @@ describe('StorageService', () => {
 
     it('should format operations correctly for bulk indexing', async () => {
       const mockBulkResponse = {
-        items: [{ index: { _id: '1', status: 201 } }],
+        items: [{ create: { _id: '1', status: 201 } }],
         errors: false,
       };
 
@@ -77,14 +85,17 @@ describe('StorageService', () => {
       await storageService.bulkIndexDocs({ index, docs });
 
       expect(mockEsClient.bulk).toHaveBeenCalledWith({
-        operations: [{ index: { _index: index } }, docs[0]],
+        operations: [{ create: { _index: index } }, docs[0]],
         refresh: 'wait_for',
       });
     });
 
     it('should include _id when getId is provided', async () => {
       const mockBulkResponse = {
-        items: [{ index: { _id: 'doc-1', status: 201 } }, { index: { _id: 'doc-2', status: 201 } }],
+        items: [
+          { create: { _id: 'doc-1', status: 201 } },
+          { create: { _id: 'doc-2', status: 201 } },
+        ],
         errors: false,
       };
 
@@ -99,9 +110,9 @@ describe('StorageService', () => {
 
       expect(mockEsClient.bulk).toHaveBeenCalledWith({
         operations: [
-          { index: { _index: index, _id: 'doc-1' } },
+          { create: { _index: index, _id: 'doc-1' } },
           mockDocs[0],
-          { index: { _index: index, _id: 'doc-2' } },
+          { create: { _index: index, _id: 'doc-2' } },
           mockDocs[1],
         ],
         refresh: 'wait_for',
@@ -111,9 +122,9 @@ describe('StorageService', () => {
     it('should log error when bulk response contains errors', async () => {
       const mockBulkResponse = {
         items: [
-          { index: { _id: '1', status: 201 } },
+          { create: { _id: '1', status: 201 } },
           {
-            index: {
+            create: {
               _id: '2',
               status: 400,
               error: {
@@ -137,7 +148,7 @@ describe('StorageService', () => {
 
     it('should handle bulk response with errors but no error items gracefully', async () => {
       const mockBulkResponse = {
-        items: [{ index: { _id: '1', status: 201 } }],
+        items: [{ create: { _id: '1', status: 201 } }],
         errors: true,
         took: 5,
       };

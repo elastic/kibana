@@ -6,7 +6,7 @@
   "visibility": "shared",
   "plugin": {
     "id": "alertingVTwo",
-    "browser": false,
+    "browser": true,
     "server": true,
     "configPath": ["xpack", "alerting_v2"],
     "requiredPlugins": [
@@ -16,6 +16,7 @@
       "data",
       "security"
     ],
+    "optionalPlugins": ["management"],
     "extraPublicDirs": []
   }
 }

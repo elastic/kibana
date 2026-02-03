@@ -7,6 +7,7 @@
 
 import type { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
 import { useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 import type { StreamsAppRouter, StreamsAppRoutes } from '../routes/config';
 import { streamsAppRouter } from '../routes/config';
 import { useKibana } from './use_kibana';
@@ -24,32 +25,28 @@ export interface StatefulStreamsAppRouter extends StreamsAppRouter {
 
 export function useStreamsAppRouter(): StatefulStreamsAppRouter {
   const {
-    core: {
-      http,
-      application: { navigateToApp },
-    },
+    core: { http },
   } = useKibana();
-
-  const link = (...args: any[]) => {
-    // @ts-expect-error
-    return streamsAppRouter.link(...args);
-  };
+  const history = useHistory();
 
   return useMemo<StatefulStreamsAppRouter>(
     () => ({
       ...streamsAppRouter,
       push: (...args) => {
-        const next = link(...args);
-        navigateToApp('streams', { path: next, replace: false });
+        // @ts-expect-error
+        const path = streamsAppRouter.link(...args);
+        history?.push(path);
       },
-      replace: (path, ...args) => {
-        const next = link(path, ...args);
-        navigateToApp('streams', { path: next, replace: true });
+      replace: (...args) => {
+        // @ts-expect-error
+        const path = streamsAppRouter.link(...args);
+        history?.replace(path);
       },
-      link: (path, ...args) => {
-        return http.basePath.prepend('/app/streams' + link(path, ...args));
+      link: (...args) => {
+        const path = streamsAppRouter.link(...args);
+        return http.basePath.prepend(`/app/streams${path}`);
       },
     }),
-    [navigateToApp, http.basePath]
+    [history, http.basePath]
   );
 }

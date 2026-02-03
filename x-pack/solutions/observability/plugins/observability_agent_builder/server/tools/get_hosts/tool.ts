@@ -28,9 +28,6 @@ const DEFAULT_TIME_RANGE = {
   end: 'now',
 };
 
-const DEFAULT_LIMIT = 20;
-const MAX_LIMIT = 100;
-
 export type GetHostsToolResult = OtherResult<{
   total: number;
   hosts: Array<{
@@ -42,20 +39,12 @@ export type GetHostsToolResult = OtherResult<{
 
 const getHostsSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_LIMIT)
-    .describe(
-      `Maximum number of hosts to return. Defaults to ${DEFAULT_LIMIT}, maximum is ${MAX_LIMIT}.`
-    )
-    .optional(),
+  limit: z.number().int().min(1).max(100).default(20).describe(`Maximum number of hosts to return`),
   kqlFilter: z
     .string()
     .optional()
     .describe(
-      'Optional KQL filter to narrow down results. Examples: "service.name: frontend" (show only hosts running the frontend service), "host.name: web-*", or "cloud.provider: aws".'
+      'KQL filter to narrow down results. Examples: "service.name: frontend", "host.name: web-*", "cloud.provider: aws".'
     ),
 });
 
@@ -92,7 +81,7 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
       toolParams,
       { request }
     ): Promise<ToolHandlerReturn<GetHostsToolResult | ErrorResult>> => {
-      const { start, end, limit = DEFAULT_LIMIT, kqlFilter } = toolParams;
+      const { start, end, limit, kqlFilter } = toolParams;
 
       try {
         const { hosts, total } = await getToolHandler({

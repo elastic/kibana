@@ -20,7 +20,8 @@ const transformDataSourceType = (dataSources: DataSource): Connector => {
   return {
     id: dataSources.id,
     name: dataSources.name,
-    type: dataSources.stackConnector?.type, // Already has '.' prefix (e.g., '.notion')
+    type: dataSources.stackConnector.type,
+    iconType: dataSources.iconType,
     category: 'popular',
   };
 };

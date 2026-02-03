@@ -10,7 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { RulesLocatorParams } from '@kbn/deeplinks-observability';
 
-const RULES_PAGE_LINK = '/app/observability/alerts/rules';
+const RULES_PAGE_LINK = '/app/rules';
 const STAT_CLASS = 'euiStat';
 const STAT_TITLE_PRIMARY_SELECTOR = '[class*="euiStat__title-primary"]';
 const STAT_BUTTON_CLASS = 'euiButtonEmpty';

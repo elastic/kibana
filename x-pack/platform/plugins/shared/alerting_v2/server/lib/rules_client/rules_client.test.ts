@@ -15,7 +15,7 @@ import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../saved_objects';
 import { RulesClient } from './rules_client';
-import { createMockRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
+import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 
 import type { CreateRuleParams, UpdateRuleData } from './types';
 
@@ -38,7 +38,7 @@ describe('RulesClient', () => {
   const http = httpServiceMock.createStartContract();
   const taskManager = taskManagerMock.createStart();
   const security = securityMock.createStart();
-  const rulesSavedObjectService = createMockRulesSavedObjectService();
+  const { rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService();
 
   const baseCreateData: CreateRuleParams['data'] = {
     name: 'rule-1',
@@ -67,12 +67,27 @@ describe('RulesClient', () => {
     });
     security.authc.getCurrentUser.mockReturnValue(user);
 
-    rulesSavedObjectService.create.mockResolvedValue('rule-id-default');
-    rulesSavedObjectService.update.mockResolvedValue();
-    rulesSavedObjectService.delete.mockResolvedValue();
-    rulesSavedObjectService.find.mockResolvedValue({
+    mockSavedObjectsClient.create.mockResolvedValue({
+      id: 'rule-id-default',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: baseCreateData,
+      references: [],
+    });
+    mockSavedObjectsClient.update.mockResolvedValue({
+      id: 'rule-id-default',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: baseCreateData,
+      references: [],
+    });
+    mockSavedObjectsClient.delete.mockResolvedValue({
+      id: 'rule-id-default',
+      type: RULE_SAVED_OBJECT_TYPE,
+    });
+    mockSavedObjectsClient.find.mockResolvedValue({
       saved_objects: [],
       total: 0,
+      page: 1,
+      per_page: 20,
     });
 
     ensureRuleExecutorTaskScheduledMock.mockResolvedValue({ id: 'task-123' });
@@ -90,24 +105,30 @@ describe('RulesClient', () => {
   describe('createRule', () => {
     it('creates a rule SO and does not schedule a task when disabled', async () => {
       const client = createClient();
-      rulesSavedObjectService.create.mockResolvedValueOnce('rule-id-1');
+      mockSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'rule-id-1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: baseCreateData,
+        references: [],
+      });
 
       const res = await client.createRule({
         data: { ...baseCreateData, enabled: false },
         options: { id: 'rule-id-1' },
       });
 
-      expect(rulesSavedObjectService.create).toHaveBeenCalledWith({
-        attrs: expect.objectContaining({
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
           name: 'rule-1',
           enabled: false,
           createdBy: 'elastic',
         }),
-        id: 'rule-id-1',
-      });
+        { id: 'rule-id-1', overwrite: false }
+      );
 
       expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
-      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
 
       expect(res).toEqual(
         expect.objectContaining({
@@ -123,7 +144,12 @@ describe('RulesClient', () => {
 
     it('schedules a task when enabled', async () => {
       const client = createClient();
-      rulesSavedObjectService.create.mockResolvedValueOnce('rule-id-2');
+      mockSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'rule-id-2',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: baseCreateData,
+        references: [],
+      });
 
       const res = await client.createRule({
         data: { ...baseCreateData, enabled: true },
@@ -138,7 +164,7 @@ describe('RulesClient', () => {
           spaceId: 'space-1',
         }),
       });
-      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
       expect(res).toEqual(
         expect.objectContaining({
           id: 'rule-id-2',
@@ -149,7 +175,12 @@ describe('RulesClient', () => {
 
     it('cleans up the saved object if scheduling fails', async () => {
       const client = createClient();
-      rulesSavedObjectService.create.mockResolvedValueOnce('rule-id-3');
+      mockSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'rule-id-3',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: baseCreateData,
+        references: [],
+      });
       ensureRuleExecutorTaskScheduledMock.mockRejectedValueOnce(new Error('schedule failed'));
 
       await expect(
@@ -159,12 +190,15 @@ describe('RulesClient', () => {
         })
       ).rejects.toThrow('schedule failed');
 
-      expect(rulesSavedObjectService.delete).toHaveBeenCalledWith({ id: 'rule-id-3' });
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        'rule-id-3'
+      );
     });
 
     it('throws 409 conflict when id already exists', async () => {
       const client = createClient();
-      rulesSavedObjectService.create.mockRejectedValueOnce(
+      mockSavedObjectsClient.create.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-id-4')
       );
 
@@ -195,7 +229,7 @@ describe('RulesClient', () => {
   describe('updateRule', () => {
     it('throws 404 when rule is not found', async () => {
       const client = createClient();
-      rulesSavedObjectService.get.mockRejectedValueOnce(
+      mockSavedObjectsClient.get.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, 'rule-id-1')
       );
 
@@ -217,10 +251,12 @@ describe('RulesClient', () => {
         updatedBy: 'elastic',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
-      rulesSavedObjectService.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
         attributes: existingAttributes,
         version: 'WzEsMV0=',
         id: 'rule-id-1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
       });
 
       await client.updateRule({
@@ -233,11 +269,12 @@ describe('RulesClient', () => {
         spaceId: 'space-1',
       });
       expect(taskManager.removeIfExists).toHaveBeenCalledWith('task:fallback');
-      expect(rulesSavedObjectService.update).toHaveBeenCalledWith({
-        id: 'rule-id-1',
-        attrs: expect.objectContaining({ enabled: false }),
-        version: 'WzEsMV0=',
-      });
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        'rule-id-1',
+        expect.objectContaining({ enabled: false }),
+        { version: 'WzEsMV0=' }
+      );
     });
 
     it('enables a rule by ensuring the task exists', async () => {
@@ -251,10 +288,12 @@ describe('RulesClient', () => {
         updatedBy: 'elastic',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
-      rulesSavedObjectService.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
         attributes: existingAttributes,
         version: 'WzEsMV0=',
         id: 'rule-id-2',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
       });
 
       await client.updateRule({
@@ -263,11 +302,12 @@ describe('RulesClient', () => {
       });
 
       expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalled();
-      expect(rulesSavedObjectService.update).toHaveBeenCalledWith({
-        id: 'rule-id-2',
-        attrs: expect.objectContaining({ enabled: true }),
-        version: 'WzEsMV0=',
-      });
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        'rule-id-2',
+        expect.objectContaining({ enabled: true }),
+        { version: 'WzEsMV0=' }
+      );
     });
 
     it('throws 409 conflict when version is stale', async () => {
@@ -281,13 +321,15 @@ describe('RulesClient', () => {
         updatedBy: 'elastic',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
-      rulesSavedObjectService.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'rule-id-4',
         attributes: existingAttributes,
         version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
       });
 
-      rulesSavedObjectService.update.mockRejectedValueOnce(
+      mockSavedObjectsClient.update.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-id-4')
       );
 
@@ -311,15 +353,21 @@ describe('RulesClient', () => {
         updatedBy: 'elastic',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
-      rulesSavedObjectService.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
         attributes: existingAttributes,
         version: 'WzEsMV0=',
         id: 'rule-id-get-1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
       });
 
       const res = await client.getRule({ id: 'rule-id-get-1' });
 
-      expect(rulesSavedObjectService.get).toHaveBeenCalledWith('rule-id-get-1');
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        'rule-id-get-1',
+        undefined
+      );
       expect(res).toEqual({
         id: 'rule-id-get-1',
         ...existingAttributes,
@@ -328,7 +376,7 @@ describe('RulesClient', () => {
 
     it('throws 404 when rule is not found', async () => {
       const client = createClient();
-      rulesSavedObjectService.get.mockRejectedValueOnce(
+      mockSavedObjectsClient.get.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
           RULE_SAVED_OBJECT_TYPE,
           'rule-id-get-404'
@@ -353,10 +401,12 @@ describe('RulesClient', () => {
         updatedBy: 'elastic',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
-      rulesSavedObjectService.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
         attributes: existingAttributes,
         version: 'WzEsMV0=',
         id: 'rule-id-del-1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
       });
       getRuleExecutorTaskIdMock.mockReturnValueOnce('task:delete');
 
@@ -367,12 +417,15 @@ describe('RulesClient', () => {
         spaceId: 'space-1',
       });
       expect(taskManager.removeIfExists).toHaveBeenCalledWith('task:delete');
-      expect(rulesSavedObjectService.delete).toHaveBeenCalledWith({ id: 'rule-id-del-1' });
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        'rule-id-del-1'
+      );
     });
 
     it('throws 404 when rule is not found', async () => {
       const client = createClient();
-      rulesSavedObjectService.get.mockRejectedValueOnce(
+      mockSavedObjectsClient.get.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
           RULE_SAVED_OBJECT_TYPE,
           'rule-id-del-404'
@@ -391,6 +444,9 @@ describe('RulesClient', () => {
 
       const so1 = {
         id: 'rule-1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+        score: 0,
         attributes: {
           ...baseCreateData,
           name: 'rule-1',
@@ -403,6 +459,9 @@ describe('RulesClient', () => {
       };
       const so2 = {
         id: 'rule-2',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+        score: 0,
         attributes: {
           ...baseCreateData,
           name: 'rule-2',
@@ -414,14 +473,22 @@ describe('RulesClient', () => {
         },
       };
 
-      rulesSavedObjectService.find.mockResolvedValueOnce({
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
         saved_objects: [so1, so2],
         total: 2,
+        page: 2,
+        per_page: 50,
       });
 
       const res = await client.findRules({ page: 2, perPage: 50 });
 
-      expect(rulesSavedObjectService.find).toHaveBeenCalledWith({ page: 2, perPage: 50 });
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: RULE_SAVED_OBJECT_TYPE,
+        page: 2,
+        perPage: 50,
+        sortField: 'updatedAt',
+        sortOrder: 'desc',
+      });
 
       expect(res).toEqual({
         items: [

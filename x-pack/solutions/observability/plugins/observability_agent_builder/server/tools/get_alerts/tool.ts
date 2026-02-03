@@ -57,19 +57,17 @@ const getAlertsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Optional KQL (Kibana Query Language) filter to narrow down alerts. Examples: \'service.name: "frontend"\' (alerts for the frontend service), \'service.name: "checkout" AND host.name: "web-*"\', \'kibana.alert.rule.name: "High CPU"\'.'
+      'KQL filter to narrow down alerts. Examples: \'service.name: "frontend"\', \'kibana.alert.rule.name: "High CPU"\'.'
     ),
   includeRecovered: z
     .boolean()
-    .optional()
-    .describe(
-      'Whether to include recovered/closed alerts. Defaults to false, which means only active alerts will be returned.'
-    ),
+    .default(false)
+    .describe('Whether to include recovered/closed alerts alongside active ones.'),
   fields: z
     .array(z.string())
     .optional()
     .describe(
-      'Optional list of fields to include in the alert documents. If not specified, a default set of common alert fields is returned. Use this to request specific fields like "error.message", "url.full", or any custom alert fields.'
+      'Fields to include in the alert documents. Use to request specific fields like "error.message" or "url.full".'
     ),
 });
 

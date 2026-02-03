@@ -13,16 +13,18 @@ import { bindOnSetup } from './setup/bind_on_setup';
 import { bindOnStart } from './setup/bind_on_start';
 import { bindRoutes } from './setup/bind_routes';
 import { bindServices } from './setup/bind_services';
+import { bindRuleExecutionServices } from './setup/bind_rule_executor';
 
 export const config: PluginConfigDescriptor<PluginConfig> = {
   schema: configSchema,
 };
 
 export const module = new ContainerModule((options) => {
-  bindRoutes(options);
-  bindServices(options);
   bindOnSetup(options);
   bindOnStart(options);
+  bindRoutes(options);
+  bindServices(options);
+  bindRuleExecutionServices(options);
 });
 
 export type { PluginConfig as AlertingV2Config } from './config';

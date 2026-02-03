@@ -84,7 +84,7 @@ export const DatavisualizerSelector: FC = () => {
             title={
               <FormattedMessage
                 id="xpack.ml.datavisualizer.selector.dataVisualizerTitle"
-                defaultMessage="Data Visualizer"
+                defaultMessage="Data visualizer"
               />
             }
           />

@@ -56,11 +56,11 @@ export class WorkflowsExtensionsExamplePlugin
     // Register steps on setup phase
     registerStepDefinitions(plugins.workflowsExtensions, {
       externalService: new ExampleExternalService({
-        'my-proxy': 'https://example.com',
-        'my-other-proxy': 'https://example.com/other',
-        'my-third-proxy': 'https://example.com/third',
-        'my-fourth-proxy': 'https://example.com/fourth',
-        'my-fifth-proxy': 'https://example.com/fifth',
+        'my-proxy': { name: 'Production Proxy', url: 'https://example.com' },
+        'my-other-proxy': { name: 'Staging Proxy', url: 'https://example.com/other' },
+        'my-third-proxy': { name: 'Development Proxy', url: 'https://example.com/third' },
+        'my-fourth-proxy': { name: 'Testing Proxy', url: 'https://example.com/fourth' },
+        'my-fifth-proxy': { name: 'Backup Proxy', url: 'https://example.com/fifth' },
       }),
     });
 

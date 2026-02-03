@@ -55,7 +55,6 @@ import {
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID, createGetIndexInfoTool } from './get_index_info';
 
 const PLATFORM_TOOL_IDS = [
-  platformCoreTools.search,
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,

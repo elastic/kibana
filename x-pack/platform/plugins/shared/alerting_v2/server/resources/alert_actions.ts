@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_ACTIONS_DATA_STREAM = '.alerts-actions';
+export const ALERT_ACTIONS_BACKING_INDEX = '.ds-.alerts-actions-*';
 export const ALERT_ACTIONS_ILM_POLICY_NAME = '.alerts-actions-ilm-policy';
 
 export const ALERT_ACTIONS_ILM_POLICY: IlmPolicy = {
@@ -31,10 +32,11 @@ const mappings: estypes.MappingTypeMapping = {
   dynamic: false,
   properties: {
     '@timestamp': { type: 'date' },
-    alert_series_id: { type: 'keyword' },
     last_series_event_timestamp: { type: 'date' },
+    expiry: { type: 'date' },
     actor: { type: 'keyword' },
     action_type: { type: 'keyword' },
+    group_hash: { type: 'keyword' },
     episode_id: { type: 'keyword' },
     rule_id: { type: 'keyword' },
     source: { type: 'keyword' },
@@ -43,13 +45,16 @@ const mappings: estypes.MappingTypeMapping = {
 
 export const alertActionSchema = z.object({
   '@timestamp': z.string(),
-  alert_series_id: z.string(),
+  group_hash: z.string(),
   last_series_event_timestamp: z.string(),
-  actor: z.string(),
-  action_type: z.string(),
-  episode_id: z.string(),
+  expiry: z.string().optional(),
+  actor: z.string().nullable(),
+  action_type: z.string(), // "fire-event"
+  episode_id: z.string().optional(),
   rule_id: z.string(),
-  source: z.string(),
+  source: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  reason: z.string().optional(),
 });
 
 export type AlertAction = z.infer<typeof alertActionSchema>;
