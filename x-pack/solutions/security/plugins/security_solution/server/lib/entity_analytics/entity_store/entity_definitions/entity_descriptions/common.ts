@@ -11,7 +11,7 @@ import type {
 } from '../../../../../../common/api/entity_analytics/entity_store';
 import type { FieldDescription } from '../../installation/types';
 
-import { oldestValue, newestValue } from './field_utils';
+import { oldestValue, newestValue, collectValues } from './field_utils';
 
 export const getCommonFieldDescriptions = (ecsField: BaseECSEntityField): FieldDescription[] => {
   return [
@@ -109,6 +109,18 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       source: `${prefix}.behaviors.Used_usb_device`,
       destination: 'entity.behaviors.Used_usb_device',
       mapping: { type: 'boolean' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.behaviors.Anomaly_job_ids`,
+      destination: 'entity.behaviors.Anomaly_job_ids',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.behaviors.Rule_names`,
+      destination: 'entity.behaviors.Rule_names',
+      mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
 

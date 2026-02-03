@@ -49,6 +49,8 @@ export const EntityField = z
         brute_force_victim: z.boolean().optional(),
         new_country_login: z.boolean().optional(),
         used_usb_device: z.boolean().optional(),
+        anomaly_job_ids: z.array(z.string()).optional(),
+        rule_names: z.array(z.string()).optional(),
       })
       .strict()
       .optional(),

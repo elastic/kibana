@@ -54,11 +54,17 @@ Object {
         "host.entity.attributes.Privileged": Object {
           "type": "boolean",
         },
+        "host.entity.behaviors.Anomaly_job_ids": Object {
+          "type": "keyword",
+        },
         "host.entity.behaviors.Brute_force_victim": Object {
           "type": "boolean",
         },
         "host.entity.behaviors.New_country_login": Object {
           "type": "boolean",
+        },
+        "host.entity.behaviors.Rule_names": Object {
+          "type": "keyword",
         },
         "host.entity.behaviors.Used_usb_device": Object {
           "type": "boolean",

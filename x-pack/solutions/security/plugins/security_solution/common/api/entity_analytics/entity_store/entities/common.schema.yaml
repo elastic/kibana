@@ -55,6 +55,14 @@ components:
               type: boolean
             used_usb_device:
               type: boolean
+            anomaly_job_ids:
+              type: array
+              items:
+                type: string
+            rule_names:
+              type: array
+              items:
+                type: string
         lifecycle:
           type: object
           additionalProperties: false

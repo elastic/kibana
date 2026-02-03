@@ -173,6 +173,22 @@ Object {
     },
     Object {
       "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.behaviors.Anomaly_job_ids",
+      "source": "entity.behaviors.Anomaly_job_ids",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.behaviors.Rule_names",
+      "source": "entity.behaviors.Rule_names",
+    },
+    Object {
+      "aggregation": Object {
         "sort": Object {
           "@timestamp": "desc",
         },
@@ -936,11 +952,17 @@ Object {
     "entity.attributes.Privileged": Object {
       "type": "boolean",
     },
+    "entity.behaviors.Anomaly_job_ids": Object {
+      "type": "keyword",
+    },
     "entity.behaviors.Brute_force_victim": Object {
       "type": "boolean",
     },
     "entity.behaviors.New_country_login": Object {
       "type": "boolean",
+    },
+    "entity.behaviors.Rule_names": Object {
+      "type": "keyword",
     },
     "entity.behaviors.Used_usb_device": Object {
       "type": "boolean",
@@ -1487,6 +1509,22 @@ Object {
     },
     Object {
       "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.behaviors.Anomaly_job_ids",
+      "source": "host.entity.behaviors.Anomaly_job_ids",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.behaviors.Rule_names",
+      "source": "host.entity.behaviors.Rule_names",
+    },
+    Object {
+      "aggregation": Object {
         "sort": Object {
           "@timestamp": "desc",
         },
@@ -1607,11 +1645,17 @@ Object {
     "entity.attributes.Privileged": Object {
       "type": "boolean",
     },
+    "entity.behaviors.Anomaly_job_ids": Object {
+      "type": "keyword",
+    },
     "entity.behaviors.Brute_force_victim": Object {
       "type": "boolean",
     },
     "entity.behaviors.New_country_login": Object {
       "type": "boolean",
+    },
+    "entity.behaviors.Rule_names": Object {
+      "type": "keyword",
     },
     "entity.behaviors.Used_usb_device": Object {
       "type": "boolean",
@@ -2096,6 +2140,22 @@ Object {
     },
     Object {
       "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.behaviors.Anomaly_job_ids",
+      "source": "service.entity.behaviors.Anomaly_job_ids",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.behaviors.Rule_names",
+      "source": "service.entity.behaviors.Rule_names",
+    },
+    Object {
+      "aggregation": Object {
         "sort": Object {
           "@timestamp": "desc",
         },
@@ -2200,11 +2260,17 @@ Object {
     "entity.attributes.Privileged": Object {
       "type": "boolean",
     },
+    "entity.behaviors.Anomaly_job_ids": Object {
+      "type": "keyword",
+    },
     "entity.behaviors.Brute_force_victim": Object {
       "type": "boolean",
     },
     "entity.behaviors.New_country_login": Object {
       "type": "boolean",
+    },
+    "entity.behaviors.Rule_names": Object {
+      "type": "keyword",
     },
     "entity.behaviors.Used_usb_device": Object {
       "type": "boolean",
@@ -2645,6 +2711,22 @@ Object {
     },
     Object {
       "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.behaviors.Anomaly_job_ids",
+      "source": "user.entity.behaviors.Anomaly_job_ids",
+    },
+    Object {
+      "aggregation": Object {
+        "limit": 10,
+        "type": "terms",
+      },
+      "destination": "entity.behaviors.Rule_names",
+      "source": "user.entity.behaviors.Rule_names",
+    },
+    Object {
+      "aggregation": Object {
         "sort": Object {
           "@timestamp": "desc",
         },
@@ -2757,11 +2839,17 @@ Object {
     "entity.attributes.Privileged": Object {
       "type": "boolean",
     },
+    "entity.behaviors.Anomaly_job_ids": Object {
+      "type": "keyword",
+    },
     "entity.behaviors.Brute_force_victim": Object {
       "type": "boolean",
     },
     "entity.behaviors.New_country_login": Object {
       "type": "boolean",
+    },
+    "entity.behaviors.Rule_names": Object {
+      "type": "keyword",
     },
     "entity.behaviors.Used_usb_device": Object {
       "type": "boolean",

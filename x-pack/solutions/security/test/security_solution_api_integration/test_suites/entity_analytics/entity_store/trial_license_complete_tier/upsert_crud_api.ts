@@ -104,6 +104,8 @@ export default function (providerContext: FtrProviderContext) {
               },
               behaviors: {
                 brute_force_victim: true,
+                anomaly_job_ids: ['job-1'],
+                rule_names: ['rule-1'],
               },
             },
           },
@@ -121,6 +123,8 @@ export default function (providerContext: FtrProviderContext) {
             expect(hit._source?.entity?.id).toEqual(userName);
             expect(hit._source?.entity?.attributes?.Privileged).toBeTruthy();
             expect(hit._source?.entity?.behaviors?.Brute_force_victim).toBeTruthy();
+            expect(hit._source?.entity?.behaviors?.Anomaly_job_ids).toEqual(['job-1']);
+            expect(hit._source?.entity?.behaviors?.Rule_names).toEqual(['rule-1']);
           });
 
           return true;
@@ -154,6 +158,44 @@ export default function (providerContext: FtrProviderContext) {
               expect(hit._source?.entity?.id).toEqual(userName);
               expect(hit._source?.entity?.attributes?.Privileged).toBeTruthy();
               expect(hit._source?.entity?.behaviors?.Brute_force_victim).toBeTruthy();
+              expect(hit._source?.entity?.behaviors?.Anomaly_job_ids).toEqual(['job-1']);
+              expect(hit._source?.entity?.behaviors?.Rule_names).toEqual(['rule-1']);
+            });
+            return true;
+          }
+        );
+
+        log.info('Calling upsert api to append more behavior values...');
+        const { statusCode: appendStatusCode } = await securitySolutionApi.upsertEntity({
+          params: {
+            entityType: 'user',
+          },
+          body: {
+            entity: {
+              id: userName,
+              behaviors: {
+                anomaly_job_ids: ['job-2', 'job-1'], // job-1 should not be duplicated
+                rule_names: ['rule-2'],
+              },
+            },
+          },
+          query: {},
+        });
+
+        expect(appendStatusCode).toEqual(200);
+
+        log.info('Verifying behavior values were appended without duplicates...');
+        await retry.waitForWithTimeout(
+          'Behavior values are appended',
+          LOCAL_TIMEOUT_MS,
+          async () => {
+            await assertEntityFromES(es, userName, USER_INDEX_NAME, (hit) => {
+              expect(hit._source?.entity?.behaviors?.Anomaly_job_ids).toHaveLength(2);
+              expect(hit._source?.entity?.behaviors?.Anomaly_job_ids).toContain('job-1');
+              expect(hit._source?.entity?.behaviors?.Anomaly_job_ids).toContain('job-2');
+              expect(hit._source?.entity?.behaviors?.Rule_names).toHaveLength(2);
+              expect(hit._source?.entity?.behaviors?.Rule_names).toContain('rule-1');
+              expect(hit._source?.entity?.behaviors?.Rule_names).toContain('rule-2');
             });
             return true;
           }
