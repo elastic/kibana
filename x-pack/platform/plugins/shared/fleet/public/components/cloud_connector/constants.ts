@@ -44,6 +44,14 @@ export const AZURE_CLOUD_CONNECTOR_FIELD_NAMES = {
   AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID: 'azure_credentials_cloud_connector_id',
 } as const;
 
+export const GCP_CLOUD_CONNECTOR_FIELD_NAMES = {
+  SERVICE_ACCOUNT: 'service_account',
+  AUDIENCE: 'audience',
+  GCP_SERVICE_ACCOUNT: 'gcp.service_account_email',
+  GCP_AUDIENCE: 'gcp.audience',
+  GCP_CREDENTIALS_CLOUD_CONNECTOR_ID: 'gcp_credentials_cloud_connector_id',
+} as const;
+
 // Minimum version required for AWS cloud connector reusability feature
 export const CLOUD_CONNECTOR_AWS_CSPM_REUSABLE_MIN_VERSION = '3.1.0-preview06';
 export const CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION = '1.1.5';

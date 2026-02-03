@@ -84,6 +84,7 @@ export const GCP_SETUP_ACCESS = {
 };
 
 export const GCP_CREDENTIALS_TYPE = {
+  CLOUD_CONNECTORS: 'cloud_connectors',
   CREDENTIALS_FILE: 'credentials-file',
   CREDENTIALS_JSON: 'credentials-json',
   CREDENTIALS_NONE: 'credentials-none',
