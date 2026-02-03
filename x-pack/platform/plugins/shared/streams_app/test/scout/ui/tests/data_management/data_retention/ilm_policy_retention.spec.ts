@@ -191,7 +191,7 @@ test.describe('Stream data retention - ILM policy', { tag: ['@ess'] }, () => {
 
       // Delete the downsampling step from the policy
       await page.getByTestId('downsamplingPhase-1h-label').click();
-      await page.getByTestId('downsamplingPopover-step1-deleteButton').click();
+      await page.getByTestId('downsamplingPopover-step1-removeButton').click();
 
       await expect(page.getByTestId('editPolicyModalTitle')).toBeVisible();
       await page.getByTestId('editPolicyModal-overwriteButton').click();
@@ -239,7 +239,7 @@ test.describe('Stream data retention - ILM policy', { tag: ['@ess'] }, () => {
     });
 
     try {
-      const extraStreamName = 'logs.downsample.save-as-new';
+      const extraStreamName = 'logs.downsample-save-as-new';
       await apiServices.streams.forkStream('logs', extraStreamName, {
         field: 'service.name',
         eq: 'downsample-save-as-new',
@@ -269,7 +269,7 @@ test.describe('Stream data retention - ILM policy', { tag: ['@ess'] }, () => {
 
       // Delete the downsampling step from the policy
       await page.getByTestId('downsamplingPhase-1h-label').click();
-      await page.getByTestId('downsamplingPopover-step1-deleteButton').click();
+      await page.getByTestId('downsamplingPopover-step1-removeButton').click();
 
       await expect(page.getByTestId('editPolicyModalTitle')).toBeVisible();
       await page.getByTestId('editPolicyModal-saveAsNewButton').click();

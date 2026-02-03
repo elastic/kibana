@@ -103,6 +103,9 @@ describe('LifecycleSummary', () => {
   const createDisabledDefinition = () =>
     ({
       stream: { name: 'test-stream' },
+      privileges: {
+        lifecycle: true,
+      },
       effective_lifecycle: { disabled: {} },
     } as Streams.ingest.all.GetResponse);
 
@@ -137,7 +140,7 @@ describe('LifecycleSummary', () => {
 
       expect(screen.getByTestId('downsamplingBar-label')).toBeInTheDocument();
     });
-    it('should lifecycle summary for disabled lifecycle', () => {
+    it('should render lifecycle summary for disabled lifecycle', () => {
       const definition = createDisabledDefinition();
       render(<LifecycleSummary definition={definition} />);
 
