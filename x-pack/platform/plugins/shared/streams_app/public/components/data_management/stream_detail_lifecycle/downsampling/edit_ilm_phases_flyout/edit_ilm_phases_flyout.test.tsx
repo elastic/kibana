@@ -208,7 +208,7 @@ describe('EditIlmPhasesFlyout', () => {
             name: 'warm',
             size_in_bytes: 0,
             min_age: '30d',
-            downsample: { fixed_interval: '1d' },
+            downsample: { after: '30d', fixed_interval: '1d' },
           },
         })
       );
@@ -226,13 +226,13 @@ describe('EditIlmPhasesFlyout', () => {
             name: 'cold',
             size_in_bytes: 0,
             min_age: '20d',
-            searchable_snapshot: { snapshot_repository: 'repo1' },
+            searchable_snapshot: 'repo1',
           },
           frozen: {
             name: 'frozen',
             size_in_bytes: 0,
             min_age: '40d',
-            searchable_snapshot: { snapshot_repository: 'repo1' },
+            searchable_snapshot: 'repo1',
           },
         },
         searchableSnapshotRepositories: ['repo1', 'repo2'],
@@ -262,13 +262,13 @@ describe('EditIlmPhasesFlyout', () => {
           name: 'cold',
           size_in_bytes: 0,
           min_age: '20d',
-          searchable_snapshot: { snapshot_repository: 'repo1' },
+          searchable_snapshot: 'repo1',
         },
         frozen: {
           name: 'frozen',
           size_in_bytes: 0,
           min_age: '40d',
-          searchable_snapshot: { snapshot_repository: 'repo1' },
+          searchable_snapshot: 'repo1',
         },
       };
 
@@ -291,11 +291,11 @@ describe('EditIlmPhasesFlyout', () => {
           ...initialPhases,
           cold: {
             ...initialPhases.cold,
-            searchable_snapshot: { snapshot_repository: 'repo2' },
+            searchable_snapshot: 'repo2',
           },
           frozen: {
             ...initialPhases.frozen,
-            searchable_snapshot: { snapshot_repository: 'repo2' },
+            searchable_snapshot: 'repo2',
           },
         })
       );
@@ -310,7 +310,7 @@ describe('EditIlmPhasesFlyout', () => {
             name: 'cold',
             size_in_bytes: 0,
             min_age: '20d',
-            searchable_snapshot: { snapshot_repository: 'repo1' },
+            searchable_snapshot: 'repo1',
           },
         },
         searchableSnapshotRepositories: ['repo1'],
@@ -375,7 +375,7 @@ describe('EditIlmPhasesFlyout', () => {
       const onChange = jest.fn();
       renderFlyout({
         initialPhases: {
-          delete: { name: 'delete', min_age: '60d', delete_searchable_snapshot: true } as any,
+          delete: { name: 'delete', min_age: '60d' },
         },
         onChange,
       });

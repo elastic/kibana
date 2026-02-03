@@ -32,9 +32,7 @@ export const createIlmPhasesFlyoutDeserializer = () => {
     };
 
     const searchableSnapshotRepository =
-      phases.cold?.searchable_snapshot?.snapshot_repository ??
-      phases.frozen?.searchable_snapshot?.snapshot_repository ??
-      '';
+      phases.cold?.searchable_snapshot ?? phases.frozen?.searchable_snapshot ?? '';
 
     return {
       _meta: {
@@ -56,7 +54,7 @@ export const createIlmPhasesFlyoutDeserializer = () => {
           downsample: {
             ...withDownsampleDefaults(phases.warm?.downsample?.fixed_interval),
           },
-          ...withMillis(phases.warm?.min_age),
+          ...withMillis(phases.warm?.min_age ?? phases.warm?.downsample?.after),
         },
         cold: {
           enabled: Boolean(phases.cold),
@@ -67,7 +65,7 @@ export const createIlmPhasesFlyoutDeserializer = () => {
             ...withDownsampleDefaults(phases.cold?.downsample?.fixed_interval),
           },
           searchableSnapshotEnabled: Boolean(phases.cold?.searchable_snapshot),
-          ...withMillis(phases.cold?.min_age),
+          ...withMillis(phases.cold?.min_age ?? phases.cold?.downsample?.after),
         },
         frozen: {
           enabled: Boolean(phases.frozen),

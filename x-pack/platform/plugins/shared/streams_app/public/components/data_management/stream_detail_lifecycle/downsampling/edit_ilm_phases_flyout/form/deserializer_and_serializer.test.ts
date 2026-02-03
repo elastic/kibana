@@ -29,9 +29,8 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
         rollover: { max_age: '1d' },
         readonly: true,
         downsample: {
+          after: '0ms',
           fixed_interval: '2d',
-          force_merge_index: false,
-          sampling_method: 'last_value',
           unknown_nested: unknownValue,
         },
         // unknown fields should be preserved
@@ -43,9 +42,8 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
         min_age: '20d',
         readonly: true,
         downsample: {
+          after: '20d',
           fixed_interval: '4d',
-          force_merge_index: true,
-          sampling_method: 'aggregate',
           unknown_nested: unknownValue,
         },
         unknown: unknownValue,
@@ -56,19 +54,18 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
         min_age: '30d',
         readonly: true,
         downsample: {
+          after: '30d',
           fixed_interval: '8d',
-          force_merge_index: true,
-          sampling_method: 'aggregate',
           unknown_nested: unknownValue,
         },
-        searchable_snapshot: { snapshot_repository: 'repo' },
+        searchable_snapshot: 'repo',
         unknown: unknownValue,
       } as any,
       frozen: {
         name: 'frozen',
         size_in_bytes: 0,
         min_age: '40d',
-        searchable_snapshot: { snapshot_repository: 'repo' },
+        searchable_snapshot: 'repo',
         unknown: unknownValue,
       } as any,
       delete: {
@@ -116,9 +113,8 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
 
     const out = serializer(internal) as any;
     expect(out.warm.downsample).toEqual({
+      after: '20d',
       fixed_interval: '6d',
-      force_merge_index: true,
-      sampling_method: 'aggregate',
       unknown_nested: unknownValue,
     });
   });
@@ -153,29 +149,6 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
     expect(internal._meta.searchableSnapshot.repository).toBe('');
   });
 
-  it('deserializes searchable snapshot repository from cold first, then frozen', () => {
-    const internal = deserializer({
-      cold: {
-        name: 'cold',
-        searchable_snapshot: { snapshot_repository: 'coldRepo' },
-      } as any,
-      frozen: {
-        name: 'frozen',
-        searchable_snapshot: { snapshot_repository: 'frozenRepo' },
-      } as any,
-    });
-    expect(internal._meta.searchableSnapshot.repository).toBe('coldRepo');
-
-    const internal2 = deserializer({
-      frozen: {
-        name: 'frozen',
-        min_age: '1d',
-        searchable_snapshot: { snapshot_repository: 'fRepo' },
-      } as any,
-    });
-    expect(internal2._meta.searchableSnapshot.repository).toBe('fRepo');
-  });
-
   it('defaults delete_searchable_snapshot to true when delete phase omits it', () => {
     const internal = deserializer({
       delete: { name: 'delete', min_age: '1d' } as any,
@@ -184,6 +157,29 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
 
     const internal2 = deserializer({});
     expect(internal2._meta.delete.deleteSearchableSnapshotEnabled).toBe(true);
+  });
+
+  it('deserializes searchable snapshot repository from cold first, then frozen', () => {
+    const internal = deserializer({
+      cold: {
+        name: 'cold',
+        searchable_snapshot: 'coldRepo',
+      } as any,
+      frozen: {
+        name: 'frozen',
+        searchable_snapshot: 'frozenRepo',
+      } as any,
+    });
+    expect(internal._meta.searchableSnapshot.repository).toBe('coldRepo');
+
+    const internal2 = deserializer({
+      frozen: {
+        name: 'frozen',
+        min_age: '1d',
+        searchable_snapshot: 'fRepo',
+      } as any,
+    });
+    expect(internal2._meta.searchableSnapshot.repository).toBe('fRepo');
   });
 
   it('computes minAgeToMilliSeconds from min_age when parsing succeeds', () => {
@@ -204,11 +200,11 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
 
     const out = serializer(internal) as any;
     expect(out.cold.searchable_snapshot).toBeUndefined();
-    expect(out.frozen.searchable_snapshot).toEqual({ snapshot_repository: 'repo1' });
+    expect(out.frozen.searchable_snapshot).toEqual('repo1');
 
     internal._meta.cold.searchableSnapshotEnabled = true;
     const out2 = serializer(internal) as any;
-    expect(out2.cold.searchable_snapshot).toEqual({ snapshot_repository: 'repo1' });
-    expect(out2.frozen.searchable_snapshot).toEqual({ snapshot_repository: 'repo1' });
+    expect(out2.cold.searchable_snapshot).toEqual('repo1');
+    expect(out2.frozen.searchable_snapshot).toEqual('repo1');
   });
 });

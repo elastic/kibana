@@ -35,9 +35,11 @@ export const createIlmPhasesFlyoutSerializer = (initialPhases: IlmPolicyPhases =
 
     const buildNextDownsample = (
       previousDownsample: unknown,
+      after: string | undefined,
       fixedIntervalValue: string | undefined,
       fixedIntervalUnit: string | undefined
     ) => {
+      const resolvedAfter = after ?? (previousDownsample as any)?.after ?? '0ms';
       const fixedInterval =
         formatDownsampleInterval(fixedIntervalValue, fixedIntervalUnit) ??
         (previousDownsample as any)?.fixed_interval ??
@@ -46,6 +48,7 @@ export const createIlmPhasesFlyoutSerializer = (initialPhases: IlmPolicyPhases =
 
       return {
         ...(previousDownsample ?? {}),
+        after: resolvedAfter,
         fixed_interval: fixedInterval,
       };
     };
@@ -70,8 +73,10 @@ export const createIlmPhasesFlyoutSerializer = (initialPhases: IlmPolicyPhases =
       }
 
       if (meta.hot.downsampleEnabled) {
+        const after = (previous as any).min_age ?? '0ms';
         hot.downsample = buildNextDownsample(
           previous.downsample,
+          after,
           meta.hot.downsample?.fixedIntervalValue,
           meta.hot.downsample?.fixedIntervalUnit
         );
@@ -101,8 +106,10 @@ export const createIlmPhasesFlyoutSerializer = (initialPhases: IlmPolicyPhases =
       }
 
       if (meta.warm.downsampleEnabled) {
+        const after = minAge ?? (previous as any).min_age ?? '0ms';
         (next.warm as any).downsample = buildNextDownsample(
           previous.downsample,
+          after,
           meta.warm.downsample?.fixedIntervalValue,
           meta.warm.downsample?.fixedIntervalUnit
         );
@@ -132,8 +139,10 @@ export const createIlmPhasesFlyoutSerializer = (initialPhases: IlmPolicyPhases =
       }
 
       if (meta.cold.downsampleEnabled) {
+        const after = minAge ?? (previous as any).min_age ?? '0ms';
         (next.cold as any).downsample = buildNextDownsample(
           previous.downsample,
+          after,
           meta.cold.downsample?.fixedIntervalValue,
           meta.cold.downsample?.fixedIntervalUnit
         );
@@ -142,9 +151,7 @@ export const createIlmPhasesFlyoutSerializer = (initialPhases: IlmPolicyPhases =
       }
 
       if (meta.cold.searchableSnapshotEnabled) {
-        (next.cold as any).searchable_snapshot = {
-          snapshot_repository: searchableSnapshotRepository,
-        };
+        (next.cold as any).searchable_snapshot = searchableSnapshotRepository;
       } else {
         delete (next.cold as any).searchable_snapshot;
       }
@@ -165,9 +172,7 @@ export const createIlmPhasesFlyoutSerializer = (initialPhases: IlmPolicyPhases =
       if (!minAge) delete (next.frozen as any).min_age;
 
       // Frozen phase always requires searchable snapshots.
-      (next.frozen as any).searchable_snapshot = {
-        snapshot_repository: searchableSnapshotRepository,
-      };
+      (next.frozen as any).searchable_snapshot = searchableSnapshotRepository;
     }
 
     // DELETE
