@@ -15,6 +15,10 @@ steps:
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 4
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:dashboards
         label: 'Cypress MKI - Dashboards'
@@ -29,6 +33,10 @@ steps:
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:siem_migrations
         label: 'Cypress MKI - SIEM Integrations'
@@ -43,6 +51,10 @@ steps:
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:sourcerer
         label: 'Cypress MKI - Sourcerer'
@@ -57,6 +69,10 @@ steps:
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:threat_intelligence
         label: 'Cypress MKI - Threat Intelligence'
@@ -71,6 +87,10 @@ steps:
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:timeline_templates
         label: 'Cypress MKI - Timeline Templates'
@@ -85,6 +105,10 @@ steps:
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:timelines
         label: 'Cypress MKI - Timelines'
@@ -99,6 +123,10 @@ steps:
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 2
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:filters
         label: 'Cypress MKI - Explore - Filters'
@@ -113,6 +141,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:guided_onboarding
         label: 'Cypress MKI - Explore - Guided Onboarding'
@@ -127,6 +159,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:inspect
         label: 'Cypress MKI - Explore - Inspect'
@@ -141,6 +177,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:navigation
         label: 'Cypress MKI - Explore - Navigation'
@@ -155,6 +195,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:overview
         label: 'Cypress MKI - Explore - Overview'
@@ -169,6 +213,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:pagination
         label: 'Cypress MKI - Explore - Pagination'
@@ -183,6 +231,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:urls
         label: 'Cypress MKI - Explore - URLs'
@@ -197,6 +249,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
   - group: "API MKI - Investigations"
     key: api_test_investigations
@@ -213,7 +269,7 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2
+              limit: 1
 
       - label: 'API MKI - investigations:saved-objects:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:saved-objects:runner:qa:serverless
@@ -227,7 +283,7 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2
+              limit: 1
 
       - label: 'API MKI - explore:overview:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:overview:runner:qa:serverless
@@ -241,4 +297,4 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2
+              limit: 1
