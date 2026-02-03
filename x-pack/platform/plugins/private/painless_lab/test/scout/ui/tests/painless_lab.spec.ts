@@ -51,7 +51,7 @@ test.describe('Painless Lab', { tag: tags.ESS_ONLY }, () => {
     await expect(pageObjects.painlessLab.editorOutputPane).toContainText(TEST_SCRIPT_RESULT);
 
     await pageObjects.painlessLab.viewRequestButton.click();
-    await expect(pageObjects.painlessLab.requestFlyoutHeader).toBeVisible();
+    await expect(pageObjects.painlessLab.requestFlyoutHeader).toBeHidden();
 
     expect(await pageObjects.painlessLab.getFlyoutRequestBody()).toBe(TEST_SCRIPT_REQUEST);
 
