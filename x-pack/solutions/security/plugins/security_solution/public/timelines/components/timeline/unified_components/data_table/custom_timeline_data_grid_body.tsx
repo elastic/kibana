@@ -43,9 +43,14 @@ const VirtualizedCustomDataGridContainer = styled.div<{
     max-width: ${(props) => props.$maxWidth}px;
   }
 
+  .euiDataGridHeader {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
  .euiDataGridRowCell--lastColumn.euiDataGridRowCell--controlColumn  .euiDataGridRowCell__content {
-    width: ${(props) => props.$maxWidth}px;
-    max-width: ${(props) => props.$maxWidth}px;
+    width: ${(props) => `min(100%, ${props.$maxWidth}px)`};
+    max-width: 100%;
     overflow-x: auto;
     scrollbar-width: thin;
     scroll-padding: 0 0 0 0,

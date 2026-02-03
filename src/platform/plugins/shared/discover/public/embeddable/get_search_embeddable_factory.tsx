@@ -175,6 +175,7 @@ export const getSearchEmbeddableFactory = ({
           partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$ },
           discoverServices,
           isEditable: startServices.isEditable,
+          getTitle: () => titleManager.api.title$.getValue(),
         }),
         dataLoading$,
         blockingError$,
