@@ -16,6 +16,9 @@ import {
   DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
   DEFAULT_TIME_RANGE,
   DEFAULT_LOG_SOURCE_FIELDS,
+  DEFAULT_ERROR_LOGS_ONLY,
+  DEFAULT_MAX_SEQUENCES,
+  DEFAULT_MAX_LOGS_PER_SEQUENCE,
 } from './constants';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getNoResultsMessage, getToolHandler } from './handler';
@@ -39,7 +42,7 @@ const getCorrelatedLogsSchema = z.object({
     ),
   errorLogsOnly: z
     .boolean()
-    .default(true)
+    .default(DEFAULT_ERROR_LOGS_ONLY)
     .describe(
       'When true, only sequences containing error logs (ERROR, WARN, FATAL, HTTP 5xx) are returned. Set to false to return any sequence. You can use `kqlFilter` to apply another filter (e.g., slow requests).'
     ),
@@ -57,11 +60,11 @@ const getCorrelatedLogsSchema = z.object({
     ),
   maxSequences: z
     .number()
-    .default(10)
+    .default(DEFAULT_MAX_SEQUENCES)
     .describe('Maximum number of unique log sequences to return.'),
   maxLogsPerSequence: z
     .number()
-    .default(50)
+    .default(DEFAULT_MAX_LOGS_PER_SEQUENCE)
     .describe(
       'Maximum number of logs per sequence. Increase this to see a longer sequence of logs surrounding the anchor log.'
     ),
