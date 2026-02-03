@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiButtonIcon,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
@@ -26,6 +33,7 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({
   endpointInfo,
   isCloudEnabled,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [isCopied, setIsCopied] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -50,7 +58,7 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({
 
   const copyButtonStyles = css`
     opacity: ${isCopied ? 1 : 0};
-    transition: opacity 150ms ease-in-out;
+    transition: opacity ${euiTheme.animation.fast} ease-in-out;
 
     &:focus {
       opacity: 1;
