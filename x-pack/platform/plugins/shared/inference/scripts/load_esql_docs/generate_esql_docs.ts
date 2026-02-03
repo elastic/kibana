@@ -537,9 +537,6 @@ async function updateSyntaxFile(
 
     // Write updated content
     await Fs.writeFile(syntaxFilePath, syntaxContent, 'utf-8');
-    log.info(
-      `Updated syntax.txt section ${sectionTag} with ${functionDescriptions.length} functions from ${mdFileName}`
-    );
   } catch (error) {
     log.warning(
       `Failed to update syntax.txt for ${mdFileName}: ${
@@ -589,31 +586,17 @@ async function generateDoc({
         const isCommand =
           docFile.content.includes('**Syntax**') && !docFile.content.match(/^# [A-Z_]+$/m);
 
-        try {
-          const rewrittenContent = await callOutput(
-            rewriteFunctionPagePrompt({
-              content: docFile.content,
-              documentation,
-              command: isCommand,
-            })
-          );
-          filesToWrite.push({
-            name: docFile.name,
-            content: rewrittenContent,
-          });
-          log.info(`Rewrote ${docFile.name} using LLM`);
-        } catch (error) {
-          log.warning(
-            `Failed to rewrite ${docFile.name}: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-          // Fall back to original content if LLM rewrite fails
-          filesToWrite.push({
-            name: docFile.name,
+        const rewrittenContent = await callOutput(
+          rewriteFunctionPagePrompt({
             content: docFile.content,
-          });
-        }
+            documentation,
+            command: isCommand,
+          })
+        );
+        filesToWrite.push({
+          name: docFile.name,
+          content: rewrittenContent,
+        });
       });
     })
   );
@@ -675,6 +658,22 @@ yargs(process.argv.slice(2))
             inferenceClient = kibanaClient.createInferenceClient({
               connectorId: connector.connectorId,
             });
+
+            try {
+              const callOutput = bindOutput({
+                connectorId: inferenceClient.getConnectorId(),
+                output: inferenceClient.output,
+              });
+              const resp = await callOutput({
+                input: 'Test',
+                system:
+                  'You are a helpful assistant. Respond with "OK" to confirm you are working.',
+              });
+              log.success(`✅ Connected to connector ${connector.connectorId} ${resp}`);
+            } catch (error) {
+              log.error(`❌ Unable to connect to connector ${connector.connectorId}: ${error}`);
+              throw error;
+            }
           }
 
           const zipUrl = 'http://elastic.co/docs/llm.zip';
@@ -737,18 +736,15 @@ yargs(process.argv.slice(2))
                   archivePath: zipPath,
                   targetDir: extractDir,
                 });
-                log.info(`Extracted to ${extractDir}`);
               } catch (extractError) {
                 log.warning(
                   `Extraction encountered errors: ${
                     extractError instanceof Error ? extractError.message : String(extractError)
                   }`
                 );
-                log.info(`Continuing with partial extraction...`);
               }
             }
 
-            log.info(`Looking for markdown files in ${commandsDir}...`);
             const commandsPathExists = await Fs.access(commandsDir)
               .then(() => true)
               .catch(() => false);
@@ -815,7 +811,6 @@ yargs(process.argv.slice(2))
                     continue;
                   } else {
                     // Some output files are missing, process the file
-                    log.info(`Processing ${mdFile} - some output files are missing from disk`);
                   }
                 } else {
                   // No output files in cache, skip
@@ -853,15 +848,17 @@ yargs(process.argv.slice(2))
                   outputFiles: [outputFileName],
                 };
                 cacheUpdated = true;
-
-                log.info(`Extracted YAML from ${mdFile} -> ${outputFileName}`);
               } else {
                 log.warning(`No YAML code blocks found in ${mdFile}, skipping`);
               }
             }
+            if (docFiles.length > 0) {
+              log.info(`✅ Found ${docFiles.length} new documents to process`);
+            } else {
+              log.info(`⏰ No new content detected compared to previous run`);
+            }
 
             // Process functions-operators
-            log.info(`Looking for markdown files in ${functionsOperatorsDir}...`);
             const functionsOperatorsPathExists = await Fs.access(functionsOperatorsDir)
               .then(() => true)
               .catch(() => false);
@@ -871,10 +868,6 @@ yargs(process.argv.slice(2))
               const functionMdFiles = functionFiles.filter((file) => file.endsWith('.md'));
 
               if (functionMdFiles.length > 0) {
-                log.info(
-                  `Found ${functionMdFiles.length} markdown files in functions-operators directory`
-                );
-
                 for (const mdFile of functionMdFiles) {
                   const filePath = Path.join(functionsOperatorsDir, mdFile);
                   const content = await Fs.readFile(filePath, 'utf-8');
@@ -909,7 +902,6 @@ yargs(process.argv.slice(2))
                         continue;
                       } else {
                         // Some output files are missing, process the file
-                        log.info(`Processing ${mdFile} - some output files are missing from disk`);
                       }
                     } else {
                       // No output files in cache, skip
@@ -970,9 +962,6 @@ yargs(process.argv.slice(2))
                         outputFiles.push(outputFile);
                         docFiles.push(outputFile);
                         outputToSourceMap.set(outputFileName, cacheKey);
-                        log.info(
-                          `Extracted function ${section.name} from ${mdFile} -> ${outputFileName} (changed)`
-                        );
                       } else {
                         // Section unchanged, skip processing
                         log.debug(
@@ -1020,6 +1009,8 @@ yargs(process.argv.slice(2))
             // Use LLM to rewrite documentation if connectorId is provided
             let finalDocFiles = docFiles;
             if (inferenceClient) {
+              // Capture inferenceClient in a const for TypeScript narrowing
+              const client = inferenceClient;
               // Process all files that made it through (unchanged files were already skipped)
               const filesToProcess: Array<{
                 name: string;
@@ -1031,10 +1022,10 @@ yargs(process.argv.slice(2))
               });
 
               if (filesToProcess.length > 0) {
-                log.info(`Rewriting ${filesToProcess.length} documents using LLM...`);
+                // log.info(`Rewriting ${filesToProcess.length} documents using LLM...`);
                 const rewrittenFiles = await generateDoc({
                   docFiles: filesToProcess,
-                  inferenceClient,
+                  inferenceClient: client,
                   log,
                 });
                 log.info(`Successfully rewritten ${rewrittenFiles.length} documents`);
@@ -1047,25 +1038,15 @@ yargs(process.argv.slice(2))
                 finalDocFiles = await Promise.all(
                   rewrittenFiles.map(async (file) => {
                     return limiter(async () => {
-                      try {
-                        const enrichedContent = await enrichDocumentation({
-                          content: file.content,
-                          inferenceClient,
-                        });
-                        log.info(`Enriched ${file.name} with ES|QL query descriptions`);
-                        return {
-                          name: file.name,
-                          content: enrichedContent,
-                        };
-                      } catch (error) {
-                        log.warning(
-                          `Failed to enrich ${file.name}: ${
-                            error instanceof Error ? error.message : String(error)
-                          }`
-                        );
-                        // Fall back to original content if enrichment fails
-                        return file;
-                      }
+                      const enrichedContent = await enrichDocumentation({
+                        content: file.content,
+                        inferenceClient: client,
+                      });
+                      // log.info(`Enriched ${file.name} with ES|QL query descriptions`);
+                      return {
+                        name: file.name,
+                        content: enrichedContent,
+                      };
                     });
                   })
                 );
@@ -1085,9 +1066,9 @@ yargs(process.argv.slice(2))
                 })
               );
 
-              log.info(`Successfully wrote ${finalDocFiles.length} files to ${outDir}`);
+              // log.info(`Successfully wrote ${finalDocFiles.length} files to ${outDir}`);
             } else {
-              log.info(`Dry run: Would write ${finalDocFiles.length} files to ${outDir}`);
+              // log.info(`Dry run: Would write ${finalDocFiles.length} files to ${outDir}`);
             }
 
             // Save cache if it was updated
