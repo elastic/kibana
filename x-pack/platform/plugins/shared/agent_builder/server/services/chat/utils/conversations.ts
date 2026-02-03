@@ -8,7 +8,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { of, forkJoin, switchMap } from 'rxjs';
-import { type Conversation, type RoundCompleteEvent } from '@kbn/agent-builder-common';
+import {
+  type Conversation,
+  type RoundCompleteEvent,
+  createBadRequestError,
+} from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
@@ -57,11 +61,13 @@ export const updateConversation$ = ({
   conversation,
   title$,
   roundCompletedEvents$,
+  resend = false,
 }: {
   conversation: Conversation;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
   conversationClient: ConversationClient;
+  resend?: boolean;
 }) => {
   return forkJoin({
     title: title$,
@@ -69,7 +75,9 @@ export const updateConversation$ = ({
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
       const { round, resumed = false, conversation_state } = roundCompletedEvent.data;
-      const updatedRound = resumed
+      // Replace last round when resumed (HITL flow) or resend is requested
+      const shouldReplaceLastRound = resumed || resend;
+      const updatedRound = shouldReplaceLastRound
         ? [...conversation.rounds.slice(0, -1), round]
         : [...conversation.rounds, round];
 
@@ -102,7 +110,7 @@ export const conversationExists = async ({
   return conversationClient.exists(conversationId);
 };
 
-export type ConversationOperation = 'CREATE' | 'UPDATE';
+export type ConversationOperation = 'CREATE' | 'UPDATE' | 'RESEND';
 
 export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
 
@@ -114,13 +122,30 @@ export const getConversation = async ({
   agentId,
   conversationId,
   autoCreateConversationWithId = false,
+  resend = false,
   conversationClient,
 }: {
   agentId: string;
   conversationId: string | undefined;
   autoCreateConversationWithId?: boolean;
+  resend?: boolean;
   conversationClient: ConversationClient;
 }): Promise<ConversationWithOperation> => {
+  // Resend case: requires conversationId and at least one round
+  if (resend) {
+    if (!conversationId) {
+      throw createBadRequestError('conversation_id is required when resend is true');
+    }
+    const conversation = await conversationClient.get(conversationId);
+    if (conversation.rounds.length === 0) {
+      throw createBadRequestError('Cannot resend: conversation has no rounds');
+    }
+    return {
+      ...conversation,
+      operation: 'RESEND',
+    };
+  }
+
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
     return {

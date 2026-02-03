@@ -85,4 +85,8 @@ export interface ChatConverseParams {
    * These override the stored agent configuration for this execution only.
    */
   configurationOverrides?: AgentConfigurationOverrides;
+  /**
+   * When true, regenerates the last conversation round using its original input.
+   */
+  resend?: boolean;
 }

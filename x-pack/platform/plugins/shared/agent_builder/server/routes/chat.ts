@@ -167,6 +167,14 @@ export function registerChatRoutes({
         }
       )
     ),
+    resend: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'When true, regenerates the last conversation round using its original input. Requires conversation_id.',
+        },
+      })
+    ),
   });
 
   const validateAttachments = async ({
@@ -231,6 +239,7 @@ export function registerChatRoutes({
       capabilities,
       browser_api_tools: browserApiTools,
       configuration_overrides: configurationOverrides,
+      resend,
     } = payload;
 
     return chatService.converse({
@@ -240,6 +249,7 @@ export function registerChatRoutes({
       capabilities,
       browserApiTools,
       configurationOverrides,
+      resend,
       abortSignal,
       nextInput: {
         message: input,
