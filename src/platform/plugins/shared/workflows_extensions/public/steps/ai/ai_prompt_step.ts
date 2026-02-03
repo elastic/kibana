@@ -9,29 +9,25 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
-import type { InputSchema } from '../../../common/steps/ai';
 import {
   AiPromptOutputSchema,
   AiPromptStepCommonDefinition,
   AiPromptStepTypeId,
   getStructuredOutputSchema,
 } from '../../../common/steps/ai';
-import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
+import { ActionsMenuGroup, createPublicStepDefinition } from '../../step_registry/types';
 
-export const AiPromptStepDefinition: PublicStepDefinition = {
+export const AiPromptStepDefinition = createPublicStepDefinition({
   ...AiPromptStepCommonDefinition,
   editorHandlers: {
     dynamicSchema: {
       getOutputSchema: ({ input }) => {
-        const typedInput = input as z.infer<typeof InputSchema>;
-
-        if (!typedInput.schema) {
+        if (!input.schema) {
           return Promise.resolve(AiPromptOutputSchema);
         }
 
-        const zodSchema = fromJSONSchema(typedInput.schema);
+        const zodSchema = fromJSONSchema(input.schema);
 
         if (!zodSchema) {
           return Promise.resolve(AiPromptOutputSchema);
@@ -134,4 +130,4 @@ See this [JSON Schema reference](https://json-schema.org/learn/getting-started-s
 \`\`\``,
     ],
   },
-};
+});
