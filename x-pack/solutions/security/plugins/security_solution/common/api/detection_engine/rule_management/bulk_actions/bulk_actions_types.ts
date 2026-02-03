@@ -32,3 +32,5 @@ export type BulkActionEditForRuleParams =
   | BulkActionEditPayloadTimeline
   | BulkActionEditPayloadAlertSuppression
   | BulkActionEditPayloadSchedule;
+
+export type BulkActionEditWithReadPrivileges = BulkActionEditPayloadInvestigationFields;
