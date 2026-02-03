@@ -17,7 +17,11 @@ import { QueryBuilder } from '../../common/query_builder';
 import { IndexAndTimestampField } from '../custom_common/index_and_timestamp_field';
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 
-export function CustomKqlIndicatorTypeForm() {
+interface CustomKqlIndicatorTypeFormProps {
+  isFlyout?: boolean;
+}
+
+export function CustomKqlIndicatorTypeForm({ isFlyout = false }: CustomKqlIndicatorTypeFormProps) {
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
   const dataViewId = watch(DATA_VIEW_FIELD);
@@ -29,7 +33,11 @@ export function CustomKqlIndicatorTypeForm() {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <IndexAndTimestampField dataView={dataView} isLoading={isIndexFieldsLoading} />
+      <IndexAndTimestampField
+        dataView={dataView}
+        isLoading={isIndexFieldsLoading}
+        isFlyout={isFlyout}
+      />
 
       <EuiFlexItem>
         <QueryBuilder

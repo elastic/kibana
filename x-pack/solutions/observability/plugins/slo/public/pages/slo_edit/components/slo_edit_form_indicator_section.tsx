@@ -51,26 +51,42 @@ export function SloEditFormIndicatorSection({ formSettings }: SloEditFormIndicat
     return SLI_OPTIONS.filter((option) => allowedIndicatorTypes.includes(option.value));
   }, [allowedIndicatorTypes]);
 
+  const documentationUrl = useMemo(() => {
+    switch (indicatorType) {
+      case 'sli.kql.custom':
+        return 'https://ela.st/docs-create-custom-kql-slo';
+      case 'sli.apm.transactionDuration':
+      case 'sli.apm.transactionErrorRate':
+        return 'https://ela.st/docs-create-slo-apm';
+      case 'sli.synthetics.availability':
+        return 'https://ela.st/docs-create-synthetics-slo';
+      case 'sli.metric.custom':
+        return 'https://ela.st/docs-create-custom-metric-slo';
+      case 'sli.histogram.custom':
+        return 'https://ela.st/docs-create-histogram-metric-slo';
+      case 'sli.metric.timeslice':
+        return 'https://ela.st/docs-create-timeslice-metric-slo';
+      default:
+        return null;
+    }
+  }, [indicatorType]);
+
   const indicatorTypeForm = useMemo(() => {
     switch (indicatorType) {
       case 'sli.kql.custom':
-        return isFlyout ? <UnsupportedIndicatorMessage /> : <CustomKqlIndicatorTypeForm />;
+        return <CustomKqlIndicatorTypeForm isFlyout={isFlyout} />;
       case 'sli.apm.transactionDuration':
         return <ApmLatencyIndicatorTypeForm isFlyout={isFlyout} />;
       case 'sli.apm.transactionErrorRate':
         return <ApmAvailabilityIndicatorTypeForm isFlyout={isFlyout} />;
       case 'sli.synthetics.availability':
-        return isFlyout ? (
-          <UnsupportedIndicatorMessage />
-        ) : (
-          <SyntheticsAvailabilityIndicatorTypeForm />
-        );
+        return <SyntheticsAvailabilityIndicatorTypeForm />;
       case 'sli.metric.custom':
-        return isFlyout ? <UnsupportedIndicatorMessage /> : <CustomMetricIndicatorTypeForm />;
+        return <CustomMetricIndicatorTypeForm isFlyout={isFlyout} />;
       case 'sli.histogram.custom':
-        return isFlyout ? <UnsupportedIndicatorMessage /> : <HistogramIndicatorTypeForm />;
+        return <HistogramIndicatorTypeForm isFlyout={isFlyout} />;
       case 'sli.metric.timeslice':
-        return isFlyout ? <UnsupportedIndicatorMessage /> : <TimesliceMetricIndicatorTypeForm />;
+        return <TimesliceMetricIndicatorTypeForm isFlyout={isFlyout} />;
       default:
         assertNever(indicatorType);
     }
@@ -94,12 +110,11 @@ export function SloEditFormIndicatorSection({ formSettings }: SloEditFormIndicat
             <EuiFlexItem>
               <EuiText size="s">{toIndicatorTypeDescription(indicatorType)}</EuiText>
             </EuiFlexItem>
-            {(indicatorType === 'sli.apm.transactionDuration' ||
-              indicatorType === 'sli.apm.transactionErrorRate') && (
+            {documentationUrl && (
               <EuiFlexItem grow={false}>
                 <EuiLink
                   data-test-subj="sloSloEditFormIndicatorSectionViewDocumentationButton"
-                  href="https://ela.st/docs-create-slo-apm"
+                  href={documentationUrl}
                   target="_blank"
                 >
                   {i18n.translate('xpack.slo.sloEdit.flyout.viewDocumentation', {
@@ -169,17 +184,6 @@ export function SloEditFormIndicatorSection({ formSettings }: SloEditFormIndicat
         </>
       )}
       {indicatorTypeForm}
-    </EuiPanel>
-  );
-}
-
-function UnsupportedIndicatorMessage() {
-  return (
-    <EuiPanel color="subdued" hasBorder>
-      {i18n.translate('xpack.slo.sloEdit.flyout.unsupportedIndicatorType', {
-        defaultMessage:
-          'This indicator type is not yet supported in the quick create flyout. Please use the full SLO editor.',
-      })}
     </EuiPanel>
   );
 }

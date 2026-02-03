@@ -16,20 +16,26 @@ import { IndexSelection } from './index_selection';
 interface Props {
   dataView?: DataView;
   isLoading: boolean;
+  isFlyout?: boolean;
 }
 
-export function IndexAndTimestampField({ dataView, isLoading }: Props) {
+export function IndexAndTimestampField({ dataView, isLoading, isFlyout = false }: Props) {
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
 
   const timestampFields = dataView?.fields?.filter((field) => field.type === 'date') ?? [];
 
   return (
-    <EuiFlexGroup gutterSize="m" css={{ paddingRight: 34 }}>
-      <EuiFlexItem grow={5}>
+    <EuiFlexGroup
+      direction={isFlyout ? 'column' : 'row'}
+      gutterSize="m"
+      css={isFlyout ? undefined : { paddingRight: 34 }}
+    >
+      {/* minWidth is used to prevent the flex items from growing too wide */}
+      <EuiFlexItem grow={isFlyout ? true : 5} css={{ minWidth: 0 }}>
         <IndexSelection selectedDataView={dataView} />
       </EuiFlexItem>
-      <EuiFlexItem grow={2}>
+      <EuiFlexItem grow={isFlyout ? true : 2} css={{ minWidth: 0 }}>
         <TimestampFieldSelector
           fields={timestampFields}
           isLoading={!!index && isLoading}

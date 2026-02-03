@@ -30,7 +30,13 @@ export { NEW_CUSTOM_METRIC } from './metric_indicator';
 
 const SUPPORTED_METRIC_FIELD_TYPES = ['number', 'histogram'];
 
-export function CustomMetricIndicatorTypeForm() {
+interface CustomMetricIndicatorTypeFormProps {
+  isFlyout?: boolean;
+}
+
+export function CustomMetricIndicatorTypeForm({
+  isFlyout = false,
+}: CustomMetricIndicatorTypeFormProps) {
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
   const dataViewId = watch(DATA_VIEW_FIELD);
@@ -56,7 +62,11 @@ export function CustomMetricIndicatorTypeForm() {
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="column" gutterSize="m">
-        <IndexAndTimestampField dataView={dataView} isLoading={isIndexFieldsLoading} />
+        <IndexAndTimestampField
+          dataView={dataView}
+          isLoading={isIndexFieldsLoading}
+          isFlyout={isFlyout}
+        />
 
         <EuiFlexItem>
           <QueryBuilder

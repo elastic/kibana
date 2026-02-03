@@ -26,7 +26,11 @@ import { QueryBuilder } from '../../common/query_builder';
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { HistogramIndicator } from './histogram_indicator';
 
-export function HistogramIndicatorTypeForm() {
+interface HistogramIndicatorTypeFormProps {
+  isFlyout?: boolean;
+}
+
+export function HistogramIndicatorTypeForm({ isFlyout = false }: HistogramIndicatorTypeFormProps) {
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
   const dataViewId = watch(DATA_VIEW_FIELD);
@@ -50,7 +54,11 @@ export function HistogramIndicatorTypeForm() {
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="column" gutterSize="m">
-        <IndexAndTimestampField dataView={dataView} isLoading={isIndexFieldsLoading} />
+        <IndexAndTimestampField
+          dataView={dataView}
+          isLoading={isIndexFieldsLoading}
+          isFlyout={isFlyout}
+        />
 
         <EuiFlexItem>
           <QueryBuilder
