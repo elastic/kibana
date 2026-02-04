@@ -106,8 +106,8 @@
     "@xstate5/react/**/xstate": "5.19.2",
     "apache-arrow": "20.x - 21.x",
     "globby/fast-glob": "3.3.3",
-    "pkce-challenge": "3.1.0",
-    "lodash": "4.17.23"
+    "lodash": "4.17.23",
+    "pkce-challenge": "3.1.0"
   },
   "dependencies": {
     "@ai-sdk/langchain": "1.0.108",
