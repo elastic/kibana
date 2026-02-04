@@ -47,7 +47,7 @@ export const createSkillEntries = (
       }),
       content: {
         raw: {
-          body: stringifiedContent
+          body: stringifiedContent,
         },
         plain_text: stringifiedContent,
       },
@@ -72,7 +72,7 @@ export const createSkillEntries = (
         }),
         content: {
           raw: {
-            body: referencedContent.content
+            body: referencedContent.content,
           },
           plain_text: referencedContent.content,
         },
