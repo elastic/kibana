@@ -76,6 +76,29 @@ export interface RunStats {
   totalRepetitions: number;
 }
 
+interface RunStatsAggregations {
+  by_dataset?: {
+    buckets?: Array<{
+      key: string;
+      dataset_name?: { buckets?: Array<{ key: string }> };
+      by_evaluator?: {
+        buckets?: Array<{
+          key: string;
+          score_stats?: {
+            avg?: number;
+            std_deviation?: number;
+            min?: number;
+            max?: number;
+            count?: number;
+          };
+          // Captured by percentiles aggregation opposed to the extended_stats aggregation used for the above
+          score_median?: { values?: Record<string, number> };
+        }>;
+      };
+    }>;
+  };
+}
+
 const EVALUATIONS_DATA_STREAM_ALIAS = '.kibana-evaluations';
 const EVALUATIONS_DATA_STREAM_WILDCARD = '.kibana-evaluations*';
 const EVALUATIONS_DATA_STREAM_TEMPLATE = 'kibana-evaluations-template';
@@ -263,12 +286,15 @@ export class EvaluationScoreRepository {
 
   async getStatsByRunId(runId: string): Promise<RunStats | null> {
     try {
+      const runQuery = { term: { run_id: runId } };
+
       const metadataResponse = await this.esClient.search<EvaluationScoreDocument>({
         index: EVALUATIONS_DATA_STREAM_WILDCARD,
-        query: { term: { run_id: runId } },
+        query: runQuery,
         size: 1,
       });
 
+      // Used for metedata for the evaluation run (all score documents capture the same metadata)
       const firstDoc = metadataResponse.hits?.hits[0]?._source;
       if (!firstDoc) {
         return null;
@@ -277,28 +303,17 @@ export class EvaluationScoreRepository {
       const aggResponse = await this.esClient.search({
         index: EVALUATIONS_DATA_STREAM_WILDCARD,
         size: 0,
-        query: { term: { run_id: runId } },
+        query: runQuery,
         aggs: {
           by_dataset: {
-            // High limit to accommodate large evaluation suites; typical runs have <100 datasets
             terms: { field: 'example.dataset.id', size: 10000 },
             aggs: {
-              dataset_name: {
-                terms: { field: 'example.dataset.name', size: 1 },
-              },
-              unique_examples: {
-                cardinality: { field: 'example.id' },
-              },
+              dataset_name: { terms: { field: 'example.dataset.name', size: 1 } },
               by_evaluator: {
-                // High limit to accommodate many evaluators; typical runs have <20 evaluators
                 terms: { field: 'evaluator.name', size: 1000 },
                 aggs: {
-                  score_stats: {
-                    extended_stats: { field: 'evaluator.score' },
-                  },
-                  score_median: {
-                    percentiles: { field: 'evaluator.score', percents: [50] },
-                  },
+                  score_stats: { extended_stats: { field: 'evaluator.score' } },
+                  score_median: { percentiles: { field: 'evaluator.score', percents: [50] } },
                 },
               },
             },
@@ -306,47 +321,22 @@ export class EvaluationScoreRepository {
         },
       });
 
-      const stats: EvaluatorStats[] = [];
-      const aggregations = aggResponse.aggregations as
-        | {
-            by_dataset?: {
-              buckets?: Array<{
-                key: string;
-                dataset_name?: { buckets?: Array<{ key: string }> };
-                unique_examples?: { value?: number };
-                by_evaluator?: {
-                  buckets?: Array<{
-                    key: string;
-                    score_stats?: {
-                      avg?: number;
-                      std_deviation?: number;
-                      min?: number;
-                      max?: number;
-                      count?: number;
-                    };
-                    score_median?: { values?: Record<string, number> };
-                  }>;
-                };
-              }>;
-            };
-          }
-        | undefined;
-
+      const aggregations = aggResponse.aggregations as RunStatsAggregations | undefined;
       const datasetBuckets = aggregations?.by_dataset?.buckets ?? [];
-      const totalRepetitions = firstDoc.run_metadata?.total_repetitions ?? 1;
-      for (const datasetBucket of datasetBuckets) {
+
+      const stats = datasetBuckets.flatMap((datasetBucket) => {
         const datasetId = datasetBucket.key;
         const datasetName = datasetBucket.dataset_name?.buckets?.[0]?.key ?? datasetId;
-
         const evaluatorBuckets = datasetBucket.by_evaluator?.buckets ?? [];
-        for (const evalBucket of evaluatorBuckets) {
-          const scoreStats = evalBucket.score_stats;
-          const median = evalBucket.score_median?.values?.['50.0'];
 
-          stats.push({
+        return evaluatorBuckets.map((evaluatorBucket) => {
+          const scoreStats = evaluatorBucket.score_stats;
+          const median = evaluatorBucket.score_median?.values?.['50.0'];
+
+          return {
             datasetId,
             datasetName,
-            evaluatorName: evalBucket.key,
+            evaluatorName: evaluatorBucket.key,
             stats: {
               mean: scoreStats?.avg ?? 0,
               median: median ?? 0,
@@ -355,15 +345,15 @@ export class EvaluationScoreRepository {
               max: scoreStats?.max ?? 0,
               count: scoreStats?.count ?? 0,
             },
-          });
-        }
-      }
+          };
+        });
+      });
 
       return {
         stats,
         taskModel: firstDoc.task.model,
         evaluatorModel: firstDoc.evaluator.model,
-        totalRepetitions,
+        totalRepetitions: firstDoc.run_metadata?.total_repetitions ?? 1,
       };
     } catch (error) {
       this.log.error(`Failed to retrieve stats for run ID ${runId}:`, error);
