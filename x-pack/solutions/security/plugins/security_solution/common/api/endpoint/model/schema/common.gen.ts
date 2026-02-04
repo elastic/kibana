@@ -114,6 +114,7 @@ export const Command = z.enum([
   'scan',
   'runscript',
   'cancel',
+  'memory-dump',
 ]);
 export type CommandEnum = typeof Command.enum;
 export const CommandEnum = Command.enum;
@@ -301,10 +302,10 @@ export const ResponseActionDetails = z.object({
       })
     )
     .optional(),
-  /** 
+  /**
       * The outputs of the response action for each agent ID that it was sent to. Content different depending on the
 response action command and will only be present for agents that have responded to the response action
- 
+
       */
   outputs: z
     .object({})
