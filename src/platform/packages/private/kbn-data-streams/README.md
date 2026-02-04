@@ -20,6 +20,88 @@ Inspired by `@kbn/storage-adapter` and other data stream adapter-like implementa
 * Helpers for creating (search) runtime fields (incoming)
 * Test utilities (incoming)
 
+## API Reference
+
+The `DataStreamClient` provides a lightweight data-mapper pattern for CRUD operations against Elasticsearch data streams.
+
+### Supported Operations
+
+#### `index(document, options?)`
+Index a single document into the data stream. Supports optional `space` parameter for space-aware operations.
+
+```typescript
+const response = await client.index({
+  space: 'my-space', // optional
+  id: 'doc-123',     // optional, auto-generated if not provided
+  document: { '@timestamp': new Date().toISOString(), field: 'value' },
+  refresh: true,
+});
+```
+
+#### `bulk(operations, options?)`
+Perform bulk operations. Currently supports `create` operations only. Supports optional `space` parameter applied globally to all operations.
+
+```typescript
+const response = await client.bulk({
+  space: 'my-space', // optional, applied to all operations
+  operations: [
+    { create: { _id: 'doc-1' } },
+    { '@timestamp': new Date().toISOString(), field: 'value1' },
+    { create: { _id: 'doc-2' } },
+    { '@timestamp': new Date().toISOString(), field: 'value2' },
+  ],
+  refresh: true,
+});
+```
+
+#### `search(query, options?)`
+Search documents in the data stream. Supports optional `space` parameter for space-aware filtering.
+
+```typescript
+const response = await client.search({
+  space: 'my-space', // optional
+  query: { match_all: {} },
+  size: 10,
+});
+```
+
+#### `existsIndex()`
+Check if the data stream exists.
+
+```typescript
+const exists = await client.existsIndex();
+```
+
+### Unsupported Operations
+
+The following operations are **not** exposed in the API because they require knowledge of the underlying backing index names, which we keep as a private implementation detail:
+
+- **`get(id)`**: Use `search()` with an `ids` query instead (see example below)
+- **Bulk `update` operations**: Data streams are append-only; updates require targeting specific backing indices
+- **Bulk `delete` operations**: Deletes require specifying the backing index name
+
+#### Retrieving a Document by ID
+
+Since `get()` is not supported, use `search()` with an `ids` query to retrieve a document by ID:
+
+```typescript
+// Retrieve a single document by ID
+const response = await client.search({
+  space: 'my-space', // optional, required if document is space-bound
+  query: { ids: { values: ['document-id'] } },
+  size: 1,
+});
+
+if (response.hits.hits.length > 0) {
+  const document = response.hits.hits[0]._source;
+  // Use the document...
+} else {
+  // Document not found
+}
+```
+
+This approach works across all backing indices in the data stream, unlike Elasticsearch's `get()` API which requires a specific backing index name.
+
 
 ## Mapping updates
 
