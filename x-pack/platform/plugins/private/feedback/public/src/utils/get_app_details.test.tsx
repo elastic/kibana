@@ -20,6 +20,16 @@ const createMockNavLink = (
   ...partial,
 });
 
+const setWindowLocation = (pathname: string) => {
+  Object.defineProperty(window, 'location', {
+    value: {
+      pathname,
+      origin: 'http://localhost:5601',
+    },
+    writable: true,
+  });
+};
+
 describe('getAppDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -39,10 +49,7 @@ describe('getAppDetails', () => {
       }),
     ];
 
-    coreStartMock.executionContext.get.mockReturnValue({
-      name: 'discover',
-      url: '/app/discover',
-    });
+    setWindowLocation('/app/discover');
     coreStartMock.chrome.navLinks.getAll.mockReturnValue(navLinks);
 
     const result = getAppDetails(coreStartMock);
@@ -54,7 +61,7 @@ describe('getAppDetails', () => {
     });
   });
 
-  it('should fallback to matching by name if no URL match is found', () => {
+  it('should match by URL prefix when no exact match', () => {
     const navLinks: ChromeNavLink[] = [
       createMockNavLink({
         id: 'discover',
@@ -68,10 +75,7 @@ describe('getAppDetails', () => {
       }),
     ];
 
-    coreStartMock.executionContext.get.mockReturnValue({
-      name: 'dashboard',
-      url: '/some/other/url',
-    });
+    setWindowLocation('/app/dashboard/view/123');
     coreStartMock.chrome.navLinks.getAll.mockReturnValue(navLinks);
 
     const result = getAppDetails(coreStartMock);
@@ -79,7 +83,7 @@ describe('getAppDetails', () => {
     expect(result).toEqual({
       title: 'Dashboard',
       id: 'dashboard',
-      url: '/some/other/url',
+      url: '/app/dashboard/view/123',
     });
   });
 
@@ -97,10 +101,7 @@ describe('getAppDetails', () => {
       }),
     ];
 
-    coreStartMock.executionContext.get.mockReturnValue({
-      name: 'discover',
-      url: '/app/discover',
-    });
+    setWindowLocation('/app/discover');
     coreStartMock.chrome.navLinks.getAll.mockReturnValue(navLinks);
 
     const result = getAppDetails(coreStartMock);
@@ -121,10 +122,7 @@ describe('getAppDetails', () => {
       }),
     ];
 
-    coreStartMock.executionContext.get.mockReturnValue({
-      name: 'discover',
-      url: '/app/discover',
-    });
+    setWindowLocation('/app/discover');
     coreStartMock.chrome.navLinks.getAll.mockReturnValue(navLinks);
 
     const result = getAppDetails(coreStartMock);
@@ -145,10 +143,7 @@ describe('getAppDetails', () => {
       }),
     ];
 
-    coreStartMock.executionContext.get.mockReturnValue({
-      name: 'unknownApp',
-      url: '/app/unknown/path',
-    });
+    setWindowLocation('/app/unknown/path');
     coreStartMock.chrome.navLinks.getAll.mockReturnValue(navLinks);
 
     const result = getAppDetails(coreStartMock);
@@ -161,10 +156,7 @@ describe('getAppDetails', () => {
   });
 
   it('should return "Kibana" when navLinks is empty', () => {
-    coreStartMock.executionContext.get.mockReturnValue({
-      name: 'testApp',
-      url: '/app/testApp',
-    });
+    setWindowLocation('/app/testApp');
     coreStartMock.chrome.navLinks.getAll.mockReturnValue([]);
 
     const result = getAppDetails(coreStartMock);
@@ -176,44 +168,50 @@ describe('getAppDetails', () => {
     });
   });
 
-  it('should clear execution context before getting app details', () => {
+  it('should strip hash from navLink URL when matching', () => {
     const navLinks: ChromeNavLink[] = [
       createMockNavLink({
-        id: 'discover',
-        title: 'Discover',
-        url: '/app/discover',
+        id: 'dashboards',
+        title: 'Dashboards',
+        url: '/s/test/app/dashboards#/list',
       }),
     ];
 
-    coreStartMock.executionContext.get.mockReturnValue({
-      name: 'discover',
-      url: '/app/discover',
-    });
-    coreStartMock.chrome.navLinks.getAll.mockReturnValue(navLinks);
-
-    getAppDetails(coreStartMock);
-
-    expect(coreStartMock.executionContext.clear).toHaveBeenCalledTimes(1);
-  });
-
-  it('should preserve the executionContext URL in the result', () => {
-    const navLinks: ChromeNavLink[] = [
-      createMockNavLink({
-        id: 'discover',
-        title: 'Discover',
-        url: '/app/discover',
-      }),
-    ];
-
-    const executionUrl = '/app/discover/view/123?query=test';
-    coreStartMock.executionContext.get.mockReturnValue({
-      name: 'discover',
-      url: executionUrl,
-    });
+    setWindowLocation('/s/test/app/dashboards');
     coreStartMock.chrome.navLinks.getAll.mockReturnValue(navLinks);
 
     const result = getAppDetails(coreStartMock);
 
-    expect(result.url).toBe(executionUrl);
+    expect(result).toEqual({
+      title: 'Dashboards',
+      id: 'dashboards',
+      url: '/s/test/app/dashboards',
+    });
+  });
+
+  it('should match most specific navLink URL for deep links', () => {
+    const navLinks: ChromeNavLink[] = [
+      createMockNavLink({
+        id: 'slos',
+        title: 'SLOs',
+        url: '/app/slos',
+      }),
+      createMockNavLink({
+        id: 'slos-welcome',
+        title: 'SLOs Welcome',
+        url: '/app/slos/welcome',
+      }),
+    ];
+
+    setWindowLocation('/app/slos/welcome');
+    coreStartMock.chrome.navLinks.getAll.mockReturnValue(navLinks);
+
+    const result = getAppDetails(coreStartMock);
+
+    expect(result).toEqual({
+      title: 'SLOs Welcome',
+      id: 'slos-welcome',
+      url: '/app/slos/welcome',
+    });
   });
 });

@@ -8,41 +8,38 @@
 import type { CoreStart } from '@kbn/core/public';
 
 /**
- * Get current app details from execution context and nav links
+ * Get current app details from browser URL and nav links.
+ * Uses the actual browser URL for accurate deep link detection.
  */
 export const getAppDetails = (core: CoreStart) => {
-  /**
-   * Clear previous context to get the latest app info
-   */
-  core.executionContext.clear();
-
-  const executionContext = core.executionContext.get();
+  const currentPath = window.location.pathname;
   const navLinks = core.chrome.navLinks.getAll();
+
+  /**
+   * Helper to get just the pathname from a navLink URL (strips hash and query string)
+   * e.g., "/s/test/app/dashboards#/list" -> "/s/test/app/dashboards"
+   */
+  const getNavLinkPath = (link: { url: string }) => {
+    return new URL(link.url, window.location.origin).pathname;
+  };
 
   /**
    * Try to match by url first (exact match)
    */
-  let match = navLinks.find((link) => link.url === executionContext.url);
+  let match = navLinks.find((link) => getNavLinkPath(link) === currentPath);
 
   /**
-   * If no exact match, check if executionContext.url starts with any navLink.url then
+   * If no exact match, check if currentPath starts with any navLink.url then
    * sort the matches by URL length descending to get the most specific match first.
-   * This handles cases where apps have sub-paths created by an navigation event within the app,
-   * which causes the executionContext.url to contain that sub-path but navLink doesn't
-   * e.g /app/slos/welcome (executionContext.url) vs /app/slos (navLink.url)
-   */
-  if (!match && executionContext.url) {
-    const matches = navLinks
-      .filter((link) => executionContext.url?.startsWith(link.url))
-      .sort((a, b) => b.url.length - a.url.length);
-    match = matches[0];
-  }
-
-  /**
-   * Fallback to matching by name
+   * This handles cases where apps have sub-paths created by a navigation event within the app,
+   * which causes the currentPath to contain that sub-path but navLink doesn't
+   * e.g /app/slos/welcome (currentPath) vs /app/slos (navLink.url)
    */
   if (!match) {
-    match = navLinks.find((link) => link.id === executionContext.name);
+    const matches = navLinks
+      .filter((link) => currentPath.startsWith(getNavLinkPath(link)))
+      .sort((a, b) => getNavLinkPath(b).length - getNavLinkPath(a).length);
+    match = matches[0];
   }
 
   let title = match?.title;
@@ -55,6 +52,6 @@ export const getAppDetails = (core: CoreStart) => {
   return {
     title: title ?? 'Kibana',
     id: match?.id ?? 'Kibana',
-    url: executionContext.url,
+    url: currentPath,
   };
 };
