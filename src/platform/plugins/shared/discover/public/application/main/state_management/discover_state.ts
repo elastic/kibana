@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/common';
@@ -19,7 +18,7 @@ import type { DiscoverCustomizationContext } from '../../../customizations';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { selectTabRuntimeState } from './redux';
 import { createTabActionInjector, internalStateActions, selectTab } from './redux';
-import type { SearchSourceChangeType } from './redux/types';
+import { createSearchSource } from './utils/create_search_source';
 
 export interface DiscoverStateContainerParams {
   /**
@@ -83,16 +82,6 @@ export interface DiscoverStateContainer {
    */
   getSearchSource: () => ISearchSource;
   /**
-   * Gets observable for search source updates of the current tab
-   */
-  getSearchSourceUpdates$: () => Observable<
-    | {
-        changeType: SearchSourceChangeType;
-        value: ISearchSource;
-      }
-    | undefined
-  >;
-  /**
    * State manager for runtime state that can't be stored in Redux
    */
   runtimeStateManager: RuntimeStateManager;
@@ -126,15 +115,16 @@ export function getDiscoverStateContainer({
   const injectCurrentTab = createTabActionInjector(tabId);
   const getCurrentTab = () => selectTab(internalState.getState(), tabId);
   const getSearchSource = (): ISearchSource => {
-    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    return (
-      tabRuntimeState.searchSourceState$.getValue()?.value ??
-      services.data.search.searchSource.createEmpty()
-    );
-  };
-  const getSearchSourceUpdates$ = () => {
-    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    return tabRuntimeState.searchSourceState$;
+    const dataView = selectTabRuntimeState(runtimeStateManager, tabId)?.currentDataView$.getValue();
+    const appState = getCurrentTab().appState;
+    const globalState = getCurrentTab().globalState;
+
+    return createSearchSource({
+      dataView,
+      appState,
+      globalState,
+      services,
+    });
   };
 
   const dataStateContainer = getDataStateContainer({
@@ -152,7 +142,6 @@ export function getDiscoverStateContainer({
     injectCurrentTab,
     getCurrentTab,
     getSearchSource,
-    getSearchSourceUpdates$,
     runtimeStateManager,
     dataState: dataStateContainer,
     stateStorage,

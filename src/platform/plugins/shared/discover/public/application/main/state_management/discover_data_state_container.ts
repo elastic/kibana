@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
   filter,
@@ -18,6 +17,10 @@ import {
   Subject,
   switchMap,
   tap,
+  distinctUntilChanged,
+  from,
+  type Observable,
+  skip,
 } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -41,7 +44,7 @@ import { getDefaultProfileState } from './utils/get_default_profile_state';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
-import { SearchSourceChangeType } from './redux/types';
+import { createSearchSource } from './utils/create_search_source';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -222,12 +225,13 @@ export function getDataStateContainer({
   // The main subscription to handle state changes
   dataSubjects.documents$.pipe(switchMap(esqlFetchSubscribe)).subscribe();
   // Make sure to clean up the ES|QL state when the saved search changes
-  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
-  tabRuntimeState.searchSourceState$.subscribe((state) => {
-    if (state?.changeType === SearchSourceChangeType.reset) {
+  from(internalState)
+    .pipe(map((state) => state.persistedDiscoverSessionResetTimestamp))
+    .pipe(distinctUntilChanged())
+    .pipe(skip(1))
+    .subscribe(() => {
       cleanupEsql();
-    }
-  });
+    });
 
   /**
    * handler emitted by `timefilter.getAutoRefreshFetch$()`
@@ -286,9 +290,12 @@ export function getDataStateContainer({
           }
 
           // get the latest search source instance
-          const searchSource = internalState.dispatch(
-            injectCurrentTab(internalStateActions.updateSearchSourceState)()
-          );
+          const searchSource = createSearchSource({
+            dataView: currentDataView$.getValue(),
+            appState: getCurrentTab().appState,
+            globalState: getCurrentTab().globalState,
+            services,
+          });
           const commonFetchParams: Omit<CommonFetchParams, 'abortController'> = {
             dataSubjects,
             initialFetchStatus: getInitialFetchStatus(),

@@ -190,6 +190,7 @@ export interface DiscoverInternalState {
   userId: string | undefined;
   spaceId: string | undefined;
   persistedDiscoverSession: DiscoverSession | undefined;
+  persistedDiscoverSessionResetTimestamp: number;
   hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
@@ -211,11 +212,6 @@ export interface DiscoverInternalState {
      */
     unsafeCurrentId: string;
   };
-}
-
-export enum SearchSourceChangeType {
-  reset = 'reset',
-  update = 'update',
 }
 
 export interface UpdateESQLQueryActionPayload {

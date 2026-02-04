@@ -55,6 +55,7 @@ const initialState: DiscoverInternalState = {
   userId: undefined,
   spaceId: undefined,
   persistedDiscoverSession: undefined,
+  persistedDiscoverSessionResetTimestamp: 0,
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
   savedDataViews: [],
@@ -129,6 +130,13 @@ export const internalStateSlice = createSlice({
       state.tabs.unsafeCurrentId = action.payload.selectedTabId;
       state.persistedDiscoverSession =
         action.payload.updatedDiscoverSession ?? state.persistedDiscoverSession;
+    },
+
+    setPersistedDiscoverSessionResetTimestamp: (
+      state,
+      action: PayloadAction<{ timestamp: number }>
+    ) => {
+      state.persistedDiscoverSessionResetTimestamp = action.payload.timestamp;
     },
 
     setUnsavedChanges: (state, action: PayloadAction<HasUnsavedChangesResult>) => {
@@ -482,9 +490,13 @@ const createMiddleware = (options: InternalStateDependencies) => {
       (action, listenerApi) => {
         const discoverSession =
           action.payload.updatedDiscoverSession ?? listenerApi.getState().persistedDiscoverSession;
-        const { runtimeStateManager, tabsStorageManager } = listenerApi.extra;
+        const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         const getTabInternalState = (tabId: string) =>
-          selectTabRuntimeInternalState(runtimeStateManager, tabId);
+          selectTabRuntimeInternalState({
+            tabId,
+            runtimeStateManager,
+            services,
+          });
         void tabsStorageManager.persistLocally(
           action.payload,
           getTabInternalState,
@@ -500,10 +512,14 @@ const createMiddleware = (options: InternalStateDependencies) => {
     actionCreator: syncLocallyPersistedTabState,
     effect: throttle<InternalStateListenerEffect<typeof syncLocallyPersistedTabState>>(
       (action, listenerApi) => {
-        const { runtimeStateManager, tabsStorageManager } = listenerApi.extra;
+        const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         withTab(listenerApi.getState(), action.payload, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
-            internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id),
+            internalState: selectTabRuntimeInternalState({
+              tabId: tab.id,
+              runtimeStateManager,
+              services,
+            }),
             attributes: tab.attributes,
             appState: tab.appState,
             globalState: tab.globalState,

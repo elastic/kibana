@@ -51,8 +51,9 @@ export const setTabs: InternalStateThunkActionCreator<
   function setTabsThunkFn(
     dispatch,
     getState,
-    { runtimeStateManager, tabsStorageManager, services: { profilesManager, ebtManager } }
+    { runtimeStateManager, tabsStorageManager, services }
   ) {
+    const { profilesManager, ebtManager } = services;
     const previousState = getState();
     const discoverSessionChanged =
       params.updatedDiscoverSession &&
@@ -72,8 +73,11 @@ export const setTabs: InternalStateThunkActionCreator<
       const newRecentlyClosedTab: TabState = { ...tab };
       // make sure to get the latest internal and app state from runtime state manager before deleting the runtime state
       newRecentlyClosedTab.initialInternalState =
-        selectTabRuntimeInternalState(runtimeStateManager, tab.id) ??
-        cloneDeep(tab.initialInternalState);
+        selectTabRuntimeInternalState({
+          tabId: tab.id,
+          runtimeStateManager,
+          services,
+        }) ?? cloneDeep(tab.initialInternalState);
       newRecentlyClosedTab.attributes = cloneDeep(tab.attributes);
       newRecentlyClosedTab.appState = cloneDeep(tab.appState);
       newRecentlyClosedTab.globalState = cloneDeep(tab.globalState);
@@ -174,8 +178,11 @@ export const updateTabs: InternalStateThunkActionCreator<
         }
 
         tab.initialInternalState =
-          selectTabRuntimeInternalState(runtimeStateManager, item.duplicatedFromId) ??
-          cloneDeep(existingTabToDuplicateFrom.initialInternalState);
+          selectTabRuntimeInternalState({
+            tabId: item.duplicatedFromId,
+            runtimeStateManager,
+            services,
+          }) ?? cloneDeep(existingTabToDuplicateFrom.initialInternalState);
         tab.attributes = cloneDeep(existingTabToDuplicateFrom.attributes);
         tab.appState = cloneDeep(existingTabToDuplicateFrom.appState);
         tab.globalState = cloneDeep(existingTabToDuplicateFrom.globalState);

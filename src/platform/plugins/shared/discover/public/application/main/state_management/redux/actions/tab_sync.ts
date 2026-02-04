@@ -10,7 +10,6 @@
 import { combineLatest, merge, startWith } from 'rxjs';
 import {
   connectToQueryState,
-  type ISearchSource,
   noSearchSessionStorageCapabilityMessage,
 } from '@kbn/data-plugin/public';
 import { syncState } from '@kbn/kibana-utils-plugin/public';
@@ -22,7 +21,6 @@ import { selectTabRuntimeState } from '../runtime_state';
 import { addLog } from '../../../../../utils/add_log';
 import { internalStateActions } from '..';
 import type { DiscoverAppState } from '../types';
-import { SearchSourceChangeType } from '../types';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { getCurrentUrlState } from '../../utils/cleanup_url_state';
 import { buildStateSubscribe } from '../../utils/build_state_subscribe';
@@ -34,8 +32,6 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../../../common/data_sources';
-import { updateSearchSource } from '../../utils/update_search_source';
-import { searchSourceComparator } from '../selectors/unsaved_changes';
 
 /**
  * Initializing state containers and start subscribing to changes triggering e.g. data fetching
@@ -259,20 +255,6 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       );
     });
 
-    // syncing the changes with the current search source
-    const searchSourceSubscription = merge(
-      tabRuntimeState.currentDataView$,
-      appState$,
-      globalState$
-    ).subscribe(() => {
-      // TODO: reduce the number of updates by checking what actually changed
-      dispatch(
-        updateSearchSourceState({
-          tabId,
-        })
-      );
-    });
-
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = stateContainer.dataState.subscribe();
 
@@ -307,7 +289,6 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
 
     const unsubscribeFn = () => {
       tabStateSubscription.unsubscribe();
-      searchSourceSubscription.unsubscribe();
       unsubscribeData();
       appStateSubscription.unsubscribe();
       unsubscribeUrlState();
@@ -327,55 +308,4 @@ export const stopSyncing: InternalStateThunkActionCreator<[TabActionPayload]> = 
     const unsubscribeFn = tabRuntimeState.unsubscribeFn$.getValue();
     unsubscribeFn?.();
     tabRuntimeState.unsubscribeFn$.next(undefined);
-  };
-
-/**
- * Update the search source based on the current state
- * @param tabId
- */
-export const updateSearchSourceState: InternalStateThunkActionCreator<
-  [TabActionPayload],
-  ISearchSource
-> = ({ tabId }) =>
-  function updateSearchSourceStateThunkFn(dispatch, getState, { services, runtimeStateManager }) {
-    const tabState = selectTab(getState(), tabId);
-    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    const stateContainer = tabRuntimeState.stateContainer$.getValue();
-
-    if (!stateContainer) {
-      throw new Error('State container is not initialized');
-    }
-
-    const { currentDataView$, searchSourceState$ } = tabRuntimeState;
-
-    const searchSource =
-      searchSourceState$.getValue()?.value ?? services.data.search.searchSource.createEmpty();
-
-    const searchSourceUpdated = searchSource.createCopy();
-
-    addLog('[tabSync] search source update');
-
-    updateSearchSource({
-      searchSource: searchSourceUpdated,
-      dataView: currentDataView$.getValue(),
-      appState: tabState.appState,
-      globalState: tabState.globalState,
-      services,
-    });
-
-    if (
-      searchSourceComparator(
-        searchSource.getSerializedFields(),
-        searchSourceUpdated.getSerializedFields()
-      )
-    ) {
-      return searchSource;
-    }
-
-    searchSourceState$.next({
-      changeType: SearchSourceChangeType.update,
-      value: searchSourceUpdated,
-    });
-
-    return searchSourceUpdated;
   };

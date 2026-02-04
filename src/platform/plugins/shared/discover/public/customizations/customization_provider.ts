@@ -54,7 +54,7 @@ export const getExtendedDiscoverStateContainer = (
       initialUrlState: undefined,
       persistedTab: fromTabStateToSavedObjectTab({
         tab: stateContainer.getCurrentTab(),
-        searchSource: newSavedSearch.searchSource,
+        dataView: undefined,
         services,
       }),
       dataView: newSavedSearch.searchSource.getField('index'),

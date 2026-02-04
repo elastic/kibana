@@ -9,7 +9,8 @@
 
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
-import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
@@ -17,6 +18,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DEFAULT_TAB_STATE } from './constants';
+import { createSearchSource } from '../utils/create_search_source';
 
 export const fromSavedObjectTabToTabState = ({
   tab,
@@ -86,18 +88,24 @@ export const fromSavedObjectTabToSearchSource = async ({
 
 export const fromTabStateToSavedObjectTab = ({
   tab,
-  searchSource,
+  dataView,
   overrideTimeRestore,
   services,
 }: {
   tab: TabState;
-  searchSource: SavedSearch['searchSource'] | undefined;
+  dataView: DataView | undefined;
   overrideTimeRestore?: boolean;
   services: DiscoverServices;
 }): DiscoverSessionTab => {
   const allowedSampleSize = getAllowedSampleSize(tab.appState.sampleSize, services.uiSettings);
-  const serializedSearchSource =
-    searchSource?.getSerializedFields() ?? tab.initialInternalState?.serializedSearchSource;
+  const serializedSearchSource = dataView
+    ? createSearchSource({
+        dataView,
+        appState: tab.appState,
+        globalState: tab.globalState,
+        services,
+      }).getSerializedFields()
+    : tab.initialInternalState?.serializedSearchSource;
   const timeRestore = overrideTimeRestore ?? tab.attributes.timeRestore ?? false;
 
   return {

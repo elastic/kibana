@@ -85,7 +85,7 @@ export const selectHasUnsavedChanges = (
           services,
         }),
       }),
-      searchSource: undefined,
+      dataView: undefined,
       services,
     });
 
@@ -93,7 +93,7 @@ export const selectHasUnsavedChanges = (
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
     const normalizedTab = fromTabStateToSavedObjectTab({
       tab: tabState,
-      searchSource: tabRuntimeState?.searchSourceState$.getValue()?.value, // TODO: remove?
+      dataView: tabRuntimeState?.currentDataView$.getValue(),
       services,
     });
 

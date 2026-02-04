@@ -8,7 +8,6 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { ISearchSource } from '@kbn/data-plugin/common';
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
@@ -17,9 +16,11 @@ import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
 import type { ProfilesManager, ScopedProfilesManager } from '../../../../context_awareness';
-import type { TabState, SearchSourceChangeType } from './types';
+import type { TabState } from './types';
 import type { DiscoverEBTManager, ScopedDiscoverEBTManager } from '../../../../ebt_manager';
 import { selectTab } from './selectors';
+import { createSearchSource } from '../utils/create_search_source';
+import type { DiscoverServices } from '../../../../build_services';
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
@@ -34,7 +35,6 @@ export interface UnifiedHistogramConfig {
 
 interface TabRuntimeState {
   stateContainer?: DiscoverStateContainer;
-  searchSourceState: { changeType: SearchSourceChangeType; value: ISearchSource } | undefined;
   customizationService?: ConnectedCustomizationService;
   unifiedHistogramConfig: UnifiedHistogramConfig;
   scopedProfilesManager: ScopedProfilesManager;
@@ -99,7 +99,6 @@ export const createTabRuntimeState = ({
     ),
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
-    searchSourceState$: new BehaviorSubject<TabRuntimeState['searchSourceState']>(undefined),
     unsubscribeFn$: new BehaviorSubject<TabRuntimeState['unsubscribeFn']>(undefined),
   };
 };
@@ -118,19 +117,34 @@ export const selectIsDataViewUsedInMultipleRuntimeTabStates = (
     (tab) => tab.currentDataView$.getValue()?.id === dataViewId
   ).length > 1;
 
-export const selectTabRuntimeInternalState = (
-  runtimeStateManager: RuntimeStateManager,
-  tabId: string
-): TabState['initialInternalState'] | undefined => {
+export const selectTabRuntimeInternalState = ({
+  tabId,
+  runtimeStateManager,
+  services,
+}: {
+  tabId: string;
+  runtimeStateManager: RuntimeStateManager;
+  services: DiscoverServices;
+}): TabState['initialInternalState'] | undefined => {
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const stateContainer = tabRuntimeState?.stateContainer$.getValue();
-  const searchSource = tabRuntimeState?.searchSourceState$.getValue()?.value;
+  const dataView = tabRuntimeState?.currentDataView$.getValue();
 
-  if (!searchSource || !stateContainer) {
+  if (!stateContainer || !dataView) {
     return undefined;
   }
 
-  const { dataRequestParams } = selectTab(stateContainer.internalState.getState(), tabId);
+  const { dataRequestParams, appState, globalState } = selectTab(
+    stateContainer.internalState.getState(),
+    tabId
+  );
+
+  const searchSource = createSearchSource({
+    dataView,
+    appState,
+    globalState,
+    services,
+  });
 
   return {
     serializedSearchSource: searchSource.getSerializedFields(),

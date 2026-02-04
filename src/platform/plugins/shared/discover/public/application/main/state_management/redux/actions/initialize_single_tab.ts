@@ -25,13 +25,12 @@ import { loadAndResolveDataView } from '../../utils/resolve_data_view';
 import { isDataViewSource } from '../../../../../../common/data_sources';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/validate_time';
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
-import { updateSearchSource } from '../../utils/update_search_source';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
 import { disconnectTab } from './tabs';
 import { selectTab } from '../selectors';
-import { SearchSourceChangeType, type TabState, type TabStateGlobalState } from '../types';
+import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
@@ -68,13 +67,8 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
-    const {
-      currentDataView$,
-      stateContainer$,
-      customizationService$,
-      scopedEbtManager$,
-      searchSourceState$,
-    } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const { currentDataView$, stateContainer$, customizationService$, scopedEbtManager$ } =
+      selectTabRuntimeState(runtimeStateManager, tabId);
 
     /**
      * New tab initialization with the restored data if available
@@ -142,9 +136,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       persistedDiscoverSession && persistedTab
         ? await fromSavedObjectTabToSearchSource({ tab: persistedTab, services })
         : undefined;
-    const searchSource = await services.data.search.searchSource.create(
-      tabState.initialInternalState?.serializedSearchSource
-    );
 
     const initialQuery = urlAppState?.query ?? persistedTab?.serializedSearchSource.query;
     const isEsqlMode = isOfAggregateQueryType(initialQuery);
@@ -246,14 +237,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       services,
     });
 
-    updateSearchSource({
-      searchSource,
-      dataView,
-      appState: initialAppState,
-      globalState: initialGlobalState,
-      services,
-    });
-
     /**
      * Sync global services
      */
@@ -315,7 +298,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     dispatch(internalStateSlice.actions.resetAppState({ tabId, appState: initialAppState }));
 
     // Set runtime state
-    searchSourceState$.next({ changeType: SearchSourceChangeType.reset, value: searchSource });
     stateContainer$.next(stateContainer);
     customizationService$.next(customizationService);
 

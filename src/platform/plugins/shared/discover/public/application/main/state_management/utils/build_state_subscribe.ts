@@ -28,6 +28,7 @@ import {
   isDataSourceType,
 } from '../../../../../common/data_sources';
 import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
+import { createSearchSource } from './create_search_source';
 
 /**
  * Builds a subscribe function for the app state, that is executed when the app state changes in URL
@@ -92,13 +93,18 @@ export const buildStateSubscribe =
         ? nextState.dataSource.dataViewId
         : undefined;
 
+      const currentDataView = selectTabRuntimeState(
+        runtimeStateManager,
+        getCurrentTab().id
+      ).currentDataView$.getValue();
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView({
         dataViewId,
-        // TODO: does it make sense to pass searchSource when resolving a data view?
-        searchSource: selectTabRuntimeState(
-          runtimeStateManager,
-          getCurrentTab().id
-        ).searchSourceState$.getValue()?.value,
+        searchSource: createSearchSource({
+          dataView: currentDataView,
+          appState: getCurrentTab().appState,
+          globalState: getCurrentTab().globalState,
+          services,
+        }),
         isEsqlMode,
         internalState,
         runtimeStateManager,

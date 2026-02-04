@@ -196,7 +196,7 @@ export const loadAndResolveDataView = async ({
   dataViewId?: string;
   locationDataViewSpec?: DataViewSpec;
   initialAdHocDataViewSpec?: DataViewSpec;
-  searchSource?: ISearchSource;
+  searchSource?: ISearchSource; // TODO: Replace with prevDataView
   isEsqlMode?: boolean;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
