@@ -16,17 +16,15 @@ interface FieldGroupProps {
 
 export const FieldGroup: React.FC<FieldGroupProps> = ({ title, children }) => {
   return (
-    <>
-      <EuiSplitPanel.Outer hasShadow={false} hasBorder={true}>
-        <EuiSplitPanel.Inner color="subdued" grow={false}>
-          <EuiTitle size="xxs">
-            <h3>
-              <strong>{title}</strong>
-            </h3>
-          </EuiTitle>
-        </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner>{children}</EuiSplitPanel.Inner>
-      </EuiSplitPanel.Outer>
-    </>
+    <EuiSplitPanel.Outer hasShadow={false} hasBorder={true}>
+      <EuiSplitPanel.Inner color="subdued" grow={false}>
+        <EuiTitle size="xxs">
+          <h3>
+            <strong>{title}</strong>
+          </h3>
+        </EuiTitle>
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner>{children}</EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
   );
 };

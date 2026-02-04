@@ -61,8 +61,8 @@ export const ErrorCallOut: React.FC<ErrorCallOutProps> = ({
         color="danger"
       >
         <ul>
-          {errorMessages.map((error, index) => (
-            <li key={index}>{error}</li>
+          {errorMessages.map((error) => (
+            <li key={String(error)}>{error}</li>
           ))}
         </ul>
       </EuiCallOut>
