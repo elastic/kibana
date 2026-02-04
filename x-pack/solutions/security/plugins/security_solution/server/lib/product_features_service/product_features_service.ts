@@ -38,6 +38,7 @@ import {
   rulesSavedObjects,
   rulesV2SavedObjects,
   rulesV3SavedObjects,
+  rulesV4SavedObjects,
   securityExceptionsSavedObjects,
   securityNotesSavedObjects,
   securityTimelineSavedObjects,
@@ -99,7 +100,7 @@ export class ProductFeaturesService {
       }),
       getRulesV4Feature({
         ...securityFeatureParams,
-        savedObjects: [...rulesV3SavedObjects, ...securityExceptionsSavedObjects],
+        savedObjects: [...rulesV4SavedObjects, ...securityExceptionsSavedObjects],
       }),
     ]);
     this.productFeaturesRegistry.create('alerts', [getAlertsFeature()]);
