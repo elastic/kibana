@@ -45,12 +45,13 @@ const esqlKnowledgeBase = {} as EsqlKnowledgeBase;
 const ruleMigrationsRetriever = {} as RuleMigrationsRetriever;
 const dashboardMigrationsRetriever = {} as DashboardMigrationsRetriever;
 
-const createLlmInstance = () => {
-  return mockLlm;
-};
+const createLlmInstance = () => ({
+  ...mockLlm,
+  bindTools: () => null,
+});
 
 async function getSiemRuleMigrationGraph(logger: Logger): Promise<Drawable> {
-  const model = createLlmInstance() as ChatModel;
+  const model = createLlmInstance() as unknown as ChatModel;
   const telemetryClient = {} as RuleMigrationTelemetryClient;
   const tools = getRulesMigrationTools('some_migration_id', {
     rulesClient: {} as unknown as RuleMigrationsDataClient,
