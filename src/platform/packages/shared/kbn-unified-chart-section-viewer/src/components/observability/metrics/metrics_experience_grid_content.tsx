@@ -33,7 +33,13 @@ import { useMetricsExperienceFieldsContext } from './context/metrics_experience_
 export interface MetricsExperienceGridContentProps
   extends Pick<
     UnifiedMetricsGridProps,
-    'services' | 'fetchParams' | 'onBrushEnd' | 'onFilter' | 'actions' | 'histogramCss'
+    | 'services'
+    | 'fetchParams'
+    | 'onBrushEnd'
+    | 'onFilter'
+    | 'actions'
+    | 'histogramCss'
+    | 'isTabSelected'
   > {
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   fields: MetricField[];
@@ -50,6 +56,7 @@ export const MetricsExperienceGridContent = ({
   actions,
   histogramCss,
   isDiscoverLoading = false,
+  isTabSelected,
 }: MetricsExperienceGridContentProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -154,6 +161,7 @@ export const MetricsExperienceGridContent = ({
           searchTerm={searchTerm}
           whereStatements={whereStatements}
           getUserMessages={getUserMessages}
+          isTabSelected={isTabSelected}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

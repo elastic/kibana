@@ -253,6 +253,9 @@ const CustomChartSectionWrapper = ({
   });
 
   const metricsGridState = useCurrentTabSelector((state) => state.uiState.metricsGrid);
+  const isTabSelected = useInternalStateSelector(
+    (state) => state.tabs.unsafeCurrentId === currentTabId
+  );
   const setMetricsGridState = useCurrentTabAction(internalStateActions.setMetricsGridState);
   const onInitialStateChange = useCallback(
     (newMetricsGridState: Partial<UnifiedMetricsGridRestorableState>) => {
@@ -312,6 +315,7 @@ const CustomChartSectionWrapper = ({
         fetch$,
         fetchParams,
         isComponentVisible,
+        isTabSelected,
         ...unifiedHistogramProps,
         initialState: metricsGridState,
         onInitialStateChange,

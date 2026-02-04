@@ -27,7 +27,7 @@ import { useMetricsExperienceState } from './context/metrics_experience_state_pr
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
-  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
+  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions' | 'isTabSelected'
 > & {
   dimensions: Dimension[];
   searchTerm?: string;
@@ -54,6 +54,7 @@ export const MetricsGrid = ({
   discoverFetch$,
   searchTerm,
   getUserMessages,
+  isTabSelected,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -177,7 +178,7 @@ export const MetricsGrid = ({
           })}
         </EuiFlexGrid>
       </A11yGridWrapper>
-      {flyoutData && (
+      {flyoutData && isTabSelected !== false && (
         <MetricInsightsFlyout
           metric={flyoutData.metric}
           esqlQuery={flyoutData.esqlQuery}
