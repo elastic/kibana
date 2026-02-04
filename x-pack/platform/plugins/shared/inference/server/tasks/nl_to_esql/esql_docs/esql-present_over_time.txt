@@ -1,0 +1,27 @@
+# PRESENT_OVER_TIME
+
+Calculates the presence of a field in the output result over a specified time range.
+
+## Syntax
+
+`PRESENT_OVER_TIME(field, window)`
+
+### Parameters
+
+#### field
+
+The metric field to calculate the presence for.
+
+#### window
+
+The time window over which to compute the presence.
+
+## Examples
+
+Calculates the maximum presence of the `events_received` field for each pod in the "prod" cluster, grouping results into 2-minute time buckets.
+
+```esql
+TS k8s
+| WHERE cluster == "prod" AND pod == "two"
+| STATS events_received = MAX(PRESENT_OVER_TIME(events_received)) BY pod, time_bucket = TBUCKET(2 minute)
+```
