@@ -11,12 +11,24 @@ import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from './flyout';
 
+/**
+ * Options for opening a system flyout.
+ */
 export type OverlaySystemFlyoutOpenOptions = Omit<OverlayFlyoutOpenOptions, 'session'> & {
   /**
    * Control the flyout session behavior. See {@link EuiFlyoutProps.session}
    * @default "start"
    */
   session?: EuiFlyoutProps['session'];
+  /**
+   * Title for the flyout (for flyout system managed history).
+   */
+  title?: string;
+  /**
+   * Props for the flyout menu.
+   * If `title` is provided here, it takes precedence over the top-level `title`.
+   */
+  flyoutMenuProps?: EuiFlyoutProps['flyoutMenuProps'];
 };
 
 /**

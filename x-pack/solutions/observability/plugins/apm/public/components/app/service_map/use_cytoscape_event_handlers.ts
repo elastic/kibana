@@ -71,10 +71,15 @@ function setCursor(cursor: string, event: cytoscape.EventObjectCore) {
   }
 }
 
-function resetConnectedEdgeStyle(cytoscapeInstance: cytoscape.Core, node?: cytoscape.NodeSingular) {
+function resetConnectedEdgeStyle(
+  cytoscapeInstance: cytoscape.Core,
+  { node, edge }: { node?: cytoscape.NodeSingular; edge?: cytoscape.EdgeSingular } = {}
+) {
   cytoscapeInstance.edges().removeClass('highlight');
   if (node) {
     node.connectedEdges().addClass('highlight');
+  } else if (edge) {
+    edge.addClass('highlight');
   }
 }
 
@@ -95,7 +100,7 @@ export function useCytoscapeEventHandlers({
     const dataHandler: cytoscape.EventHandler = (event, fit) => {
       if (serviceName) {
         const node = event.cy.getElementById(serviceName);
-        resetConnectedEdgeStyle(event.cy, node);
+        resetConnectedEdgeStyle(event.cy, { node });
         // Add the "primary" class to the node if its id matches the serviceName.
         if (event.cy.nodes().length > 0) {
           event.cy.nodes().removeClass('primary');
@@ -125,7 +130,7 @@ export function useCytoscapeEventHandlers({
     );
 
     const mouseoverHandler: cytoscape.EventHandler = (event) => {
-      if (event.target.isNode()) {
+      if (event.target.isNode() || event.target.isEdge()) {
         setCursor('pointer', event);
       }
 
@@ -141,13 +146,21 @@ export function useCytoscapeEventHandlers({
     };
     const selectHandler: cytoscape.EventHandler = (event) => {
       trackApmEvent({ metric: 'service_map_node_select' });
-      resetConnectedEdgeStyle(event.cy, event.target);
+      resetConnectedEdgeStyle(event.cy, { node: event.target });
     };
     const unselectHandler: cytoscape.EventHandler = (event) => {
-      resetConnectedEdgeStyle(
-        event.cy,
-        serviceName ? event.cy.getElementById(serviceName) : undefined
-      );
+      resetConnectedEdgeStyle(event.cy, {
+        node: serviceName ? event.cy.getElementById(serviceName) : undefined,
+      });
+    };
+    const edgeSelectHandler: cytoscape.EventHandler = (event) => {
+      trackApmEvent({ metric: 'service_map_edge_select' });
+      resetConnectedEdgeStyle(event.cy, { edge: event.target });
+    };
+    const edgeUnselectHandler: cytoscape.EventHandler = (event) => {
+      resetConnectedEdgeStyle(event.cy, {
+        node: serviceName ? event.cy.getElementById(serviceName) : undefined,
+      });
     };
     const debugHandler: cytoscape.EventHandler = (event) => {
       const debugEnabled = sessionStorage.getItem('apm_debug') === 'true';
@@ -190,6 +203,8 @@ export function useCytoscapeEventHandlers({
       cy.on('mouseout', 'edge, node', mouseoutHandler);
       cy.on('select', 'node', selectHandler);
       cy.on('unselect', 'node', unselectHandler);
+      cy.on('select', 'edge', edgeSelectHandler);
+      cy.on('unselect', 'edge', edgeUnselectHandler);
       cy.on('drag', 'node', dragHandler);
       cy.on('dragfree', 'node', dragfreeHandler);
       cy.on('tapstart', tapstartHandler);
@@ -208,6 +223,8 @@ export function useCytoscapeEventHandlers({
         cy.removeListener('mouseout', 'edge, node', mouseoutHandler);
         cy.removeListener('select', 'node', selectHandler);
         cy.removeListener('unselect', 'node', unselectHandler);
+        cy.removeListener('select', 'edge', edgeSelectHandler);
+        cy.removeListener('unselect', 'edge', edgeUnselectHandler);
         cy.removeListener('drag', 'node', dragHandler);
         cy.removeListener('dragfree', 'node', dragfreeHandler);
         cy.removeListener('tapstart', tapstartHandler);
