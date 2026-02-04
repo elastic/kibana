@@ -2,7 +2,7 @@
 
 Retrieves application-level runtime metrics (CPU usage, heap/non-heap memory, thread count) for a service's instances.
 
-Currently supports JVM (Java) metrics. Future versions may support other runtimes (Node.js, Python, Go).
+**Currently only supports JVM (Java) services.** Non-Java services will return no data. 
 
 ## When to Use
 
