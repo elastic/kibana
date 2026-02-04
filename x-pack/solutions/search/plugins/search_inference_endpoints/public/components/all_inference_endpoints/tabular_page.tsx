@@ -22,10 +22,12 @@ import * as i18n from '../../../common/translations';
 
 import { useTableData } from '../../hooks/use_table_data';
 import type { FilterOptions } from './types';
+import type { SortFieldInferenceEndpoint } from './types';
 
 import { useAllInferenceEndpointsState } from '../../hooks/use_all_inference_endpoints_state';
 import { ServiceProviderFilter } from './filter/service_provider_filter';
 import { TaskTypeFilter } from './filter/task_type_filter';
+import { SortButton } from './sort/sort_button';
 import { TableSearch } from './search/table_search';
 import { EndpointInfo } from './render_table_columns/render_endpoint/endpoint_info';
 import { Model } from './render_table_columns/render_model/model';
@@ -110,6 +112,15 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     [setFilterOptions]
   );
 
+  const onSortFieldChange = useCallback(
+    (field: SortFieldInferenceEndpoint) => {
+      setQueryParams({
+        sortField: field,
+      });
+    },
+    [setQueryParams]
+  );
+
   const { paginatedSortedTableData, pagination, sorting } = useTableData(
     inferenceEndpoints,
     queryParams,
@@ -138,11 +149,13 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '300px',
       },
       {
+        field: 'model',
         name: i18n.MODEL,
         'data-test-subj': 'modelCell',
-        render: (endpointInfo: InferenceInferenceEndpointInfo) => {
+        render: (_model: unknown, endpointInfo: InferenceInferenceEndpointInfo) => {
           return <Model endpointInfo={endpointInfo} />;
         },
+        sortable: true,
         width: '200px',
       },
       {
@@ -156,7 +169,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
 
           return null;
         },
-        sortable: false,
+        sortable: true,
         width: '285px',
       },
       {
@@ -170,7 +183,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
 
           return null;
         },
-        sortable: false,
+        sortable: true,
         width: '100px',
       },
       {
@@ -249,6 +262,12 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem style={{ width: '400px' }} grow={false}>
               <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SortButton
+                selectedSortField={queryParams.sortField}
+                onSortFieldChange={onSortFieldChange}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <ServiceProviderFilter

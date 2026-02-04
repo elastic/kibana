@@ -162,3 +162,23 @@ export const INFERENCE_ENDPOINTS_TABLE_CAPTION = i18n.translate(
     defaultMessage: 'Inference endpoints table',
   }
 );
+
+export const SORT = i18n.translate('xpack.searchInferenceEndpoints.sort', {
+  defaultMessage: 'Sort',
+});
+
+export const SORT_BY_ENDPOINT = i18n.translate('xpack.searchInferenceEndpoints.sort.endpoint', {
+  defaultMessage: 'Endpoint',
+});
+
+export const SORT_BY_SERVICE = i18n.translate('xpack.searchInferenceEndpoints.sort.service', {
+  defaultMessage: 'Service',
+});
+
+export const SORT_BY_TYPE = i18n.translate('xpack.searchInferenceEndpoints.sort.type', {
+  defaultMessage: 'Type',
+});
+
+export const SORT_BY_MODEL = i18n.translate('xpack.searchInferenceEndpoints.sort.model', {
+  defaultMessage: 'Model',
+});

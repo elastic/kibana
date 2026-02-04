@@ -12,6 +12,9 @@ export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [25, 50, 100];
 
 export enum SortFieldInferenceEndpoint {
   inference_id = 'inference_id',
+  service = 'service',
+  task_type = 'task_type',
+  model = 'model',
 }
 export enum SortOrder {
   asc = 'asc',

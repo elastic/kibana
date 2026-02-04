@@ -8,13 +8,14 @@
 import type { EuiTableSortingType } from '@elastic/eui';
 import type { Pagination } from '@elastic/eui';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
 import type { FilterOptions, QueryParams } from '../components/all_inference_endpoints/types';
 import {
   INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
+  SortFieldInferenceEndpoint,
   SortOrder,
 } from '../components/all_inference_endpoints/types';
 import { getModelId } from '../utils/get_model_id';
@@ -57,10 +58,28 @@ export const useTableData = (
     });
   }, [inferenceEndpoints, searchKey, filterOptions]);
 
+  const getSortValue = useCallback(
+    (endpoint: InferenceInferenceEndpointInfo, field: SortFieldInferenceEndpoint): string => {
+      switch (field) {
+        case SortFieldInferenceEndpoint.inference_id:
+          return endpoint.inference_id ?? '';
+        case SortFieldInferenceEndpoint.service:
+          return endpoint.service ?? '';
+        case SortFieldInferenceEndpoint.task_type:
+          return endpoint.task_type ?? '';
+        case SortFieldInferenceEndpoint.model:
+          return getModelId(endpoint) ?? '';
+        default:
+          return '';
+      }
+    },
+    []
+  );
+
   const sortedTableData: InferenceInferenceEndpointInfo[] = useMemo(() => {
     return [...tableData].sort((a, b) => {
-      const aValue = a[queryParams.sortField];
-      const bValue = b[queryParams.sortField];
+      const aValue = getSortValue(a, queryParams.sortField);
+      const bValue = getSortValue(b, queryParams.sortField);
 
       if (queryParams.sortOrder === SortOrder.asc) {
         return aValue.localeCompare(bValue);
@@ -68,7 +87,7 @@ export const useTableData = (
         return bValue.localeCompare(aValue);
       }
     });
-  }, [tableData, queryParams]);
+  }, [tableData, queryParams, getSortValue]);
 
   const pagination: Pagination = useMemo(
     () => ({
