@@ -6,28 +6,40 @@
  */
 
 import { lensApiStateSchema, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
 import { schema } from '@kbn/config-schema';
-import { getLensTransforms } from '../common/transforms';
-import type { LensTransforms } from '../common/transforms/types';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { isByRefLensConfig } from '../common/transforms/utils';
 import { lensItemDataSchemaV2 } from './content_management';
+import { LENS_EMBEDDABLE_TYPE } from '../common/constants';
+import { getTransformIn } from '../common/transforms/transform_in';
+import { getTransformOut } from '../common/transforms/transform_out';
 
-export const getLensServerTransforms = (
-  builder: LensConfigBuilder,
-  { transformEnhancementsIn, transformEnhancementsOut }: EmbeddableSetup
-): LensTransforms => {
-  return {
-    ...getLensTransforms({
-      builder,
-      transformEnhancementsIn,
-      transformEnhancementsOut,
+export function registerLensEmbeddableTransforms(
+  embeddableSetup: EmbeddableSetup,
+  builder: LensConfigBuilder
+) {
+  embeddableSetup.registerTransforms(LENS_EMBEDDABLE_TYPE, {
+    getTransforms: (drilldownTransforms: DrilldownTransforms) => ({
+      transformIn: getTransformIn(builder, drilldownTransforms.transformIn),
+      transformOut: getTransformOut(builder, drilldownTransforms.transformOut),
     }),
-    ...getExtraServerTransformProps(builder),
-  };
-};
+    getSchema: () => {
+      return builder.isEnabled ? lensPanelSchema : undefined;
+    },
+    throwOnUnmappedPanel: (config: LensSerializedAPIConfig) => {
+      if (isByRefLensConfig(config)) return;
+
+      const chartType = builder.getType(config.attributes);
+
+      if (builder.isEnabled && !builder.isSupported(chartType)) {
+        throw new Error(`Lens "${chartType}" chart type is not supported`);
+      }
+    },
+  });
+}
 
 const legacyPanelAttributesSchema = lensItemDataSchemaV2.extends({
   // Why are these added to the panel attributes?
@@ -53,22 +65,3 @@ const lensByRefPanelSchema = schema.object(
 );
 
 const lensPanelSchema = schema.oneOf([lensByValuePanelSchema, lensByRefPanelSchema]);
-
-function getExtraServerTransformProps(
-  builder: LensConfigBuilder
-): Pick<LensTransforms, 'getSchema' | 'throwOnUnmappedPanel'> {
-  return {
-    getSchema: () => {
-      return builder.isEnabled ? lensPanelSchema : undefined;
-    },
-    throwOnUnmappedPanel: (config: LensSerializedAPIConfig) => {
-      if (isByRefLensConfig(config)) return;
-
-      const chartType = builder.getType(config.attributes);
-
-      if (builder.isEnabled && !builder.isSupported(chartType)) {
-        throw new Error(`Lens "${chartType}" chart type is not supported`);
-      }
-    },
-  };
-}
