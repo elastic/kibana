@@ -12,7 +12,7 @@ export const INDEX_PATTERN_REGEX = /^[^A-Z^\\/?"<>|\s#,]+$/;
 export const graphRequestSchema = schema.object({
   nodesLimit: schema.maybe(schema.number()),
   showUnknownTarget: schema.maybe(schema.boolean()),
-  pinnedIds: schema.maybe(schema.arrayOf(schema.string())),
+  pinnedIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
   query: schema.object({
     originEventIds: schema.arrayOf(
       schema.object({ id: schema.string(), isAlert: schema.boolean() })
