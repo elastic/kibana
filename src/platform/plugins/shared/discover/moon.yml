@@ -128,7 +128,6 @@ dependsOn:
   - '@kbn/shared-ux-document-data-cascade'
   - '@kbn/zod'
   - '@kbn/cps'
-  - '@kbn/controls-renderer'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/core-chrome-app-menu'
