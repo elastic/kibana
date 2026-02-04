@@ -103,7 +103,7 @@ describe('rulePageShowRequestModal', () => {
 
   // maybe add another test for display only create body for new rules
 
-  test('renders edit request correctly for existing rule', async () => {
+  test('renders update request correctly for existing rule', async () => {
     useRuleFormState.mockReturnValue({
       formData,
       multiConsumerSelection: 'logs',
@@ -114,9 +114,9 @@ describe('rulePageShowRequestModal', () => {
 
     await userEvent.click(await screen.findByTestId('showRequestUpdateTab'));
 
-    expect(screen.getByTestId('modalHeaderTitle').textContent).toBe('Edit alerting rule request');
+    expect(screen.getByTestId('modalHeaderTitle').textContent).toBe('Update alerting rule request');
     expect(screen.getByTestId('modalSubtitle').textContent).toBe(
-      'This Kibana request will edit this rule.'
+      'This Kibana request will update this rule.'
     );
     expect(screen.getByTestId('modalRequestCodeBlock').textContent).toMatchInlineSnapshot(`
       "PUT kbn:/api/alerting/rule/test-id

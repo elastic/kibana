@@ -30,6 +30,7 @@ import {
 } from '../translations';
 import { RequestCodeBlock } from '../components';
 import type { ShowRequestActivePage } from '../types';
+import { useRuleFormState } from '../hooks';
 
 interface RuleFlyoutShowRequestProps {
   onClose: () => void;
@@ -37,6 +38,7 @@ interface RuleFlyoutShowRequestProps {
 
 export const RuleFlyoutShowRequest = ({ onClose }: RuleFlyoutShowRequestProps) => {
   const [activeTab, setActiveTab] = useState<ShowRequestActivePage>('create');
+  const { id } = useRuleFormState();
 
   return (
     <>
@@ -72,13 +74,15 @@ export const RuleFlyoutShowRequest = ({ onClose }: RuleFlyoutShowRequestProps) =
             >
               {SHOW_REQUEST_MODAL_CREATE_TAB}
             </EuiTab>
-            <EuiTab
-              isSelected={activeTab === 'update'}
-              onClick={() => setActiveTab('update')}
-              data-test-subj="showRequestCreateTab"
-            >
-              {SHOW_REQUEST_MODAL_UPDATE_TAB}
-            </EuiTab>
+            {id && (
+              <EuiTab
+                isSelected={activeTab === 'update'}
+                onClick={() => setActiveTab('update')}
+                data-test-subj="showRequestCreateTab"
+              >
+                {SHOW_REQUEST_MODAL_UPDATE_TAB}
+              </EuiTab>
+            )}
           </EuiTabs>
         </EuiFlexItem>
 

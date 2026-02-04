@@ -792,7 +792,7 @@ export const DISABLED_ACTIONS_WARNING_TITLE = i18n.translate(
 export const SHOW_REQUEST_MODAL_EDIT = i18n.translate(
   'responseOpsRuleForm.ruleForm.showRequestModal.subheadingTitleEdit',
   {
-    defaultMessage: 'edit',
+    defaultMessage: 'update',
   }
 );
 
@@ -828,7 +828,7 @@ export const SHOW_REQUEST_MODAL_SUBTITLE = (mode: string) =>
 export const SHOW_REQUEST_MODAL_TITLE_EDIT = i18n.translate(
   'responseOpsRuleForm.ruleForm.showRequestModal.headerTitleEdit',
   {
-    defaultMessage: 'Edit',
+    defaultMessage: 'Update',
   }
 );
 
