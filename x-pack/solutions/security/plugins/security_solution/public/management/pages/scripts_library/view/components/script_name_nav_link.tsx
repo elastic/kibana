@@ -18,7 +18,7 @@ export const ScriptNameNavLink = memo<ScriptNameNavLinkProps>(
   ({ name, onClick, 'data-test-subj': dataTestSubj }) => {
     return (
       <EuiLink
-        data-test-subj={`${dataTestSubj}-nav-link`}
+        data-test-subj={`${dataTestSubj}-name-button`}
         className="eui-displayInline eui-textTruncate"
         onClick={onClick}
       >

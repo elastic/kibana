@@ -51,6 +51,7 @@ export class EndpointScriptsGenerator extends BaseDataGenerator {
         60
       )}`,
       example: `${this.randomString(30)}\n ${this.randomString(30)} \n ${this.randomString(30)}`,
+      pathToExecutable: `/usr/local/bin/${name}`,
       createdBy,
       createdAt,
       updatedAt,

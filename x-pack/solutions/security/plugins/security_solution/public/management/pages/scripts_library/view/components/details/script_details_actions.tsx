@@ -8,7 +8,6 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ListScriptsRequestQuery } from '../../../../../../../common/api/endpoint';
 import type { EndpointScript } from '../../../../../../../common/endpoint/types';
 import { ContextMenuItemNavByRouter } from '../../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import {
@@ -17,15 +16,13 @@ import {
 } from '../../hooks/use_script_action_items';
 
 interface EndpointScriptDetailsActionsProps {
-  queryParams: ListScriptsRequestQuery;
   scriptItem: EndpointScript;
   onClickAction: UseScriptActionItemsProps['onClickAction'];
   'data-test-subj'?: string;
 }
 export const EndpointScriptDetailsActions = memo<EndpointScriptDetailsActionsProps>(
-  ({ queryParams, scriptItem: script, onClickAction, 'data-test-subj': dataTestSubj }) => {
+  ({ scriptItem: script, onClickAction, 'data-test-subj': dataTestSubj }) => {
     const menuOptions = useScriptActionItems({
-      queryParams,
       script,
       onClickAction,
       showDetailsAction: false,

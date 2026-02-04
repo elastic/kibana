@@ -84,7 +84,7 @@ export const EndpointScriptDetailsFlyoutBody = memo<EndpointScriptDetailsFlyoutB
             }
             return (
               label && (
-                <EuiFlexItem key={key}>
+                <EuiFlexItem key={key} data-test-subj={`${dataTestSubj}-detail-${key}`}>
                   <EndpointScriptDetailItem label={label} appendToLabel={appendToLabel} key={key}>
                     {renderScriptDetails(key as KeyType, value)}
                   </EndpointScriptDetailItem>

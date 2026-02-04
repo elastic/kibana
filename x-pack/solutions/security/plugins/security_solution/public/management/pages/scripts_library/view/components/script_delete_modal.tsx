@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useCallback } from 'react';
-import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useToasts } from '../../../../../common/lib/kibana';
 import { AutoFocusButton } from '../../../../../common/components/autofocus_button/autofocus_button';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { SCRIPT_LIBRARY_LABELS as i18n } from '../../translations';
@@ -35,15 +35,15 @@ export const EndpointScriptDeleteModal = memo<EndpointScriptDeleteModalProps>(
   ({ scriptId, scriptName, onCancel, onSuccess, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const modalTitleId = useGeneratedHtmlId();
-    const { addError, addSuccess } = useAppToasts();
+    const toasts = useToasts();
 
     const { mutateAsync: deleteScriptMutation, isLoading: isDeleting } = useDeleteEndpointScript({
       onSuccess: () => {
-        addSuccess(i18n.deleteModal.successToastTitle);
+        toasts.addSuccess(i18n.deleteModal.successToastTitle);
         onSuccess();
       },
       onError: (error) => {
-        addError(error, {
+        toasts.addError(error, {
           title: i18n.deleteModal.errorToastTitle,
           toastMessage: error?.body?.message ?? error.message,
         });
@@ -65,6 +65,7 @@ export const EndpointScriptDeleteModal = memo<EndpointScriptDeleteModalProps>(
         onClose={onClickCancel}
         data-test-subj={dataTestSubj}
         aria-labelledby={modalTitleId}
+        role="alertdialog"
       >
         <EuiModalHeader data-test-subj={getTestId('header')}>
           <EuiModalHeaderTitle id={modalTitleId}>{i18n.deleteModal.title}</EuiModalHeaderTitle>
@@ -86,7 +87,7 @@ export const EndpointScriptDeleteModal = memo<EndpointScriptDeleteModalProps>(
           <EuiButtonEmpty
             onClick={onClickCancel}
             isDisabled={isDeleting}
-            data-test-subj={getTestId('cancelButton')}
+            data-test-subj={getTestId('cancel-button')}
           >
             {i18n.deleteModal.cancelButtonLabel}
           </EuiButtonEmpty>
@@ -97,7 +98,7 @@ export const EndpointScriptDeleteModal = memo<EndpointScriptDeleteModalProps>(
             onClick={onClickDelete}
             isLoading={isDeleting}
             isDisabled={isDeleting}
-            data-test-subj={getTestId('submitButton')}
+            data-test-subj={getTestId('delete-button')}
           >
             {i18n.deleteModal.deleteButtonLabel}
           </AutoFocusButton>

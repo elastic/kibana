@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import * as reactTestingLibrary from '@testing-library/react';
-import userEvent, { type UserEvent } from '@testing-library/user-event';
+import { act, fireEvent } from '@testing-library/react';
 import {
   createAppRootMockRenderer,
   type AppContextTestRender,
@@ -26,7 +25,6 @@ jest.mock('../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 describe('ScriptsLibraryTable', () => {
-  let userEve: UserEvent;
   let render: (props?: ScriptsLibraryTableProps) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
@@ -51,21 +49,12 @@ describe('ScriptsLibraryTable', () => {
     'data-test-subj': 'test',
   };
 
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   beforeEach(() => {
     scriptsGenerator = new EndpointScriptsGenerator('seed');
     useUserPrivilegesMock.mockReturnValue({
       endpointPrivileges: getEndpointAuthzInitialStateMock(),
     });
-    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    userEve = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
+
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
 
@@ -92,37 +81,36 @@ describe('ScriptsLibraryTable', () => {
 
   describe('Table rendering and interactions', () => {
     it('renders record range label', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
       expect(renderResult.getByTestId('test-record-range-label')).toBeInTheDocument();
     });
 
     it('renders scripts table', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
       expect(renderResult.getByTestId('test')).toBeInTheDocument();
     });
 
     it('shows correct set of columns', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const columns = renderResult.getAllByRole('columnheader');
       expect(columns).toHaveLength(7);
-      expect(columns.map((column) => column.textContent).join(',')).toEqual(
-        'Name,Platforms,Types,Updated by,Last updated,Size,Actions'
-      );
+      const columnLabels = columns.map((column) => column.textContent).join(',');
+      expect(columnLabels).toEqual('Name,Platforms,Types,Updated by,Last updated,Size,Actions');
     });
 
     it('shows error when error prop is set', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render({ ...defaultProps, error: 'An error occurred' });
 
       expect(renderResult.getByText('An error occurred')).toBeInTheDocument();
     });
 
     it('shows `no records` are available', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render({ ...defaultProps, items: [], totalItemCount: 0 });
 
       expect(renderResult.getByText('No scripts found')).toBeInTheDocument();
@@ -131,7 +119,7 @@ describe('ScriptsLibraryTable', () => {
 
   describe('With records', () => {
     it('shows correct number of rows', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
 
       render({
         ...defaultProps,
@@ -146,18 +134,18 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('shows script name as a button for opening details flyout', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByTestId } = renderResult;
-      const nameButton = getByTestId('test-column-name-script-1-nav-link');
+      const nameButton = getByTestId('test-column-name-script-1-name-button');
       expect(nameButton).toHaveTextContent('Script One');
       // should be a button element
       expect(nameButton.tagName).toBe('BUTTON');
     });
 
     it('shows platform badges for each script', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render({
         ...defaultProps,
         items: [
@@ -177,8 +165,8 @@ describe('ScriptsLibraryTable', () => {
       });
     });
 
-    it('shows Types for each script', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+    it('shows Types for each script', async () => {
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByTestId } = renderResult;
@@ -187,18 +175,19 @@ describe('ScriptsLibraryTable', () => {
 
       const typesPopover = getByTestId('test-typesDisplayPopoverButton');
       // click on types cell and verify popover content
-      userEve.click(typesPopover).then(() => {
-        expect(getByTestId('test-typesDisplayPopoverTitle')).toHaveTextContent('Types');
-        const badges = getByTestId('test-typesDisplayPopoverWrapper').querySelectorAll('.euiBadge');
-        expect(badges).toHaveLength(11);
-        // verify all tags are present and are in sorted order
-        const tags = Array.from(badges).map((badge) => badge.textContent);
-        expect(tags).toEqual(Object.values(SCRIPT_TAGS).sort());
+      await act(async () => {
+        await fireEvent.click(typesPopover);
       });
+      expect(getByTestId('test-typesDisplayPopoverTitle')).toHaveTextContent('Types');
+      const badges = getByTestId('test-typesDisplayPopoverWrapper').querySelectorAll('.euiBadge');
+      expect(badges).toHaveLength(11);
+      // verify all tags are present and are in sorted order
+      const tags = Array.from(badges).map((badge) => badge.textContent);
+      expect(tags).toEqual(Object.values(SCRIPT_TAGS).sort());
     });
 
     it('shows last updated info', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByText } = renderResult;
@@ -207,7 +196,7 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('shows file size in human readable format', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render({
         ...defaultProps,
         items: [
@@ -224,13 +213,13 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('should sort by column `Name` when header clicked', async () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByText } = renderResult;
       const nameHeader = getByText('Name');
 
-      await userEve.click(nameHeader);
+      await fireEvent.click(nameHeader);
 
       expect(defaultProps.onChange).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -243,13 +232,13 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('should sort by column `Last updated` when header clicked', async () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByText } = renderResult;
       const lastUpdatedHeader = getByText('Last updated');
 
-      await userEve.click(lastUpdatedHeader);
+      await fireEvent.click(lastUpdatedHeader);
       expect(defaultProps.onChange).toHaveBeenCalledWith(
         expect.objectContaining({
           sort: {
@@ -261,13 +250,13 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('should sort by column `Updated by` when header clicked', async () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByText } = renderResult;
       const updatedByHeader = getByText('Updated by');
 
-      await userEve.click(updatedByHeader);
+      await fireEvent.click(updatedByHeader);
       expect(defaultProps.onChange).toHaveBeenCalledWith(
         expect.objectContaining({
           sort: {
@@ -279,13 +268,13 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('should sort by column `Size` when header clicked', async () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByText } = renderResult;
       const sizeHeader = getByText('Size');
 
-      await userEve.click(sizeHeader);
+      await fireEvent.click(sizeHeader);
       expect(defaultProps.onChange).toHaveBeenCalledWith(
         expect.objectContaining({
           sort: {
@@ -294,6 +283,78 @@ describe('ScriptsLibraryTable', () => {
           },
         })
       );
+    });
+  });
+
+  describe('With records and row actions', () => {
+    it('should trigger details flyout when script name is clicked', async () => {
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      render();
+
+      const { getByTestId } = renderResult;
+      const nameButton = getByTestId('test-column-name-script-1-name-button');
+
+      await fireEvent.click(nameButton);
+
+      expect(defaultProps.onClickAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          show: 'details',
+          script: expect.objectContaining({ id: 'script-1' }),
+        })
+      );
+    });
+
+    it('should show `edit` and `delete` actions with `canWriteScriptsLibrary` privilege', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: {
+          ...getEndpointAuthzInitialStateMock(),
+          canWriteScriptsLibrary: true,
+        },
+      });
+
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      render();
+
+      const { getByTestId } = renderResult;
+      const actionsButton = getByTestId('test-row-actions-script-1');
+
+      await fireEvent.click(actionsButton);
+
+      const actionPanel = getByTestId('test-row-actions-script-1-panel');
+      expect(actionPanel).toBeInTheDocument();
+      const actionItems = actionPanel.querySelectorAll('.euiContextMenuItem');
+      expect(actionItems).toHaveLength(4);
+      const actionItemLabels = Array.from(actionItems).map((item) => item.textContent);
+      expect(actionItemLabels).toEqual([
+        'View details',
+        'Edit script',
+        'Download script',
+        'Delete script',
+      ]);
+    });
+
+    it('should not show `edit` and `delete` actions without `canWriteScriptsLibrary` privilege', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: {
+          ...getEndpointAuthzInitialStateMock(),
+          canWriteScriptsLibrary: false,
+        },
+      });
+
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      render();
+
+      const { getByTestId } = renderResult;
+      const actionsButton = getByTestId('test-row-actions-script-1');
+
+      await fireEvent.click(actionsButton);
+
+      const actionPanel = getByTestId('test-row-actions-script-1-panel');
+      expect(actionPanel).toBeInTheDocument();
+      const actionItems = actionPanel.querySelectorAll('.euiContextMenuItem');
+      expect(actionItems).toHaveLength(2);
+      const actionItemLabels = Array.from(actionItems).map((item) => item.textContent);
+      expect(actionItemLabels).toEqual(['View details', 'Download script']);
     });
   });
 });

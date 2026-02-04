@@ -56,14 +56,12 @@ interface GetScriptsLibraryTableColumnsProps {
   formatBytes: (bytes: number) => string;
   getTestId: (suffix?: string | undefined) => string | undefined;
   onClickAction: ScriptsLibraryTableProps['onClickAction'];
-  queryParams: ScriptsLibraryTableProps['queryParams'];
 }
 
 const getScriptsLibraryTableColumns = ({
   formatBytes,
   getTestId,
   onClickAction,
-  queryParams,
 }: GetScriptsLibraryTableColumnsProps) => {
   const columns = [
     {
@@ -187,8 +185,8 @@ const getScriptsLibraryTableColumns = ({
           render: (item: EndpointScript) => (
             <ScriptRowActions
               scriptItem={item}
-              queryParams={queryParams}
               onClickAction={onClickAction}
+              data-test-subj={getTestId(`row-actions-${item.id}`)}
             />
           ),
         },
@@ -290,9 +288,8 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
           formatBytes,
           getTestId,
           onClickAction,
-          queryParams,
         }),
-      [formatBytes, getTestId, onClickAction, queryParams]
+      [formatBytes, getTestId, onClickAction]
     );
 
     const setTableRowProps = useCallback((scriptData: ScriptItems[number]) => {
