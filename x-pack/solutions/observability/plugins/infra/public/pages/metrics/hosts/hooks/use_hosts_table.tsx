@@ -305,10 +305,6 @@ export const useHostsTable = () => {
                         setProperties({ detailsItemId: row.id === detailsItemId ? null : row.id });
                       }}
                       onClickAriaLabel={TABLE_CONTENT_LABEL.activeAlerts}
-                      iconOnClick={() => {
-                        setProperties({ detailsItemId: row.id === detailsItemId ? null : row.id });
-                      }}
-                      iconOnClickAriaLabel={TABLE_CONTENT_LABEL.activeAlerts}
                     >
                       {alertsCount}
                     </EuiBadge>

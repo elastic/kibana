@@ -98,17 +98,6 @@ export function SignificantEventsTable({
                 setSelectedSystem(systemsByName[query.feature.name]);
               }
             }}
-            iconOnClick={() => {
-              if (query.feature?.name) {
-                setSelectedSystem(systemsByName[query.feature.name]);
-              }
-            }}
-            iconOnClickAriaLabel={i18n.translate(
-              'xpack.streams.significantEventsTable.systemDetailsFlyoutAriaLabel',
-              {
-                defaultMessage: 'Open system details',
-              }
-            )}
             data-test-subj="significant_events_table_system_badge"
           >
             {query.feature?.name ?? '--'}

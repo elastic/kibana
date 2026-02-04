@@ -64,8 +64,6 @@ export const RuleTagBadge = <T extends RuleTagBadgeOptions>(props: RuleTagBadgeP
         tabIndex={-1}
         onClick={onClick}
         onClickAriaLabel="Tags"
-        iconOnClick={onClick}
-        iconOnClickAriaLabel="Tags"
       >
         {tags.length}
       </EuiBadge>

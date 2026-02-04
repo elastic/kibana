@@ -123,8 +123,6 @@ exports[`Table should render conflicting type 1`] = `
       iconOnClick={[Function]}
       iconOnClickAriaLabel="Conflict Detail"
       iconType="warning"
-      onClick={[Function]}
-      onClickAriaLabel="Conflict Detail"
     >
       Conflict
     </EuiBadge>

@@ -62,9 +62,7 @@ export function SyntheticsIndicatorOverview({ slo }: Props) {
               <EuiBadge
                 color="hollow"
                 onClick={onMonitorClick}
-                iconOnClick={onMonitorClick}
                 onClickAriaLabel={MONITOR_ARIA_LABEL}
-                iconOnClickAriaLabel={MONITOR_ARIA_LABEL}
               >
                 {i18n.translate('xpack.slo.sloDetails.overview.syntheticsMonitor.name', {
                   defaultMessage: 'Name: {value}',
@@ -78,9 +76,7 @@ export function SyntheticsIndicatorOverview({ slo }: Props) {
               <EuiBadge
                 color="hollow"
                 onClick={onLocationClick}
-                iconOnClick={onLocationClick}
                 onClickAriaLabel={LOCATION_ARIA_LABEL}
-                iconOnClickAriaLabel={LOCATION_ARIA_LABEL}
               >
                 {i18n.translate('xpack.slo.sloDetails.overview.syntheticsMonitor.locationName', {
                   defaultMessage: 'Location: {value}',
