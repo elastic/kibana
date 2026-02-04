@@ -183,7 +183,7 @@ function hasValidQuery(command: ESQLAstPromqlCommand): boolean {
   }
 
   // unknown type - check if it's actually a param assignment mistakenly placed here
-  if (query.type === 'unknown') {
+  if (query.type === 'query') {
     const text = query.text?.trim() ?? '';
 
     // Empty text, starts with "=" (orphaned assignment value), or looks like param assignment
