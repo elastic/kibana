@@ -23,6 +23,7 @@ export const MONITOR_MANAGEMENT_ROUTE = '/manage-monitors';
 export const OVERVIEW_ROUTE = '/';
 
 export const MONITORS_ROUTE = '/monitors';
+export const ERRORS_ROUTE = '/errors';
 
 export const GETTING_STARTED_ROUTE = '/monitors/getting-started';
 

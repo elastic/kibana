@@ -249,6 +249,8 @@ export const PingStateType = t.type({
   docId: t.string,
   state: ErrorStateCodec,
   error: PingErrorType,
+  config_id: t.string,
+  observer: ObserverCodec,
 });
 export type Ping = t.TypeOf<typeof PingType>;
 export type PingState = t.TypeOf<typeof PingStateType>;
