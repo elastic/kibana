@@ -218,7 +218,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
                 }
                 resetEditingState();
               }}
-              onSave={async (value: string) => {
+              onSave={async (value: string): Promise<void> => {
                 resetEditingState();
                 markdownStateManager.api.setContent(value);
                 if (savedObjectId) {
