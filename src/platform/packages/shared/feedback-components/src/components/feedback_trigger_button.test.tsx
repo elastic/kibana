@@ -18,7 +18,9 @@ jest.mock('./feedback_container', () => ({
   FeedbackContainer: () => <div data-test-subj="feedbackContainer">Feedback Container</div>,
 }));
 
-const createMockProps = (overrides: Partial<React.ComponentProps<typeof FeedbackTriggerButton>> = {}) => ({
+const createMockProps = (
+  overrides: Partial<React.ComponentProps<typeof FeedbackTriggerButton>> = {}
+) => ({
   appDetails: { title: 'Test App', id: 'test-app', url: '/app/test-app' },
   questions: [],
   activeSolutionNavId$: new BehaviorSubject<string | null>(null),
