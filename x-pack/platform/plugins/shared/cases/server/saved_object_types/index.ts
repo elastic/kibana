@@ -15,6 +15,7 @@ import { caseConnectorMappingsSavedObjectType } from './connector_mappings';
 import { casesTelemetrySavedObjectType } from './telemetry';
 import { casesRulesSavedObjectType } from './cases_rules';
 import { caseIdIncrementerSavedObjectType } from './id_incrementer';
+import { createCaseAttachmentSavedObjectType } from './attachments';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import { caseTemplateSavedObjectType } from './templates';
 import type { ConfigType } from '../config';
@@ -24,7 +25,7 @@ interface RegisterSavedObjectsArgs {
   logger: Logger;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
-  templatesConfig?: ConfigType['templates'];
+  config: ConfigType;
 }
 
 export const registerSavedObjects = ({
@@ -32,7 +33,7 @@ export const registerSavedObjects = ({
   logger,
   persistableStateAttachmentTypeRegistry,
   lensEmbeddableFactory,
-  templatesConfig,
+  config,
 }: RegisterSavedObjectsArgs) => {
   core.savedObjects.registerType(
     createCaseCommentSavedObjectType({
@@ -56,7 +57,10 @@ export const registerSavedObjects = ({
   core.savedObjects.registerType(casesTelemetrySavedObjectType);
   core.savedObjects.registerType(casesRulesSavedObjectType);
 
-  if (templatesConfig?.enabled) {
+  if (config.templates?.enabled) {
     core.savedObjects.registerType(caseTemplateSavedObjectType);
+  }
+  if (config.attachments?.enabled) {
+    core.savedObjects.registerType(createCaseAttachmentSavedObjectType());
   }
 };
