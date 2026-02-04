@@ -11,10 +11,9 @@ import React from 'react';
 import { screen, act, fireEvent } from '@testing-library/react';
 import { FeedbackBody } from './feedback_body';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { coreMock } from '@kbn/core/public/mocks';
 import { getFeedbackQuestionsForApp } from '@kbn/feedback-registry';
 
-const coreStartMock = coreMock.createStart();
+const mockGetCurrentUserEmail = jest.fn().mockResolvedValue(undefined);
 
 const mockProps = {
   handleChangeCsatOptionId: jest.fn(),
@@ -22,18 +21,19 @@ const mockProps = {
   handleChangeAllowEmailContact: jest.fn(),
   handleChangeEmail: jest.fn(),
   onEmailValidationChange: jest.fn(),
+  getCurrentUserEmail: mockGetCurrentUserEmail,
   email: '',
   questions: getFeedbackQuestionsForApp(),
   allowEmailContact: false,
   selectedCsatOptionId: '',
   questionAnswers: {},
   appTitle: 'Test App',
-  core: coreStartMock,
 };
 
 describe('FeedbackBody', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetCurrentUserEmail.mockResolvedValue(undefined);
   });
 
   it('should render', async () => {

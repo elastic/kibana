@@ -8,44 +8,65 @@
  */
 
 import React, { useState, useEffect, lazy, Suspense } from 'react';
+import type { Observable } from 'rxjs';
 import { EuiHeaderSectionItemButton, EuiIcon, EuiToolTip, EuiModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '@kbn/core/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
 
 const LazyFeedbackContainer = lazy(() =>
   import('./feedback_container').then((m) => ({ default: m.FeedbackContainer }))
 );
 
-interface Props {
-  core: CoreStart;
-  cloud?: CloudStart;
-  organizationId?: string;
+interface AppDetails {
+  title: string;
+  id: string;
+  url: string;
 }
 
-export const FeedbackTriggerButton = ({ core, cloud, organizationId }: Props) => {
+interface Props {
+  appDetails: AppDetails;
+  questions: FeedbackRegistryEntry[];
+  activeSolutionNavId$: Observable<string | null>;
+  serverlessProjectType?: string;
+  organizationId?: string;
+  getCurrentUserEmail: () => Promise<string | undefined>;
+  sendFeedback: (data: Record<string, unknown>) => Promise<void>;
+  showSuccessToast: (title: string) => void;
+  showErrorToast: (title: string) => void;
+  checkTelemetryOptIn: () => Promise<boolean>;
+}
+
+export const FeedbackTriggerButton = ({
+  appDetails,
+  questions,
+  activeSolutionNavId$,
+  serverlessProjectType,
+  organizationId,
+  getCurrentUserEmail,
+  sendFeedback,
+  showSuccessToast,
+  showErrorToast,
+  checkTelemetryOptIn,
+}: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isOptedIn, setIsOptedIn] = useState<boolean | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    const checkTelemetryStatus = async () => {
+    const checkStatus = async () => {
       try {
         setIsLoading(true);
-        const telemetryConfig = await core.http.get<{ optIn: boolean | null }>(
-          '/internal/telemetry/config',
-          { version: '2' }
-        );
-        setIsOptedIn(telemetryConfig.optIn);
-      } catch (err) {
+        const optedIn = await checkTelemetryOptIn();
+        setIsOptedIn(optedIn);
+      } catch {
         setIsOptedIn(false);
       } finally {
         setIsLoading(false);
       }
     };
 
-    checkTelemetryStatus();
-  }, [core.http]);
+    checkStatus();
+  }, [checkTelemetryOptIn]);
 
   const handleShowFeedbackContainer = () => {
     setIsModalOpen(true);
@@ -88,9 +109,15 @@ export const FeedbackTriggerButton = ({ core, cloud, organizationId }: Props) =>
         >
           <Suspense fallback={null}>
             <LazyFeedbackContainer
-              core={core}
-              cloud={cloud}
+              appDetails={appDetails}
+              questions={questions}
+              activeSolutionNavId$={activeSolutionNavId$}
+              serverlessProjectType={serverlessProjectType}
               organizationId={organizationId}
+              getCurrentUserEmail={getCurrentUserEmail}
+              sendFeedback={sendFeedback}
+              showSuccessToast={showSuccessToast}
+              showErrorToast={showErrorToast}
               hideFeedbackContainer={handleHideFeedbackContainer}
             />
           </Suspense>

@@ -1,22 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import type { ChangeEvent } from 'react';
 import { EuiFieldText, EuiFormRow, EuiFormErrorText } from '@elastic/eui';
-import type { SecurityServiceStart } from '@kbn/core/public';
 import { parseOneAddress } from 'email-addresses';
 import { i18n } from '@kbn/i18n';
 
-interface Props {
+export interface EmailInputProps {
+  /** Current email value */
   email: string;
-  security?: SecurityServiceStart;
+  /** Callback when email value changes */
   handleChangeEmail: (email: string) => void;
+  /** Callback when email validation status changes */
   onValidationChange: (isValid: boolean) => void;
+  /** Function to fetch current user email for pre-filling the input */
+  getCurrentUserEmail: () => Promise<string | undefined>;
 }
 
 const validateEmail = (value: string): boolean => {
@@ -31,7 +36,12 @@ const validateEmail = (value: string): boolean => {
   }
 };
 
-export const EmailInput = ({ email, security, handleChangeEmail, onValidationChange }: Props) => {
+export const EmailInput = ({
+  email,
+  handleChangeEmail,
+  onValidationChange,
+  getCurrentUserEmail,
+}: EmailInputProps) => {
   const hasFetchedEmailRef = useRef(false);
   const [touched, setTouched] = useState(false);
 
@@ -53,14 +63,14 @@ export const EmailInput = ({ email, security, handleChangeEmail, onValidationCha
 
   useEffect(() => {
     const fetchEmail = async () => {
-      if (!security || email || hasFetchedEmailRef.current) {
+      if (email || hasFetchedEmailRef.current) {
         return;
       }
 
       try {
-        const user = await security.authc.getCurrentUser();
-        if (user?.email) {
-          handleChangeEmail(user.email);
+        const userEmail = await getCurrentUserEmail();
+        if (userEmail) {
+          handleChangeEmail(userEmail);
         }
       } catch {
         handleChangeEmail('');
@@ -70,7 +80,7 @@ export const EmailInput = ({ email, security, handleChangeEmail, onValidationCha
     };
 
     fetchEmail();
-  }, [security, email, handleChangeEmail]);
+  }, [getCurrentUserEmail, email, handleChangeEmail]);
 
   return (
     <>

@@ -1,28 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import userEvent from '@testing-library/user-event';
-import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { EmailInput } from './email_input';
 
-const mockSecurityService = securityServiceMock.createStart();
+const mockGetCurrentUserEmail = jest.fn();
 
 const mockProps = {
   email: '',
   handleChangeEmail: jest.fn(),
   onValidationChange: jest.fn(),
+  getCurrentUserEmail: mockGetCurrentUserEmail,
 };
 
 describe('EmailInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetCurrentUserEmail.mockResolvedValue(undefined);
   });
 
   it('should render email input', () => {
@@ -47,34 +50,24 @@ describe('EmailInput', () => {
     expect(mockProps.handleChangeEmail).toHaveBeenCalled();
   });
 
-  it('should fetch user email from security service', async () => {
-    mockSecurityService.authc.getCurrentUser.mockResolvedValue(
-      securityServiceMock.createMockAuthenticatedUser({
-        email: 'capybara@elastic.co',
-      })
-    );
+  it('should fetch user email using getCurrentUserEmail', async () => {
+    mockGetCurrentUserEmail.mockResolvedValue('capybara@elastic.co');
 
-    renderWithI18n(<EmailInput {...mockProps} security={mockSecurityService} />);
+    renderWithI18n(<EmailInput {...mockProps} />);
 
     await waitFor(() => {
-      expect(mockSecurityService.authc.getCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockGetCurrentUserEmail).toHaveBeenCalledTimes(1);
       expect(mockProps.handleChangeEmail).toHaveBeenCalledWith('capybara@elastic.co');
     });
   });
 
   it('should not fetch email if email is already provided', async () => {
-    mockSecurityService.authc.getCurrentUser.mockResolvedValue(
-      securityServiceMock.createMockAuthenticatedUser({
-        email: 'not.capybara@elastic.co',
-      })
-    );
+    mockGetCurrentUserEmail.mockResolvedValue('not.capybara@elastic.co');
 
-    renderWithI18n(
-      <EmailInput {...mockProps} email="capybara@elastic.co" security={mockSecurityService} />
-    );
+    renderWithI18n(<EmailInput {...mockProps} email="capybara@elastic.co" />);
 
     await waitFor(() => {
-      expect(mockSecurityService.authc.getCurrentUser).not.toHaveBeenCalled();
+      expect(mockGetCurrentUserEmail).not.toHaveBeenCalled();
     });
   });
 

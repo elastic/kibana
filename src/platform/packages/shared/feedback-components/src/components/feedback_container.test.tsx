@@ -11,30 +11,30 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import userEvent from '@testing-library/user-event';
-import { coreMock } from '@kbn/core/public/mocks';
-import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
+import { getFeedbackQuestionsForApp } from '@kbn/feedback-registry';
 import { FeedbackContainer } from './feedback_container';
 
-const coreStartMock = coreMock.createStart();
-const cloudStartMock = cloudMock.createStart();
-
 const mockProps = {
-  core: coreStartMock,
-  cloud: cloudStartMock,
+  appDetails: {
+    title: 'Test App',
+    id: 'test-app',
+    url: '/app/test',
+  },
+  questions: getFeedbackQuestionsForApp('test-app'),
+  activeSolutionNavId$: new BehaviorSubject<string | null>(null),
+  serverlessProjectType: undefined,
   organizationId: 'test-org-id',
+  getCurrentUserEmail: jest.fn().mockResolvedValue(undefined),
+  sendFeedback: jest.fn().mockResolvedValue(undefined),
+  showSuccessToast: jest.fn(),
+  showErrorToast: jest.fn(),
   hideFeedbackContainer: jest.fn(),
 };
 
 describe('FeedbackContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    coreStartMock.executionContext.get.mockReturnValue({
-      name: 'test-app',
-      url: '/app/test',
-    });
-    coreStartMock.chrome.navLinks.getAll.mockReturnValue([]);
-    coreStartMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject(null));
   });
 
   it('should render container', () => {
@@ -75,8 +75,6 @@ describe('FeedbackContainer', () => {
   });
 
   it('should submit feedback with correct data', async () => {
-    coreStartMock.http.post.mockResolvedValue({});
-
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
     const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
@@ -94,15 +92,16 @@ describe('FeedbackContainer', () => {
     await userEvent.click(sendButton);
 
     await waitFor(() => {
-      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/feedback/send', {
-        body: expect.any(String),
-      });
+      expect(mockProps.sendFeedback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          app_id: 'test-app',
+          organization_id: 'test-org-id',
+        })
+      );
     });
   });
 
   it('should show success toast and hide container on successful submit', async () => {
-    coreStartMock.http.post.mockResolvedValue({});
-
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
     const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
@@ -120,9 +119,9 @@ describe('FeedbackContainer', () => {
     await userEvent.click(sendButton);
 
     await waitFor(() => {
-      expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: expect.stringContaining('Thanks for your feedback'),
-      });
+      expect(mockProps.showSuccessToast).toHaveBeenCalledWith(
+        expect.stringContaining('Thanks for your feedback')
+      );
       expect(mockProps.hideFeedbackContainer).toHaveBeenCalledTimes(1);
     });
   });

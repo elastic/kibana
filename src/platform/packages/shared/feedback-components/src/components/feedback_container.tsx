@@ -8,29 +8,55 @@
  */
 
 import React, { useState } from 'react';
-import type { CoreStart } from '@kbn/core/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { Observable } from 'rxjs';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
-import { getFeedbackQuestionsForApp } from '@kbn/feedback-registry';
-import { getAppDetails } from '@kbn/feedback-plugin/public/src/utils';
+import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
 import { FeedbackHeader } from './header';
 import { FeedbackBody } from './body/feedback_body';
 import { FeedbackFooter } from './footer/feedback_footer';
 
+interface AppDetails {
+  title: string;
+  id: string;
+  url: string;
+}
+
 interface Props {
-  core: CoreStart;
-  cloud?: CloudStart;
+  /** App details (title, id, url) */
+  appDetails: AppDetails;
+  /** Feedback questions for this app */
+  questions: FeedbackRegistryEntry[];
+  /** Observable for active solution nav ID */
+  activeSolutionNavId$: Observable<string | null>;
+  /** Serverless project type if in serverless mode */
+  serverlessProjectType?: string;
+  /** Organization ID */
   organizationId?: string;
+  /** Function to fetch current user's email */
+  getCurrentUserEmail: () => Promise<string | undefined>;
+  /** Function to send feedback to the server */
+  sendFeedback: (data: Record<string, unknown>) => Promise<void>;
+  /** Function to show a success toast */
+  showSuccessToast: (title: string) => void;
+  /** Function to show an error toast */
+  showErrorToast: (title: string) => void;
+  /** Callback to hide the feedback container */
   hideFeedbackContainer: () => void;
 }
 
 export const FeedbackContainer = ({
-  core,
-  cloud,
+  appDetails,
+  questions,
+  activeSolutionNavId$,
+  serverlessProjectType,
   organizationId,
+  getCurrentUserEmail,
+  sendFeedback,
+  showSuccessToast,
+  showErrorToast,
   hideFeedbackContainer,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
@@ -41,11 +67,9 @@ export const FeedbackContainer = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(true);
 
-  const solutionView = useObservable(core.chrome.getActiveSolutionNavId$());
+  const solutionView = useObservable(activeSolutionNavId$);
 
-  const { title: appTitle, id: appId, url: appUrl } = getAppDetails(core);
-
-  const questions = getFeedbackQuestionsForApp(appId);
+  const { title: appTitle, id: appId, url: appUrl } = appDetails;
 
   const isFormFilled =
     selectedCsatOptionId ||
@@ -79,7 +103,7 @@ export const FeedbackContainer = ({
   };
 
   const getSolutionType = () => {
-    return cloud?.serverless?.projectType || solutionView || 'classic';
+    return serverlessProjectType || solutionView || 'classic';
   };
 
   const submitFeedback = async () => {
@@ -101,25 +125,23 @@ export const FeedbackContainer = ({
         url: appUrl,
       };
 
-      await core.http.post(`/internal/feedback/send`, {
-        body: JSON.stringify(eventData),
-      });
+      await sendFeedback(eventData);
 
       setIsSubmitting(false);
 
-      core.notifications.toasts.addSuccess({
-        title: i18n.translate('feedback.submissionSuccessToast.title', {
+      showSuccessToast(
+        i18n.translate('feedback.submissionSuccessToast.title', {
           defaultMessage: 'Thanks for your feedback!',
-        }),
-      });
+        })
+      );
 
       hideFeedbackContainer();
     } catch (_error) {
-      core.notifications.toasts.addSuccess({
-        title: i18n.translate('feedback.submissionFailureToast.title', {
+      showErrorToast(
+        i18n.translate('feedback.submissionFailureToast.title', {
           defaultMessage: 'Failed to submit feedback. Please try again later.',
-        }),
-      });
+        })
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -139,7 +161,6 @@ export const FeedbackContainer = ({
     >
       <FeedbackHeader />
       <FeedbackBody
-        core={core}
         questionAnswers={questionAnswers}
         selectedCsatOptionId={selectedCsatOptionId}
         allowEmailContact={allowEmailContact}
@@ -151,6 +172,7 @@ export const FeedbackContainer = ({
         handleChangeAllowEmailContact={handleChangeAllowEmailContact}
         handleChangeEmail={handleChangeEmail}
         onEmailValidationChange={handleEmailValidationChange}
+        getCurrentUserEmail={getCurrentUserEmail}
       />
       <FeedbackFooter
         isSendFeedbackButtonDisabled={isSendFeedbackButtonDisabled}

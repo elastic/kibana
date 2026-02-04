@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -10,17 +12,21 @@ import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { EmailSection } from './email_section';
 
+const mockGetCurrentUserEmail = jest.fn().mockResolvedValue(undefined);
+
 const mockProps = {
   email: '',
   allowEmailContact: false,
   handleChangeAllowEmailContact: jest.fn(),
   handleChangeEmail: jest.fn(),
   onEmailValidationChange: jest.fn(),
+  getCurrentUserEmail: mockGetCurrentUserEmail,
 };
 
 describe('EmailSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetCurrentUserEmail.mockResolvedValue(undefined);
   });
 
   it('should render email consent checkbox', () => {
