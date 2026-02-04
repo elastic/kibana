@@ -21,7 +21,6 @@ import { getQueryForFields } from '../shared/get_query_for_fields';
 import { getFunctionArgumentHover } from './get_function_argument_hover';
 import { getColumnHover } from './get_column_hover';
 import { findSubquery } from '../shared/subqueries_helpers';
-import { arithmeticOperators, comparisonFunctions } from '../../commands/definitions/all_operators';
 
 interface HoverContent {
   contents: Array<{ value: string }>;
@@ -94,10 +93,8 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
     hoverContent.contents.push(...argHints);
   }
 
-  const mathOperators = arithmeticOperators.concat(comparisonFunctions).map(({ name }) => name);
-  const operators = ['='].concat(mathOperators);
   // Function signature hover
-  if (node.type === 'function' && !operators.includes(node.name)) {
+  if (node.type === 'function' && node.name !== '=') {
     const functionSignature = await getFunctionSignatureHover(node);
     hoverContent.contents.push(...functionSignature);
   }
