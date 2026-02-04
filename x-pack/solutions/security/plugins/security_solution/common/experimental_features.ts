@@ -215,6 +215,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Automatic Migration of Splunk dashboards in Security Solution
    */
   splunkV2DashboardsEnabled: false,
+
+  /**
+   * Enables Detection Engine Health UI. A set of pages aggregating various health metrics
+   * related to the Detection Engine.
+   */
+  deHealthUIEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

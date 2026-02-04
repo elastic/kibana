@@ -16,11 +16,14 @@ import {
 import * as i18n from './translations';
 import {
   COVERAGE_OVERVIEW_PATH,
+  DE_RULE_HEALTH_PATH,
+  DE_SPACE_RULES_HEALTH_PATH,
   RULES_LANDING_PATH,
   RULES_PATH,
   AI_RULE_CREATION_PATH,
   SecurityPageName,
 } from '../../common/constants';
+import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { NotFoundPage } from '../app/404';
 import { RulesPage } from '../detection_engine/rule_management_ui/pages/rule_management';
 import { CreateRulePage } from '../detection_engine/rule_creation_ui/pages/rule_creation';
@@ -32,6 +35,10 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { AllRulesTabs } from '../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
 import { AddRulesPage } from '../detection_engine/rule_management_ui/pages/add_rules';
+import {
+  DetectionEngineRuleHealthPage,
+  DetectionEngineSpaceRulesHealthPage,
+} from '../detection_engine/health_ui/pages';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { RulesLandingPage } from './landing';
 import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pages/coverage_overview';
@@ -40,7 +47,11 @@ import { withSecurityRoutePageWrapper } from '../common/components/security_rout
 import { hasCapabilities } from '../common/lib/capabilities';
 import { useKibana } from '../common/lib/kibana/kibana_react';
 
-const getRulesSubRoutes = (capabilities: Capabilities) => [
+interface Features {
+  deHealthUIEnabled: boolean;
+}
+
+const getRulesSubRoutes = (capabilities: Capabilities, { deHealthUIEnabled }: Features) => [
   ...(hasCapabilities(capabilities, RULES_UI_READ_PRIVILEGE) // regular detection rules are enabled
     ? [
         {
@@ -60,6 +71,27 @@ const getRulesSubRoutes = (capabilities: Capabilities) => [
           }),
           exact: true,
         },
+        // Detection Engine Health UI Routes
+        ...(deHealthUIEnabled
+          ? [
+              {
+                path: DE_SPACE_RULES_HEALTH_PATH,
+                main: withSecurityRoutePageWrapper(
+                  DetectionEngineSpaceRulesHealthPage,
+                  SecurityPageName.spaceRulesHealth
+                ),
+                exact: true,
+              },
+              {
+                path: DE_RULE_HEALTH_PATH,
+                main: withSecurityRoutePageWrapper(
+                  DetectionEngineRuleHealthPage,
+                  SecurityPageName.ruleHealth
+                ),
+                exact: true,
+              },
+            ]
+          : []),
       ]
     : []),
   ...(hasCapabilities(capabilities, RULES_UI_EDIT_PRIVILEGE)
@@ -90,14 +122,15 @@ const getRulesSubRoutes = (capabilities: Capabilities) => [
 const RulesContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
   const { capabilities } = useKibana().services.application;
+  const deHealthUIEnabled = useIsExperimentalFeatureEnabled('deHealthUIEnabled');
 
   const subRoutes = useMemo(() => {
-    return getRulesSubRoutes(capabilities).map((route) => (
+    return getRulesSubRoutes(capabilities, { deHealthUIEnabled }).map((route) => (
       <Route key={`rules-route-${route.path}`} path={route.path} exact={route?.exact ?? false}>
         <route.main />
       </Route>
     ));
-  }, [capabilities]);
+  }, [capabilities, deHealthUIEnabled]);
 
   return (
     <PluginTemplateWrapper>
