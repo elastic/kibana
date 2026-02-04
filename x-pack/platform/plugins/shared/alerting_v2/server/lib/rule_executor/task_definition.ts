@@ -7,33 +7,23 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { AlertingServerSetupDependencies } from '../../types';
-import type { TaskRunnerFactory } from '../services/task_run_scope_service/create_task_runner';
+import type { AlertingTaskDefinition } from '../services/task_run_scope_service/create_task_runner';
 import { RuleExecutorTaskRunner } from './task_runner';
 
 export const ALERTING_RULE_EXECUTOR_TASK_TYPE = 'alerting_v2:rule_executor' as const;
 
-export function registerRuleExecutorTaskDefinition({
-  taskManager,
-  taskRunnerFactory,
-}: {
-  taskManager: AlertingServerSetupDependencies['taskManager'];
-  taskRunnerFactory: TaskRunnerFactory;
-}) {
-  const createTaskRunner = taskRunnerFactory({
-    taskRunnerClass: RuleExecutorTaskRunner,
-    taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
-  });
-
-  taskManager.registerTaskDefinitions({
-    [ALERTING_RULE_EXECUTOR_TASK_TYPE]: {
-      title: 'Alerting v2 rule executor (ES|QL)',
-      timeout: '5m',
-      paramsSchema: schema.object({
-        ruleId: schema.string(),
-        spaceId: schema.string(),
-      }),
-      createTaskRunner,
-    },
-  });
-}
+/**
+ * Task definition for rule executor.
+ * Bound to TaskDefinition token and automatically registered with Task Manager on setup.
+ */
+export const RuleExecutorTaskDefinition: AlertingTaskDefinition<RuleExecutorTaskRunner> = {
+  taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
+  title: 'Alerting v2 rule executor (ES|QL)',
+  timeout: '5m',
+  paramsSchema: schema.object({
+    ruleId: schema.string(),
+    spaceId: schema.string(),
+  }),
+  taskRunnerClass: RuleExecutorTaskRunner,
+  requiresFakeRequest: true,
+};
