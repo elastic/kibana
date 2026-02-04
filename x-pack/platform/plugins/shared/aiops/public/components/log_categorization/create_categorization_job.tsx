@@ -12,13 +12,11 @@ import moment from 'moment';
 import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import {
-  CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
-  type CreateCategorizationADJobContext,
-} from '@kbn/ml-ui-actions';
+import { type CreateCategorizationADJobContext } from '@kbn/ml-ui-actions';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
+import { CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 interface Props {
