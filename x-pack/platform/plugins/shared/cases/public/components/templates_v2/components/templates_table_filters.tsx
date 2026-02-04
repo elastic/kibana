@@ -91,7 +91,7 @@ const TemplatesTableFiltersComponent: React.FC<TemplatesTableFiltersProps> = ({
             id="tags"
             buttonLabel={i18n.TAGS}
             options={mapToMultiSelectOption(availableTags)}
-            selectedOptionKeys={queryParams.tags ?? []}
+            selectedOptionKeys={queryParams.tags}
             onChange={onTagsChange}
             isLoading={isLoadingTags}
           />
@@ -99,7 +99,7 @@ const TemplatesTableFiltersComponent: React.FC<TemplatesTableFiltersProps> = ({
             id="createdBy"
             buttonLabel={i18n.CREATED_BY}
             options={mapToMultiSelectOption(availableCreatedBy)}
-            selectedOptionKeys={queryParams.createdBy ?? []}
+            selectedOptionKeys={queryParams.createdBy}
             onChange={onCreatedByChange}
             isLoading={isLoadingCreators}
           />

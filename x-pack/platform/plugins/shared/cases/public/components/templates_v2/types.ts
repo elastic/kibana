@@ -59,6 +59,8 @@ export interface QueryParams {
   sortField: SortField;
   sortOrder: SortOrder;
   search: string;
-  tags?: string[];
-  createdBy?: string[];
+  tags: string[];
+  createdBy: string[];
 }
+
+export type TemplatesURLQueryParams = Partial<QueryParams>;

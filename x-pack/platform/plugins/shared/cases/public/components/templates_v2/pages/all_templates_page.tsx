@@ -91,8 +91,8 @@ export const AllTemplatesPage: React.FC = () => {
 
   const hasFilters =
     queryParams.search.length > 0 ||
-    (queryParams.tags?.length ?? 0) > 0 ||
-    (queryParams.createdBy?.length ?? 0) > 0;
+    queryParams.tags.length > 0 ||
+    queryParams.createdBy.length > 0;
 
   const handleClearFilters = useCallback(() => {
     setQueryParams({ search: '', tags: [], createdBy: [], page: 1 });

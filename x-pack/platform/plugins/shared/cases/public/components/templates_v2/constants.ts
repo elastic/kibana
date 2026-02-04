@@ -9,12 +9,18 @@ import type { QueryParams, Template } from './types';
 
 export const PAGE_SIZE_OPTIONS: number[] = [10, 25, 50, 100];
 
+export const TEMPLATES_STATE_URL_KEY = 'templates';
+
+export const SORT_ORDER_VALUES: Array<'asc' | 'desc'> = ['asc', 'desc'];
+
 export const DEFAULT_QUERY_PARAMS: QueryParams = {
   page: 1,
   perPage: PAGE_SIZE_OPTIONS[0],
   sortField: 'name',
   sortOrder: 'asc',
   search: '',
+  tags: [],
+  createdBy: [],
 };
 
 export const LINE_CLAMP = 3;

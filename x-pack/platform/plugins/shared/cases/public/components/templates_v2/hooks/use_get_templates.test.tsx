@@ -27,6 +27,7 @@ describe('useGetTemplates', () => {
         solution: 'security' as const,
         fields: 5,
         tags: ['tag1'],
+        createdBy: 'user1',
         lastUpdate: '2024-01-01T00:00:00.000Z',
         lastTimeUsed: '2024-01-01T00:00:00.000Z',
         usage: 10,
@@ -80,6 +81,8 @@ describe('useGetTemplates', () => {
         sortField: 'name',
         sortOrder: 'asc',
         search: '',
+        tags: [],
+        createdBy: [],
       },
     });
   });
@@ -117,6 +120,8 @@ describe('useGetTemplates', () => {
         search: 'test',
         sortField: 'lastUpdate',
         sortOrder: 'desc',
+        tags: [],
+        createdBy: [],
       },
     });
   });
@@ -150,6 +155,8 @@ describe('useGetTemplates', () => {
         sortField: 'name',
         sortOrder: 'asc',
         search: 'partial search',
+        tags: [],
+        createdBy: [],
       },
     });
   });

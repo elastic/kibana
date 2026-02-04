@@ -7,17 +7,30 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { EuiBasicTableProps, EuiTableSelectionType } from '@elastic/eui';
+
 import type { QueryParams, Template } from '../types';
-import { DEFAULT_QUERY_PARAMS } from '../constants';
+import { useSyncedQueryParams } from './use_synced_query_params';
 
-export const useTemplatesState = () => {
-  const [queryParams, setQueryParamsState] = useState<QueryParams>(DEFAULT_QUERY_PARAMS);
+interface UseTemplatesStateReturn {
+  queryParams: QueryParams;
+  setQueryParams: (queryParam: Partial<QueryParams>) => void;
+  sorting: EuiBasicTableProps<Template>['sorting'];
+  selectedTemplates: Template[];
+  selection: EuiTableSelectionType<Template>;
+  deselectTemplates: () => void;
+}
+
+export const useTemplatesState = (): UseTemplatesStateReturn => {
   const [selectedTemplates, setSelectedTemplates] = useState<Template[]>([]);
+  const { queryParams, setQueryParams: setSyncedQueryParams } = useSyncedQueryParams();
 
-  const setQueryParams = useCallback((newParams: Partial<QueryParams>) => {
-    setQueryParamsState((prev) => ({ ...prev, ...newParams }));
-    setSelectedTemplates([]);
-  }, []);
+  const setQueryParams = useCallback(
+    (newQueryParams: Partial<QueryParams>) => {
+      setSyncedQueryParams(newQueryParams);
+      setSelectedTemplates([]);
+    },
+    [setSyncedQueryParams]
+  );
 
   const deselectTemplates = useCallback(() => {
     setSelectedTemplates([]);

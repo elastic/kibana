@@ -17,6 +17,10 @@ describe('useTemplatesState', () => {
     <TestProviders>{children}</TestProviders>
   );
 
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   it('returns default query params', () => {
     const { result } = renderHook(() => useTemplatesState(), { wrapper });
 
@@ -26,6 +30,8 @@ describe('useTemplatesState', () => {
       sortField: 'name',
       sortOrder: 'asc',
       search: '',
+      tags: [],
+      createdBy: [],
     });
   });
 
@@ -67,6 +73,8 @@ describe('useTemplatesState', () => {
       sortField: 'name',
       sortOrder: 'asc',
       search: '',
+      tags: [],
+      createdBy: [],
     });
   });
 
@@ -107,6 +115,7 @@ describe('useTemplatesState', () => {
       solution: 'security',
       fields: 5,
       tags: ['tag1'],
+      createdBy: 'user1',
       lastUpdate: '2024-01-01T00:00:00.000Z',
       lastTimeUsed: '2024-01-01T00:00:00.000Z',
       usage: 10,
@@ -138,6 +147,7 @@ describe('useTemplatesState', () => {
       solution: 'security',
       fields: 5,
       tags: ['tag1'],
+      createdBy: 'user1',
       lastUpdate: '2024-01-01T00:00:00.000Z',
       lastTimeUsed: '2024-01-01T00:00:00.000Z',
       usage: 10,
@@ -174,6 +184,8 @@ describe('useTemplatesState', () => {
       sortField: 'name',
       sortOrder: 'asc',
       search: 'test',
+      tags: [],
+      createdBy: [],
     });
   });
 });
