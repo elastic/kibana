@@ -20,11 +20,11 @@ import {
   createBadRequestError,
 } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { withConverseSpan } from '../../tracing';
 import type { ConversationService } from '../conversation';
 import type { ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import {
   generateTitle,
   handleCancellation,
@@ -112,7 +112,9 @@ class ChatServiceImpl implements ChatService {
     return withConverseSpan({ agentId, conversationId }, (span) => {
       // Resolve scoped services
       return defer(async () => {
-        const validatedAttachments = await this.validateAttachmentsIfProvided(nextInput.attachments);
+        const validatedAttachments = await this.validateAttachmentsIfProvided(
+          nextInput.attachments
+        );
         const validatedNextInput = validatedAttachments
           ? { ...nextInput, attachments: validatedAttachments }
           : nextInput;
