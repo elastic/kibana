@@ -14,7 +14,6 @@ import {
   EuiText,
   type EuiDataGridCustomBodyProps,
   useEuiTheme,
-  type EuiDataGridToolbarProps,
   EuiButtonIcon,
 } from '@elastic/eui';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -24,6 +23,7 @@ import {
   DataLoadingState,
   DataGridDensity,
   type UnifiedDataTableProps,
+  type CustomGridBodyContext,
 } from '@kbn/unified-data-table';
 import type { DataCascadeRowCellProps } from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord, SortOrder } from '@kbn/discover-utils';
@@ -56,7 +56,7 @@ interface ESQLDataCascadeLeafCellProps
 }
 
 interface CustomCascadeGridBodyProps
-  extends EuiDataGridCustomBodyProps,
+  extends CustomGridBodyContext, EuiDataGridCustomBodyProps,
     Pick<
       ESQLDataCascadeLeafCellProps,
       'stickyHeaderPortal' | 'getScrollElement' | 'getScrollMargin' | 'preventSizeChangePropagation'
@@ -64,7 +64,6 @@ interface CustomCascadeGridBodyProps
   data: DataTableRecord[];
   isFullScreenMode?: boolean;
   initialOffset: () => number;
-  toolbarRenderer: EuiDataGridToolbarProps['renderCustomToolbar'];
 }
 
 const EMPTY_SORT: SortOrder[] = [];
@@ -89,7 +88,8 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   headerRow,
   footerRow,
   stickyHeaderPortal,
-  toolbarRenderer,
+  renderCustomToolbar,
+  provideDataGridRefOverrides,
 }: CustomCascadeGridBodyProps) {
   const visibleRows = useMemo(
     () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
@@ -152,6 +152,28 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
 
     return () => unregister?.();
   }, [preventSizeChangePropagation, scrollElementGetter, virtualizer.scrollElement]);
+  
+  // Register custom scroll implementations with the parent data table.
+  // This enables features like in-table search to work correctly with
+  // our custom virtualization instead of EUI's built-in virtualization.
+  useEffect(() => {
+    provideDataGridRefOverrides({
+      scrollToItem: ({ rowIndex, align }) => {
+        if (rowIndex !== undefined) {
+          // Map EUI align values to tanstack-react-virtual compatible values
+          // EUI uses 'smart' which tanstack doesn't support, so we map it to 'auto'
+          const mappedAlign =
+            align === 'smart' ? 'auto' : (align as 'auto' | 'center' | 'start' | 'end' | undefined);
+          virtualizer.scrollToIndex(rowIndex, { align: mappedAlign ?? 'auto' });
+        }
+      },
+      scrollTo: ({ scrollTop }) => {
+        if (scrollTop !== undefined) {
+          virtualizer.scrollToOffset(scrollTop);
+        }
+      },
+    });
+  }, [virtualizer, provideDataGridRefOverrides]);
 
   const items = virtualizer.getVirtualItems();
 
@@ -169,16 +191,16 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
           ? createPortal(
               <>
                 <div>
-                  {toolbarRenderer?.({
+                  {renderCustomToolbar?.({
                     hasRoomForGridControls: true,
                     fullScreenControl: (
                       <EuiButtonIcon iconType="fullScreen" aria-label="Full Screen" />
                     ),
                     keyboardShortcutsControl: (
-                      <EuiButtonIcon iconType="keyboardShortcuts" aria-label="Keyboard Shortcuts" />
+                      <EuiButtonIcon iconType="keyboard" aria-label="Keyboard Shortcuts" />
                     ),
                     displayControl: (
-                      <EuiButtonIcon iconType="display" aria-label="Display Options" />
+                      <EuiButtonIcon iconType="controls" aria-label="Display Options" />
                     ),
                     columnControl: <EuiButtonIcon iconType="column" aria-label="Column Options" />,
                     columnSortingControl: (
@@ -318,7 +340,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
           initialOffset={getScrollOffset}
           isFullScreenMode={isCellInFullScreenMode}
           stickyHeaderPortal={stickyHeaderPortal}
-          toolbarRenderer={context.renderCustomToolbar}
+          renderCustomToolbar={context.renderCustomToolbar}
+          provideDataGridRefOverrides={context.provideDataGridRefOverrides}
         />
       ),
       [

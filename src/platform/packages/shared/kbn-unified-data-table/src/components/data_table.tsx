@@ -28,7 +28,6 @@ import type {
   EuiDataGridStyle,
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
-  EuiDataGridToolbarProps,
 } from '@elastic/eui';
 import {
   EuiDataGrid,
@@ -78,6 +77,8 @@ import type {
   CustomGridColumnsConfiguration,
   DataGridPaginationMode,
   CustomBulkActions,
+  CustomGridBodyContext,
+  DataGridScrollOverrides,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -383,11 +384,16 @@ interface InternalUnifiedDataTableProps {
    *
    * Behind the scenes, this function is treated as a React component,
    * allowing hooks, context, and other React concepts to be used.
-   * It receives #EuiDataGridCustomBodyProps as its only argument.
+   * It receives #EuiDataGridCustomBodyProps as its first argument and a context object
+   * as the second argument that allows integration with UnifiedDataTable features.
+   *
+   * The context includes `scrollOverridesRef` which custom grid bodies can use to provide
+   * their own scroll implementations for features like in-table search to work correctly
+   * with custom virtualization.
    */
   renderCustomGridBody?: (
     args: EuiDataGridCustomBodyProps,
-    context: Pick<EuiDataGridToolbarProps, 'renderCustomToolbar'>
+    context: CustomGridBodyContext
   ) => React.ReactNode;
   /**
    * Optional render for the grid toolbar
@@ -1176,11 +1182,14 @@ const InternalUnifiedDataTable = React.forwardRef<
       if (!renderCustomGridBody) return undefined;
 
       // This allows us to pass functions internal
-      // to the data table to be accessible within the custom grid body,
-      // for example the toolbar rendering function
+      // to the data table in a way that's accessible within the custom grid body
       return (euiCustomGridBodyProps: EuiDataGridCustomBodyProps) => {
         return renderCustomGridBody(euiCustomGridBodyProps, {
           renderCustomToolbar: renderCustomToolbarFn,
+          provideDataGridRefOverrides: (overrides: DataGridScrollOverrides) => {
+            if (!dataGridRef.current) return;
+            Object.assign(dataGridRef.current, overrides);
+          },
         });
       };
     }, [renderCustomGridBody, renderCustomToolbarFn]);
