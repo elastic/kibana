@@ -241,13 +241,12 @@ function generateAlertSummary({
     - Only give a non-inconclusive Assessment when supported by on-topic signals; otherwise say "Inconclusive" and don't speculate.
     - Keep it concise (~100–150 words total).
 
-    Signal priority (use what exists, skip what doesn't):
-    1) Application metrics: high CPU usage, memory pressure, or thread count spikes
-    2) Downstream dependencies: dependency metrics that may indicate issues
-    3) Change points: sudden shifts in throughput/latency/failure rate
-    4) Log categories: error messages and exception patterns
-    5) Errors: exception patterns with downstream context
-    6) Service summary: instance counts, versions, anomalies, and metadata
+    Available signals (use what's relevant and available):
+    - Application metrics: CPU, memory, thread saturation — indicates internal resource pressure
+    - Downstream dependencies: latency/errors in called services — indicates external issues
+    - Change points: sudden shifts in throughput/latency/failure rate — shows when problems started
+    - Log categories: error messages and exception patterns
+    - Service summary: instance counts, versions, anomalies, and metadata
 
     ${getEntityLinkingInstructions({ urlPrefix })}
   `);
