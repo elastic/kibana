@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID } from '@kbn/management-settings-ids';
+import {
+  SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID,
+  AI_CHAT_EXPERIENCE_TYPE,
+} from '@kbn/management-settings-ids';
 import { rootRequest } from './common';
 
 export const setKibanaSetting = (key: string, value: boolean | number | string) => {
@@ -22,4 +25,8 @@ export const enableRelatedIntegrations = () => {
 
 export const disableRelatedIntegrations = () => {
   setKibanaSetting(SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID, false);
+};
+
+export const setPreferredChatExperienceToAgent = () => {
+  setKibanaSetting(AI_CHAT_EXPERIENCE_TYPE, 'agent');
 };

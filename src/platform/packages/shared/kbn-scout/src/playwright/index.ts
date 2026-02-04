@@ -15,7 +15,7 @@ export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
 
 // Matchers
-export { expect } from './expect';
+export { expect } from './matchers/ui';
 
 // Types for Playwright options
 export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
