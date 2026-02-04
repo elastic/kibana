@@ -34,7 +34,8 @@ import { registerAnalyticsContextProvider } from './register_analytics_context_p
 import type { InternalChromeSetup, InternalChromeStart } from './types';
 import { createChromeState } from './state';
 import {
-  setupChromeSideEffects,
+  handleEuiFullScreenChanges,
+  handleSystemColorModeChange,
   showCspWarningIfNeeded,
   setupAppChangeHandler,
 } from './side_effects';
@@ -118,13 +119,15 @@ export class ChromeService {
     });
 
     // 2. Setup side effects (fullscreen changes, system color mode)
-    setupChromeSideEffects({
-      visibility: state.visibility,
+    handleEuiFullScreenChanges({
+      isVisible$: state.visibility.isVisible$,
+      setIsVisible: state.visibility.setIsVisible,
       stop$: this.stop$,
+    });
+    handleSystemColorModeChange({
       getNotifications,
-      i18n,
-      theme,
-      userProfile,
+      coreStart: { i18n, theme, userProfile },
+      stop$: this.stop$,
       http,
       uiSettings,
     });

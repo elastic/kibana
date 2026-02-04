@@ -8,7 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs';
 import type { ChromeDocTitle } from '@kbn/core-chrome-browser';
 import type { ChromeState } from '../state/chrome_state';
 
