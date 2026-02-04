@@ -9,6 +9,7 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
+  euiContainerCSS,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -303,7 +304,7 @@ export default function SLODetailsFlyout({
       }
     >
       <EuiFlyoutHeader hasBorder>{renderHeader()}</EuiFlyoutHeader>
-      <EuiFlyoutBody>{renderBody()}</EuiFlyoutBody>
+      <EuiFlyoutBody css={euiContainerCSS('inline-size')}>{renderBody()}</EuiFlyoutBody>
       {!hideFooter && <EuiFlyoutFooter>{renderFooter()}</EuiFlyoutFooter>}
     </EuiFlyout>
   );
