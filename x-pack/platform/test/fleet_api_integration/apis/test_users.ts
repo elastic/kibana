@@ -102,6 +102,26 @@ export const testUsers: {
     username: 'fleet_settings_all_only',
     password: 'changeme',
   },
+  fleet_generate_report_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['generate_report'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_generate_report_only',
+    password: 'changeme',
+  },
+  fleet_generate_report_agents_read_only: {
+    permissions: {
+      feature: {
+        fleetv2: ['generate_report', 'agents_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_generate_report_agents_read_only',
+    password: 'changeme',
+  },
   fleet_agent_policies_read_only: {
     permissions: {
       feature: {
