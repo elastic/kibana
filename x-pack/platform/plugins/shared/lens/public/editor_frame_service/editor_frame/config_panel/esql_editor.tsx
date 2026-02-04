@@ -23,7 +23,12 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Simplify } from '@kbn/chart-expressions-common';
 import { useCurrentAttributes } from '../../../app_plugin/shared/edit_on_the_fly/use_current_attributes';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
-import { onActiveDataChange, useLensDispatch, useLensSelector } from '../../../state_management';
+import {
+  onActiveDataChange,
+  useLensDispatch,
+  useLensSelector,
+  selectCanEditTextBasedQuery,
+} from '../../../state_management';
 import type { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { getSuggestions } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { useESQLVariables } from '../../../app_plugin/shared/edit_on_the_fly/use_esql_variables';
@@ -48,7 +53,6 @@ export type ESQLEditorProps = Simplify<
     | 'panelId'
     | 'closeFlyout'
     | 'data'
-    | 'canEditTextBasedQuery'
     | 'editorContainer'
     | 'setCurrentAttributes'
     | 'updateSuggestion'
@@ -78,7 +82,6 @@ export function ESQLEditor({
   layerId,
   closeFlyout,
   editorContainer,
-  canEditTextBasedQuery,
   dataLoading$,
   setCurrentAttributes,
   updateSuggestion,
@@ -91,6 +94,7 @@ export function ESQLEditor({
 
   const { visualizationMap, datasourceMap } = useEditorFrameService();
   const { visualization } = useLensSelector((state) => state.lens);
+  const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
 
   const [errors, setErrors] = useState<Error[]>([]);
   const [submittedQuery, setSubmittedQuery] = useState<AggregateQuery | Query>(
@@ -205,7 +209,7 @@ export function ESQLEditor({
     });
   }, [query, submittedQuery, errors.length, onTextBasedQueryStateChange]);
 
-  // Early exit if it's not in TextBased mode
+  // Early exit if it's not in TextBased mode or the editor should be hidden
   if (!isTextBasedLanguage || !canEditTextBasedQuery || !isOfAggregateQueryType(query)) {
     return null;
   }
@@ -297,7 +301,6 @@ function InnerESQLEditor({
     closeFlyout,
   });
 
-  const hideTimeFilterInfo = false;
   return (
     <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
       <div
@@ -309,8 +312,6 @@ function InnerESQLEditor({
         <ESQLLangEditor
           query={query}
           onTextLangQueryChange={setQuery}
-          detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
-          hideTimeFilterInfo={hideTimeFilterInfo}
           errors={errors}
           warning={
             suggestsLimitedColumns
