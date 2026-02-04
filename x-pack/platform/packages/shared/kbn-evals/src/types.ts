@@ -16,7 +16,7 @@ import type {
   EvaluatorDisplayOptions,
   EvaluatorDisplayGroup,
 } from './utils/reporting/report_table';
-import type { DatasetScoreWithStats } from './utils/evaluation_stats';
+import type { EvaluatorStats } from './utils/score_repository';
 
 export interface EvaluationDataset<TExample extends Example = Example> {
   name: string;
@@ -181,7 +181,7 @@ export interface ReportDisplayOptions {
   evaluatorDisplayGroups: EvaluatorDisplayGroup[];
 }
 export interface EvaluationReport {
-  datasetScoresWithStats: DatasetScoreWithStats[];
+  stats: EvaluatorStats[];
   model: Model;
   evaluatorModel: Model;
   repetitions: number;

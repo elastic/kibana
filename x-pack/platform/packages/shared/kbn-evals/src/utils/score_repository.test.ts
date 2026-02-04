@@ -305,7 +305,6 @@ describe('EvaluationScoreRepository', () => {
         datasetId: 'dataset-1',
         datasetName: 'Test Dataset',
         evaluatorName: 'Correctness',
-        numExamples: 10,
       });
       expect(result?.stats[0].stats).toMatchObject({
         mean: 0.85,
@@ -377,7 +376,7 @@ describe('EvaluationScoreRepository', () => {
       const result = await repository.getStatsByRunId('run-123');
 
       expect(result?.totalRepetitions).toBe(1);
-      expect(result?.stats[0].numExamples).toBe(5); // 5 unique examples * 1 repetition
+      expect(result?.stats[0].stats.count).toBe(5);
     });
   });
 

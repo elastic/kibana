@@ -11,7 +11,7 @@ import type { Model } from '@kbn/inference-common';
 import type { EvaluationScoreRepository } from '../score_repository';
 import { createTable } from './report_table';
 import type { ReportDisplayOptions } from '../../types';
-import { convertAggregationToDatasetScores } from '../evaluation_stats';
+
 export type EvaluationReporter = (
   scoreRepository: EvaluationScoreRepository,
   runId: string,
@@ -37,11 +37,9 @@ export function createDefaultTerminalReporter(
       return;
     }
 
-    const datasetScoresWithStats = convertAggregationToDatasetScores(runStats.stats);
-
     const header = buildReportHeader(runStats.taskModel, runStats.evaluatorModel);
     const summaryTable = createTable(
-      datasetScoresWithStats,
+      runStats.stats,
       runStats.totalRepetitions,
       options.reportDisplayOptions
     );

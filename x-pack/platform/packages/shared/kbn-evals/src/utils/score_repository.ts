@@ -52,14 +52,13 @@ export interface EvaluationScoreDocument {
 }
 
 /**
- * Parses Elasticsearch EvaluationScoreDocuments to DatasetScoreWithStats array
- * This is the core transformation logic shared across different reporters
+ * Statistics for a single evaluator on a single dataset.
+ * This is the core data structure returned by ES aggregations and used throughout the reporting system.
  */
-export interface DatasetEvaluatorStats {
+export interface EvaluatorStats {
   datasetId: string;
   datasetName: string;
   evaluatorName: string;
-  numExamples: number;
   stats: {
     mean: number;
     median: number;
@@ -71,7 +70,7 @@ export interface DatasetEvaluatorStats {
 }
 
 export interface RunStats {
-  stats: DatasetEvaluatorStats[];
+  stats: EvaluatorStats[];
   taskModel: Model;
   evaluatorModel: Model;
   totalRepetitions: number;
@@ -307,7 +306,7 @@ export class EvaluationScoreRepository {
         },
       });
 
-      const stats: DatasetEvaluatorStats[] = [];
+      const stats: EvaluatorStats[] = [];
       const aggregations = aggResponse.aggregations as
         | {
             by_dataset?: {
@@ -338,8 +337,6 @@ export class EvaluationScoreRepository {
       for (const datasetBucket of datasetBuckets) {
         const datasetId = datasetBucket.key;
         const datasetName = datasetBucket.dataset_name?.buckets?.[0]?.key ?? datasetId;
-        const uniqueExamples = datasetBucket.unique_examples?.value ?? 0;
-        const numExamples = uniqueExamples * totalRepetitions;
 
         const evaluatorBuckets = datasetBucket.by_evaluator?.buckets ?? [];
         for (const evalBucket of evaluatorBuckets) {
@@ -350,7 +347,6 @@ export class EvaluationScoreRepository {
             datasetId,
             datasetName,
             evaluatorName: evalBucket.key,
-            numExamples,
             stats: {
               mean: scoreStats?.avg ?? 0,
               median: median ?? 0,

@@ -49,20 +49,9 @@ export { createTable } from './src/utils/reporting/report_table';
 export {
   EvaluationScoreRepository,
   type EvaluationScoreDocument,
-  type DatasetEvaluatorStats,
+  type EvaluatorStats,
   type RunStats,
 } from './src/utils/score_repository';
-
-export {
-  getUniqueEvaluatorNames,
-  calculateOverallStats,
-  convertAggregationToDatasetScores,
-} from './src/utils/evaluation_stats';
-export type {
-  DatasetScore,
-  DatasetScoreWithStats,
-  EvaluatorStats,
-} from './src/utils/evaluation_stats';
 
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
 export { createSpanLatencyEvaluator } from './src/evaluators/trace_based';
