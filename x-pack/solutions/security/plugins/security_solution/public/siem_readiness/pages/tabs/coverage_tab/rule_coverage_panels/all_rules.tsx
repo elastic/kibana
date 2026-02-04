@@ -32,6 +32,11 @@ export const AllRuleCoveragePanel: React.FC = () => {
 
   const { getIntegrations, getDetectionRules } = useSiemReadinessApi();
 
+  const allRules = useMemo(
+    () => getDetectionRules.data?.data || [],
+    [getDetectionRules.data?.data]
+  );
+
   const getInstalledIntegrations = useMemo(() => {
     return (
       getIntegrations?.data?.items?.filter(
@@ -59,17 +64,17 @@ export const AllRuleCoveragePanel: React.FC = () => {
     [getInstalledIntegrations]
   );
 
-  // Get unique integration names from enabled rules using flatMap
+  // Get enabled rules from all rules
+  const enabledRules = useMemo(() => allRules.filter((rule) => rule.enabled), [allRules]);
+
+  // Get unique integration names from enabled rules
   const relatedIntegrationNames = useMemo(() => {
-    if (!getDetectionRules.data?.data) return [];
-
-    const integrations = getDetectionRules.data.data
-      .filter((rule) => rule.enabled && rule.related_integrations)
-      .flatMap((rule) => (rule.related_integrations ?? []).map((i) => i.package))
-      .filter((pkg): pkg is string => Boolean(pkg));
-
-    return [...new Set(integrations)];
-  }, [getDetectionRules.data?.data]);
+    const allIntegrations = enabledRules.flatMap((rule) => rule.related_integrations || []);
+    const packageNames = allIntegrations.map((i) => i.package);
+    const validPackages = packageNames.filter(Boolean);
+    const uniquePackages = [...new Set(validPackages)];
+    return uniquePackages;
+  }, [enabledRules]);
 
   const installedIntegrationsOptions = useMemo(() => {
     return relatedIntegrationNames
