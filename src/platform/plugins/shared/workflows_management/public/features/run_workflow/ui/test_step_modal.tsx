@@ -84,29 +84,31 @@ export function TestStepModal({
 
       try {
         // First, configure the JSON language service with schema validation
-        monaco.languages.json?.jsonDefaults?.setDiagnosticsOptions({
+        const currentModel = editor.getModel();
+        monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
           validate: true,
           allowComments: false,
           enableSchemaRequest: false,
           schemas: [
             {
               uri: schemaUri, // schema URI
-              fileMatch: [modelUri], // bind to this specific model URI
+              fileMatch: [currentModel?.uri.toString() ?? ''], // bind to this specific model URI
               schema: jsonSchema as any,
             },
           ],
         });
 
         // Get current editor content
-        const text =
-          editor.getValue() || JSON.stringify(initialcontextOverride.stepContext, null, 2);
+        // const text =
+        //   editor.getValue() || JSON.stringify(initialcontextOverride.stepContext, null, 2);
 
         // Create model with the specific URI that matches our schema fileMatch
-        const uri = monaco.Uri.parse(modelUri);
-        const model = monaco.editor.createModel(text, 'json', uri);
+        // const uri = monaco.Uri.parse(modelUri);
+        // const model = monaco.editor.createModel(text, 'json', uri);
 
         // Set the model to the editor
-        editor.setModel(model);
+        // currentModel?.dispose();
+        // editor.setModel(model);
       } catch (error) {
         // Monaco setup failed - fall back to basic JSON editing
       }
@@ -116,7 +118,7 @@ export function TestStepModal({
         editor.setValue(JSON.stringify(initialcontextOverride.stepContext, null, 2));
       }
     },
-    [initialcontextOverride.stepContext, jsonSchema, modelUri, schemaUri]
+    [initialcontextOverride.stepContext, jsonSchema, schemaUri]
   );
 
   useEffect(() => {
@@ -143,7 +145,12 @@ export function TestStepModal({
   }
 
   return (
-    <EuiModal aria-labelledby={modalTitleId} maxWidth={false} onClose={onClose}>
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      maxWidth={false}
+      onClose={onClose}
+      data-test-subj="testStepModal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           <EuiFlexGroup direction="column" gutterSize="xs">
