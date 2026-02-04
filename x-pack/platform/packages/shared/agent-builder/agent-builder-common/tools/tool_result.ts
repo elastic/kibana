@@ -16,6 +16,7 @@ export enum ToolResultType {
   visualization = 'visualization',
   other = 'other',
   error = 'error',
+  fileReference = 'file_reference',
 }
 
 export enum SupportedChartType {
@@ -104,6 +105,14 @@ export type ErrorResult = ToolResultMixin<
   }
 >;
 
+export type FileReferenceResult = ToolResultMixin<
+  ToolResultType.fileReference,
+  {
+    filepath: string;
+    comment: string;
+  }
+>;
+
 export type ToolResult<T extends Object = Record<string, unknown>> =
   | ResourceResult
   | TabularDataResult
@@ -111,7 +120,8 @@ export type ToolResult<T extends Object = Record<string, unknown>> =
   | VisualizationResult
   | DashboardResult
   | OtherResult<T>
-  | ErrorResult;
+  | ErrorResult
+  | FileReferenceResult;
 
 export const isResourceResult = (result: ToolResult): result is ResourceResult => {
   return result.type === ToolResultType.resource;
@@ -135,6 +145,10 @@ export const isErrorResult = (result: ToolResult): result is ErrorResult => {
 
 export const isDashboardResult = (result: ToolResult): result is DashboardResult => {
   return result.type === ToolResultType.dashboard;
+};
+
+export const isFileReferenceResult = (result: ToolResult): result is FileReferenceResult => {
+  return result.type === ToolResultType.fileReference;
 };
 
 export interface VisualizationElementAttributes {

@@ -10,6 +10,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import type { VisualizationConfig } from './types';
 import { guessChartType } from './guess_chart_type';
@@ -82,9 +83,9 @@ This tool will:
         let parsedExistingConfig: VisualizationConfig | null = null;
 
         if (attachmentId) {
-          const existingAttachment = attachments.get(attachmentId);
-          if (existingAttachment) {
-            const latestVersion = attachments.getLatest(attachmentId);
+          const existingAttachmentRecord = attachments.getAttachmentRecord(attachmentId);
+          if (existingAttachmentRecord) {
+            const latestVersion = getLatestVersion(existingAttachmentRecord);
             if (latestVersion?.data) {
               parsedExistingConfig = latestVersion.data as VisualizationConfig;
               existingConfig = JSON.stringify(parsedExistingConfig);
@@ -149,7 +150,7 @@ This tool will:
         let version: number;
         let isUpdate = false;
 
-        if (attachmentId && attachments.get(attachmentId)) {
+        if (attachmentId && attachments.getAttachmentRecord(attachmentId)) {
           const updated = await attachments.update(attachmentId, {
             data: visualizationData,
             description: `Visualization: ${nlQuery.slice(0, 50)}${
