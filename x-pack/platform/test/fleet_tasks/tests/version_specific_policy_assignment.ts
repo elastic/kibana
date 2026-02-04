@@ -62,11 +62,12 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
       // Install a package and create a package policy
       // Using system package as it's commonly available
-      await supertest
+      const { body: installResponse } = await supertest
         .post('/api/fleet/epm/packages/system')
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
+      const installedVersion = installResponse.items?.[0]?.version || installResponse.item?.version;
 
       const { body: packagePolicyResponse } = await supertest
         .post('/api/fleet/package_policies')
@@ -77,7 +78,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
           policy_id: policyId,
           package: {
             name: 'system',
-            version: '1.65.2',
+            version: installedVersion,
           },
           inputs: {},
         })
@@ -177,7 +178,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
       expect(versionedPolicy.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
     });
 
-    it('should skip agents already on correct versioned policy with current revision', async () => {
+    it('should skip agents already on correct versioned policy', async () => {
       const versionedPolicyId = `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`;
 
       // First, create an agent on parent policy and wait for it to be reassigned
@@ -189,14 +190,11 @@ export default function (providerContext: FtrProviderContextWithServices) {
         expect(agent.policy_id).to.be(versionedPolicyId);
       });
 
-      // Get the current policy revision
-      const agent = await getAgent('agent1');
-      const currentRevision = agent.policy_revision_idx;
-
-      // Create another agent already on the correct versioned policy with current revision
-      await createAgentDoc(providerContext, 'agent2', versionedPolicyId, '8.18.0', true, {
-        policy_revision_idx: currentRevision,
-      });
+      // Create another agent already on the correct versioned policy.
+      // Note: Policy revision doesn't matter - agents on the correct versioned policy
+      // will receive policy updates automatically through fleet-server after deployPolicies
+      // updates .fleet-policies, so they don't need reassignment.
+      await createAgentDoc(providerContext, 'agent2', versionedPolicyId, '8.18.0');
 
       await waitForTask();
 
