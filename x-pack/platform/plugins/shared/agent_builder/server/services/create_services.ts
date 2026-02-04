@@ -155,6 +155,7 @@ export class ServiceManager {
       auditLogService,
       chat,
       hooks,
+      spaces,
     };
 
     return this.internalStart;

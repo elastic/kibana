@@ -44,6 +44,7 @@ export interface InternalStartServices {
   runnerFactory: RunnerFactory;
   hooks: HooksServiceStart;
   auditLogService: AuditLogService;
+  spaces?: SpacesPluginStart;
 }
 
 export interface ServiceSetupDeps {

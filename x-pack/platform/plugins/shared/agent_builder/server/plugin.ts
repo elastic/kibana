@@ -28,6 +28,7 @@ import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
+import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 
 export class AgentBuilderPlugin
   implements
@@ -92,21 +93,29 @@ export class AgentBuilderPlugin
 
     registerAgentBuilderHandlerContext({ coreSetup });
 
+    const getInternalServices = () => {
+      const services = this.serviceManager.internalStart;
+      if (!services) {
+        throw new Error('getInternalServices called before service init');
+      }
+      return services;
+    };
+
     const router = coreSetup.http.createRouter<AgentBuilderHandlerContext>();
     registerRoutes({
       router,
       coreSetup,
       logger: this.logger,
       pluginsSetup: setupDeps,
-      getInternalServices: () => {
-        const services = this.serviceManager.internalStart;
-        if (!services) {
-          throw new Error('getInternalServices called before service init');
-        }
-        return services;
-      },
+      getInternalServices,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
+    });
+
+    registerBeforeAgentWorkflowsHook(serviceSetups, {
+      workflowsManagement: setupDeps.workflowsManagement,
+      logger: this.logger,
+      getInternalServices,
     });
 
     return {

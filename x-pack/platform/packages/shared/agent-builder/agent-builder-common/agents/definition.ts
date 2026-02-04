@@ -88,6 +88,11 @@ export interface AgentConfiguration {
   tools: ToolSelection[];
 
   /**
+   * Optional list of workflow ids. When set, these workflows run before the agent is executed.
+   */
+  workflow_ids?: string[];
+
+  /**
    * Custom configuration for the research step of the agent.
    */
   research?: AgentResearchStepConfiguration;

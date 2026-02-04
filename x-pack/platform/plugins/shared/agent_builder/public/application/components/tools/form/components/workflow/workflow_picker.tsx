@@ -10,15 +10,26 @@ import { EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useController, useFormContext } from 'react-hook-form';
 import { useListWorkflows } from '../../../../../hooks/tools/use_list_workflows';
-import type { WorkflowToolFormData } from '../../types/tool_form_types';
 
-export const WorkflowPicker: React.FC = () => {
-  const { control, trigger } = useFormContext<WorkflowToolFormData>();
+export interface WorkflowPickerProps {
+  /** Form field name (e.g. 'workflow_id' or 'configuration.workflow_ids') */
+  name: string;
+  /** Single workflow (string) vs multiple (string[]). Default true. */
+  singleSelection?: boolean;
+  isDisabled?: boolean;
+}
+
+export const WorkflowPicker: React.FC<WorkflowPickerProps> = ({
+  name,
+  singleSelection = true,
+  isDisabled = false,
+}) => {
+  const { control, trigger } = useFormContext();
   const {
-    field: { value, onChange, onBlur, name },
+    field: { value, onChange, onBlur },
     fieldState,
   } = useController({
-    name: 'workflow_id',
+    name,
     control,
   });
 
@@ -33,43 +44,65 @@ export const WorkflowPicker: React.FC = () => {
   }, [workflows]);
 
   const selectedOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
-    if (!value) return [];
-    const selectedWorkflow = workflows?.find((w) => w.id === value);
-    if (!selectedWorkflow) return [];
-    return [
-      {
-        key: selectedWorkflow.id,
-        label: selectedWorkflow.name,
-        value: selectedWorkflow.id,
-      },
-    ];
-  }, [value, workflows]);
+    if (singleSelection) {
+      const id = value as string | undefined;
+      if (!id) return [];
+      const selectedWorkflow = workflows?.find((w) => w.id === id);
+      if (!selectedWorkflow) return [];
+      return [
+        { key: selectedWorkflow.id, label: selectedWorkflow.name, value: selectedWorkflow.id },
+      ];
+    }
+    const ids = Array.isArray(value) ? value : [];
+    return ids
+      .map((id) => workflows?.find((w) => w.id === id))
+      .filter(Boolean)
+      .map((w) => ({ key: w!.id, label: w!.name, value: w!.id }));
+  }, [value, workflows, singleSelection]);
 
   const handleSelectionChange = async (
     newSelectedOptions: Array<EuiComboBoxOptionOption<string>>
   ) => {
-    const selectedWorkflowId = newSelectedOptions.length > 0 ? newSelectedOptions[0].value : '';
-    onChange(selectedWorkflowId);
+    if (singleSelection) {
+      const selectedWorkflowId = newSelectedOptions.length > 0 ? newSelectedOptions[0].value : '';
+      onChange(selectedWorkflowId);
+    } else {
+      onChange(newSelectedOptions.map((o) => o.value ?? '').filter(Boolean));
+    }
     await trigger(name);
   };
 
+  const placeholder = singleSelection
+    ? i18n.translate('xpack.agentBuilder.tools.workflow.picker.placeholder', {
+        defaultMessage: 'Select a workflow',
+      })
+    : i18n.translate('xpack.agentBuilder.agents.form.settings.workflowPlaceholder', {
+        defaultMessage: 'Select workflows',
+      });
+
+  const ariaLabel = singleSelection
+    ? i18n.translate('xpack.agentBuilder.tools.workflow.picker.ariaLabel', {
+        defaultMessage: 'Workflow selection',
+      })
+    : i18n.translate('xpack.agentBuilder.agents.form.settings.workflowAriaLabel', {
+        defaultMessage: 'Pre-execution workflows selection',
+      });
+
   return (
     <EuiComboBox
-      placeholder={i18n.translate('xpack.agentBuilder.tools.workflow.picker.placeholder', {
-        defaultMessage: 'Select a workflow',
-      })}
+      placeholder={placeholder}
       options={options}
-      fullWidth={true}
+      fullWidth
       selectedOptions={selectedOptions}
       onChange={handleSelectionChange}
       onBlur={onBlur}
-      singleSelection={{ asPlainText: false }}
+      singleSelection={singleSelection ? { asPlainText: false } : undefined}
       isLoading={isLoading}
       isInvalid={fieldState.invalid}
-      data-test-subj="agentBuilderWorkflowPicker"
-      aria-label={i18n.translate('xpack.agentBuilder.tools.workflow.picker.ariaLabel', {
-        defaultMessage: 'Workflow selection',
-      })}
+      isClearable={!singleSelection}
+      isDisabled={isDisabled}
+      data-test-subj={'agentBuilderWorkflowPicker'}
+      aria-label={ariaLabel}
     />
   );
 };
