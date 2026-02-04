@@ -25,7 +25,7 @@ export const useAgentCount = () => {
         tools: tools?.length ?? 0,
       };
     },
-    enabled: hasEnterpriseLicense && !!agentBuilder,
+    enabled: hasEnterpriseLicense && !!onechat,
   });
 
   return {
