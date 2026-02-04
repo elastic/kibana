@@ -51,7 +51,7 @@ export function transformDashboardOut(
         }
       : undefined;
 
-  const options = transformOptionsOut(optionsJSON ?? '{}', pinned_panels?.showApplySelections);
+  const options = transformOptionsOut(optionsJSON ?? '{}', legacyControls?.showApplySelections);
 
   // try to maintain a consistent (alphabetical) order of keys
   return {
