@@ -65,6 +65,9 @@
     "script": ".buildkite/scripts/steps/checks/native_modules.sh"
   },
   {
+    "script": ".buildkite/scripts/steps/checks/yarn_install_scripts.sh"
+  },
+  {
     "script": ".buildkite/scripts/steps/checks/test_files_missing_owner.sh"
   },
   {

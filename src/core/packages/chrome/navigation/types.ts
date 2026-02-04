@@ -9,7 +9,7 @@
 
 import type { IconType } from '@elastic/eui';
 
-export type BadgeType = 'beta' | 'techPreview';
+export type BadgeType = 'beta' | 'techPreview' | 'new';
 
 export interface SecondaryMenuItem {
   /**
@@ -29,7 +29,7 @@ export interface SecondaryMenuItem {
    */
   'data-test-subj'?: string;
   /**
-   * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`).
+   * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`).
    */
   badgeType?: BadgeType;
   /**
@@ -75,7 +75,7 @@ export interface MenuItem {
    */
   'data-test-subj'?: string;
   /**
-   * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`).
+   * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`).
    */
   badgeType?: BadgeType;
   /**
