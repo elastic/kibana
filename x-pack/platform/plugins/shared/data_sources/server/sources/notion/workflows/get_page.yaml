@@ -1,0 +1,16 @@
+version: '1'
+name: 'sources.notion.get_page'
+description: 'Given the ID of a Notion page, get metadata related to it'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: page_id
+    type: string
+steps:
+  - name: get-page
+    type: notion.getPage
+    connector-id: <%= stackConnectorId %>
+    with:
+      pageId: "${{inputs.page_id}}"
