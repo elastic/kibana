@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { filter, combineLatest, debounceTime, distinctUntilChanged, of } from 'rxjs';
+import { filter, combineLatest, debounceTime, distinctUntilChanged, of, pairwise, startWith } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import deepEqual from 'fast-deep-equal';
 import { isToolUiEvent } from '@kbn/agent-builder-common/chat';
@@ -60,6 +60,33 @@ export function useDashboardAgentContext({
     const attachmentService = getDashboardAttachmentService();
     return attachmentService.getAttachmentId(savedObjectId, urlAttachmentId);
   }, [savedObjectId, urlAttachmentId]);
+
+  // Effect to migrate attachment ID when dashboard is saved for the first time
+  // This preserves the agent conversation context through the save operation
+  useEffect(
+    function migrateAttachmentOnSave() {
+      if (!dashboardApi) {
+        return;
+      }
+
+      const subscription = dashboardApi.savedObjectId$
+        .pipe(
+          startWith(undefined),
+          pairwise()
+        )
+        .subscribe(([previousId, currentId]) => {
+          // Migration: unsaved (undefined) -> saved (has ID)
+          if (!previousId && currentId) {
+            getDashboardAttachmentService().migrateUnsavedToSaved(currentId);
+          }
+        });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    },
+    [dashboardApi]
+  );
 
   // Effect to set up conversation flyout config with dashboard context
   useEffect(
