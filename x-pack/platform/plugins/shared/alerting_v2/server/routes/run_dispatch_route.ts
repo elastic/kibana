@@ -11,7 +11,7 @@ import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/c
 import type { RouteHandler } from '@kbn/core-di-server';
 import { Request, Response } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
-import { DispatcherService } from '../lib/dispatcher/dispatcher';
+import { DispatcherService, type DispatcherServiceContract } from '../lib/dispatcher/dispatcher';
 
 const runDispatchBodySchema = schema.object({
   previousStartedAt: schema.maybe(schema.string({ minLength: 1 })),
@@ -40,7 +40,7 @@ export class RunDispatchRoute implements RouteHandler {
     @inject(Request)
     private readonly request: KibanaRequest<unknown, unknown, RunDispatchBody>,
     @inject(Response) private readonly response: KibanaResponseFactory,
-    @inject(DispatcherService) private readonly dispatcherService: DispatcherService
+    @inject(DispatcherService) private readonly dispatcherService: DispatcherServiceContract
   ) {}
 
   async handle() {

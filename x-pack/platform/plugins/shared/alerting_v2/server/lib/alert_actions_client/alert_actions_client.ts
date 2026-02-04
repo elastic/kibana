@@ -19,8 +19,13 @@ import type {
   BulkCreateAlertActionItemBody,
   CreateAlertActionBody,
 } from '../../routes/schemas/alert_action_schema';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
-import { QueryService, type QueryServiceContract } from '../services/query_service/query_service';
+import type { QueryServiceContract } from '../services/query_service/query_service';
+import { QueryServiceScopedToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
 
@@ -28,8 +33,9 @@ import { StorageServiceScopedToken } from '../services/storage_service/tokens';
 export class AlertActionsClient {
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
-    @inject(QueryService) private readonly queryService: QueryServiceContract,
+    @inject(QueryServiceScopedToken) private readonly queryService: QueryServiceContract,
     @inject(StorageServiceScopedToken) private readonly storageService: StorageServiceContract,
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @optional() @inject(PluginStart('security')) private readonly security?: SecurityPluginStart
   ) {}
 
@@ -37,6 +43,10 @@ export class AlertActionsClient {
     groupHash: string;
     action: CreateAlertActionBody;
   }): Promise<void> {
+    this.logger.debug({
+      message: () =>
+        `Creating alert action for group_hash [${params.groupHash}] with action type [${params.action.action_type}].`,
+    });
     const [username, alertEvent] = await Promise.all([
       this.getUserName(),
       this.findLastAlertEventRecordOrThrow({
@@ -151,15 +161,27 @@ export class AlertActionsClient {
     episodeId?: string;
   }): Promise<AlertEventRecord> {
     const { groupHash, episodeId } = params;
+    this.logger.debug({
+      message: () =>
+        `Fetching last alert event record for group_hash [${groupHash}]${
+          episodeId ? ` and episode_id [${episodeId}]` : ''
+        }.`,
+    });
+
     const query = esql`
       FROM ${ALERT_EVENTS_DATA_STREAM}
       | WHERE type == "alert" AND group_hash == ${groupHash} AND ${
-      episodeId ? esql.exp`episode_id == ${episodeId}` : esql.exp`true`
+      episodeId ? esql.exp`episode.id == ${episodeId}` : esql.exp`true`
     }
       | SORT @timestamp DESC
-      | RENAME rule.id AS rule_id
+      | RENAME rule.id AS rule_id, episode.id AS episode_id
       | KEEP @timestamp, group_hash, episode_id, rule_id
       | LIMIT 1`.toRequest();
+
+    this.logger.debug({
+      message: () =>
+        `Executing ESQL query to find last alert event record: ${JSON.stringify(query.query)}`,
+    });
 
     const result = queryResponseToRecords<AlertEventRecord>(
       await this.queryService.executeQuery({ query: query.query })
