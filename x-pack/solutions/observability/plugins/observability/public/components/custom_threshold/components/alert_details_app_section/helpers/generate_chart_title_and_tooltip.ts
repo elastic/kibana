@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { CustomThresholdExpressionMetric } from '../../../../../../common/custom_threshold_rule/types';
 import type { MetricExpression } from '../../../types';
-import { CustomThresholdExpressionMetric } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 
 const CHART_TITLE_LIMIT = 120;
 
