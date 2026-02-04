@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// setup ts/pkg support in this webpack process
-require('@kbn/babel-register').install();
-
+// NOTE: babel-register removed - dependent @kbn/* packages must be pre-built
 const Path = require('path');
 
 const webpack = require('webpack');

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-require('@kbn/babel-register').install();
+// NOTE: babel-register removed - load_esql_docs must be pre-built or converted to JS
 
 require('./load_esql_docs');

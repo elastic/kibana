@@ -7,32 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Kibana development mode entry point.
+ *
+ * TypeScript transpilation is handled by Vite Module Runner.
+ * babel-register has been removed from the codebase.
+ */
+
 const collectExtendedStackTrace = process.argv.includes('--extended-stack-trace');
 
 if (collectExtendedStackTrace) {
   // Using these modules when in dev mode to extend the stack traces.
-  // Why?
-  //      When running unattended (non-awaited) promises, V8 removes the parent call-stack (as none of those objects are required by V8).
-  //      This results in (very) incomplete and unhelpful stack traces that makes it super-hard to figure out what called a failing promise.
-  //      The libraries below help to provide more complete stack traces.
-  //
-  // `trace` uses AsyncHooks to store the call-stack and attaches them to the stack trace when an error occurs.
-  // Note that line numbers might be off when using `trace`.
   // eslint-disable-next-line import/no-extraneous-dependencies
   require('trace');
-  // `clarify` tries to remove Node.js' internal libraries from the stack trace to make it a bit more human-friendly.
   // eslint-disable-next-line import/no-extraneous-dependencies
   require('clarify');
 }
-// More info in https://trace.js.org/
 
 if (process.features.require_module) {
   console.warn(
-    "Node.js's experimental support for native ES modules is enabled.  This will not be enabled in production while the feature is experimental.  It is recommended to add `--no-experimental-require-module` to NODE_OPTIONS."
+    "Node.js's experimental support for native ES modules is enabled. " +
+      'It is recommended to add `--no-experimental-require-module` to NODE_OPTIONS.'
   );
 }
 
+// Setup Node.js environment (no babel-register)
 require('@kbn/setup-node-env');
 
-require('./apm')(process.env.ELASTIC_APM_SERVICE_NAME || 'kibana-proxy');
-require('./cli');
+// NOTE: APM initialization is deferred until after Vite is running
+// because it requires TypeScript packages that need transpilation.
+// The APM init happens inside vite_cli.mjs via Vite Module Runner.
+
+// Bootstrap using Vite Module Runner for TypeScript transpilation
+(async () => {
+  try {
+    const { bootstrapViteCli } = await import('../serve/vite_cli.mjs');
+    await bootstrapViteCli();
+  } catch (error) {
+    console.error('[vite] Failed to bootstrap:', error);
+    process.exit(1);
+  }
+})();

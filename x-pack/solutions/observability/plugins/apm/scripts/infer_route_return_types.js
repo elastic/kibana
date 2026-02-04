@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-// compile typescript on the fly
-require('@kbn/babel-register').install();
+// NOTE: babel-register removed - infer_route_return_types must be pre-built or converted to JS
 require('./infer_route_return_types');

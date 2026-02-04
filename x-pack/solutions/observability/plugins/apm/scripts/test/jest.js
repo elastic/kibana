@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('@kbn/babel-register').install();
+// NOTE: babel-register removed - jest handles TypeScript transpilation
 
 const { run } = require('jest');
 

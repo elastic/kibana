@@ -6,6 +6,7 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/babel-register').install();
+// NOTE: babel-register removed - TypeScript files must be pre-built
+// or use Vite for transpilation in dev mode
 
 require('./generate');

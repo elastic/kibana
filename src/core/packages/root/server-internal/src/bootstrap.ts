@@ -12,6 +12,7 @@ import { getPackages } from '@kbn/repo-packages';
 import type { CliArgs } from '@kbn/config';
 import { Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Root } from './root';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 
@@ -31,14 +32,6 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
     // --optimize is deprecated and does nothing now, avoid starting up and just shutdown
     return;
   }
-
-  // `bootstrap` is exported from the `src/core/server/index` module,
-  // meaning that any test importing, implicitly or explicitly, anything concrete
-  // from `core/server` will load `dev-utils`. As some tests are mocking the `fs` package,
-  // and as `REPO_ROOT` is initialized on the fly when importing `dev-utils` and requires
-  // the `fs` package, it causes failures. This is why we use a dynamic `require` here.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { REPO_ROOT } = require('@kbn/repo-info');
 
   const env = Env.createDefault(REPO_ROOT, {
     configs,

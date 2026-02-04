@@ -35,7 +35,24 @@ function canRequire(path) {
   }
 }
 
-const getBootstrapScript = (isDev) => {
+const getBootstrapScript = (isDev, useVite) => {
+  // When using Vite, use the Vite-based bootstrap that doesn't need babel-register
+  if (useVite && isDev) {
+    return async (options) => {
+      // Dynamic import of the ESM Vite bootstrap module
+      const { bootstrapWithVite, bootstrapChildWithVite } = await import('./vite_bootstrap.mjs');
+
+      if (process.env.isDevCliChild === 'true') {
+        // Child process: bootstrap the actual Kibana server
+        return bootstrapChildWithVite(options);
+      } else {
+        // Main process: bootstrap the dev mode (optimizer, watcher, etc.)
+        return bootstrapWithVite(options);
+      }
+    };
+  }
+
+  // Legacy babel-register based bootstrap
   if (DEV_MODE_SUPPORTED && isDev && process.env.isDevCliChild !== 'true') {
     // need dynamic require to exclude it from production build
     // eslint-disable-next-line import/no-dynamic-require
@@ -267,7 +284,15 @@ export default function (program) {
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
       .option('--no-optimizer', 'Disable the kbn/optimizer completely')
       .option('--no-cache', 'Disable the kbn/optimizer cache')
-      .option('--use-vite', 'Use Vite dev server instead of webpack optimizer (experimental)')
+      .option('--use-vite', 'Use Vite for both browser and server-side (experimental)')
+      .option(
+        '--use-vite-browser',
+        'Use Vite dev server for browser bundles instead of webpack optimizer (experimental)'
+      )
+      .option(
+        '--use-vite-server',
+        'Use Vite for server-side plugin loading with HMR support (experimental)'
+      )
       .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode')
       .option(
         '--no-dev-credentials',
@@ -324,6 +349,8 @@ export default function (program) {
       serverless: isServerlessMode,
       uiam: isServerlessSamlSupported && !!opts.uiam,
       useVite: !!opts.useVite,
+      useViteBrowser: !!opts.useViteBrowser || !!opts.useVite,
+      useViteServer: !!opts.useViteServer || !!opts.useVite,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode
@@ -333,7 +360,11 @@ export default function (program) {
     // This variable is then used to identify that we're the 'real'
     // Kibana server process, and will be using core's bootstrap script
     // to effectively start Kibana.
-    const bootstrapScript = getBootstrapScript(cliArgs.dev);
+    //
+    // When --use-vite is specified, we use the Vite-based bootstrap which
+    // doesn't require babel-register and uses Vite's Module Runner for
+    // TypeScript transpilation.
+    const bootstrapScript = getBootstrapScript(cliArgs.dev, cliArgs.useVite);
     const keystoreConfig = await readKeystore();
     await bootstrapScript({
       configs,

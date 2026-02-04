@@ -13,5 +13,5 @@
  * Usage: node create-apm-users.js
  ******************************/
 
-require('@kbn/babel-register').install();
+// NOTE: babel-register removed - create_apm_users_cli must be pre-built or converted to JS
 require('./create_apm_users/create_apm_users_cli');

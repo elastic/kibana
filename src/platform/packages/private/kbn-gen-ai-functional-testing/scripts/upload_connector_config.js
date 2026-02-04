@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/babel-register').install();
+// NOTE: babel-register removed - manage_connector_config must be pre-built or converted to JS
 require('../src/manage_connector_config').uploadToVault();

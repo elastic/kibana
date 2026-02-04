@@ -2,5 +2,17 @@
   "name": "@kbn/timelion-grammar",
   "version": "1.0.0",
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
-  "private": true
+  "private": true,
+  "main": "./target/index.js",
+  "module": "./target/index.js",
+  "exports": {
+    ".": {
+      "import": "./target/index.js",
+      "default": "./target/index.js"
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "postinstall": "node scripts/build.cjs"
+  }
 }

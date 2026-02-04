@@ -14,3 +14,18 @@ export type {
   DiscoveredPlugins,
   PluginDependencies,
 } from './src';
+
+// Module loader exports for Vite server-side support
+export {
+  RequireModuleLoader,
+  DynamicImportModuleLoader,
+  createDefaultModuleLoader,
+  setGlobalModuleLoader,
+  getGlobalModuleLoader,
+  resolvePluginServerPath,
+} from './src';
+export type { ModuleLoader } from './src';
+
+// ViteModuleLoader types - implementation is in @kbn/vite-server (pre-compiled ESM)
+// To use ViteModuleLoader: const { createViteModuleLoader } = await import('@kbn/vite-server');
+export type { PluginHmrRegistration, PluginHmrUpdateEvent, PluginHmrCallback } from './src';

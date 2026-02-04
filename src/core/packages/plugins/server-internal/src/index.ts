@@ -16,3 +16,18 @@ export type {
 export { config } from './plugins_config';
 export type { PluginDependencies } from './types';
 export { PluginWrapper } from './plugin';
+export {
+  type ModuleLoader,
+  RequireModuleLoader,
+  DynamicImportModuleLoader,
+  createDefaultModuleLoader,
+  setGlobalModuleLoader,
+  getGlobalModuleLoader,
+  resolvePluginServerPath,
+} from './module_loader';
+// ViteModuleLoader types - implementation is in @kbn/vite-server (pre-compiled ESM)
+export type {
+  PluginHmrRegistration,
+  PluginHmrUpdateEvent,
+  PluginHmrCallback,
+} from './vite_module_loader';

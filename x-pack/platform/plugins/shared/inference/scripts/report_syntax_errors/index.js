@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-require('@kbn/babel-register').install();
+// NOTE: babel-register removed - report_syntax_errors must be pre-built or converted to JS
 
 require('./report_syntax_errors');

@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/core'
   - '@kbn/logging'
-  - '@kbn/babel-register'
   - '@kbn/dev-cli-runner'
   - '@kbn/expect'
   - '@kbn/tooling-log'

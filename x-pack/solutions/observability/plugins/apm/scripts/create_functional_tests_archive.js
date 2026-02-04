@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-// compile typescript on the fly
-require('@kbn/babel-register').install();
+// NOTE: babel-register removed - create_functional_tests_archive must be pre-built or converted to JS
 require('./create_functional_tests_archive');

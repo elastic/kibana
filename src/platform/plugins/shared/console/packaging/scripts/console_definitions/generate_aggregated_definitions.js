@@ -158,8 +158,7 @@ class StandaloneSpecDefinitionsService {
     }
 
     try {
-      // Register TypeScript loader
-      require('@kbn/babel-register').install();
+      // NOTE: babel-register removed - jsIndexPath must be pre-built or converted to JS
 
       // Load the JS spec loaders
       // Dynamic require is necessary here because the path is determined at runtime based on version directories

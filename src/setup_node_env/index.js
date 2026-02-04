@@ -7,12 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// development env setup includes babel/register after the env is initialized
+/**
+ * Node.js environment setup for Kibana.
+ *
+ * NOTE: babel-register has been removed. TypeScript transpilation is now handled by:
+ * - Vite Module Runner for dev mode (`yarn start --use-vite`)
+ * - Pre-transpiled cache (`.transpile-cache/`) from `yarn transpile`
+ *
+ * Scripts that need TypeScript support should either:
+ * 1. Use `yarn transpile` to pre-build packages
+ * 2. Use the Vite-based dev mode
+ * 3. Be converted to JavaScript
+ */
+
+// Development environment setup
 require('./setup_env');
 
-// restore < Node 16 default DNS lookup behavior
+// Restore < Node 16 default DNS lookup behavior
 require('./dns_ipv4_first');
 
-require('@kbn/babel-register').install();
-
+// Security hardening
 require('@kbn/security-hardening');

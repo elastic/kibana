@@ -1,19 +1,10 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "**/*.js",
-    "**/*.ts",
-    "**/*.mjs",
-    "**/*.cjs",
-    "../../typings/**/*"
-  ],
-  "exclude": [
-    "target/**/*",
-    "packages/**/*"
-  ],
+  "include": ["**/*.js", "**/*.ts", "**/*.mjs", "**/*.cjs", "../../typings/**/*"],
+  "exclude": ["target/**/*", "packages/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/screenshotting-plugin",
@@ -49,7 +40,6 @@
     "@kbn/projects-solutions-groups",
     "@kbn/dot-text",
     "@kbn/yarn-lock-validator",
-    "@kbn/sort-package-json",
-    "@kbn/babel-register"
+    "@kbn/sort-package-json"
   ]
 }

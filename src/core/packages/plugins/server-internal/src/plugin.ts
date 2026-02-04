@@ -26,6 +26,7 @@ import type {
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import { Setup, Start } from '@kbn/core-di';
 import { createSetupModule, createStartModule } from '@kbn/core-di-internal';
+import { type ModuleLoader, getGlobalModuleLoader, resolvePluginServerPath } from './module_loader';
 
 const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]plugins[\/|\\]/; // Matches src/plugins directory on POSIX and Windows
 const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]plugins[\/|\\]/; // Matches x-pack/plugins directory on POSIX and Windows
@@ -68,6 +69,7 @@ export class PluginWrapper<
 
   private readonly log: Logger;
   private readonly initializerContext: PluginInitializerContext;
+  private readonly moduleLoader: ModuleLoader;
 
   private definition?: PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart>;
   private instance?:
@@ -86,6 +88,7 @@ export class PluginWrapper<
       readonly manifest: PluginManifest;
       readonly opaqueId: PluginOpaqueId;
       readonly initializerContext: PluginInitializerContext;
+      readonly moduleLoader?: ModuleLoader;
     }
   ) {
     this.path = params.path;
@@ -93,6 +96,7 @@ export class PluginWrapper<
     this.manifest = params.manifest;
     this.opaqueId = params.opaqueId;
     this.initializerContext = params.initializerContext;
+    this.moduleLoader = params.moduleLoader ?? getGlobalModuleLoader();
     this.log = params.initializerContext.logger.get();
     this.name = params.manifest.id;
     this.configPath = params.manifest.configPath;
@@ -107,7 +111,7 @@ export class PluginWrapper<
   public async init() {
     this.log.debug('Initializing plugin');
 
-    this.definition = this.getPluginDefinition();
+    this.definition = await this.getPluginDefinition();
     this.instance = await this.createPluginInstance();
 
     if (!('plugin' in this.definition || 'module' in this.definition)) {
@@ -200,7 +204,9 @@ export class PluginWrapper<
     if (!this.manifest.server) {
       return null;
     }
-    const definition = this.getPluginDefinition();
+    // Use synchronous loading for config descriptor since it's called
+    // during discovery, before async init() is called
+    const definition = this.getPluginDefinitionSync();
     if (!definition.config) {
       this.log.debug(`Plugin "${this.name}" does not export "config" (${this.path}).`);
       return null;
@@ -213,7 +219,34 @@ export class PluginWrapper<
     return config;
   }
 
-  protected getPluginDefinition(): PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart> {
+  /**
+   * Load the plugin definition using the configured module loader.
+   * This method is async to support different loading strategies:
+   * - Synchronous require() in production
+   * - Dynamic import() for ESM
+   * - Vite module runner for development with HMR
+   */
+  protected async getPluginDefinition(): Promise<
+    PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart>
+  > {
+    const modulePath = resolvePluginServerPath(this.path);
+    return this.moduleLoader.loadModule<
+      PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart>
+    >(modulePath);
+  }
+
+  /**
+   * Synchronous version for backward compatibility.
+   * Used by getConfigDescriptor which is called before init().
+   * @deprecated Use getPluginDefinition() instead
+   */
+  protected getPluginDefinitionSync(): PluginDefinition<
+    TSetup,
+    TStart,
+    TPluginsSetup,
+    TPluginsStart
+  > {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require(join(this.path, 'server')) ?? {};
   }
 

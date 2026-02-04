@@ -1,19 +1,9 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "harden/**/*",
-    "root/**/*",
-    "*.js",
-    "*.ts",
-  ],
-  "kbn_references": [
-    "@kbn/babel-register",
-    "@kbn/security-hardening",
-  ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "include": ["harden/**/*", "root/**/*", "*.js", "*.ts"],
+  "kbn_references": ["@kbn/security-hardening"],
+  "exclude": ["target/**/*"]
 }

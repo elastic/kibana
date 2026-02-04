@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-require('@kbn/babel-register').install();
+// NOTE: babel-register removed - generate_monitors must be pre-built or converted to JS
 require('./tasks/generate_monitors').generateMonitors();

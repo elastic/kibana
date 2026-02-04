@@ -15,23 +15,20 @@ module.exports = {
     return require('../../../../../' + 'src/platform/packages/private/kbn-repo-packages');
   },
 
+  // NOTE: babel-register removed - these packages must be pre-built ESM
   ['@kbn/ci-stats-reporter']() {
-    require('@kbn/babel-register').install();
     return require('@kbn/ci-stats-reporter');
   },
 
   ['@kbn/yarn-lock-validator']() {
-    require('@kbn/babel-register').install();
     return require('@kbn/yarn-lock-validator');
   },
 
   ['@kbn/sort-package-json']() {
-    require('@kbn/babel-register').install();
     return require('@kbn/sort-package-json');
   },
 
   ['@kbn/get-repo-files']() {
-    require('@kbn/babel-register').install();
     return require('@kbn/get-repo-files');
   },
 };

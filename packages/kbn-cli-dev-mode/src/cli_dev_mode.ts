@@ -62,9 +62,17 @@ export type SomeCliArgs = Pick<
   | 'basePath'
 > & {
   /**
-   * Use Vite dev server instead of webpack optimizer
+   * Use Vite for both browser and server-side
    */
   useVite?: boolean;
+  /**
+   * Use Vite dev server for browser bundles
+   */
+  useViteBrowser?: boolean;
+  /**
+   * Use Vite for server-side plugin loading with HMR
+   */
+  useViteServer?: boolean;
 };
 
 export interface CliDevModeOptions {
@@ -112,13 +120,13 @@ export class CliDevMode {
   private readonly devServer: DevServer;
   private readonly optimizer?: Optimizer;
   private readonly viteServer?: ViteServer;
-  private readonly useVite: boolean;
+  private readonly useViteBrowser: boolean;
   private startTime?: number;
   private subscription?: Rx.Subscription;
 
   constructor({ cliArgs, config, log }: { cliArgs: SomeCliArgs; config: CliDevConfig; log?: Log }) {
     this.log = log || new CliLog(!!cliArgs.silent);
-    this.useVite = !!cliArgs.useVite;
+    this.useViteBrowserBrowser = !!cliArgs.useViteBrowser;
 
     if (cliArgs.basePath) {
       this.basePathProxy = getBasePathProxyServer({
@@ -135,8 +143,10 @@ export class CliDevMode {
     });
 
     // Build argv for the dev server, adding Vite config if enabled
+    // Filter out vite-related flags as they're handled via env vars
+    const viteFlags = ['--no-watch', '--use-vite', '--use-vite-browser', '--use-vite-server'];
     const devServerArgv = [
-      ...process.argv.slice(2).filter((v) => v !== '--no-watch' && v !== '--use-vite'),
+      ...process.argv.slice(2).filter((v) => !viteFlags.includes(v)),
       ...(this.basePathProxy
         ? [
             `--server.port=${this.basePathProxy.targetPort}`,
@@ -146,20 +156,24 @@ export class CliDevMode {
         : []),
     ];
 
-    // Pass Vite configuration to Kibana server via env var
+    // Pass Vite browser configuration to Kibana server via env var
     // This will be picked up by the bundle routes registration
-    if (this.useVite) {
-      devServerArgv.push('--use-vite');
+    if (this.useViteBrowserBrowser) {
+      devServerArgv.push('--use-vite-browser');
     }
 
     // Environment variables to pass to child process
-    // When Vite is enabled, pass the Vite server URL (it uses fixed ports)
+    // When Vite browser is enabled, pass the Vite server URL (it uses fixed ports)
     // Plugin IDs will be passed after Vite server starts
     const devServerEnv: Record<string, string> = {};
-    if (this.useVite) {
+    if (this.useViteBrowserBrowser) {
       // Vite runs on fixed ports: 5173 for HTTP, 5174 for HMR
-      devServerEnv.KBN_VITE_SERVER_URL = 'http://localhost:5173';
+      devServerEnv.KBN_VITE_BROWSER_URL = 'http://localhost:5173';
       // Note: KBN_VITE_PLUGIN_IDS will be set dynamically when Vite starts
+    }
+    if (cliArgs.useViteServer) {
+      // Enable server-side Vite module loading in the child process
+      devServerEnv.KBN_VITE_SERVER = 'true';
     }
 
     this.devServer = new DevServer({
@@ -182,12 +196,12 @@ export class CliDevMode {
     });
 
     // Use either Vite or webpack optimizer based on flag
-    if (this.useVite) {
+    if (this.useViteBrowserBrowser) {
       this.log.write(
         Rx.of({
           type: 'info' as const,
           indent: false,
-          args: ['Using Vite dev server instead of webpack optimizer'],
+          args: ['Using Vite dev server for browser bundles instead of webpack optimizer'],
         })
       );
 
@@ -248,11 +262,11 @@ export class CliDevMode {
 
     // Get the bundler ready observable (either optimizer or vite)
     const bundlerReady$ =
-      this.useVite && this.viteServer
+      this.useViteBrowser && this.viteServer
         ? this.viteServer.isReady$()
         : this.optimizer?.isReady$() ?? Rx.of(true);
 
-    const bundlerName = this.useVite ? '@kbn/vite' : '@kbn/optimizer';
+    const bundlerName = this.useViteBrowser ? '@kbn/vite' : '@kbn/optimizer';
 
     if (basePathProxy) {
       const serverReady$ = new Rx.BehaviorSubject(false);
@@ -273,7 +287,7 @@ export class CliDevMode {
                       if (!optimizerReady$.getValue()) {
                         this.log.warn(
                           'please hold',
-                          this.useVite
+                          this.useViteBrowser
                             ? 'Vite dev server is starting so requests have been paused'
                             : 'optimizer is still bundling so requests have been paused'
                         );
@@ -319,7 +333,7 @@ export class CliDevMode {
     }
 
     // Start either Vite or webpack optimizer
-    if (this.useVite && this.viteServer) {
+    if (this.useViteBrowser && this.viteServer) {
       this.subscription.add(
         this.viteServer.run$.pipe(takeUntil(exitSignal$)).subscribe(this.observer(bundlerName))
       );
@@ -442,7 +456,7 @@ export class CliDevMode {
   private getStarted$() {
     // Get the bundler phase observable (either optimizer or vite)
     const bundlerPhase$ =
-      this.useVite && this.viteServer
+      this.useViteBrowser && this.viteServer
         ? this.viteServer.getPhase$().pipe(
             map((phase) => {
               if (phase === 'error') {

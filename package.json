@@ -67,7 +67,8 @@
     "test:jest": "node --no-experimental-require-module scripts/jest",
     "test:jest_integration": "node --no-experimental-require-module scripts/jest_integration",
     "test:type_check": "node --no-experimental-require-module scripts/type_check",
-    "test:vitest": "node scripts/vitest"
+    "test:vitest": "node scripts/vitest",
+    "transpile": "node --no-experimental-require-module scripts/transpile_packages"
   },
   "repository": {
     "type": "git",
@@ -1539,7 +1540,6 @@
     "@kbn/apm-ftr-e2e": "link:x-pack/solutions/observability/plugins/apm/ftr_e2e",
     "@kbn/axe-config": "link:src/platform/packages/shared/kbn-axe-config",
     "@kbn/babel-preset": "link:packages/kbn-babel-preset",
-    "@kbn/babel-register": "link:src/platform/packages/shared/kbn-babel-register",
     "@kbn/babel-transform": "link:src/platform/packages/private/kbn-babel-transform",
     "@kbn/bench": "link:src/platform/packages/shared/kbn-bench",
     "@kbn/cache-cli": "link:src/platform/packages/shared/kbn-cache-cli",
@@ -1752,6 +1752,7 @@
     "@kbn/test-suites-xpack-security-endpoint": "link:x-pack/solutions/security/test/security_solution_endpoint",
     "@kbn/test-suites-xpack-workplace-ai": "link:x-pack/solutions/workplaceai/test",
     "@kbn/tooling-log": "link:src/platform/packages/shared/kbn-tooling-log",
+    "@kbn/transpile-packages-cli": "link:packages/kbn-transpile-packages-cli",
     "@kbn/ts-projects": "link:packages/kbn-ts-projects",
     "@kbn/ts-type-check-cli": "link:packages/kbn-ts-type-check-cli",
     "@kbn/tsconfig-base": "link:packages/kbn-tsconfig/base",
@@ -1759,6 +1760,7 @@
     "@kbn/validate-oas": "link:src/platform/packages/private/kbn-validate-oas",
     "@kbn/vite-config": "link:packages/kbn-vite-config",
     "@kbn/vite-optimizer": "link:packages/kbn-vite-optimizer",
+    "@kbn/vite-server": "link:packages/kbn-vite-server",
     "@kbn/vitest": "link:packages/kbn-vitest",
     "@kbn/web-worker-stub": "link:packages/kbn-web-worker-stub",
     "@kbn/whereis-pkg-cli": "link:packages/kbn-whereis-pkg-cli",
@@ -2092,6 +2094,7 @@
     "val-loader": "6.0.0",
     "vinyl-fs": "4.0.0",
     "vite": "8.0.0-beta.12",
+    "vite-node": "5.3.0",
     "vitest": "4.0.18",
     "vscode-languageserver-textdocument": "1.0.12",
     "watchpack": "1.7.5",

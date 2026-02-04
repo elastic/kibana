@@ -56,7 +56,7 @@ import type {
   InternalCoreStart,
 } from '@kbn/core-lifecycle-server-internal';
 import type { DiscoveredPlugins } from '@kbn/core-plugins-server-internal';
-import { PluginsService } from '@kbn/core-plugins-server-internal';
+import { PluginsService, setGlobalModuleLoader } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
@@ -114,6 +114,7 @@ export class Server {
   private discoveredPlugins?: DiscoveredPlugins;
   private readonly logger: LoggerFactory;
   private nodeRoles?: NodeRoles;
+  private viteModuleLoader?: { close(): Promise<void> };
 
   private readonly uptimePerStep: Partial<UptimeSteps> = {};
 
@@ -179,6 +180,36 @@ export class Server {
 
     const prebootStartUptime = performance.now();
     const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
+
+    // Initialize Vite module loader for server-side HMR in development
+    if (process.env.KBN_VITE_SERVER === 'true' && this.env.mode.dev) {
+      this.log.info('Initializing Vite server-side module loader for HMR support');
+      try {
+        // Dynamic import @kbn/vite-server which is pre-compiled as ESM
+        // Use Function constructor to prevent Babel from transforming import() to require()
+        // This is necessary because @kbn/vite-server is ESM-only (depends on Vite which is ESM-only)
+        const dynamicImport = new Function('specifier', 'return import(specifier)') as (
+          specifier: string
+        ) => Promise<typeof import('@kbn/vite-server')>;
+        const { createViteModuleLoader } = await dynamicImport('@kbn/vite-server');
+        const loader = createViteModuleLoader({
+          repoRoot: this.env.homeDir,
+          onModuleInvalidated: (modulePath: string) => {
+            this.log.debug(`[vite-server] Module invalidated: ${modulePath}`);
+          },
+          onPluginHmrUpdate: async (event: { pluginIds: string[] }) => {
+            this.log.info(`[vite-server] HMR update for plugins: ${event.pluginIds.join(', ')}`);
+          },
+        });
+        await loader.initialize();
+        setGlobalModuleLoader(loader);
+        this.viteModuleLoader = loader;
+        this.log.info('Vite server-side module loader initialized successfully');
+      } catch (error) {
+        this.log.error(`Failed to initialize Vite module loader: ${error}`);
+        this.log.warn('Falling back to standard module loading');
+      }
+    }
 
     // service required for plugin discovery
     const analyticsPreboot = this.analytics.preboot();
@@ -561,6 +592,12 @@ export class Server {
     this.deprecations.stop();
     this.security.stop();
     this.userProfile.stop();
+
+    // Clean up Vite module loader if initialized
+    if (this.viteModuleLoader) {
+      await this.viteModuleLoader.close();
+      this.viteModuleLoader = undefined;
+    }
   }
 
   private async ensureValidConfiguration() {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('@kbn/babel-register').install();
+// NOTE: babel-register removed - manage_secrets must be pre-built or converted to JS
 const { retrieveConfigFromVault } = require('./manage_secrets');
 const minimist = require('minimist');
 

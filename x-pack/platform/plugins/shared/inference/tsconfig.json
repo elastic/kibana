@@ -13,16 +13,12 @@
     "scripts/**/*",
     ".storybook/**/*"
   ],
-  "exclude": [
-    "target/**/*",
-    ".storybook/**/*.js"
-  ],
+  "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/esql-language",
     "@kbn/core",
     "@kbn/logging",
-    "@kbn/babel-register",
     "@kbn/dev-cli-runner",
     "@kbn/expect",
     "@kbn/tooling-log",

@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/babel-register').install();
+// NOTE: babel-register removed - junit_reporter must be pre-built or converted to JS
 module.exports = require('./junit_reporter');

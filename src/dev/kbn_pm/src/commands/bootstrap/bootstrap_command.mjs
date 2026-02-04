@@ -114,21 +114,6 @@ export const command = {
       await runInstallScripts(log, { quiet });
     });
 
-    await time('pre-build webpack bundles for packages', async () => {
-      log.info('pre-build webpack bundles for packages');
-      await run(
-        'yarn',
-        ['kbn', 'build-shared']
-          .concat(quiet ? ['--quiet'] : [])
-          .concat(forceInstall ? ['--no-cache'] : [])
-          .concat(allowRoot ? ['--allow-root'] : []),
-        {
-          pipe: true,
-        }
-      );
-      log.success('shared webpack bundles built');
-    });
-
     await time('sort package json', async () => {
       await sortPackageJson(log);
     });

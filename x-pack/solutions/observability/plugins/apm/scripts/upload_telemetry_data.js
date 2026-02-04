@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-// compile typescript on the fly
-require('@kbn/babel-register').install();
+// NOTE: babel-register removed - upload_telemetry_data must be pre-built or converted to JS
 require('./upload_telemetry_data');

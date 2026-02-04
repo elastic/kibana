@@ -1,7 +1,7 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "packaging/**/*", "test/**/*"],
   "kbn_references": [
@@ -44,12 +44,9 @@
     "@kbn/core-analytics-browser-internal",
     "@kbn/core-theme-browser-internal",
     "@kbn/core-i18n-browser-internal",
-    "@kbn/babel-register",
     "@kbn/core-injected-metadata-browser-internal",
     "@kbn/node-libs-browser-webpack-plugin",
-    "@kbn/esql-types",
+    "@kbn/esql-types"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }
