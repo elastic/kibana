@@ -16,8 +16,6 @@ import {
   layoutVar,
 } from '@kbn/core-chrome-layout-constants';
 import { CommonGlobalAppStyles } from '../common/global_app_styles';
-import chromeBgDark from './assets/chrome-bg-dark.webp';
-import chromeBgLight from './assets/chrome-bg-light.webp';
 
 const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
   return css`
@@ -86,37 +84,29 @@ const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
 };
 
 /**
- * Project mode background styles with gradient and wave pattern.
+ * Project mode background styles with gradient.
  * Only applied when chromeStyle is 'project' to differentiate from classic mode.
  */
 const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
   const { colorMode } = euiThemeContext;
   const isDarkMode = colorMode === 'DARK';
 
-  // Wave pattern images imported via bundler
-  const wavePatternDark = `url("${chromeBgDark}")`;
-  const wavePatternLight = `url("${chromeBgLight}")`;
-
-  // Dark mode layered background: radial light source in center, blue tint, wave pattern, dark gradient base
+  // Dark mode layered background: radial light source in center, blue tint, dark gradient base
   const darkModeBackground = [
     'radial-gradient(1200px 800px at 50% 50%, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.04))',
     'linear-gradient(rgba(36, 61, 111, 0.1), rgba(36, 61, 111, 0))',
-    wavePatternDark,
     'linear-gradient(#07101F 0%, #050D1A 50%, #030A16 100%)',
   ].join(', ');
 
-  // Light mode layered background: subtle blue glow at top center, wave pattern at bottom, light gradient base
+  // Light mode layered background: subtle blue glow at top center, light gradient base
   const lightModeBackground = [
     'radial-gradient(1200px 800px at 50% 0%, rgba(36, 61, 111, 0.04), rgba(36, 61, 111, 0))',
-    wavePatternLight,
     'linear-gradient(#F6F9FC, #F4F7FA)',
   ].join(', ');
 
   return css`
     html {
       background: ${isDarkMode ? darkModeBackground : lightModeBackground};
-      background-size: ${isDarkMode ? 'auto, auto, 100% 600px, auto' : 'auto, 100% 600px, auto'};
-      background-position: ${isDarkMode ? 'top, top, bottom, top' : 'top, bottom, top'};
       background-repeat: no-repeat;
     }
   `;
