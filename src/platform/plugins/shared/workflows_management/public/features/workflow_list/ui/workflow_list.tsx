@@ -256,6 +256,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
                   }
                 >
                   <EuiSwitch
+                    data-test-subj={`workflowToggleSwitch-${item.id}`}
                     disabled={!canUpdateWorkflow || !item.valid}
                     checked={item.enabled}
                     onChange={() => handleToggleWorkflow(item)}
