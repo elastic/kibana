@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { INTERNAL_BULK_DELETE_TEMPLATES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-import { escapeHatch } from '../utils';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { mockTemplates } from './mock_data';
 
@@ -22,7 +22,9 @@ export const bulkDeleteTemplatesRoute = createCasesRoute({
   path: INTERNAL_BULK_DELETE_TEMPLATES_URL,
   security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
-    body: escapeHatch,
+    body: schema.object({
+      ids: schema.arrayOf(schema.string()),
+    }),
   },
   routerOptions: {
     access: 'internal',
