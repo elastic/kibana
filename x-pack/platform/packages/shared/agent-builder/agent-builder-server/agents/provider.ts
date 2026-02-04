@@ -29,6 +29,7 @@ import type {
 } from '../runner';
 import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
+import type { ToolRegistry } from '../tools';
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
@@ -77,6 +78,11 @@ export interface AgentHandlerContext {
    * Tool provider that can be used to list or execute tools.
    */
   toolProvider: ToolProvider;
+  /**
+   * Tool registry for accessing internal tool definitions.
+   * Used for features like tool-specific result summarization.
+   */
+  toolRegistry: ToolRegistry;
   /**
    * AgentBuilder runner scoped to the current execution.
    */
