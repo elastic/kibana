@@ -734,7 +734,6 @@ export interface Installation {
   previous_version?: string | null;
   rolled_back?: boolean;
   is_rollback_ttl_expired?: boolean;
-  deprecated?: DeprecationInfo;
 }
 
 export interface PackageUsageStats {

@@ -19,6 +19,7 @@ import {
   packageInfoHasOtelInputs,
 } from '../../../../../../../../common/services/otelcol_helpers';
 import { ExperimentalFeaturesService } from '../../../../../services';
+import { wrapTitle } from '../../../components/utils';
 
 export const PrereleaseCallout: React.FC<{
   packageInfo: PackageInfo;
@@ -69,7 +70,7 @@ export const OtelPackageCallout: React.FC<{
   packageInfo: PackageInfo;
 }> = ({ packageInfo }) => {
   const { docLinks } = useStartServices();
-  const packageTitle = packageInfo.title;
+  const packageTitle = wrapTitle(packageInfo.title, !!packageInfo.deprecated || false);
 
   return (
     <>

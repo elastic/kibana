@@ -155,6 +155,7 @@ export type PackageSpecCategory =
   | 'workplace_search_content_source';
 
 export interface PackageSpecConditions {
+  deprecated?: DeprecationInfo;
   kibana?: {
     version?: string;
   };

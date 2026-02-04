@@ -36,6 +36,8 @@ import {
   useRollbackAvailablePackages,
 } from '../hooks/use_rollback_available';
 
+import { wrapTitle } from '../../../components/utils';
+
 import { InstallationVersionStatus } from './installation_version_status';
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
 import { DashboardsCell } from './dashboards_cell';
@@ -160,12 +162,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                       data-test-subj={`installedIntegrationsTable.integrationNameColumn.${item.name}`}
                       grow={false}
                     >
-                      {(() => {
-                        const title = item.title;
-                        return isDeprecated && !title.match(/ \(deprecated\)$/)
-                          ? `${title} (deprecated)`
-                          : title;
-                      })()}
+                      {wrapTitle(item.title, isDeprecated || false)}
                     </EuiFlexItem>
                     {isDeprecated && (
                       <EuiFlexItem grow={false}>

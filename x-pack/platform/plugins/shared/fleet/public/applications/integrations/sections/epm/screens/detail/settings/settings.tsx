@@ -50,6 +50,8 @@ import { ExperimentalFeaturesService } from '../../../../../services';
 
 import { DeprecationCallout } from '../overview/overview';
 
+import { wrapTitle } from '../../../components/utils';
+
 import { InstallButton } from './install_button';
 import { ReinstallButton } from './reinstall_button';
 import { UpdateButton } from './update_button';
@@ -331,7 +333,11 @@ export const SettingsPage: React.FC<Props> = memo(
                       <EuiSpacer size="l" />
                       <p>
                         <UpdateButton
-                          {...packageInfo}
+                          name={packageInfo.name}
+                          title={wrapTitle(
+                            packageInfo.title,
+                            !!packageInfo.deprecated || false
+                          )}
                           version={latestVersion}
                           agentPolicyIds={agentPolicyIds}
                           packagePolicyIds={packagePolicyIds}

@@ -60,6 +60,8 @@ import { WithHeaderLayout } from '../../../../layouts';
 import { SideBarColumn } from '../../components/side_bar_column';
 import { PermissionsError } from '../../../../layouts';
 
+import { wrapTitle } from '../../components/utils';
+
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
 
@@ -365,13 +367,14 @@ export function Detail() {
                     <EuiText>
                       {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
                       <h1>
-                        {(() => {
-                          const title = integrationInfo?.title || packageInfo?.title || '\u00A0';
-                          const isDeprecated = !!packageInfo?.deprecated;
-                          return isDeprecated && !title.match(/ \(deprecated\)$/)
-                            ? `${title} (deprecated)`
-                            : title;
-                        })()}
+                        {wrapTitle(
+                          integrationInfo?.title || packageInfo?.title || '',
+                          !!(
+                            packageInfo?.deprecated ||
+                            packageInfo?.conditions?.deprecated ||
+                            integrationInfo?.deprecated
+                          ) || false
+                        )}
                       </h1>
                     </EuiText>
                   </EuiFlexItem>
@@ -594,7 +597,10 @@ export function Detail() {
                                   : {}),
                               })}
                               missingSecurityConfiguration={missingSecurityConfiguration}
-                              packageName={integrationInfo?.title || packageInfo.title}
+                              packageName={wrapTitle(
+                                integrationInfo?.title || packageInfo.title,
+                                !!packageInfo.deprecated || false
+                              )}
                               onClick={handleAddIntegrationPolicyClick}
                             />
                           </EuiFlexItem>
@@ -827,7 +833,12 @@ export function Detail() {
       `}
     >
       {integrationInfo || packageInfo ? (
-        <Breadcrumbs packageTitle={integrationInfo?.title || packageInfo?.title || ''} />
+        <Breadcrumbs
+          packageTitle={wrapTitle(
+            integrationInfo?.title || packageInfo?.title || '',
+            !!(packageInfo?.deprecated || integrationInfo?.deprecated) || false
+          )}
+        />
       ) : null}
       {packageInfoError ? (
         <EuiFlexGroup alignItems="flexStart">
@@ -891,7 +902,10 @@ export function Detail() {
       )}
       {isEditOpen && (
         <EditIntegrationFlyout
-          integrationName={packageInfo?.title || 'Integration'}
+          integrationName={wrapTitle(
+            integrationInfo?.title || packageInfo?.title || 'integration',
+            !!(packageInfo?.deprecated || integrationInfo?.deprecated) || false
+          )}
           onClose={() => setIsEditOpen(false)}
           packageInfo={packageInfo}
           setIsEditOpen={setIsEditOpen}

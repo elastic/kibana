@@ -41,6 +41,7 @@ import {
   getLineClampStyles,
   shouldShowInstallationStatus,
 } from './installation_status';
+import { wrapTitle } from './utils';
 
 export type PackageCardProps = IntegrationCardItem;
 
@@ -221,9 +222,7 @@ export function PackageCard({
     showInstallationStatus,
     isActive: hasDataStreams,
   });
-  // if the title already contains " (deprecated)", don't add it again, e.g. "Log Management (deprecated)"
-  const concatTitle =
-    isDeprecated && !title.match(/ \(deprecated\)$/) ? `${title} (deprecated)` : title;
+
   const testid = `integration-card:${id}`;
   return (
     <TrackApplicationView viewId={testid}>
@@ -264,7 +263,12 @@ export function PackageCard({
         data-test-subj={testid}
         betaBadgeProps={quickstartBadge(isQuickstart)}
         layout="horizontal"
-        title={<CardTitle title={concatTitle} titleBadge={titleBadge} />}
+        title={
+          <CardTitle
+            title={wrapTitle(title, isDeprecated || false)}
+            titleBadge={titleBadge}
+          />
+        }
         titleSize={titleSize}
         description={showDescription ? description : ''}
         hasBorder
