@@ -149,5 +149,13 @@ test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
     await expect(suggestWidget.getByRole('option', { name: 'elasticsearch.search' })).toBeVisible();
     await expect(suggestWidget.getByRole('option', { name: 'elasticsearch.index' })).toBeVisible();
     await expect(suggestWidget.getByRole('option', { name: 'elasticsearch.bulk' })).toBeVisible();
+
+    await suggestWidget.getByRole('option', { name: 'elasticsearch.search' }).click();
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('with:');
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('Space');
+
+    await expect(suggestWidget).toBeVisible();
   });
 });
