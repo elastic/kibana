@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { MetricExpression } from '../../../types';
+import { CustomThresholdExpressionMetric } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 
 const CHART_TITLE_LIMIT = 120;
 
@@ -14,7 +15,7 @@ const equationResultText = i18n.translate('xpack.observability.customThreshold.a
   defaultMessage: 'Equation result for ',
 });
 
-const resolveMetricDisplay = (metric: MetricExpression['metrics'][0]) => {
+const resolveMetricDisplay = (metric: CustomThresholdExpressionMetric) => {
   if (metric.field && metric.filter) {
     return `${metric.aggType} (${metric.field}, ${metric.filter})`;
   }
