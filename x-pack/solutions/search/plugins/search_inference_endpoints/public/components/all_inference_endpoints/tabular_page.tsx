@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n as kbnI18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -37,6 +38,10 @@ import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_help
 import { EditInferenceFlyout } from '../edit_inference_endpoints/edit_inference_flyout';
 import { docLinks } from '../../../common/doc_links';
 import { EndpointStats } from './endpoint_stats';
+
+const searchContainerStyles = css`
+  width: 400px;
+`;
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
@@ -253,7 +258,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem style={{ width: '400px' }} grow={false}>
+                <EuiFlexItem css={searchContainerStyles} grow={false}>
                   <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
