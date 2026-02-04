@@ -11,7 +11,7 @@ import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
-import { createInferenceInternalError, ChatCompletionEventType } from '@kbn/inference-common';
+import { ChatCompletionEventType } from '@kbn/inference-common';
 import { TOOL_USE_END, TOOL_USE_START } from './constants';
 
 function matchOnSignalStart(buffer: string) {
