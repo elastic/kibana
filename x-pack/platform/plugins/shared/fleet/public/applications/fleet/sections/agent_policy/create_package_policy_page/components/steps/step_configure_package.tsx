@@ -107,7 +107,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
             return inputs.map((packageInput) => {
               const packagePolicyInput = packagePolicyInputs.find(
                 (input) =>
-                  input.type === packageInput.type &&
+                  input.type === packageInput.type && 
                   (hasIntegrations ? input.policy_template === policyTemplate.name : true)
               );
               const packageInputStreams = getRegistryStreamWithDataStreamForInputType(
