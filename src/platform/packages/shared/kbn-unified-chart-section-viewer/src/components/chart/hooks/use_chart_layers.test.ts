@@ -55,7 +55,7 @@ describe('useChartLayers', () => {
 
     const [layer] = result.current;
     expect(layer.seriesType).toBe('line');
-    expect(layer.breakdown).toEqual(['service.name']); // Single dimension as array
+    expect(layer.breakdown).toBe('service.name'); // Single dimension as string
     expect(layer.yAxis[0].value).toBe('AVG(system.cpu.total.norm.pct)');
     expect(layer.yAxis[0].seriesColor).toBe('#FFF');
   });
@@ -74,8 +74,8 @@ describe('useChartLayers', () => {
 
     const [layer] = result.current;
     expect(layer.seriesType).toBe('line');
-    // Lens natively supports multiple dimensions - pass all dimensions as array
-    expect(layer.breakdown).toEqual(['service.name', 'host.name']);
+    // Lens uses first dimension only after revert
+    expect(layer.breakdown).toBe('service.name');
     expect(layer.yAxis[0].value).toBe('AVG(system.cpu.total.norm.pct)');
     expect(layer.yAxis[0].seriesColor).toBe('#FFF');
   });
