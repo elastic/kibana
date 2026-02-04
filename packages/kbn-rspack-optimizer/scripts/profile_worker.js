@@ -193,7 +193,7 @@ async function main() {
       // RsDoctor (if not stats-only and manifest exists)
       if (!statsOnly && Fs.existsSync(rsdoctorManifest)) {
         log.info('RsDoctor (interactive):');
-        log.info('  → npx @rsdoctor/cli analyze --profile ' + rsdoctorManifest);
+        log.info('  → npx @rsdoctor/cli analyze --profile target/public/bundles/.rsdoctor/manifest.json');
         log.info('');
       }
 
@@ -206,11 +206,11 @@ async function main() {
 
       process.exit(0);
     } else {
-      log.error('Profile build failed after ' + duration + 's');
+      log.error(`Profile build failed after ${duration}s`);
       process.exit(1);
     }
   } catch (error) {
-    log.error('Profile build error: ' + error.message);
+    log.error(`Profile build error: ${error.message}`);
     console.error(error.stack);
     process.exit(1);
   }
