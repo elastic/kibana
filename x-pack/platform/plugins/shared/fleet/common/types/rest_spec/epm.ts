@@ -42,6 +42,8 @@ export interface GetPackagesRequest {
     excludeInstallStatus?: boolean;
     withPackagePoliciesCount?: boolean;
     type?: string;
+    package?: string;
+    all?: boolean;
   };
 }
 
