@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Document, isMap, isPair, isScalar, isSeq, type Pair, parseDocument, visit } from 'yaml';
+import {
+  type Document,
+  isMap,
+  isPair,
+  isScalar,
+  isSeq,
+  type Pair,
+  parseDocument,
+  visit,
+} from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { isBuiltInStepType } from '@kbn/workflows';
 import { generateBuiltInStepSnippet } from './generate_builtin_step_snippet';
@@ -21,8 +30,8 @@ import {
 } from './snippet_insertion_utils';
 import {
   getStepNodeAtPosition,
-  getStepsAndElseKeyOffsets,
   getStepNodesWithType,
+  getStepsAndElseKeyOffsets,
   isStepLikeMap,
 } from '../../../../../common/lib/yaml';
 import { getIndentLevelFromLineNumber } from '../get_indent_level';
@@ -76,9 +85,7 @@ function findStepWithMaxEndOffsetAtOrBefore(
   for (const node of nodes) {
     const range = getMonacoRangeFromYamlNode(model, node);
     if (!range) continue;
-    const endOffset = model.getOffsetAt(
-      new monaco.Position(range.endLineNumber, range.endColumn)
-    );
+    const endOffset = model.getOffsetAt(new monaco.Position(range.endLineNumber, range.endColumn));
     if (endOffset <= cursorOffset && endOffset > bestEndOffset) {
       bestEndOffset = endOffset;
       best = node;
@@ -92,7 +99,8 @@ function getStepsInInnermostBlockContainingCursor(
   model: monaco.editor.ITextModel,
   cursorOffset: number
 ): StepNodeLike[] {
-  const candidates: Array<{ seq: { items?: unknown[] }; rangeStart: number; rangeEnd: number }> = [];
+  const candidates: Array<{ seq: { items?: unknown[] }; rangeStart: number; rangeEnd: number }> =
+    [];
   visit(document, {
     Pair(_key, pair) {
       if (!pair.key || !isScalar(pair.key)) return;
@@ -121,10 +129,7 @@ function getStepsInInnermostBlockContainingCursor(
   return steps;
 }
 
-function getLastRootStepEndLine(
-  model: monaco.editor.ITextModel,
-  stepsPair: Pair
-): number | null {
+function getLastRootStepEndLine(model: monaco.editor.ITextModel, stepsPair: Pair): number | null {
   const sequence = stepsPair.value;
   if (!isSeq(sequence) || !sequence.items || sequence.items.length === 0) return null;
   const lastItem = sequence.items[sequence.items.length - 1];
@@ -166,7 +171,8 @@ function getLastThenStepBeforeElseLine(
       const line = model.getPositionAt(keyNode.range[0])?.lineNumber;
       if (line !== elseKeyLineNumber) return;
       const pathEnd = path.length >= 1 ? path[path.length - 1] : null;
-      const parent = pathEnd && isPair(pathEnd) && path.length >= 2 ? path[path.length - 2] : pathEnd;
+      const parent =
+        pathEnd && isPair(pathEnd) && path.length >= 2 ? path[path.length - 2] : pathEnd;
       if (!parent || !isMap(parent)) return;
       if ((parent as { get?: (k: string) => unknown }).get?.('type') !== 'if') return;
       const stepsSeq = (parent as { get?: (k: string) => unknown }).get?.('steps');
@@ -212,8 +218,7 @@ function findStepNodeToInsertAfter(
     if (stepAtCursor) {
       if (stepAtCursor.get('type') === 'if') {
         const elsePair = stepAtCursor.items?.find(
-          (item): item is Pair =>
-            isPair(item) && isScalar(item.key) && item.key.value === 'else'
+          (item): item is Pair => isPair(item) && isScalar(item.key) && item.key.value === 'else'
         );
         const elseKeyRange =
           elsePair?.key && typeof (elsePair.key as { range?: number[] }).range !== 'undefined'
@@ -246,11 +251,7 @@ function findStepNodeToInsertAfter(
             );
           });
         if (nestedStepsInsideCurrentStep) {
-          const bestStep = findStepWithMaxEndOffsetAtOrBefore(
-            stepsInBlock,
-            model,
-            cursorOffset
-          );
+          const bestStep = findStepWithMaxEndOffsetAtOrBefore(stepsInBlock, model, cursorOffset);
           return bestStep ?? stepsInBlock[stepsInBlock.length - 1];
         }
       }
@@ -322,7 +323,10 @@ function getInsertPointAfterStep(
     const isAfterStep =
       cursorLine > stepRange.endLineNumber ||
       (cursorLine === stepRange.endLineNumber && cursorColumn > stepRange.endColumn);
-    if (cursorLineEmpty && (cursorLineIndent >= stepIndent || cursorLine >= stepRange.startLineNumber)) {
+    if (
+      cursorLineEmpty &&
+      (cursorLineIndent >= stepIndent || cursorLine >= stepRange.startLineNumber)
+    ) {
       insertAtLineNumber = cursorLine;
     } else if (isAfterStep && (cursorLineEmpty || cursorLineIndent >= stepIndent)) {
       insertAtLineNumber = cursorLine;
@@ -371,8 +375,7 @@ function getDefaultInsertPoint(
         elseKeyLines
       );
       if (cursorInsertPoint) return cursorInsertPoint;
-      const insertAt =
-        model.getLineContent(cursorLine).trim() === '' ? cursorLine : cursorLine + 1;
+      const insertAt = model.getLineContent(cursorLine).trim() === '' ? cursorLine : cursorLine + 1;
       return atLine(insertAt);
     }
   }
@@ -409,11 +412,7 @@ function getInsertPointFromCursor(
 } | null {
   const cursorLine = cursorPosition.lineNumber;
   const rootLine = stepsKeyRange.startLineNumber;
-  const at = (
-    insertAtLineNumber: number,
-    insertAfterComment: boolean,
-    commentCount?: number
-  ) => ({
+  const at = (insertAtLineNumber: number, insertAfterComment: boolean, commentCount?: number) => ({
     insertAtLineNumber,
     indentLevel: getStepIndentForInsertLine(document, model, insertAtLineNumber, rootLine),
     insertAfterComment,
@@ -583,7 +582,9 @@ export function insertStepSnippet(
       : insertText;
 
   const cursorOnElseLine =
-    cursorPosition !== undefined && cursorPosition !== null && elseKeyLines.has(cursorPosition.lineNumber);
+    cursorPosition !== undefined &&
+    cursorPosition !== null &&
+    elseKeyLines.has(cursorPosition.lineNumber);
 
   if (
     !replaceRange &&
