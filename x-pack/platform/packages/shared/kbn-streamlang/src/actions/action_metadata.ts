@@ -673,8 +673,7 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
     tips: [
       i18n.translate('xpack.streamlang.actionMetadata.userAgent.tips.properties', {
-        defaultMessage:
-          'Available properties: name, os, device, original, version, os_name, os_version, os_full, os_major, os_minor',
+        defaultMessage: 'Available properties: name, os, device, original, version',
       }),
       i18n.translate('xpack.streamlang.actionMetadata.userAgent.tips.deviceType', {
         defaultMessage: 'Use extract_device_type to identify desktop, mobile, or tablet devices',

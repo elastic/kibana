@@ -6,14 +6,37 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiFieldText,
+  EuiFormRow,
+  EuiComboBox,
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useController } from 'react-hook-form';
+import type { UserAgentProperty } from '@kbn/streamlang';
 import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
-import type { UserAgentFormState } from '../../../../types';
+import { ToggleField } from '../toggle_field';
+import type {
+  ExtractBooleanFields,
+  ProcessorFormState,
+  UserAgentFormState,
+} from '../../../../types';
+
+const userAgentPropertyOptions: Array<EuiComboBoxOptionOption<UserAgentProperty>> = [
+  { label: 'name', value: 'name' },
+  { label: 'os', value: 'os' },
+  { label: 'device', value: 'device' },
+  { label: 'original', value: 'original' },
+  { label: 'version', value: 'version' },
+];
 
 const TargetFieldSelector = () => {
   const { register } = useFormContext<UserAgentFormState>();
@@ -39,6 +62,106 @@ const TargetFieldSelector = () => {
   );
 };
 
+const RegexFileField = () => {
+  const { register } = useFormContext<UserAgentFormState>();
+  const { ref, ...inputProps } = register('regex_file');
+
+  return (
+    <EuiFormRow
+      label={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentRegexFileLabel',
+        { defaultMessage: 'Regex file (optional)' }
+      )}
+      helpText={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentRegexFileHelpText',
+        {
+          defaultMessage:
+            'File containing the regular expressions used to parse the user agent string. Located in config/ingest-user-agent directory.',
+        }
+      )}
+      fullWidth
+    >
+      <EuiFieldText {...inputProps} inputRef={ref} />
+    </EuiFormRow>
+  );
+};
+
+const PropertiesField = () => {
+  const { field } = useController<UserAgentFormState, 'properties'>({
+    name: 'properties',
+  });
+
+  const handleChange = (options: Array<EuiComboBoxOptionOption<UserAgentProperty>>) => {
+    field.onChange(options.map((option) => option.value as UserAgentProperty));
+  };
+
+  const selectedOptions = (field.value ?? []).map((value) => ({
+    label: value,
+    value,
+  }));
+
+  return (
+    <EuiFormRow
+      label={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentPropertiesLabel',
+        { defaultMessage: 'Properties' }
+      )}
+      helpText={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentPropertiesHelpText',
+        {
+          defaultMessage:
+            'Properties to add to the target field. Defaults to all: name, os, device, original, version.',
+        }
+      )}
+      fullWidth
+    >
+      <EuiComboBox
+        compressed
+        fullWidth
+        options={userAgentPropertyOptions}
+        selectedOptions={selectedOptions}
+        onChange={handleChange}
+        isClearable
+        data-test-subj="streamsAppUserAgentPropertiesSelector"
+      />
+    </EuiFormRow>
+  );
+};
+
+const ExtractDeviceTypeToggle = () => {
+  return (
+    <ToggleField
+      name={'extract_device_type' as ExtractBooleanFields<ProcessorFormState>}
+      label={
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentExtractDeviceTypeLabel',
+              { defaultMessage: 'Extract device type' }
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              size="s"
+              label="Beta"
+              tooltipContent={i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentExtractDeviceTypeBetaTooltip',
+                { defaultMessage: 'This functionality is in beta and is subject to change.' }
+              )}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+      helpText={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentExtractDeviceTypeHelpText',
+        {
+          defaultMessage: 'Extracts device type from the user agent string on a best-effort basis.',
+        }
+      )}
+    />
+  );
+};
+
 export const UserAgentProcessorForm = () => {
   return (
     <>
@@ -52,10 +175,15 @@ export const UserAgentProcessorForm = () => {
       <EuiSpacer size="m" />
       <TargetFieldSelector />
       <EuiSpacer size="m" />
+      <RegexFileField />
+      <EuiSpacer size="m" />
+      <PropertiesField />
+      <EuiSpacer size="m" />
       <FieldsAccordion>
         <ProcessorConditionEditor />
       </FieldsAccordion>
       <EuiSpacer size="m" />
+      <ExtractDeviceTypeToggle />
       <IgnoreFailureToggle />
       <IgnoreMissingToggle />
     </>

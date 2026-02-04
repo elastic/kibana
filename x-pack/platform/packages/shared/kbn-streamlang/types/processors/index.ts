@@ -516,18 +516,7 @@ export const concatProcessorSchema = processorBaseWithWhereSchema.extend({
  * User agent processor - Extract details from browser user agent strings
  */
 
-const userAgentProperties = [
-  'name',
-  'os',
-  'device',
-  'original',
-  'version',
-  'os_name',
-  'os_version',
-  'os_full',
-  'os_major',
-  'os_minor',
-] as const;
+const userAgentProperties = ['name', 'os', 'device', 'original', 'version'] as const;
 
 export type UserAgentProperty = (typeof userAgentProperties)[number];
 
