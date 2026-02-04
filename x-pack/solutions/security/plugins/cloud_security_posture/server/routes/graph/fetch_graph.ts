@@ -28,6 +28,7 @@ import {
   formatJsonProperty,
   buildLookupJoinEsql,
   buildEnrichPolicyEsql,
+  buildPinnedEsql,
 } from './utils';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
@@ -318,22 +319,6 @@ const buildEsqlQuery = ({
   const actorFieldHintCases = generateFieldHintCases(GRAPH_ACTOR_ENTITY_FIELDS, 'actorEntityId');
   const targetFieldHintCases = generateFieldHintCases(GRAPH_TARGET_ENTITY_FIELDS, 'targetEntityId');
 
-  // Generate pinned evaluation
-  // This checks if the current document _id, actor entity ID, or target entity ID matches any of the pinned IDs
-  const pinnedParams =
-    pinnedIds && pinnedIds.length > 0
-      ? pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ')
-      : '';
-
-  const pinnedEval = pinnedParams
-    ? `| EVAL pinned = CASE(
-    _id IN (${pinnedParams}), _id,
-    actorEntityId IN (${pinnedParams}), actorEntityId,
-    targetEntityId IN (${pinnedParams}), targetEntityId,
-    null
-  )`
-    : '| EVAL pinned = TO_STRING(null)';
-
   const query = `FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
@@ -347,7 +332,7 @@ const buildEsqlQuery = ({
 ${targetEntityIdEvals}
 | MV_EXPAND actorEntityId
 | MV_EXPAND targetEntityId
-${pinnedEval}
+${buildPinnedEsql(pinnedIds)}
 | EVAL actorEntityFieldHint = CASE(
 ${actorFieldHintCases},
     ""

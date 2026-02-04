@@ -94,7 +94,7 @@ export const formatJsonProperty = (propertyName: string, valueVar: string): stri
  */
 export const buildLookupJoinEsql = (lookupIndexName: string): string => {
   return `| DROP entity.id
-| DROP entity.target.id  
+| DROP entity.target.id
 // rename entity.*fields before next pipeline to avoid name collisions
 | EVAL entity.id = actorEntityId
 | LOOKUP JOIN ${lookupIndexName} ON entity.id
@@ -102,7 +102,7 @@ export const buildLookupJoinEsql = (lookupIndexName: string): string => {
 | RENAME actorEntityType    = entity.type
 | RENAME actorEntitySubType = entity.sub_type
 | RENAME actorHostIp        = host.ip
-| RENAME actorLookupEntityId = entity.id 
+| RENAME actorLookupEntityId = entity.id
 
 | EVAL entity.id = targetEntityId
 | LOOKUP JOIN ${lookupIndexName} ON entity.id
@@ -130,4 +130,26 @@ export const buildEnrichPolicyEsql = (enrichPolicyName: string): string => {
   return `// Use ENRICH policy for entity enrichment (deprecated fallback)
 | ENRICH ${enrichPolicyName} ON actorEntityId WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
 | ENRICH ${enrichPolicyName} ON targetEntityId WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip`;
+};
+
+/**
+ * Generates ESQL statement for evaluating pinned IDs.
+ * This checks if the document _id, actorEntityId, or targetEntityId matches any of the pinned IDs.
+ *
+ * @param pinnedIds - Array of IDs to check against (document _id, entity IDs)
+ * @returns ESQL statement string
+ */
+export const buildPinnedEsql = (pinnedIds?: string[]): string => {
+  if (!pinnedIds || pinnedIds.length === 0) {
+    return '| EVAL pinned = TO_STRING(null)';
+  }
+
+  const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
+
+  return `| EVAL pinned = CASE(
+    _id IN (${pinnedParamsStr}), _id,
+    actorEntityId IN (${pinnedParamsStr}), actorEntityId,
+    targetEntityId IN (${pinnedParamsStr}), targetEntityId,
+    null
+  )`;
 };
