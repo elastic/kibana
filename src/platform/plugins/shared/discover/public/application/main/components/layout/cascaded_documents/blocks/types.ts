@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
-
-type ESQLDataGroupNode = DataTableRecord['flattened'] & { id: string };
-
-export type { ESQLDataGroupNode };
+export interface ESQLDataGroupNode {
+  id: string;
+  groupColumn: string;
+  groupValue: string;
+  aggregatedValues: Record<string, number | string[]>;
+}
