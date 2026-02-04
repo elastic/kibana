@@ -514,6 +514,8 @@ src/platform/packages/shared/kbn-es-query-server @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-types @elastic/kibana-core
 src/platform/packages/shared/kbn-esql-composer @elastic/obs-presentation-team @elastic/obs-ai-team
 src/platform/packages/shared/kbn-esql-language @elastic/kibana-esql
+src/platform/packages/shared/kbn-esql-resource-browser @elastic/kibana-management
+src/platform/packages/shared/kbn-esql-resource-browser/.storybook @elastic/kibana-management
 src/platform/packages/shared/kbn-esql-types @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-event-annotation-common @elastic/kibana-visualizations
