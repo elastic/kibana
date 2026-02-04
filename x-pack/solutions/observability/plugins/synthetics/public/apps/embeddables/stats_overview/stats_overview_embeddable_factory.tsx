@@ -68,7 +68,7 @@ export const getStatsOverviewEmbeddableFactory = (
       const filters$ = new BehaviorSubject(initialState.filters);
 
       const { embeddableEnhanced } = pluginStart;
-      const dynamicActionsManager = embeddableEnhanced?.initializeEmbeddableDynamicActions(
+      const dynamicActionsManager = await embeddableEnhanced?.initializeEmbeddableDynamicActions(
         uuid,
         () => titleManager.api.title$.getValue(),
         initialState
@@ -95,7 +95,7 @@ export const getStatsOverviewEmbeddableFactory = (
         getComparators: () => ({
           ...titleComparators,
           filters: 'referenceEquality',
-          ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+          ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
         }),
         defaultState: {
           filters: DEFAULT_FILTERS,

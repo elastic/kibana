@@ -59,6 +59,21 @@ export async function yarnInstallDeps(log, { offline, quiet }) {
 }
 
 /**
+ * Runs allowlisted install scripts (.yarnrc ignore-scripts is enabled)
+ * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
+ * @param {{ quiet: boolean }} options
+ * @returns {Promise<void>}
+ */
+export async function runInstallScripts(log, { quiet }) {
+  log.info('running allowlisted install scripts');
+  await run('node', ['scripts/yarn_install_scripts.js', 'run'], {
+    cwd: REPO_ROOT,
+    pipe: !quiet,
+  });
+  log.success('install scripts completed');
+}
+
+/**
  * Checks if the installed state adheres to the integrity checksums from the yarn.lock file
  * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
  * @returns {Promise<boolean>}

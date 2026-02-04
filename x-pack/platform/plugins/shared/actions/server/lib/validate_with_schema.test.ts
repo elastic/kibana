@@ -325,6 +325,58 @@ test('should throw an error when custom validators fail', () => {
   ).toThrowErrorMatchingInlineSnapshot(`"error validating connector type secrets: test error"`);
 });
 
+describe('validateSecrets', () => {
+  test('should not run validation when secrets are undefined', () => {
+    const schemaValidator = z3.object({ foo: z3.string() }).strict();
+    const actionType: ActionType = {
+      id: 'foo',
+      name: 'bar',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      executor,
+      validate: {
+        params: {
+          schema: schemaValidator,
+        },
+        config: {
+          schema: schemaValidator,
+        },
+        secrets: {
+          schema: schemaValidator,
+        },
+      },
+    };
+
+    expect(() =>
+      validateSecrets(actionType, undefined, { configurationUtilities })
+    ).not.toThrowError();
+  });
+
+  test('should not run validation when secrets are null', () => {
+    const schemaValidator = z3.object({ foo: z3.string() }).strict();
+    const actionType: ActionType = {
+      id: 'foo',
+      name: 'bar',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      executor,
+      validate: {
+        params: {
+          schema: schemaValidator,
+        },
+        config: {
+          schema: schemaValidator,
+        },
+        secrets: {
+          schema: schemaValidator,
+        },
+      },
+    };
+
+    expect(() => validateSecrets(actionType, null, { configurationUtilities })).not.toThrowError();
+  });
+});
+
 describe('validateConnectors', () => {
   const testValue = { any: ['old', 'thing'] };
   const selfValidator = { parse: (value: Record<string, unknown>) => value };
