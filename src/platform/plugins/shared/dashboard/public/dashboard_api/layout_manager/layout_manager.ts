@@ -171,7 +171,8 @@ export function initializeLayoutManager(
     uuid: string,
     panelPackage: PanelPackage,
     grid?: DashboardPanel['grid'],
-    beside?: string
+    beside?: string,
+    dimensions?: { width?: number; height?: number }
   ): Promise<DashboardLayout> => {
     const { panelType: type, serializedState } = panelPackage;
     if (grid) {
@@ -192,8 +193,8 @@ export function initializeLayoutManager(
       panelPlacementSettings?.strategy,
       {
         currentPanels: layout$.value.panels,
-        height: panelPlacementSettings.height,
-        width: panelPlacementSettings.width,
+        height: dimensions?.height ?? panelPlacementSettings.height,
+        width: dimensions?.width ?? panelPlacementSettings.width,
         beside,
       }
     );
@@ -289,6 +290,7 @@ export function initializeLayoutManager(
       displaySuccessMessage?: boolean;
       scrollToPanel?: boolean;
       beside?: string;
+      dimensions?: { width?: number; height?: number };
     },
     grid?: DashboardPanel['grid']
   ) => {
@@ -296,7 +298,7 @@ export function initializeLayoutManager(
     const { serializedState, panelType } = panelPackage;
     usageCollectionService?.reportUiCounter(DASHBOARD_UI_METRIC_ID, METRIC_TYPE.CLICK, panelType);
 
-    layout$.next(await placeNewPanel(uuid, panelPackage, grid, options?.beside));
+    layout$.next(await placeNewPanel(uuid, panelPackage, grid, options?.beside, options?.dimensions));
 
     const { scrollToPanel, displaySuccessMessage } = {
       scrollToPanel: true,

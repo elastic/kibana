@@ -9,6 +9,11 @@
 
 import type { PanelPackage } from './presentation_container';
 
+export interface PanelDimensions {
+  width?: number;
+  height?: number;
+}
+
 /**
  * This API can add a new panel as a child.
  */
@@ -19,6 +24,7 @@ export interface CanAddNewPanel {
       displaySuccessMessage?: boolean;
       scrollToPanel?: boolean;
       beside?: string; // ID of an existing panel to place the new panel beside
+      dimensions?: PanelDimensions;
     }
   ) => Promise<ApiType | undefined>;
 }

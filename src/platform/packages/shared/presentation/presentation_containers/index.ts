@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { apiCanAddNewPanel, type CanAddNewPanel } from './interfaces/can_add_new_panel';
+export {
+  apiCanAddNewPanel,
+  type CanAddNewPanel,
+  type PanelDimensions,
+} from './interfaces/can_add_new_panel';
 export { apiHasSerializedChildState, type HasSerializedChildState } from './interfaces/child_state';
 export { childrenUnsavedChanges$ } from './interfaces/unsaved_changes/children_unsaved_changes';
 export { initializeUnsavedChanges } from './interfaces/unsaved_changes/initialize_unsaved_changes';

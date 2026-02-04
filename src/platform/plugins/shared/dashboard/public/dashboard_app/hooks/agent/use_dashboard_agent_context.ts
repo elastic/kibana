@@ -156,14 +156,22 @@ export function useDashboardAgentContext({
             const lensAttributes = configBuilder.fromAPIFormat(lensConfig);
             const panelTitle = lensAttributes.title ?? panel.title ?? 'Generated panel';
 
-            await dashboardApi.addNewPanel({
-              panelType: LENS_EMBEDDABLE_TYPE,
-              maybePanelId: panel.panelId,
-              serializedState: {
-                attributes: lensAttributes,
-                title: panelTitle,
+            await dashboardApi.addNewPanel(
+              {
+                panelType: LENS_EMBEDDABLE_TYPE,
+                maybePanelId: panel.panelId,
+                serializedState: {
+                  attributes: lensAttributes,
+                  title: panelTitle,
+                },
               },
-            });
+              {
+                dimensions: {
+                  width: 12,
+                  height: 12,
+                },
+              }
+            );
           } catch (error) {
             // eslint-disable-next-line no-console
             console.error('Failed to add panel from agent builder:', error);
