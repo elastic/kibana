@@ -32,7 +32,7 @@ describe('PROMQL columnsAfter', () => {
     expect(result).toEqual(sourceFields);
   });
 
-  it('returns source columns plus the assigned column name', async () => {
+  it('returns derived columns when an assignment is present and a pipe follows', async () => {
     const sourceFields: ESQLFieldWithMetadata[] = [
       { name: 'bytes', type: 'double', userDefined: false },
       { name: 'agent', type: 'keyword', userDefined: false },
@@ -41,7 +41,7 @@ describe('PROMQL columnsAfter', () => {
     const result = await columnsAfter(
       synth.cmd`PROMQL index=metrics col0=(rate(http_requests_total[5m]))`,
       [],
-      '',
+      'PROMQL index=metrics col0=(rate(http_requests_total[5m])) | LIMIT 10',
       {
         fromFrom: () => Promise.resolve([]),
         fromJoin: () => Promise.resolve([]),
@@ -50,7 +50,7 @@ describe('PROMQL columnsAfter', () => {
       }
     );
 
-    expect(result.map(({ name }) => name)).toEqual(['bytes', 'agent', 'col0']);
+    expect(result.map(({ name }) => name)).toEqual(['col0']);
   });
 
   it('returns empty when no index param is present', async () => {
@@ -68,7 +68,7 @@ describe('PROMQL columnsAfter', () => {
     const result = await columnsAfter(
       synth.cmd`PROMQL index=metrics step=5m rate(http_requests_total[5m])`,
       [],
-      '',
+      'PROMQL index=metrics step=5m rate(http_requests_total[5m]) | LIMIT 10',
       {
         fromFrom: () => Promise.resolve([]),
         fromJoin: () => Promise.resolve([]),
@@ -78,5 +78,27 @@ describe('PROMQL columnsAfter', () => {
     );
 
     expect(result).toEqual([{ name: 'step', type: 'date', userDefined: false }]);
+  });
+
+  it('returns only derived columns when a pipe follows', async () => {
+    const result = await columnsAfter(
+      synth.cmd`PROMQL index=metrics step=5m sum by (job) (http_requests_total{env="prod"})`,
+      [],
+      'PROMQL index=metrics step=5m sum by (job) (http_requests_total{env="prod"}) | KEEP job',
+      {
+        fromFrom: () => Promise.resolve([]),
+        fromJoin: () => Promise.resolve([]),
+        fromEnrich: () => Promise.resolve([]),
+        fromPromql: () =>
+          Promise.resolve([
+            { name: 'job', type: 'keyword', userDefined: false },
+            { name: 'env', type: 'keyword', userDefined: false },
+            { name: 'http_requests_total', type: 'double', userDefined: false },
+            { name: 'extra_field', type: 'keyword', userDefined: false },
+          ]),
+      }
+    );
+
+    expect(result.map(({ name }) => name)).toEqual(['step', 'job']);
   });
 });
