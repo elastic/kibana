@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiTitle } from '@elastic/eui';
+import {
+  euiContainerQuery,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiStat,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
@@ -15,6 +22,7 @@ import {
 import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import numeral from '@elastic/numeral';
+import { css } from '@emotion/react';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../../../utils/slo/labels';
 import { useErrorBudgetChart } from './hooks/use_error_budget_chart';
 import { SloFlyoutPanel } from '../../../shared_flyout/flyout_panel';
@@ -22,6 +30,7 @@ import { WideChart } from '../../wide_chart';
 import { getSloChartState } from '../../../utils/is_slo_failed';
 import { ErrorBudgetActions } from './error_budget_actions';
 import type { ErrorBudgetChartPanelProps } from './types';
+import { CHART_PANEL_WIDTH_BREAKPOINT } from '../../../shared_flyout/constants';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
@@ -45,23 +54,11 @@ export function ErrorBudgetChartFlyoutPanel({
     isDashboardContext,
   } = useErrorBudgetChart({ slo, data });
 
-  const [isMouseOver, setIsMouseOver] = useState(false);
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
 
   return (
     <>
-      <EuiFlexItem
-        onMouseOver={() => {
-          if (!isMouseOver) {
-            setIsMouseOver(true);
-          }
-        }}
-        onMouseLeave={() => {
-          if (isMouseOver) {
-            setIsMouseOver(false);
-          }
-        }}
-      >
+      <EuiFlexItem>
         <SloFlyoutPanel
           title={i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.title', {
             defaultMessage: 'Error budget burn down',
@@ -69,22 +66,33 @@ export function ErrorBudgetChartFlyoutPanel({
           renderTooltip
           append={
             !isDashboardContext && (
-              <EuiFlexGroup justifyContent="flexEnd" wrap>
-                {isMouseOver && (
-                  <EuiFlexItem grow={false}>
-                    <ErrorBudgetActions setDashboardAttachmentReady={setDashboardAttachmentReady} />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <ErrorBudgetActions setDashboardAttachmentReady={setDashboardAttachmentReady} />
+              </EuiFlexItem>
             )
           }
         >
-          <EuiFlexGroup direction="row" gutterSize="m">
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="m"
+            css={css`
+              ${euiContainerQuery(`(width <= ${CHART_PANEL_WIDTH_BREAKPOINT}px)`)} {
+                flex-direction: column-reverse;
+              }
+            `}
+          >
             <EuiFlexItem grow={1}>
               <EuiPanel hasShadow={false} paddingSize="m" color="plain" hasBorder>
-                <EuiFlexGroup direction="column">
+                <EuiFlexGroup
+                  direction="column"
+                  css={css`
+                    ${euiContainerQuery(`(width <= ${CHART_PANEL_WIDTH_BREAKPOINT}px)`)} {
+                      flex-direction: row;
+                    }
+                  `}
+                >
                   {!hideHeaderDurationLabel && (
-                    <EuiFlexItem>
+                    <EuiFlexItem grow={false}>
                       <EuiTitle size="xxs">
                         <h5>
                           {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)

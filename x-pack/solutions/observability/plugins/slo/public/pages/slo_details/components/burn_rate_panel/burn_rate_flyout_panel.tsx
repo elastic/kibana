@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonGroup, euiContainerQuery, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { css } from '@emotion/react';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { BurnRateStatus } from './burn_rate_status';
 import { burnRateWindowLabel } from './utils';
 import { SloFlyoutPanel } from '../../shared_flyout/flyout_panel';
 import { useBurnRatePanel } from './hooks/use_burn_rate_panel';
 import type { BurnRatePanelProps } from './types';
+import { CHART_PANEL_WIDTH_BREAKPOINT } from '../../shared_flyout/constants';
 
 export function BurnRateFlyoutPanel({ slo, isAutoRefreshing }: BurnRatePanelProps) {
   const {
@@ -53,7 +55,15 @@ export function BurnRateFlyoutPanel({ slo, isAutoRefreshing }: BurnRatePanelProp
             buttonSize="compressed"
           />
         </EuiFlexItem>
-        <EuiFlexGroup direction="row" gutterSize="m">
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="m"
+          css={css`
+            ${euiContainerQuery(`(width <= ${CHART_PANEL_WIDTH_BREAKPOINT}px)`)} {
+              flex-direction: column-reverse;
+            }
+          `}
+        >
           <EuiFlexItem grow={1}>
             <BurnRateStatus
               selectedWindow={selectedWindow}

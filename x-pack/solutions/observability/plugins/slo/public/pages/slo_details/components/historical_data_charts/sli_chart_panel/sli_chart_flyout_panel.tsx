@@ -5,17 +5,26 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiTitle } from '@elastic/eui';
+import {
+  euiContainerQuery,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiStat,
+  EuiTitle,
+} from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
 import React from 'react';
+import { css } from '@emotion/react';
 import { getSloChartState } from '../../../utils/is_slo_failed';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../../../utils/slo/labels';
 import { WideChart } from '../../wide_chart';
 import { useSliChartPanel } from './hooks/use_sli_chart_panel';
 import { SloFlyoutPanel } from '../../../shared_flyout/flyout_panel';
 import type { SliChartPanelProps } from './types';
+import { CHART_PANEL_WIDTH_BREAKPOINT } from '../../../shared_flyout/constants';
 
 export function SliChartFlyoutPanel({
   data,
@@ -33,12 +42,27 @@ export function SliChartFlyoutPanel({
       })}
       renderTooltip
     >
-      <EuiFlexGroup direction="row" gutterSize="m">
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="m"
+        css={css`
+          ${euiContainerQuery(`(width <= ${CHART_PANEL_WIDTH_BREAKPOINT}px)`)} {
+            flex-direction: column-reverse;
+          }
+        `}
+      >
         <EuiFlexItem grow={1}>
           <EuiPanel hasShadow={false} paddingSize="m" color="plain" hasBorder>
-            <EuiFlexGroup direction="column">
+            <EuiFlexGroup
+              direction="column"
+              css={css`
+                ${euiContainerQuery(`(width <= ${CHART_PANEL_WIDTH_BREAKPOINT}px)`)} {
+                  flex-direction: row;
+                }
+              `}
+            >
               {!hideHeaderDurationLabel && (
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiTitle size="xxs">
                     <h5>
                       {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
