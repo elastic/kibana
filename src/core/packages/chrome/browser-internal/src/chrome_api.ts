@@ -9,15 +9,12 @@
 
 import { map } from 'rxjs';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
-import type { InternalChromeStart } from '../types';
-import type { ChromeState } from '../state/chrome_state';
-import type { NavControlsService } from '../services/nav_controls';
-import type { NavLinksService } from '../services/nav_links';
-import type { ProjectNavigationService } from '../services/project_navigation';
-import type { DocTitleService } from '../services/doc_title';
-import { createBreadcrumbsApi } from './breadcrumbs_api';
-import { createHelpApi } from './help_api';
-import { createProjectApi } from './project_api';
+import type { InternalChromeStart } from './types';
+import type { ChromeState } from './state/chrome_state';
+import type { NavControlsService } from './services/nav_controls';
+import type { NavLinksService } from './services/nav_links';
+import type { ProjectNavigationService } from './services/project_navigation';
+import type { DocTitleService } from './services/doc_title';
 
 type NavControlsStart = ReturnType<NavControlsService['start']>;
 type NavLinksStart = ReturnType<NavLinksService['start']>;
@@ -51,20 +48,37 @@ export function createChromeApi({
   services,
   components,
 }: ChromeApiDeps): InternalChromeStart {
-  const projectApi = createProjectApi({
-    projectNavigation: services.projectNavigation,
-    chromeStyle: state.style.chromeStyle,
-  });
+  const { projectNavigation } = services;
 
-  const breadcrumbsApi = createBreadcrumbsApi({
-    state,
-    setProjectBreadcrumbs: projectApi.setBreadcrumbs,
-  });
+  const validateProjectStyle = () => {
+    const style = state.style.chromeStyle.get();
+    if (style !== 'project') {
+      throw new Error(
+        `Invalid ChromeStyle value of "${style}". This method requires ChromeStyle set to "project".`
+      );
+    }
+  };
 
-  const helpApi = createHelpApi({
-    state,
-    setHelpMenuLinks: services.navControls.setHelpMenuLinks,
-  });
+  const project: InternalChromeStart['project'] = {
+    setHome: (homeHref) => {
+      validateProjectStyle();
+      projectNavigation.setProjectHome(homeHref);
+    },
+    setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
+    setFeedbackUrlParams: projectNavigation.setFeedbackUrlParams.bind(projectNavigation),
+    setKibanaName: projectNavigation.setKibanaName.bind(projectNavigation),
+    initNavigation: (id, navigationTree$, config) => {
+      validateProjectStyle();
+      projectNavigation.initNavigation(id, navigationTree$, config);
+    },
+    getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
+    setBreadcrumbs: (breadcrumbs, params) =>
+      projectNavigation.setProjectBreadcrumbs(breadcrumbs, params),
+    getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
+    getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
+    updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
+    changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
+  };
 
   return {
     // Component factories (deprecated)
@@ -94,14 +108,38 @@ export function createChromeApi({
     setGlobalFooter: state.globalFooter.set,
 
     // Breadcrumbs
-    ...breadcrumbsApi,
+    getBreadcrumbs$: () => state.breadcrumbs.classic.$,
+    setBreadcrumbs: (newBreadcrumbs, params = {}) => {
+      state.breadcrumbs.classic.set(newBreadcrumbs);
+      if (params.project) {
+        const { value: projectValue, absolute = false } = params.project;
+        project.setBreadcrumbs(projectValue ?? [], { absolute });
+      }
+    },
+    getBreadcrumbsAppendExtensions$: () => state.breadcrumbs.appendExtensions.$,
+    setBreadcrumbsAppendExtension: (extension) => {
+      state.breadcrumbs.appendExtensions.addSorted(
+        extension,
+        ({ order: orderA = 50 }, { order: orderB = 50 }) => orderA - orderB
+      );
+      return () => {
+        state.breadcrumbs.appendExtensions.remove((ext) => ext === extension);
+      };
+    },
+    setBreadcrumbsBadges: (badges) => state.breadcrumbs.badges.set(badges),
 
     // App Menu
     getAppMenu$: () => state.appMenu.$,
     setAppMenu: state.appMenu.set,
 
     // Help
-    ...helpApi,
+    getHelpExtension$: () => state.help.extension.$,
+    setHelpExtension: state.help.extension.set,
+    getHelpSupportUrl$: () => state.help.supportUrl.$,
+    setHelpSupportUrl: state.help.supportUrl.set,
+    getGlobalHelpExtensionMenuLinks$: () => state.help.globalMenuLinks.$,
+    registerGlobalHelpExtensionMenuLink: (link) => state.help.globalMenuLinks.add(link),
+    setHelpMenuLinks: services.navControls.setHelpMenuLinks,
 
     // Custom Nav Link
     getCustomNavLink$: () => state.customNavLink.$,
@@ -126,9 +164,9 @@ export function createChromeApi({
 
     // Project Navigation
     getActiveSolutionNavId$: () =>
-      services.projectNavigation.getActiveSolutionNavId$() as ReturnType<
+      projectNavigation.getActiveSolutionNavId$() as ReturnType<
         InternalChromeStart['getActiveSolutionNavId$']
       >,
-    project: projectApi,
+    project,
   };
 }

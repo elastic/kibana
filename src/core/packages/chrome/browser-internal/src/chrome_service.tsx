@@ -38,7 +38,7 @@ import {
   showCspWarningIfNeeded,
   setupAppChangeHandler,
 } from './side_effects';
-import { createChromeApi } from './api';
+import { createChromeApi } from './chrome_api';
 
 interface ConstructorParams {
   browserSupportsCsp: boolean;
