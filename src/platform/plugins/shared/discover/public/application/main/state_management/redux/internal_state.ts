@@ -10,6 +10,7 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { throttle } from 'lodash';
+import { from, type Observable } from 'rxjs';
 import {
   type PayloadAction,
   type PayloadActionCreator,
@@ -260,6 +261,22 @@ export const internalStateSlice = createSlice({
         tab.controlGroupState = action.payload.controlGroupState;
       }),
 
+    setCascadedDocumentsState: (
+      state,
+      action: TabAction<Pick<TabState, 'cascadedDocumentsState'>>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.cascadedDocumentsState = action.payload.cascadedDocumentsState;
+      }),
+
+    setSelectedCascadeGroups: (
+      state,
+      actions: TabAction<Pick<TabState['cascadedDocumentsState'], 'selectedCascadeGroups'>>
+    ) =>
+      withTab(state, actions.payload, (tab) => {
+        tab.cascadedDocumentsState.selectedCascadeGroups = actions.payload.selectedCascadeGroups;
+      }),
+
     setEsqlVariables: (
       state,
       action: TabAction<{ esqlVariables: ESQLControlVariable[] | undefined }>
@@ -504,22 +521,32 @@ export interface InternalStateDependencies {
   urlStateStorage: IKbnUrlStateStorage;
   tabsStorageManager: TabsStorageManager;
   searchSessionManager: DiscoverSearchSessionManager;
+  getInternalState$: () => Observable<DiscoverInternalState>;
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
-export const createInternalStateStore = (options: InternalStateDependencies) => {
-  return configureStore({
+export const createInternalStateStore = (
+  options: Omit<InternalStateDependencies, 'getInternalState$'>
+) => {
+  const optionsWithStore: InternalStateDependencies = {
+    ...options,
+    getInternalState$: () => from(internalState),
+  };
+
+  const internalState = configureStore({
     reducer: internalStateSlice.reducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
-        thunk: { extraArgument: options },
+        thunk: { extraArgument: optionsWithStore },
         serializableCheck: !IS_JEST_ENVIRONMENT,
-      }).prepend(createMiddleware(options)),
+      }).prepend(createMiddleware(optionsWithStore)),
     devTools: {
       name: 'DiscoverInternalState',
     },
   });
+
+  return internalState;
 };
 
 export type InternalStateStore = ReturnType<typeof createInternalStateStore>;

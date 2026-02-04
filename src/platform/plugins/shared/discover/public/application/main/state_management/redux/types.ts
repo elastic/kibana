@@ -25,7 +25,7 @@ import type {
   UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
-import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
+import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
@@ -117,6 +117,11 @@ export interface DiscoverAppState {
   density?: DataGridDensity;
 }
 
+export interface CascadedDocumentsState {
+  availableCascadeGroups: string[];
+  selectedCascadeGroups: string[];
+}
+
 export enum TabInitializationStatus {
   NotStarted = 'NotStarted',
   InProgress = 'InProgress',
@@ -143,9 +148,7 @@ export interface TabState extends TabItem {
   appState: DiscoverAppState;
   previousAppState: DiscoverAppState;
   controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
-  /**
-   * ESQL query variables
-   */
+  cascadedDocumentsState: CascadedDocumentsState;
   esqlVariables: ESQLControlVariable[] | undefined;
   forceFetchOnSelect: boolean;
   isDataViewLoading: boolean;

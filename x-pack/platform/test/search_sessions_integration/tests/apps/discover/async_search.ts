@@ -182,6 +182,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await common.navigateToApp('discover');
       await discover.selectTextBaseLang();
       await header.waitUntilLoadingHasFinished();
+      await testSubjects.click('app-menu-overflow-button');
       expect(await searchSessions.exists()).to.be(true);
     });
   });

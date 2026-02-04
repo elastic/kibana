@@ -114,6 +114,7 @@ export const Command = z.enum([
   'scan',
   'runscript',
   'cancel',
+  'memory-dump',
 ]);
 export type CommandEnum = typeof Command.enum;
 export const CommandEnum = Command.enum;

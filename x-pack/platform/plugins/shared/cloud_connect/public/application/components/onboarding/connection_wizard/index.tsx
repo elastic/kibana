@@ -38,7 +38,7 @@ interface ConnectionWizardProps {
 }
 
 export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect }) => {
-  const { docLinks, clusterConfig, cloudUrl, telemetryService, apiService } =
+  const { docLinks, clusterConfig, cloudUrl, telemetryService, apiService, setJustConnected } =
     useCloudConnectedAppContext();
   const [apiKey, setApiKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -71,6 +71,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
 
     if (data?.success) {
       telemetryService.trackClusterConnected();
+      setJustConnected(true);
       onConnect();
     }
 
@@ -179,6 +180,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
           <>
             <EuiSpacer size="m" />
             <EuiCallOut
+              announceOnMount
               title="Authentication failed"
               color="danger"
               iconType="error"

@@ -8,7 +8,7 @@
 /* Assertions are performed by re-using the streams_app fixtures and page objects. */
 /* eslint-disable playwright/expect-expect */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../../../fixtures';
 
 test.describe(
