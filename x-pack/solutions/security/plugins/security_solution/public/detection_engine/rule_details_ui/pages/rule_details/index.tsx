@@ -30,7 +30,6 @@ import styled from 'styled-components';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
-
 import {
   dataTableActions,
   dataTableSelectors,
@@ -38,6 +37,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { css } from '@emotion/css';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { RuleCustomizationsContextProvider } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
@@ -60,7 +60,6 @@ import {
 } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
-import { FiltersGlobal } from '../../../../common/components/filters_global';
 import {
   getDetectionEngineUrl,
   getRuleDetailsTabUrl,
@@ -183,6 +182,10 @@ const StyledMinHeightTabContainer = styled.div`
  */
 const RuleFieldsSectionWrapper = styled.div`
   overflow-wrap: anywhere;
+`;
+
+const StyledEuiFlexItem = styled(EuiFlexItem)`
+  min-width: 0px;
 `;
 
 const defaultGroupingOptions = [
@@ -693,7 +696,6 @@ export const RuleDetailsPage = connector(
                           </EuiFlexGroup>
                         </EuiToolTip>
                       </EuiFlexItem>
-
                       <EuiFlexItem grow={false}>
                         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                           <EuiFlexItem grow={false}>
@@ -741,7 +743,14 @@ export const RuleDetailsPage = connector(
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.overview})`}>
                       <RuleFieldsSectionWrapper>
                         <EuiFlexGroup>
-                          <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
+                          <StyledEuiFlexItem
+                            data-test-subj="aboutRule"
+                            component="section"
+                            grow={2}
+                            css={css`
+                              flex-basis: 60%;
+                            `}
+                          >
                             {rule !== null && (
                               <StepAboutRuleToggleDetails
                                 loading={isLoading}
@@ -750,8 +759,13 @@ export const RuleDetailsPage = connector(
                                 rule={rule}
                               />
                             )}
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={1}>
+                          </StyledEuiFlexItem>
+                          <StyledEuiFlexItem
+                            grow={1}
+                            css={css`
+                              flex-basis: 40%;
+                            `}
+                          >
                             <EuiFlexGroup direction="column">
                               <EuiFlexItem component="section" grow={1} data-test-subj="defineRule">
                                 <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
@@ -764,7 +778,6 @@ export const RuleDetailsPage = connector(
                                   )}
                                 </StepPanel>
                               </EuiFlexItem>
-                              <EuiSpacer />
                               <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
                                 <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
                                   {rule != null && <RuleScheduleSection rule={rule} />}
@@ -781,7 +794,7 @@ export const RuleDetailsPage = connector(
                                 </EuiFlexItem>
                               )}
                             </EuiFlexGroup>
-                          </EuiFlexItem>
+                          </StyledEuiFlexItem>
                         </EuiFlexGroup>
                       </RuleFieldsSectionWrapper>
                     </Route>
