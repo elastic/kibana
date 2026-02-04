@@ -6,11 +6,7 @@
  */
 
 import minimatch from 'minimatch';
-import type {
-  FileEntry,
-  FsEntry,
-  DirEntry,
-} from '@kbn/agent-builder-server/runner/filestore';
+import type { FileEntry, FsEntry, DirEntry } from '@kbn/agent-builder-server/runner/filestore';
 import type { Volume, VolumeGlobOptions } from './types';
 import { normalizePath, getPathSegments } from './path_utils';
 
@@ -126,10 +122,7 @@ export class MemoryVolume implements Volume {
     return entries;
   }
 
-  async glob(
-    patterns: string | string[],
-    options: VolumeGlobOptions = {}
-  ): Promise<FsEntry[]> {
+  async glob(patterns: string | string[], options: VolumeGlobOptions = {}): Promise<FsEntry[]> {
     const patternArray = Array.isArray(patterns) ? patterns : [patterns];
     const { onlyFiles = false, onlyDirectories = false } = options;
 
