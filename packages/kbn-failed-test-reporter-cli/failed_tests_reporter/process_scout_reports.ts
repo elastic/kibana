@@ -15,7 +15,7 @@ import type { ProcessReportsParams } from './process_reports_types';
 import { createFailureIssue, updateFailureIssue } from './report_failure';
 import { reportFailuresToEs } from './report_failures_to_es';
 
-const updateScoutHtmlReport = ({
+export const updateScoutHtmlReport = ({
   log,
   reportDir,
   failure,
@@ -43,7 +43,7 @@ const updateScoutHtmlReport = ({
     const trackedBranchesLine = `<strong>Failures in tracked branches</strong>: ${badgeHtml} ${issueLinkHtml}`;
 
     updatedContent = updatedContent.replace(
-      /<div id="tracked-branches-status">[\s\S]*?<\/div>/,
+      /<div[^>]*id="tracked-branches-status"[^>]*>[\s\S]*?<\/div>/,
       `<div class="section" id="tracked-branches-status">${trackedBranchesLine}</div>`
     );
   }
