@@ -227,20 +227,11 @@ export class DashboardApp {
   }
 
   async clearUnsavedChanges() {
-    const isViewMode = await this.getIsInViewMode();
-    if (isViewMode) {
-      await this.switchToEditMode();
-    }
-
     const unsavedBadge = this.page.testSubj.locator('dashboardUnsavedChangesBadge');
     if (await unsavedBadge.isVisible()) {
       await this.clickQuickSave();
       await expect(unsavedBadge).toBeHidden();
       await this.toasts.closeAll();
-    }
-
-    if (isViewMode) {
-      await this.clickCancelOutOfEditMode();
     }
   }
 
@@ -860,18 +851,7 @@ export class DashboardApp {
    * may not be available in view mode.
    */
   async expectLinkedToLibrary(title?: string) {
-    // Switch to edit mode if needed
-    const isViewMode = await this.getIsInViewMode();
-    if (isViewMode) {
-      await this.switchToEditMode();
-    }
-
     await this.expectExistsPanelAction('embeddablePanelAction-unlinkFromLibrary', title);
-
-    // Restore view mode if we switched
-    if (isViewMode) {
-      await this.clickCancelOutOfEditMode();
-    }
   }
 
   /**
@@ -882,17 +862,6 @@ export class DashboardApp {
    * may not be available in view mode.
    */
   async expectNotLinkedToLibrary(title?: string) {
-    // Switch to edit mode if needed
-    const isViewMode = await this.getIsInViewMode();
-    if (isViewMode) {
-      await this.switchToEditMode();
-    }
-
     await this.expectExistsPanelAction('embeddablePanelAction-saveToLibrary', title);
-
-    // Restore view mode if we switched
-    if (isViewMode) {
-      await this.clickCancelOutOfEditMode();
-    }
   }
 }
