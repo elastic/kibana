@@ -28,7 +28,7 @@ export { scoutSpaceParallelFixture } from './scout_space';
 export type { ScoutSpaceParallelFixture } from './scout_space';
 
 export { apiServicesFixture } from './apis';
-export type { ApiServicesFixture } from './apis';
+export type { ApiServicesFixture, ApiServicesTypes } from './apis';
 
 export { synthtraceFixture } from './synthtrace';
 export type { SynthtraceFixture } from './synthtrace';
