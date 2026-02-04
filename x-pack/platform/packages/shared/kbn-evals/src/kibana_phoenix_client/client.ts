@@ -16,7 +16,6 @@ import type {
   EvalsExecutorClient,
   Evaluator,
   EvaluationDataset,
-  ExampleWithId,
   ExperimentTask,
   RanExperiment,
   TaskOutput,
@@ -268,17 +267,5 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
     );
 
     return datasets;
-  }
-
-  async getDatasetExamples(datasetId: string): Promise<ExampleWithId[]> {
-    const response = await this.phoenixClient.GET('/v1/datasets/{id}/examples', {
-      params: {
-        path: {
-          id: datasetId,
-        },
-      },
-    });
-
-    return (response.data?.data.examples ?? []) as ExampleWithId[];
   }
 }

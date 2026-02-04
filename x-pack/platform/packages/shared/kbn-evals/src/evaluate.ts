@@ -22,7 +22,6 @@ import { getPhoenixConfig } from './utils/get_phoenix_config';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, getConnectorIdAsUuid } from './utils/create_connector_fixture';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
-import { EvaluationAnalysisService } from './utils/analysis';
 import { EvaluationScoreRepository } from './utils/score_repository';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 import {
@@ -317,19 +316,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       // Get repetitions from test options (set in playwright config)
       const repetitions = (testInfo.project.use as any).repetitions || 1;
       await use(repetitions);
-    },
-    { scope: 'worker' },
-  ],
-  evaluationAnalysisService: [
-    async ({ esClient, log }, use) => {
-      const evaluationsEsClient = process.env.EVALUATIONS_ES_URL
-        ? createEsClientForTesting({
-            esUrl: process.env.EVALUATIONS_ES_URL,
-          })
-        : esClient;
-      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
-      const helper = new EvaluationAnalysisService(scoreRepository, log);
-      await use(helper);
     },
     { scope: 'worker' },
   ],

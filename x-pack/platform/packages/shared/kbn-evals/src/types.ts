@@ -10,7 +10,6 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { EsClient, ScoutWorkerFixtures } from '@kbn/scout';
 import type { EvaluationCriterion } from './evaluators/criteria';
-import type { EvaluationAnalysisService } from './utils/analysis';
 import { type EvaluationReporter } from './utils/reporting/evaluation_reporter';
 import type {
   EvaluatorDisplayOptions,
@@ -202,7 +201,6 @@ export interface EvaluationSpecificWorkerFixtures {
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
   repetitions: number;
-  evaluationAnalysisService: EvaluationAnalysisService;
   reportDisplayOptions: ReportDisplayOptions;
   reportModelScore: EvaluationReporter;
   traceEsClient: EsClient;
@@ -223,5 +221,4 @@ export interface EvaluationWorkerFixtures extends ScoutWorkerFixtures {
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
   repetitions: number;
-  evaluationAnalysisService: EvaluationAnalysisService;
 }
