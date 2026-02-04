@@ -33,6 +33,7 @@ describe('var_group_policy_effects', () => {
     {
       name: 'auth_method',
       title: 'Authentication Method',
+      selector_title: 'Select authentication method',
       options: [
         {
           name: 'cloud_connector',

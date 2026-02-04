@@ -104,7 +104,7 @@ describe('useVarGroupCloudConnector hook', () => {
       })
     );
 
-    const updatedPolicy = { name: 'updated-policy' };
+    const updatedPolicy = { name: 'updated-policy', enabled: true, policy_ids: [], inputs: [] };
     act(() => {
       result.current.handleCloudConnectorUpdate({ updatedPolicy });
     });
