@@ -47,7 +47,9 @@ const INFERENCE_ID_TO_SEMANTIC_TEXT_MAPPING: Record<SupportedInferenceId, Semant
     inference_id: DEFAULT_ELSER,
   },
 };
-export const getSemanticTextMapping = (inferenceId: string): SemanticTextMapping => {
+export const getSemanticTextMapping = (
+  inferenceId: string = DEFAULT_ELSER
+): SemanticTextMapping => {
   if (isSupportedInferenceId(inferenceId)) {
     return INFERENCE_ID_TO_SEMANTIC_TEXT_MAPPING[inferenceId];
   }

@@ -22,3 +22,13 @@ export interface TaskConfig {
   embeddingClusterPassword: string;
   inferenceId?: string;
 }
+
+export interface OpenAPITaskConfig {
+  stackVersion: string;
+  buildFolder: string;
+  targetFolder: string;
+  embeddingClusterUrl: string;
+  embeddingClusterUsername: string;
+  embeddingClusterPassword: string;
+  inferenceId?: string;
+}
