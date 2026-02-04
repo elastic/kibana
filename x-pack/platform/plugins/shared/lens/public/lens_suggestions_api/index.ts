@@ -71,11 +71,6 @@ const shouldShowLineChart = (
 
   if (!esqlQuery) return undefined;
 
-  const { root } = Parser.parse(esqlQuery);
-  const isPromql = root.commands.find(({ name }) => name === 'promql');
-
-  if (isPromql) return true;
-
   // Check if there's at least one date column (for x-axis)
   const hasDateColumn = columns.some((col) => col.meta?.type === 'date');
   const hasMultipleSeries = columns.length > 2;
