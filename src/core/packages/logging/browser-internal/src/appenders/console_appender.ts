@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Layout, LogRecord, DisposableAppender } from '@kbn/logging';
+import { type Layout, type LogRecord, type DisposableAppender, LogLevel } from '@kbn/logging';
 import { unsafeConsole } from '@kbn/security-hardening';
 
 /**
@@ -27,8 +27,33 @@ export class ConsoleAppender implements DisposableAppender {
    * @param record `LogRecord` instance to be logged.
    */
   public append(record: LogRecord) {
-    // eslint-disable-next-line @kbn/eslint/no_unsafe_console
-    unsafeConsole.log(this.layout.format(record));
+    const message = this.layout.format(record);
+    switch (record.level) {
+      case LogLevel.Error:
+      case LogLevel.Fatal:
+        // eslint-disable-next-line @kbn/eslint/no_unsafe_console
+        unsafeConsole.error(message);
+        break;
+      case LogLevel.Warn:
+        // eslint-disable-next-line @kbn/eslint/no_unsafe_console
+        unsafeConsole.warn(message);
+        break;
+      case LogLevel.Trace:
+        // eslint-disable-next-line @kbn/eslint/no_unsafe_console
+        unsafeConsole.trace(message);
+        break;
+      case LogLevel.Info:
+        // eslint-disable-next-line @kbn/eslint/no_unsafe_console
+        unsafeConsole.info(message);
+        break;
+      case LogLevel.Debug:
+        // eslint-disable-next-line @kbn/eslint/no_unsafe_console
+        unsafeConsole.debug(message);
+        break;
+      default:
+        // eslint-disable-next-line @kbn/eslint/no_unsafe_console
+        unsafeConsole.log(message);
+    }
   }
 
   /**
