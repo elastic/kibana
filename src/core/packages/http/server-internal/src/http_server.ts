@@ -23,6 +23,8 @@ import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-
 import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import { isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { AuthStatus } from '@kbn/core-http-server';
+import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type {
   AuthenticationHandler,
   HttpAuth,
@@ -559,11 +561,16 @@ export class HttpServer {
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
 
-      // TODO: This only works if we get the execution context from the request in the x-kbn-context header.
-      // The browser does this but if someone does a request directly to the server it may not exist.
-      // Should we do it differently or is this ok?
+      let spaceId: string | undefined;
+      // try to getspace from URL (`/s/<id>`); fall back to `x-kbn-context` when parsing fails/missing.
+      try {
+        spaceId = getSpaceIdFromPath(request.url.pathname, config.basePath).spaceId;
+      } catch {
+        spaceId = parentContext?.space;
+      }
+
       userActivity?.setInjectedContext({
-        kibana: { space: { id: parentContext?.space } },
+        kibana: { space: { id: spaceId } },
       });
 
       if (executionContext && parentContext) {
@@ -587,39 +594,30 @@ export class HttpServer {
     });
 
     this.server!.ext('onPreHandler', (request, responseToolkit) => {
-      // TODO: is it ok to pull the values like this or should we
-      // look for an alternative?
-      const isAuthenticatedUser = (value: unknown): value is AuthenticatedUser => {
-        if (typeof value !== 'object' || value === null) return false;
-        const v = value as Record<string, unknown>;
-        return (
-          typeof v.username === 'string' &&
-          (v.email === undefined || typeof v.email === 'string') &&
-          Array.isArray(v.roles) &&
-          v.roles.every((r) => typeof r === 'string') &&
-          (v.profile_uid === undefined || typeof v.profile_uid === 'string')
-        );
-      };
+      (request.app as KibanaRequestState).span?.end();
+      (request.app as KibanaRequestState).span = null;
 
-      const user = isAuthenticatedUser(request?.auth?.credentials)
-        ? request.auth.credentials
-        : undefined;
-
+      const { state: user, status } = this.authState.get<AuthenticatedUser>(request);
+      const isAuthenticated = status === AuthStatus.authenticated;
       userActivity?.setInjectedContext({
-        user: {
-          ip: request.info.remoteAddress,
-          id: user?.profile_uid,
-          username: user?.username,
-          email: user?.email,
-          roles: user?.roles ? [...user.roles] : undefined,
-        },
+        user: isAuthenticated
+          ? {
+              ip: request.info.remoteAddress,
+              id: user.profile_uid,
+              username: user.username,
+              email: user.email,
+              roles: user.roles ? [...user.roles] : undefined,
+            }
+          : { ip: request.info.remoteAddress },
         session: {
           id: request.state?.sid?.sid,
         },
+        http: {
+          request: {
+            referrer: request.info.referrer,
+          },
+        },
       });
-
-      (request.app as KibanaRequestState).span?.end();
-      (request.app as KibanaRequestState).span = null;
 
       return responseToolkit.continue;
     });

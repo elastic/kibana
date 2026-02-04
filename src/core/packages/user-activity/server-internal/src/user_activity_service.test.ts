@@ -183,6 +183,7 @@ describe('UserActivityService', () => {
     it('sets kibana space context', () => {
       service.setInjectedContext({
         kibana: { space: { id: 'my-space' } },
+        http: { request: { referrer: 'elastic.co' } },
       });
 
       service.trackUserAction({
@@ -194,6 +195,7 @@ describe('UserActivityService', () => {
       const logCalls = loggingSystemMock.collect(core.logger).info;
       expect(logCalls[0][1]).toMatchObject({
         kibana: { space: { id: 'my-space' } },
+        http: { request: { referrer: 'elastic.co' } },
       });
     });
 

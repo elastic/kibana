@@ -107,6 +107,9 @@ export class UserActivityService
         space: { ...current.kibana?.space, ...newContext.kibana?.space },
       },
       user: { ...current.user, ...newContext.user },
+      http: {
+        request: { ...current.http?.request, ...newContext.http?.request },
+      },
     });
   };
 

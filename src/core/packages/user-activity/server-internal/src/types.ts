@@ -31,11 +31,19 @@ export interface UserContext {
   ip?: string;
 }
 
+/** @internal */
+export interface HttpRequestContext {
+  referrer?: string;
+}
+
 /**
  * Context automatically injected by HTTP middleware.
  * @internal
  */
 export interface InjectedContext {
+  http?: {
+    request?: HttpRequestContext;
+  };
   session?: SessionContext;
   kibana?: {
     space?: SpaceContext;
