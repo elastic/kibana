@@ -109,9 +109,8 @@ describe('ScriptsLibraryTable', () => {
 
       const columns = renderResult.getAllByRole('columnheader');
       expect(columns).toHaveLength(7);
-      expect(columns.map((column) => column.textContent).join(',')).toEqual(
-        'Name,Platforms,Types,Updated by,Last updated,Size,Actions'
-      );
+      const columnLabels = columns.map((column) => column.textContent).join(',');
+      expect(columnLabels).toEqual('Name,Platforms,Types,Updated by,Last updated,Size,Actions');
     });
 
     it('shows error when error prop is set', () => {
