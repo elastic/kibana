@@ -137,19 +137,16 @@ export const suggestionsApi = ({
       (!sug.hide && sug.visualizationId !== 'lnsLegacyMetric')
   );
 
-  const chartType = preferredChartType
-    ? preferredChartType.toLowerCase()
-    : shouldUseLineChart(context)
-    ? 'line'
-    : undefined;
+  const chartType = preferredChartType?.toLowerCase();
 
   // to return line / area instead of a bar chart
+  const xyTargetTypeId = chartType ?? (shouldUseLineChart(context) ? 'line' : undefined);
   const xyResult = switchVisualizationType({
     visualizationMap,
     suggestions: [primarySuggestion, ...newSuggestions],
-    targetTypeId: chartType,
+    targetTypeId: xyTargetTypeId,
     familyType: 'lnsXY',
-    forceSwitch: ['area', 'line'].some((type) => chartType?.includes(type)),
+    forceSwitch: ['area', 'line'].some((type) => xyTargetTypeId?.includes(type)),
   });
   if (xyResult) return xyResult;
 
