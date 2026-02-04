@@ -27,6 +27,7 @@ import type {
   NetworkDirectionProcessor,
   JsonExtractProcessor,
   EnrichProcessor,
+  UserAgentProcessor,
 } from '@kbn/streamlang';
 import type { EnrichmentDataSource } from '../../../../../common/url_schema';
 import type { ConfigDrivenProcessorFormState } from './steps/blocks/action/config_driven/types';
@@ -83,6 +84,7 @@ export type NetworkDirectionFormState = Omit<
   internal_networks_field?: string;
 };
 export type EnrichFormState = EnrichProcessor;
+export type UserAgentFormState = UserAgentProcessor;
 
 export type SpecialisedFormState =
   | GrokFormState
@@ -105,6 +107,8 @@ export type SpecialisedFormState =
   | JsonExtractFormState
   | NetworkDirectionFormState
   | EnrichFormState;
+  | ConcatFormState
+  | UserAgentFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
 export type ConditionBlockFormState = StreamlangConditionBlockWithUIAttributes;

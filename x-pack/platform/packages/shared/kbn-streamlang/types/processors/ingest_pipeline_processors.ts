@@ -31,6 +31,7 @@ import type {
   NetworkDirectionProcessor,
   JsonExtractProcessor,
   EnrichProcessor,
+  UserAgentProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -176,6 +177,12 @@ export type IngestPipelineEnrichProcessor = RenameFieldsAndRemoveAction<
   { to: 'target_field'; where: 'if' }
 >;
 
+// User Agent
+export type IngestPipelineUserAgentProcessor = RenameFieldsAndRemoveAction<
+  UserAgentProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -206,4 +213,5 @@ export type IngestPipelineProcessor =
   | IngestPipelineNetworkDirectionProcessor
   | IngestPipelineJsonExtractProcessor
   | IngestPipelineEnrichProcessor
+  | IngestPipelineUserAgentProcessor
   | IngestPipelineManualIngestPipelineProcessor;

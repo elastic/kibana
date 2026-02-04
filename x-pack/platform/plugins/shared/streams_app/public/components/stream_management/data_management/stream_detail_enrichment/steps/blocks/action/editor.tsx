@@ -65,6 +65,7 @@ import { JoinProcessorForm } from './join';
 import { JsonExtractProcessorForm } from './json_extract';
 import { NetworkDirectionProcessorForm } from './network_direction';
 import { EnrichProcessorForm } from './enrich';
+import { UserAgentProcessorForm } from './user_agent';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
@@ -171,6 +172,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 {type === 'json_extract' && <JsonExtractProcessorForm />}
                 {type === 'network_direction' && <NetworkDirectionProcessorForm />}
                 {type === 'enrich' && <EnrichProcessorForm />}
+                {type === 'user_agent' && <UserAgentProcessorForm />}
                 {!SPECIALISED_TYPES.includes(type) && (
                   <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
                 )}

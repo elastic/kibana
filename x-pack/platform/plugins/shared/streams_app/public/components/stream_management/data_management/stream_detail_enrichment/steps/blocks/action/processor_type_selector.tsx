@@ -358,7 +358,14 @@ const getAvailableProcessors: (
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.mathHelpText"
           defaultMessage="Evaluate {expressionNote}. Reference fields directly (for example, {example}). The result is written to the Output field."
           values={{
-            expressionNote: <strong>arithmetic or logical expressions</strong>,
+            expressionNote: (
+              <strong>
+                {i18n.translate(
+                  'xpack.streams.getAvailableProcessors.strong.arithmeticOrLogicalExpressionsLabel',
+                  { defaultMessage: 'arithmetic or logical expressions' }
+                )}
+              </strong>
+            ),
             example: (
               <>
                 <EuiCode>bytes / duration </EuiCode>
@@ -661,6 +668,37 @@ const getAvailableProcessors: (
       );
     },
   },
+  user_agent: {
+    type: 'user_agent' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentInputDisplay',
+      {
+        defaultMessage: 'User agent',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentHelpText"
+          defaultMessage="{userAgentLink} from browser user agent strings (browser name, OS, device info, etc.)."
+          values={{
+            userAgentLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsUserAgentLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.userAgent}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.userAgentLinkLabel', {
+                  defaultMessage: 'Extracts details',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -694,6 +732,7 @@ const PROCESSOR_GROUP_MAP: Record<
   grok: 'extract',
   dissect: 'extract',
   json_extract: 'extract',
+  user_agent: 'extract',
   convert: 'convert',
   date: 'convert',
   replace: 'convert',

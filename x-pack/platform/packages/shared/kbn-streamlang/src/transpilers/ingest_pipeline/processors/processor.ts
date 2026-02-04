@@ -30,6 +30,7 @@ import type {
   IngestPipelineNetworkDirectionProcessor,
   IngestPipelineJsonExtractProcessor,
   IngestPipelineEnrichProcessor,
+  IngestPipelineUserAgentProcessor,
 } from '../../../../types/processors/ingest_pipeline_processors';
 
 type WithOptionalTracingTag<T> = T & { tag?: string };
@@ -58,5 +59,6 @@ export interface ActionToIngestType {
   network_direction: WithOptionalTracingTag<IngestPipelineNetworkDirectionProcessor>;
   json_extract: WithOptionalTracingTag<IngestPipelineJsonExtractProcessor>;
   enrich: WithOptionalTracingTag<IngestPipelineEnrichProcessor>;
+  user_agent: WithOptionalTracingTag<IngestPipelineUserAgentProcessor>;
   manual_ingest_pipeline: WithOptionalTracingTag<IngestPipelineManualIngestPipelineProcessor>;
 }
