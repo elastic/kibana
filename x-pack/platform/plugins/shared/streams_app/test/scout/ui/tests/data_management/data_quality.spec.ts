@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
 import { generateLogsData } from '../../fixtures/generators';
 
 const TEST_STREAM = 'logs-nginx-default';
 
-test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/251123
+test.describe.skip('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
     const currentTime = Date.now();
     const generateLogs = generateLogsData(logsSynthtraceEsClient);
