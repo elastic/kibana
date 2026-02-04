@@ -8,11 +8,13 @@
  */
 
 import type { Observable } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import type { ChromeDocTitle } from '@kbn/core-chrome-browser';
 import type { ChromeState } from '../state/chrome_state';
 
 export interface AppChangeHandlerDeps {
   currentAppId$: Observable<string | undefined>;
+  stop$: Observable<void>;
   state: ChromeState;
   docTitle: ChromeDocTitle;
 }
@@ -23,10 +25,11 @@ export interface AppChangeHandlerDeps {
  */
 export function setupAppChangeHandler({
   currentAppId$,
+  stop$,
   state,
   docTitle,
 }: AppChangeHandlerDeps): void {
-  currentAppId$.subscribe(() => {
+  currentAppId$.pipe(takeUntil(stop$)).subscribe(() => {
     // Reset UI elements
     state.badge.set(undefined);
     state.appMenu.set(undefined);

@@ -8,10 +8,3 @@
  */
 
 export { createChromeApi } from './chrome_api';
-export {
-  createBreadcrumbsApi,
-  type BreadcrumbsApi,
-  type BreadcrumbsApiDeps,
-} from './breadcrumbs_api';
-export { createHelpApi, type HelpApi, type HelpApiDeps } from './help_api';
-export { createProjectApi, type ProjectApi, type ProjectApiDeps } from './project_api';

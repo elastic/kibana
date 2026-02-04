@@ -154,6 +154,7 @@ export class ChromeService {
     // 5. Setup app change handler (resets chrome state on app navigation)
     setupAppChangeHandler({
       currentAppId$: application.currentAppId$,
+      stop$: this.stop$,
       state,
       docTitle,
     });
