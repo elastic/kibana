@@ -251,34 +251,32 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
           }
         />
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EndpointStats endpoints={tableData} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-                <EuiFlexItem css={searchContainerStyles} grow={false}>
-                  <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ServiceProviderFilter
-                    optionKeys={filterOptions.provider}
-                    uniqueProviders={uniqueProvidersAndTaskTypes.providers}
-                    onChange={onFilterChangedCallback}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <TaskTypeFilter
-                    optionKeys={filterOptions.type}
-                    onChange={onFilterChangedCallback}
-                    uniqueTaskTypes={uniqueProvidersAndTaskTypes.taskTypes}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EndpointStats endpoints={tableData} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+              <EuiFlexItem css={searchContainerStyles} grow={false}>
+                <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ServiceProviderFilter
+                  optionKeys={filterOptions.provider}
+                  uniqueProviders={uniqueProvidersAndTaskTypes.providers}
+                  onChange={onFilterChangedCallback}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TaskTypeFilter
+                  optionKeys={filterOptions.type}
+                  onChange={onFilterChangedCallback}
+                  uniqueTaskTypes={uniqueProvidersAndTaskTypes.taskTypes}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiFlexItem>
           <EuiBasicTable
             columns={tableColumns}
