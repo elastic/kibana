@@ -25,13 +25,15 @@ export const LegacyEngineDescriptorV1 = LogExtractionState.pick({
   lookbackPeriod: true,
   fieldHistoryLength: true,
   filter: true,
-}).merge(z.object({
-  docsPerSecond: z.literal(-1),
-  indexPattern: z.literal(''),
-  enrichPolicyExecutionInterval: z.null(),
-  timestampField: z.literal('@timestamp'),
-  maxPageSearchSize: z.literal(10000),
-}));
+}).merge(
+  z.object({
+    docsPerSecond: z.literal(-1),
+    indexPattern: z.literal(''),
+    enrichPolicyExecutionInterval: z.null(),
+    timestampField: z.literal('@timestamp'),
+    maxPageSearchSize: z.literal(10000),
+  })
+);
 
 type StatusEngine = Omit<GetStatusResult['engines'][number], 'versionState'> &
   LegacyEngineDescriptorV1;

@@ -24,7 +24,7 @@ import type {
   EntityStoreStatus,
   EngineComponentStatus,
   EngineComponentResource,
-  GetStatusResult
+  GetStatusResult,
 } from './types';
 import { getExtractEntityTaskId } from '../tasks/extract_entity_task';
 import { getLatestEntitiesIndexName } from './assets/latest_index';
