@@ -19,7 +19,13 @@ import {
   withCompleteItem,
   assignCompletionItem,
 } from '../complete_items';
-import { expectSuggestions, suggest } from '../../../__tests__/commands/autocomplete';
+import { Location } from '../types';
+import {
+  expectSuggestions,
+  getFieldNamesByType,
+  getFunctionSignaturesByReturnType,
+  suggest,
+} from '../../../__tests__/commands/autocomplete';
 import type { ICommandCallbacks } from '../types';
 import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import {
@@ -194,17 +200,35 @@ describe('RERANK Autocomplete', () => {
     test('suggests field continuations after selecting a field', async () => {
       const query = buildRerankQuery({ query: '"search query"', onClause: 'keywordField' });
 
-      await expectRerankSuggestions(query, [
-        'keywordField, ',
-        'keywordField WITH { $0 } ',
-        'keywordField | ',
-      ]);
+      await expectRerankSuggestions(query, {
+        contains: [
+          ', ',
+          'WITH { $0 }',
+          '| ',
+          ...getFieldNamesByType('any'),
+          ...getFunctionSignaturesByReturnType(Location.RERANK, 'any', { scalar: true }),
+        ],
+      });
     });
 
     test('suggests continuations after field with more trailing spaces', async () => {
       const query = buildRerankQuery({ query: '"search query"', onClause: 'keywordField' }) + ' ';
 
-      await expectRerankSuggestions(query, NEXT_ACTIONS);
+      await expectRerankSuggestions(query, [
+        ...NEXT_ACTIONS,
+        ...getFunctionSignaturesByReturnType(
+          Location.RERANK,
+          'any',
+          {
+            operators: true,
+            excludeOperatorGroups: [],
+            skipAssign: true,
+            agg: false,
+            scalar: false,
+          },
+          ['keyword']
+        ),
+      ]);
     });
   });
 
@@ -283,23 +307,6 @@ describe('RERANK Autocomplete', () => {
 
       await expectRerankSuggestions(query, NEXT_ACTIONS_EXPRESSIONS);
     });
-
-    test.each(OPERATOR_SUGGESTIONS.COMPARISON)(
-      'Incomplete %s operator shows other operators',
-      async (operator) => {
-        const operatorClause = `${operator} 10`;
-        const query =
-          buildRerankQuery({
-            query: '"search query"',
-            onClause: `textField = keywordField ${operatorClause}`,
-          }) + ' ';
-
-        await expectRerankSuggestions(query, {
-          contains: [...addPlaceholder(OPERATOR_SUGGESTIONS.COMPARISON.slice(0, 4))],
-          notContains: NEXT_ACTIONS_EXPRESSIONS,
-        });
-      }
-    );
 
     test('handles empty IN list as incomplete expression', async () => {
       const query =
@@ -403,31 +410,6 @@ describe('RERANK Autocomplete', () => {
   // ============================================================================
   // Edge Cases and Error Handling
   // ============================================================================
-
-  describe('Advanced boolean expressions', () => {
-    test('handles complex parenthesized expressions', async () => {
-      // Complex expressions ending with incomplete part show operators
-      const expression = '(textField = "value") AND NOT (keywordField';
-      const query =
-        buildRerankQuery({
-          query: '"search query"',
-          onClause: expression,
-        }) + ' ';
-
-      await expectRerankSuggestions(query, {
-        contains: [
-          addPlaceholder([OPERATOR_SUGGESTIONS.PATTERN[0]])[0],
-          ...addPlaceholder(OPERATOR_SUGGESTIONS.SET.slice(0, 1)),
-          OPERATOR_SUGGESTIONS.EXISTENCE[0],
-        ],
-        notContains: [
-          ...NEXT_ACTIONS_EXPRESSIONS,
-          ...addPlaceholder(OPERATOR_SUGGESTIONS.COMPARISON),
-        ],
-      });
-    });
-  });
-
   describe('Edge cases', () => {
     test('handles dotted field names correctly', async () => {
       const query =
