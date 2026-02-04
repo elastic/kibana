@@ -100,17 +100,17 @@ export default function (providerContext: FtrProviderContext) {
         await createAgentPolicyWithPackagePolicy();
         await fleetAndAgents.generateAgent(
           'online',
-          agentId,
-          agentPolicyWithPPId,
-          previousMinorVersion
-        );
-        await fleetAndAgents.generateAgent(
-          'online',
           upgradedAgentId,
           `${agentPolicyWithPPId}#${previousMinor}`,
           kibanaVersion,
           undefined,
           new Date().toISOString()
+        );
+        await fleetAndAgents.generateAgent(
+          'online',
+          agentId,
+          agentPolicyWithPPId,
+          previousMinorVersion
         );
       });
       after(async () => {
@@ -270,17 +270,17 @@ export default function (providerContext: FtrProviderContext) {
         await createAgentPolicyWithPackagePolicy();
         await fleetAndAgents.generateAgent(
           'online',
-          agentId,
-          agentPolicyWithPPId,
-          previousMinorVersion
-        );
-        await fleetAndAgents.generateAgent(
-          'online',
           upgradedAgentId,
           `${agentPolicyWithPPId}#${previousMinor}`,
           kibanaVersion,
           undefined,
           new Date().toISOString()
+        );
+        await fleetAndAgents.generateAgent(
+          'online',
+          agentId,
+          agentPolicyWithPPId,
+          previousMinorVersion
         );
       });
       after(async () => {
