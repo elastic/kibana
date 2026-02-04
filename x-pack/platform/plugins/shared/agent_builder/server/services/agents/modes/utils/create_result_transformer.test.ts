@@ -7,7 +7,11 @@
 
 import type { ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common';
-import type { FilestoreEntry, IFileStore } from '@kbn/agent-builder-server/runner/filestore';
+import type {
+  FilestoreEntry,
+  FilestoreVersionedEntry,
+  IFileStore,
+} from '@kbn/agent-builder-server/runner/filestore';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import { createFileSystemStoreMock } from '../../../../test_utils/runner';
 import {
@@ -27,11 +31,11 @@ describe('createResultTransformer', () => {
     results,
   });
 
-  const createMockFileStore = (entries: Map<string, FilestoreEntry>): IFileStore => {
+  const createMockFileStore = (entries: Map<string, FilestoreVersionedEntry>): IFileStore => {
     const filestore = createFileSystemStoreMock();
     filestore.getEntry.mockImplementation(async (path: string) => entries.get(path));
     filestore.read.mockImplementation(async (path: string, _options?: { version?: number }) =>
-      entries.get(path)
+      toFilestoreEntry(entries.get(path))
     );
     return filestore;
   };
@@ -40,21 +44,47 @@ describe('createResultTransformer', () => {
     path: string,
     tokenCount: number,
     data: Record<string, unknown> = {}
-  ): FilestoreEntry => ({
+  ): FilestoreVersionedEntry => ({
     path,
     type: 'file',
-    version: 1,
     metadata: {
       type: 'tool_result' as any,
       id: 'result-id',
       readonly: true,
-      token_count: tokenCount,
+      versioned: false,
     },
-    content: {
-      raw: data,
-      plain_text: JSON.stringify(data),
-    },
+    versions: [
+      {
+        version: 1,
+        content: {
+          raw: data,
+          plain_text: JSON.stringify(data),
+        },
+        metadata: {
+          token_count: tokenCount,
+        },
+      },
+    ],
   });
+
+  const toFilestoreEntry = (entry?: FilestoreVersionedEntry): FilestoreEntry | undefined => {
+    if (!entry) {
+      return undefined;
+    }
+    const latest = entry.versions.reduce((current, next) =>
+      next.version > current.version ? next : current
+    );
+    return {
+      path: entry.path,
+      type: 'file',
+      version: latest.version,
+      metadata: {
+        ...entry.metadata,
+        ...latest.metadata,
+      },
+      content: latest.content,
+    };
+  };
 
   const createMockToolRegistry = (
     tools: Map<string, { summarizeToolReturn?: (step: ToolCallWithResult) => ToolResult[] | null }>
@@ -173,7 +203,7 @@ describe('createResultTransformer', () => {
     it('substitutes results above threshold with file references', async () => {
       const toolRegistry = createMockToolRegistry(new Map([['search', {} as any]]));
 
-      const entries = new Map<string, FilestoreEntry>();
+      const entries = new Map<string, FilestoreVersionedEntry>();
       entries.set(
         '/tool_calls/search/call-1/result-1.json',
         createFileEntry(
@@ -207,7 +237,7 @@ describe('createResultTransformer', () => {
     it('keeps results below threshold as-is', async () => {
       const toolRegistry = createMockToolRegistry(new Map([['search', {} as any]]));
 
-      const entries = new Map<string, FilestoreEntry>();
+      const entries = new Map<string, FilestoreVersionedEntry>();
       entries.set(
         '/tool_calls/search/call-1/result-1.json',
         createFileEntry('/tool_calls/search/call-1/result-1.json', 100, { small: 'data' })
@@ -254,7 +284,7 @@ describe('createResultTransformer', () => {
     it('does not apply filestore substitution when filestoreEnabled is false', async () => {
       const toolRegistry = createMockToolRegistry(new Map([['search', {} as any]]));
 
-      const entries = new Map<string, FilestoreEntry>();
+      const entries = new Map<string, FilestoreVersionedEntry>();
       entries.set(
         '/tool_calls/search/call-1/result-1.json',
         createFileEntry(
@@ -298,7 +328,7 @@ describe('createResultTransformer', () => {
       const toolRegistry = createMockToolRegistry(new Map([['search', toolWithSummarizer as any]]));
 
       // Even if we have large file entries, summarized results should not be substituted
-      const entries = new Map<string, FilestoreEntry>();
+      const entries = new Map<string, FilestoreVersionedEntry>();
       entries.set(
         '/tool_calls/search/call-1/summarized.json',
         createFileEntry(
@@ -413,7 +443,7 @@ describe('createResultTransformer', () => {
     it('respects custom threshold parameter', async () => {
       const toolRegistry = createMockToolRegistry(new Map([['search', {} as any]]));
 
-      const entries = new Map<string, FilestoreEntry>();
+      const entries = new Map<string, FilestoreVersionedEntry>();
       // Token count of 200 - above custom threshold of 100
       entries.set(
         '/tool_calls/search/call-1/result-1.json',
