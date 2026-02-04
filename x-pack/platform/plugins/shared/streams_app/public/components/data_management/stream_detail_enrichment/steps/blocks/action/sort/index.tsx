@@ -11,7 +11,7 @@ import { EuiSpacer, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { useController } from 'react-hook-form';
 import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
-import { IgnoreFailureToggle } from '../ignore_toggles';
+import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { SortTargetFieldSelector } from './target_field';
 import type { SortFormState } from '../../../../types';
@@ -72,6 +72,7 @@ export const SortProcessorForm = () => {
       </FieldsAccordion>
       <EuiSpacer size="m" />
       <IgnoreFailureToggle />
+      <IgnoreMissingToggle />
     </>
   );
 };

@@ -21,6 +21,10 @@ import { conditionToESQLAst } from '../condition_to_esql';
  *   Uses EVAL with CASE: EVAL target_field = CASE(<condition>, MV_SORT(field, order), existing_value)
  *   If `to` is not provided, updates field in-place
  *
+ * For ignore_missing:
+ *   Uses EVAL with CASE to check if field is not null before sorting:
+ *   EVAL field = CASE(IS_NOT_NULL(field), MV_SORT(field, order), field)
+ *
  * Notes:
  * - ES|QL's MV_SORT function sorts a multivalued field in lexicographical order.
  * - The order parameter can be "ASC" (default) or "DESC".
@@ -80,9 +84,27 @@ import { conditionToESQLAst } from '../condition_to_esql';
  *    ```txt
  *    | EVAL tags = CASE(status == "active", MV_SORT(tags, "DESC"), tags)
  *    ```
+ *
+ * @example With ignore_missing:
+ *    ```typescript
+ *    const streamlangDSL: StreamlangDSL = {
+ *      steps: [
+ *        {
+ *          action: 'sort',
+ *          from: 'tags',
+ *          ignore_missing: true,
+ *        } as SortProcessor,
+ *      ],
+ *    };
+ *    ```
+ *
+ *    Generates:
+ *    ```txt
+ *    | EVAL tags = CASE(IS_NOT_NULL(tags), MV_SORT(tags, "ASC"), tags)
+ *    ```
  */
 export function convertSortProcessorToESQL(processor: SortProcessor): ESQLAstCommand[] {
-  const { from, to, order = 'asc' } = processor;
+  const { from, to, order = 'asc', ignore_missing } = processor;
 
   const commands: ESQLAstCommand[] = [];
 
@@ -94,10 +116,23 @@ export function convertSortProcessorToESQL(processor: SortProcessor): ESQLAstCom
   const sortFunction = Builder.expression.func.call('MV_SORT', [fromColumn, orderLiteral]);
 
   // Check if this is conditional or unconditional sort
-  if ('where' in processor && processor.where && !('always' in processor.where)) {
-    // Conditional sort: use EVAL with CASE
-    // EVAL target_field = CASE(<condition>, MV_SORT(field, order), existing_value)
-    const conditionExpression = conditionToESQLAst(processor.where);
+  const hasCondition = 'where' in processor && processor.where && !('always' in processor.where);
+
+  if (hasCondition || ignore_missing) {
+    // Build the condition expression
+    let conditionExpression;
+
+    if (hasCondition && ignore_missing) {
+      // Combine where condition with null check: (condition) AND (field IS NOT NULL)
+      const whereCondition = conditionToESQLAst(processor.where!);
+      const notNullCheck = Builder.expression.func.call('IS_NOT_NULL', [fromColumn]);
+      conditionExpression = Builder.expression.func.binary('and', [whereCondition, notNullCheck]);
+    } else if (hasCondition) {
+      conditionExpression = conditionToESQLAst(processor.where!);
+    } else {
+      // Just ignore_missing: field IS NOT NULL
+      conditionExpression = Builder.expression.func.call('IS_NOT_NULL', [fromColumn]);
+    }
 
     // For CASE else clause: use target field if it exists, else use source field
     const elseValue = to ? targetColumn : fromColumn;

@@ -502,6 +502,7 @@ export interface SortProcessor extends ProcessorBaseWithWhere {
   from: string;
   to?: string;
   order?: SortOrder;
+  ignore_missing?: boolean;
 }
 
 export const sortProcessorSchema = processorBaseWithWhereSchema.extend({
@@ -513,6 +514,7 @@ export const sortProcessorSchema = processorBaseWithWhereSchema.extend({
   order: z
     .optional(z.enum(sortOrders))
     .describe('Sort order - "asc" (ascending) or "desc" (descending). Defaults to "asc"'),
+  ignore_missing: z.optional(z.boolean()).describe('Skip processing when source field is missing'),
 }) satisfies z.Schema<SortProcessor>;
 
 /**

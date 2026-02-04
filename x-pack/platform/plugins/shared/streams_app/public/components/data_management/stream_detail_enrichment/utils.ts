@@ -282,7 +282,8 @@ const defaultSortProcessorFormState = (): SortFormState => ({
   action: 'sort' as const,
   from: '',
   order: 'asc',
-  ignore_failure: false,
+  ignore_failure: true,
+  ignore_missing: true,
   where: ALWAYS_CONDITION,
 });
 
@@ -665,7 +666,7 @@ export const convertFormStateToProcessor = (
     }
 
     if (formState.action === 'sort') {
-      const { from, order, to, ignore_failure } = formState;
+      const { from, order, to, ignore_failure, ignore_missing } = formState;
       return {
         processorDefinition: {
           action: 'sort',
@@ -673,6 +674,7 @@ export const convertFormStateToProcessor = (
           order,
           to: isEmpty(to) ? undefined : to,
           ignore_failure,
+          ignore_missing,
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as SortProcessor,
