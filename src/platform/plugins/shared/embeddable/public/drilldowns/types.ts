@@ -27,12 +27,20 @@ export type DrilldownDefinition<TDrilldownState extends DrilldownState = Drilldo
    * @param config Drilldown state.
    * @param context Object that represents context in which the drilldown is being executed in.
    */
-  execute: (drilldownState: TDrilldownState, context: EmbeddableApiContext) => Promise<void>;
+  execute(drilldownState: TDrilldownState, context: EmbeddableApiContext): Promise<void>;
 
   /**
    * Name of EUI icon to display when showing this drilldown to user.
    */
   euiIcon?: string;
+
+  /**
+   * Returns a link where drilldown should navigate on middle click or Ctrl + click.
+   */
+  getHref?(
+    drilldownState: TDrilldownState,
+    context: EmbeddableApiContext
+  ): Promise<string | undefined>;
 
   isCompatible?: ActionDefinition['isCompatible'];
 

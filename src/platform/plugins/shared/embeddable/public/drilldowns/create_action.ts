@@ -32,11 +32,19 @@ export function createAction(embeddableUuid: string, drilldownState: DrilldownSt
   }
 
   uiActions.addTriggerActionAsync(actionId, trigger, async () => {
-    const { execute, euiIcon, isCompatible, license } = (await getDrilldown(type)) ?? {};
+    const { execute, euiIcon, getHref, isCompatible, license } = (await getDrilldown(type)) ?? {};
+
     return {
       id: actionId,
       getDisplayName: () => label,
       getIconType: () => euiIcon,
+      ...(getHref
+        ? {
+            getHref: async (context: EmbeddableApiContext) => {
+              return getHref(drilldownState, context);
+            },
+          }
+        : {}),
       execute: async (context: EmbeddableApiContext) => {
         if (license && licensing) {
           licensing.featureUsage.notifyUsage(license.featureName).catch(() => {
