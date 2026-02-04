@@ -395,7 +395,7 @@ export function StreamsTreeTable({
                     <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive wrap>
                   <EuiLink
                     data-test-subj={`streamsNameLink-${item.stream.name}`}
                     href={router.link('/{key}', {
@@ -412,12 +412,8 @@ export function StreamsTreeTable({
                   >
                     <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
                   </EuiLink>
-                </EuiFlexItem>
-                {Streams.QueryStream.Definition.is(item.stream) && (
-                  <EuiFlexItem grow={false}>
-                    <QueryStreamBadge />
-                  </EuiFlexItem>
-                )}
+                  {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
+                </EuiFlexGroup>
               </EuiFlexGroup>
             );
           },
