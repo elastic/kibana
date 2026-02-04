@@ -6,12 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import createContainer from 'constate';
+import type { DocViewActions } from '@kbn/unified-doc-viewer/src/services/types';
 
-export type {
-  DocView,
-  DocViewActions,
-  DocViewFilterFn,
-  DocViewRenderProps,
-  DocViewerComponent,
-  DocViewerRestorableState,
-} from './services/types';
+interface UseDocViewerExtensionActionsParams {
+  actions?: DocViewActions;
+}
+
+const useDocViewerExtensionActions = ({ actions }: UseDocViewerExtensionActionsParams) => {
+  return actions;
+};
+
+export const [DocViewerExtensionActionsProvider, useDocViewerExtensionActionsContext] =
+  createContainer(useDocViewerExtensionActions);
