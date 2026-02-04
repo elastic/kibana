@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -17,10 +16,6 @@ import {
 import type { EuiSelectableOption } from '@elastic/eui';
 import * as i18n from '../../../../common/translations';
 import { SortFieldInferenceEndpoint } from '../types';
-
-const listContainerStyles = css`
-  width: 150px;
-`;
 
 interface SortOption {
   field: SortFieldInferenceEndpoint;
@@ -99,7 +94,7 @@ export const SortButton: React.FC<SortButtonProps> = ({ selectedSortField, onSor
             onFocusBadge: false,
           }}
         >
-          {(list) => <div css={listContainerStyles}>{list}</div>}
+          {(list) => list}
         </EuiSelectable>
       </EuiPopover>
     </EuiFilterGroup>
