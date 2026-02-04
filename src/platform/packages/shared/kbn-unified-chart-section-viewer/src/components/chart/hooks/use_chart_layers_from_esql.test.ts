@@ -119,7 +119,7 @@ describe('useChartLayers', () => {
     expect(layer.yAxis[0].label).toBe('value');
     expect(layer.yAxis[0].seriesColor).toBe('blue');
     expect(layer.seriesType).toBe('area');
-    expect(layer.breakdown).toEqual(['service.name']); // Single dimension as array
+    expect(layer.breakdown).toBe('service.name'); // Single dimension uses actual dimension name
   });
 
   it('maps columns correctly to yAxis and uses first dimension for multiple dimensions', async () => {
@@ -158,8 +158,8 @@ describe('useChartLayers', () => {
     expect(layer.yAxis[0].label).toBe('value');
     expect(layer.yAxis[0].seriesColor).toBe('blue');
     expect(layer.seriesType).toBe('area');
-    // Lens natively supports multiple dimensions - pass all dimensions as array
-    expect(layer.breakdown).toEqual(['service.name', 'host.name']);
+    // Lens natively supports multiple dimensions - pass first dimension as breakdown
+    expect(layer.breakdown).toBe('service.name');
   });
 
   it('uses first date column as xAxis', async () => {
