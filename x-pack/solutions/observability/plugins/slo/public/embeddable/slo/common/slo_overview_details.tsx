@@ -22,46 +22,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
-import type { SloTabId } from '@kbn/deeplinks-observability';
-import { OVERVIEW_TAB_ID } from '@kbn/deeplinks-observability';
-import { HeaderTitle } from '../../../pages/slo_details/components/header_title';
-import { SloDetails } from '../../../pages/slo_details/components/slo_details';
+import { OVERVIEW_TAB_ID, type SloTabId } from '@kbn/deeplinks-observability';
 import { useSloDetailsTabs } from '../../../pages/slo_details/hooks/use_slo_details_tabs';
+import { SloDetails } from '../../../pages/slo_details/components/slo_details';
 import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
 import { useKibana } from '../../../hooks/use_kibana';
+import { HeaderTitle } from '../../../pages/slo_details/components/header_title';
 
 export interface SloOverviewDetailsContentProps {
   slo: SLOWithSummaryResponse;
-  initialTabId?: SloTabId;
-}
-
-export function SloOverviewDetailsContent({
-  slo,
-  initialTabId = OVERVIEW_TAB_ID,
-}: SloOverviewDetailsContentProps) {
-  const [selectedTabId, setSelectedTabId] = useState<SloTabId>(initialTabId);
-
-  const { tabs } = useSloDetailsTabs({
-    slo,
-    isAutoRefreshing: false,
-    selectedTabId,
-    setSelectedTabId,
-  });
-
-  return (
-    <>
-      <HeaderTitle slo={slo} isLoading={false} />
-      <EuiTabs>
-        {tabs.map(({ id, label, ...tab }) => (
-          <EuiTab key={id} {...tab} isSelected={id === selectedTabId}>
-            {label}
-          </EuiTab>
-        ))}
-      </EuiTabs>
-      <EuiSpacer size="m" />
-      <SloDetails slo={slo} isAutoRefreshing={false} selectedTabId={selectedTabId} isFlyout />
-    </>
-  );
+  selectedTabId: SloTabId;
 }
 
 export interface SloOverviewDetailsFlyoutFooterProps {
@@ -117,6 +87,15 @@ export function SloOverviewDetails({
     prefix: 'sloOverviewFlyout',
   });
 
+  const [selectedTabId, setSelectedTabId] = useState<SloTabId>(OVERVIEW_TAB_ID);
+
+  const { tabs } = useSloDetailsTabs({
+    slo,
+    isAutoRefreshing: false,
+    selectedTabId,
+    setSelectedTabId,
+  });
+
   const onClose = () => {
     setSelectedSlo(null);
   };
@@ -138,7 +117,16 @@ export function SloOverviewDetails({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <SloOverviewDetailsContent slo={slo} />
+        <HeaderTitle slo={slo} isLoading={false} />
+        <EuiTabs>
+          {tabs.map(({ id, label, ...tab }) => (
+            <EuiTab key={id} {...tab} isSelected={id === selectedTabId}>
+              {label}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+        <EuiSpacer size="m" />
+        <SloDetails slo={slo} isAutoRefreshing={false} selectedTabId={selectedTabId} isFlyout />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <SloOverviewDetailsFlyoutFooter slo={slo} onClose={onClose} />

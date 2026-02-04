@@ -14,11 +14,17 @@ interface Props {
   slo: SLOWithSummaryResponse;
   onClick?: (tag: string) => void;
   defaultVisibleTags?: number;
+  color?: string;
 }
 
 const DEFAULT_VISIBLE_TAGS = 3;
 
-export function SloTagsBadge({ slo, onClick, defaultVisibleTags = DEFAULT_VISIBLE_TAGS }: Props) {
+export function SloTagsBadge({
+  slo,
+  onClick,
+  defaultVisibleTags = DEFAULT_VISIBLE_TAGS,
+  color,
+}: Props) {
   const [expanded, setExpanded] = useState(false);
   const tags = slo.tags;
   const visibleTags = expanded ? tags : tags.slice(0, defaultVisibleTags);
@@ -46,7 +52,9 @@ export function SloTagsBadge({ slo, onClick, defaultVisibleTags = DEFAULT_VISIBL
           key={tag}
           onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
         >
-          <EuiBadge {...getClickProps(tag)}>{tag}</EuiBadge>
+          <EuiBadge color={color} {...getClickProps(tag)}>
+            {tag}
+          </EuiBadge>
         </EuiFlexItem>
       ))}
       {hasMore && (

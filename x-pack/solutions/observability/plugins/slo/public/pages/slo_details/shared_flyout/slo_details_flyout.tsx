@@ -7,6 +7,7 @@
 
 import type { EuiFlyoutProps } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,21 +15,30 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiHorizontalRule,
   EuiLink,
   EuiLoadingSpinner,
+  EuiMarkdownFormat,
+  EuiSelect,
+  EuiTab,
+  EuiTabs,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { SloTabId, SloDetailsLocatorParams } from '@kbn/deeplinks-observability';
 import { sloDetailsLocatorID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
+import { css } from '@emotion/react';
+import moment from 'moment';
+import { SloStateBadge, SloStatusBadge, SloValueBadge } from '../../../components/slo/slo_badges';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { useKibana } from '../../../hooks/use_kibana';
-import {
-  SloOverviewDetailsContent,
-  SloOverviewDetailsFlyoutFooter,
-} from '../../../embeddable/slo/common/slo_overview_details';
+import { SloOverviewDetailsFlyoutFooter } from '../../../embeddable/slo/common/slo_overview_details';
+import { useSloDetailsTabs } from '../hooks/use_slo_details_tabs';
+import { SloDetails } from '../components/slo_details';
+import { SloRemoteBadge } from '../../slos/components/badges/slo_remote_badge';
+import { SloTagsBadge } from '../../../components/slo/slo_badges/slo_tags_badge';
 
 export interface SLODetailsFlyoutProps {
   sloId: string;
@@ -52,6 +62,10 @@ const TITLES = {
   }),
 };
 
+const NOT_AVAILABLE_LABEL = i18n.translate('xpack.slo.sloDetailsFlyout.header.notAvailableLabel', {
+  defaultMessage: 'n/a',
+});
+
 // eslint-disable-next-line import/no-default-export
 export default function SLODetailsFlyout({
   sloId,
@@ -60,7 +74,7 @@ export default function SLODetailsFlyout({
   size = 'm',
   hideFooter = false,
   session = 'inherit',
-  initialTabId,
+  initialTabId = 'overview',
 }: SLODetailsFlyoutProps) {
   const { share } = useKibana().services;
 
@@ -79,6 +93,14 @@ export default function SLODetailsFlyout({
     shouldRefetch: false,
   });
 
+  const [selectedTabId, setSelectedTabId] = useState<SloTabId>(initialTabId);
+  const { tabs } = useSloDetailsTabs({
+    slo,
+    isAutoRefreshing: false,
+    selectedTabId,
+    setSelectedTabId,
+  });
+
   const isNotFound = isSuccess && !slo;
 
   const sloDetailsUrl = slo
@@ -87,25 +109,109 @@ export default function SLODetailsFlyout({
         ?.getRedirectUrl({ sloId: slo.id, instanceId: slo.instanceId })
     : undefined;
 
-  const title = useMemo(() => {
+  const renderHeader = () => {
     if (isError) {
       return TITLES.error;
     }
+
     if (isNotFound) {
       return TITLES.notFound;
     }
+
     if (isLoading) {
       return TITLES.loading;
     }
+
     if (slo && sloDetailsUrl) {
       return (
-        <EuiLink href={sloDetailsUrl} data-test-subj="sloDetailsFlyoutTitleLink" target="_blank">
-          {slo.name}
-        </EuiLink>
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={true}>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow" iconSide="left" iconType="visGauge">
+                {i18n.translate('xpack.slo.sloDetailsFlyout.sloBadgeLabel', {
+                  defaultMessage: 'SLO',
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+            <SloValueBadge slo={slo} />
+            <SloStatusBadge slo={slo} />
+            <SloStateBadge slo={slo} />
+            <SloRemoteBadge slo={slo} />
+          </EuiFlexGroup>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h3 id={flyoutTitleId}>
+                  <EuiLink
+                    href={sloDetailsUrl}
+                    data-test-subj="sloDetailsFlyoutTitleLink"
+                    target="_blank"
+                  >
+                    {slo.name}
+                  </EuiLink>
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiMarkdownFormat textSize="xs" color="subdued">
+                {i18n.translate('xpack.slo.sloDetailsFlyout.header.lastUpdatedLabel', {
+                  defaultMessage: 'Last updated by **{updatedBy}** on **{updatedAt}**',
+                  values: {
+                    updatedBy: slo.updatedBy ?? NOT_AVAILABLE_LABEL,
+                    updatedAt: moment(slo.updatedAt).format('ll'),
+                  },
+                })}
+              </EuiMarkdownFormat>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {slo.tags.length > 0 && (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={true}>
+              <SloTagsBadge slo={slo} color="hollow" />
+            </EuiFlexGroup>
+          )}
+          {(slo.indicator.type === 'sli.apm.transactionDuration' ||
+            slo.indicator.type === 'sli.apm.transactionErrorRate') && (
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem>
+                <EuiHorizontalRule margin="none" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiSelect
+                  data-test-subj="sloDetailsFlyoutTransactionNameSelect"
+                  value={slo.indicator.params.transactionName}
+                  options={[
+                    {
+                      value: slo.indicator.params.transactionName,
+                      text: slo.indicator.params.transactionName,
+                    },
+                  ]}
+                  prepend="Transaction name"
+                  aria-label={i18n.translate(
+                    'xpack.slo.sloDetailsFlyout.header.select.transactionNameLabel',
+                    { defaultMessage: 'Transaction name' }
+                  )}
+                  compressed
+                  fullWidth
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiHorizontalRule margin="none" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+          <EuiTabs bottomBorder={false} expand>
+            {tabs.map(({ id, label, ...tab }) => (
+              <EuiTab key={id} {...tab} isSelected={id === selectedTabId}>
+                {label}
+              </EuiTab>
+            ))}
+          </EuiTabs>
+        </EuiFlexGroup>
       );
     }
+
     return slo?.name ?? '';
-  }, [isError, isNotFound, isLoading, slo, sloDetailsUrl]);
+  };
 
   const renderBody = useCallback(() => {
     if (isError) {
@@ -157,8 +263,8 @@ export default function SLODetailsFlyout({
       return null;
     }
 
-    return <SloOverviewDetailsContent slo={slo} initialTabId={initialTabId} />;
-  }, [sloId, isError, isNotFound, isLoading, slo, initialTabId]);
+    return <SloDetails slo={slo} isAutoRefreshing={false} selectedTabId={selectedTabId} isFlyout />;
+  }, [sloId, isError, isNotFound, isLoading, slo, selectedTabId]);
 
   const renderFooter = useCallback(() => {
     if (isError || isNotFound || isLoading || !slo) {
@@ -181,12 +287,22 @@ export default function SLODetailsFlyout({
       size={size}
       session={session}
       resizable
+      paddingSize="m"
+      css={
+        isSuccess && !!slo
+          ? css`
+              .euiFlyoutHeader {
+                /* 
+                Remove padding at the bottom of the flyout header when the SLO has loaded
+                so the tabs are visually connected to the header border.
+                */
+                padding-block-end: 0px;
+              }
+            `
+          : undefined
+      }
     >
-      <EuiFlyoutHeader hasBorder={!slo}>
-        <EuiTitle size="s">
-          <h2 id={flyoutTitleId}>{title}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
+      <EuiFlyoutHeader hasBorder>{renderHeader()}</EuiFlyoutHeader>
       <EuiFlyoutBody>{renderBody()}</EuiFlyoutBody>
       {!hideFooter && <EuiFlyoutFooter>{renderFooter()}</EuiFlyoutFooter>}
     </EuiFlyout>
