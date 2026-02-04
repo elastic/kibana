@@ -12,12 +12,14 @@ import { EvaluationScoreRepository } from '../../utils/score_repository';
 import { formatPairedTTestReport } from '../../utils/reporting/compare_report';
 import { computePairedTTestResults, pairScores } from '../../utils/statistical_analysis';
 
-const DEFAULT_EVALUATIONS_ES_URL = 'http://elastic:changeme@localhost:9200';
+const DEFAULT_EVALUATIONS_ES_URL = 'http://elastic:changeme@localhost:9220';
 
 export const compareCmd: Command<void> = {
   name: 'compare',
   description: `
   Compare two evaluation runs using paired t-tests.
+
+  NOTE: The two runs must use the same experiment orchestrator (e.g. Kibana or Phoenix), due to the different handling of the dataset/example IDs.
 
   Example:
     node scripts/evals compare <run-id-1> <run-id-2>
