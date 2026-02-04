@@ -27,7 +27,7 @@ interface GetTracesToolResult extends OtherResult {
   };
 }
 
-const START = 'now-1h';
+const START = 'now-10m';
 const END = 'now';
 
 async function indexCorrelatedLogs({
@@ -106,7 +106,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           logs: correlatedLogs,
         });
       });
-      it('returns a single trace sequence with APM events and correlated logs', async () => {
+      it('returns a single trace sequence with APM and logs', async () => {
         const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
           id: OBSERVABILITY_GET_TRACES_TOOL_ID,
           params: {
@@ -146,6 +146,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(traceItems).to.have.length(0);
         expect(logs).to.have.length(0);
         expect(errorItems).to.have.length(0);
+      });
+
+      it('does not return sequences that do not match the specified terms', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
+          id: OBSERVABILITY_GET_TRACES_TOOL_ID,
+          params: {
+            start: 'now-10m',
+            end: 'now',
+            kqlFilter: 'service.name: "non-existing-service"',
+          },
+        });
+        const { sequences } = results[0].data;
+        expect(sequences.length).to.be(0);
       });
     });
   });
