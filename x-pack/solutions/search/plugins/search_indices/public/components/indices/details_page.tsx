@@ -58,19 +58,23 @@ export const SearchIndexDetailsPage = () => {
   } = useKibana().services;
   const {
     data: index,
-    refetch,
+    refetch: refetchIndex,
     isError: isIndexError,
     isInitialLoading,
     error: indexLoadingError,
   } = useIndex(indexName);
   const {
     data: mappings,
+    refetch: refetchMappings,
     isError: isMappingsError,
     isInitialLoading: isMappingsInitialLoading,
     error: mappingsError,
   } = useIndexMapping(indexName);
-  const { data: indexDocuments, isInitialLoading: indexDocumentsIsInitialLoading } =
-    useIndexDocumentSearch(indexName);
+  const {
+    data: indexDocuments,
+    refetch: refetchIndexDocuments,
+    isInitialLoading: indexDocumentsIsInitialLoading,
+  } = useIndexDocumentSearch(indexName);
   const { data: userPrivileges } = useUserPrivilegesQuery(indexName);
 
   const navigateToPlayground = useCallback(async () => {
@@ -112,6 +116,7 @@ export const SearchIndexDetailsPage = () => {
             isInitialLoading={indexDocumentsIsInitialLoading}
             userPrivileges={userPrivileges}
             navigateToPlayground={navigateToPlayground}
+            mappingData={mappings}
           />
         ),
         'data-test-subj': `${SearchIndexDetailsTabs.DATA}Tab`,
@@ -141,6 +146,7 @@ export const SearchIndexDetailsPage = () => {
     indexDocuments,
     indexDocumentsIsInitialLoading,
     userPrivileges,
+    mappings,
     navigateToPlayground,
   ]);
   const [selectedTab, setSelectedTab] = useState(detailsPageTabs[0]);
@@ -175,9 +181,12 @@ export const SearchIndexDetailsPage = () => {
     application.navigateToApp('management', { deepLinkId: 'index_management' });
   }, [application]);
 
-  const refetchIndex = useCallback(() => {
-    refetch();
-  }, [refetch]);
+  const refetchAllData = useCallback(() => {
+    refetchIndex();
+    refetchMappings();
+    refetchIndexDocuments();
+  }, [refetchIndex, refetchMappings, refetchIndexDocuments]);
+
   const indexError = useMemo(
     () =>
       isIndexError
@@ -197,7 +206,10 @@ export const SearchIndexDetailsPage = () => {
   }, [isShowingDeleteModal]);
   const { euiTheme } = useEuiTheme();
 
-  if (isInitialLoading || isMappingsInitialLoading || indexDocumentsIsInitialLoading) {
+  const pageDataLoading =
+    isInitialLoading || isMappingsInitialLoading || indexDocumentsIsInitialLoading;
+
+  if (pageDataLoading) {
     return (
       <SectionLoading>
         {i18n.translate('xpack.searchIndices.loadingDescription', {
@@ -221,7 +233,7 @@ export const SearchIndexDetailsPage = () => {
         <IndexloadingError
           error={indexError}
           navigateToIndexListPage={navigateToIndexListPage}
-          reloadFunction={refetchIndex}
+          reloadFunction={refetchAllData}
         />
       ) : (
         <>
@@ -298,12 +310,27 @@ export const SearchIndexDetailsPage = () => {
             <EuiFlexGroup direction="column">
               <EuiFlexGroup direction="column">
                 <EuiFlexItem>
-                  <EuiFlexGroup css={{ overflow: 'auto' }} wrap>
-                    <EuiFlexItem grow={false} css={{ minWidth: 400 }}>
-                      <ConnectionDetails />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false} css={{ minWidth: 400 }}>
-                      <ApiKeyForm />
+                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+                    <EuiFlexGroup css={{ overflow: 'auto' }} wrap>
+                      <EuiFlexItem grow={false}>
+                        <ConnectionDetails />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <ApiKeyForm minWidth={400} />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiFlexItem css={{ maxWidth: 'fit-content' }}>
+                      <EuiButton
+                        data-test-subj="SearchIndexDetailsPageRefreshDataButton"
+                        isLoading={pageDataLoading}
+                        onClick={refetchAllData}
+                        iconType="refresh"
+                        color="success"
+                      >
+                        {i18n.translate('xpack.searchIndices.indexAction.refreshDataButtonLabel', {
+                          defaultMessage: 'Refresh data',
+                        })}
+                      </EuiButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
