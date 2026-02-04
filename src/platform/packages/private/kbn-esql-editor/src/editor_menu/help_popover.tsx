@@ -34,18 +34,11 @@ import { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import type { ESQLEditorDeps } from '../types';
 import { useEsqlEditorActions } from '../editor_actions_context';
 
-interface HelpPopoverProps {
-  actions?: {
-    currentQuery?: string;
-    submitEsqlQuery?: (query: string) => void;
-  };
-}
-
 const esqlHelpLabel = i18n.translate('esqlEditor.menu.helpLabel', {
   defaultMessage: 'ES|QL help',
 });
 
-export const HelpPopover: React.FC<HelpPopoverProps> = ({ actions: actionsOverride }) => {
+export const HelpPopover: React.FC = () => {
   const kibana = useKibana<ESQLEditorDeps>();
   const { core, data } = kibana.services;
   const { docLinks, http, chrome, analytics, notifications } = core;
@@ -54,8 +47,7 @@ export const HelpPopover: React.FC<HelpPopoverProps> = ({ actions: actionsOverri
     [notifications]
   );
   const { euiTheme } = useEuiTheme();
-  const contextActions = useEsqlEditorActions();
-  const actions = actionsOverride ?? contextActions;
+  const actions = useEsqlEditorActions();
 
   const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);

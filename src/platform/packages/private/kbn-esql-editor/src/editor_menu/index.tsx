@@ -10,7 +10,6 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import type { EsqlEditorActions } from '../editor_actions_context';
 import { useEsqlEditorActions } from '../editor_actions_context';
 import { searchPlaceholder } from '../editor_visor';
 import { HelpPopover } from './help_popover';
@@ -35,17 +34,8 @@ const removeStarredQueryLabel = i18n.translate(
   }
 );
 
-// Uses context when wrapped by EsqlEditorActionsProvider.
-// For inline editors (no provider), actions are passed via props.
-export function ESQLMenu({
-  actions,
-  hideHistory,
-}: {
-  actions?: Partial<EsqlEditorActions>;
-  hideHistory?: boolean;
-} = {}) {
-  const contextActions = useEsqlEditorActions();
-  const editorActions = actions ?? contextActions;
+export function ESQLMenu({ hideHistory }: { hideHistory?: boolean } = {}) {
+  const editorActions = useEsqlEditorActions();
   const { euiTheme } = useEuiTheme();
   const onToggleVisor = editorActions?.toggleVisor;
   const onToggleHistory = editorActions?.toggleHistory;
@@ -112,12 +102,7 @@ export function ESQLMenu({
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <HelpPopover
-          actions={{
-            currentQuery: editorActions?.currentQuery,
-            submitEsqlQuery: editorActions?.submitEsqlQuery,
-          }}
-        />
+        <HelpPopover />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

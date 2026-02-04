@@ -95,6 +95,10 @@ import {
 } from './editor_footer/esql_starred_queries_service';
 import type { ESQLEditorDeps, ESQLEditorProps as ESQLEditorPropsInternal } from './types';
 import {
+  EsqlEditorActionsProvider,
+  useHasEsqlEditorActionsProvider,
+} from './editor_actions_context';
+import {
   registerCustomCommands,
   addEditorKeyBindings,
   addTabKeybindingRules,
@@ -676,14 +680,7 @@ const ESQLEditorInternal = function ESQLEditor({
     [onSuggestionsReady, telemetryService]
   );
 
-  const {
-    editorActions,
-    onClickQueryHistory,
-    onSubmitEsqlQuery,
-    onToggleHistory,
-    onToggleStarredQuery,
-    onToggleVisor,
-  } = useEsqlEditorActions({
+  const { editorActions, onClickQueryHistory, onToggleVisor } = useEsqlEditorActions({
     code,
     isHistoryOpen,
     isCurrentQueryStarred,
@@ -1101,19 +1098,7 @@ const ESQLEditorInternal = function ESQLEditor({
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ESQLMenu
-              actions={{
-                toggleVisor: onToggleVisor,
-                toggleHistory: hideQueryHistory ? undefined : onToggleHistory,
-                toggleStarredQuery: onToggleStarredQuery,
-                submitEsqlQuery: onSubmitEsqlQuery,
-                isHistoryOpen,
-                isCurrentQueryStarred,
-                canToggleStarredQuery: Boolean(starredQueriesService && trimmedQuery),
-                currentQuery: code,
-              }}
-              hideHistory={hideQueryHistory}
-            />
+            <ESQLMenu hideHistory={hideQueryHistory} />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
@@ -1383,5 +1368,19 @@ const ESQLEditorInternal = function ESQLEditor({
   return editorPanel;
 };
 
-export const ESQLEditor = withRestorableState(ESQLEditorInternal);
+const ESQLEditorWithState = withRestorableState(ESQLEditorInternal);
+
+export const ESQLEditor = (props: ComponentProps<typeof ESQLEditorWithState>) => {
+  const hasProvider = useHasEsqlEditorActionsProvider();
+
+  if (hasProvider) {
+    return <ESQLEditorWithState {...props} />;
+  }
+
+  return (
+    <EsqlEditorActionsProvider>
+      <ESQLEditorWithState {...props} />
+    </EsqlEditorActionsProvider>
+  );
+};
 export type ESQLEditorProps = ComponentProps<typeof ESQLEditor>;
