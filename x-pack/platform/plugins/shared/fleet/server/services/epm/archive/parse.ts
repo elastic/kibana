@@ -119,6 +119,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'assets',
   'data_streams',
   'license',
+  'requires',
   'type',
   'categories',
   'conditions',

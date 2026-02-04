@@ -37,6 +37,12 @@ export interface PackageSpecManifest {
   source?: {
     license: string;
   };
+  requires?: {
+    content?: {
+      package: string;
+      version: string;
+    }[];
+  };
   type?: PackageSpecPackageType;
   release?: 'experimental' | 'beta' | 'ga';
   categories?: Array<PackageSpecCategory | undefined>;

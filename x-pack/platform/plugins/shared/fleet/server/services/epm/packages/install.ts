@@ -1218,6 +1218,7 @@ export async function restartInstallation(options: {
     install_started_at: new Date().toISOString(),
     install_source: installSource,
     previous_version: previousVersion,
+    // TODO dependencies should be updated there too
   };
 
   if (verificationResult) {
@@ -1275,6 +1276,12 @@ export async function createInstallation(options: {
     install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
     keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
     verification_status: 'unknown',
+    // TODO put behind a feature flag
+    dependencies:
+      packageInfo.requires?.content?.map((pkg) => ({
+        name: pkg.package,
+        version: pkg.version,
+      })) ?? null,
   };
 
   if (verificationResult) {
