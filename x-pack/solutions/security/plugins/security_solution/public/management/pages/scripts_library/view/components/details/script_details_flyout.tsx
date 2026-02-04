@@ -14,7 +14,7 @@ import { EndpointScriptDetailsFlyoutHeader } from './script_details_flyout_heade
 import { EndpointScriptDetailsFlyoutBody } from './script_details_flyout_body';
 import { EndpointScriptDetailsFlyoutFooter } from './script_details_flyout_footer';
 
-interface EndpointScriptDetailsFlyoutProps {
+export interface EndpointScriptDetailsFlyoutProps {
   queryParams: ListScriptsRequestQuery;
   scriptItem: EndpointScript;
   onClickAction: UseScriptActionItemsProps['onClickAction'];

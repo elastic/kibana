@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import * as reactTestingLibrary from '@testing-library/react';
+import { act } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import {
   createAppRootMockRenderer,
@@ -92,19 +92,19 @@ describe('ScriptsLibraryTable', () => {
 
   describe('Table rendering and interactions', () => {
     it('renders record range label', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
       expect(renderResult.getByTestId('test-record-range-label')).toBeInTheDocument();
     });
 
     it('renders scripts table', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
       expect(renderResult.getByTestId('test')).toBeInTheDocument();
     });
 
     it('shows correct set of columns', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const columns = renderResult.getAllByRole('columnheader');
@@ -115,14 +115,14 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('shows error when error prop is set', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render({ ...defaultProps, error: 'An error occurred' });
 
       expect(renderResult.getByText('An error occurred')).toBeInTheDocument();
     });
 
     it('shows `no records` are available', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render({ ...defaultProps, items: [], totalItemCount: 0 });
 
       expect(renderResult.getByText('No scripts found')).toBeInTheDocument();
@@ -131,7 +131,7 @@ describe('ScriptsLibraryTable', () => {
 
   describe('With records', () => {
     it('shows correct number of rows', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
 
       render({
         ...defaultProps,
@@ -146,7 +146,7 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('shows script name as a button for opening details flyout', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByTestId } = renderResult;
@@ -157,7 +157,7 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('shows platform badges for each script', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render({
         ...defaultProps,
         items: [
@@ -177,8 +177,8 @@ describe('ScriptsLibraryTable', () => {
       });
     });
 
-    it('shows Types for each script', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+    it('shows Types for each script', async () => {
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByTestId } = renderResult;
@@ -187,7 +187,7 @@ describe('ScriptsLibraryTable', () => {
 
       const typesPopover = getByTestId('test-typesDisplayPopoverButton');
       // click on types cell and verify popover content
-      userEve.click(typesPopover).then(() => {
+      await userEve.click(typesPopover).then(() => {
         expect(getByTestId('test-typesDisplayPopoverTitle')).toHaveTextContent('Types');
         const badges = getByTestId('test-typesDisplayPopoverWrapper').querySelectorAll('.euiBadge');
         expect(badges).toHaveLength(11);
@@ -198,7 +198,7 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('shows last updated info', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByText } = renderResult;
@@ -207,7 +207,7 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('shows file size in human readable format', () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render({
         ...defaultProps,
         items: [
@@ -224,7 +224,7 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('should sort by column `Name` when header clicked', async () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByText } = renderResult;
@@ -243,7 +243,7 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('should sort by column `Last updated` when header clicked', async () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByText } = renderResult;
@@ -261,7 +261,7 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('should sort by column `Updated by` when header clicked', async () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByText } = renderResult;
@@ -279,7 +279,7 @@ describe('ScriptsLibraryTable', () => {
     });
 
     it('should sort by column `Size` when header clicked', async () => {
-      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByText } = renderResult;

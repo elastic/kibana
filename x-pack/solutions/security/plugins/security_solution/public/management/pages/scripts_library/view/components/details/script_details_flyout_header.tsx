@@ -32,7 +32,7 @@ export const EndpointScriptDetailsFlyoutHeader = memo<EndpointScriptDetailsFlyou
     return (
       <EuiFlyoutHeader hasBorder data-test-subj={dataTestSubj}>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj={`${dataTestSubj}-lastUpdatedLabel`}>
             <EuiFlexGroup
               justifyContent="flexStart"
               alignItems="center"
@@ -54,7 +54,7 @@ export const EndpointScriptDetailsFlyoutHeader = memo<EndpointScriptDetailsFlyou
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj={`${dataTestSubj}-scriptNameTitle`}>
             <EuiToolTip content={scriptName} anchorClassName="eui-textTruncate">
               <EuiTitle size="s">
                 <h2
@@ -66,7 +66,7 @@ export const EndpointScriptDetailsFlyoutHeader = memo<EndpointScriptDetailsFlyou
               </EuiTitle>
             </EuiToolTip>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj={`${dataTestSubj}-platformBadges`}>
             <ScriptTablePlatformBadges
               platforms={platforms}
               data-test-subj={dataTestSubj ? `${dataTestSubj}-platform` : undefined}
