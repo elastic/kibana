@@ -30,13 +30,13 @@ const DataViewFlyoutContentContainer = ({
   getDataViewHelpText,
 }: DataViewEditorProps) => {
   const {
-    services: { dataViews, notifications, http },
+    services: { dataViews, notifications, http, cps },
   } = useKibana<DataViewEditorContext>();
 
   const [dataViewEditorService] = useState(
     () =>
       new DataViewEditorService({
-        services: { http, dataViews },
+        services: { http, dataViews, cpsManager: cps?.cpsManager },
         initialValues: {
           name: editData?.name,
           type: editData?.type as INDEX_PATTERN_TYPE,
