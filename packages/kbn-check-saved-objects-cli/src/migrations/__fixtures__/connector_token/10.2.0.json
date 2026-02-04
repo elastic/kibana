@@ -1,0 +1,22 @@
+{
+  "10.1.0": [
+    {
+      "connectorId": "abc123-def456-connector-id",
+      "tokenType": "access_token",
+      "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlRlc3QgVXNlciIsImlhdCI6MTUxNjIzOTAyMn0.test_signature",
+      "expiresAt": "2025-01-15T14:30:00.000Z",
+      "createdAt": "2025-01-15T13:00:00.000Z",
+      "updatedAt": "2025-01-15T13:00:00.000Z"
+    }
+  ],
+  "10.2.0": [
+    {
+      "connectorId": "abc123-def456-connector-id",
+      "tokenType": "access_token",
+      "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlRlc3QgVXNlciIsImlhdCI6MTUxNjIzOTAyMn0.test_signature",
+      "expiresAt": "2025-01-15T14:30:00.000Z",
+      "createdAt": "2025-01-15T13:00:00.000Z",
+      "updatedAt": "2025-01-15T13:00:00.000Z"
+    }
+  ]
+}
