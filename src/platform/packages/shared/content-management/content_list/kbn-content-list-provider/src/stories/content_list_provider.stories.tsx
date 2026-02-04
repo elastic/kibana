@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import {
   EuiPanel,
@@ -22,11 +22,7 @@ import {
   EuiIcon,
   EuiCallOut,
 } from '@elastic/eui';
-import {
-  MOCK_DASHBOARDS,
-  createMockFindItems,
-  type DashboardMockItem,
-} from '@kbn/content-list-mock-data/storybook';
+import { MOCK_DASHBOARDS, createMockFindItems } from '@kbn/content-list-mock-data/storybook';
 import { ContentListProvider, useContentListConfig } from '../context';
 import { useContentListItems } from '../state';
 import { useContentListSort } from '../features/sorting';
@@ -183,6 +179,81 @@ export default meta;
 
 type Story = StoryObj<StoryArgs>;
 
+/**
+ * Story wrapper component that handles stable prop references.
+ */
+const ProviderStory = ({ args }: { args: StoryArgs }) => {
+  // Memoize labels to maintain stable reference.
+  const labels = useMemo(
+    () => ({ entity: args.entityName, entityPlural: args.entityNamePlural }),
+    [args.entityName, args.entityNamePlural]
+  );
+
+  // Memoize dataSource to maintain stable reference.
+  const dataSource = useMemo(() => {
+    const mockFindItems = createMockFindItems({
+      items: MOCK_DASHBOARDS.slice(0, args.numberOfItems),
+    });
+
+    const findItems = async (params: FindItemsParams): Promise<FindItemsResult> => {
+      const result = await mockFindItems({
+        searchQuery: params.searchQuery,
+        filters: {},
+        sort: params.sort ?? { field: 'title', direction: 'asc' },
+        page: params.page,
+      });
+      return {
+        items: result.items.map((item) => ({
+          id: item.id,
+          title: item.attributes.title,
+          description: item.attributes.description,
+          type: item.type,
+          updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+        })),
+        total: result.total,
+      };
+    };
+
+    return { findItems };
+  }, [args.numberOfItems]);
+
+  // Memoize features to maintain stable reference.
+  const features = useMemo(
+    () =>
+      args.enableSorting
+        ? {
+            sorting: {
+              initialSort: { field: args.initialSortField, direction: args.initialSortDirection },
+            },
+          }
+        : { sorting: false as const },
+    [args.enableSorting, args.initialSortField, args.initialSortDirection]
+  );
+
+  // Key forces re-mount when configuration changes.
+  const key = `${args.enableSorting}-${args.initialSortField}-${args.initialSortDirection}-${args.numberOfItems}`;
+
+  return (
+    <ContentListProvider
+      key={key}
+      id="playground"
+      labels={labels}
+      dataSource={dataSource}
+      features={features}
+    >
+      {args.showConfig && (
+        <>
+          <ConfigDisplay />
+          <EuiSpacer size="m" />
+        </>
+      )}
+      <SortControls />
+      <EuiSpacer size="m" />
+      <ItemsList />
+    </ContentListProvider>
+  );
+};
+
 export const Provider: Story = {
   args: {
     entityName: 'dashboard',
@@ -193,52 +264,5 @@ export const Provider: Story = {
     numberOfItems: 8,
     showConfig: true,
   },
-  render: (args) => {
-    // Create a mock findItems function using the package's helper.
-    const mockFindItems = createMockFindItems({
-      items: MOCK_DASHBOARDS.slice(0, args.numberOfItems),
-    });
-
-    // Adapt the mock function to the provider's expected signature.
-    const findItems = async (
-      params: FindItemsParams
-    ): Promise<FindItemsResult<DashboardMockItem>> =>
-      mockFindItems({
-        searchQuery: params.searchQuery,
-        filters: {},
-        sort: params.sort,
-        page: params.page,
-      });
-
-    const features = args.enableSorting
-      ? {
-          sorting: {
-            initialSort: { field: args.initialSortField, direction: args.initialSortDirection },
-          },
-        }
-      : { sorting: false as const };
-
-    // Key forces re-mount when configuration changes.
-    const key = `${args.enableSorting}-${args.initialSortField}-${args.initialSortDirection}-${args.numberOfItems}`;
-
-    return (
-      <ContentListProvider
-        key={key}
-        id="playground"
-        labels={{ entity: args.entityName, entityPlural: args.entityNamePlural }}
-        dataSource={{ findItems }}
-        features={features}
-      >
-        {args.showConfig && (
-          <>
-            <ConfigDisplay />
-            <EuiSpacer size="m" />
-          </>
-        )}
-        <SortControls />
-        <EuiSpacer size="m" />
-        <ItemsList />
-      </ContentListProvider>
-    );
-  },
+  render: (args) => <ProviderStory args={args} />,
 };

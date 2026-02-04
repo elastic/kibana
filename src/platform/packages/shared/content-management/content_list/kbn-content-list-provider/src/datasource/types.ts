@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import type { TransformFunction } from '../item';
+import type { ContentListItem } from '../item';
 
 /**
  * Active filters applied to the content list.
@@ -28,8 +27,13 @@ export interface FindItemsParams {
   /** Active filters. */
   filters: ActiveFilters;
 
-  /** Sort configuration. */
-  sort: {
+  /**
+   * Sort configuration.
+   *
+   * When sorting is disabled via `features.sorting: false`, this will be `undefined`.
+   * Implementations should return items in their natural order (e.g., server default).
+   */
+  sort?: {
     /** Field name to sort by. */
     field: string;
     /** Sort direction. */
@@ -51,9 +55,9 @@ export interface FindItemsParams {
 /**
  * Result from the `findItems` function.
  */
-export interface FindItemsResult<T = UserContentCommonSchema> {
+export interface FindItemsResult {
   /** Items for the current page. */
-  items: T[];
+  items: ContentListItem[];
 
   /** Total matching items for pagination. */
   total: number;
@@ -62,69 +66,15 @@ export interface FindItemsResult<T = UserContentCommonSchema> {
 /**
  * Function signature for fetching items from a data source.
  */
-export type FindItemsFn<T = UserContentCommonSchema> = (
-  params: FindItemsParams
-) => Promise<FindItemsResult<T>>;
+export type FindItemsFn = (params: FindItemsParams) => Promise<FindItemsResult>;
 
 /**
- * Base data source configuration properties.
+ * Data source configuration properties.
  */
-interface BaseDataSourceConfig<T = UserContentCommonSchema> {
+export interface DataSourceConfig {
   /** Fetches items from the data source. */
-  findItems: FindItemsFn<T>;
+  findItems: FindItemsFn;
 
   /** Called after successful fetch. */
-  onFetchSuccess?: (result: FindItemsResult<T>) => void;
-
-  /** Clears internal caches before refetch. */
-  clearCache?: () => void;
+  onFetchSuccess?: (result: FindItemsResult) => void;
 }
-
-/** Transform config with optional `transform` for `UserContentCommonSchema` types. */
-interface OptionalTransformConfig<T> {
-  /** Converts raw items to `ContentListItem` format. */
-  transform?: TransformFunction<T>;
-}
-
-/** Transform config with required `transform` for custom item types. */
-interface RequiredTransformConfig<T> {
-  /** Converts raw items to `ContentListItem` format. */
-  transform: TransformFunction<T>;
-}
-
-/**
- * Data source configuration for fetching and transforming items.
- *
- * `transform` is optional for `UserContentCommonSchema` types, required otherwise.
- *
- * @example
- * ```ts
- * // Items matching `UserContentCommonSchema` — transform is optional.
- * const simpleDataSource: DataSourceConfig = {
- *   findItems: async ({ searchQuery, sort, page, signal }) => {
- *     const response = await api.search({ query: searchQuery, sort, page, signal });
- *     return { items: response.hits, total: response.total };
- *   },
- * };
- *
- * // Custom items — transform is required.
- * interface MyItem {
- *   uuid: string;
- *   name: string;
- * }
- *
- * const customDataSource: DataSourceConfig<MyItem> = {
- *   findItems: async ({ searchQuery }) => {
- *     const response = await api.search(searchQuery);
- *     return { items: response.results, total: response.count };
- *   },
- *   transform: (item) => ({
- *     id: item.uuid,
- *     title: item.name,
- *     type: 'my-type',
- *   }),
- * };
- * ```
- */
-export type DataSourceConfig<T = UserContentCommonSchema> = BaseDataSourceConfig<T> &
-  (T extends UserContentCommonSchema ? OptionalTransformConfig<T> : RequiredTransformConfig<T>);

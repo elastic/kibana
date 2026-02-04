@@ -11,8 +11,8 @@
  * Standardized item structure for rendering components (tables, grids, etc.).
  *
  * This is the common interface that all rendering components work with,
- * regardless of the underlying datasource type. Raw items from the datasource
- * are transformed into this format using a {@link TransformFunction}.
+ * regardless of the underlying datasource type. The `findItems` function
+ * in `DataSourceConfig` must return items in this format.
  *
  * @template T Additional properties to include on the item type.
  */
@@ -28,26 +28,6 @@ export type ContentListItem<T = Record<string, unknown>> = T & {
   /** Last update timestamp. */
   updatedAt?: Date;
 };
-
-/**
- * Transform function that converts datasource items to `ContentListItem`.
- *
- * Used to convert raw items from your data source into the standardized
- * `ContentListItem` format that rendering components expect.
- *
- * @template T The raw item type from the datasource.
- *
- * @example
- * ```ts
- * const myTransform: TransformFunction<MyItem> = (item) => ({
- *   id: item.uuid,
- *   title: item.name,
- *   description: item.summary,
- *   updatedAt: new Date(item.modified),
- * });
- * ```
- */
-export type TransformFunction<T> = (item: T) => ContentListItem;
 
 /**
  * Per-item configuration for link behavior and actions.

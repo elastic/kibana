@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-
 /**
  * Simplified sort field definition.
  *
@@ -38,40 +36,6 @@ export interface SortField {
 }
 
 /**
- * Default sort fields available for all content lists.
- *
- * @example
- * ```tsx
- * import { DEFAULT_SORT_FIELDS } from '@kbn/content-list-provider';
- *
- * <ContentListProvider
- *   features={{
- *     sorting: {
- *       fields: [
- *         ...DEFAULT_SORT_FIELDS,
- *         { field: 'status', name: 'Status' },
- *       ],
- *     },
- *   }}
- * />
- * ```
- */
-export const DEFAULT_SORT_FIELDS: SortField[] = [
-  {
-    field: 'title',
-    name: i18n.translate('contentManagement.contentList.sorting.fieldNameLabel', {
-      defaultMessage: 'Name',
-    }),
-  },
-  {
-    field: 'updatedAt',
-    name: i18n.translate('contentManagement.contentList.sorting.fieldLastUpdatedLabel', {
-      defaultMessage: 'Last updated',
-    }),
-  },
-];
-
-/**
  * Sort option definition with explicit label, field, and direction.
  */
 export interface SortOption {
@@ -90,10 +54,7 @@ export interface SortOption {
  * Use `options` for full control over each dropdown option.
  */
 export interface SortingConfig {
-  /**
-   * Simplified sortable fields - auto-generates asc/desc options for each field.
-   * Use `DEFAULT_SORT_FIELDS` to include standard fields.
-   */
+  /** Simplified sortable fields - auto-generates asc/desc options for each field. */
   fields?: SortField[];
 
   /**

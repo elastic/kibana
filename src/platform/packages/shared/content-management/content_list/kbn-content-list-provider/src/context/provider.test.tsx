@@ -9,21 +9,21 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { ContentListProvider, useContentListConfig } from './provider';
 import type { ContentListProviderProps } from './provider';
 import type { FindItemsResult, FindItemsParams } from '../datasource';
+import type { ContentListItem } from '../item';
 
 describe('ContentListProvider', () => {
   const mockFindItems = jest.fn(
-    async (_params: FindItemsParams): Promise<FindItemsResult<UserContentCommonSchema>> => ({
+    async (_params: FindItemsParams): Promise<FindItemsResult> => ({
       items: [],
       total: 0,
     })
   );
 
-  const createWrapper = (props?: Partial<ContentListProviderProps<UserContentCommonSchema>>) => {
-    const defaultProps: ContentListProviderProps<UserContentCommonSchema> = {
+  const createWrapper = (props?: Partial<ContentListProviderProps>) => {
+    const defaultProps: ContentListProviderProps = {
       id: 'test-list',
       labels: { entity: 'item', entityPlural: 'items' },
       dataSource: { findItems: mockFindItems },
@@ -205,7 +205,7 @@ describe('ContentListProvider', () => {
   describe('item config', () => {
     it('provides item config when specified', () => {
       const itemConfig = {
-        getHref: (item: { id: string }) => `/view/${item.id}`,
+        getHref: (item: ContentListItem) => `/view/${item.id}`,
       };
 
       const { result } = renderHook(() => useContentListConfig(), {

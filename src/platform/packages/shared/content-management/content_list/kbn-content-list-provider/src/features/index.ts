@@ -9,7 +9,8 @@
 
 // Feature types.
 export type { ContentListFeatures, ContentListSupports } from './types';
+export { isSortingConfig } from './types';
 
 // Sorting feature.
-export type { SortField, SortOption, SortingConfig } from './sorting';
-export { DEFAULT_SORT_FIELDS, useContentListSort } from './sorting';
+export type { SortField, SortOption, SortingConfig, UseContentListSortReturn } from './sorting';
+export { useContentListSort } from './sorting';

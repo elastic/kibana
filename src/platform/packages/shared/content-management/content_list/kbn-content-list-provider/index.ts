@@ -28,8 +28,13 @@ export { useContentListItems } from './src/state';
 export { useContentListSort } from './src/features';
 
 // Types.
-export type { ContentListItem, TransformFunction, ContentListItemConfig } from './src/item';
-export type { ContentListFeatures, ContentListSupports, SortingConfig } from './src/features';
+export type { ContentListItem, ContentListItemConfig } from './src/item';
+export type {
+  ContentListFeatures,
+  ContentListSupports,
+  SortingConfig,
+  UseContentListSortReturn,
+} from './src/features';
 export type {
   FindItemsFn,
   FindItemsParams,
@@ -38,5 +43,4 @@ export type {
 } from './src/datasource';
 
 // Utilities.
-export { defaultTransform } from './src/datasource';
 export { contentListKeys } from './src/query';

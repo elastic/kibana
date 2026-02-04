@@ -18,6 +18,15 @@ export interface ContentListFeatures {
 }
 
 /**
+ * Type guard to check if sorting config is a `SortingConfig` object (not boolean).
+ */
+export const isSortingConfig = (
+  sorting: ContentListFeatures['sorting']
+): sorting is SortingConfig => {
+  return typeof sorting === 'object' && sorting !== null;
+};
+
+/**
  * Resolved feature support flags.
  *
  * These flags represent the **effective** availability of features after evaluating:

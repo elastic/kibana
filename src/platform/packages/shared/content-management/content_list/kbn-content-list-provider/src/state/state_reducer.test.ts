@@ -9,174 +9,21 @@
 
 import { reducer } from './state_reducer';
 import { CONTENT_LIST_ACTIONS, DEFAULT_FILTERS } from './types';
-import type { ContentListState, ContentListAction } from './types';
-import type { ContentListItem } from '../item';
+import type { ContentListClientState, ContentListAction } from './types';
 
 describe('state_reducer', () => {
-  const createInitialState = (overrides?: Partial<ContentListState>): ContentListState => ({
-    items: [],
-    totalItems: 0,
-    isLoading: false,
-    error: undefined,
+  /**
+   * Creates initial client state for testing.
+   *
+   * Note: The reducer only manages client-controlled state (filters, sort).
+   * Query data (items, isLoading, error) is managed by React Query directly.
+   */
+  const createInitialState = (
+    overrides?: Partial<ContentListClientState>
+  ): ContentListClientState => ({
     filters: DEFAULT_FILTERS,
     sort: { field: 'updatedAt', direction: 'desc' },
     ...overrides,
-  });
-
-  const createMockItem = (id: string): ContentListItem => ({
-    id,
-    title: `Item ${id}`,
-    type: 'dashboard',
-  });
-
-  describe('SET_ITEMS', () => {
-    it('sets items and totalItems from payload', () => {
-      const initialState = createInitialState({ isLoading: true });
-      const items = [createMockItem('1'), createMockItem('2')];
-
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_ITEMS,
-        payload: { items, totalItems: 10 },
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.items).toBe(items);
-      expect(newState.totalItems).toBe(10);
-    });
-
-    it('preserves isLoading state (loading is managed by SET_LOADING)', () => {
-      const initialState = createInitialState({ isLoading: true });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_ITEMS,
-        payload: { items: [], totalItems: 0 },
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.isLoading).toBe(true);
-    });
-
-    it('clears any existing error', () => {
-      const initialState = createInitialState({ error: new Error('Previous error') });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_ITEMS,
-        payload: { items: [], totalItems: 0 },
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.error).toBeUndefined();
-    });
-
-    it('preserves other state properties', () => {
-      const initialState = createInitialState({
-        filters: { search: 'test' },
-        sort: { field: 'title', direction: 'asc' },
-      });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_ITEMS,
-        payload: { items: [createMockItem('1')], totalItems: 1 },
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.filters).toEqual({ search: 'test' });
-      expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
-    });
-  });
-
-  describe('SET_LOADING', () => {
-    it('sets isLoading to true', () => {
-      const initialState = createInitialState({ isLoading: false });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_LOADING,
-        payload: true,
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.isLoading).toBe(true);
-    });
-
-    it('sets isLoading to false', () => {
-      const initialState = createInitialState({ isLoading: true });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_LOADING,
-        payload: false,
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.isLoading).toBe(false);
-    });
-
-    it('preserves other state properties', () => {
-      const items = [createMockItem('1')];
-      const initialState = createInitialState({ items, totalItems: 1 });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_LOADING,
-        payload: true,
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.items).toBe(items);
-      expect(newState.totalItems).toBe(1);
-    });
-  });
-
-  describe('SET_ERROR', () => {
-    it('sets error from payload', () => {
-      const initialState = createInitialState({ isLoading: true });
-      const error = new Error('Fetch failed');
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_ERROR,
-        payload: error,
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.error).toBe(error);
-    });
-
-    it('sets isLoading to false', () => {
-      const initialState = createInitialState({ isLoading: true });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_ERROR,
-        payload: new Error('Fetch failed'),
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.isLoading).toBe(false);
-    });
-
-    it('clears error when payload is undefined', () => {
-      const initialState = createInitialState({ error: new Error('Previous error') });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_ERROR,
-        payload: undefined,
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.error).toBeUndefined();
-    });
-
-    it('preserves other state properties', () => {
-      const items = [createMockItem('1')];
-      const initialState = createInitialState({ items, totalItems: 1 });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_ERROR,
-        payload: new Error('Error'),
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.items).toBe(items);
-      expect(newState.totalItems).toBe(1);
-    });
   });
 
   describe('SET_SORT', () => {
@@ -206,12 +53,9 @@ describe('state_reducer', () => {
       expect(newState.sort).toEqual({ field: 'updatedAt', direction: 'desc' });
     });
 
-    it('preserves other state properties', () => {
-      const items = [createMockItem('1')];
+    it('preserves filters when setting sort', () => {
       const initialState = createInitialState({
-        items,
-        totalItems: 1,
-        isLoading: true,
+        filters: { search: 'test query' },
       });
       const action: ContentListAction = {
         type: CONTENT_LIST_ACTIONS.SET_SORT,
@@ -220,15 +64,13 @@ describe('state_reducer', () => {
 
       const newState = reducer(initialState, action);
 
-      expect(newState.items).toBe(items);
-      expect(newState.totalItems).toBe(1);
-      expect(newState.isLoading).toBe(true);
+      expect(newState.filters).toEqual({ search: 'test query' });
     });
   });
 
   describe('unknown action', () => {
     it('returns current state for unknown action types', () => {
-      const initialState = createInitialState({ totalItems: 5 });
+      const initialState = createInitialState();
       const action = { type: 'UNKNOWN_ACTION', payload: {} } as unknown as ContentListAction;
 
       const newState = reducer(initialState, action);
@@ -238,42 +80,6 @@ describe('state_reducer', () => {
   });
 
   describe('immutability', () => {
-    it('returns a new state object for SET_ITEMS', () => {
-      const initialState = createInitialState();
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_ITEMS,
-        payload: { items: [], totalItems: 0 },
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState).not.toBe(initialState);
-    });
-
-    it('returns a new state object for SET_LOADING', () => {
-      const initialState = createInitialState();
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_LOADING,
-        payload: true,
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState).not.toBe(initialState);
-    });
-
-    it('returns a new state object for SET_ERROR', () => {
-      const initialState = createInitialState();
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_ERROR,
-        payload: new Error('Test'),
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState).not.toBe(initialState);
-    });
-
     it('returns a new state object for SET_SORT', () => {
       const initialState = createInitialState();
       const action: ContentListAction = {
@@ -288,16 +94,16 @@ describe('state_reducer', () => {
 
     it('does not mutate the original state', () => {
       const initialState = createInitialState();
-      const originalItems = initialState.items;
       const originalSort = initialState.sort;
+      const originalFilters = initialState.filters;
 
       reducer(initialState, {
-        type: CONTENT_LIST_ACTIONS.SET_ITEMS,
-        payload: { items: [createMockItem('1')], totalItems: 1 },
+        type: CONTENT_LIST_ACTIONS.SET_SORT,
+        payload: { field: 'title', direction: 'asc' },
       });
 
-      expect(initialState.items).toBe(originalItems);
       expect(initialState.sort).toBe(originalSort);
+      expect(initialState.filters).toBe(originalFilters);
     });
   });
 });

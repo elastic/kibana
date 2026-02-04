@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { DataSourceConfig } from '../datasource';
 import type { ContentListItemConfig } from '../item';
 
@@ -71,8 +70,8 @@ export type ContentListCoreConfig = ContentListCoreConfigBase & ContentListIdent
  *
  * @template T The raw item type from the datasource (defaults to `UserContentCommonSchema`).
  */
-export type ContentListConfig<T = UserContentCommonSchema> = ContentListCoreConfig & {
-  dataSource: DataSourceConfig<T>;
+export type ContentListConfig = ContentListCoreConfig & {
+  dataSource: DataSourceConfig;
 };
 
 /**

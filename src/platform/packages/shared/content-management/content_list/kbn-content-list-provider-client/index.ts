@@ -11,11 +11,12 @@
 export { ContentListClientProvider } from './src/provider';
 export type { ContentListClientProviderProps } from './src/provider';
 
-// Strategy adapter.
-export { createFindItemsAdapter } from './src/strategy';
+// Strategy.
+export { createFindItemsFn } from './src/strategy';
+
+// Types.
 export type {
   TableListViewFindItemsFn,
+  TableListViewFindItemsResult,
   SavedObjectReference,
-  CreateFindItemsAdapterOptions,
-  CreateFindItemsAdapterResult,
-} from './src/strategy';
+} from './src/types';

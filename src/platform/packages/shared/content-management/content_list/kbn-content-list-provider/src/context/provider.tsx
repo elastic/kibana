@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, createContext, useContext } from 'react';
-import type { ReactNode } from 'react';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import React, { useMemo, createContext, useContext, type ReactNode } from 'react';
 import type { ContentListCoreConfig, ContentListConfig, ContentListServices } from './types';
 import type { ContentListFeatures, ContentListSupports } from '../features';
 import type { DataSourceConfig } from '../datasource';
@@ -19,15 +17,20 @@ import { QueryClientProvider, contentListQueryClient } from '../query';
 /**
  * Internal context value type.
  */
-export type ContentListProviderContextValue = ContentListCoreConfig & {
+export type ContentListProviderContextValue = Omit<
+  ContentListCoreConfig,
+  'id' | 'queryKeyScope'
+> & {
+  /** Optional identifier (may be undefined if only `queryKeyScope` was provided). */
+  id?: string;
+  /** Resolved query key scope (always present after provider initialization). */
+  queryKeyScope: string;
   /** Data source configuration. */
   dataSource: DataSourceConfig;
   /** Feature configuration. */
   features: ContentListFeatures;
   /** Resolved feature support flags. */
   supports: ContentListSupports;
-  /** Resolved query key scope (always resolved, even if derived from `id`). */
-  queryKeyScope: string;
 };
 
 /**
@@ -39,10 +42,8 @@ export const ContentListContext = createContext<ContentListProviderContextValue 
 
 /**
  * Props for the `ContentListProvider` component.
- *
- * @template T The raw item type from the datasource (defaults to `UserContentCommonSchema`).
  */
-export type ContentListProviderProps<T = UserContentCommonSchema> = ContentListConfig<T> & {
+export type ContentListProviderProps = ContentListConfig & {
   /** Child components that will have access to the content list context. */
   children: ReactNode;
   /** Optional services for the provider. */
@@ -52,24 +53,14 @@ export type ContentListProviderProps<T = UserContentCommonSchema> = ContentListC
 };
 
 /**
- * Main provider component for content list functionality.
+ * Main provider component for content list functionality, including data fetching
+ * (via React Query) and sorting.
  *
- * This provider sets up the context for managing content lists, including:
- * - Data fetching and caching via React Query
- * - Sorting
- *
- * @example
- * ```tsx
- * <ContentListProvider
- *   id="my-list"
- *   labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
- *   dataSource={{ findItems }}
- * >
- *   <MyContentList />
- * </ContentListProvider>
- * ```
+ * Props like `dataSource` and `features` should be stable references to avoid
+ * unnecessary re-renders. Configuration from `features.sorting` is read once at
+ * mount; use a `key` prop to remount if you need to change initial sort dynamically.
  */
-export const ContentListProvider = <T extends UserContentCommonSchema = UserContentCommonSchema>({
+export const ContentListProvider = ({
   children,
   dataSource,
   labels,
@@ -78,7 +69,7 @@ export const ContentListProvider = <T extends UserContentCommonSchema = UserCont
   id,
   queryKeyScope: queryKeyScopeProp,
   features = {},
-}: ContentListProviderProps<T>): JSX.Element => {
+}: ContentListProviderProps): JSX.Element => {
   // Derive queryKeyScope: explicit prop takes priority, otherwise derive from id.
   // At least one of id or queryKeyScope is guaranteed by ContentListIdentity type.
   const queryKeyScope = queryKeyScopeProp ?? `${id}-listing`;
@@ -92,7 +83,6 @@ export const ContentListProvider = <T extends UserContentCommonSchema = UserCont
   );
 
   // Create context value.
-  // Type assertion is safe: T extends UserContentCommonSchema, so dataSource satisfies DataSourceConfig.
   const value: ContentListProviderContextValue = useMemo(
     () => ({
       labels,
@@ -100,7 +90,7 @@ export const ContentListProvider = <T extends UserContentCommonSchema = UserCont
       isReadOnly,
       id,
       queryKeyScope,
-      dataSource: dataSource as DataSourceConfig,
+      dataSource,
       features,
       supports,
     }),

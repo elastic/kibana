@@ -14,5 +14,3 @@ export type {
   FindItemsFn,
   DataSourceConfig,
 } from './types';
-
-export { defaultTransform } from './default_transform';

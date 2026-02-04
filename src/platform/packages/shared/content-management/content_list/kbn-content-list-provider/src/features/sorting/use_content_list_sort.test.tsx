@@ -9,14 +9,13 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { ContentListProvider } from '../../context';
 import type { FindItemsResult, FindItemsParams } from '../../datasource';
 import { useContentListSort } from './use_content_list_sort';
 
 describe('useContentListSort', () => {
   const mockFindItems = jest.fn(
-    async (_params: FindItemsParams): Promise<FindItemsResult<UserContentCommonSchema>> => ({
+    async (_params: FindItemsParams): Promise<FindItemsResult> => ({
       items: [],
       total: 0,
     })

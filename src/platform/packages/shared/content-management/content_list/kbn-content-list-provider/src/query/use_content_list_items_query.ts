@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo } from 'react';
-import type { Dispatch } from 'react';
+import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
-import type { ContentListItem } from '../item';
-import type { ContentListState, ContentListAction } from '../state/types';
-import { CONTENT_LIST_ACTIONS } from '../state/types';
+import type { ContentListClientState, ContentListQueryData } from '../state/types';
 import { useContentListConfig } from '../context';
-import { defaultTransform } from '../datasource';
 import { contentListKeys } from './keys';
 
 /**
@@ -27,32 +23,30 @@ const DEFAULT_PAGE = { index: 0, size: 20 };
  *
  * This hook:
  * - Fetches items using the configured `findItems` function.
- * - Transforms raw items to `ContentListItem` format.
- * - Dispatches state updates for items, loading, and error states.
+ * - Returns query data directly (items, loading, error) without dispatching.
  *
- * @param state - Current content list state.
- * @param dispatch - State dispatch function.
- * @returns Object with `refetch` function for manual data refresh.
+ * Note: Items are expected to already be in `ContentListItem` format.
+ * Transformation should happen in the `findItems` implementation.
+ *
+ * @param clientState - Client-controlled state (filters, sort).
+ * @returns Query data and refetch function.
  */
 export const useContentListItemsQuery = (
-  state: ContentListState,
-  dispatch: Dispatch<ContentListAction>
-) => {
-  const { dataSource, queryKeyScope } = useContentListConfig();
+  clientState: ContentListClientState
+): ContentListQueryData & { refetch: () => void } => {
+  const { dataSource, queryKeyScope, supports } = useContentListConfig();
 
-  // Build query parameters from state.
+  // Build query parameters from client state.
+  // Only include sort if sorting is supported; otherwise, let the data source use its natural order.
   const queryParams = useMemo(
     () => ({
-      searchQuery: state.filters.search ?? '',
-      filters: state.filters,
-      sort: state.sort,
+      searchQuery: clientState.filters.search ?? '',
+      filters: clientState.filters,
+      sort: supports.sorting ? clientState.sort : undefined,
       page: DEFAULT_PAGE,
     }),
-    [state.filters, state.sort]
+    [clientState.filters, clientState.sort, supports.sorting]
   );
-
-  // Get transform function (default if not provided).
-  const transform = dataSource.transform ?? defaultTransform;
 
   // React Query for data fetching.
   const query = useQuery({
@@ -60,60 +54,37 @@ export const useContentListItemsQuery = (
     queryFn: async ({ signal }) => {
       const result = await dataSource.findItems({ ...queryParams, signal });
 
-      // Transform items to ContentListItem format.
-      const transformedItems: ContentListItem[] = result.items.map(transform);
-
       // Invoke success callback if provided.
+      // Note: Errors from `onFetchSuccess` are caught and logged to prevent them from
+      // breaking the query. In production, errors are logged but not surfaced to the UI.
+      // If you need to handle callback failures, consider adding error handling within
+      // your `onFetchSuccess` implementation.
       if (dataSource.onFetchSuccess) {
         try {
           dataSource.onFetchSuccess(result);
         } catch (error) {
-          if (process.env.NODE_ENV !== 'production') {
-            // eslint-disable-next-line no-console
-            console.warn('[ContentListProvider] onFetchSuccess callback error:', error);
-          }
+          // eslint-disable-next-line no-console
+          console.warn('[ContentListProvider] onFetchSuccess callback error:', error);
         }
       }
 
-      return {
-        items: transformedItems,
-        total: result.total,
-      };
+      return result;
     },
   });
 
-  // Sync query state to reducer state.
-  useEffect(() => {
-    if (query.isLoading || query.isFetching) {
-      dispatch({ type: CONTENT_LIST_ACTIONS.SET_LOADING, payload: true });
+  // Derive error (normalize to Error type).
+  const error = useMemo(() => {
+    if (!query.error) {
+      return undefined;
     }
-  }, [query.isLoading, query.isFetching, dispatch]);
-
-  useEffect(() => {
-    if (!query.isLoading && !query.isFetching) {
-      dispatch({ type: CONTENT_LIST_ACTIONS.SET_LOADING, payload: false });
-    }
-  }, [query.isLoading, query.isFetching, dispatch]);
-
-  useEffect(() => {
-    if (query.data) {
-      dispatch({
-        type: CONTENT_LIST_ACTIONS.SET_ITEMS,
-        payload: { items: query.data.items, totalItems: query.data.total },
-      });
-    }
-  }, [query.data, dispatch]);
-
-  useEffect(() => {
-    if (query.error) {
-      dispatch({
-        type: CONTENT_LIST_ACTIONS.SET_ERROR,
-        payload: query.error instanceof Error ? query.error : new Error(String(query.error)),
-      });
-    }
-  }, [query.error, dispatch]);
+    return query.error instanceof Error ? query.error : new Error(String(query.error));
+  }, [query.error]);
 
   return {
+    items: query.data?.items ?? [],
+    totalItems: query.data?.total ?? 0,
+    isLoading: query.isLoading || query.isFetching,
+    error,
     refetch: query.refetch,
   };
 };

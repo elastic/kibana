@@ -7,51 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import type { ReactNode } from 'react';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import React, { useMemo, type ReactNode } from 'react';
 import type {
   ContentListCoreConfig,
   ContentListFeatures,
-  TransformFunction,
+  DataSourceConfig,
 } from '@kbn/content-list-provider';
 import { ContentListProvider } from '@kbn/content-list-provider';
-import { createFindItemsAdapter, type TableListViewFindItemsFn } from './strategy';
+import type { TableListViewFindItemsFn } from './types';
+import { createFindItemsFn } from './strategy';
 
 /**
  * Props for the Client provider.
  *
  * This provider wraps an existing `TableListView`-style `findItems` function and handles
  * client-side sorting, filtering, and pagination.
- *
- * @template T The item type from the datasource.
  */
-export type ContentListClientProviderProps<T extends UserContentCommonSchema> =
-  ContentListCoreConfig & {
-    /** Child components that will have access to the content list context. */
-    children: ReactNode;
-
-    /**
-     * The consumer's existing `findItems` function (same signature as `TableListView`).
-     */
-    findItems: TableListViewFindItemsFn<T>;
-
-    /**
-     * Optional transform function to convert raw items to the expected format.
-     */
-    transform?: TransformFunction<T>;
-
-    /**
-     * Feature configuration for enabling/customizing capabilities.
-     */
-    features?: ContentListFeatures;
-  };
+export type ContentListClientProviderProps = ContentListCoreConfig & {
+  children?: ReactNode;
+  /**
+   * The consumer's existing `findItems` function (same signature as `TableListView`).
+   */
+  findItems: TableListViewFindItemsFn;
+  /**
+   * Feature configuration for enabling/customizing capabilities.
+   */
+  features?: ContentListFeatures;
+};
 
 /**
  * Client-side content list provider.
  *
  * Wraps an existing `TableListView`-style `findItems` function and provides
- * client-side sorting, filtering, and pagination.
+ * client-side sorting, filtering, and pagination. The strategy handles transformation
+ * of `UserContentCommonSchema` items to `ContentListItem` format.
  *
  * @example
  * ```tsx
@@ -64,31 +53,22 @@ export type ContentListClientProviderProps<T extends UserContentCommonSchema> =
  * </ContentListClientProvider>
  * ```
  */
-export const ContentListClientProvider = <T extends UserContentCommonSchema>({
+export const ContentListClientProvider = ({
   children,
   findItems: tableListViewFindItems,
-  transform,
-  features,
-  ...coreConfig
-}: ContentListClientProviderProps<T>): JSX.Element => {
-  // Create the adapter once and memoize it.
-  const { findItems, clearCache } = useMemo(
-    () => createFindItemsAdapter({ findItems: tableListViewFindItems }),
+  ...rest
+}: ContentListClientProviderProps): JSX.Element => {
+  // Create the adapted findItems function (includes transformation).
+  const findItems = useMemo(
+    () => createFindItemsFn(tableListViewFindItems),
     [tableListViewFindItems]
   );
 
-  // Build the dataSource config. Transform is optional for UserContentCommonSchema types.
-  const dataSource = useMemo(
-    () => ({
-      findItems,
-      clearCache,
-      transform,
-    }),
-    [findItems, clearCache, transform]
-  );
+  // Build the dataSource config. No transform needed - strategy handles it.
+  const dataSource: DataSourceConfig = useMemo(() => ({ findItems }), [findItems]);
 
   return (
-    <ContentListProvider {...{ ...coreConfig, dataSource, features }}>
+    <ContentListProvider dataSource={dataSource} {...rest}>
       {children}
     </ContentListProvider>
   );

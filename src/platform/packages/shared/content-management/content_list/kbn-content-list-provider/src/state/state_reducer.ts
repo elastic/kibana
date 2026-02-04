@@ -7,34 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContentListState, ContentListAction } from './types';
+import type { ContentListClientState, ContentListAction } from './types';
 import { CONTENT_LIST_ACTIONS } from './types';
 
 /**
- * State reducer for `ContentListProvider`.
+ * State reducer for client-controlled state.
  *
- * Handles all state mutations with immutable updates.
+ * Handles only user-driven state mutations (filters, sort).
+ * Query data (items, loading, error) is managed by React Query directly.
  *
- * @param state - Current state.
+ * @param state - Current client state.
  * @param action - Action to apply.
- * @returns New state.
+ * @returns New client state.
  */
-export const reducer = (state: ContentListState, action: ContentListAction): ContentListState => {
+export const reducer = (
+  state: ContentListClientState,
+  action: ContentListAction
+): ContentListClientState => {
   switch (action.type) {
-    case CONTENT_LIST_ACTIONS.SET_ITEMS:
-      return {
-        ...state,
-        items: action.payload.items,
-        totalItems: action.payload.totalItems,
-        error: undefined,
-      };
-
-    case CONTENT_LIST_ACTIONS.SET_LOADING:
-      return { ...state, isLoading: action.payload };
-
-    case CONTENT_LIST_ACTIONS.SET_ERROR:
-      return { ...state, error: action.payload, isLoading: false };
-
     case CONTENT_LIST_ACTIONS.SET_SORT:
       return {
         ...state,

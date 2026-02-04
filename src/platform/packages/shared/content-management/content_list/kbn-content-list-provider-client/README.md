@@ -14,15 +14,14 @@ Use this provider when:
 - Working with **smaller datasets** (< 10,000 items).
 - Your existing `findItems` implementation already handles data fetching.
 
-## Current Limitations
+## How It Works
 
-This adapter is a migration stepping stone. It currently:
+This adapter is designed for easy migration from `TableListView`. It:
 
-- **Passes only `searchQuery`** to your existing `findItems` function (sorting, pagination, and filtering are handled client-side).
-- **Does not forward** `sort`, `page`, or `filters` parameters to your `findItems` implementation — the adapter fetches a single result set per `searchQuery` and applies sorting and pagination in memory.
-- **Caches results by `searchQuery`** only — changing sort/page will reuse the cached results and reapply client-side sorting and pagination, but will not trigger a new fetch.
-
-For full server-side sorting and pagination support, use `ContentListProvider` directly with a custom `findItems` implementation.
+- **Passes only `searchQuery`** to your existing `findItems` function (matching `TableListView` behavior).
+- **Applies client-side sorting and pagination** on the returned results — your `findItems` fetches all matching items, and the adapter sorts and paginates in memory.
+- **Does not forward** `sort`, `page`, or `filters` parameters to your `findItems` implementation.
+- **Caches by `searchQuery`** — React Query caches results based on the search query. Changing sort or page reuses cached data.
 
 ## Usage
 
@@ -35,13 +34,9 @@ import { ContentListClientProvider } from '@kbn/content-list-provider-client';
 
 // Your existing findItems function from TableListView - no changes needed!
 const findItems = useCallback(
-  async (searchTerm, { references, referencesToExclude } = {}) => {
+  async (searchTerm) => {
     return dashboardClient.search({
       search: searchTerm,
-      tags: {
-        included: (references ?? []).map(({ id }) => id),
-        excluded: (referencesToExclude ?? []).map(({ id }) => id),
-      },
     }).then(({ total, dashboards }) => ({
       total,
       hits: dashboards.map(transformToDashboardUserContent),
@@ -71,24 +66,22 @@ const findItems = useCallback(
 </ContentListClientProvider>
 ```
 
-### Using the Adapter Directly
+### Using the Adapter Function Directly
 
-If you need more control, you can use the adapter directly:
+If you need more control, you can use the adapter function directly:
 
 ```tsx
-import { createFindItemsAdapter } from '@kbn/content-list-provider-client';
+import { createFindItemsFn } from '@kbn/content-list-provider-client';
 import { ContentListProvider } from '@kbn/content-list-provider';
 
 // Wrap your existing findItems.
-const { findItems, clearCache } = createFindItemsAdapter({
-  findItems: myExistingFindItems,
-});
+const findItems = createFindItemsFn(myExistingFindItems);
 
 // Use with the base provider.
 <ContentListProvider
   id="dashboard"
   labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
-  dataSource={{ findItems, clearCache }}
+  dataSource={{ findItems }}
 >
   <MyListComponent />
 </ContentListProvider>
@@ -101,41 +94,36 @@ const { findItems, clearCache } = createFindItemsAdapter({
 | `id` | `string` | Yes* | Unique identifier. `queryKeyScope` derived as `${id}-listing` if not provided. |
 | `queryKeyScope` | `string` | Yes* | Explicit React Query cache key scope. |
 | `labels` | `ContentListLabels` | Yes | User-facing entity labels (should be i18n-translated). |
-| `findItems` | `TableListViewFindItemsFn<T>` | Yes | Your existing `TableListView` findItems function. |
-| `transform` | `TransformFunction<T>` | No | Custom transform for items. |
+| `findItems` | `TableListViewFindItemsFn` | Yes | Your existing `TableListView` findItems function. |
 | `features` | `ContentListFeatures` | No | Feature configuration. |
 | `item` | `ContentListItemConfig` | No | Per-item configuration for links. |
 | `isReadOnly` | `boolean` | No | Disable mutation actions. |
 
 *At least one of `id` or `queryKeyScope` is required.
 
-## How It Works
-
-The adapter wraps your existing `findItems` function and:
-
-1. **Receives** the new structured `FindItemsParams` (searchQuery, filters, sort, page).
-2. **Extracts `searchQuery`** and passes it to your existing function.
-3. **Calls** your existing `findItems(searchQuery)`.
-4. **Caches** the result by `searchQuery` to avoid redundant fetches.
-5. **Returns** structured `FindItemsResult`.
-
-**Note:** The adapter does not forward `refs`, `sort`, `page`, or `filters` to your `findItems` function. Sorting and pagination are applied client-side on the cached result set.
-
 ## findItems Function Signature
 
 Your existing `findItems` function should match this signature:
 
 ```typescript
-type TableListViewFindItemsFn<T> = (
+interface SavedObjectReference {
+  type: string;
+  id: string;
+  name?: string;
+}
+
+type TableListViewFindItemsFn = (
   searchQuery: string,
   refs?: {
-    references?: Array<{ type: string; id: string }>;
-    referencesToExclude?: Array<{ type: string; id: string }>;
+    references?: SavedObjectReference[];
+    referencesToExclude?: SavedObjectReference[];
   }
-) => Promise<{ total: number; hits: T[] }>;
+) => Promise<{ total: number; hits: UserContentCommonSchema[] }>;
 ```
 
 This is the same signature expected by `TableListView.findItems`.
+
+> **Note:** The `refs` parameter (for tag filtering) is not yet supported in the new `ContentListProvider` architecture. Only `searchQuery` is forwarded in this initial version. Tag filtering support is planned for a future release.
 
 ## Exports
 
@@ -145,8 +133,14 @@ export { ContentListClientProvider } from './provider';
 export type { ContentListClientProviderProps } from './provider';
 
 // Adapter for direct usage.
-export { createFindItemsAdapter } from './strategy';
-export type { TableListViewFindItemsFn } from './strategy';
+export { createFindItemsFn } from './strategy';
+
+// Types.
+export type {
+  TableListViewFindItemsFn,
+  TableListViewFindItemsResult,
+  SavedObjectReference,
+} from './types';
 ```
 
 ## Related Packages

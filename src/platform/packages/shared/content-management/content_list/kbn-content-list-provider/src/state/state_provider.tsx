@@ -9,10 +9,11 @@
 
 import React, { useMemo, useReducer, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import type { ContentListState, ContentListStateContextValue } from './types';
+import type { ContentListClientState, ContentListStateContextValue } from './types';
 import { DEFAULT_FILTERS } from './types';
 import { ContentListStateContext } from './use_content_list_state';
 import { useContentListConfig } from '../context';
+import { isSortingConfig } from '../features';
 import { reducer } from './state_reducer';
 import { useContentListItemsQuery } from '../query';
 
@@ -28,58 +29,64 @@ export interface ContentListStateProviderProps {
  * Internal provider component that manages the runtime state of the content list.
  *
  * This provider:
- * - Initializes state from the configuration context.
+ * - Manages client-controlled state (filters, sort) via reducer.
  * - Uses React Query for data fetching with caching and deduplication.
- * - Provides dispatch function for state updates.
+ * - Combines client state with query data for a unified state interface.
+ *
+ * Note: Initial state is derived from `features.sorting` at mount and not updated
+ * if configuration changes. See {@link ContentListProvider} for details.
  *
  * @internal This is automatically included when using `ContentListProvider`.
  */
 export const ContentListStateProvider = ({ children }: ContentListStateProviderProps) => {
-  const { features, dataSource } = useContentListConfig();
+  const { features } = useContentListConfig();
   const { sorting } = features;
 
   // Determine initial sort from sorting config (default: title ascending).
   const initialSort = useMemo(() => {
-    if (typeof sorting === 'object' && sorting.initialSort) {
+    if (isSortingConfig(sorting) && sorting.initialSort) {
       return sorting.initialSort;
     }
     return { field: 'title', direction: 'asc' as const };
   }, [sorting]);
 
-  // Initial state with sensible defaults.
-  const initialState: ContentListState = useMemo(
+  // Initial client state (filters, sort).
+  const initialClientState: ContentListClientState = useMemo(
     () => ({
-      items: [],
-      totalItems: 0,
-      isLoading: true,
-      error: undefined,
       filters: { ...DEFAULT_FILTERS },
       sort: initialSort,
     }),
     [initialSort]
   );
 
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [clientState, dispatch] = useReducer(reducer, initialClientState);
 
-  // Use React Query for data fetching.
-  const { refetch: queryRefetch } = useContentListItemsQuery(state, dispatch);
+  // Use React Query for data fetching - returns query data directly.
+  const {
+    items,
+    totalItems,
+    isLoading,
+    error,
+    refetch: queryRefetch,
+  } = useContentListItemsQuery(clientState);
 
-  // Wrap refetch to clear internal caches before fetching fresh data.
-  const refetch = useCallback(() => {
-    if (dataSource.clearCache) {
-      dataSource.clearCache();
-    }
-    return queryRefetch();
-  }, [dataSource, queryRefetch]);
+  // Expose refetch for manual refresh.
+  const refetch = useCallback(() => queryRefetch(), [queryRefetch]);
 
-  // Memoize context value to prevent unnecessary re-renders.
+  // Combine client state with query data for unified state interface.
   const contextValue: ContentListStateContextValue = useMemo(
     () => ({
-      state,
+      state: {
+        ...clientState,
+        items,
+        totalItems,
+        isLoading,
+        error,
+      },
       dispatch,
       refetch,
     }),
-    [state, dispatch, refetch]
+    [clientState, items, totalItems, isLoading, error, dispatch, refetch]
   );
 
   return (

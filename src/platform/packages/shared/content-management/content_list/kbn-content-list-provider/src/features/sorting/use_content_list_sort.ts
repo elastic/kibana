@@ -13,6 +13,20 @@ import { useContentListConfig } from '../../context';
 import { CONTENT_LIST_ACTIONS } from '../../state/types';
 
 /**
+ * Return type for the `useContentListSort` hook.
+ */
+export interface UseContentListSortReturn {
+  /** Current sort field name. */
+  field: string;
+  /** Current sort direction. */
+  direction: 'asc' | 'desc';
+  /** Updates the sort configuration. No-op if sorting is disabled. */
+  setSort: (field: string, direction: 'asc' | 'desc') => void;
+  /** Whether sorting is supported (enabled via features). */
+  isSupported: boolean;
+}
+
+/**
  * Hook to access and control sorting functionality.
  *
  * Use this hook when you need to read or update the sort configuration.
@@ -46,7 +60,7 @@ import { CONTENT_LIST_ACTIONS } from '../../state/types';
  * }
  * ```
  */
-export const useContentListSort = () => {
+export const useContentListSort = (): UseContentListSortReturn => {
   const { supports } = useContentListConfig();
   const { state, dispatch } = useContentListState();
 

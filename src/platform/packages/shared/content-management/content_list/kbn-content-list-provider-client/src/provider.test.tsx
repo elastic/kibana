@@ -13,7 +13,7 @@ import type { UserContentCommonSchema } from '@kbn/content-management-table-list
 import { useContentListConfig } from '@kbn/content-list-provider';
 import { ContentListClientProvider } from './provider';
 import type { ContentListClientProviderProps } from './provider';
-import type { TableListViewFindItemsFn } from './strategy';
+import type { TableListViewFindItemsFn } from './types';
 
 describe('ContentListClientProvider', () => {
   const createMockItem = (id: string): UserContentCommonSchema => ({
@@ -29,24 +29,23 @@ describe('ContentListClientProvider', () => {
 
   const createMockFindItems = (
     items: UserContentCommonSchema[] = []
-  ): jest.Mock<ReturnType<TableListViewFindItemsFn<UserContentCommonSchema>>> => {
+  ): jest.Mock<ReturnType<TableListViewFindItemsFn>> => {
     return jest.fn().mockResolvedValue({ hits: items, total: items.length });
   };
 
-  const createWrapper = (
-    props?: Partial<ContentListClientProviderProps<UserContentCommonSchema>>
-  ) => {
+  const createWrapper = (props?: Partial<ContentListClientProviderProps>) => {
     const defaultFindItems = createMockFindItems([createMockItem('1')]);
-    const defaultProps: ContentListClientProviderProps<UserContentCommonSchema> = {
+    const defaultProps: ContentListClientProviderProps = {
       id: 'test-client-list',
       labels: { entity: 'dashboard', entityPlural: 'dashboards' },
       findItems: defaultFindItems,
       children: null,
-      ...props,
     };
 
     return ({ children }: { children: React.ReactNode }) => (
-      <ContentListClientProvider {...defaultProps}>{children}</ContentListClientProvider>
+      <ContentListClientProvider {...defaultProps} {...props}>
+        {children}
+      </ContentListClientProvider>
     );
   };
 
@@ -94,7 +93,7 @@ describe('ContentListClientProvider', () => {
   });
 
   describe('dataSource creation', () => {
-    it('creates dataSource with adapted findItems', () => {
+    it('creates dataSource with findItems', () => {
       const { result } = renderHook(() => useContentListConfig(), {
         wrapper: createWrapper(),
       });
@@ -104,35 +103,13 @@ describe('ContentListClientProvider', () => {
       expect(typeof result.current.dataSource.findItems).toBe('function');
     });
 
-    it('creates dataSource with clearCache', () => {
+    it('does not include onFetchSuccess by default', () => {
       const { result } = renderHook(() => useContentListConfig(), {
         wrapper: createWrapper(),
       });
 
-      expect(result.current.dataSource.clearCache).toBeDefined();
-      expect(typeof result.current.dataSource.clearCache).toBe('function');
-    });
-
-    it('passes transform to dataSource when provided', () => {
-      const customTransform = jest.fn((item: UserContentCommonSchema) => ({
-        id: item.id,
-        title: item.attributes.title,
-        type: item.type,
-      }));
-
-      const { result } = renderHook(() => useContentListConfig(), {
-        wrapper: createWrapper({ transform: customTransform }),
-      });
-
-      expect(result.current.dataSource.transform).toBe(customTransform);
-    });
-
-    it('does not include transform when not provided', () => {
-      const { result } = renderHook(() => useContentListConfig(), {
-        wrapper: createWrapper(),
-      });
-
-      expect(result.current.dataSource.transform).toBeUndefined();
+      // onFetchSuccess is optional and not set by the client provider.
+      expect(result.current.dataSource.onFetchSuccess).toBeUndefined();
     });
   });
 
@@ -176,7 +153,7 @@ describe('ContentListClientProvider', () => {
     });
   });
 
-  describe('adapter memoization', () => {
+  describe('memoization', () => {
     it('maintains stable dataSource reference across renders', () => {
       const { result, rerender } = renderHook(() => useContentListConfig(), {
         wrapper: createWrapper(),

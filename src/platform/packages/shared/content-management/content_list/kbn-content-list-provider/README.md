@@ -95,12 +95,8 @@ The `dataSource` prop configures how items are fetched:
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
-| `findItems` | `FindItemsFn<T>` | Yes | Async function that fetches items. |
-| `transform` | `TransformFunction<T>` | No* | Converts raw items to `ContentListItem` format. |
+| `findItems` | `FindItemsFn` | Yes | Async function that fetches items (returns `{ items: ContentListItem[], total: number }`). |
 | `onFetchSuccess` | `(result) => void` | No | Callback after successful fetch. |
-| `clearCache` | `() => void` | No | Function to clear internal caches before refetch. |
-
-*Transform is optional for `UserContentCommonSchema`-compatible types; required for custom types.
 
 #### findItems Parameters
 
@@ -108,7 +104,7 @@ The `dataSource` prop configures how items are fetched:
 interface FindItemsParams {
   searchQuery: string;
   filters: ActiveFilters;
-  sort: { field: string; direction: 'asc' | 'desc' };
+  sort?: { field: string; direction: 'asc' | 'desc' };
   page: { index: number; size: number };
   signal?: AbortSignal;
 }
@@ -177,5 +173,5 @@ Manages runtime data using a reducer pattern with React Query for data fetching.
 | Hook | Returns | Purpose |
 |------|---------|---------|
 | `useContentListItems()` | `{ items, totalItems, isLoading, error, refetch }` | Access loaded items and loading state. |
-| `useContentListSort()` | `{ field, direction, setSort }` | Read/update sort configuration. |
+| `useContentListSort()` | `{ field, direction, setSort, isSupported }` | Read/update sort configuration. |
 
