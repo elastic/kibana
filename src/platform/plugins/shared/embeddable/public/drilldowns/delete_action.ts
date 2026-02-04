@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { uiActions } from "../kibana_services";
-import { DrilldownStateInternal } from "./types";
+import { uiActions } from '../kibana_services';
+import type { DrilldownStateInternal } from './types';
 
 export function deleteAction(drilldownState: DrilldownStateInternal) {
   const { actionId, triggers } = drilldownState;
   if (!uiActions.hasAction(actionId)) return;
 
-  triggers.forEach(trigger => uiActions.detachAction(trigger, actionId));
+  triggers.forEach((trigger) => uiActions.detachAction(trigger, actionId));
   uiActions.unregisterAction(actionId);
 }

@@ -7,21 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DrilldownDefinition } from "./types";
+import type { DrilldownDefinition } from './types';
 
 const registry: {
   [key: string]: () => Promise<DrilldownDefinition>;
 } = {};
 
-export function registerDrilldown(
-  type: string,
-  getDrilldownDefinition: () => Promise<DrilldownDefinition>
-) {
+export function registerDrilldown(type: string, getFn: () => Promise<DrilldownDefinition>) {
   if (registry[type]) {
     throw new Error(`Drilldown already registered for type "${type}".`);
   }
 
-  registry[type] = getDrilldownDefinition;
+  registry[type] = getFn;
 }
 
 export async function getDrilldownDefinition(type: string) {

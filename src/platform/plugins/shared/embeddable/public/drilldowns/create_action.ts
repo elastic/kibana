@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiHasUniqueId, EmbeddableApiContext } from "@kbn/presentation-publishing";
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiHasUniqueId } from '@kbn/presentation-publishing';
+import type { LicenseType } from '@kbn/licensing-types';
 import { getDrilldownDefinition, hasDrilldownDefinition } from './registry';
-import { licensing, uiActions } from "../kibana_services";
-import { LicenseType } from "@kbn/licensing-types";
-import { DrilldownStateInternal } from "./types";
+import { licensing, uiActions } from '../kibana_services';
+import type { DrilldownStateInternal } from './types';
 
 async function isCompatibleLicense(minimalLicense?: LicenseType) {
   if (!minimalLicense || !licensing) return true;
@@ -33,14 +34,13 @@ export function createAction(embeddableUuid: string, drilldownState: DrilldownSt
   uiActions.registerActionAsync(actionId, async () => ({
     id: actionId,
     execute: async (context: EmbeddableApiContext) => {
-      const { execute, licenseFeatureName, minimalLicense } = (await getDrilldownDefinition(type)) ?? {};
-      
+      const { execute, licenseFeatureName, minimalLicense } =
+        (await getDrilldownDefinition(type)) ?? {};
+
       if (minimalLicense && licenseFeatureName && licensing) {
         licensing.featureUsage.notifyUsage(licenseFeatureName).catch(() => {
           // eslint-disable-next-line no-console
-          console.warn(
-            `Drilldown [type = ${type}] fail notify feature usage.`
-          );
+          console.warn(`Drilldown [type = ${type}] fail notify feature usage.`);
         });
       }
 
@@ -51,14 +51,14 @@ export function createAction(embeddableUuid: string, drilldownState: DrilldownSt
       if (!apiHasUniqueId(embeddable) || embeddable.uuid !== embeddableUuid) {
         return false;
       }
-      
+
       const { minimalLicense, isCompatible } = (await getDrilldownDefinition(type)) ?? {};
 
       if (!(await isCompatibleLicense(minimalLicense))) return false;
-      
+
       return isCompatible ? await isCompatible(context) : true;
     },
   }));
 
-  triggers.forEach(trigger => uiActions.attachAction(trigger, actionId));
+  triggers.forEach((trigger) => uiActions.attachAction(trigger, actionId));
 }

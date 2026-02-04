@@ -7,22 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LicenseType } from '@kbn/licensing-types';
-import type { EmbeddableApiContext, PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
+import type { LicenseType } from '@kbn/licensing-types';
+import type {
+  EmbeddableApiContext,
+  PublishingSubject,
+  StateComparators,
+} from '@kbn/presentation-publishing';
+import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { Observable } from 'rxjs';
+import type { DrilldownsState, DrilldownState } from '../../server';
 
 export type DrilldownStateInternal = DrilldownState & { actionId: string };
 
 export type DrilldownDefinition<TDrilldownState extends DrilldownState = DrilldownState> = {
-  execute: (drilldownState: TDrilldownState, context: EmbeddableApiContext) => Promise<void>,
-  isCompatible?: ActionDefinition['isCompatible'],
-  
+  execute: (drilldownState: TDrilldownState, context: EmbeddableApiContext) => Promise<void>;
+  isCompatible?: ActionDefinition['isCompatible'];
+
   /**
    * Minimal license level
    * Empty means no restrictions
    */
-  minimalLicense?: LicenseType,
+  minimalLicense?: LicenseType;
 
   /**
    * Required when `minimalLicense` is used.
@@ -36,7 +41,7 @@ export type DrilldownDefinition<TDrilldownState extends DrilldownState = Drilldo
    * Used to narrow trigger selection when configuring drilldown
    */
   supportedTriggers: string[];
-}
+};
 
 export interface DrilldownsManager {
   api: HasDrilldowns;
@@ -51,16 +56,3 @@ export type HasDrilldowns = {
   setDrilldowns: (drilldowns: DrilldownState[]) => void;
   drilldowns$: PublishingSubject<DrilldownState[]>;
 };
-
-//
-// TODO replace with types from server when server PR merges
-//
-export type DrilldownState = {
-  label: string;
-  triggers: string[];
-  type: string;
-}
-
-export type DrilldownsState = {
-  drilldowns?: DrilldownState[]
-}
