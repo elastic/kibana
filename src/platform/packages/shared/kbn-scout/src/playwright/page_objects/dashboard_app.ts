@@ -123,15 +123,8 @@ export class DashboardApp {
   }
 
   async openSettingsFlyout() {
-    if (!(await this.getSettingsFlyout().isVisible())) {
-      if (await this.settingsButton.isVisible()) {
-        await this.settingsButton.click();
-      } else {
-        // Fallback for layouts where the top-nav settings button is not rendered.
-        await this.page.getByRole('button', { name: 'Open dashboard settings' }).click();
-      }
-      await expect(this.getSettingsFlyout()).toBeVisible();
-    }
+    await this.settingsButton.click();
+    await expect(this.getSettingsFlyout()).toBeVisible();
   }
 
   async toggleSyncColors(value: boolean) {
@@ -174,12 +167,9 @@ export class DashboardApp {
    * Clicks the cancel button to exit edit mode without saving.
    */
   async clickCancelOutOfEditMode() {
-    const isEditMode = await this.viewOnlyModeButton.isVisible();
-    if (isEditMode) {
-      await this.viewOnlyModeButton.click();
-      // Wait for view mode to be active
-      await expect(this.editModeButton).toBeVisible();
-    }
+    await expect(this.viewOnlyModeButton).toBeVisible();
+    await this.viewOnlyModeButton.click();
+    await expect(this.editModeButton).toBeHidden();
   }
 
   /**
@@ -210,20 +200,8 @@ export class DashboardApp {
   }
 
   async clickQuickSave() {
-    const quickSaveMenuItem = this.page.testSubj.locator('dashboardQuickSaveMenuItem');
-    if (await quickSaveMenuItem.isVisible()) {
-      await quickSaveMenuItem.click();
-      return;
-    }
-
-    const interactiveSaveMenuItem = this.page.testSubj.locator('dashboardInteractiveSaveMenuItem');
-    if (await interactiveSaveMenuItem.isVisible()) {
-      await interactiveSaveMenuItem.click();
-      return;
-    }
-
-    // Fallback when test subjects are not present (UI renders a plain "Save" button)
-    await this.page.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(this.page.testSubj.locator('dashboardQuickSaveMenuItem')).toBeVisible();
+    await this.page.testSubj.click('dashboardQuickSaveMenuItem');
   }
 
   async clearUnsavedChanges() {
@@ -681,14 +659,9 @@ export class DashboardApp {
     await panelWrapper.scrollIntoViewIfNeeded();
     await panelWrapper.hover();
 
-    // Check if menu is already open
-    const isOpen = await this.page.testSubj.locator('embeddablePanelContextMenuOpen').isVisible();
-    if (!isOpen) {
-      // Click the menu icon inside the panel wrapper.
-      const menuIcon = panelWrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]');
-      await menuIcon.click();
-      await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeVisible();
-    }
+    const menuIcon = panelWrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]');
+    await menuIcon.click();
+    await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeVisible();
   }
 
   async navigateToLensEditorFromPanel(title?: string) {
@@ -697,12 +670,6 @@ export class DashboardApp {
     const navigateToLensEditorLink = this.page.testSubj.locator('navigateToLensEditorLink');
     await expect(navigateToLensEditorLink).toBeVisible();
     await navigateToLensEditorLink.click();
-
-    const confirmModal = this.page.testSubj.locator('confirmModalConfirmButton');
-    if (await confirmModal.isVisible()) {
-      await confirmModal.click();
-    }
-
     await expect(this.page.testSubj.locator('lnsApp')).toBeVisible();
   }
 
