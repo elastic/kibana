@@ -153,7 +153,8 @@ const InternalDocViewerTable = ({
 
   const [pinnedFields, setPinnedFields] = useRestorableState(
     'pinnedFields',
-    getPinnedFieldsFromStorage(currentDataViewId, storage)
+    getPinnedFieldsFromStorage(currentDataViewId, storage),
+    { shouldStoreDefaultValueRightAway: true }
   );
 
   const flattened = hit.flattened;
