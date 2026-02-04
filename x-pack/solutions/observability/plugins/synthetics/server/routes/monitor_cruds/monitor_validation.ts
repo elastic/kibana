@@ -161,6 +161,19 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId: string): 
         payload: monitorFields,
       };
     }
+
+    const timeout = monitorFields[ConfigKey.TIMEOUT];
+    if (timeout) {
+      const timeoutSeconds = typeof timeout === 'string' ? parseInt(timeout, 10) : timeout;
+      if (timeoutSeconds < 30) {
+        return {
+          valid: false,
+          reason: BROWSER_INVALID_TIMEOUT_ERROR,
+          details: BROWSER_INVALID_TIMEOUT_DETAILS(timeoutSeconds),
+          payload: monitorFields,
+        };
+      }
+    }
   }
 
   if (spaceId && !isEmpty(kSpaces)) {
@@ -526,3 +539,17 @@ export const LOCATION_REQUIRED_ERROR = i18n.translate(
       'At least one location is required, either elastic managed or private e.g locations: ["us-east"] or private_locations:["test private location"]',
   }
 );
+
+const BROWSER_INVALID_TIMEOUT_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidTimeoutError',
+  {
+    defaultMessage: 'Browser Monitor timeout is invalid',
+  }
+);
+
+const BROWSER_INVALID_TIMEOUT_DETAILS = (timeout: number) =>
+  i18n.translate('xpack.synthetics.server.monitors.invalidTimeoutDetails', {
+    defaultMessage:
+      'Invalid timeout {timeout} seconds supplied. Minimum timeout for browser monitors is 30 seconds.',
+    values: { timeout },
+  });

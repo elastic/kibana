@@ -16,8 +16,9 @@ import {
 
 import { tlsFormatters } from './tls_formatters';
 import type { BrowserFields } from '../../../../common/runtime_types';
-import { ConfigKey } from '../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 
+const HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS = 30;
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
 export const throttlingFormatter: Formatter = (fields) => {
@@ -32,6 +33,21 @@ export const throttlingFormatter: Formatter = (fields) => {
     upload: Number(throttling?.value?.upload || DEFAULT_THROTTLING_VALUE.upload),
     latency: Number(throttling?.value?.latency || DEFAULT_THROTTLING_VALUE),
   });
+};
+
+export const browserTimeoutFormatterPrivate: Formatter = (fields) => {
+  const value = (fields[ConfigKey.TIMEOUT] as string) ?? '';
+  if (!value) return null;
+  
+  // Heartbeat adds an overhead to browser monitor timeouts, so we need to subtract that overhead
+  // to ensure the actual timeout matches the user's expectation.
+  if (fields[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER) {
+    const timeoutSeconds = parseInt(value, 10);
+    const adjustedTimeout = Math.max(1, timeoutSeconds - HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS);
+    return `${adjustedTimeout}s`;
+  }
+    
+  return `${value}s`;
 };
 
 export const browserFormatters: BrowserFormatMap = {
@@ -49,5 +65,6 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayToJsonFormatter,
   [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
   ...commonFormatters,
+  [ConfigKey.TIMEOUT]: browserTimeoutFormatterPrivate,
   ...tlsFormatters,
 };
