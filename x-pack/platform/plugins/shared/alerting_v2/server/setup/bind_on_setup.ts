@@ -9,10 +9,10 @@ import { Logger, OnSetup, PluginSetup } from '@kbn/core-di';
 import { CoreSetup } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { registerDispatcherTaskDefinition } from '../lib/dispatcher/task_definition';
-import { DispatcherTaskRunner } from '../lib/dispatcher/task_runner';
 import { registerRuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { TaskRunnerFactoryToken } from '../lib/services/task_run_scope_service/create_task_runner';
+import { TaskRunnerInternalFactoryToken } from '../lib/services/task_run_scope_service/create_task_runner_internal';
 import { registerSavedObjects } from '../saved_objects';
 import type { AlertingServerSetupDependencies } from '../types';
 
@@ -38,7 +38,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     registerDispatcherTaskDefinition({
       taskManager,
-      dispatcherTaskRunner: container.get(DispatcherTaskRunner),
+      taskRunnerInternalFactory: container.get(TaskRunnerInternalFactoryToken),
     });
   });
 }

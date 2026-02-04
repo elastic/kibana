@@ -16,15 +16,8 @@ import type {
 
 type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
 
-export interface DispatcherTaskRunnerContract {
-  run(params: {
-    taskInstance: RunContext['taskInstance'];
-    abortController: RunContext['abortController'];
-  }): Promise<RunResult>;
-}
-
 @injectable()
-export class DispatcherTaskRunner implements DispatcherTaskRunnerContract {
+export class DispatcherTaskRunner {
   constructor(
     @inject(DispatcherService) private readonly dispatcherService: DispatcherServiceContract
   ) {}

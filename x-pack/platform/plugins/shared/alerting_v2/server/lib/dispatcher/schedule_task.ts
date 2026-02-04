@@ -8,6 +8,8 @@
 import type { AlertingServerStartDependencies } from '../../types';
 import { DISPATCHER_TASK_ID, DISPATCHER_TASK_TYPE } from './task_definition';
 
+export const INTERVAL = '30s';
+
 export async function scheduleDispatcherTask({
   taskManager,
 }: {
@@ -17,7 +19,7 @@ export async function scheduleDispatcherTask({
     id: DISPATCHER_TASK_ID,
     taskType: DISPATCHER_TASK_TYPE,
     schedule: {
-      interval: '30s',
+      interval: INTERVAL,
     },
     scope: ['alerting'],
     state: {},

@@ -5,38 +5,30 @@
  * 2.0.
  */
 
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { AlertingServerSetupDependencies } from '../../types';
-import type { AlertingTaskRunner } from '../services/task_run_scope_service/create_task_runner';
+import type { TaskRunnerInternalFactory } from '../services/task_run_scope_service/create_task_runner_internal';
+import { DispatcherTaskRunner } from './task_runner';
 
 export const DISPATCHER_TASK_TYPE = 'alerting_v2:dispatcher' as const;
 export const DISPATCHER_TASK_ID = 'alerting_v2:dispatcher:1.0.0' as const;
 
 export function registerDispatcherTaskDefinition({
   taskManager,
-  dispatcherTaskRunner,
+  taskRunnerInternalFactory,
 }: {
   taskManager: AlertingServerSetupDependencies['taskManager'];
-  dispatcherTaskRunner: AlertingTaskRunner;
+  taskRunnerInternalFactory: TaskRunnerInternalFactory;
 }) {
+  const createTaskRunner = taskRunnerInternalFactory({
+    taskRunnerClass: DispatcherTaskRunner,
+  });
+
   taskManager.registerTaskDefinitions({
     [DISPATCHER_TASK_TYPE]: {
       title: 'Alerting v2 dispatcher (ES|QL)',
-      timeout: '5m',
+      timeout: '1m',
       maxAttempts: 1,
-      createTaskRunner: ({
-        taskInstance,
-        abortController,
-      }: {
-        taskInstance: ConcreteTaskInstance;
-        abortController: AbortController;
-      }) => {
-        return {
-          run: async () => {
-            return dispatcherTaskRunner.run({ taskInstance, abortController });
-          },
-        };
-      },
+      createTaskRunner,
     },
   });
 }
