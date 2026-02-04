@@ -357,7 +357,9 @@ function stripDataStreamFields(doc) {
 }
 
 function transform(docs, config, useFromToRange) {
-  var sourceRangeStart, sourceRange, targetRange;
+  var sourceRangeStart;
+  var sourceRange;
+  var targetRange;
 
   if (config.translateTimestamps) {
     if (useFromToRange) {
