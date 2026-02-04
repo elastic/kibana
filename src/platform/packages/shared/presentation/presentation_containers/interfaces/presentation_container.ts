@@ -11,9 +11,13 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { apiHasParentApi, apiHasUniqueId } from '@kbn/presentation-publishing';
 import type { BehaviorSubject, Observable } from 'rxjs';
 import { combineLatest, isObservable, map, of, switchMap } from 'rxjs';
+import {
+  apiHasSections as baseApiHasSections,
+  type HasSections as BaseHasSections,
+} from '@kbn/presentation-publishing';
 import type { CanAddNewPanel } from './can_add_new_panel';
 import { apiCanAddNewPanel } from './can_add_new_panel';
-import type { CanAddNewSection } from './can_add_new_section';
+import { type CanAddNewSection, apiCanAddNewSection } from './can_add_new_section';
 
 export interface PanelPackage<SerializedState extends object = object> {
   panelType: string;
@@ -73,15 +77,15 @@ export const apiIsPresentationContainer = (api: unknown | null): api is Presenta
   );
 };
 
-export interface HasSections extends CanAddNewSection {
+export interface HasSections extends BaseHasSections, CanAddNewSection {
   getPanelSection: (uuid: string) => string | undefined;
-  panelSection$: (uuid: string) => Observable<string | undefined>;
 }
 
 export const apiHasSections = (api: unknown): api is HasSections => {
   return (
+    baseApiHasSections(api) &&
     typeof (api as HasSections)?.getPanelSection === 'function' &&
-    typeof (api as HasSections)?.panelSection$ === 'function'
+    apiCanAddNewSection(api)
   );
 };
 

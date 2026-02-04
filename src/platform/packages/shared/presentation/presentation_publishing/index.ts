@@ -105,6 +105,7 @@ export {
   apiHasSerializableState,
   type HasSerializableState,
 } from './interfaces/has_serializable_state';
+export { apiHasSections, type HasSections } from './interfaces/has_sections';
 export {
   apiHasSupportedTriggers,
   type HasSupportedTriggers,
