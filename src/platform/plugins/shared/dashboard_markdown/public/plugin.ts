@@ -47,33 +47,31 @@ export class DashboardMarkdownPlugin
       return markdownEmbeddableFactory;
     });
 
-    core.getStartServices().then(([_, deps]) => {
-      contentManagement.registry.register({
-        id: MARKDOWN_SAVED_OBJECT_TYPE,
-        name: 'Markdown',
-        version: { latest: 1 },
-      });
+    contentManagement.registry.register({
+      id: MARKDOWN_SAVED_OBJECT_TYPE,
+      name: 'Markdown',
+      version: { latest: 1 },
+    });
 
-      embeddable.registerAddFromLibraryType({
-        onAdd: async (container, savedObject) => {
-          container.addNewPanel<MarkdownEmbeddableState>(
-            {
-              panelType: MARKDOWN_EMBEDDABLE_TYPE,
-              serializedState: {
-                savedObjectId: savedObject.id,
-                title: savedObject.attributes.title,
-                description: savedObject.attributes.description,
-              },
+    embeddable.registerAddFromLibraryType({
+      onAdd: async (container, savedObject) => {
+        container.addNewPanel<MarkdownEmbeddableState>(
+          {
+            panelType: MARKDOWN_EMBEDDABLE_TYPE,
+            serializedState: {
+              savedObjectId: savedObject.id,
+              title: savedObject.attributes.title,
+              description: savedObject.attributes.description,
             },
-            {
-              displaySuccessMessage: true,
-            }
-          );
-        },
-        savedObjectType: MARKDOWN_SAVED_OBJECT_TYPE,
-        savedObjectName: APP_NAME,
-        getIconForSavedObject: () => APP_ICON,
-      });
+          },
+          {
+            displaySuccessMessage: true,
+          }
+        );
+      },
+      savedObjectType: MARKDOWN_SAVED_OBJECT_TYPE,
+      savedObjectName: APP_NAME,
+      getIconForSavedObject: () => APP_ICON,
     });
   }
 
