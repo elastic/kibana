@@ -12,6 +12,10 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 
+jest.mock('./feedback_container', () => ({
+  FeedbackContainer: () => <div data-test-subj="feedbackContainer">Feedback Container</div>,
+}));
+
 const coreStartMock = coreMock.createStart();
 
 const mockProps = {
@@ -59,6 +63,8 @@ describe('FeedbackButton', () => {
     const feedbackButton = screen.getByTestId('feedbackTriggerButton');
     await userEvent.click(feedbackButton);
 
-    expect(coreStartMock.overlays.openModal).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Feedback form' })).toBeInTheDocument();
+    });
   });
 });

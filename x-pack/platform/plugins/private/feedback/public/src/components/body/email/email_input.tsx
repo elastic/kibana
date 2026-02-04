@@ -90,7 +90,7 @@ export const EmailInput = ({ email, security, handleChangeEmail, onValidationCha
       {showError && (
         <EuiFormErrorText>
           {i18n.translate('feedback.emailInput.errorMessage', {
-            defaultMessage: 'Please enter a valid email address.',
+            defaultMessage: 'Enter a valid email address',
           })}
         </EuiFormErrorText>
       )}
