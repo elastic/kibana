@@ -4,19 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { getDatasourceId } from '@kbn/visualization-utils';
+import { Parser } from '@kbn/esql-language';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import type {
-  VisualizeEditorContext,
-  Suggestion,
   IndexPatternRef,
-  VisualizationMap,
+  Suggestion,
+  TextBasedPrivateState,
   TypedLensByValueInput,
   TypedLensSerializedState,
-  TextBasedPrivateState,
+  VisualizationMap,
+  VisualizeEditorContext,
 } from '@kbn/lens-common';
 
 const datasourceHasIndexPatternRefs = (
@@ -212,3 +214,36 @@ export function switchVisualizationType({
     ];
   }
 }
+
+/**
+ * Determines whether the given visualization context represents a time series.
+ * A time series context implies that a line chart is the appropriate visualization.
+ *
+ * Only applicable to TS/PromQL queries. Considered a time series when:
+ *   - A date column is available
+ *
+ * @param context the lens suggestions api context as being set by the consumers
+ * @returns `true` if the context is a time series, `false` if not, or `undefined` if the context is not applicable
+ * (e.g., non-ESQL queries or when `textBasedColumns` is unavailable)
+ */
+export const shouldUseLineChart = (
+  context: VisualizeFieldContext | VisualizeEditorContext
+): boolean | undefined => {
+  // Only applies to ESQL queries with textBasedColumns
+  if (!('textBasedColumns' in context) || !context.textBasedColumns || !('query' in context)) {
+    return undefined;
+  }
+
+  const columns = context.textBasedColumns;
+  const esqlQuery = context.query?.esql;
+
+  if (!esqlQuery) return undefined;
+
+  const { root } = Parser.parse(esqlQuery);
+  const isPromqlOrTs = root.commands.find(({ name }) => name === 'promql' || name === 'ts');
+
+  if (!isPromqlOrTs) return false;
+
+  // Check if there's at least one date column (for x-axis)
+  return columns.some((col) => col.meta?.type === 'date');
+};

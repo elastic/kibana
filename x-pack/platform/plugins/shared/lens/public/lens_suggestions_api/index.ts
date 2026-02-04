@@ -17,7 +17,11 @@ import type {
   TypedLensByValueInput,
 } from '@kbn/lens-common';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
-import { mergeSuggestionWithVisContext, switchVisualizationType } from './helpers';
+import {
+  mergeSuggestionWithVisContext,
+  shouldUseLineChart,
+  switchVisualizationType,
+} from './helpers';
 
 interface SuggestionsApiProps {
   context: VisualizeFieldContext | VisualizeEditorContext;
@@ -133,12 +137,16 @@ export const suggestionsApi = ({
       (!sug.hide && sug.visualizationId !== 'lnsLegacyMetric')
   );
 
-  const chartType = preferredChartType?.toLowerCase();
+  const chartType = preferredChartType
+    ? preferredChartType.toLowerCase()
+    : shouldUseLineChart(context)
+    ? 'line'
+    : undefined;
 
   // to return line / area instead of a bar chart
   const xyResult = switchVisualizationType({
     visualizationMap,
-    suggestions: newSuggestions,
+    suggestions: [primarySuggestion, ...newSuggestions],
     targetTypeId: chartType,
     familyType: 'lnsXY',
     forceSwitch: ['area', 'line'].some((type) => chartType?.includes(type)),
