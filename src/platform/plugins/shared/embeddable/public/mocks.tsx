@@ -47,6 +47,7 @@ export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTran
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerAddFromLibraryType: jest.fn().mockImplementation(registerAddFromLibraryType),
+    registerDrilldown: jest.fn(),
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
     registerLegacyURLTransform: jest.fn(),
   };

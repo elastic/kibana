@@ -67,6 +67,7 @@ import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
 import {
   DASHBOARD_APP_ID,
+  DASHBOARD_DRILLDOWN_TYPE,
   LANDING_PAGE_PATH,
   SEARCH_SESSION_ID,
 } from '../common/page_bundle_constants';
@@ -285,6 +286,11 @@ export class DashboardPlugin
         order: 100,
       });
     }
+
+    embeddable.registerDrilldown(DASHBOARD_DRILLDOWN_TYPE, async () => {
+      const { dashboardDrilldown } = await import('./dashboard_renderer/dashboard_module');
+      return dashboardDrilldown;
+    });
 
     return {};
   }

@@ -20,6 +20,7 @@ import type { registerReactEmbeddableFactory } from './react_embeddable_system';
 import type { EmbeddableStateTransfer } from './state_transfer';
 import type { DrilldownTransforms, EmbeddableTransforms } from '../common';
 import type { AddFromLibraryFormProps } from './add_from_library/add_from_library_flyout';
+import { registerDrilldown } from './drilldowns/registry';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -63,6 +64,11 @@ export interface EmbeddableSetup {
    *  });
    */
   registerAddFromLibraryType: typeof registerAddFromLibraryType;
+
+  /**
+   * Registers an async {@link DrilldownDefintion} getter.
+   */
+  registerDrilldown: typeof registerDrilldown;
 
   /**
    * Registers an async {@link ReactEmbeddableFactory} getter.

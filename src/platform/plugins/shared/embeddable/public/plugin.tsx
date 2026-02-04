@@ -32,6 +32,7 @@ import {
   hasLegacyURLTransform,
   getLegacyURLTransform,
 } from './bwc/legacy_url_transform';
+import { registerDrilldown } from './drilldowns/registry';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
@@ -44,6 +45,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     registerTriggers(uiActions);
 
     return {
+      registerDrilldown,
       registerReactEmbeddableFactory,
       registerAddFromLibraryType,
       registerLegacyURLTransform,
