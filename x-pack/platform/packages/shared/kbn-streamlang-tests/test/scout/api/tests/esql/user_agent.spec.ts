@@ -11,12 +11,10 @@ import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
-  'Streamlang to ES|QL - User Agent Processor (Not Supported)',
+  'Streamlang to ES|QL - User Agent Processor',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    apiTest('should handle user_agent by showing warning message', async ({ esql, testBed }) => {
-      const indexName = 'stream-e2e-test-esql-user-agent-not-supported';
-
+    apiTest('should generate USER_AGENT command with basic configuration', async () => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
@@ -29,137 +27,196 @@ apiTest.describe(
 
       const { query } = transpile(streamlangDSL);
 
-      // Verify that the ES|QL query contains a warning about user_agent not being supported
-      expect(query).toContain('WARNING: user_agent processor not supported in ES|QL');
-
-      // Test that the generated query is valid ES|QL syntax
-      const docs = [
-        {
-          http: {
-            user_agent:
-              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0',
-          },
-          existing_field: 'existing_value',
-        },
-      ];
-
-      // Create a simple test index with data for ES|QL execution
-      await testBed.ingest(indexName, docs);
-
-      // Execute the ES|QL query - it should run without syntax errors
-      const result = await esql.queryOnIndex(indexName, query);
-
-      // Should return the documents (the warning is just informational)
-      expect(result.documents.length).toBeGreaterThan(0);
-
-      // The original fields should be preserved since user_agent is not processed
-      expect(result.documents[0]).toHaveProperty('existing_field', 'existing_value');
-
-      // The user_agent processor should NOT have been applied (no 'parsed_agent' field)
-      expect(result.documents[0]).not.toHaveProperty('parsed_agent');
+      // Verify that the ES|QL query contains the USER_AGENT command
+      expect(query).toContain('USER_AGENT');
+      expect(query).toContain('parsed_agent');
+      expect(query).toContain('`http.user_agent`');
     });
 
-    apiTest(
-      'should handle user_agent with where condition (condition ignored)',
-      async ({ esql, testBed }) => {
-        const indexName = 'stream-e2e-test-esql-user-agent-conditional';
+    apiTest('should generate USER_AGENT command with default target field', async () => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'user_agent',
+            from: 'agent_string',
+          } as UserAgentProcessor,
+        ],
+      };
 
+      const { query } = transpile(streamlangDSL);
+
+      // Default target field should be 'user_agent'
+      expect(query).toContain('USER_AGENT');
+      expect(query).toContain('user_agent');
+      expect(query).toContain('agent_string');
+    });
+
+    apiTest('should generate USER_AGENT command with regex_file option', async () => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'user_agent',
+            from: 'agent_string',
+            to: 'parsed_agent',
+            regex_file: 'myregexes.yaml',
+          } as UserAgentProcessor,
+        ],
+      };
+
+      const { query } = transpile(streamlangDSL);
+
+      // Should contain WITH clause with regex_file option
+      expect(query).toContain('USER_AGENT');
+      expect(query).toContain('WITH');
+      expect(query).toContain('regex_file');
+      expect(query).toContain('myregexes.yaml');
+    });
+
+    apiTest('should generate USER_AGENT command with extract_device_type option', async () => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'user_agent',
+            from: 'agent_string',
+            to: 'parsed_agent',
+            extract_device_type: true,
+          } as UserAgentProcessor,
+        ],
+      };
+
+      const { query } = transpile(streamlangDSL);
+
+      // Should contain WITH clause with extract_device_type option
+      expect(query).toContain('USER_AGENT');
+      expect(query).toContain('WITH');
+      expect(query).toContain('extract_device_type');
+      expect(query).toContain('true');
+    });
+
+    apiTest('should generate USER_AGENT command with all options', async () => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'user_agent',
+            from: 'http.user_agent',
+            to: 'parsed_agent',
+            regex_file: 'custom.yaml',
+            extract_device_type: true,
+          } as UserAgentProcessor,
+        ],
+      };
+
+      const { query } = transpile(streamlangDSL);
+
+      // Should contain USER_AGENT command with all options in WITH clause
+      expect(query).toContain('USER_AGENT');
+      expect(query).toContain('parsed_agent');
+      expect(query).toContain('WITH');
+      expect(query).toContain('regex_file');
+      expect(query).toContain('custom.yaml');
+      expect(query).toContain('extract_device_type');
+      expect(query).toContain('true');
+    });
+
+    apiTest('should handle ignore_missing with conditional execution', async () => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'user_agent',
+            from: 'agent_string',
+            to: 'parsed_agent',
+            ignore_missing: true,
+          } as UserAgentProcessor,
+        ],
+      };
+
+      const { query } = transpile(streamlangDSL);
+
+      // Should generate conditional execution pattern (CASE statement for temporary field)
+      expect(query).toContain('USER_AGENT');
+      expect(query).toContain('CASE');
+      expect(query).toContain('__temp_user_agent_where_agent_string__');
+      expect(query).toContain('DROP');
+    });
+
+    apiTest('should handle where condition with conditional execution', async () => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'user_agent',
+            from: 'agent_string',
+            to: 'parsed_agent',
+            where: { field: 'should_parse', eq: true },
+          } as UserAgentProcessor,
+        ],
+      };
+
+      const { query } = transpile(streamlangDSL);
+
+      // Should generate conditional execution with WHERE condition check
+      expect(query).toContain('USER_AGENT');
+      expect(query).toContain('CASE');
+      expect(query).toContain('should_parse');
+    });
+
+    apiTest('should generate valid ES|QL when mixed with supported processors', async () => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'set',
+            to: 'supported_field',
+            value: 'supported_value',
+          },
+          {
+            action: 'user_agent',
+            from: 'agent_string',
+            to: 'parsed_agent',
+          } as UserAgentProcessor,
+          {
+            action: 'rename',
+            from: 'old_field',
+            to: 'new_field',
+            override: true,
+          },
+        ],
+      };
+
+      const { query } = transpile(streamlangDSL);
+
+      // Should contain USER_AGENT command
+      expect(query).toContain('USER_AGENT');
+
+      // Should also contain supported processors
+      expect(query).toContain('EVAL'); // For set processor
+      expect(query).toContain('RENAME'); // For rename processor
+    });
+
+    // Template validation tests - both transpilers should consistently REJECT Mustache templates
+    [
+      {
+        templateType: '{{ }}',
+        from: '{{template_from}}',
+      },
+      {
+        templateType: '{{{ }}}',
+        from: '{{{template_from}}}',
+      },
+    ].forEach(({ templateType, from }) => {
+      apiTest(`should consistently reject ${templateType} template syntax`, async () => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
               action: 'user_agent',
-              from: 'agent_string',
-              to: 'parsed_agent',
-              where: { field: 'should_parse', eq: true },
+              from,
             } as UserAgentProcessor,
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
-
-        expect(query).toContain('WARNING: user_agent processor not supported in ES|QL');
-
-        const docs = [
-          {
-            agent_string: 'Mozilla/5.0 Chrome/120.0.0.0',
-            should_parse: true,
-          },
-          {
-            agent_string: 'Mozilla/5.0 Safari/605.1.15',
-            should_parse: false,
-          },
-        ];
-
-        await testBed.ingest(indexName, docs);
-        const result = await esql.queryOnIndex(indexName, query);
-
-        // Both documents should be returned since the user_agent processor (and its condition) is ignored
-        expect(result.documents).toHaveLength(2);
-
-        // Neither document should have the parsed_agent field applied
-        result.documents.forEach((doc) => {
-          expect(doc).not.toHaveProperty('parsed_agent');
-        });
-      }
-    );
-
-    apiTest(
-      'should generate valid ES|QL when mixed with supported processors',
-      async ({ esql, testBed }) => {
-        const indexName = 'stream-e2e-test-esql-user-agent-mixed';
-
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'set',
-              to: 'supported_field',
-              value: 'supported_value',
-            },
-            {
-              action: 'user_agent',
-              from: 'agent_string',
-              to: 'parsed_agent',
-            } as UserAgentProcessor,
-            {
-              action: 'rename',
-              from: 'old_field',
-              to: 'new_field',
-              override: true,
-            },
-          ],
-        };
-
-        const { query } = transpile(streamlangDSL);
-
-        // Should contain the warning for user_agent processor
-        expect(query).toContain('WARNING: user_agent processor not supported in ES|QL');
-
-        // Should also contain supported processors
-        expect(query).toContain('EVAL'); // For set processor
-
-        const docs = [
-          {
-            agent_string: 'Mozilla/5.0 Chrome/120.0.0.0',
-            old_field: 'to_be_renamed',
-            new_field: '',
-          },
-        ];
-
-        await testBed.ingest(indexName, docs);
-        const result = await esql.queryOnIndex(indexName, query);
-
-        expect(result.documents.length).toBeGreaterThan(0);
-
-        const doc = result.documents[0];
-
-        // Supported processors should work
-        expect(doc).toHaveProperty('supported_field', 'supported_value');
-        expect(doc).toHaveProperty('new_field', 'to_be_renamed');
-        expect(doc).not.toHaveProperty('old_field'); // Should be renamed
-
-        // User agent processor should be ignored
-        expect(doc).not.toHaveProperty('parsed_agent');
-      }
-    );
+        // Transpiler should throw validation error for Mustache templates
+        expect(() => transpile(streamlangDSL)).toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+        );
+      });
+    });
   }
 );
