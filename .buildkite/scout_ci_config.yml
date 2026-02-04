@@ -9,6 +9,7 @@ plugins:
     - fleet
     - index_management
     - infra
+    - lens
     - maps
     - observability
     - observability_onboarding
