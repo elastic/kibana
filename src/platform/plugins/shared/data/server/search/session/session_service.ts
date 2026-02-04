@@ -32,6 +32,7 @@ import type {
 import { ENHANCED_ES_SEARCH_STRATEGY, SEARCH_SESSION_TYPE } from '../../../common';
 import type { ISearchSessionService } from '../..';
 import { NoSearchIdInSessionError } from '../..';
+import { strategyToString } from '../../../common';
 import type { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
 import { getSessionStatus } from './get_session_status';
 
@@ -301,7 +302,7 @@ export class SearchSessionService implements ISearchSessionService {
 
     const searchInfo: SearchSessionRequestInfo = {
       id: searchId,
-      strategy: String(strategy),
+      strategy: strategyToString(strategy),
     };
 
     if (!this.trackIdBatchQueueMap.has(sessionId)) {

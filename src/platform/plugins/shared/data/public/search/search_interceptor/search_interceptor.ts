@@ -79,6 +79,7 @@ import {
   isRunningResponse,
   pollSearch,
   shimHitsTotal,
+  strategyToString,
   UI_SETTINGS,
 } from '../../../common';
 import type { SearchUsageCollector } from '../collectors';
@@ -366,8 +367,11 @@ export class SearchInterceptor {
           isSavedToBackground = true;
         });
 
+    const strategyString = strategy ? strategyToString(strategy) : strategy;
     const sendCancelRequest = once(() =>
-      this.deps.http.delete(`/internal/search/${String(strategy)}/${id}`, { version: '1' })
+      this.deps.http.delete(`/internal/search/${strategyString}/${id}`, {
+        version: '1',
+      })
     );
 
     const cancel = async () => {
@@ -487,10 +491,10 @@ export class SearchInterceptor {
     // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
     // at that point, exclude all params when request.id is defined (polling phase)
     const paramsToUse = request.id ? { dropNullColumns: params?.dropNullColumns } : params || {};
-
+    const strategyString = strategy ? strategyToString(strategy) : strategy;
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
-        `/internal/search/${String(strategy)}${request.id ? `/${request.id}` : ''}`,
+        `/internal/search/${strategyString}${request.id ? `/${request.id}` : ''}`,
         {
           version: '1',
           signal: abortSignal,

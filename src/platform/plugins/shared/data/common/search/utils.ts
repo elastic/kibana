@@ -49,3 +49,7 @@ export const getUserTimeZone = (
 
   return userTimeZone ?? defaultTimeZone;
 };
+
+export function strategyToString(strategy: string | symbol): string {
+  return typeof strategy === 'string' ? strategy : strategy.description!;
+}
