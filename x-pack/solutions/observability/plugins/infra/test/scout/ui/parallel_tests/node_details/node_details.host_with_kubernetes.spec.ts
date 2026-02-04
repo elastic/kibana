@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 import {
   DATE_WITH_K8S_HOSTS_DATA_FROM,
