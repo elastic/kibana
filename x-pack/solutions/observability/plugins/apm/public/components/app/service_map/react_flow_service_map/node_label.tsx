@@ -33,7 +33,7 @@ export const NodeLabel = memo(({ label, selected = false }: NodeLabelProps) => {
   `;
 
   return (
-    <EuiFlexItem grow={false} css={labelStyles}>
+    <EuiFlexItem grow={false} css={labelStyles} aria-hidden="true">
       {label}
     </EuiFlexItem>
   );
