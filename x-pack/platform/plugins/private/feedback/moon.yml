@@ -18,15 +18,12 @@ project:
   metadata:
     sourceRoot: x-pack/platform/plugins/private/feedback
 dependsOn:
-  - '@kbn/test-jest-helpers'
   - '@kbn/core'
-  - '@kbn/i18n'
   - '@kbn/cloud-plugin'
   - '@kbn/telemetry-plugin'
   - '@kbn/config-schema'
   - '@kbn/feedback-registry'
   - '@kbn/feedback-components'
-  - '@kbn/core-security-browser-mocks'
   - '@kbn/core-http-router-server-mocks'
 tags:
   - plugin
