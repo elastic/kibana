@@ -14,7 +14,4 @@ export interface ToolCallEntryMeta {
   tool_call_id: string;
 }
 
-export type ToolCallFileEntry<TData extends object = object> = FileEntry<
-  TData,
-  ToolCallEntryMeta
->;
+export type ToolCallFileEntry<TData extends object = object> = FileEntry<TData, ToolCallEntryMeta>;
