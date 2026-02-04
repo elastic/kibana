@@ -16,13 +16,15 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useCasesCreateTemplateNavigation } from '../../../common/navigation/hooks';
 import * as i18n from '../../templates/translations';
-import { useCasesCreateTemplateNavigation } from '../../../common/navigation';
 import type { Template } from '../types';
 import { useTemplatesColumns } from '../hooks/use_templates_columns';
 import { useTemplatesState } from '../hooks/use_templates_state';
 import { useTemplatesPagination } from '../hooks/use_templates_pagination';
 import { useGetTemplates } from '../hooks/use_get_templates';
+import { useGetTemplateTags } from '../hooks/use_get_template_tags';
+import { useGetTemplateCreators } from '../hooks/use_get_template_creators';
 import { useTemplatesActions } from '../hooks/use_templates_actions';
 import { TemplatesListHeader } from '../components/templates_list_header';
 import { TemplatesTableFilters } from '../components/templates_table_filters';
@@ -40,7 +42,8 @@ export const AllTemplatesPage: React.FC = () => {
     useTemplatesState();
 
   const { data, isLoading, refetch } = useGetTemplates({ queryParams });
-
+  const { data: tags = [], isLoading: isLoadingTags } = useGetTemplateTags();
+  const { data: creators = [], isLoading: isLoadingCreators } = useGetTemplateCreators();
   const { pagination, onTableChange } = useTemplatesPagination({
     queryParams,
     setQueryParams,
@@ -86,10 +89,13 @@ export const AllTemplatesPage: React.FC = () => {
   const isDataEmpty = data?.templates.length === 0;
   const isInitialLoading = isLoading && isDataEmpty;
 
-  const hasFilters = queryParams.search.length > 0;
+  const hasFilters =
+    queryParams.search.length > 0 ||
+    (queryParams.tags?.length ?? 0) > 0 ||
+    (queryParams.createdBy?.length ?? 0) > 0;
 
   const handleClearFilters = useCallback(() => {
-    setQueryParams({ search: '', page: 1 });
+    setQueryParams({ search: '', tags: [], createdBy: [], page: 1 });
   }, [setQueryParams]);
 
   const totalTemplates = pagination.totalItemCount;
@@ -105,6 +111,10 @@ export const AllTemplatesPage: React.FC = () => {
         onQueryParamsChange={setQueryParams}
         onRefresh={refetch}
         isLoading={isLoading}
+        availableTags={tags}
+        availableCreatedBy={creators}
+        isLoadingTags={isLoadingTags}
+        isLoadingCreators={isLoadingCreators}
       />
       {isInitialLoading ? (
         <EuiSkeletonText data-test-subj="templates-table-loading" lines={10} />

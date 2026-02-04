@@ -21,6 +21,8 @@ export const casesQueriesKeys = {
   templates: ['templates'] as const,
   templatesList: () => [...casesQueriesKeys.templates, 'list'] as const,
   templatesAll: (params: unknown) => [...casesQueriesKeys.templatesList(), params] as const,
+  templatesTags: () => [...casesQueriesKeys.templates, 'tags'] as const,
+  templatesCreators: () => [...casesQueriesKeys.templates, 'creators'] as const,
   connectorsList: () => [...casesQueriesKeys.connectors, 'list'] as const,
   casesList: () => [...casesQueriesKeys.all, 'list'] as const,
   casesMetrics: () => [...casesQueriesKeys.casesList(), 'metrics'] as const,

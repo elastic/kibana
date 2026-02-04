@@ -12,6 +12,7 @@ export interface Template {
   solution: 'security' | 'observability' | 'other';
   fields: number;
   tags: string[];
+  createdBy: string;
   lastUpdate: string;
   lastTimeUsed: string;
   usage: number;
@@ -58,4 +59,6 @@ export interface QueryParams {
   sortField: SortField;
   sortOrder: SortOrder;
   search: string;
+  tags?: string[];
+  createdBy?: string[];
 }

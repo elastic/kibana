@@ -78,7 +78,6 @@ export const getTemplates = async ({
   const start = (page - 1) * perPage;
   const end = start + perPage;
   const paginatedTemplates = sortedTemplates.slice(start, end);
-
   return {
     templates: paginatedTemplates,
     page,
@@ -367,4 +366,51 @@ export const bulkExportTemplates = async ({
     filename,
     content: yamlContent,
   };
+};
+
+export const getTemplateTags = async ({
+  signal,
+}: {
+  signal?: AbortSignal;
+} = {}): Promise<string[]> => {
+  // TODO: Replace with actual API call when available
+  // const response = await KibanaServices.get().http.fetch<string[]>(
+  //   `${TEMPLATES_URL}/tags`,
+  //   {
+  //     method: 'GET',
+  //     signal,
+  //   }
+  // );
+  // return response;
+
+  // ---- MOCK IMPLEMENTATION - Remove when API is available ----
+  // Extract unique tags from all templates
+  const allTags = MOCK_TEMPLATES.flatMap((template) => template.tags);
+  const uniqueTags = [...new Set(allTags)].sort();
+  // ---- END MOCK IMPLEMENTATION ----
+  return uniqueTags;
+};
+
+export const getTemplateCreators = async ({
+  signal,
+}: {
+  signal?: AbortSignal;
+} = {}): Promise<string[]> => {
+  // TODO: Replace with actual API call when available
+  // const response = await KibanaServices.get().http.fetch<string[]>(
+  //   `${TEMPLATES_URL}/creators`,
+  //   {
+  //     method: 'GET',
+  //     signal,
+  //   }
+  // );
+  // return response;
+
+  // ---- MOCK IMPLEMENTATION - Remove when API is available ----
+  // Extract unique creators from all templates
+  const allCreators = MOCK_TEMPLATES.map((template) => template.createdBy);
+  const uniqueCreators = [...new Set(allCreators)].sort();
+  // ---- END MOCK IMPLEMENTATION ----
+
+  return uniqueCreators;
 };

@@ -54,6 +54,14 @@ export const REFRESH_TEMPLATES = i18n.translate('xpack.cases.templates.refreshTe
   defaultMessage: 'Refresh templates',
 });
 
+export const TAGS = i18n.translate('xpack.cases.templates.tags', {
+  defaultMessage: 'Tags',
+});
+
+export const CREATED_BY = i18n.translate('xpack.cases.templates.createdBy', {
+  defaultMessage: 'Created by',
+});
+
 export const TEMPLATES_INFO_TITLE = i18n.translate('xpack.cases.templates.infoTitle', {
   defaultMessage: 'Create custom templates for your needs',
 });
@@ -163,6 +171,20 @@ export const ERROR_FETCHING_TEMPLATES = i18n.translate(
   'xpack.cases.templates.errorFetchingTemplates',
   {
     defaultMessage: 'Error fetching templates',
+  }
+);
+
+export const ERROR_FETCHING_TEMPLATE_TAGS = i18n.translate(
+  'xpack.cases.templates.errorFetchingTemplateTags',
+  {
+    defaultMessage: 'Error fetching template tags',
+  }
+);
+
+export const ERROR_FETCHING_TEMPLATE_CREATORS = i18n.translate(
+  'xpack.cases.templates.errorFetchingTemplateCreators',
+  {
+    defaultMessage: 'Error fetching template creators',
   }
 );
 

@@ -6,9 +6,16 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiFilterGroup,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { TemplatesSearch } from './templates_search';
+import { MultiSelectFilter, mapToMultiSelectOption } from '../../all_cases/multi_select_filter';
 import type { QueryParams } from '../types';
 import * as i18n from '../../templates/translations';
 
@@ -17,6 +24,10 @@ export interface TemplatesTableFiltersProps {
   onQueryParamsChange: (params: Partial<QueryParams>) => void;
   onRefresh: () => void;
   isLoading?: boolean;
+  availableTags?: string[];
+  availableCreatedBy?: string[];
+  isLoadingTags?: boolean;
+  isLoadingCreators?: boolean;
 }
 
 const TemplatesTableFiltersComponent: React.FC<TemplatesTableFiltersProps> = ({
@@ -24,12 +35,30 @@ const TemplatesTableFiltersComponent: React.FC<TemplatesTableFiltersProps> = ({
   onQueryParamsChange,
   onRefresh,
   isLoading = false,
+  availableTags = [],
+  availableCreatedBy = [],
+  isLoadingTags = false,
+  isLoadingCreators = false,
 }) => {
   const { euiTheme } = useEuiTheme();
 
   const onSearchChange = useCallback(
     (search: string) => {
       onQueryParamsChange({ search, page: 1 });
+    },
+    [onQueryParamsChange]
+  );
+
+  const onTagsChange = useCallback(
+    ({ selectedOptionKeys }: { filterId: string; selectedOptionKeys: string[] }) => {
+      onQueryParamsChange({ tags: selectedOptionKeys, page: 1 });
+    },
+    [onQueryParamsChange]
+  );
+
+  const onCreatedByChange = useCallback(
+    ({ selectedOptionKeys }: { filterId: string; selectedOptionKeys: string[] }) => {
+      onQueryParamsChange({ createdBy: selectedOptionKeys, page: 1 });
     },
     [onQueryParamsChange]
   );
@@ -51,6 +80,30 @@ const TemplatesTableFiltersComponent: React.FC<TemplatesTableFiltersProps> = ({
           onSearchChange={onSearchChange}
           key={queryParams.search}
         />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup
+          css={css`
+            background-color: transparent;
+          `}
+        >
+          <MultiSelectFilter
+            id="tags"
+            buttonLabel={i18n.TAGS}
+            options={mapToMultiSelectOption(availableTags)}
+            selectedOptionKeys={queryParams.tags ?? []}
+            onChange={onTagsChange}
+            isLoading={isLoadingTags}
+          />
+          <MultiSelectFilter
+            id="createdBy"
+            buttonLabel={i18n.CREATED_BY}
+            options={mapToMultiSelectOption(availableCreatedBy)}
+            selectedOptionKeys={queryParams.createdBy ?? []}
+            onChange={onCreatedByChange}
+            isLoading={isLoadingCreators}
+          />
+        </EuiFilterGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
