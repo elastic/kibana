@@ -90,7 +90,7 @@ const OverviewComponent = () => {
   const {
     endpointPrivileges: { canAccessFleet },
   } = useUserPrivileges();
-  const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
+  const { hasIndexRead, hasAlertsRead } = useAlertsPrivileges();
   const { tiDataSources: allTiDataSources, isInitiallyLoaded: isTiLoaded } = useAllTiDataSources();
 
   if (newDataViewPickerEnabled && status === 'pristine') {
@@ -129,7 +129,7 @@ const OverviewComponent = () => {
 
               <EuiFlexItem grow={3}>
                 <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
-                  {hasIndexRead && hasKibanaREAD && (
+                  {hasIndexRead && hasAlertsRead && (
                     <EuiFlexItem grow={false}>
                       <SignalsByCategory filters={filters} />
                       <EuiSpacer size="l" />

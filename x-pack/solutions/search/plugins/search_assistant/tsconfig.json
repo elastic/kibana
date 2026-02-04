@@ -29,7 +29,9 @@
     "@kbn/ml-plugin",
     "@kbn/share-plugin",
     "@kbn/triggers-actions-ui-plugin",
-    "@kbn/ai-assistant-icon"
+    "@kbn/ai-assistant-icon",
+    "@kbn/ai-assistant-common",
+    "@kbn/management-settings-ids"
   ],
   "exclude": [
     "target/**/*",

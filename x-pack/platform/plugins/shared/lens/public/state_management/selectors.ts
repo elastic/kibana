@@ -17,6 +17,7 @@ export const selectQuery = (state: LensState) => state.lens.query;
 export const selectSearchSessionId = (state: LensState) => state.lens.searchSessionId;
 export const selectFilters = (state: LensState) => state.lens.filters;
 export const selectResolvedDateRange = (state: LensState) => state.lens.resolvedDateRange;
+export const selectProjectRouting = (state: LensState) => state.lens.projectRouting;
 export const selectAdHocDataViews = (state: LensState) =>
   Object.fromEntries(
     Object.values(state.lens.dataViews.indexPatterns)
@@ -40,6 +41,24 @@ export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
 export const selectSelectedLayerId = (state: LensState) => state.lens.visualization.selectedLayerId;
 
+/**
+ * Selector to check if the text-based (ES|QL) editor should be hidden.
+ * This is set to true when the parent application (e.g., Discover) explicitly
+ * requests hiding the editor. Used primarily for flyout structure decisions.
+ */
+export const selectHideTextBasedEditor = (state: LensState) => state.lens.hideTextBasedEditor;
+
+/**
+ * Selector to determine if the user can edit a text-based (ES|QL) query.
+ * Returns true only when:
+ * 1. The editor is not explicitly hidden (hideTextBasedEditor is false)
+ * 2. The current query is an aggregate/ES|QL query type
+ *
+ * Used by ESQLEditor and ConfigPanel to decide whether to render the ES|QL editor.
+ */
+export const selectCanEditTextBasedQuery = (state: LensState) =>
+  !state.lens.hideTextBasedEditor && isOfAggregateQueryType(state.lens.query);
+
 let applyChangesCounter: number | undefined;
 export const selectTriggerApplyChanges = (state: LensState) => {
   const shouldApply = state.lens.applyChangesCounter !== applyChangesCounter;
@@ -49,12 +68,13 @@ export const selectTriggerApplyChanges = (state: LensState) => {
 
 // TODO - is there any point to keeping this around since we have selectExecutionSearchContext?
 export const selectExecutionContext = createSelector(
-  [selectQuery, selectFilters, selectResolvedDateRange],
-  (query, filters, dateRange) => ({
+  [selectQuery, selectFilters, selectResolvedDateRange, selectProjectRouting],
+  (query, filters, dateRange, projectRouting) => ({
     now: Date.now(),
     dateRange,
     query,
     filters,
+    projectRouting,
   })
 );
 
@@ -67,6 +87,7 @@ export const selectExecutionContextSearch = createSelector(selectExecutionContex
   },
   filters: res.filters,
   disableWarningToasts: true,
+  projectRouting: res.projectRouting,
 }));
 
 const selectInjectedDependencies = (_state: LensState, dependencies: unknown) => dependencies;

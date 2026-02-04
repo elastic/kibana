@@ -24,10 +24,10 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
 import { type RecommendedQuery, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
-import { getRecommendedQueriesTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
+import { getRecommendedQueriesTemplates } from '@kbn/esql-language/src/commands/registry/options/recommended_queries';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import { getCategorizationField } from '@kbn/aiops-utils';
-import { prettifyQueryTemplate } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries/utils';
+import { prettifyQueryTemplate } from '@kbn/esql-language/src/commands/registry/options/recommended_queries/utils';
 import { ESQLEditorTelemetryService } from '@kbn/esql-editor/src/telemetry/telemetry_service';
 import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { IUnifiedSearchPluginServices } from '../types';
@@ -44,8 +44,8 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
   onESQLQuerySubmit,
 }) => {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { docLinks, http, chrome, analytics } = kibana.services;
-
+  const { docLinks, http, chrome, analytics, notifications } = kibana.services;
+  const isFeedbackEnabled = useMemo(() => notifications.feedback.isEnabled(), [notifications]);
   const { euiTheme } = useEuiTheme();
 
   const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
@@ -217,26 +217,30 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
                 },
               ]
             : []),
-          {
-            name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.feedback', {
-              defaultMessage: 'Submit feedback',
-            }),
-            icon: 'editorComment',
-            renderItem: () => (
-              <EuiContextMenuItem
-                key="feedback"
-                icon="editorComment"
-                data-test-subj="esql-feedback"
-                target="_blank"
-                href={FEEDBACK_LINK}
-                onClick={() => setIsESQLMenuPopoverOpen(false)}
-              >
-                {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.feedback', {
-                  defaultMessage: 'Submit feedback',
-                })}
-              </EuiContextMenuItem>
-            ),
-          },
+          ...(isFeedbackEnabled
+            ? [
+                {
+                  name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.feedback', {
+                    defaultMessage: 'Submit feedback',
+                  }),
+                  icon: 'editorComment',
+                  renderItem: () => (
+                    <EuiContextMenuItem
+                      key="feedback"
+                      icon="editorComment"
+                      data-test-subj="esql-feedback"
+                      target="_blank"
+                      href={FEEDBACK_LINK}
+                      onClick={() => setIsESQLMenuPopoverOpen(false)}
+                    >
+                      {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.feedback', {
+                        defaultMessage: 'Submit feedback',
+                      })}
+                    </EuiContextMenuItem>
+                  ),
+                },
+              ]
+            : []),
         ],
       },
       {
@@ -273,6 +277,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     toggleLanguageComponent,
     solutionsRecommendedQueries, // This dependency is fine here, as it *uses* the state
     categorizationField,
+    isFeedbackEnabled,
   ]);
 
   const esqlMenuPopoverStyles = css`

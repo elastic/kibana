@@ -97,7 +97,9 @@
     "@kbn/setup-node-env",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/react-query",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/securitysolution-es-utils",
+    "@kbn/response-ops-retry-service"
   ],
   "exclude": [
     "target/**/*"

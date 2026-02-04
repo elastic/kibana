@@ -12,7 +12,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { STATUS } from '../../../..';
+import { STATUS } from '../../../../file_upload_manager';
 import { useFileUploadKibana } from '../../kibana_context';
 
 const existsErrorText = i18n.translate(

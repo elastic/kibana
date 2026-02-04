@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstQueryExpression, ESQLCommand } from '@kbn/esql-ast';
+import type { ESQLAstQueryExpression, ESQLCommand } from '@kbn/esql-language';
 
 export interface Command {
   body: string;

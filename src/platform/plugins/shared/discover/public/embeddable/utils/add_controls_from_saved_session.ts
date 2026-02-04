@@ -6,53 +6,37 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { BehaviorSubject } from 'rxjs';
 import type { CanAddNewPanel } from '@kbn/presentation-containers';
-import type { SavedObjectCommon, FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
-import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import { type ESQLControlState, apiPublishesESQLVariables } from '@kbn/esql-types';
-import type { ControlPanelsState } from '@kbn/controls-plugin/public';
-import { type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import type { ESQLControlState, PublishesESQLVariables } from '@kbn/esql-types';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import { omit } from 'lodash';
 
-export const addControlsFromSavedSession = (
-  container: CanAddNewPanel & { controlGroupApi$?: unknown; esqlVariables$?: unknown },
-  savedObject: SavedObjectCommon<FinderAttributes>
-): void => {
-  const savedSessionAttributes = savedObject.attributes as SavedSearchAttributes;
-  if (
-    !savedSessionAttributes.controlGroupJson ||
-    Object.keys(savedSessionAttributes.controlGroupJson).length === 0
-  ) {
-    return;
-  }
-
-  const controlsState = JSON.parse(
-    savedSessionAttributes.controlGroupJson
-  ) as ControlPanelsState<ESQLControlState>;
-
-  if (!apiPublishesESQLVariables(container) || !('controlGroupApi$' in container)) {
-    return;
-  }
-
+export const addControlsFromSavedSession = async (
+  container: CanAddNewPanel & Partial<PublishesESQLVariables>,
+  controlGroupJson: string,
+  uuid?: string | undefined
+): Promise<void> => {
+  const controlsState = controlGroupJson.length
+    ? (JSON.parse(controlGroupJson) as ControlPanelsState<ESQLControlState>)
+    : {};
   const esqlVariables$ = container.esqlVariables$;
   const esqlVariables = esqlVariables$?.getValue();
-  const controlGroupApi$ = container.controlGroupApi$ as BehaviorSubject<ControlGroupRendererApi>;
-  const controlGroupApi = controlGroupApi$.getValue();
 
-  // Only add controls whose variableName exists in current esqlVariables
-  Object.values(controlsState).forEach((panel) => {
+  // Only add controls whose variableName does not exist in current esqlVariables
+  for (const panel of Object.values(controlsState)) {
     const variableName = panel.variableName;
     const variableExists = esqlVariables?.some((esqlVar) => esqlVar.key === variableName);
     if (!variableExists) {
-      controlGroupApi.addNewPanel({
-        panelType: ESQL_CONTROL,
-        serializedState: {
-          rawState: {
-            ...panel,
+      await container.addNewPanel(
+        {
+          panelType: ESQL_CONTROL,
+          serializedState: {
+            ...omit(panel, ['width', 'grow', 'order']),
           },
         },
-      });
+        { beside: uuid, scrollToPanel: false }
+      );
     }
-  });
+  }
 };

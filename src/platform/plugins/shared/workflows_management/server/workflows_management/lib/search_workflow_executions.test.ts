@@ -22,7 +22,6 @@ describe('searchWorkflowExecutions', () => {
     } as any;
 
     mockLogger = loggerMock.create();
-    mockLogger.info = jest.fn();
     mockLogger.error = jest.fn();
   });
 

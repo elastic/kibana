@@ -87,7 +87,7 @@ export const SettingsFieldWrapper: React.FC<{
         <>
           {settingsConfig.description({ renderer })}{' '}
           {settingsConfig.learnMoreLink && (
-            <EuiLink href={settingsConfig.learnMoreLink} external>
+            <EuiLink href={settingsConfig.learnMoreLink} external target="_blank">
               <FormattedMessage
                 id="xpack.fleet.configuredSettings.learnMoreLinkText"
                 defaultMessage="Learn more."

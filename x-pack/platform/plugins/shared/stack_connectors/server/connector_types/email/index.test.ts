@@ -615,6 +615,73 @@ describe('params validation', () => {
       )
     ).not.toThrowError();
   });
+
+  test('throws for too long "to" address ', async () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+
+    const longEmailAddress = 'a'.repeat(513 - '@example.com'.length) + '@example.com';
+
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: [longEmailAddress],
+          cc: ['cc@example.com'],
+          bcc: ['bcc@example.com'],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: Field \\"to.0\\": String must contain at most 512 character(s)"`
+    );
+  });
+  test('throws for too long "cc" address ', async () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+
+    const longEmailAddress = 'a'.repeat(513 - '@example.com'.length) + '@example.com';
+
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['to@example.com'],
+          cc: [longEmailAddress],
+          bcc: ['bcc@example.com'],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: Field \\"cc.0\\": String must contain at most 512 character(s)"`
+    );
+  });
+  test('throws for too long "bcc" address ', async () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+
+    const longEmailAddress = 'a'.repeat(513 - '@example.com'.length) + '@example.com';
+
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['to@example.com'],
+          cc: ['cc@example.com'],
+          bcc: [longEmailAddress],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: Field \\"bcc.0\\": String must contain at most 512 character(s)"`
+    );
+  });
 });
 
 describe('execute()', () => {

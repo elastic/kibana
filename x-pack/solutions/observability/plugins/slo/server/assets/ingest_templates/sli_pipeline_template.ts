@@ -71,7 +71,7 @@ export const getSLIPipelineTemplate = (
         date_index_name: {
           field: '@timestamp',
           index_name_prefix: SLI_INGEST_PIPELINE_INDEX_NAME_PREFIX,
-          date_rounding: 'M',
+          date_rounding: 'd',
           date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
         },
       },

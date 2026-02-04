@@ -17,23 +17,76 @@ import {
   EuiIcon,
   EuiLink,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
+import { DATA_SOURCES_APP_ID } from '@kbn/deeplinks-data-sources';
+import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_AGENTS } from '../../../common';
 import { useAgents } from '../hooks/use_agents';
 import { useKibana } from '../hooks/use_kibana';
+import { useNavigateToApp } from '../hooks/use_navigate_to_app';
 import salesForceSVG from '../../assets/salesforce.svg';
 import googleDriveSVG from '../../assets/google_drive.svg';
 import confluenceSVG from '../../assets/confluence.svg';
+
+const MAX_DISPLAY_ITEMS = 4;
+const CARD_MIN_HEIGHT = '320px';
+
+const cardContainerStyles = css`
+  height: 100%;
+`;
+
+const cardStyles = css`
+  height: 100%;
+  min-height: ${CARD_MIN_HEIGHT};
+`;
+
+// Hardcoded sources data
+const allSources = [
+  {
+    name: 'Salesforce',
+    status: 'Syncing',
+    icon: salesForceSVG,
+  },
+  {
+    name: 'Google Drive',
+    status: 'Sync error',
+    icon: googleDriveSVG,
+  },
+  {
+    name: 'Confluence',
+    status: 'Up to date',
+    icon: confluenceSVG,
+  },
+  {
+    name: 'Slack',
+    status: 'Syncing',
+    icon: salesForceSVG,
+  },
+  {
+    name: 'Jira',
+    status: 'Up to date',
+    icon: confluenceSVG,
+  },
+  {
+    name: 'SharePoint',
+    status: 'Up to date',
+    icon: googleDriveSVG,
+  },
+];
 
 export const SnapshotsSection: React.FC = () => {
   const { data: agents = [], isLoading: isLoadingAgents } = useAgents();
   const {
     services: { application, chrome },
   } = useKibana();
+  const navigateToApp = useNavigateToApp();
 
   const agentCount = agents.length;
+  const sourceCount = allSources.length;
+  const syncingCount = allSources.filter((s) => s.status === 'Syncing').length;
 
   const getAgentEditUrl = useCallback(
     (agentId: string) => {
@@ -51,14 +104,14 @@ export const SnapshotsSection: React.FC = () => {
         <h2>
           <FormattedMessage
             id="xpack.workplaceai.gettingStarted.snapshots.title"
-            defaultMessage="Snapshots"
+            defaultMessage="My Usage Snapshots"
           />
         </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="l" alignItems="flexStart">
-        <EuiFlexItem>
-          <EuiPanel paddingSize="m">
+      <EuiFlexGroup gutterSize="l" alignItems="stretch">
+        <EuiFlexItem css={cardContainerStyles}>
+          <EuiPanel paddingSize="m" css={cardStyles}>
             <EuiTitle size="xs">
               <h3>
                 <FormattedMessage
@@ -78,8 +131,14 @@ export const SnapshotsSection: React.FC = () => {
             </EuiText>
             <EuiSpacer size="m" />
             <EuiBasicTable
-              items={agents.slice(0, 3)}
+              items={agents.slice(0, MAX_DISPLAY_ITEMS)}
               loading={isLoadingAgents}
+              tableCaption={i18n.translate(
+                'xpack.workplaceai.gettingStarted.snapshots.myAgentsTableCaption',
+                {
+                  defaultMessage: 'My agents list',
+                }
+              )}
               columns={[
                 {
                   field: 'name',
@@ -107,19 +166,46 @@ export const SnapshotsSection: React.FC = () => {
                   },
                 },
                 {
-                  field: 'type',
-                  name: i18n.translate('xpack.workplaceai.gettingStarted.snapshots.typeColumn', {
-                    defaultMessage: 'Type',
+                  field: 'configuration',
+                  name: i18n.translate('xpack.workplaceai.gettingStarted.snapshots.toolsColumn', {
+                    defaultMessage: 'Tools',
                   }),
-                  render: (type: string) => type || '-',
+                  render: (configuration?: AgentConfiguration) => {
+                    const toolCount =
+                      configuration?.tools?.reduce(
+                        (count: number, selection: ToolSelection) =>
+                          count + (selection.tool_ids?.length ?? 0),
+                        0
+                      ) ?? 0;
+                    return toolCount;
+                  },
                 },
               ]}
             />
+            {agentCount > MAX_DISPLAY_ITEMS && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiLink
+                      onClick={() =>
+                        navigateToApp(`${AGENT_BUILDER_APP_ID}:${AGENT_BUILDER_AGENTS}`)
+                      }
+                    >
+                      <FormattedMessage
+                        id="xpack.workplaceai.gettingStarted.snapshots.seeAllAgents"
+                        defaultMessage="See all"
+                      />
+                    </EuiLink>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
           </EuiPanel>
         </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EuiPanel paddingSize="m">
+        <EuiFlexItem css={cardContainerStyles}>
+          <EuiPanel paddingSize="m" css={cardStyles}>
             <EuiTitle size="xs">
               <h3>
                 <FormattedMessage
@@ -132,59 +218,20 @@ export const SnapshotsSection: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.workplaceai.gettingStarted.snapshots.connectedSourcesStatus"
-                  defaultMessage="3 connected sources · 2 syncing now"
+                  defaultMessage="{sourceCount} connected sources · {syncingCount} syncing now"
+                  values={{ sourceCount, syncingCount }}
                 />
               </p>
             </EuiText>
             <EuiSpacer size="m" />
             <EuiBasicTable
-              items={[
+              tableCaption={i18n.translate(
+                'xpack.workplaceai.gettingStarted.snapshots.mySourcesTableCaption',
                 {
-                  name: i18n.translate(
-                    'xpack.workplaceai.gettingStarted.snapshots.salesforceName',
-                    {
-                      defaultMessage: 'Salesforce',
-                    }
-                  ),
-                  status: i18n.translate(
-                    'xpack.workplaceai.gettingStarted.snapshots.syncingStatus',
-                    {
-                      defaultMessage: 'Syncing',
-                    }
-                  ),
-                  icon: salesForceSVG,
-                },
-                {
-                  name: i18n.translate(
-                    'xpack.workplaceai.gettingStarted.snapshots.googleDriveName',
-                    {
-                      defaultMessage: 'Google Drive',
-                    }
-                  ),
-                  status: i18n.translate(
-                    'xpack.workplaceai.gettingStarted.snapshots.syncErrorStatus',
-                    {
-                      defaultMessage: 'Sync error',
-                    }
-                  ),
-                  icon: googleDriveSVG,
-                },
-                {
-                  name: i18n.translate(
-                    'xpack.workplaceai.gettingStarted.snapshots.confluenceName',
-                    {
-                      defaultMessage: 'Confluence',
-                    }
-                  ),
-                  status: i18n.translate(
-                    'xpack.workplaceai.gettingStarted.snapshots.upToDateStatus',
-                    {
-                      defaultMessage: 'Up to date',
-                    }
-                  ),
-                  icon: confluenceSVG,
-                },
-              ]}
+                  defaultMessage: 'My sources list',
+                }
+              )}
+              items={allSources.slice(0, MAX_DISPLAY_ITEMS)}
               columns={[
                 {
                   field: 'name',
@@ -194,7 +241,7 @@ export const SnapshotsSection: React.FC = () => {
                       defaultMessage: 'Source name',
                     }
                   ),
-                  render: (name: string, item: any) => (
+                  render: (name: string, item: { icon: string }) => (
                     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                       <EuiFlexItem grow={false}>
                         <EuiIcon type={item.icon} />
@@ -212,13 +259,7 @@ export const SnapshotsSection: React.FC = () => {
                   }),
                   render: (status: string) => (
                     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                      {status ===
-                        i18n.translate(
-                          'xpack.workplaceai.gettingStarted.snapshots.syncErrorStatus',
-                          {
-                            defaultMessage: 'Sync error',
-                          }
-                        ) && (
+                      {status === 'Sync error' && (
                         <EuiFlexItem grow={false}>
                           <EuiIcon type="alert" color="danger" />
                         </EuiFlexItem>
@@ -231,16 +272,31 @@ export const SnapshotsSection: React.FC = () => {
                 },
               ]}
             />
+            {sourceCount > MAX_DISPLAY_ITEMS && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiLink onClick={() => navigateToApp(DATA_SOURCES_APP_ID)}>
+                      <FormattedMessage
+                        id="xpack.workplaceai.gettingStarted.snapshots.seeAllSources"
+                        defaultMessage="See all"
+                      />
+                    </EuiLink>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
           </EuiPanel>
         </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EuiPanel paddingSize="m">
+        <EuiFlexItem css={cardContainerStyles}>
+          <EuiPanel paddingSize="m" css={cardStyles}>
             <EuiTitle size="xs">
               <h3>
                 <FormattedMessage
                   id="xpack.workplaceai.gettingStarted.snapshots.usageSnapshotTitle"
-                  defaultMessage="Usage snapshot"
+                  defaultMessage="Chat Activities"
                 />
               </h3>
             </EuiTitle>
@@ -254,6 +310,12 @@ export const SnapshotsSection: React.FC = () => {
             </EuiText>
             <EuiSpacer size="m" />
             <EuiBasicTable
+              tableCaption={i18n.translate(
+                'xpack.workplaceai.gettingStarted.snapshots.chatActivitiesTableCaption',
+                {
+                  defaultMessage: 'Chat activities metrics',
+                }
+              )}
               items={[
                 {
                   metric: i18n.translate(

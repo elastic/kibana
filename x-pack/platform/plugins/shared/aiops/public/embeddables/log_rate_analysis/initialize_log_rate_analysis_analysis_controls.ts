@@ -9,8 +9,8 @@ import { BehaviorSubject } from 'rxjs';
 import type { LogRateAnalysisComponentApi } from './types';
 import type { LogRateAnalysisEmbeddableState } from '../../../common/embeddables/log_rate_analysis/types';
 
-export const initializeLogRateAnalysisControls = (rawState: LogRateAnalysisEmbeddableState) => {
-  const dataViewId = new BehaviorSubject(rawState.dataViewId);
+export const initializeLogRateAnalysisControls = (initialState: LogRateAnalysisEmbeddableState) => {
+  const dataViewId = new BehaviorSubject(initialState.dataViewId);
 
   const updateUserInput = (update: Pick<LogRateAnalysisEmbeddableState, 'dataViewId'>) => {
     dataViewId.next(update.dataViewId);

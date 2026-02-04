@@ -15,6 +15,7 @@ jest.mock('@kbn/streamlang', () => ({
 jest.mock('./migrate_to_streamlang_on_read', () => ({
   migrateRoutingIfConditionToStreamlang: jest.fn((definition) => definition),
   migrateOldProcessingArrayToStreamlang: jest.fn((definition) => definition),
+  migrateWhereBlocksToCondition: jest.fn((steps) => ({ steps, migrated: false })),
 }));
 
 jest.mock('@kbn/streams-schema', () => ({
@@ -65,20 +66,6 @@ function createCompleteClassicStreamDefinition(overrides: any = {}) {
         ...overrides,
       },
       failure_store: { inherit: {} },
-    },
-  };
-}
-
-function createCompleteGroupStreamDefinition(overrides: any = {}) {
-  return {
-    name: 'test-group-stream',
-    description: 'Test group stream',
-    updated_at: new Date().toISOString(),
-    group: {
-      members: [],
-      tags: [],
-      metadata: {},
-      ...overrides,
     },
   };
 }
@@ -317,42 +304,6 @@ describe('migrateOnRead', () => {
     });
   });
 
-  describe('group migration', () => {
-    it('should add metadata to group if missing', () => {
-      const definition = {
-        name: 'test-group-stream',
-        description: 'Test group stream',
-        group: {
-          members: ['stream1', 'stream2'],
-          tags: ['tag1', 'tag2'],
-          // No metadata field
-        },
-      };
-
-      const result = migrateOnRead(definition);
-
-      expect((result as any).group.metadata).toEqual({});
-      expect(mockStreamsAsserts).toHaveBeenCalled();
-    });
-
-    it('should add tags to group if missing', () => {
-      const definition = {
-        name: 'test-group-stream',
-        description: 'Test group stream',
-        group: {
-          members: ['stream1', 'stream2'],
-          metadata: { foo: 'bar' },
-          // No tags field
-        },
-      };
-
-      const result = migrateOnRead(definition);
-
-      expect((result as any).group.tags).toEqual([]);
-      expect(mockStreamsAsserts).toHaveBeenCalled();
-    });
-  });
-
   describe('updated_at migration', () => {
     describe('Should add updated_at if missing', () => {
       it('for wired stream', () => {
@@ -376,17 +327,6 @@ describe('migrateOnRead', () => {
         expect(result.updated_at).toEqual(new Date(0).toISOString());
         expect(mockStreamsAsserts).toHaveBeenCalled();
       });
-
-      it('for group stream', () => {
-        const definition = createCompleteGroupStreamDefinition() as Partial<
-          ReturnType<typeof createCompleteGroupStreamDefinition>
-        >;
-        delete definition.updated_at;
-
-        const result = migrateOnRead(definition);
-        expect(result.updated_at).toEqual(new Date(0).toISOString());
-        expect(mockStreamsAsserts).toHaveBeenCalled();
-      });
     });
 
     describe('Should not touch updated_at if present', () => {
@@ -401,15 +341,6 @@ describe('migrateOnRead', () => {
 
       it('for classic stream', () => {
         const definition = createCompleteClassicStreamDefinition();
-        const existingUpdatedAt = definition.updated_at;
-
-        const result = migrateOnRead(definition);
-        expect(result.updated_at).toEqual(existingUpdatedAt);
-        expect(mockStreamsAsserts).not.toHaveBeenCalled();
-      });
-
-      it('for group stream', () => {
-        const definition = createCompleteGroupStreamDefinition();
         const existingUpdatedAt = definition.updated_at;
 
         const result = migrateOnRead(definition);
@@ -460,14 +391,15 @@ describe('migrateOnRead', () => {
       });
     });
 
-    describe('Should not modify non-ingest streams', () => {
-      it('for group stream', () => {
-        const definition = createCompleteGroupStreamDefinition();
+    it('Should not fail if applied to old Group stream definitions', () => {
+      const groupStreamDefinition = {
+        name: 'Old Group stream',
+        description: 'An old Group stream',
+        updated_at: '2026-01-07T10:36:31.522Z',
+        group: { metadata: {}, tags: [], members: [] },
+      };
 
-        const result = migrateOnRead(definition);
-        expect((result as any).ingest).toBeUndefined();
-        expect(mockStreamsAsserts).not.toHaveBeenCalled();
-      });
+      expect(() => migrateOnRead(groupStreamDefinition)).not.toThrow();
     });
   });
 });

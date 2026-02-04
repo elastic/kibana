@@ -67,6 +67,7 @@ import {
   ALERT_INSTANCE_ID,
   ALERT_SEVERITY_IMPROVING,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_UUID,
@@ -99,6 +100,7 @@ import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance
 import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
+import { backfillInitiator } from '../../common/constants';
 
 jest.mock('../lib/rule_gaps/update/update_gaps');
 const UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
@@ -288,7 +290,7 @@ describe('Ad Hoc Task Runner', () => {
         duration: '1h',
         enabled: true,
         end: '2024-03-01T05:00:00.000Z',
-        initiator: 'user',
+        initiator: backfillInitiator.USER,
         rule: {
           name: 'test',
           tags: [],
@@ -519,6 +521,7 @@ describe('Ad Hoc Task Runner', () => {
           [ALERT_INSTANCE_ID]: '1',
           [ALERT_SEVERITY_IMPROVING]: false,
           [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+          [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
           [ALERT_PENDING_RECOVERED_COUNT]: 0,
           [ALERT_CONSECUTIVE_MATCHES]: 1,
           [ALERT_RULE_CATEGORY]: 'My test rule',
@@ -928,6 +931,7 @@ describe('Ad Hoc Task Runner', () => {
       savedObjectsRepository: internalSavedObjectsRepository,
       backfillClient: taskRunnerFactoryInitializerParams.backfillClient,
       actionsClient,
+      initiator: backfillInitiator.USER,
     });
 
     testAlertingEventLogCalls({

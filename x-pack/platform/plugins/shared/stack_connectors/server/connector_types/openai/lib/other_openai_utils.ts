@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { SSLSettings } from '@kbn/actions-plugin/server';
+import type { SSLSettings } from '@kbn/actions-utils';
 import type { AxiosError } from 'axios';
 import type { Secrets } from '@kbn/connector-schemas/openai';
 

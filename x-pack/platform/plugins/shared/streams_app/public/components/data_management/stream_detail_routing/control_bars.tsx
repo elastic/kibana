@@ -33,7 +33,11 @@ import {
   routingConverter,
 } from './utils';
 
-export const AddRoutingRuleControls = () => {
+interface AddRoutingRuleControlsProps {
+  isStreamNameValid: boolean;
+}
+
+export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleControlsProps) => {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { cancelChanges, forkStream } = useStreamRoutingEvents();
   const [isRequestPreviewFlyoutOpen, setIsRequestPreviewFlyoutOpen] = React.useState(false);
@@ -84,7 +88,7 @@ export const AddRoutingRuleControls = () => {
             <PrivilegesTooltip hasPrivileges={hasPrivileges}>
               <SaveButton
                 isLoading={isForking}
-                isDisabled={!canForkRouting}
+                isDisabled={!canForkRouting || !isStreamNameValid}
                 onClick={() => forkStream()}
               />
             </PrivilegesTooltip>
@@ -187,13 +191,13 @@ export const EditRoutingRuleControls = ({
 export const EditSuggestedRuleControls = ({
   onSave,
   onAccept,
-  nameError,
   conditionError,
+  isStreamNameValid,
 }: {
   onSave?: () => void;
   onAccept: () => void;
-  nameError?: string;
   conditionError?: string;
+  isStreamNameValid: boolean;
 }) => {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { cancelChanges } = useStreamRoutingEvents();
@@ -201,7 +205,7 @@ export const EditSuggestedRuleControls = ({
   const canSave = routingSnapshot.can({ type: 'suggestion.saveSuggestion' });
   const hasPrivileges = routingSnapshot.context.definition.privileges.manage;
 
-  const hasValidationErrors = !!nameError || !!conditionError;
+  const hasValidationErrors = !!conditionError;
   const isUpdateDisabled = hasValidationErrors || !canSave;
 
   const handleAccept = () => {
@@ -220,7 +224,7 @@ export const EditSuggestedRuleControls = ({
         <PrivilegesTooltip hasPrivileges={hasPrivileges}>
           <UpdateAndAcceptButton
             isLoading={false}
-            isDisabled={isUpdateDisabled}
+            isDisabled={isUpdateDisabled || !isStreamNameValid}
             onClick={handleAccept}
           />
         </PrivilegesTooltip>

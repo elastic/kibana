@@ -8,7 +8,7 @@
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import { useFileUploadContext } from '../../..';
+import { useFileUploadContext } from '../../use_file_upload';
 
 export const ImportErrors: FC = () => {
   const { uploadStatus } = useFileUploadContext();

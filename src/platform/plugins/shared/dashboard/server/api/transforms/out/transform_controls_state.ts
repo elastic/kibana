@@ -8,56 +8,74 @@
  */
 
 import { flow } from 'lodash';
+
+import type { Reference } from '@kbn/content-management-utils';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
+
+import type { DashboardPinnedPanelsState as DashboardControlsState } from '../../../../common';
+import type { StoredControlGroupInput, StoredControlState } from '../../../dashboard_saved_object';
+import { embeddableService, logger } from '../../../kibana_services';
 
 /**
  * Transform functions for serialized controls state.
  */
 export const transformControlsState: (
-  serializedControlState: string
-) => ControlsGroupState['controls'] = flow(
-  JSON.parse,
-  transformControlObjectToArray,
-  transformControlsWidthAuto,
-  transformControlsSetDefaults,
-  transformControlProperties
-);
+  serializedControlState: string,
+  containerReferences: Reference[]
+) => DashboardControlsState = (serializedControlState, containerReferences) => {
+  const state = flow(
+    JSON.parse,
+    transformControlObjectToArray,
+    transformControlProperties
+  )(serializedControlState);
+  return injectControlReferences(state, containerReferences);
+};
 
-export function transformControlObjectToArray(controls: Record<string, SerializableRecord>) {
+export function transformControlObjectToArray(
+  controls: StoredControlGroupInput['panels']
+): Array<StoredControlState> {
   return Object.entries(controls).map(([id, control]) => ({ id, ...control }));
 }
 
-/**
- * Some controls were serialized with width set to 'auto'. This function will transform those controls
- * to have the default width and grow set to true. See @link https://github.com/elastic/kibana/issues/211113.
- */
-export function transformControlsWidthAuto(controls: SerializableRecord[]) {
-  return controls.map((control) => {
-    if (control.width === 'auto') {
-      return { ...control, width: DEFAULT_CONTROL_WIDTH, grow: true };
+export function transformControlProperties(controls: Array<StoredControlState>) {
+  return controls
+    .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
+    .map(({ explicitInput, id, type, grow, width }) => {
+      return {
+        uid: id,
+        type,
+        ...(grow !== undefined && { grow }),
+        ...(width !== undefined && { width }),
+        config: explicitInput as SerializableRecord,
+      };
+    });
+}
+
+function injectControlReferences(
+  controls: ControlsGroupState,
+  containerReferences: Reference[]
+): DashboardControlsState {
+  const transformedControls: DashboardControlsState = [];
+
+  controls.forEach((control) => {
+    const transforms = embeddableService.getTransforms(control.type);
+    const { config, ...rest } = control;
+    if (transforms?.transformOut) {
+      try {
+        transformedControls.push({
+          ...rest,
+          config: transforms.transformOut(config, [], containerReferences, control.uid),
+        } as DashboardControlsState[number]);
+      } catch (transformOutError) {
+        // do not prevent read on transformOutError
+        logger.warn(
+          `Unable to transform "${control.type}" embeddable state on read. Error: ${transformOutError.message}`
+        );
+      }
+    } else {
+      transformedControls.push({ ...rest, config } as DashboardControlsState[number]);
     }
-    return control;
   });
-}
-
-// TODO We may want to remove setting defaults in the future
-export function transformControlsSetDefaults(controls: SerializableRecord[]) {
-  return controls.map((control) => ({
-    grow: DEFAULT_CONTROL_GROW,
-    width: DEFAULT_CONTROL_WIDTH,
-    ...control,
-  }));
-}
-
-export function transformControlProperties(controls: SerializableRecord[]): SerializableRecord[] {
-  return controls.map(({ explicitInput, id, type, width, grow, order }) => ({
-    controlConfig: explicitInput,
-    id,
-    grow,
-    order,
-    type,
-    width,
-  }));
+  return transformedControls;
 }

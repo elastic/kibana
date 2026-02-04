@@ -64,6 +64,7 @@ describe('Workflows Connector', () => {
           subActionParams: {
             workflowId: 'test-workflow-id',
             spaceId: 'default',
+            summaryMode: true,
             inputs: {
               event: {
                 alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
@@ -135,20 +136,23 @@ describe('Workflows Connector', () => {
           subAction: 'run' as const,
           subActionParams: {
             workflowId: 'test-workflow-id',
-            inputs: {
-              alerts: [],
-              rule: {
-                id: 'rule-1',
-                name: 'Test Rule',
-                tags: ['test'],
-                consumer: 'test-consumer',
-                producer: 'test-producer',
-                ruleTypeId: 'test-rule-type',
-              },
-              ruleUrl: 'https://example.com/rule',
-              spaceId: 'default',
-            },
             spaceId: 'default',
+            summaryMode: true,
+            inputs: {
+              event: {
+                alerts: [],
+                rule: {
+                  id: 'rule-1',
+                  name: 'Test Rule',
+                  tags: ['test'],
+                  consumer: 'test-consumer',
+                  producer: 'test-producer',
+                  ruleTypeId: 'test-rule-type',
+                },
+                ruleUrl: 'https://example.com/rule',
+                spaceId: 'default',
+              },
+            },
           },
         },
         logger: mockLogger,
@@ -182,6 +186,7 @@ describe('Workflows Connector', () => {
           subActionParams: {
             workflowId: 'test-workflow-id',
             spaceId: 'default',
+            summaryMode: true,
           },
         },
         logger: mockLogger,
@@ -210,6 +215,8 @@ describe('Workflows Connector', () => {
           subAction: 'run' as const,
           subActionParams: {
             workflowId: 'test-workflow-id',
+            spaceId: 'default',
+            summaryMode: true,
             inputs: {
               event: {
                 alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
@@ -225,7 +232,6 @@ describe('Workflows Connector', () => {
                 spaceId: 'default',
               },
             },
-            spaceId: 'default',
           },
         },
         logger: mockLogger,

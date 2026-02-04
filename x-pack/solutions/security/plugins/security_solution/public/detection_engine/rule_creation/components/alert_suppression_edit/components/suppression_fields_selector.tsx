@@ -41,6 +41,7 @@ export function SuppressionFieldsSelector({
             browserFields: suppressibleFields,
             isDisabled: disabled,
             fullWidth,
+            ariaLabel: i18n.ALERT_SUPPRESSION_SUPPRESS_BY_FIELD_LABEL,
           }}
         />
       </>

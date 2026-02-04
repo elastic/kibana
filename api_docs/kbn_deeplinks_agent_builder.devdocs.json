@@ -24,21 +24,6 @@
     "misc": [
       {
         "parentPluginId": "@kbn/deeplinks-agent-builder",
-        "id": "def-common.AGENT_BUILDER_AGENTS_CREATE",
-        "type": "string",
-        "tags": [],
-        "label": "AGENT_BUILDER_AGENTS_CREATE",
-        "description": [],
-        "signature": [
-          "\"agents_create\""
-        ],
-        "path": "src/platform/packages/shared/deeplinks/agent_builder/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/deeplinks-agent-builder",
         "id": "def-common.AGENT_BUILDER_APP_ID",
         "type": "string",
         "tags": [],
@@ -48,6 +33,8 @@
           "\"agent_builder\""
         ],
         "path": "src/platform/packages/shared/deeplinks/agent_builder/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -63,6 +50,8 @@
           "\"agent_builder\" | \"agent_builder:agents\" | \"agent_builder:tools\" | \"agent_builder:conversations\" | \"agent_builder:agents_create\""
         ],
         "path": "src/platform/packages/shared/deeplinks/agent_builder/deep_links.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

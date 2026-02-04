@@ -21,14 +21,15 @@
       "dataViews",
       "fieldFormats",
       "usageCollection",
-      "unifiedSearch",
+      "kql",
       "expressionXY",
+      "uiActions",
+      "embeddable"
     ],
     "optionalPlugins": [
       "home"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "kibanaUtils",
       "kibanaReact",
       "fieldFormats"

@@ -182,7 +182,7 @@ export class SpacesGridPage extends Component<Props, State> {
             },
           }}
           loading={this.state.loading}
-          message={
+          noItemsMessage={
             this.state.loading ? (
               <FormattedMessage
                 id="xpack.spaces.management.spacesGridPage.loadingTitle"

@@ -506,6 +506,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('active/expired filter buttons work as expected', async () => {
+        await pageObjects.apiKeys.clickTypeFilters('personal');
         await pageObjects.apiKeys.clickExpiryFilters('active');
         await ensureApiKeysExist(['my api key', 'Alerting: Managed', 'test_cross_cluster']);
         await ensureApiKeyDoesNotExist('test_api_key');
@@ -536,6 +537,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('username filter buttons work as expected', async () => {
+        await pageObjects.apiKeys.clickTypeFilters('personal');
         await pageObjects.apiKeys.clickUserNameDropdown();
         expect(
           await testSubjects.exists('userProfileSelectableOption-system_indices_superuser')
@@ -553,6 +555,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('search bar works as expected', async () => {
+        await pageObjects.apiKeys.clickTypeFilters('personal');
         await pageObjects.apiKeys.setSearchBarValue('test_user_api_key');
 
         await ensureApiKeysExist(['test_user_api_key']);
@@ -562,6 +565,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.apiKeys.setSearchBarValue('"api"');
         await ensureApiKeysExist(['my api key']);
+      });
+
+      it('loads default view', async () => {
+        // Default view should be personal API keys
+        await ensureApiKeysExist(['test_user_api_key', 'test_api_key']);
       });
     });
   });

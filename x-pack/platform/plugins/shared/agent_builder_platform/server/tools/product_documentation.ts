@@ -6,17 +6,21 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/onechat-common';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { createErrorResult } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server';
+import { ToolResultType } from '@kbn/agent-builder-common';
 import type { CoreSetup } from '@kbn/core/server';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '../types';
 
 const productDocumentationSchema = z.object({
-  query: z.string().describe('Search query to retrieve documentation about Elastic products'),
+  query: z
+    .string()
+    .describe(
+      'Search query to retrieve documentation about Elastic products. Rewritten in English to best match the documentation content.'
+    ),
   product: z
     .enum(['kibana', 'elasticsearch', 'observability', 'security'])
     .optional()
@@ -31,6 +35,9 @@ const productDocumentationSchema = z.object({
 // TODO make this configurable, we need a platform level setting for the embedding model
 const inferenceId = defaultInferenceEndpoints.ELSER;
 
+// Path to GenAI Settings within the management app
+const GENAI_SETTINGS_APP_PATH = '/app/management/ai/genAiSettings';
+
 export const productDocumentationTool = (
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>
 ): BuiltinToolDefinition<typeof productDocumentationSchema> => {
@@ -38,6 +45,21 @@ export const productDocumentationTool = (
   const getLlmTasks = async () => {
     const [, plugins] = await coreSetup.getStartServices();
     return plugins.llmTasks;
+  };
+
+  // Check if product documentation is installed
+  const isProductDocAvailable = async (
+    llmTasks: NonNullable<Awaited<ReturnType<typeof getLlmTasks>>>
+  ) => {
+    try {
+      return (
+        (await llmTasks.retrieveDocumentationAvailable({
+          inferenceId,
+        })) ?? false
+      );
+    } catch {
+      return false;
+    }
   };
 
   const baseTool: BuiltinToolDefinition<typeof productDocumentationSchema> = {
@@ -53,6 +75,25 @@ export const productDocumentationTool = (
             createErrorResult({
               message:
                 'Product documentation tool is not available. LlmTasks plugin is not available.',
+            }),
+          ],
+        };
+      }
+
+      // Check if product documentation is installed
+      const isAvailable = await isProductDocAvailable(llmTasks);
+      if (!isAvailable) {
+        // Build the full settings URL using the request's base path (includes space prefix)
+        const basePath = coreSetup.http.basePath.get(request);
+        const settingsUrl = `${basePath}${GENAI_SETTINGS_APP_PATH}`;
+
+        return {
+          results: [
+            createErrorResult({
+              message: `Product documentation is not installed. To use this tool, please install Elastic documentation from the GenAI Settings page: ${settingsUrl}. Do not perform any other tool calls, and provide the user with a link to install the documentation.`,
+              metadata: {
+                settingsUrl,
+              },
             }),
           ],
         };
@@ -90,7 +131,7 @@ export const productDocumentationTool = (
         // Return documentation results
         return {
           results: result.documents.map((doc: RetrieveDocumentationResultDoc) => ({
-            type: ToolResultType.resource,
+            type: ToolResultType.other,
             data: {
               reference: {
                 url: doc.url,
@@ -118,28 +159,11 @@ export const productDocumentationTool = (
       }
     },
     tags: [],
+    // Tool is always available - handler will check if docs are installed and provide guidance
     availability: {
-      cacheMode: 'space',
+      cacheMode: 'global',
       handler: async () => {
-        try {
-          const [, plugins] = await coreSetup.getStartServices();
-          const llmTasks = plugins.llmTasks;
-
-          if (!llmTasks) {
-            return { status: 'unavailable' };
-          }
-
-          const isAvailable =
-            (await llmTasks.retrieveDocumentationAvailable({
-              inferenceId,
-            })) ?? false;
-
-          return {
-            status: isAvailable ? 'available' : 'unavailable',
-          };
-        } catch (error) {
-          return { status: 'unavailable' };
-        }
+        return { status: 'available' };
       },
     },
   };

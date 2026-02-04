@@ -824,4 +824,41 @@ describe('CreateConnectorFlyout', () => {
       expect(onClose).toHaveBeenCalled();
     });
   });
+
+  describe('spec connector', () => {
+    const specActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      id: 'spec-connector',
+      source: 'spec',
+      actionConnectorFields: lazy(() => import('../connector_mock')),
+    });
+
+    beforeEach(() => {
+      actionTypeRegistry.get.mockReturnValue(specActionTypeModel);
+      actionTypeRegistry.has.mockReturnValue(true);
+
+      loadActionTypes.mockResolvedValue([
+        {
+          id: specActionTypeModel.id,
+          name: 'Test spec connector',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic' as const,
+          supportedFeatureIds: ['alerting', 'siem'],
+        },
+      ]);
+    });
+
+    it('does not show the save and test', async () => {
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+
+      expect(screen.queryByTestId('create-connector-flyout-save-test-btn')).not.toBeInTheDocument();
+    });
+  });
 });

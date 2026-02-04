@@ -25,7 +25,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { getESQLSources } from '../helpers';
+import { getESQLSources } from '@kbn/esql-utils';
 import type { ESQLEditorDeps } from '../types';
 import { DataSourcesList } from './datasources_list';
 import { generateIndexPatterns } from './utils';
@@ -57,7 +57,7 @@ interface SourcesDropdownProps {
 
 export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDropdownProps) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  const [sourcesOptions, setSourcesOptions] = useState<EuiComboBoxOptionOption[]>([]);
+  const [fetchedSources, setFetchedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const euiTheme = useEuiTheme();
   const isMounted = useMountedState();
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
@@ -80,21 +80,20 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
           ...sourceNames.map((name) => ({ label: name })),
         ];
 
-        // Also include any currently selected sources that are not in the fetched list (e.g. patterns that don't exist at the dashPatterns)
-        const existingLabels = new Set(allOptions.map((option) => option.label));
-        const currentSourcesOptions = currentSources
-          .filter((source) => !existingLabels.has(source))
-          .map((source) => ({ label: source }));
-
-        const combinedOptions = [...allOptions, ...currentSourcesOptions];
-
-        setSourcesOptions(combinedOptions);
+        setFetchedSources(allOptions);
       }
     }
-    if (sourcesOptions.length === 0) {
-      fetchSources();
-    }
-  }, [core, getLicense, sourcesOptions.length, isMounted, currentSources]);
+    fetchSources();
+  }, [core, getLicense, isMounted]);
+
+  const sourcesOptions = useMemo(() => {
+    const existingLabels = new Set(fetchedSources.map((option) => option.label));
+    const currentSourcesOptions = currentSources
+      .filter((source) => !existingLabels.has(source))
+      .map((source) => ({ label: source }));
+
+    return [...fetchedSources, ...currentSourcesOptions];
+  }, [fetchedSources, currentSources]);
 
   const createTrigger = function () {
     return (

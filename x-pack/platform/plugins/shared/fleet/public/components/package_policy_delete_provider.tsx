@@ -15,26 +15,22 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory } from 'react-router-dom';
 
 import {
   useStartServices,
-  sendDeleteAgentPolicy,
   useConfig,
   sendGetAgents,
   useMultipleAgentPolicies,
-  useLink,
   useDeletePackagePolicyMutation,
   sendDeletePackageDatastreamAssets,
 } from '../hooks';
 import { AGENTS_PREFIX } from '../../common/constants';
 import type { AgentPolicy, PackagePolicyPackage } from '../types';
 import { sendDeleteAgentlessPolicy } from '../hooks/use_request/agentless_policy';
-import { ExperimentalFeaturesService } from '../services';
 
 interface Props {
   agentPolicies?: AgentPolicy[];
-  from?: 'fleet-policy-list' | undefined;
+  from?: 'fleet-policy-list' | 'installed-integrations' | undefined;
   packagePolicyPackage?: PackagePolicyPackage;
   isAgentlessPolicy?: boolean | null;
   children: (deletePackagePoliciesPrompt: DeletePackagePoliciesPrompt) => React.ReactElement;
@@ -58,8 +54,6 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
-  const history = useHistory();
-  const { getPath } = useLink();
   const [packagePolicies, setPackagePolicies] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isLoadingAgentsCount, setIsLoadingAgentsCount] = useState<boolean>(false);
@@ -134,7 +128,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const deletePackagePolicies = useCallback(async () => {
     setIsLoading(true);
     try {
-      if (isAgentlessPolicy && ExperimentalFeaturesService.get().useAgentlessAPIInUI) {
+      if (isAgentlessPolicy) {
         for (const policyId of packagePolicies) {
           await sendDeleteAgentlessPolicy(policyId);
           notifications.toasts.addSuccess(
@@ -178,28 +172,6 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                 values: { id: successfulResults[0].name || successfulResults[0].id },
               });
 
-          const agentlessPolicy = agentPolicies?.find(
-            (policy) => policy.supports_agentless === true
-          );
-
-          if (!!agentlessPolicy) {
-            try {
-              await sendDeleteAgentPolicy({ agentPolicyId: agentlessPolicy.id });
-              if (from === 'fleet-policy-list') {
-                history.push(getPath('policies_list'));
-              }
-            } catch (e) {
-              notifications.toasts.addDanger(
-                i18n.translate(
-                  'xpack.fleet.deletePackagePolicy.fatalErrorAgentlessNotificationTitle',
-                  {
-                    defaultMessage: 'Error deleting agentless deployment',
-                  }
-                )
-              );
-            }
-          }
-
           notifications.toasts.addSuccess(successMessage);
         }
 
@@ -234,11 +206,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
     closeModal,
     deletePackagePolicyMutationAsync,
     packagePolicyPackage,
-    agentPolicies,
     notifications.toasts,
-    from,
-    history,
-    getPath,
     isAgentlessPolicy,
   ]);
 

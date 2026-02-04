@@ -16,6 +16,7 @@ import {
   hasTransformationalCommand,
   getCategorizeField,
   convertTimeseriesCommandToFrom,
+  hasDateBreakdown,
 } from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
@@ -394,14 +395,14 @@ export class LensVisService {
           dataType: 'string',
           isBucketed: true,
           label: i18n.translate('unifiedHistogram.breakdownColumnLabel', {
-            defaultMessage: 'Top 3 values of {fieldName}',
+            defaultMessage: 'Top 9 values of {fieldName}',
             values: { fieldName: breakdownField?.displayName },
           }),
           operationType: 'terms',
           scale: 'ordinal',
           sourceField: breakdownField.name,
           params: {
-            size: 3,
+            size: 9,
             orderBy: {
               type: 'column',
               columnId: 'count_column',
@@ -433,7 +434,7 @@ export class LensVisService {
           seriesType: 'bar_stacked',
           xAccessor: 'date_column',
           ...(showBreakdown
-            ? { splitAccessor: 'breakdown_column' }
+            ? { splitAccessors: ['breakdown_column'] }
             : {
                 yConfig: [
                   {
@@ -500,7 +501,8 @@ export class LensVisService {
       const layers = Array.isArray(visualization?.layers) ? visualization.layers : [];
       if (
         !layers.some(
-          (layer) => 'splitAccessor' in layer && layer.splitAccessor === breakdownColumn.name
+          (layer) =>
+            'splitAccessors' in layer && layer.splitAccessors?.includes(breakdownColumn.name)
         )
       ) {
         // the preferred vis attributes don't contain the breakdown column, so we discard it to avoid issues
@@ -599,7 +601,7 @@ export class LensVisService {
                 return {
                   ...layer,
                   accessors: ['results'],
-                  splitAccessor: breakdownColumn.name,
+                  splitAccessors: [breakdownColumn.name],
                 };
               }),
             },
@@ -657,9 +659,14 @@ export class LensVisService {
       return [];
     }
 
-    const preferredChartType = preferredVisAttributes
+    const mappedPreferredChartType = preferredVisAttributes
       ? mapVisToChartType(preferredVisAttributes.visualizationType)
       : undefined;
+
+    const preferredChartType =
+      !mappedPreferredChartType && hasDateBreakdown(query.esql, columns)
+        ? ChartType.Line
+        : mappedPreferredChartType;
 
     let visAttributes = preferredVisAttributes;
 
@@ -671,7 +678,7 @@ export class LensVisService {
       dataViewSpec: dataView?.toSpec(),
       fieldName: '',
       textBasedColumns: columns,
-      query: query && isOfAggregateQueryType(query) ? query : undefined,
+      query,
     };
 
     return (

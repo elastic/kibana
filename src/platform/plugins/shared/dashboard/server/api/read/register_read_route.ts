@@ -10,15 +10,16 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { commonRouteConfig, INTERNAL_API_VERSION, PUBLIC_API_PATH } from '../constants';
+import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
 import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
 import { stripUnmappedKeys } from '../scope_tooling';
+import { DASHBOARD_API_PATH } from '../../../common/constants';
 
 export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>) {
   const readRoute = router.get({
-    path: `${PUBLIC_API_PATH}/{id}`,
+    path: `${DASHBOARD_API_PATH}/{id}`,
     summary: `Get a dashboard`,
     ...commonRouteConfig,
   });

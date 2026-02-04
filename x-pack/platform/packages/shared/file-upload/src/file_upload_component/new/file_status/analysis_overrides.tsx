@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import type { InputOverrides } from '@kbn/file-upload-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FileAnalysis } from '../../../..';
+import type { FileAnalysis } from '../../../../file_upload_manager';
 import { EditFlyout } from './edit_flyout';
 
 interface Props {

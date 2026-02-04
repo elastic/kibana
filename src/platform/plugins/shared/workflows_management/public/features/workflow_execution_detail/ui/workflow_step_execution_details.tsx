@@ -23,9 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
-
 import { StepExecutionDataView } from './step_execution_data_view';
-import { StepExecutionTimelineStateful } from './step_execution_timeline_stateful';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
 
 interface WorkflowStepExecutionDetailsProps {
@@ -68,10 +66,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
         {
           id: 'input',
           name: 'Input',
-        },
-        {
-          id: 'timeline',
-          name: 'Timeline',
         },
       ];
     }, [stepExecution, isTriggerPseudoStep]);
@@ -193,12 +187,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                   )}
                   <StepExecutionDataView stepExecution={stepExecution} mode="input" />
                 </>
-              )}
-              {selectedTabId === 'timeline' && (
-                <StepExecutionTimelineStateful
-                  executionId={workflowExecutionId}
-                  stepExecutionId={stepExecution.id}
-                />
               )}
             </EuiFlexItem>
           ) : (

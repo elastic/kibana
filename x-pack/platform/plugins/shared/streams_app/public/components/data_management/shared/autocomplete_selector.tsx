@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
 
 export interface Suggestion {
@@ -34,6 +34,7 @@ export interface AutocompleteSelectorProps {
   hideSuggestions?: boolean;
   labelAppend?: React.ReactNode;
   showIcon?: boolean;
+  prepend?: EuiComboBoxProps<string>['prepend'];
 }
 
 /**
@@ -56,6 +57,7 @@ export const AutocompleteSelector = ({
   hideSuggestions = false,
   labelAppend,
   showIcon = false,
+  prepend,
 }: AutocompleteSelectorProps) => {
   const comboBoxOptions = useMemo(
     () =>
@@ -151,6 +153,7 @@ export const AutocompleteSelector = ({
           })}
           autoFocus={autoFocus}
           noSuggestions={hideSuggestions}
+          prepend={prepend}
         />
       </EuiFormRow>
     </>

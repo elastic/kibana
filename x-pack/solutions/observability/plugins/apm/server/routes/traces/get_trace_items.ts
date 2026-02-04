@@ -5,28 +5,25 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { last } from 'lodash';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { type Error } from '@kbn/apm-types';
+import type { Logger } from '@kbn/logging';
+import { last } from 'lodash';
 import type { APMConfig } from '../..';
-import type {
-  WaterfallError,
-  WaterfallSpan,
-  WaterfallTransaction,
-} from '../../../common/waterfall/typings';
+import type { WaterfallSpan, WaterfallTransaction } from '../../../common/waterfall/typings';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getSpanLinksCountById } from '../span_links/get_linked_children';
-import { getTraceDocsPerPage } from './get_trace_docs_per_page';
-import { getApmTraceErrorQuery, requiredFields } from './get_apm_trace_error_query';
 import { compactMap } from '../../utils/compact_map';
+import { getSpanLinksCountById } from '../span_links/get_linked_children';
+import { getApmTraceErrorQuery, requiredFields } from './get_apm_trace_error_query';
+import { getTraceDocsPerPage } from './get_trace_docs_per_page';
 
 export type TraceDoc = WaterfallTransaction | WaterfallSpan;
 
 export interface TraceItems {
   exceedsMax: boolean;
   traceDocs: TraceDoc[];
-  errorDocs: WaterfallError[];
+  errorDocs: Error[];
   spanLinksCountById: Record<string, number>;
   traceDocsTotal: number;
   maxTraceItems: number;
@@ -99,7 +96,7 @@ export async function getApmTraceError(params: {
 }) {
   const response = await getApmTraceErrorQuery(params);
 
-  return compactMap(response.hits.hits, (hit) => {
+  return compactMap(response.hits.hits, (hit): Error | undefined => {
     const errorSource = 'error' in hit._source ? hit._source : undefined;
     const event = hit.fields
       ? accessKnownApmEventFields(hit.fields).requireFields(requiredFields)
@@ -111,23 +108,28 @@ export async function getApmTraceError(params: {
 
     const { _id: id, parent, error, ...unflattened } = event.unflatten();
 
-    const waterfallErrorEvent: WaterfallError = {
-      ...unflattened,
+    return {
       id,
       parent: {
         id: parent?.id ?? unflattened.span?.id,
       },
+      trace: unflattened.trace,
+      span: unflattened.span,
+      transaction: unflattened.transaction,
+      timestamp: unflattened.timestamp,
+      service: { name: unflattened.service.name },
       error: {
-        ...error,
         exception:
           (errorSource?.error.exception?.length ?? 0) > 0
-            ? errorSource?.error.exception
-            : error.exception && [error.exception],
+            ? errorSource?.error?.exception?.[0]
+            : error.exception,
+        grouping_key: error?.grouping_key,
+        culprit: error?.culprit,
+        id: error?.id,
         log: errorSource?.error.log,
       },
+      index: hit._index,
     };
-
-    return waterfallErrorEvent;
   });
 }
 

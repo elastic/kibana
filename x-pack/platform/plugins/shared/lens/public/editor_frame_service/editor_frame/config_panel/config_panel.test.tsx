@@ -168,6 +168,7 @@ describe('ConfigPanel', () => {
   // in what case is this test needed?
   it('should fail to render layerPanels if the public API is out of date', async () => {
     const props = getDefaultProps();
+    props.framePublicAPI.datasourceLayers = {};
     const { instance } = await prepareAndMountComponent(props, undefined, undefined, null);
     expect(instance.find(LayerPanel).exists()).toBe(false);
   });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../env_var_names_constants';
 import { getDataTestSubjectSelector } from '../helpers/common';
 
 export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
@@ -232,13 +231,10 @@ export const ALERT_ASSIGNEES_SELECTABLE_OPTIONS =
   '[data-test-subj="securitySolutionAssigneesSelectable"] .euiSelectableListItem[role="option"]';
 
 export const ALERT_USER_AVATAR = (assignee: string) => {
-  let expectedAssignee = assignee;
+  const expectedAssignee = assignee;
 
-  if (Cypress.env(IS_SERVERLESS) && !Cypress.env(CLOUD_SERVERLESS)) {
-    expectedAssignee = `test ${expectedAssignee}`;
-  }
-
-  return `[data-test-subj^="securitySolutionUsersAvatar-"][title='${expectedAssignee}']`;
+  // Use partial match (^=) for title to handle cases where email is appended in parentheses
+  return `[data-test-subj^="securitySolutionUsersAvatar-"][title^='${expectedAssignee}']`;
 };
 
 export const ALERT_AVATARS_PANEL = '[data-test-subj="securitySolutionUsersAvatarsPanel"]';

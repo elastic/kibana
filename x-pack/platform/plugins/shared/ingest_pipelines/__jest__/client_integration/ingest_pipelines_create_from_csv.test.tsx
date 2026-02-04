@@ -5,76 +5,77 @@
  * 2.0.
  */
 
+import '@kbn/code-editor-mock/jest_helper';
+
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import { Route, Router } from '@kbn/shared-ux-router';
 
 import { API_BASE_PATH } from '../../common/constants';
+import { PipelinesCreateFromCsv } from '../../public/application/sections/pipelines_create_from_csv';
+import { getCreateFromCsvPath, ROUTES } from '../../public/application/services/navigation';
 
-import { setupEnvironment, pageHelpers } from './helpers';
-import type { PipelineCreateFromCsvTestBed } from './helpers/pipelines_create_from_csv.helpers';
-
-const { setup } = pageHelpers.pipelinesCreateFromCsv;
+import { setupEnvironment, WithAppDependencies } from './helpers/setup_environment';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
 
   return {
     ...original,
-    EuiFilePicker: (props: any) => (
+    EuiFilePicker: (props: {
+      'data-test-subj'?: string;
+      onChange: (files: FileList | null) => void;
+    }) => (
       <input
         data-test-subj={props['data-test-subj'] || 'mockFilePicker'}
-        onChange={(syntheticEvent: any) => {
-          props.onChange(syntheticEvent.files);
-        }}
+        type="file"
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.onChange(e.target.files)}
       />
-    ),
-  };
-});
-
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-
-  return {
-    ...original,
-    CodeEditorField: (props: any) => (
-      <p data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}>{props.value}</p>
     ),
   };
 });
 
 describe('<PipelinesCreateFromCsv />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
-  let testBed: PipelineCreateFromCsvTestBed;
 
-  beforeEach(async () => {
-    await act(async () => {
-      testBed = await setup(httpSetup);
-    });
-
-    testBed.component.update();
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
+  const renderPipelinesCreateFromCsv = async () => {
+    const history = createMemoryHistory({
+      initialEntries: [getCreateFromCsvPath()],
+    });
+
+    const Wrapped = WithAppDependencies(PipelinesCreateFromCsv, httpSetup);
+    render(
+      <Router history={history}>
+        <Route path={ROUTES.createFromCsv} component={Wrapped} />
+      </Router>
+    );
+
+    await screen.findByTestId('pageTitle');
+  };
+
   describe('on component mount', () => {
-    test('should render the correct page header and documentation link', () => {
-      const { exists, find } = testBed;
+    test('should render the correct page header and documentation link', async () => {
+      await renderPipelinesCreateFromCsv();
 
-      expect(exists('pageTitle')).toBe(true);
-      expect(find('pageTitle').text()).toEqual('Create pipeline from CSV');
-
-      expect(exists('documentationLink')).toBe(true);
-      expect(find('documentationLink').text()).toBe('CSV to pipeline docs');
+      expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create pipeline from CSV');
+      expect(screen.getByTestId('documentationLink')).toHaveTextContent('CSV to pipeline docs');
     });
 
     describe('form validation', () => {
       test('should prevent form submission if file for upload is missing', async () => {
-        const { component, find, actions } = testBed;
+        await renderPipelinesCreateFromCsv();
 
-        expect(find('processFileButton').props().disabled).toEqual(true);
+        expect(screen.getByTestId('processFileButton')).toBeDisabled();
 
-        actions.selectCsvForUpload();
-        component.update();
-
-        expect(find('processFileButton').props().disabled).toEqual(false);
+        fireEvent.change(screen.getByTestId('csvFilePicker'), {
+          target: { files: [new File(['x'], 'foo.csv')] },
+        });
+        await waitFor(() => expect(screen.getByTestId('processFileButton')).not.toBeDisabled());
       });
     });
 
@@ -99,24 +100,26 @@ describe('<PipelinesCreateFromCsv />', () => {
         ],
       };
 
-      beforeEach(async () => {
-        await act(async () => {
-          testBed = await setup(httpSetup);
-        });
-
-        testBed.component.update();
-
-        testBed.actions.selectCsvForUpload(mockFile);
-
-        testBed.component.update();
-
-        httpRequestsMockHelpers.setParseCsvResponse(parsedCsv, undefined);
-      });
-
       test('should parse csv from file upload', async () => {
-        const { actions, find } = testBed;
+        httpRequestsMockHelpers.setParseCsvResponse(parsedCsv, undefined);
+        await renderPipelinesCreateFromCsv();
 
-        await actions.clickProcessCsv();
+        fireEvent.change(screen.getByTestId('csvFilePicker'), { target: { files: [mockFile] } });
+        await waitFor(() => expect(screen.getByTestId('processFileButton')).not.toBeDisabled());
+
+        const postCallsBefore = httpSetup.post.mock.calls.length;
+        fireEvent.click(screen.getByTestId('processFileButton'));
+
+        await waitFor(() =>
+          expect(httpSetup.post.mock.calls.length).toBeGreaterThan(postCallsBefore)
+        );
+        const parseRequest = httpSetup.post.mock.results[postCallsBefore]?.value as
+          | Promise<unknown>
+          | undefined;
+        expect(parseRequest).toBeDefined();
+        await waitFor(async () => {
+          await parseRequest;
+        });
 
         expect(httpSetup.post).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}/parse_csv`,
@@ -128,12 +131,13 @@ describe('<PipelinesCreateFromCsv />', () => {
           })
         );
 
-        expect(JSON.parse(find('pipelineMappingsJSONEditor').text())).toEqual(parsedCsv);
+        const mappings = await screen.findByTestId('pipelineMappingsJSONEditor');
+        const editor = within(mappings).getByTestId('mockedCodeEditor');
+        const currentValue = editor.getAttribute('data-currentvalue') ?? '';
+        expect(JSON.parse(currentValue)).toEqual(parsedCsv);
       });
 
       test('should render an error message if error mapping pipeline', async () => {
-        const { actions, find, exists } = testBed;
-
         const errorTitle = 'title';
         const errorDetails = 'helpful description';
 
@@ -145,38 +149,32 @@ describe('<PipelinesCreateFromCsv />', () => {
 
         httpRequestsMockHelpers.setParseCsvResponse(undefined, error);
 
-        actions.selectCsvForUpload(mockFile);
-        await actions.clickProcessCsv();
+        await renderPipelinesCreateFromCsv();
+        fireEvent.change(screen.getByTestId('csvFilePicker'), { target: { files: [mockFile] } });
+        await waitFor(() => expect(screen.getByTestId('processFileButton')).not.toBeDisabled());
+        fireEvent.click(screen.getByTestId('processFileButton'));
 
-        expect(exists('errorCallout')).toBe(true);
-        expect(find('errorCallout').text()).toContain(errorTitle);
-        expect(find('errorCallout').text()).toContain(errorDetails);
+        const callout = await screen.findByTestId('errorCallout');
+        expect(callout).toHaveTextContent(errorTitle);
+        expect(callout).toHaveTextContent(errorDetails);
       });
 
       describe('results', () => {
-        beforeEach(async () => {
-          await act(async () => {
-            testBed = await setup(httpSetup);
-          });
-
-          testBed.component.update();
-        });
-
         test('result buttons', async () => {
-          const { exists, find } = testBed;
+          httpRequestsMockHelpers.setParseCsvResponse(parsedCsv, undefined);
+          await renderPipelinesCreateFromCsv();
 
-          await testBed.actions.uploadFile(mockFile);
+          fireEvent.change(screen.getByTestId('csvFilePicker'), { target: { files: [mockFile] } });
+          await waitFor(() => expect(screen.getByTestId('processFileButton')).not.toBeDisabled());
+          fireEvent.click(screen.getByTestId('processFileButton'));
 
-          expect(exists('pipelineMappingsJSONEditor')).toBe(true);
+          expect(await screen.findByTestId('pipelineMappingsJSONEditor')).toBeInTheDocument();
 
-          expect(exists('continueToCreate')).toBe(true);
-          expect(find('continueToCreate').text()).toContain('Continue to create pipeline');
-
-          expect(exists('copyToClipboard')).toBe(true);
-          expect(find('copyToClipboard').text()).toContain('Copy JSON');
-
-          expect(exists('downloadJson')).toBe(true);
-          expect(find('downloadJson').text()).toContain('Download JSON');
+          expect(screen.getByTestId('continueToCreate')).toHaveTextContent(
+            'Continue to create pipeline'
+          );
+          expect(screen.getByTestId('copyToClipboard')).toHaveTextContent('Copy JSON');
+          expect(screen.getByTestId('downloadJson')).toHaveTextContent('Download JSON');
         });
       });
     });

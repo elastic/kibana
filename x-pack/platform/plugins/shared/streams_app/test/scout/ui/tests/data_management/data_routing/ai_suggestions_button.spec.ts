@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 import {
@@ -41,7 +41,7 @@ test.describe('Stream data routing - AI suggestions button', { tag: ['@ess'] }, 
   test('should show button when AI features are enabled', async ({ page }) => {
     const button = page.getByTestId('streamsAppGenerateSuggestionButton');
     await expect(button).toBeVisible();
-    await expect(button).toContainText('Suggest partitions with AI');
+    await expect(button).toContainText('Suggest partitions');
   });
 
   test('should disable button when no connector is selected', async ({ page }) => {
@@ -81,7 +81,7 @@ test.describe('Stream data routing - AI suggestions button', { tag: ['@ess'] }, 
 
     await page.reload();
 
-    const moreButton = page.getByTestId('streamsAppGenerateSuggestionButtonMoreButton');
+    const moreButton = page.getByTestId('streamsAppAiPickConnectorButton');
     await expect(moreButton).toBeVisible();
   });
 });

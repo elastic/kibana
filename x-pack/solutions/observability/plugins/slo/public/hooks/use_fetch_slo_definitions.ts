@@ -62,6 +62,7 @@ export function useFetchSloDefinitions({
     },
     retry: false,
     refetchOnWindowFocus: false,
+    staleTime: 5 * 1000, // 5 seconds
   });
 
   return { isLoading, isError, isSuccess, data, refetch };

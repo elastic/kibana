@@ -12,11 +12,17 @@ import {
   RouteRenderer,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
+import { StreamsTourProvider } from '../streams_tour';
 import { streamsAppRouter } from '../../routes/config';
 import type { StreamsAppStartDependencies } from '../../types';
 import type { StreamsAppServices } from '../../services/types';
 import { KbnUrlStateStorageFromRouterProvider } from '../../util/kbn_url_state_context';
+import { DateRangeRedirect } from '../date_range_redirect';
+
+const queryClient = new QueryClient();
 
 export function AppRoot({
   coreStart,
@@ -44,14 +50,22 @@ export function AppRoot({
 
   return (
     <StreamsAppContextProvider context={context}>
-      {/* @ts-expect-error upgrade typescript v5.4.5 */}
-      <RouterProvider history={history} router={streamsAppRouter}>
-        <KbnUrlStateStorageFromRouterProvider>
-          <BreadcrumbsContextProvider>
-            <RouteRenderer />
-          </BreadcrumbsContextProvider>
-        </KbnUrlStateStorageFromRouterProvider>
-      </RouterProvider>
+      <StreamsTourProvider>
+        <QueryClientProvider client={queryClient}>
+          {/* @ts-expect-error upgrade typescript v5.4.5 */}
+          <RouterProvider history={history} router={streamsAppRouter}>
+            <DateRangeRedirect>
+              <PerformanceContextProvider>
+                <KbnUrlStateStorageFromRouterProvider>
+                  <BreadcrumbsContextProvider>
+                    <RouteRenderer />
+                  </BreadcrumbsContextProvider>
+                </KbnUrlStateStorageFromRouterProvider>
+              </PerformanceContextProvider>
+            </DateRangeRedirect>
+          </RouterProvider>
+        </QueryClientProvider>
+      </StreamsTourProvider>
     </StreamsAppContextProvider>
   );
 }

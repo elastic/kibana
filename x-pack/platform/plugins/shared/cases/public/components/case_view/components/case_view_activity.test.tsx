@@ -113,8 +113,13 @@ const activityTab = CASE_VIEW_PAGE_TABS.ACTIVITY;
 
 const userActionsStats = {
   total: 21,
+  totalDeletions: 0,
   totalComments: 9,
+  totalCommentDeletions: 0,
+  totalCommentCreations: 9,
+  totalHiddenCommentUpdates: 0,
   totalOtherActions: 11,
+  totalOtherActionDeletions: 0,
 };
 
 const caseProps = {

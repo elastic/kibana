@@ -271,6 +271,15 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
                   />
                 </div>
                 <EuiBasicTable
+                  tableCaption={i18n.translate(
+                    'xpack.securitySolution.flyout.entityDetails.riskSummaryTableCaption',
+                    {
+                      defaultMessage: 'Risk summary for {entity}',
+                      values: {
+                        entity: capitalize(entityType),
+                      },
+                    }
+                  )}
                   data-test-subj="risk-summary-table"
                   responsiveBreakpoint={false}
                   columns={columnsArray}

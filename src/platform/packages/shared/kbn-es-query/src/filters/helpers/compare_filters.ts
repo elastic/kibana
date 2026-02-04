@@ -16,6 +16,7 @@ export interface FilterCompareOptions {
   index?: boolean;
   disabled?: boolean;
   negate?: boolean;
+  group?: boolean;
   state?: boolean;
   alias?: boolean;
 }
@@ -28,6 +29,7 @@ export const COMPARE_ALL_OPTIONS: FilterCompareOptions = {
   index: true,
   disabled: true,
   negate: true,
+  group: true,
   state: true,
   alias: true,
 };
@@ -45,12 +47,12 @@ const mapFilter = (
   const attrsToExclude = isCombinedFilter(filter)
     ? removeRequiredAttributes(excludedAttributes)
     : excludedAttributes;
-
   const cleaned: FilterMeta = omit(filter, attrsToExclude) as FilterMeta;
   if (comparators.index) cleaned.index = filter.meta?.index;
   if (comparators.negate) cleaned.negate = filter.meta && Boolean(filter.meta.negate);
   if (comparators.disabled) cleaned.disabled = filter.meta && Boolean(filter.meta.disabled);
   if (comparators.alias) cleaned.alias = filter.meta?.alias;
+  if (comparators.group) cleaned.group = filter.meta?.group;
 
   return cleaned;
 };

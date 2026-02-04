@@ -12,6 +12,7 @@ import {
   createInferenceRequestError,
   getConnectorFamily,
   getConnectorProvider,
+  getConnectorDefaultModel,
   type ChatCompleteCompositeResponse,
   MessageRole,
 } from '@kbn/inference-common';
@@ -108,6 +109,7 @@ export function createChatCompleteCallbackApi({
             temperature,
             toolChoice,
             tools,
+            timeout,
           } = callback(executor);
 
           const messages = givenMessages.map((message) => {
@@ -155,6 +157,7 @@ export function createChatCompleteCallbackApi({
                   tools,
                   toolChoice,
                   model: {
+                    id: modelName ?? getConnectorDefaultModel(connector),
                     family: getConnectorFamily(connector),
                     provider: getConnectorProvider(connector),
                   },
@@ -174,6 +177,8 @@ export function createChatCompleteCallbackApi({
                       modelName,
                       abortSignal,
                       metadata,
+                      timeout,
+                      stream,
                     })
                     .pipe(
                       chunksIntoMessage({

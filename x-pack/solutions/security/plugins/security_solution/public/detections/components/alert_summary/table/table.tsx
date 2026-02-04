@@ -232,6 +232,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
         consumers={ALERT_TABLE_CONSUMERS}
         gridStyle={GRID_STYLE}
         id={TableId.alertsOnAlertSummaryPage}
+        isMutedAlertsEnabled={false}
         query={query}
         ref={refetchRef}
         renderActionsCell={ActionsCell}

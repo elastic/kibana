@@ -8,7 +8,7 @@
  */
 
 import { pollSearch } from './poll_search';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import { AbortError, AbortReason } from '@kbn/kibana-utils-plugin/common';
 
 describe('pollSearch', () => {
   function getMockedSearch$(resolveOnI = 1) {
@@ -84,6 +84,29 @@ describe('pollSearch', () => {
 
     expect(searchFn).toBeCalledTimes(1);
     expect(cancelFn).toBeCalledTimes(1);
+  });
+
+  test('Does not throw or cancel if abort reason is CANCELED', async () => {
+    const searchFn = jest.fn().mockResolvedValue({
+      isRunning: false,
+      isPartial: false,
+      rawResponse: {},
+    });
+    const cancelFn = jest.fn();
+
+    const abortController = new AbortController();
+    setTimeout(() => abortController.abort(AbortReason.CANCELED), 100);
+
+    // Poll should complete without throwing AbortError and without calling cancel
+    await expect(
+      pollSearch(searchFn, cancelFn, { abortSignal: abortController.signal }).toPromise()
+    ).resolves.toEqual({
+      isRunning: false,
+      isPartial: false,
+      rawResponse: {},
+    });
+
+    expect(cancelFn).not.toHaveBeenCalled();
   });
 
   test('Does not leak unresolved promises on cancel', async () => {

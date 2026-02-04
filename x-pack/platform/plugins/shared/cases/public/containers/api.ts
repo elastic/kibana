@@ -111,6 +111,7 @@ import {
   decodeFindAllAttachedAlertsResponse,
 } from './utils';
 import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
+import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
 
 export const resolveCase = async ({
   caseId,
@@ -279,6 +280,8 @@ export const getCases = async ({
     owner: [],
     category: [],
     customFields: {},
+    from: DEFAULT_FROM_DATE,
+    to: DEFAULT_TO_DATE,
   },
   queryParams = {
     page: 1,
@@ -307,6 +310,8 @@ export const getCases = async ({
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
     ...constructCustomFieldsFilter(filterOptions.customFields),
+    ...(filterOptions.from ? { from: filterOptions.from } : {}),
+    ...(filterOptions.to ? { to: filterOptions.to } : {}),
     ...queryParams,
   };
 

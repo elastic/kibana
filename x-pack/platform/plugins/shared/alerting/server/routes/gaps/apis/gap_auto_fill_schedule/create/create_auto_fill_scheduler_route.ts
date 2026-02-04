@@ -10,8 +10,9 @@ import { gapAutoFillSchedulerBodySchemaV1 } from '../../../../../../common/route
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
-import { transformRequestV1, transformResponseV1 } from './transforms';
 import { INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH } from '../../../../../types';
+import { transformRequestV1 } from './transforms';
+import { transformToGapAutoFillSchedulerResponseBodyV1 } from '../transforms/transform_response';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
 export const createAutoFillSchedulerRoute = (
@@ -29,11 +30,13 @@ export const createAutoFillSchedulerRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
+        licenseState.ensureLicenseForGapAutoFillScheduler();
+
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
         const result = await rulesClient.createGapAutoFillScheduler(transformRequestV1(req));
         const response: GapAutoFillSchedulerResponseV1 = {
-          body: transformResponseV1(result),
+          body: transformToGapAutoFillSchedulerResponseBodyV1(result),
         };
         return res.ok(response);
       })

@@ -94,6 +94,12 @@ export function updateSavedSearch({
       savedSearch.breakdownField = '';
     }
 
+    if (typeof appState.interval !== 'undefined') {
+      savedSearch.chartInterval = appState.interval;
+    } else if (savedSearch.chartInterval) {
+      savedSearch.chartInterval = 'auto';
+    }
+
     savedSearch.hideAggregatedPreview = appState.hideAggregatedPreview;
 
     // add a flag here to identify ES|QL queries

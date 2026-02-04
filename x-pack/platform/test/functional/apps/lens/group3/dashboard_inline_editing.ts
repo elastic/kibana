@@ -72,6 +72,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.save('New Lens from Modal', false, false, false, 'new');
 
       await dashboard.waitForRenderComplete();
+      // now save the dashboard
+      await dashboard.saveDashboard('My InlineEditing Dashboard', { saveAsNew: true });
+
       await dashboardPanelActions.clickInlineEdit();
 
       log.debug('Adds a secondary dimension');
@@ -81,7 +84,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'max',
         field: 'bytes',
       });
+      await dashboard.ensureMissingUnsavedChangesNotification();
       await testSubjects.click('applyFlyoutButton');
+      // After apply the should detect the changes
+      await dashboard.ensureHasUnsavedChangesNotification();
       await dashboard.waitForRenderComplete();
       const data = await lens.getMetricVisualizationData();
       const normalizedData = data.map((item) => ({
@@ -121,7 +127,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('Removes breakdown dimension');
 
       await lens.removeDimension('lnsXY_splitDimensionPanel');
-
       await testSubjects.click('applyFlyoutButton');
       await dashboard.waitForRenderComplete();
 

@@ -58,6 +58,15 @@ export function getRoutingTransform() {
         Object.assign(error, { document });
       }
 
+      // Automatically populate data_stream fields from the determined index name
+      // Index format: {type}-{dataset}-{namespace} (e.g., "metrics-apm.transaction.1m-default")
+      if (index) {
+        const [type, dataset] = index.split('-');
+        document['data_stream.type'] = type;
+        document['data_stream.dataset'] = dataset;
+        document['data_stream.namespace'] = namespace;
+      }
+
       document._index = index;
 
       callback(null, document);

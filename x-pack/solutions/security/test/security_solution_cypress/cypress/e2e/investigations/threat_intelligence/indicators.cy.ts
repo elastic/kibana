@@ -69,6 +69,8 @@ const URL = '/app/security/threat_intelligence/indicators';
 const URL_WITH_CONTRADICTORY_FILTERS =
   '/app/security/threat_intelligence/indicators?indicators=(filterQuery:(language:kuery,query:%27%27),filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:file),type:phrase),query:(match_phrase:(threat.indicator.type:file))),(%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:url),type:phrase),query:(match_phrase:(threat.indicator.type:url)))),timeRange:(from:now/d,to:now/d))';
 
+const THREAT_INTELLIGENCE_API = '**/internal/search/threatIntelligenceSearchStrategy';
+
 describe('Single indicator', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_single' }));
 
@@ -77,7 +79,9 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
   describe('basic/simple url', () => {
     beforeEach(() => {
       login();
+      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
+      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 
@@ -217,7 +221,9 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
   describe('Field browser', () => {
     beforeEach(() => {
       login();
+      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
+      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 
@@ -233,7 +239,9 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
   describe('Request inspector', () => {
     beforeEach(() => {
       login();
+      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
+      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 
@@ -266,7 +274,9 @@ describe('Multiple indicators', { tags: ['@ess'] }, () => {
   describe('Indicator page search', () => {
     beforeEach(() => {
       login();
+      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
+      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 
@@ -300,9 +310,9 @@ describe('Multiple indicators', { tags: ['@ess'] }, () => {
 
       cy.log('should reload the data when refresh button is pressed');
 
-      cy.intercept('POST', '/internal/search/threatIntelligenceSearchStrategy').as('search');
+      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('search');
       cy.get(REFRESH_BUTTON).should('exist').click();
-      cy.wait('@search');
+      cy.wait('@search', { timeout: 120000 });
     });
   });
 });
@@ -315,7 +325,9 @@ describe('Invalid Indicators', { tags: ['@ess'] }, () => {
   describe('verify the grid loads even with missing fields', () => {
     beforeEach(() => {
       login();
+      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
+      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 
@@ -372,7 +384,9 @@ describe('Missing mappings', { tags: ['@ess'] }, () => {
   describe('verify the grid loads even with missing mappings and missing fields', () => {
     beforeEach(() => {
       login();
+      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
+      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 

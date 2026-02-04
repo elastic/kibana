@@ -25,13 +25,7 @@ let nowProvider: jest.Mocked<NowProviderInternalContract>;
 let currentAppId$: BehaviorSubject<string>;
 
 beforeEach(() => {
-  const initializerContext = coreMock.createPluginInitializerContext({
-    search: {
-      sessions: {
-        notTouchedTimeout: '5m',
-      },
-    },
-  });
+  const initializerContext = coreMock.createPluginInitializerContext();
   const startService = coreMock.createSetup().getStartServices;
   nowProvider = createNowProviderMock();
   currentAppId$ = new BehaviorSubject('app');
@@ -59,7 +53,6 @@ beforeEach(() => {
     getSearchSessionEBTManagerMock(),
     getSessionsClientMock(),
     nowProvider,
-    undefined,
     { freezeState: false } // needed to use mocks inside state container
   );
   state$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);

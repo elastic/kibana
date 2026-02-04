@@ -41,6 +41,7 @@ import {
   reactRouterNavigate,
   attemptToURIDecode,
 } from '../../../../../shared_imports';
+import { formatBytes } from '../../../../..';
 import { getDataStreamDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
@@ -49,6 +50,8 @@ import { NoMatch, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 import { CreateIndexButton } from '../create_index/create_index_button';
 import { IndexTablePagination, PAGE_SIZE_OPTIONS } from './index_table_pagination';
+import { DocCountCell } from './doc_count';
+import { docCountApi } from './get_doc_count';
 
 const getColumnConfigs = ({
   showIndexStats,
@@ -59,6 +62,7 @@ const getColumnConfigs = ({
   location,
   application,
   http,
+  docCountApi,
 }) => {
   const columns = [
     {
@@ -123,14 +127,16 @@ const getColumnConfigs = ({
         }),
         order: 60,
         render: (index) => {
-          return Number(index.documents ?? 0).toLocaleString();
+          return <DocCountCell indexName={index.name} docCountApi={docCountApi} />;
         },
+        readOnly: true,
       },
       {
         fieldName: 'size',
         label: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
           defaultMessage: 'Storage size',
         }),
+        render: (index) => formatBytes(index.size),
         order: 70,
       }
     );
@@ -143,7 +149,7 @@ const getColumnConfigs = ({
           defaultMessage: 'Health',
         }),
         order: 20,
-        render: (index) => <DataHealth health={index.health} />,
+        render: (index) => (index.health ? <DataHealth health={index.health} /> : undefined),
       },
       {
         fieldName: 'status',
@@ -196,6 +202,7 @@ export class IndexTable extends Component {
   constructor(props) {
     super(props);
 
+    this.docCountApi = docCountApi(props.http);
     this.state = {
       selectedIndicesMap: {},
     };
@@ -237,6 +244,7 @@ export class IndexTable extends Component {
     // navigating back to this tab would just show an empty list because the backing indices
     // would be hidden.
     this.props.filterChanged('');
+    this.docCountApi.abort();
   }
 
   readURLParams() {
@@ -291,6 +299,35 @@ export class IndexTable extends Component {
           })}
         />
         <EuiSpacer />
+      </>
+    );
+  }
+
+  renderEnrichmentErrors() {
+    const { indicesEnrichmentErrors } = this.props;
+    if (!indicesEnrichmentErrors || indicesEnrichmentErrors.length === 0) {
+      return null;
+    }
+
+    return (
+      <>
+        <EuiCallOut
+          iconType="warning"
+          color="warning"
+          data-test-subj="indicesEnrichmentErrorCallout"
+          title={i18n.translate('xpack.idxMgmt.indexTable.enrichmentErrorTitle', {
+            defaultMessage: 'Some index details could not be loaded',
+          })}
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.indexTable.enrichmentErrorDescription"
+            defaultMessage="The following data sources failed to load: {sources}."
+            values={{
+              sources: indicesEnrichmentErrors.join(', '),
+            }}
+          />
+        </EuiCallOut>
+        <EuiSpacer size="m" />
       </>
     );
   }
@@ -357,7 +394,7 @@ export class IndexTable extends Component {
 
   buildHeader(columnConfigs) {
     const { sortField, isSortAscending } = this.props;
-    return columnConfigs.map(({ fieldName, label }) => {
+    return columnConfigs.map(({ fieldName, label, readOnly }) => {
       const isSorted = sortField === fieldName;
       // we only want to make index name column 25% width when there are more columns displayed
       const widthStyle = fieldName === 'name' && columnConfigs.length > 2 ? { width: '25%' } : {};
@@ -369,6 +406,7 @@ export class IndexTable extends Component {
           isSortAscending={isSortAscending}
           style={widthStyle}
           data-test-subj={`indexTableHeaderCell-${fieldName}`}
+          readOnly={readOnly}
         >
           {label}
         </EuiTableHeaderCell>
@@ -581,6 +619,7 @@ export class IndexTable extends Component {
             location,
             application,
             http,
+            docCountApi: this.docCountApi,
           });
           const columnsCount = columnConfigs.length + 1;
           return (
@@ -698,6 +737,8 @@ export class IndexTable extends Component {
               </EuiFlexGroup>
 
               {this.renderFilterError()}
+
+              {this.renderEnrichmentErrors()}
 
               <EuiSpacer size="m" />
 

@@ -21,7 +21,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/crypto-browser'
   - '@kbn/data-view-utils'
-  - '@kbn/esql-ast'
+  - '@kbn/esql-language'
   - '@kbn/esql-types'
   - '@kbn/search-types'
   - '@kbn/expressions-plugin'
@@ -32,6 +32,9 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/monaco'
   - '@kbn/core'
+  - '@kbn/projects-solutions-groups'
+  - '@kbn/index-management-shared-types'
+  - '@kbn/licensing-types'
 tags:
   - shared-common
   - package

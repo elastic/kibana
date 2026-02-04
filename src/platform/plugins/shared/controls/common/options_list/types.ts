@@ -7,42 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  OptionsListControlState,
+  OptionsListDSLControlState,
+  OptionsListESQLControlState,
+  OptionsListSelection,
+} from '@kbn/controls-schemas';
 import type { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-
-import type { ESQLControlState } from '@kbn/esql-types';
-import type { OptionsListSelection } from './options_list_selections';
-import type { OptionsListSortingType } from './suggestions_sorting';
-import type { DefaultDataControlState } from '../types';
-import type { OptionsListSearchTechnique } from './suggestions_searching';
 
 /**
  * ----------------------------------------------------------------
  * Options list state types
  * ----------------------------------------------------------------
  */
-
-export interface OptionsListDisplaySettings {
-  placeholder?: string;
-  hideActionBar?: boolean;
-  hideExclude?: boolean;
-  hideExists?: boolean;
-  hideSort?: boolean;
-}
-
-type OptionsListBaseControlState = OptionsListDisplaySettings & {
-  searchTechnique?: OptionsListSearchTechnique;
-  sort?: OptionsListSortingType;
-  selectedOptions?: OptionsListSelection[];
-  existsSelected?: boolean;
-  runPastTimeout?: boolean;
-  singleSelect?: boolean;
-  exclude?: boolean;
-};
-export type OptionsListDSLControlState = DefaultDataControlState & OptionsListBaseControlState;
-export type OptionsListESQLControlState = ESQLControlState & OptionsListBaseControlState;
-
-export type OptionsListControlState = OptionsListDSLControlState | OptionsListESQLControlState;
 
 export const isOptionsListESQLControlState = (
   state: OptionsListControlState | undefined
@@ -114,4 +92,5 @@ export interface OptionsListRequestBody
   searchString?: string;
   fieldSpec?: FieldSpec;
   size: number;
+  isReload?: boolean;
 }

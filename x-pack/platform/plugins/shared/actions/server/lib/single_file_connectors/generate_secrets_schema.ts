@@ -9,11 +9,15 @@ import type { ConnectorSpec } from '@kbn/connector-specs';
 
 import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib';
 import type { ActionTypeSecrets, ValidatorType } from '../../types';
+import type { ActionsConfigurationUtilities } from '../../actions_config';
 
 export const generateSecretsSchema = (
-  authTypes: ConnectorSpec['authTypes']
+  authSpec: ConnectorSpec['auth'],
+  configUtils: ActionsConfigurationUtilities
 ): ValidatorType<ActionTypeSecrets> => {
+  const settings = configUtils.getWebhookSettings();
+  const isPfxEnabled = settings.ssl.pfx.enabled;
   return {
-    schema: generateSecretsSchemaFromSpec(authTypes),
+    schema: generateSecretsSchemaFromSpec(authSpec, { isPfxEnabled }),
   };
 };

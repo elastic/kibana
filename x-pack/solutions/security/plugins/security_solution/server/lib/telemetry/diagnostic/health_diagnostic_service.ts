@@ -41,13 +41,14 @@ import {
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT,
 } from '../event_based/events';
 import { artifactService } from '../artifact';
-import { newTelemetryLogger } from '../helpers';
+import { newTelemetryLogger, withErrorMessage } from '../helpers';
 import { telemetryConfiguration } from '../configuration';
 import { RssGrowthCircuitBreaker } from './circuit_breakers/rss_growth_circuit_breaker';
 import { TimeoutCircuitBreaker } from './circuit_breakers/timeout_circuit_breaker';
 import { EventLoopUtilizationCircuitBreaker } from './circuit_breakers/event_loop_utilization_circuit_breaker';
 import { EventLoopDelayCircuitBreaker } from './circuit_breakers/event_loop_delay_circuit_breaker';
 import { ElasticsearchCircuitBreaker } from './circuit_breakers/elastic_search_circuit_breaker';
+import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
 
 const TASK_TYPE = 'security:health-diagnostic';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
@@ -62,6 +63,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private queryExecutor?: CircuitBreakingQueryExecutor;
   private analytics?: AnalyticsServiceStart;
   private _esClient?: ElasticsearchClient;
+  private telemetryConfigProvider?: TelemetryConfigProvider;
 
   constructor(logger: Logger) {
     const mdc = { task_id: TASK_ID, task_type: TASK_TYPE };
@@ -80,6 +82,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     this.queryExecutor = new CircuitBreakingQueryExecutorImpl(start.esClient, this.logger);
     this.analytics = start.analytics;
     this._esClient = start.esClient;
+    this.telemetryConfigProvider = start.telemetryConfigProvider;
 
     await this.scheduleTask(start.taskManager);
   }
@@ -87,6 +90,10 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   public async runHealthDiagnosticQueries(
     lastExecutionByQuery: Record<string, number>
   ): Promise<HealthDiagnosticQueryStats[]> {
+    if (!this.telemetryConfigProvider?.getIsOptedIn()) {
+      this.logger.debug('Skipping health diagnostic task because telemetry is disabled');
+      return [];
+    }
     this.logger.debug('Running health diagnostic task');
 
     const queriesToRun = await this.getRunnableHealthQueries(lastExecutionByQuery, new Date());
@@ -165,7 +172,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
                 message: error.message,
                 reason: error instanceof ValidationError ? error.result : undefined,
               };
-              this.logger.error('Error running query', { error });
+              this.logger.error('Error running query', withErrorMessage(error));
               resolve({
                 ...queryStats,
                 failure,
@@ -296,7 +303,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     try {
       this.analytics.reportEvent(eventTypeOpts.eventType, eventData as object);
     } catch (error) {
-      this.logger.warn('Error sending EBT', { error });
+      this.logger.warn('Error sending EBT', withErrorMessage(error));
     }
   }
 
@@ -312,7 +319,12 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
         return enabled && isDueForExecution(lastExecutedAt, now, scheduleCron);
       } catch (error) {
-        this.logger.warn('Error processing health query', { error, name: query.name });
+        this.logger.warn(
+          'Error processing health query',
+          withErrorMessage(error, {
+            name: query.name,
+          } as LogMeta)
+        );
         return false;
       }
     });
@@ -323,7 +335,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       const artifact = await artifactService.getArtifact(QUERY_ARTIFACT_ID);
       return parseDiagnosticQueries(artifact.data);
     } catch (error) {
-      this.logger.warn(`Error getting health diagnostic queries: ${error.message}`, { error });
+      this.logger.warn('Error getting health diagnostic queries', withErrorMessage(error));
       return [];
     }
   }

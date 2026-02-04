@@ -6,7 +6,6 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { MaintenanceWindowsConfig } from '../config';
 import type { ILicenseState } from '../lib/license_state';
 import type { MaintenanceWindowRequestHandlerContext } from '../types';
 
@@ -31,31 +30,28 @@ import { findMaintenanceWindowsRoute } from './apis/maintenance_window/external/
 export interface RouteOptions {
   router: IRouter<MaintenanceWindowRequestHandlerContext>;
   licenseState: ILicenseState;
-  maintenanceWindowsConfig: MaintenanceWindowsConfig;
 }
 
 export function defineRoutes(opts: RouteOptions) {
-  const { router, licenseState, maintenanceWindowsConfig } = opts;
+  const { router, licenseState } = opts;
 
-  if (maintenanceWindowsConfig.enabled) {
-    // Internal APIs
-    createMaintenanceWindowRouteInternal(router, licenseState);
-    getMaintenanceWindowRouteInternal(router, licenseState);
-    updateMaintenanceWindowRouteInternal(router, licenseState);
-    deleteMaintenanceWindowRouteInternal(router, licenseState);
-    findMaintenanceWindowsRouteInternal(router, licenseState);
-    archiveMaintenanceWindowRouteInternal(router, licenseState);
-    finishMaintenanceWindowRouteInternal(router, licenseState);
-    getActiveMaintenanceWindowsRouteInternal(router, licenseState);
-    bulkGetMaintenanceWindowRouteInternal(router, licenseState);
+  // Internal APIs
+  createMaintenanceWindowRouteInternal(router, licenseState);
+  getMaintenanceWindowRouteInternal(router, licenseState);
+  updateMaintenanceWindowRouteInternal(router, licenseState);
+  deleteMaintenanceWindowRouteInternal(router, licenseState);
+  findMaintenanceWindowsRouteInternal(router, licenseState);
+  archiveMaintenanceWindowRouteInternal(router, licenseState);
+  finishMaintenanceWindowRouteInternal(router, licenseState);
+  getActiveMaintenanceWindowsRouteInternal(router, licenseState);
+  bulkGetMaintenanceWindowRouteInternal(router, licenseState);
 
-    // External APIs
-    getMaintenanceWindowRoute(router, licenseState);
-    createMaintenanceWindowRoute(router, licenseState);
-    deleteMaintenanceWindowRoute(router, licenseState);
-    archiveMaintenanceWindowRoute(router, licenseState);
-    unarchiveMaintenanceWindowRoute(router, licenseState);
-    updateMaintenanceWindowRoute(router, licenseState);
-    findMaintenanceWindowsRoute(router, licenseState);
-  }
+  // External APIs
+  getMaintenanceWindowRoute(router, licenseState);
+  createMaintenanceWindowRoute(router, licenseState);
+  deleteMaintenanceWindowRoute(router, licenseState);
+  archiveMaintenanceWindowRoute(router, licenseState);
+  unarchiveMaintenanceWindowRoute(router, licenseState);
+  updateMaintenanceWindowRoute(router, licenseState);
+  findMaintenanceWindowsRoute(router, licenseState);
 }

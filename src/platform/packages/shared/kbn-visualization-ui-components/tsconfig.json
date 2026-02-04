@@ -18,7 +18,6 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/unified-search-plugin",
     "@kbn/utility-types",
     "@kbn/es-query",
     "@kbn/core-http-browser",
@@ -34,6 +33,7 @@
     "@kbn/field-utils",
     "@kbn/calculate-width-from-char-count",
     "@kbn/visualization-utils",
-    "@kbn/shared-ux-button-toolbar"
+    "@kbn/shared-ux-button-toolbar",
+    "@kbn/kql"
   ],
 }

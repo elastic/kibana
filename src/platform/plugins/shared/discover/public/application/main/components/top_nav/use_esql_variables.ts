@@ -6,11 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { useCallback, useEffect, useRef } from 'react';
-import type { ControlPanelsState, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
 import { skip } from 'rxjs';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
@@ -80,11 +80,18 @@ export const useESQLVariables = ({
     const inputSubscription = controlGroupApi.getInput$().subscribe((input) => {
       const controlGroupState =
         input.initialChildControlState as ControlPanelsState<ESQLControlState>;
-
+      // drop unused keys for BWC
+      const transformedState = Object.keys(controlGroupState).reduce((prev, key) => {
+        return { ...prev, [key]: omit(controlGroupState[key], ['id', 'useGlobalFilters']) };
+      }, {});
       stateContainer.savedSearchState.updateControlState({
-        nextControlState: controlGroupState,
+        nextControlState: transformedState,
       });
-      dispatch(setControlGroupState({ controlGroupState }));
+      dispatch(
+        setControlGroupState({
+          controlGroupState: transformedState,
+        })
+      );
 
       if (pendingQueryUpdate.current) {
         onUpdateESQLQuery(pendingQueryUpdate.current);
@@ -130,9 +137,7 @@ export const useESQLVariables = ({
       await controlGroupApi.addNewPanel({
         panelType: ESQL_CONTROL,
         serializedState: {
-          rawState: {
-            ...controlState,
-          },
+          ...controlState,
         },
       });
     },

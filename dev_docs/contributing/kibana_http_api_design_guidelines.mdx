@@ -403,11 +403,15 @@ Refer to <DocLink id="kibHttpApiTfGuidelines" section="return-as-much-as-you-can
 
 ### Validation
 
-**Runtime validation should be as narrow as feasible**
+**Runtime validation should be as narrow as feasible. Arrays should always have a defined upper bound.**
 
 `schema.object({ id: schema.string({ minLength: 32, maxLength: 32 }) })` ✅
 
 `schema.object({ id: schema.string() })` ❌
+
+`schema.object({ names: array(schema.string({ minLength: 1, maxLength: 32 }), { maxSize: 10 } })` ✅
+
+`schema.object({ names: array(schema.string({ minLength: 1, maxLength: 32 }), { } })` ❌
 
 **It is easier to relax requirements than tighten them up**
 

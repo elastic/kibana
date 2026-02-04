@@ -38,10 +38,6 @@ async function main() {
   }
 
   switch (pipelineSetName) {
-    case 'es-forward': {
-      pipelineSteps.push(...getESForwardPipelineTriggers());
-      break;
-    }
     case 'es-forward-9-dot-1': {
       pipelineSteps.push(...getESForward9Dot1PipelineTriggers());
       break;
@@ -64,36 +60,6 @@ async function main() {
   }
 
   emitPipeline(pipelineSteps);
-}
-
-/**
- * This pipeline is testing the forward compatibility of Kibana with different versions of Elasticsearch.
- * Should be triggered for combinations of (Kibana@7.17 + ES@8.x {current open branches on the same major})
- */
-export function getESForwardPipelineTriggers(): BuildkiteTriggerStep[] {
-  const versions = getVersionsFile();
-  const KIBANA_7_17 = versions.versions.find((v) => v.branch === '7.17');
-  if (!KIBANA_7_17) {
-    throw new Error('Update ES forward compatibility pipeline to remove 7.17 and add version 8');
-  }
-  const targetESVersions = versions.versions.filter((v) => v.branch.startsWith('8.'));
-
-  return targetESVersions.map(({ version }) => {
-    return {
-      trigger: pipelineSets['es-forward'],
-      async: true,
-      label: `Triggering Kibana ${KIBANA_7_17.version} + ES ${version} forward compatibility`,
-      build: {
-        message: process.env.MESSAGE || `ES forward-compatibility test for ES ${version}`,
-        branch: KIBANA_7_17.branch,
-        commit: 'HEAD',
-        env: {
-          ES_SNAPSHOT_MANIFEST: `https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${version}/manifest-latest-verified.json`,
-          DRY_RUN: process.env.DRY_RUN,
-        },
-      },
-    } as BuildkiteTriggerStep;
-  });
 }
 
 /**
@@ -193,9 +159,7 @@ export function getArtifactStagingPipelineTriggers() {
  */
 export function getArtifactBuildTriggers() {
   const versions = getVersionsFile();
-  const targetVersions = versions.versions.filter(
-    (version) => version.branch !== '7.17' && version.branch !== 'main'
-  );
+  const targetVersions = versions.versions.filter((version) => version.branch !== 'main');
 
   return targetVersions.map(
     ({ branch }) =>

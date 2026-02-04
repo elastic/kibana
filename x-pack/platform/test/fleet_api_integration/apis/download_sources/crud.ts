@@ -204,6 +204,30 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('POST /agent_download_sources', () => {
+      it('should not store secrets if fleet server does not meet minimum version', async function () {
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '7.0.0');
+
+        const { body: res } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `My download source ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            secrets: {
+              ssl: {
+                key: 'KEY1',
+              },
+            },
+          })
+          .expect(200);
+        expect(Object.keys(res.item)).not.to.contain('secrets');
+        expect(Object.keys(res.item)).to.contain('ssl');
+        expect(Object.keys(res.item.ssl)).to.contain('key');
+        expect(res.item.ssl.key).to.equal('KEY1');
+      });
+
       it('should allow to create a new download source host', async function () {
         const { body: postResponse } = await supertest
           .post(`/api/fleet/agent_download_sources`)
@@ -316,33 +340,9 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.body.message).to.equal('Cannot specify both ssl.key and secrets.ssl.key');
       });
 
-      it('should not store secrets if fleet server does not meet minimum version', async function () {
-        await clearAgents();
-        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '7.0.0');
-
-        const { body: res } = await supertest
-          .post(`/api/fleet/agent_download_sources`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: `My download source ${Date.now()}`,
-            host: 'http://test.fr:443',
-            is_default: false,
-            secrets: {
-              ssl: {
-                key: 'KEY1',
-              },
-            },
-          })
-          .expect(200);
-        expect(Object.keys(res.item)).not.to.contain('secrets');
-        expect(Object.keys(res.item)).to.contain('ssl');
-        expect(Object.keys(res.item.ssl)).to.contain('key');
-        expect(res.item.ssl.key).to.equal('KEY1');
-      });
-
       it('should store secrets if fleet server meets minimum version', async function () {
         await clearAgents();
-        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '8.12.0');
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.3.0');
         const res = await supertest
           .post(`/api/fleet/agent_download_sources`)
           .set('kbn-xsrf', 'xxxx')
@@ -403,7 +403,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should store secrets if fleet server meets minimum version', async function () {
         await clearAgents();
-        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '8.12.0');
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.3.0');
         const res = await supertest
           .put(`/api/fleet/agent_download_sources/${defaultDownloadSourceId}`)
           .set('kbn-xsrf', 'xxxx')

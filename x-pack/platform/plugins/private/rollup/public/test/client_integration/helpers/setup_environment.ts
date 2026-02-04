@@ -6,15 +6,26 @@
  */
 import './jest.mocks';
 
+interface MockedHttp {
+  get: jest.Mock;
+  post: jest.Mock;
+  put: jest.Mock;
+}
+
 interface RequestMocks {
-  jobs?: object;
-  createdJob?: object;
-  indxPatternVldtResp?: object;
-  [key: string]: any;
+  jobs?: unknown;
+  createdJob?: unknown;
+  indxPatternVldtResp?: Partial<{
+    doesMatchIndices: boolean;
+    doesMatchRollupIndices: boolean;
+    dateFields: string[];
+    numericFields: string[];
+    keywordFields: string[];
+  }>;
 }
 
 const mockHttpRequest = (
-  http: any,
+  http: MockedHttp,
   { jobs = {}, createdJob = {}, indxPatternVldtResp = {} }: RequestMocks = {}
 ) => {
   http.get.mockImplementation(async (url: string) => {
@@ -37,10 +48,10 @@ const mockHttpRequest = (
   });
 
   // mock '/api/rollup/start'
-  http.post.mockImplementation(async (url: string) => ({}));
+  http.post.mockImplementation(async (_url: string) => ({}));
 
   // mock '/api/rollup/create
-  http.put.mockImplementation(async (url: string) => createdJob);
+  http.put.mockImplementation(async (_url: string) => createdJob);
 };
 
 export { mockHttpRequest };

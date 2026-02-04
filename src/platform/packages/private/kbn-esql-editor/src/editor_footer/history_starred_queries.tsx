@@ -469,6 +469,9 @@ export function QueryColumn({
           iconType={isRowExpanded ? 'arrowDown' : 'arrowRight'}
           size="xs"
           color="text"
+          css={css`
+            flex-shrink: 0;
+          `}
         />
       )}
       <span

@@ -7,9 +7,9 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
-import type {
-  AddUploadedLookups,
-  UploadedLookups,
+import {
+  type AddUploadedLookups,
+  type UploadedLookups,
 } from '../../../../../../../common/components/migration_steps/types';
 import { MissingLookupsList } from '../../../../../../../common/components';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
@@ -38,7 +38,11 @@ export const useMissingLookupsListStep = ({
     (lookupName: string) => {
       // Saving the lookup with an empty content to omit it.
       // The translation will ignore this lookup and will not cause partial translations.
-      upsertResources(migrationStats.id, [{ type: 'lookup', name: lookupName, content: '' }]);
+      upsertResources({
+        migrationId: migrationStats.id,
+        vendor: migrationStats.vendor,
+        data: [{ type: 'lookup', name: lookupName, content: '' }],
+      });
     },
     [upsertResources, migrationStats]
   );

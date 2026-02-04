@@ -13,10 +13,9 @@ import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import type { CustomHostSettings } from '@kbn/actions-plugin/server/config';
-import type { ProxySettings } from '@kbn/actions-plugin/server/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { sendEmailGraphApi, sendEmailWithAttachments } from './send_email_graph_api';
+import type { CustomHostSettings, ProxySettings } from '@kbn/actions-utils';
 
 const createAxiosInstanceMock = axios.create as jest.Mock;
 const axiosInstanceMock = jest.fn();
@@ -96,6 +95,7 @@ describe('sendEmailGraphApi', () => {
               "list": Array [],
               "map": Object {},
             },
+            "agentKeepAliveTimeoutBuffer": 1000,
             "defaultPort": 443,
             "freeSockets": Object {},
             "keepAlive": false,
@@ -105,8 +105,10 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "defaultPort": 443,
               "noDelay": true,
               "path": null,
+              "protocol": "https:",
               "rejectUnauthorized": true,
             },
             "protocol": "https:",
@@ -195,6 +197,7 @@ describe('sendEmailGraphApi', () => {
               "list": Array [],
               "map": Object {},
             },
+            "agentKeepAliveTimeoutBuffer": 1000,
             "defaultPort": 443,
             "freeSockets": Object {},
             "keepAlive": false,
@@ -204,8 +207,10 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "defaultPort": 443,
               "noDelay": true,
               "path": null,
+              "protocol": "https:",
               "rejectUnauthorized": true,
             },
             "protocol": "https:",
@@ -293,6 +298,7 @@ describe('sendEmailGraphApi', () => {
               "list": Array [],
               "map": Object {},
             },
+            "agentKeepAliveTimeoutBuffer": 1000,
             "defaultPort": 443,
             "freeSockets": Object {},
             "keepAlive": false,
@@ -302,8 +308,10 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "defaultPort": 443,
               "noDelay": true,
               "path": null,
+              "protocol": "https:",
               "rejectUnauthorized": true,
             },
             "protocol": "https:",

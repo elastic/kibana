@@ -789,6 +789,7 @@ describe('Actions Plugin', () => {
             isSystemActionType: false,
             validate: { params: expect.any(Object) },
             isDeprecated: false,
+            source: 'stack',
           },
         ]);
 

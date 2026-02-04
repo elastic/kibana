@@ -71,6 +71,7 @@ const DashboardMigrationsUploadMissingPanelContent =
         telemetry.reportSetupMigrationOpenResources({
           migrationId: migrationStats.id,
           missingResourcesCount: missingResources.length,
+          vendor: migrationStats.vendor,
         });
       }, [migrationStats, openFlyout, telemetry, missingResources.length]);
 

@@ -171,7 +171,11 @@ describe('utils', () => {
         message: { type: 'match_only_text' },
       };
 
-      const result = buildUpsertStreamRequestPayload(wiredDefinition, mockSteps, updatedFields);
+      const result = buildUpsertStreamRequestPayload(
+        wiredDefinition,
+        convertUIStepsToDSL(mockSteps),
+        updatedFields
+      );
 
       expect(result).toEqual({
         ingest: {
@@ -191,7 +195,11 @@ describe('utils', () => {
         severity: { type: 'keyword' },
       };
 
-      const result = buildUpsertStreamRequestPayload(classicDefinition, mockSteps, overrides);
+      const result = buildUpsertStreamRequestPayload(
+        classicDefinition,
+        convertUIStepsToDSL(mockSteps),
+        overrides
+      );
 
       expect(result).toEqual({
         ingest: {

@@ -1,0 +1,4922 @@
+{
+  "lastModified": "2026-01-30T09:07:56.564Z",
+  "sha1": "303d49beaf118be73f52548649b8074a94722d82",
+  "tests": [
+    {
+      "id": "7a50a1b508e10f4-3be34281d1d9c2c",
+      "title": "Cross-compatibility - Append Processor should append a value to an existing array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/append.spec.ts",
+        "line": 15,
+        "column": 10
+      }
+    },
+    {
+      "id": "7a50a1b508e10f4-21c0fb5576c03ee",
+      "title": "Cross-compatibility - Append Processor should append multiple values to a non-existent field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/append.spec.ts",
+        "line": 40,
+        "column": 10
+      }
+    },
+    {
+      "id": "7a50a1b508e10f4-5a05a0173f4be88",
+      "title": "Cross-compatibility - Append Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/append.spec.ts",
+        "line": 79,
+        "column": 12
+      }
+    },
+    {
+      "id": "7a50a1b508e10f4-dee6afbbf9a654b",
+      "title": "Cross-compatibility - Append Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/append.spec.ts",
+        "line": 79,
+        "column": 12
+      }
+    },
+    {
+      "id": "7a50a1b508e10f4-2b8287590f76c75",
+      "title": "Cross-compatibility - Append Processor should result in an array in ingest, but a scalar in ES|QL for a single value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/append.spec.ts",
+        "line": 106,
+        "column": 10
+      }
+    },
+    {
+      "id": "7a50a1b508e10f4-93a5b018a492b68",
+      "title": "Cross-compatibility - Append Processor should result in an array in ingest, but a scalar in ES|QL when deduplicating to a single value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/append.spec.ts",
+        "line": 135,
+        "column": 10
+      }
+    },
+    {
+      "id": "776db5dfe5b5e43-3a5ee0d3ae34831",
+      "title": "Cross-compatibility - Concat Processor should concatenate fields and literals in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/concat.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "776db5dfe5b5e43-985d24250dcf5f8",
+      "title": "Cross-compatibility - Concat Processor should concatenate fields and literals with a where clause in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/concat.spec.ts",
+        "line": 65,
+        "column": 10
+      }
+    },
+    {
+      "id": "776db5dfe5b5e43-e00d389382330f0",
+      "title": "Cross-compatibility - Concat Processor should concatenate fields and literals with ignore_missing in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/concat.spec.ts",
+        "line": 112,
+        "column": 10
+      }
+    },
+    {
+      "id": "776db5dfe5b5e43-14d5484b1c66edf",
+      "title": "Cross-compatibility - Concat Processor should not concatenate fields and literals with ignore_missing false and some fields missing in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/concat.spec.ts",
+        "line": 163,
+        "column": 10
+      }
+    },
+    {
+      "id": "1d73432ea89c1bb-da4e5c5a7590fee",
+      "title": "Cross-compatibility - Convert Processor should convert a field to a different type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/convert.spec.ts",
+        "line": 15,
+        "column": 10
+      }
+    },
+    {
+      "id": "1d73432ea89c1bb-70690c33c4c2b97",
+      "title": "Cross-compatibility - Convert Processor should convert a field to a different type into a the target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/convert.spec.ts",
+        "line": 42,
+        "column": 10
+      }
+    },
+    {
+      "id": "1d73432ea89c1bb-b08deb8a7646996",
+      "title": "Cross-compatibility - Convert Processor should convert a field to a different type into a the target field with a where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/convert.spec.ts",
+        "line": 77,
+        "column": 10
+      }
+    },
+    {
+      "id": "1d73432ea89c1bb-1c09741bc91e2a8",
+      "title": "Cross-compatibility - Convert Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/convert.spec.ts",
+        "line": 131,
+        "column": 12
+      }
+    },
+    {
+      "id": "1d73432ea89c1bb-f6c7fbdb8ac112a",
+      "title": "Cross-compatibility - Convert Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/convert.spec.ts",
+        "line": 131,
+        "column": 12
+      }
+    },
+    {
+      "id": "0cd771dce9a6272-05605ebbe155bba",
+      "title": "Cross-compatibility - Date Processor should parse a date with a single format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
+        "line": 15,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cd771dce9a6272-bcf5343f76a106c",
+      "title": "Cross-compatibility - Date Processor should parse a date with multiple formats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
+        "line": 45,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cd771dce9a6272-6f6f483401e0fd3",
+      "title": "Cross-compatibility - Date Processor should use a different output format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
+        "line": 80,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cd771dce9a6272-d3fc2ed2b06d7d9",
+      "title": "Cross-compatibility - Date Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
+        "line": 123,
+        "column": 12
+      }
+    },
+    {
+      "id": "0cd771dce9a6272-d4386758a95c6c9",
+      "title": "Cross-compatibility - Date Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
+        "line": 123,
+        "column": 12
+      }
+    },
+    {
+      "id": "0cd771dce9a6272-270592fa014db22",
+      "title": "Cross-compatibility - Date Processor should parse the first matching among a list of input formats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
+        "line": 151,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cd771dce9a6272-1e61209a4d7a319",
+      "title": "Cross-compatibility - Date Processor should add error in ingest, but ES|QL ignores the document when parsing fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
+        "line": 199,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cd771dce9a6272-672f2228d750d48",
+      "title": "Cross-compatibility - Date Processor should parse a date with locale and timezone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
+        "line": 231,
+        "column": 10
+      }
+    },
+    {
+      "id": "fea030b8f9b60d7-4fb0273c079e337",
+      "title": "Cross-compatibility - Dissect Processor should correctly parse a log line with the dissect processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
+        "line": 15,
+        "column": 10
+      }
+    },
+    {
+      "id": "fea030b8f9b60d7-cfe89bb892ed465",
+      "title": "Cross-compatibility - Dissect Processor should support append_separator in ingest as well as in ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
+        "line": 47,
+        "column": 10
+      }
+    },
+    {
+      "id": "fea030b8f9b60d7-bfd26479ba93265",
+      "title": "Cross-compatibility - Dissect Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
+        "line": 94,
+        "column": 12
+      }
+    },
+    {
+      "id": "fea030b8f9b60d7-dcbd1cf5fc5ad46",
+      "title": "Cross-compatibility - Dissect Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
+        "line": 94,
+        "column": 12
+      }
+    },
+    {
+      "id": "fea030b8f9b60d7-03e6b961790ec7a",
+      "title": "Cross-compatibility - Dissect Processor should leave the source field intact if source field name is not present in pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
+        "line": 118,
+        "column": 10
+      }
+    },
+    {
+      "id": "fea030b8f9b60d7-97da91adf0b0750",
+      "title": "Cross-compatibility - Dissect Processor should override the source field if source field name is present in pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
+        "line": 167,
+        "column": 10
+      }
+    },
+    {
+      "id": "fea030b8f9b60d7-c598558b297046b",
+      "title": "Cross-compatibility - Dissect Processor shout not process/output the document when source field is missing and ignore_missing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
+        "line": 215,
+        "column": 10
+      }
+    },
+    {
+      "id": "fea030b8f9b60d7-220027f6ef7658c",
+      "title": "Cross-compatibility - Dissect Processor should support where clause both in ingest as well as in ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
+        "line": 246,
+        "column": 10
+      }
+    },
+    {
+      "id": "fea030b8f9b60d7-d61ef386e24e465",
+      "title": "Cross-compatibility - Dissect Processor should handle pattern matching failures differently - ingest throws errors while ES|QL returns null columns for dissected fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
+        "line": 295,
+        "column": 10
+      }
+    },
+    {
+      "id": "fea030b8f9b60d7-d936de4fcf49874",
+      "title": "Cross-compatibility - Dissect Processor should handle complete pattern mismatches differently - ingest throws errors while ES|QL returns null columns for dissected fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
+        "line": 350,
+        "column": 10
+      }
+    },
+    {
+      "id": "fea030b8f9b60d7-4f5e24d7e52beb2",
+      "title": "Cross-compatibility - Dissect Processor should handle explicitly null source field values differently between transpilers (ignore_missing=true)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
+        "line": 405,
+        "column": 10
+      }
+    },
+    {
+      "id": "dea5f43dbc8c56c-48d57c65b128534",
+      "title": "Cross-compatibility - Drop Document Processor should drop documents matching where condition in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/drop_document.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "dea5f43dbc8c56c-032daf1a21e73b7",
+      "title": "Cross-compatibility - Drop Document Processor should raise a runtime error when where is omitted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/drop_document.spec.ts",
+        "line": 72,
+        "column": 12
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-def917dabb846e7",
+      "title": "Cross-compatibility - Filter Conditions should handle eq (equals) filter condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-3be12e1cc4933e0",
+      "title": "Cross-compatibility - Filter Conditions should handle neq (not equals) filter condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 66,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-258bd4de3cc0009",
+      "title": "Cross-compatibility - Filter Conditions should handle gt (greater than) filter condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 119,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-ac155606d09025e",
+      "title": "Cross-compatibility - Filter Conditions should handle gte (greater than or equal) filter condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 174,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-e00e60c1fa058ef",
+      "title": "Cross-compatibility - Filter Conditions should handle lt (less than) filter condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 227,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-8ee7725b8a16f3b",
+      "title": "Cross-compatibility - Filter Conditions should handle lte (less than or equal) filter condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 282,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-d9c376302fff80c",
+      "title": "Cross-compatibility - Filter Conditions should handle exists filter condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 332,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-f9e92d536193aaf",
+      "title": "Cross-compatibility - Filter Conditions should handle range filter condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 388,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-c8014bbd2668fd1",
+      "title": "Cross-compatibility - Filter Conditions should handle contains filter condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 451,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-f79de17a9fb8d51",
+      "title": "Cross-compatibility - Filter Conditions should handle startsWith filter condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 557,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-8a749fed0a41cbc",
+      "title": "Cross-compatibility - Filter Conditions should handle endsWith filter condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 624,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-0b02f378bcec5be",
+      "title": "Cross-compatibility - Filter Conditions should handle multiple filter conditions with AND",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 691,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-ebfdaecd828b700",
+      "title": "Cross-compatibility - Filter Conditions should handle NOT condition with contains filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 768,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-459eb5af534fbe8",
+      "title": "Cross-compatibility - Filter Conditions should handle OR condition with multiple patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 834,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-a35ebdafd0ed170",
+      "title": "Cross-compatibility - Filter Conditions should handle includes filter condition with string array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 906,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-fcef1b15edfd7cb",
+      "title": "Cross-compatibility - Filter Conditions should handle includes with NOT condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 966,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-a3031cf95d6d234",
+      "title": "Cross-compatibility - Filter Conditions should handle special characters in patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 1020,
+        "column": 10
+      }
+    },
+    {
+      "id": "edf87fd95fcb890-e380cdf23bb07cd",
+      "title": "Cross-compatibility - Filter Conditions should handle single-element arrays in filter conditions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 1087,
+        "column": 10
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-97fb765b3076eb3",
+      "title": "Cross-compatibility - Grok Processor should correctly parse a log line with the grok processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 15,
+        "column": 10
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-4e2f8835fabd789",
+      "title": "Cross-compatibility - Grok Processor should support where clause both in ingest as wel as in ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 44,
+        "column": 10
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-2791ed34d0e7335",
+      "title": "Cross-compatibility - Grok Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 103,
+        "column": 12
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-30be0e61db59f48",
+      "title": "Cross-compatibility - Grok Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 103,
+        "column": 12
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-65ad302af9abbda",
+      "title": "Cross-compatibility - Grok Processor should handle custom oniguruma patterns in both ingest and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 127,
+        "column": 10
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-489ed16f69b10f3",
+      "title": "Cross-compatibility - Grok Processor should handle same field captured multiple times in both ingest and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 175,
+        "column": 10
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-d68421c145768e4",
+      "title": "Cross-compatibility - Grok Processor should support special character in grok regex patterns in both ingest and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 204,
+        "column": 10
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-33d4ee28ae846d5",
+      "title": "Cross-compatibility - Grok Processor should leave the source field intact if source field name is not present in pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 238,
+        "column": 10
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-1061608f4fbba71",
+      "title": "Cross-compatibility - Grok Processor should override the source field if source field name is present in pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 271,
+        "column": 10
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-c0463db15d160cb",
+      "title": "Cross-compatibility - Grok Processor should coerce int/float values to int/float when mapped type is different than the extracted type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 307,
+        "column": 10
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-c846bdbabaeceb8",
+      "title": "Cross-compatibility - Grok Processor should maintain order of documents consistently when using where clause with ignore_missing: true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 382,
+        "column": 10
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-fa35b430b8ebb8e",
+      "title": "Cross-compatibility - Grok Processor should filter out the document in ingest as well as in ES|QL when ignore_missing is false and the field is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 426,
+        "column": 10
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-2a9f17560da487e",
+      "title": "Cross-compatibility - Grok Processor should nullify ungroked fields in the doc when only partial groking is possible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 459,
+        "column": 10
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-2f05143030ddc4a",
+      "title": "Cross-compatibility - Grok Processor should nullify ungroked fields when no groking is possible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 502,
+        "column": 10
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-8b3182e7810d765",
+      "title": "Cross-compatibility - Grok Processor should inline pattern definitions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt",
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 535,
+        "column": 10
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-b312f80a29ffc69",
+      "title": "Cross-compatibility - Grok Processor should inline nested pattern definitions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt",
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 568,
+        "column": 10
+      }
+    },
+    {
+      "id": "1f52ad5e337ad60-bdc76f325e873ca",
+      "title": "Cross-compatibility - Grok Processor should inline pattern definitions with regex",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt",
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
+        "line": 604,
+        "column": 10
+      }
+    },
+    {
+      "id": "318109f8c2b1160-eb9cc8333cfc9dd",
+      "title": "Cross-compatibility - Join Processor should join fields with a delimiter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/join.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "318109f8c2b1160-d686547afc124aa",
+      "title": "Cross-compatibility - Join Processor should join fields with a delimiter when using where clause",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/join.spec.ts",
+        "line": 47,
+        "column": 10
+      }
+    },
+    {
+      "id": "318109f8c2b1160-18536f45c3889aa",
+      "title": "Cross-compatibility - Join Processor should not join fields with a delimiter when field is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/join.spec.ts",
+        "line": 98,
+        "column": 10
+      }
+    },
+    {
+      "id": "318109f8c2b1160-e635e66ee34207e",
+      "title": "Cross-compatibility - Join Processor should join fields with a delimiter when field is missing and ignore_missing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/join.spec.ts",
+        "line": 144,
+        "column": 10
+      }
+    },
+    {
+      "id": "03549666dbe4a8a-2dbaedb8e69eac6",
+      "title": "Cross-compatibility - Lowercase Processor should lowercase a field in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/lowercase.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "03549666dbe4a8a-fa68262885c5561",
+      "title": "Cross-compatibility - Lowercase Processor should lowercase a field into a target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/lowercase.spec.ts",
+        "line": 54,
+        "column": 10
+      }
+    },
+    {
+      "id": "03549666dbe4a8a-145ffabe76de5bb",
+      "title": "Cross-compatibility - Lowercase Processor should lowercase a field with a where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/lowercase.spec.ts",
+        "line": 84,
+        "column": 10
+      }
+    },
+    {
+      "id": "a50399d58840835-93db52c07b658b3",
+      "title": "Cross-compatibility - Math Processor should compute multiplication of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 16,
+        "column": 10
+      }
+    },
+    {
+      "id": "a50399d58840835-933193ef8d062eb",
+      "title": "Cross-compatibility - Math Processor should compute with nested field paths",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 41,
+        "column": 10
+      }
+    },
+    {
+      "id": "a50399d58840835-392a91b346d9b32",
+      "title": "Cross-compatibility - Math Processor integer division - both engines truncate for integer-typed fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 71,
+        "column": 10
+      }
+    },
+    {
+      "id": "a50399d58840835-5829cb3a8c35cc8",
+      "title": "Cross-compatibility - Math Processor should compute log (natural log) consistently",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 110,
+        "column": 10
+      }
+    },
+    {
+      "id": "a50399d58840835-21e74481b9e9cd3",
+      "title": "Cross-compatibility - Math Processor should compute neq (not equal) consistently",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 143,
+        "column": 10
+      }
+    },
+    {
+      "id": "a50399d58840835-d4ecd8c6776df7c",
+      "title": "Cross-compatibility - Math Processor should compute gt (greater than) consistently",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 177,
+        "column": 10
+      }
+    },
+    {
+      "id": "a50399d58840835-32f7638a198f45c",
+      "title": "Cross-compatibility - Math Processor should compute eq (equality) consistently",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 211,
+        "column": 10
+      }
+    },
+    {
+      "id": "a50399d58840835-dd2729d603d77e3",
+      "title": "Cross-compatibility - Math Processor should validate all supported functions are available in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 244,
+        "column": 10
+      }
+    },
+    {
+      "id": "a50399d58840835-afdbb84c8bf71cd",
+      "title": "Cross-compatibility - Math Processor should consistently reject unsupported functions and invalid syntax in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 317,
+        "column": 10
+      }
+    },
+    {
+      "id": "a50399d58840835-cd8de644351dd46",
+      "title": "Cross-compatibility - Math Processor INCOMPATIBLE: division by zero - Painless throws error, ES|QL returns null (Infinity)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 348,
+        "column": 10
+      }
+    },
+    {
+      "id": "a50399d58840835-93a3bf60486ee27",
+      "title": "Cross-compatibility - Math Processor INCOMPATIBLE: log of zero - Painless returns \"-Infinity\" string, ES|QL returns null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 398,
+        "column": 10
+      }
+    },
+    {
+      "id": "d299bffe8005f0a-7876b9a457b58a0",
+      "title": "Cross-compatibility - Multi-Step Pipeline with Operator Coverage should process web server access logs with comprehensive operator and processor coverage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/multi_step.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "a4680a65c2cc2c2-fcfaa8c15cd7dfa",
+      "title": "Cross-compatibility - Operator Coercion eq boolean (strict): true matches boolean true, not string \"true\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
+        "line": 15,
+        "column": 10
+      }
+    },
+    {
+      "id": "a4680a65c2cc2c2-a2234e5ae5852ee",
+      "title": "Cross-compatibility - Operator Coercion eq numeric vs string against string doc: both 450 and \"450\" match",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
+        "line": 52,
+        "column": 10
+      }
+    },
+    {
+      "id": "a4680a65c2cc2c2-251e507c373d077",
+      "title": "Cross-compatibility - Operator Coercion eq numeric vs string against numeric doc: both 450 and \"450\" match",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
+        "line": 96,
+        "column": 10
+      }
+    },
+    {
+      "id": "a4680a65c2cc2c2-937247eaf4502b7",
+      "title": "Cross-compatibility - Operator Coercion contains(\"450\") matches both string and numeric 450",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
+        "line": 141,
+        "column": 10
+      }
+    },
+    {
+      "id": "a4680a65c2cc2c2-229918e37bbb2b0",
+      "title": "Cross-compatibility - Operator Coercion range (string bounds) matches both numeric 8500 and string '8500'",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
+        "line": 177,
+        "column": 10
+      }
+    },
+    {
+      "id": "a4680a65c2cc2c2-ce6d65fab3408b2",
+      "title": "Cross-compatibility - Operator Coercion range (numeric bounds) matches both numeric 8500 and string \"8500\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
+        "line": 216,
+        "column": 10
+      }
+    },
+    {
+      "id": "3cb715f2a60e60f-b13a5d5cb3a476e",
+      "title": "Cross-compatibility - RemoveByPrefix Processor should remove nested fields in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/remove_by_prefix.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "3cb715f2a60e60f-be4066baf102d74",
+      "title": "Cross-compatibility - RemoveByPrefix Processor should handle flattened field structure in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/remove_by_prefix.spec.ts",
+        "line": 64,
+        "column": 12
+      }
+    },
+    {
+      "id": "3cb715f2a60e60f-9a7ef6a26ff7b64",
+      "title": "Cross-compatibility - RemoveByPrefix Processor should consistently reject {{ }} template syntax in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/remove_by_prefix.spec.ts",
+        "line": 118,
+        "column": 14
+      }
+    },
+    {
+      "id": "3cb715f2a60e60f-86d10540f71a019",
+      "title": "Cross-compatibility - RemoveByPrefix Processor should consistently reject {{{ }}} template syntax in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/remove_by_prefix.spec.ts",
+        "line": 118,
+        "column": 14
+      }
+    },
+    {
+      "id": "3cb715f2a60e60f-74e759427e1fbae",
+      "title": "Cross-compatibility - RemoveByPrefix Processor should consistently remove parent field and nested fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/remove_by_prefix.spec.ts",
+        "line": 141,
+        "column": 12
+      }
+    },
+    {
+      "id": "c5ffeec812d599b-45ae9b4ec861fa1",
+      "title": "Cross-compatibility - Rename Processor should rename a field when override is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/rename.spec.ts",
+        "line": 15,
+        "column": 10
+      }
+    },
+    {
+      "id": "c5ffeec812d599b-ef6dad51d6071a1",
+      "title": "Cross-compatibility - Rename Processor should not process the document when override is false and target field exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/rename.spec.ts",
+        "line": 46,
+        "column": 10
+      }
+    },
+    {
+      "id": "c5ffeec812d599b-59069d42be735e3",
+      "title": "Cross-compatibility - Rename Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/rename.spec.ts",
+        "line": 91,
+        "column": 12
+      }
+    },
+    {
+      "id": "c5ffeec812d599b-b8c4f01edfbc3e3",
+      "title": "Cross-compatibility - Rename Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/rename.spec.ts",
+        "line": 91,
+        "column": 12
+      }
+    },
+    {
+      "id": "c5ffeec812d599b-b1302c054ce2524",
+      "title": "Cross-compatibility - Rename Processor should be handled by both ingest and ES|QL when field is missing and ignore_missing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/rename.spec.ts",
+        "line": 115,
+        "column": 10
+      }
+    },
+    {
+      "id": "b3752b4b7ca3753-a3272bb1ed29a98",
+      "title": "Cross-compatibility - Replace Processor should correctly replace a literal string in both Ingest Pipeline and ES|QL (in-place)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
+        "line": 15,
+        "column": 10
+      }
+    },
+    {
+      "id": "b3752b4b7ca3753-c6a2533020ac934",
+      "title": "Cross-compatibility - Replace Processor should correctly replace a literal string to target field in both Ingest Pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
+        "line": 44,
+        "column": 10
+      }
+    },
+    {
+      "id": "b3752b4b7ca3753-9e4b9127355e938",
+      "title": "Cross-compatibility - Replace Processor should correctly replace using regex pattern in both Ingest Pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
+        "line": 75,
+        "column": 10
+      }
+    },
+    {
+      "id": "b3752b4b7ca3753-18214e496e97a1a",
+      "title": "Cross-compatibility - Replace Processor should correctly replace using regex with capture groups in both Ingest Pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
+        "line": 104,
+        "column": 10
+      }
+    },
+    {
+      "id": "b3752b4b7ca3753-970cdb5969597ff",
+      "title": "Cross-compatibility - Replace Processor should support conditional replacement with where clause in both Ingest Pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
+        "line": 133,
+        "column": 10
+      }
+    },
+    {
+      "id": "b3752b4b7ca3753-f0267cd25d33e25",
+      "title": "Cross-compatibility - Replace Processor should fail when source field is of non-string type (e.g., numeric) in both Ingest Pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
+        "line": 184,
+        "column": 10
+      }
+    },
+    {
+      "id": "b3752b4b7ca3753-66faf5f1f2a29a3",
+      "title": "Cross-compatibility - Replace Processor should successfully overwrite non-string target field (e.g., numeric) in both Ingest Pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
+        "line": 222,
+        "column": 10
+      }
+    },
+    {
+      "id": "b3752b4b7ca3753-a24ded0042de4a9",
+      "title": "Cross-compatibility - Replace Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
+        "line": 269,
+        "column": 12
+      }
+    },
+    {
+      "id": "b3752b4b7ca3753-592fb94eaeb9a72",
+      "title": "Cross-compatibility - Replace Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
+        "line": 269,
+        "column": 12
+      }
+    },
+    {
+      "id": "b3752b4b7ca3753-324b506a740c3b0",
+      "title": "Cross-compatibility - Replace Processor should document multi-value array limitation: Ingest Pipeline supports arrays, ES|QL does not",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
+        "line": 298,
+        "column": 10
+      }
+    },
+    {
+      "id": "7da1882960b17a1-e3a74c98fad2619",
+      "title": "Cross-compatibility - Set Processor should set a field using a value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
+        "line": 15,
+        "column": 10
+      }
+    },
+    {
+      "id": "7da1882960b17a1-5aa7db185850547",
+      "title": "Cross-compatibility - Set Processor should set a field by copying from another field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
+        "line": 42,
+        "column": 10
+      }
+    },
+    {
+      "id": "7da1882960b17a1-3f2e200e5e9272b",
+      "title": "Cross-compatibility - Set Processor should override an existing field when override is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
+        "line": 69,
+        "column": 10
+      }
+    },
+    {
+      "id": "7da1882960b17a1-3b8f29b364d96a2",
+      "title": "Cross-compatibility - Set Processor should not override in ingest as well as in ES|QL when override is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
+        "line": 97,
+        "column": 10
+      }
+    },
+    {
+      "id": "7da1882960b17a1-44cc4f33f262653",
+      "title": "Cross-compatibility - Set Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
+        "line": 141,
+        "column": 12
+      }
+    },
+    {
+      "id": "7da1882960b17a1-0e01d33d5791116",
+      "title": "Cross-compatibility - Set Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
+        "line": 141,
+        "column": 12
+      }
+    },
+    {
+      "id": "d369ce045586e13-0c4b2805eb36ac5",
+      "title": "Cross-compatibility - Trim Processor should trim a field in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/trim.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "d369ce045586e13-1cf21647cfa5119",
+      "title": "Cross-compatibility - Trim Processor should trim a field into a target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/trim.spec.ts",
+        "line": 51,
+        "column": 10
+      }
+    },
+    {
+      "id": "d369ce045586e13-d350f8cd4f4dac8",
+      "title": "Cross-compatibility - Trim Processor should trim a field with a where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/trim.spec.ts",
+        "line": 81,
+        "column": 10
+      }
+    },
+    {
+      "id": "7e3802cb43785bd-cd9579fdf1cc6a9",
+      "title": "Cross-compatibility - Uppercase Processor should uppercase a field in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uppercase.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "7e3802cb43785bd-cb5b12298bceeda",
+      "title": "Cross-compatibility - Uppercase Processor should uppercase a field into a target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uppercase.spec.ts",
+        "line": 54,
+        "column": 10
+      }
+    },
+    {
+      "id": "7e3802cb43785bd-b477e8f6556ef23",
+      "title": "Cross-compatibility - Uppercase Processor should uppercase a field with a where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uppercase.spec.ts",
+        "line": 84,
+        "column": 10
+      }
+    },
+    {
+      "id": "fe4a4933a3033bf-99263210ec95a67",
+      "title": "Streamlang to ES|QL - Append Processor should append a value to an existing field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/append.spec.ts",
+        "line": 15,
+        "column": 10
+      }
+    },
+    {
+      "id": "fe4a4933a3033bf-fa3c433812b8428",
+      "title": "Streamlang to ES|QL - Append Processor should append a value to a non-existent field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/append.spec.ts",
+        "line": 34,
+        "column": 10
+      }
+    },
+    {
+      "id": "fe4a4933a3033bf-4b8ed8d00e52646",
+      "title": "Streamlang to ES|QL - Append Processor should not append duplicate values when allow_duplicates is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/append.spec.ts",
+        "line": 53,
+        "column": 10
+      }
+    },
+    {
+      "id": "fe4a4933a3033bf-b0b6b9c74f86512",
+      "title": "Streamlang to ES|QL - Append Processor should append duplicate values when allow_duplicates is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/append.spec.ts",
+        "line": 75,
+        "column": 10
+      }
+    },
+    {
+      "id": "fe4a4933a3033bf-e8a86096d9996cd",
+      "title": "Streamlang to ES|QL - Append Processor should not append a value when where is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/append.spec.ts",
+        "line": 97,
+        "column": 10
+      }
+    },
+    {
+      "id": "fe4a4933a3033bf-99fe8f19a661a62",
+      "title": "Streamlang to ES|QL - Append Processor results in a scalar (single value) when dedupe outputs a single value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/append.spec.ts",
+        "line": 126,
+        "column": 10
+      }
+    },
+    {
+      "id": "fe4a4933a3033bf-a2fb87857599a2d",
+      "title": "Streamlang to ES|QL - Append Processor should support nested where with not",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/append.spec.ts",
+        "line": 150,
+        "column": 10
+      }
+    },
+    {
+      "id": "fe4a4933a3033bf-ac6ff336130c8a5",
+      "title": "Streamlang to ES|QL - Append Processor should reject Mustache template syntax {{ and {{{",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/append.spec.ts",
+        "line": 182,
+        "column": 10
+      }
+    },
+    {
+      "id": "86636706926443b-759283d89e13c20",
+      "title": "Streamlang to ES|QL - Concat Processor should concatenate fields and literals",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/concat.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "86636706926443b-a6b768226681685",
+      "title": "Streamlang to ES|QL - Concat Processor should concatenate fields and literals with a where clause",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/concat.spec.ts",
+        "line": 43,
+        "column": 10
+      }
+    },
+    {
+      "id": "86636706926443b-147b9bb3c338c66",
+      "title": "Streamlang to ES|QL - Concat Processor should concatenate fields and literals with ignore_missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/concat.spec.ts",
+        "line": 83,
+        "column": 10
+      }
+    },
+    {
+      "id": "86636706926443b-b995b1810122af9",
+      "title": "Streamlang to ES|QL - Concat Processor should not concatenate fields if ignore_missing is false and some fields are missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/concat.spec.ts",
+        "line": 120,
+        "column": 10
+      }
+    },
+    {
+      "id": "3c78db2f3b26ebd-12523b9dc2786a8",
+      "title": "Streamlang to ES|QL - Convert Processor should convert a field to a different type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/convert.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "3c78db2f3b26ebd-54242dfda0f8ec1",
+      "title": "Streamlang to ES|QL - Convert Processor should reject Mustache template syntax {{ and {{{",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/convert.spec.ts",
+        "line": 41,
+        "column": 10
+      }
+    },
+    {
+      "id": "3c78db2f3b26ebd-170875c032ff4bb",
+      "title": "Streamlang to ES|QL - Convert Processor should convert a field to a different type into a the target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/convert.spec.ts",
+        "line": 59,
+        "column": 10
+      }
+    },
+    {
+      "id": "3c78db2f3b26ebd-8e728db4de8f8fc",
+      "title": "Streamlang to ES|QL - Convert Processor should throw error if to and where are present but from is the same as to",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/convert.spec.ts",
+        "line": 90,
+        "column": 10
+      }
+    },
+    {
+      "id": "b8df263566f9f16-78765352aca168d",
+      "title": "Streamlang to ES|QL - Date Processor should parse a date and set it to @timestamp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@timestamp",
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/date.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "b8df263566f9f16-4ae1708afcd7149",
+      "title": "Streamlang to ES|QL - Date Processor should parse a date with multiple formats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/date.spec.ts",
+        "line": 37,
+        "column": 10
+      }
+    },
+    {
+      "id": "b8df263566f9f16-aa42a071a53b297",
+      "title": "Streamlang to ES|QL - Date Processor should use a different to field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/date.spec.ts",
+        "line": 65,
+        "column": 10
+      }
+    },
+    {
+      "id": "b8df263566f9f16-16c013cdee55a15",
+      "title": "Streamlang to ES|QL - Date Processor should use a different output format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/date.spec.ts",
+        "line": 88,
+        "column": 10
+      }
+    },
+    {
+      "id": "b8df263566f9f16-fd0c0c4280097f6",
+      "title": "Streamlang to ES|QL - Date Processor should not parse a date when where is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/date.spec.ts",
+        "line": 111,
+        "column": 10
+      }
+    },
+    {
+      "id": "b8df263566f9f16-0a0d02adc276a31",
+      "title": "Streamlang to ES|QL - Date Processor should leave source unchanged in case of error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/date.spec.ts",
+        "line": 144,
+        "column": 10
+      }
+    },
+    {
+      "id": "b8df263566f9f16-61d18c3bdc58b46",
+      "title": "Streamlang to ES|QL - Date Processor should reject Mustache template syntax {{ and {{{",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/date.spec.ts",
+        "line": 167,
+        "column": 10
+      }
+    },
+    {
+      "id": "5fbe2b736dc2a02-ae2dd592f3e508f",
+      "title": "Streamlang to ES|QL - Dissect Processor should correctly parse a log line with the dissect processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
+        "line": 15,
+        "column": 10
+      }
+    },
+    {
+      "id": "5fbe2b736dc2a02-474653ea4e4b1d9",
+      "title": "Streamlang to ES|QL - Dissect Processor should ignore dissected fields when ignore_missing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
+        "line": 52,
+        "column": 10
+      }
+    },
+    {
+      "id": "5fbe2b736dc2a02-b724cfb39fd4085",
+      "title": "Streamlang to ES|QL - Dissect Processor should filter the document out when ignore_missing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
+        "line": 106,
+        "column": 10
+      }
+    },
+    {
+      "id": "5fbe2b736dc2a02-72c9ea1eb1ac728",
+      "title": "Streamlang to ES|QL - Dissect Processor should use append_separator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
+        "line": 133,
+        "column": 10
+      }
+    },
+    {
+      "id": "5fbe2b736dc2a02-559491e7036e890",
+      "title": "Streamlang to ES|QL - Dissect Processor should not dissect when where is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
+        "line": 160,
+        "column": 10
+      }
+    },
+    {
+      "id": "5fbe2b736dc2a02-47afa6197f2bce5",
+      "title": "Streamlang to ES|QL - Dissect Processor should handle field type mismatches gracefully",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
+        "line": 213,
+        "column": 10
+      }
+    },
+    {
+      "id": "5fbe2b736dc2a02-cb1c0cd90956e1d",
+      "title": "Streamlang to ES|QL - Dissect Processor should dissect only when both ignore_missing and where conditions match",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
+        "line": 315,
+        "column": 10
+      }
+    },
+    {
+      "id": "5fbe2b736dc2a02-6042055edee918d",
+      "title": "Streamlang to ES|QL - Dissect Processor should handle an exhaustive dissect pattern with modifiers and mixed documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
+        "line": 401,
+        "column": 10
+      }
+    },
+    {
+      "id": "5fbe2b736dc2a02-45d7885983178a9",
+      "title": "Streamlang to ES|QL - Dissect Processor should not be able to retain ingested precision if field is mapped as long",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
+        "line": 509,
+        "column": 10
+      }
+    },
+    {
+      "id": "5fbe2b736dc2a02-ab460b40a80807c",
+      "title": "Streamlang to ES|QL - Dissect Processor should reject Mustache template syntax {{ and {{{",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
+        "line": 548,
+        "column": 10
+      }
+    },
+    {
+      "id": "2fa85bca5154bb7-f4c7970a78250e1",
+      "title": "Streamlang to ES|QL - Drop Document Processor should drop a document matching where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/drop_document.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "525ab2d1aa4c0d7-efb87aa60cf0d0e",
+      "title": "Streamlang to ES|QL - Grok Processor should correctly parse a log line with the grok processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
+        "line": 15,
+        "column": 10
+      }
+    },
+    {
+      "id": "525ab2d1aa4c0d7-9ef858d967619d5",
+      "title": "Streamlang to ES|QL - Grok Processor should creates a multi-valued column if filed is repeated in a pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
+        "line": 47,
+        "column": 10
+      }
+    },
+    {
+      "id": "525ab2d1aa4c0d7-fa92b7e32a9aebe",
+      "title": "Streamlang to ES|QL - Grok Processor should produce a column when grok pattern does not match",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
+        "line": 69,
+        "column": 10
+      }
+    },
+    {
+      "id": "525ab2d1aa4c0d7-51d1b0b7f86e9ab",
+      "title": "Streamlang to ES|QL - Grok Processor should grok an alias-only pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
+        "line": 91,
+        "column": 10
+      }
+    },
+    {
+      "id": "525ab2d1aa4c0d7-39ec448335b0e5b",
+      "title": "Streamlang to ES|QL - Grok Processor should ignore missing field when ignore_missing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
+        "line": 133,
+        "column": 10
+      }
+    },
+    {
+      "id": "525ab2d1aa4c0d7-0d76a31690c137a",
+      "title": "Streamlang to ES|QL - Grok Processor should fail if field is missing and ignore_missing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
+        "line": 173,
+        "column": 10
+      }
+    },
+    {
+      "id": "525ab2d1aa4c0d7-a306c99739045bf",
+      "title": "Streamlang to ES|QL - Grok Processor should not grok when where is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
+        "line": 195,
+        "column": 10
+      }
+    },
+    {
+      "id": "525ab2d1aa4c0d7-9df5b5f8eb06be0",
+      "title": "Streamlang to ES|QL - Grok Processor should handle field type mismatches gracefully (pre-existing numeric vs GROK string output)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
+        "line": 245,
+        "column": 10
+      }
+    },
+    {
+      "id": "525ab2d1aa4c0d7-b847c0fb2acd9a9",
+      "title": "Streamlang to ES|QL - Grok Processor should grok only when both ignore_missing and where conditions match (fork logic)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
+        "line": 308,
+        "column": 10
+      }
+    },
+    {
+      "id": "525ab2d1aa4c0d7-2136ff0f0341a4a",
+      "title": "Streamlang to ES|QL - Grok Processor should handle exhaustive pattern with mixed overrides, intact values, typed fields, and skip branches without type conflicts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
+        "line": 379,
+        "column": 10
+      }
+    },
+    {
+      "id": "525ab2d1aa4c0d7-dda18764bb7c3c6",
+      "title": "Streamlang to ES|QL - Grok Processor should not be able to retain ingested precision if field is mapped as long",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
+        "line": 500,
+        "column": 10
+      }
+    },
+    {
+      "id": "525ab2d1aa4c0d7-5ee1d192db1b834",
+      "title": "Streamlang to ES|QL - Grok Processor should reject Mustache template syntax {{ and {{{",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
+        "line": 539,
+        "column": 10
+      }
+    },
+    {
+      "id": "525ab2d1aa4c0d7-9f6f421263ca82b",
+      "title": "Streamlang to ES|QL - Grok Processor should parse Android log line with regex pattern containing escaped dot",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
+        "line": 560,
+        "column": 10
+      }
+    },
+    {
+      "id": "fb1c80b91b41c88-f6a5cbf50f5f1c1",
+      "title": "Streamlang to ES|QL - Lowercase Processor should lowercase a field in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/lowercase.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "fb1c80b91b41c88-62f6bbec1fcfd65",
+      "title": "Streamlang to ES|QL - Lowercase Processor should lowercase a field into a target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/lowercase.spec.ts",
+        "line": 37,
+        "column": 10
+      }
+    },
+    {
+      "id": "fb1c80b91b41c88-fca0ce62144a1fc",
+      "title": "Streamlang to ES|QL - Lowercase Processor should lowercase a field with a where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/lowercase.spec.ts",
+        "line": 61,
+        "column": 10
+      }
+    },
+    {
+      "id": "fb1c80b91b41c88-159322d6f10d643",
+      "title": "Streamlang to ES|QL - Lowercase Processor should lowercase a field into a target field with a where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/lowercase.spec.ts",
+        "line": 91,
+        "column": 10
+      }
+    },
+    {
+      "id": "0f9ec72879e99ce-3b9fe457a49518f",
+      "title": "Streamlang to ES|QL - Manual Ingest Pipeline Processor (Not Supported) should handle manual_ingest_pipeline by showing warning message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/manual_ingest_pipeline.spec.ts",
+        "line": 18,
+        "column": 12
+      }
+    },
+    {
+      "id": "0f9ec72879e99ce-bb67c0498650290",
+      "title": "Streamlang to ES|QL - Manual Ingest Pipeline Processor (Not Supported) should handle manual_ingest_pipeline with where condition (condition ignored)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/manual_ingest_pipeline.spec.ts",
+        "line": 70,
+        "column": 12
+      }
+    },
+    {
+      "id": "0f9ec72879e99ce-04be8fd7b26eb29",
+      "title": "Streamlang to ES|QL - Manual Ingest Pipeline Processor (Not Supported) should generate valid ES|QL when mixed with supported processors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/manual_ingest_pipeline.spec.ts",
+        "line": 120,
+        "column": 12
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-447c259c3944356",
+      "title": "Streamlang to ES|QL - Math Processor should compute multiplication of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 15,
+        "column": 10
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-4f3aed0cfc82a69",
+      "title": "Streamlang to ES|QL - Math Processor should compute addition of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 41,
+        "column": 10
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-4562bde17c41331",
+      "title": "Streamlang to ES|QL - Math Processor should compute subtraction of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 67,
+        "column": 10
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-ed29ca177a120f0",
+      "title": "Streamlang to ES|QL - Math Processor should compute division of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 93,
+        "column": 10
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-1c2e74ab0ad27ae",
+      "title": "Streamlang to ES|QL - Math Processor should compute with nested field paths",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 120,
+        "column": 10
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-0393a6fee979d37",
+      "title": "Streamlang to ES|QL - Math Processor should compute log (natural log)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 147,
+        "column": 10
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-44d16920d63d200",
+      "title": "Streamlang to ES|QL - Math Processor should compute neq (not equal) comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 173,
+        "column": 10
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-004b9ad17239967",
+      "title": "Streamlang to ES|QL - Math Processor should compute gt (greater than) comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 207,
+        "column": 10
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-0d9fdf062c24a3a",
+      "title": "Streamlang to ES|QL - Math Processor should compute lt (less than) comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 237,
+        "column": 10
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-168e7718e21ae74",
+      "title": "Streamlang to ES|QL - Math Processor should compute eq (equality) comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 265,
+        "column": 10
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-bdfedd9a18e6f20",
+      "title": "Streamlang to ES|QL - Math Processor should only apply math when where condition is met",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 292,
+        "column": 10
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-3d15672dff64a9d",
+      "title": "Streamlang to ES|QL - Math Processor should skip calculation when ignore_missing is true and field is null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 335,
+        "column": 10
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-4a23853681940f8",
+      "title": "Streamlang to ES|QL - Math Processor should throw errors for unsupported functions and invalid syntax",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 378,
+        "column": 10
+      }
+    },
+    {
+      "id": "7e7f95f940131ba-a4103e9784a7b80",
+      "title": "Streamlang to ES|QL - RemoveByPrefix Processor should keep the parent field when it has no nested fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove_by_prefix.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e7f95f940131ba-59c33558a799279",
+      "title": "Streamlang to ES|QL - RemoveByPrefix Processor should remove nested fields (parent field removed too)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove_by_prefix.spec.ts",
+        "line": 46,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e7f95f940131ba-c92795db620bc19",
+      "title": "Streamlang to ES|QL - RemoveByPrefix Processor should work with dotted field names (flattened structure)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove_by_prefix.spec.ts",
+        "line": 89,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e7f95f940131ba-2591f2cb915f98e",
+      "title": "Streamlang to ES|QL - RemoveByPrefix Processor should reject Mustache template syntax {{ and {{{ in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove_by_prefix.spec.ts",
+        "line": 127,
+        "column": 12
+      }
+    },
+    {
+      "id": "5cc125e42a6b3b3-ac97538c02aba0d",
+      "title": "Streamlang to ES|QL - Remove Processor should remove a field with DROP",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "5cc125e42a6b3b3-7e0ab3124421b1d",
+      "title": "Streamlang to ES|QL - Remove Processor should handle ignore_missing: false (default) with DROP",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "5cc125e42a6b3b3-37c45542557894f",
+      "title": "Streamlang to ES|QL - Remove Processor should handle ignore_missing: true with DROP",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove.spec.ts",
+        "line": 65,
+        "column": 10
+      }
+    },
+    {
+      "id": "5cc125e42a6b3b3-c1e8a9d47558794",
+      "title": "Streamlang to ES|QL - Remove Processor should remove field conditionally with EVAL CASE",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove.spec.ts",
+        "line": 94,
+        "column": 10
+      }
+    },
+    {
+      "id": "5cc125e42a6b3b3-ed80430a9618619",
+      "title": "Streamlang to ES|QL - Remove Processor should reject Mustache template syntax {{ and {{{ in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove.spec.ts",
+        "line": 133,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea9ecad05982c00-92b763d63845ec8",
+      "title": "Streamlang to ES|QL - Rename Processor should rename a field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/rename.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea9ecad05982c00-9fb4d8d50eb16ad",
+      "title": "Streamlang to ES|QL - Rename Processor should handle ignore_missing: false, override: false (default options)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/rename.spec.ts",
+        "line": 40,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea9ecad05982c00-9e9ed0668c874e5",
+      "title": "Streamlang to ES|QL - Rename Processor should handle ignore_missing: true, override: false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/rename.spec.ts",
+        "line": 73,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea9ecad05982c00-02181c40a6af513",
+      "title": "Streamlang to ES|QL - Rename Processor should handle ignore_missing: false, override: true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/rename.spec.ts",
+        "line": 104,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea9ecad05982c00-7572538340d04d2",
+      "title": "Streamlang to ES|QL - Rename Processor should reject Mustache template syntax {{ and {{{ in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/rename.spec.ts",
+        "line": 134,
+        "column": 10
+      }
+    },
+    {
+      "id": "b624876300eab90-f820134013ec994",
+      "title": "Streamlang to ES|QL - Replace Processor should replace a literal string with EVAL replace() (in-place)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "b624876300eab90-ba558e0aca83667",
+      "title": "Streamlang to ES|QL - Replace Processor should replace a literal string to target field with EVAL replace()",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
+        "line": 41,
+        "column": 10
+      }
+    },
+    {
+      "id": "b624876300eab90-569b7ecfbd917f3",
+      "title": "Streamlang to ES|QL - Replace Processor should replace using regex pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
+        "line": 70,
+        "column": 10
+      }
+    },
+    {
+      "id": "b624876300eab90-62412a867cd22a8",
+      "title": "Streamlang to ES|QL - Replace Processor should replace literal dot with escaped dot pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
+        "line": 94,
+        "column": 10
+      }
+    },
+    {
+      "id": "b624876300eab90-48d901c5b26a3dd",
+      "title": "Streamlang to ES|QL - Replace Processor should replace using regex with capture groups",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
+        "line": 118,
+        "column": 10
+      }
+    },
+    {
+      "id": "b624876300eab90-2061644a474c22c",
+      "title": "Streamlang to ES|QL - Replace Processor should handle ignore_missing: false (default) with WHERE filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
+        "line": 142,
+        "column": 10
+      }
+    },
+    {
+      "id": "b624876300eab90-5b81e301ce9ffda",
+      "title": "Streamlang to ES|QL - Replace Processor should handle ignore_missing: true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
+        "line": 173,
+        "column": 10
+      }
+    },
+    {
+      "id": "b624876300eab90-75773d160762ae4",
+      "title": "Streamlang to ES|QL - Replace Processor should replace field conditionally with EVAL CASE",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
+        "line": 204,
+        "column": 10
+      }
+    },
+    {
+      "id": "b624876300eab90-b6026ee2d3354de",
+      "title": "Streamlang to ES|QL - Replace Processor should replace to target field conditionally with EVAL CASE",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
+        "line": 244,
+        "column": 10
+      }
+    },
+    {
+      "id": "b624876300eab90-191ae09d7a8602d",
+      "title": "Streamlang to ES|QL - Replace Processor should reject Mustache template syntax {{ and {{{ in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
+        "line": 300,
+        "column": 10
+      }
+    },
+    {
+      "id": "3b4d56ead913a9c-e296bcdb728b2c4",
+      "title": "Streamlang to ES|QL - Set Processor should set a field using a value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "3b4d56ead913a9c-be5697cb62329d8",
+      "title": "Streamlang to ES|QL - Set Processor should reject Mustache template syntax {{ and {{{",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
+        "line": 41,
+        "column": 10
+      }
+    },
+    {
+      "id": "3b4d56ead913a9c-90ee76f947fa595",
+      "title": "Streamlang to ES|QL - Set Processor should not set a field when where is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
+        "line": 58,
+        "column": 10
+      }
+    },
+    {
+      "id": "3b4d56ead913a9c-d1d082dcb18188a",
+      "title": "Streamlang to ES|QL - Set Processor should set a field by copying from another field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
+        "line": 107,
+        "column": 10
+      }
+    },
+    {
+      "id": "3b4d56ead913a9c-f701d8e1b7ef925",
+      "title": "Streamlang to ES|QL - Set Processor should not override an existing field when override is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
+        "line": 132,
+        "column": 10
+      }
+    },
+    {
+      "id": "3b4d56ead913a9c-2621c335473f262",
+      "title": "Streamlang to ES|QL - Set Processor should override an existing field when override is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
+        "line": 168,
+        "column": 10
+      }
+    },
+    {
+      "id": "3b4d56ead913a9c-0afcf26a02ee3f2",
+      "title": "Streamlang to ES|QL - Set Processor should throw error if value and copy_from are missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
+        "line": 193,
+        "column": 10
+      }
+    },
+    {
+      "id": "3b4d56ead913a9c-07b419614263b81",
+      "title": "Streamlang to ES|QL - Set Processor should throw error if value and copy_from are both present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
+        "line": 218,
+        "column": 10
+      }
+    },
+    {
+      "id": "f9e399ebdf5a2fc-f6b6f1d8b01fe79",
+      "title": "Streamlang to ES|QL - Trim Processor should trim a field in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/trim.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "f9e399ebdf5a2fc-03599930d7fb87f",
+      "title": "Streamlang to ES|QL - Trim Processor should trim a field into a target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/trim.spec.ts",
+        "line": 37,
+        "column": 10
+      }
+    },
+    {
+      "id": "f9e399ebdf5a2fc-79269f32fbc2b3d",
+      "title": "Streamlang to ES|QL - Trim Processor should trim a field with a where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/trim.spec.ts",
+        "line": 61,
+        "column": 10
+      }
+    },
+    {
+      "id": "f9e399ebdf5a2fc-4368ea00f6c4a1d",
+      "title": "Streamlang to ES|QL - Trim Processor should trim a field into a target field with a where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/trim.spec.ts",
+        "line": 91,
+        "column": 10
+      }
+    },
+    {
+      "id": "2e12f477d3ebd9c-95843274c2d3d0f",
+      "title": "Streamlang to ES|QL - Uppercase Processor should uppercase a field in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/uppercase.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "2e12f477d3ebd9c-57d7e3a584f8992",
+      "title": "Streamlang to ES|QL - Uppercase Processor should uppercase a field into a target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/uppercase.spec.ts",
+        "line": 37,
+        "column": 10
+      }
+    },
+    {
+      "id": "2e12f477d3ebd9c-1fb555ab82c2be1",
+      "title": "Streamlang to ES|QL - Uppercase Processor should uppercase a field with a where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/uppercase.spec.ts",
+        "line": 61,
+        "column": 10
+      }
+    },
+    {
+      "id": "2e12f477d3ebd9c-a40d384b29355e4",
+      "title": "Streamlang to ES|QL - Uppercase Processor should uppercase a field into a target field with a where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/uppercase.spec.ts",
+        "line": 91,
+        "column": 10
+      }
+    },
+    {
+      "id": "6c14e6e74cf08cb-443d2aa1bd8d9a1",
+      "title": "Streamlang to Ingest Pipeline - Append Processor should append values to a field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/append.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "6c14e6e74cf08cb-dd9573aca410693",
+      "title": "Streamlang to Ingest Pipeline - Append Processor should append values to a non-existent field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/append.spec.ts",
+        "line": 40,
+        "column": 12
+      }
+    },
+    {
+      "id": "6c14e6e74cf08cb-4ed4a8529b89cbb",
+      "title": "Streamlang to Ingest Pipeline - Append Processor should not append duplicate values when allow_duplicates is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/append.spec.ts",
+        "line": 63,
+        "column": 12
+      }
+    },
+    {
+      "id": "6c14e6e74cf08cb-70500b2c62c7a8e",
+      "title": "Streamlang to Ingest Pipeline - Append Processor should append duplicate values when allow_duplicates is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/append.spec.ts",
+        "line": 90,
+        "column": 12
+      }
+    },
+    {
+      "id": "6c14e6e74cf08cb-0c9e769b4b6366f",
+      "title": "Streamlang to Ingest Pipeline - Append Processor should reject {{ }} template syntax",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/append.spec.ts",
+        "line": 127,
+        "column": 14
+      }
+    },
+    {
+      "id": "6c14e6e74cf08cb-f1ed29ae1083fe6",
+      "title": "Streamlang to Ingest Pipeline - Append Processor should reject {{{ }}} template syntax",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/append.spec.ts",
+        "line": 127,
+        "column": 14
+      }
+    },
+    {
+      "id": "7b249f18db05aaf-d34b8c4f5558ce8",
+      "title": "Streamlang to Ingest Pipeline - Concat Processor should concatenate fields and literals",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/concat.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "7b249f18db05aaf-23aa775e845a181",
+      "title": "Streamlang to Ingest Pipeline - Concat Processor should concatenate fields and literals with a where clause",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/concat.spec.ts",
+        "line": 46,
+        "column": 12
+      }
+    },
+    {
+      "id": "7b249f18db05aaf-e02d91837e502b5",
+      "title": "Streamlang to Ingest Pipeline - Concat Processor should concatenate fields and literals with ignore_missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/concat.spec.ts",
+        "line": 83,
+        "column": 12
+      }
+    },
+    {
+      "id": "7b249f18db05aaf-7e3342020b712f0",
+      "title": "Streamlang to Ingest Pipeline - Concat Processor should not concatenate fields if ignore_missing is false and some fields are missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/concat.spec.ts",
+        "line": 117,
+        "column": 12
+      }
+    },
+    {
+      "id": "95fab025e05fcb2-da7ee4a8ab20738",
+      "title": "Streamlang to Ingest Pipeline - Convert Processor should convert a field to a different type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "95fab025e05fcb2-abee5bdd8b232f7",
+      "title": "Streamlang to Ingest Pipeline - Convert Processor should reject {{ }} template syntax",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
+        "line": 66,
+        "column": 14
+      }
+    },
+    {
+      "id": "95fab025e05fcb2-ca4872fc9e612da",
+      "title": "Streamlang to Ingest Pipeline - Convert Processor should reject {{ }} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
+        "line": 66,
+        "column": 14
+      }
+    },
+    {
+      "id": "95fab025e05fcb2-0d19109eca5530a",
+      "title": "Streamlang to Ingest Pipeline - Convert Processor should reject {{ }} template syntax in values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
+        "line": 66,
+        "column": 14
+      }
+    },
+    {
+      "id": "95fab025e05fcb2-ad8d6ac47132375",
+      "title": "Streamlang to Ingest Pipeline - Convert Processor should reject {{{ }}} template syntax",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
+        "line": 66,
+        "column": 14
+      }
+    },
+    {
+      "id": "95fab025e05fcb2-d216ad8471f9695",
+      "title": "Streamlang to Ingest Pipeline - Convert Processor should convert a field to a different type into a the target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
+        "line": 84,
+        "column": 12
+      }
+    },
+    {
+      "id": "95fab025e05fcb2-6c0bfb98159adc4",
+      "title": "Streamlang to Ingest Pipeline - Convert Processor should convert a field to a different type into a the target field with a where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
+        "line": 111,
+        "column": 12
+      }
+    },
+    {
+      "id": "bacfa02539da42e-3f17dd8d477464f",
+      "title": "Streamlang to Ingest Pipeline - Date Processor should parse a date and set it to @timestamp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@timestamp",
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "bacfa02539da42e-aeca8896e4caa50",
+      "title": "Streamlang to Ingest Pipeline - Date Processor should override the field if from and to are same",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
+        "line": 41,
+        "column": 10
+      }
+    },
+    {
+      "id": "bacfa02539da42e-a4443aa5e7198ae",
+      "title": "Streamlang to Ingest Pipeline - Date Processor should parse a date with a specific format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
+        "line": 70,
+        "column": 10
+      }
+    },
+    {
+      "id": "bacfa02539da42e-ccc7b0cdbcfd324",
+      "title": "Streamlang to Ingest Pipeline - Date Processor should handle multiple formats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
+        "line": 99,
+        "column": 10
+      }
+    },
+    {
+      "id": "bacfa02539da42e-be227210e244d4f",
+      "title": "Streamlang to Ingest Pipeline - Date Processor should parse a date with a specific output format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
+        "line": 128,
+        "column": 10
+      }
+    },
+    {
+      "id": "bacfa02539da42e-185a498dc9e6de1",
+      "title": "Streamlang to Ingest Pipeline - Date Processor should fail when date format is incorrect",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
+        "line": 157,
+        "column": 10
+      }
+    },
+    {
+      "id": "bacfa02539da42e-35c6041cacbb2a7",
+      "title": "Streamlang to Ingest Pipeline - Date Processor should reject {{ }} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
+        "line": 193,
+        "column": 12
+      }
+    },
+    {
+      "id": "bacfa02539da42e-f339229bd89eda3",
+      "title": "Streamlang to Ingest Pipeline - Date Processor should reject {{{ }}} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
+        "line": 193,
+        "column": 12
+      }
+    },
+    {
+      "id": "bacfa02539da42e-a5c56e0ab3a2b96",
+      "title": "Streamlang to Ingest Pipeline - Date Processor should parse a date with a specific locale and timezone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
+        "line": 211,
+        "column": 10
+      }
+    },
+    {
+      "id": "bacfa02539da42e-3be0bbf987a31a7",
+      "title": "Streamlang to Ingest Pipeline - Date Processor should fail when locale is not valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
+        "line": 242,
+        "column": 10
+      }
+    },
+    {
+      "id": "bacfa02539da42e-64ef161fa296031",
+      "title": "Streamlang to Ingest Pipeline - Date Processor should fail when timezone is not valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
+        "line": 272,
+        "column": 10
+      }
+    },
+    {
+      "id": "fb182863413a08e-c1e4d4468702ba9",
+      "title": "Streamlang to Ingest Pipeline - Dissect Processor should correctly parse a log line with the dissect processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "fb182863413a08e-69d2d8b2f1c2bf0",
+      "title": "Streamlang to Ingest Pipeline - Dissect Processor should ignore missing field when ignore_missing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
+        "line": 50,
+        "column": 12
+      }
+    },
+    {
+      "id": "fb182863413a08e-89a0768ac5cfe32",
+      "title": "Streamlang to Ingest Pipeline - Dissect Processor should fail if field is missing and ignore_missing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
+        "line": 75,
+        "column": 12
+      }
+    },
+    {
+      "id": "fb182863413a08e-9a1b5e8fff00fd5",
+      "title": "Streamlang to Ingest Pipeline - Dissect Processor should use append_separator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
+        "line": 96,
+        "column": 12
+      }
+    },
+    {
+      "id": "fb182863413a08e-e3bcbbb4ec7242e",
+      "title": "Streamlang to Ingest Pipeline - Dissect Processor should reject {{ }} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
+        "line": 131,
+        "column": 14
+      }
+    },
+    {
+      "id": "fb182863413a08e-3e893e9293f311b",
+      "title": "Streamlang to Ingest Pipeline - Dissect Processor should reject {{{ }}} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
+        "line": 131,
+        "column": 14
+      }
+    },
+    {
+      "id": "eeda2c6f4be7ea5-867b832481ce72d",
+      "title": "Streamlang to Ingest Pipeline - Drop Document Processor should drop a document matching where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/drop_document.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "22c3aac9a279c90-658f5b09f43fc36",
+      "title": "Streamlang to Ingest Pipeline - Filter Conditions should handle includes filter condition with numeric array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/filter_conditions.spec.ts",
+        "line": 19,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fd036695248da1-ce9a38362d09290",
+      "title": "Streamlang to Ingest Pipeline - Grok Processor should correctly parse a log line with the grok processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fd036695248da1-30aa5722ca83485",
+      "title": "Streamlang to Ingest Pipeline - Grok Processor should ignore missing field when ignore_missing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
+        "line": 47,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fd036695248da1-60c885efe8a7db2",
+      "title": "Streamlang to Ingest Pipeline - Grok Processor should fail if field is missing and ignore_missing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
+        "line": 72,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fd036695248da1-f133a30d2cf9bfd",
+      "title": "Streamlang to Ingest Pipeline - Grok Processor should fail when grok pattern does not match",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
+        "line": 93,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fd036695248da1-5ab3509fd06101a",
+      "title": "Streamlang to Ingest Pipeline - Grok Processor should reject {{ }} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
+        "line": 123,
+        "column": 14
+      }
+    },
+    {
+      "id": "4fd036695248da1-a1774c1755c108f",
+      "title": "Streamlang to Ingest Pipeline - Grok Processor should reject {{{ }}} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
+        "line": 123,
+        "column": 14
+      }
+    },
+    {
+      "id": "8888aba2b788b26-7e42e5ff3150ebf",
+      "title": "Streamlang to Ingest Pipeline - Lowercase Processor should lowercase a field in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/lowercase.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "8888aba2b788b26-a8306e392716fa6",
+      "title": "Streamlang to Ingest Pipeline - Lowercase Processor should lowercase a field into a target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/lowercase.spec.ts",
+        "line": 40,
+        "column": 12
+      }
+    },
+    {
+      "id": "8888aba2b788b26-a7c49f04b6598c2",
+      "title": "Streamlang to Ingest Pipeline - Lowercase Processor should lowercase a field into a target field with a where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/lowercase.spec.ts",
+        "line": 64,
+        "column": 12
+      }
+    },
+    {
+      "id": "8888aba2b788b26-7fac37b508e90d8",
+      "title": "Streamlang to Ingest Pipeline - Lowercase Processor should throw an error if the field is not a string",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/lowercase.spec.ts",
+        "line": 97,
+        "column": 12
+      }
+    },
+    {
+      "id": "a05d3c377701d14-9e4c34d8b9f9076",
+      "title": "Streamlang to Ingest Pipeline - Manual Ingest Pipeline Processor should process basic manual ingest pipeline with set processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/manual_ingest_pipeline.spec.ts",
+        "line": 18,
+        "column": 12
+      }
+    },
+    {
+      "id": "a05d3c377701d14-28ded69239ba75b",
+      "title": "Streamlang to Ingest Pipeline - Manual Ingest Pipeline Processor should process manual ingest pipeline with multiple processors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/manual_ingest_pipeline.spec.ts",
+        "line": 58,
+        "column": 12
+      }
+    },
+    {
+      "id": "a05d3c377701d14-d031ad3474460ea",
+      "title": "Streamlang to Ingest Pipeline - Manual Ingest Pipeline Processor should process manual ingest pipeline with conditional where clause",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/manual_ingest_pipeline.spec.ts",
+        "line": 105,
+        "column": 12
+      }
+    },
+    {
+      "id": "a05d3c377701d14-2d88311e9b8ff95",
+      "title": "Streamlang to Ingest Pipeline - Manual Ingest Pipeline Processor should handle manual ingest pipeline with tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/manual_ingest_pipeline.spec.ts",
+        "line": 152,
+        "column": 12
+      }
+    },
+    {
+      "id": "a05d3c377701d14-43c40987fddc6ad",
+      "title": "Streamlang to Ingest Pipeline - Manual Ingest Pipeline Processor should handle complex manual ingest pipeline with grok processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/manual_ingest_pipeline.spec.ts",
+        "line": 188,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-4cefd9fbeb1a516",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute multiplication of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 18,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-c1ecdcf0918f311",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute addition of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 40,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-286d4f1ebec108e",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute subtraction of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 62,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-df5c2f33a314bd4",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute division of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 84,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-7495f9eb603c2eb",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute with nested field paths",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 107,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-2417ed2dac28904",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute log (natural log)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 131,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-6b3f0eb07e9a700",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute neq (not equal) comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 156,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-7075d986a9e0924",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute gt (greater than) comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 182,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-69b389df6fe393e",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute lt (less than) comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 208,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-5fd02b27fcc4260",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute eq (equality) comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 234,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-7744cd79ca67e8a",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should only apply math when where condition is met",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 261,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-2367302632b0cc8",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should skip calculation when ignore_missing is true and field is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 294,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-cf4970532085ddc",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should report errors for unsupported functions via simulation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 329,
+        "column": 12
+      }
+    },
+    {
+      "id": "2dc8292cad1f6c3-f8f60a0c0f584e3",
+      "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should remove a field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "2dc8292cad1f6c3-e7789f1053d8b8e",
+      "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should remove a field and all nested fields (subobjects)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    },
+    {
+      "id": "2dc8292cad1f6c3-54e4608dd8a5a9d",
+      "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should remove flattened fields with prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
+        "line": 82,
+        "column": 12
+      }
+    },
+    {
+      "id": "2dc8292cad1f6c3-0e46ef4dfed6461",
+      "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should remove the parent field itself when using dotted notation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
+        "line": 117,
+        "column": 12
+      }
+    },
+    {
+      "id": "2dc8292cad1f6c3-d6dcc1954b8652b",
+      "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should remove the parent field itself when using subobjects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
+        "line": 156,
+        "column": 12
+      }
+    },
+    {
+      "id": "2dc8292cad1f6c3-df48c093ee326a3",
+      "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should remove flattened fields within a nested subobject",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
+        "line": 197,
+        "column": 12
+      }
+    },
+    {
+      "id": "2dc8292cad1f6c3-7f11ae3f0974c5d",
+      "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should remove flattened fields within a deeply nested subobject",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
+        "line": 238,
+        "column": 12
+      }
+    },
+    {
+      "id": "2dc8292cad1f6c3-0cde6eb82dad651",
+      "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should reject {{ }} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
+        "line": 294,
+        "column": 14
+      }
+    },
+    {
+      "id": "2dc8292cad1f6c3-893ac27e31f7cb3",
+      "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should reject {{{ }}} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
+        "line": 294,
+        "column": 14
+      }
+    },
+    {
+      "id": "f452092549ba895-ae05c0b4fe3e8af",
+      "title": "Streamlang to Ingest Pipeline - Remove Processor should remove a field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "f452092549ba895-10d5f48d8e82422",
+      "title": "Streamlang to Ingest Pipeline - Remove Processor should ignore missing field when ignore_missing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    },
+    {
+      "id": "f452092549ba895-d85b4ecd0487a5e",
+      "title": "Streamlang to Ingest Pipeline - Remove Processor should fail if field is missing and ignore_missing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
+        "line": 65,
+        "column": 12
+      }
+    },
+    {
+      "id": "f452092549ba895-55eb48e0cae1088",
+      "title": "Streamlang to Ingest Pipeline - Remove Processor should remove field conditionally with where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
+        "line": 86,
+        "column": 12
+      }
+    },
+    {
+      "id": "f452092549ba895-3a17ed7d126a0fa",
+      "title": "Streamlang to Ingest Pipeline - Remove Processor default value of ignore_missing (false)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
+        "line": 124,
+        "column": 12
+      }
+    },
+    {
+      "id": "f452092549ba895-c9016ea65e16fa8",
+      "title": "Streamlang to Ingest Pipeline - Remove Processor should reject {{ }} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
+        "line": 155,
+        "column": 14
+      }
+    },
+    {
+      "id": "f452092549ba895-64aba042f660649",
+      "title": "Streamlang to Ingest Pipeline - Remove Processor should reject {{{ }}} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
+        "line": 155,
+        "column": 14
+      }
+    },
+    {
+      "id": "a41eb2ed154b058-0dabaf496197265",
+      "title": "Streamlang to Ingest Pipeline - Rename Processor should rename a field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "a41eb2ed154b058-28a14c354a7fdb5",
+      "title": "Streamlang to Ingest Pipeline - Rename Processor should reject {{ }} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
+        "line": 54,
+        "column": 14
+      }
+    },
+    {
+      "id": "a41eb2ed154b058-e717cba2b5516b9",
+      "title": "Streamlang to Ingest Pipeline - Rename Processor should reject {{{ }}} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
+        "line": 54,
+        "column": 14
+      }
+    },
+    {
+      "id": "a41eb2ed154b058-4c7bc3be6013b42",
+      "title": "Streamlang to Ingest Pipeline - Rename Processor should ignore missing field when ignore_missing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
+        "line": 71,
+        "column": 12
+      }
+    },
+    {
+      "id": "a41eb2ed154b058-1b373035b6b0cef",
+      "title": "Streamlang to Ingest Pipeline - Rename Processor should fail if field is missing and ignore_missing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
+        "line": 96,
+        "column": 12
+      }
+    },
+    {
+      "id": "a41eb2ed154b058-f2107fcedb8b2e7",
+      "title": "Streamlang to Ingest Pipeline - Rename Processor should override existing field when override is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
+        "line": 118,
+        "column": 12
+      }
+    },
+    {
+      "id": "a41eb2ed154b058-9a6b7cb8304a8db",
+      "title": "Streamlang to Ingest Pipeline - Rename Processor should fail if target field exists and override is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
+        "line": 143,
+        "column": 12
+      }
+    },
+    {
+      "id": "a41eb2ed154b058-741b968220b5259",
+      "title": "Streamlang to Ingest Pipeline - Rename Processor default values of ignore_missing and override (ignore_missing: false, override: false)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
+        "line": 165,
+        "column": 12
+      }
+    },
+    {
+      "id": "214d436321f41fd-527a78f86f77511",
+      "title": "Streamlang to Ingest Pipeline - Replace Processor should replace a literal string (in-place)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "214d436321f41fd-474501a090d6ce7",
+      "title": "Streamlang to Ingest Pipeline - Replace Processor should replace a literal string to target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    },
+    {
+      "id": "214d436321f41fd-593ec31b029cb6c",
+      "title": "Streamlang to Ingest Pipeline - Replace Processor should replace using regex pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
+        "line": 67,
+        "column": 12
+      }
+    },
+    {
+      "id": "214d436321f41fd-ab6b7f435a6fa9b",
+      "title": "Streamlang to Ingest Pipeline - Replace Processor should replace using regex with capture groups",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
+        "line": 91,
+        "column": 12
+      }
+    },
+    {
+      "id": "214d436321f41fd-c0fcce9569ace97",
+      "title": "Streamlang to Ingest Pipeline - Replace Processor should fail if field is missing (default value) and ignore_missing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
+        "line": 115,
+        "column": 12
+      }
+    },
+    {
+      "id": "214d436321f41fd-6407d72fc6fd875",
+      "title": "Streamlang to Ingest Pipeline - Replace Processor should ignore missing field when ignore_missing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
+        "line": 140,
+        "column": 12
+      }
+    },
+    {
+      "id": "214d436321f41fd-74e8b527c08ce02",
+      "title": "Streamlang to Ingest Pipeline - Replace Processor should replace field conditionally with where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
+        "line": 167,
+        "column": 12
+      }
+    },
+    {
+      "id": "214d436321f41fd-25e6d5f762b493a",
+      "title": "Streamlang to Ingest Pipeline - Replace Processor should replace to target field conditionally with where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
+        "line": 207,
+        "column": 12
+      }
+    },
+    {
+      "id": "214d436321f41fd-179fdb753f5ff6d",
+      "title": "Streamlang to Ingest Pipeline - Replace Processor should reject {{ }} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
+        "line": 263,
+        "column": 14
+      }
+    },
+    {
+      "id": "214d436321f41fd-d405629ef1b4e84",
+      "title": "Streamlang to Ingest Pipeline - Replace Processor should reject {{{ }}} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
+        "line": 263,
+        "column": 14
+      }
+    },
+    {
+      "id": "e662c5633ad6530-c1283100acb8874",
+      "title": "Streamlang to Ingest Pipeline - Set Processor should set a field using a value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "e662c5633ad6530-177dd8d3279cf9f",
+      "title": "Streamlang to Ingest Pipeline - Set Processor should reject {{ }} template syntax",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
+        "line": 66,
+        "column": 14
+      }
+    },
+    {
+      "id": "e662c5633ad6530-68d94689dd5eb99",
+      "title": "Streamlang to Ingest Pipeline - Set Processor should reject {{ }} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
+        "line": 66,
+        "column": 14
+      }
+    },
+    {
+      "id": "e662c5633ad6530-c4000c7be5dca66",
+      "title": "Streamlang to Ingest Pipeline - Set Processor should reject {{ }} template syntax in values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
+        "line": 66,
+        "column": 14
+      }
+    },
+    {
+      "id": "e662c5633ad6530-e2ecc520ddf721f",
+      "title": "Streamlang to Ingest Pipeline - Set Processor should reject {{{ }}} template syntax",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
+        "line": 66,
+        "column": 14
+      }
+    },
+    {
+      "id": "e662c5633ad6530-ce30fe1a8b377f5",
+      "title": "Streamlang to Ingest Pipeline - Set Processor should set a field by copying from another field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
+        "line": 83,
+        "column": 12
+      }
+    },
+    {
+      "id": "e662c5633ad6530-9d799fd4eff67dc",
+      "title": "Streamlang to Ingest Pipeline - Set Processor should not override an existing field when override is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
+        "line": 105,
+        "column": 12
+      }
+    },
+    {
+      "id": "e662c5633ad6530-f9d520f5bc888ba",
+      "title": "Streamlang to Ingest Pipeline - Set Processor should override an existing field when override is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
+        "line": 128,
+        "column": 12
+      }
+    },
+    {
+      "id": "e662c5633ad6530-482c4aedcd40339",
+      "title": "Streamlang to Ingest Pipeline - Set Processor should throw error if value and copy_from are missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
+        "line": 151,
+        "column": 12
+      }
+    },
+    {
+      "id": "e662c5633ad6530-810415859b38553",
+      "title": "Streamlang to Ingest Pipeline - Set Processor should throw error if value and copy_from are both present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
+        "line": 176,
+        "column": 12
+      }
+    },
+    {
+      "id": "b68be3427bc395f-039696e9eb61cd4",
+      "title": "Streamlang to Ingest Pipeline - Trim Processor should trim a field in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/trim.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "b68be3427bc395f-4f9c55a77d7cccb",
+      "title": "Streamlang to Ingest Pipeline - Trim Processor should trim a field into a target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/trim.spec.ts",
+        "line": 40,
+        "column": 12
+      }
+    },
+    {
+      "id": "b68be3427bc395f-d16fbe5d5fe405e",
+      "title": "Streamlang to Ingest Pipeline - Trim Processor should trim a field into a target field with a where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/trim.spec.ts",
+        "line": 64,
+        "column": 12
+      }
+    },
+    {
+      "id": "b68be3427bc395f-75c7e646714869b",
+      "title": "Streamlang to Ingest Pipeline - Trim Processor should throw an error if the field is not a string",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/trim.spec.ts",
+        "line": 97,
+        "column": 12
+      }
+    },
+    {
+      "id": "25608d799dc2aa5-201880c677c9802",
+      "title": "Streamlang to Ingest Pipeline - Uppercase Processor should uppercase a field in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/uppercase.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "25608d799dc2aa5-aa5e107ffbb2acd",
+      "title": "Streamlang to Ingest Pipeline - Uppercase Processor should uppercase a field into a target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/uppercase.spec.ts",
+        "line": 40,
+        "column": 12
+      }
+    },
+    {
+      "id": "25608d799dc2aa5-d8cea7adf19011c",
+      "title": "Streamlang to Ingest Pipeline - Uppercase Processor should uppercase a field into a target field with a where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/uppercase.spec.ts",
+        "line": 64,
+        "column": 12
+      }
+    },
+    {
+      "id": "25608d799dc2aa5-68d8bc8d6e9c688",
+      "title": "Streamlang to Ingest Pipeline - Uppercase Processor should throw an error if the field is not a string",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/uppercase.spec.ts",
+        "line": 97,
+        "column": 12
+      }
+    }
+  ]
+}

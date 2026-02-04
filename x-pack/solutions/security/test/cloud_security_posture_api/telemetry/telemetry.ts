@@ -24,7 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
   const logger = getService('log');
   const findingsIndexProvider = new EsIndexDataProvider(es, FINDINGS_INDEX);
 
-  describe('Verify cloud_security_posture telemetry payloads', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/247313
+  describe.skip('Verify cloud_security_posture telemetry payloads', async () => {
     before(async () => {
       await waitForPluginInitialized({ retry, logger, supertest });
     });
@@ -386,6 +387,16 @@ export default function ({ getService }: FtrProviderContext) {
             .cspm_cloud_connector_usage_stats
         )
       ).to.be(true);
+
+      // When cloud connectors exist, each item should have these fields:
+      // - id: string
+      // - created_at: string
+      // - updated_at: string
+      // - hasCredentials: boolean
+      // - cloud_provider: string
+      // - account_type: 'single' | 'organization' | undefined
+      // - packagePolicyIds: string[]
+      // - packagePolicyCount: number
     });
 
     it('includes asset_inventory_cloud_connector_usage_stats in telemetry', async () => {

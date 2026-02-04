@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ServiceParams, SSLSettings } from '@kbn/actions-plugin/server';
+import type { SSLSettings } from '@kbn/actions-utils';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import OpenAI from 'openai';

@@ -26,6 +26,8 @@ export enum RuleAuditAction {
   FIND = 'rule_find',
   MUTE = 'rule_mute',
   UNMUTE = 'rule_unmute',
+  BULK_MUTE_ALERTS = 'rule_alert_bulk_mute',
+  BULK_UNMUTE_ALERTS = 'rule_alert_bulk_unmute',
   MUTE_ALERT = 'rule_alert_mute',
   UNMUTE_ALERT = 'rule_alert_unmute',
   AGGREGATE = 'rule_aggregate',
@@ -60,6 +62,7 @@ export enum GapAutoFillSchedulerAuditAction {
   GET = 'gap_auto_fill_scheduler_get',
   UPDATE = 'gap_auto_fill_scheduler_update',
   DELETE = 'gap_auto_fill_scheduler_delete',
+  GET_LOGS = 'gap_auto_fill_scheduler_get_logs',
 }
 
 export interface GapAutoFillSchedulerAuditEventParams {
@@ -86,6 +89,8 @@ const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_find: ['access', 'accessing', 'accessed'],
   rule_mute: ['mute', 'muting', 'muted'],
   rule_unmute: ['unmute', 'unmuting', 'unmuted'],
+  rule_alert_bulk_mute: ['bulk mute', 'bulk muting', 'bulk muted'],
+  rule_alert_bulk_unmute: ['bulk unmute', 'bulk unmuting', 'bulk unmuted'],
   rule_alert_mute: ['mute alert of', 'muting alert of', 'muted alert of'],
   rule_alert_unmute: ['unmute alert of', 'unmuting alert of', 'unmuted alert of'],
   rule_aggregate: ['access', 'accessing', 'accessed'],
@@ -164,6 +169,8 @@ const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = 
   rule_find: 'access',
   rule_mute: 'change',
   rule_unmute: 'change',
+  rule_alert_bulk_mute: 'change',
+  rule_alert_bulk_unmute: 'change',
   rule_alert_mute: 'change',
   rule_alert_unmute: 'change',
   rule_aggregate: 'access',
@@ -304,6 +311,11 @@ const gapAutoFillSchedulerEventVerbs: Record<GapAutoFillSchedulerAuditAction, Ve
     'deleting gap auto fill scheduler',
     'deleted gap auto fill scheduler',
   ],
+  gap_auto_fill_scheduler_get_logs: [
+    'get gap auto fill scheduler logs',
+    'getting gap auto fill scheduler logs',
+    'got gap auto fill scheduler logs',
+  ],
 };
 
 const gapAutoFillSchedulerEventTypes: Record<
@@ -314,6 +326,7 @@ const gapAutoFillSchedulerEventTypes: Record<
   gap_auto_fill_scheduler_get: 'access',
   gap_auto_fill_scheduler_update: 'change',
   gap_auto_fill_scheduler_delete: 'deletion',
+  gap_auto_fill_scheduler_get_logs: 'access',
 };
 
 export function gapAutoFillSchedulerAuditEvent({

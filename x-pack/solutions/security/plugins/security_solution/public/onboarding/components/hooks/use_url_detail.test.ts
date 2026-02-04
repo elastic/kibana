@@ -6,6 +6,7 @@
  */
 import { renderHook, act } from '@testing-library/react';
 import { useUrlDetail, useSyncUrlDetails, getCardIdFromHash } from './use_url_detail';
+import { useHistory } from 'react-router-dom';
 
 // --- Mocks for dependencies ---
 jest.mock('@kbn/security-solution-navigation', () => ({
@@ -34,6 +35,14 @@ jest.mock('../onboarding_context', () => ({
   useOnboardingContext: jest.fn(),
 }));
 
+jest.mock('react-router-dom', () => {
+  const originalModule = jest.requireActual('react-router-dom');
+  return {
+    ...originalModule,
+    useHistory: jest.fn(),
+  };
+});
+
 // Import the mocked modules for type-checking and setting implementations
 import { useStoredUrlDetails } from './use_stored_state';
 import { useTopicId } from './use_topic_id';
@@ -42,6 +51,7 @@ import { useNavigateTo, SecurityPageName } from '@kbn/security-solution-navigati
 import { useOnboardingContext } from '../onboarding_context';
 import type { OnboardingCardId } from '../../constants';
 import { OnboardingTopicId } from '../../constants';
+import type { History } from 'history';
 
 // --- Tests for useUrlDetail ---
 describe('useUrlDetail', () => {
@@ -107,8 +117,14 @@ describe('useUrlDetail', () => {
   });
 
   it('setCard updates the URL hash, stored detail and reports telemetry when a cardId is provided', () => {
-    // Spy on history.replaceState (used in setHash)
-    const replaceStateSpy = jest.spyOn(history, 'replaceState').mockImplementation(() => {});
+    // Spy on history.replace (used in setHash)
+    const useHistoryMock = useHistory as unknown as jest.MockedFn<typeof useHistory>;
+    const replaceStateMock = jest.fn();
+
+    useHistoryMock.mockReturnValue({
+      replace: replaceStateMock,
+    } as unknown as History<unknown>);
+
     (useTopicId as jest.Mock).mockReturnValue(OnboardingTopicId.default);
     const { result } = renderHook(() => useUrlDetail());
     const cardId = 'card1';
@@ -118,26 +134,33 @@ describe('useUrlDetail', () => {
     });
 
     // Expect the URL hash to be updated to "#card1"
-    expect(replaceStateSpy).toHaveBeenCalledWith(null, '', `#${cardId}`);
+    expect(replaceStateMock).toHaveBeenCalledWith({ hash: `#${cardId}` });
     // For topic "default", getUrlDetail produces `#card1`
     expect(mockSetStoredUrlDetail).toHaveBeenCalledWith(`#${cardId}`);
     expect(mockReportCardOpen).toHaveBeenCalledWith(cardId);
-    replaceStateSpy.mockRestore();
+    replaceStateMock.mockRestore();
   });
 
   it('setCard updates the URL hash and stored detail without reporting telemetry when cardId is null', () => {
-    const replaceStateSpy = jest.spyOn(history, 'replaceState').mockImplementation(() => {});
+    // Spy on history.replace (used in setHash)
+    const useHistoryMock = useHistory as unknown as jest.MockedFn<typeof useHistory>;
+    const replaceStateMock = jest.fn();
+
+    useHistoryMock.mockReturnValue({
+      replace: replaceStateMock,
+    } as unknown as History<unknown>);
+
     const { result } = renderHook(() => useUrlDetail());
 
     act(() => {
       result.current.setCard(null);
     });
 
-    expect(replaceStateSpy).toHaveBeenCalledWith(null, '', ' ');
+    expect(replaceStateMock).toHaveBeenCalledWith({ hash: undefined });
     // For a null cardId, getUrlDetail returns an empty string (falsy) so stored detail becomes null
     expect(mockSetStoredUrlDetail).toHaveBeenCalledWith(null);
     expect(mockReportCardOpen).not.toHaveBeenCalled();
-    replaceStateSpy.mockRestore();
+    replaceStateMock.mockRestore();
   });
 
   it('navigateToDetail calls navigateTo with the correct parameters', () => {

@@ -29,7 +29,8 @@ export function useFileUpload(
   http: HttpSetup,
   notifications: NotificationsStart,
   getFieldsStatsGrid?: () => React.FC<{ results: FindFileStructureResponse | null }>,
-  onUploadComplete?: (results: FileUploadResults | null) => void
+  onUploadComplete?: (results: FileUploadResults | null) => void,
+  reset?: (existingIndex?: string) => void
 ) {
   const isMounted = useMountedState();
   const { dataViews } = data;
@@ -276,6 +277,7 @@ export function useFileUpload(
     abortAllAnalysis,
     abortImport,
     getFieldsStatsGrid,
+    reset,
   };
 }
 

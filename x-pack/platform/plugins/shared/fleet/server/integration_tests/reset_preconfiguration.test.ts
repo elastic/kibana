@@ -266,7 +266,7 @@ describe('Fleet preconfiguration reset', () => {
         .send();
 
       const agentPolicies = await kbnServer.coreStart.savedObjects
-        .createInternalRepository()
+        .getUnsafeInternalClient()
         .find<AgentPolicySOAttributes>({
           type: agentPolicyType,
           perPage: 10000,
@@ -288,7 +288,7 @@ describe('Fleet preconfiguration reset', () => {
   describe('Reset one preconfigured policy', () => {
     beforeEach(() => addAgents());
     it('Works and reset one preconfigured policies if the policy is already deleted (with a ghost package policy)', async () => {
-      const soClient = kbnServer.coreStart.savedObjects.createInternalRepository();
+      const soClient = kbnServer.coreStart.savedObjects.getUnsafeInternalClient();
 
       await soClient.delete(agentPolicyType, POLICY_ID);
 
@@ -312,7 +312,7 @@ describe('Fleet preconfiguration reset', () => {
         .send();
 
       const agentPolicies = await kbnServer.coreStart.savedObjects
-        .createInternalRepository()
+        .getUnsafeInternalClient()
         .find<AgentPolicySOAttributes>({
           type: agentPolicyType,
           perPage: 10000,
@@ -334,7 +334,7 @@ describe('Fleet preconfiguration reset', () => {
     });
 
     it('Works if the preconfigured policies already exists with a missing package policy', async () => {
-      const soClient = kbnServer.coreStart.savedObjects.createInternalRepository();
+      const soClient = kbnServer.coreStart.savedObjects.getUnsafeInternalClient();
 
       await soClient.update(agentPolicyType, POLICY_ID, {});
 
@@ -368,7 +368,7 @@ describe('Fleet preconfiguration reset', () => {
     });
 
     it('Works and reset one preconfigured policies if the policy was deleted with a preconfiguration deletion record', async () => {
-      const soClient = kbnServer.coreStart.savedObjects.createInternalRepository();
+      const soClient = kbnServer.coreStart.savedObjects.getUnsafeInternalClient();
 
       await soClient.delete(agentPolicyType, POLICY_ID);
       await soClient.create(PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE, {
@@ -387,7 +387,7 @@ describe('Fleet preconfiguration reset', () => {
         .send();
 
       const agentPolicies = await kbnServer.coreStart.savedObjects
-        .createInternalRepository()
+        .getUnsafeInternalClient()
         .find<AgentPolicySOAttributes>({
           type: agentPolicyType,
           perPage: 10000,

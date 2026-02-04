@@ -18,7 +18,7 @@ import {
 import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
-import { authz } from '../../../common/api/util/authz';
+import { authz } from '../util/authz';
 import { processLookups } from '../util/lookups';
 import { withLicense } from '../../../common/api/util/with_license';
 import type { CreateSiemMigrationResourceInput } from '../../../common/data/siem_migrations_data_resources_client';
@@ -88,14 +88,17 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
               );
               return res.ok({ body: { acknowledged: true } });
             }
-            const resourceIdentifier = new RuleResourceIdentifier(rule.original_rule.vendor);
-            const resourcesToCreate = resourceIdentifier
-              .fromResources(resources)
-              .map<CreateSiemMigrationResourceInput>((resource) => ({
-                ...resource,
-                migration_id: migrationId,
-              }));
-            await ruleMigrationsClient.data.resources.create(resourcesToCreate);
+
+            if (rule.original_rule.vendor === 'splunk') {
+              const resourceIdentifier = new RuleResourceIdentifier(rule.original_rule.vendor);
+              const identifiedMissingResources = await resourceIdentifier.fromResources(resources);
+              const resourcesToCreate =
+                identifiedMissingResources.map<CreateSiemMigrationResourceInput>((resource) => ({
+                  ...resource,
+                  migration_id: migrationId,
+                }));
+              await ruleMigrationsClient.data.resources.create(resourcesToCreate);
+            }
 
             return res.ok({ body: { acknowledged: true } });
             // Create identified resource documents to keep track of them (without content)

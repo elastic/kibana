@@ -105,16 +105,18 @@ export abstract class ResourceRetriever<I extends ItemDocument = ItemDocument> {
 
     let nestedResourcesFound = resourcesFound;
     do {
-      const nestedResourcesIdentified = resourceIdentifier.fromResources(nestedResourcesFound);
+      const nestedResourcesIdentified = await resourceIdentifier.fromResources(
+        nestedResourcesFound
+      );
+      const nextNestedResources: MigrationDefinedResource[] = [];
 
-      nestedResourcesFound = [];
-      nestedResourcesIdentified.forEach((resource) => {
+      nestedResourcesIdentified.forEach((resource, index) => {
         if (resource.type !== 'macro' && resource.type !== 'lookup') {
           return;
         }
         const existingResource = existingResources[resource.type][resource.name];
         if (existingResource) {
-          nestedResourcesFound.push(existingResource);
+          nextNestedResources.push(existingResource);
           if (resource.type === 'macro') {
             macrosFound.set(resource.name, existingResource);
           } else if (resource.type === 'lookup') {
@@ -122,6 +124,7 @@ export abstract class ResourceRetriever<I extends ItemDocument = ItemDocument> {
           }
         }
       });
+      nestedResourcesFound = nextNestedResources;
     } while (nestedResourcesFound.length > 0);
 
     return {

@@ -68,7 +68,8 @@ export function getColumns(
   toggleRow,
   filter,
   influencerFilter,
-  sourceIndicesWithGeoFields
+  sourceIndicesWithGeoFields,
+  showAnomalyAlertFlyout
 ) {
   const columns = [
     {
@@ -366,6 +367,7 @@ export function getColumns(
               interval={interval}
               showRuleEditorFlyout={showRuleEditorFlyout}
               sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+              showAnomalyAlertFlyout={showAnomalyAlertFlyout}
             />
           );
         } else {

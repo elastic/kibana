@@ -168,8 +168,11 @@ export class ElasticsearchService
         `Successfully connected to Elasticsearch after waiting for ${elasticsearchWaitTime} milliseconds`,
         {
           event: {
-            type: 'kibana_started.elasticsearch.waitTime',
+            // ECS Event reference: https://www.elastic.co/docs/reference/ecs/ecs-event
+            action: 'kibana_started.elasticsearch.waitTime',
+            category: 'database',
             duration: elasticsearchWaitTime,
+            type: 'connection',
           },
         }
       );

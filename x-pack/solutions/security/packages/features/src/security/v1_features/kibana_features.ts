@@ -22,11 +22,26 @@ import {
   APP_ID,
   SERVER_APP_ID,
   LEGACY_NOTIFICATIONS_ID,
+  CLOUD_DEFEND_APP_ID,
   CLOUD_POSTURE_APP_ID,
-  SECURITY_FEATURE_ID_V4,
+  SECURITY_FEATURE_ID_V5,
   TIMELINE_FEATURE_ID,
   NOTES_FEATURE_ID,
-  CLOUD_DEFEND_APP_ID,
+  LISTS_API_SUMMARY,
+  LISTS_API_READ,
+  LISTS_API_ALL,
+  RULES_FEATURE_ID_V2,
+  SECURITY_UI_SHOW,
+  SECURITY_UI_CRUD,
+  INITIALIZE_SECURITY_SOLUTION,
+  RULES_API_ALL,
+  RULES_API_READ,
+  ALERTS_API_ALL,
+  ALERTS_API_READ,
+  EXCEPTIONS_API_ALL,
+  EXCEPTIONS_API_READ,
+  USERS_API_READ,
+  EXCEPTIONS_SUBFEATURE_ALL,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -58,7 +73,7 @@ export const getSecurityBaseKibanaFeature = ({
         defaultMessage: 'The {currentId} permissions are deprecated, please see {latestId}.',
         values: {
           currentId: SERVER_APP_ID,
-          latestId: SECURITY_FEATURE_ID_V4,
+          latestId: SECURITY_FEATURE_ID_V5,
         },
       }
     ),
@@ -93,33 +108,43 @@ export const getSecurityBaseKibanaFeature = ({
         default: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
-          // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
-          { feature: SECURITY_FEATURE_ID_V4, privileges: ['all'] },
+          // note: overriden by product feature endpointArtifactManagement when enabled
+          { feature: SECURITY_FEATURE_ID_V5, privileges: ['all'] },
+          { feature: RULES_FEATURE_ID_V2, privileges: ['all'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
-          // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
-          { feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_all'] },
+          // note: overriden by product feature endpointArtifactManagement when enabled
+          { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_all'] },
+          {
+            feature: RULES_FEATURE_ID_V2,
+            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ALL],
+          },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [
         APP_ID,
-        'lists-all',
-        'lists-read',
-        'lists-summary',
+        LISTS_API_ALL,
+        LISTS_API_READ,
+        LISTS_API_SUMMARY,
+        RULES_API_ALL,
+        RULES_API_READ,
+        ALERTS_API_ALL,
+        ALERTS_API_READ,
+        EXCEPTIONS_API_ALL,
+        EXCEPTIONS_API_READ,
+        USERS_API_READ,
+        INITIALIZE_SECURITY_SOLUTION,
         'rac',
         'cloud-security-posture-all',
         'cloud-security-posture-read',
-        'cloud-defend-all',
-        'cloud-defend-read',
         'timeline_write',
         'timeline_read',
         'notes_write',
         'notes_read',
-        'bulkGetUserProfiles',
       ],
       savedObject: {
         all: ['alert', ...savedObjects],
@@ -136,34 +161,40 @@ export const getSecurityBaseKibanaFeature = ({
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: ['show', 'crud'],
+      ui: [SECURITY_UI_SHOW, SECURITY_UI_CRUD],
     },
     read: {
       replacedBy: {
         default: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
-          // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
-          { feature: SECURITY_FEATURE_ID_V4, privileges: ['read'] },
+          { feature: SECURITY_FEATURE_ID_V5, privileges: ['read'] },
+          { feature: RULES_FEATURE_ID_V2, privileges: ['read'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
-          // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
-          { feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_read'] },
+          { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_read'] },
+          {
+            feature: RULES_FEATURE_ID_V2,
+            privileges: ['minimal_read'],
+          },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [
         APP_ID,
-        'lists-read',
+        LISTS_API_READ,
+        RULES_API_READ,
+        ALERTS_API_READ,
+        EXCEPTIONS_API_READ,
+        USERS_API_READ,
+        INITIALIZE_SECURITY_SOLUTION,
         'rac',
         'cloud-security-posture-read',
-        'cloud-defend-read',
         'timeline_read',
         'notes_read',
-        'bulkGetUserProfiles',
       ],
       savedObject: {
         all: [],
@@ -180,7 +211,7 @@ export const getSecurityBaseKibanaFeature = ({
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: ['show'],
+      ui: [SECURITY_UI_SHOW],
     },
   },
 });

@@ -63,8 +63,10 @@ import type { ErrorOutput } from './lib/bulk_operation_buffer';
 import { BulkUpdateError, MsearchError } from './lib/errors';
 import { TASK_SO_NAME } from './saved_objects';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
+import type { ApiKeyAndUserScope } from './lib/api_key_utils';
 import { getFirstRunAt } from './lib/get_first_run_at';
 import { isInterval } from './lib/intervals';
+import { bulkMarkApiKeysForInvalidation } from './lib/bulk_mark_api_keys_for_invalidation';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -116,6 +118,7 @@ export interface FetchResult {
 export interface BulkUpdateOpts {
   validate: boolean;
   mergeAttributes?: boolean;
+  options?: ApiKeyOptions;
 }
 
 export type BulkUpdateResult = Result<ConcreteTaskInstance, ErrorOutput>;
@@ -214,6 +217,61 @@ export class TaskStore {
         excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
       });
     }
+    return this.savedObjectsRepository;
+  }
+
+  private async regenerateApiKeyFromRequest(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
+    const hasEncryptedFields = docs.some((doc) => doc.apiKey && doc.userScope);
+    const apiKeyIdsToRemoveMap = new Map<string, string>();
+    let apiKeyAndUserScopeMap: Map<string, ApiKeyAndUserScope> | null = null;
+
+    // If a task with an API key is updated with a request
+    if (hasEncryptedFields && options?.request && options?.regenerateApiKey) {
+      const docsWithApiKeys: ConcreteTaskInstance[] = [];
+
+      docs.forEach((taskInstance) => {
+        const { apiKey, userScope } = taskInstance;
+        if (apiKey && userScope) {
+          docsWithApiKeys.push(taskInstance);
+          if (!userScope.apiKeyCreatedByUser) {
+            apiKeyIdsToRemoveMap.set(taskInstance.id, userScope.apiKeyId);
+          }
+        }
+      });
+
+      // and create new API keys using the new request
+      if (docsWithApiKeys.length) {
+        apiKeyAndUserScopeMap = await this.getApiKeyFromRequest(docsWithApiKeys, options.request);
+      }
+    }
+
+    return { apiKeyAndUserScopeMap, apiKeyIdsToRemoveMap };
+  }
+
+  private getSoClientForUpdate(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
+    const hasEncryptedFields = docs.some((doc) => doc.apiKey && doc.userScope);
+
+    // If a task with an API key is updated without a request, throw an error.
+    if (hasEncryptedFields && !options?.request) {
+      throw new Error(
+        'Request is not defined but some of the tasks have API key or user scope. Cannot get the encrypted saved objects repository to bulk update tasks.'
+      );
+    }
+
+    if (options?.request && !hasEncryptedFields) {
+      this.logger.debug(
+        'Request is defined but none of the tasks have API key or user scope. Using regular saved objects repository to bulk update tasks.'
+      );
+    }
+
+    // Return scoped client if request is defined AND at least one document has encrypted fields
+    if (options?.request && this.getIsSecurityEnabled() && hasEncryptedFields) {
+      return this.savedObjectsService.getScopedClient(options.request, {
+        includedHiddenTypes: [TASK_SO_NAME],
+        excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
+      });
+    }
+
     return this.savedObjectsRepository;
   }
 
@@ -518,19 +576,33 @@ export class TaskStore {
    */
   public async bulkUpdate(
     docs: ConcreteTaskInstance[],
-    { validate, mergeAttributes = true }: BulkUpdateOpts
+    { validate, mergeAttributes = true, options }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
+    const soClientToUpdate = this.getSoClientForUpdate(docs, options);
+    const regenerateResult = await this.regenerateApiKeyFromRequest(docs, options);
+    const apiKeyAndUserScopeMap = regenerateResult.apiKeyAndUserScopeMap || new Map();
+    const apiKeyIdsToRemoveMap = regenerateResult.apiKeyIdsToRemoveMap;
+
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
         try {
           const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
             validate,
           });
+          const { apiKey: updatedApiKey, userScope: updatedUserScope } =
+            apiKeyAndUserScopeMap.get(taskInstance.id) || {};
+          const apiKey = updatedApiKey || doc?.apiKey;
+          const userScope = updatedUserScope || doc?.userScope;
+
           acc.set(doc.id, {
             type: 'task',
             id: doc.id,
             version: doc.version,
-            attributes: taskInstanceToAttributes(taskInstance, doc.id),
+            attributes: {
+              ...taskInstanceToAttributes(taskInstance, doc.id),
+              ...(apiKey ? { apiKey } : {}),
+              ...(userScope ? { userScope } : {}),
+            },
             mergeAttributes,
           });
         } catch (e) {
@@ -546,7 +618,7 @@ export class TaskStore {
     let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
     try {
       ({ saved_objects: updatedSavedObjects } =
-        await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+        await soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(
           Array.from(newDocs.values()),
           {
             refresh: false,
@@ -557,7 +629,8 @@ export class TaskStore {
       throw e;
     }
 
-    return updatedSavedObjects.map((updatedSavedObject) => {
+    const apiKeyIdsToRemove: string[] = [];
+    const updates = updatedSavedObjects.map((updatedSavedObject) => {
       if (updatedSavedObject.error !== undefined) {
         return asErr({
           type: 'task',
@@ -576,8 +649,23 @@ export class TaskStore {
       const result = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance, {
         validate,
       });
+      const oldApiKey = apiKeyIdsToRemoveMap.get(updatedSavedObject.id);
+      if (oldApiKey) {
+        apiKeyIdsToRemove.push(oldApiKey);
+      }
       return asOk(result);
     });
+
+    // after successful updates we should invalidate the old API keys
+    if (apiKeyIdsToRemove.length) {
+      await bulkMarkApiKeysForInvalidation({
+        apiKeyIds: apiKeyIdsToRemove,
+        logger: this.logger,
+        savedObjectsClient: this.savedObjectsRepository,
+      });
+    }
+
+    return updates;
   }
 
   public async bulkPartialUpdate(
@@ -674,7 +762,11 @@ export class TaskStore {
 
     if (apiKey && userScope) {
       if (!userScope.apiKeyCreatedByUser) {
-        await this.security.authc.apiKeys.invalidateAsInternalUser({ ids: [userScope.apiKeyId] });
+        await bulkMarkApiKeysForInvalidation({
+          apiKeyIds: [userScope.apiKeyId],
+          logger: this.logger,
+          savedObjectsClient: this.savedObjectsRepository,
+        });
       }
     }
 
@@ -707,8 +799,10 @@ export class TaskStore {
     });
 
     if (apiKeyIdsToRemove.length) {
-      await this.security.authc.apiKeys.invalidateAsInternalUser({
-        ids: [...new Set(apiKeyIdsToRemove)],
+      await bulkMarkApiKeysForInvalidation({
+        apiKeyIds: apiKeyIdsToRemove,
+        logger: this.logger,
+        savedObjectsClient: this.savedObjectsRepository,
       });
     }
 
@@ -966,7 +1060,6 @@ export class TaskStore {
   public async aggregate<TSearchRequest extends AggregationOpts>({
     aggs,
     query,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     runtime_mappings,
     size = 0,
   }: TSearchRequest): Promise<estypes.SearchResponse<ConcreteTaskInstance>> {
@@ -989,13 +1082,11 @@ export class TaskStore {
 
   public async updateByQuery(
     opts: UpdateByQuerySearchOpts = {},
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     { max_docs: max_docs }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     const { sort, ...rest } = opts;
     try {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { total, updated, version_conflicts } = await this.esClient.updateByQuery(
         {
           index: this.index,

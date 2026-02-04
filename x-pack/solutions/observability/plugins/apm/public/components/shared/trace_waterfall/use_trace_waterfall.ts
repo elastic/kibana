@@ -6,10 +6,13 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { useMemo } from 'react';
+import type { Error } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
-import { type IWaterfallLegend, WaterfallLegendType } from '../../../../common/waterfall/legend';
+import { useMemo } from 'react';
+import { WaterfallLegendType, type IWaterfallLegend } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
+import type { ErrorMark } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
+import type { OnErrorClick } from './trace_waterfall_context';
 
 const FALLBACK_WARNING = i18n.translate(
   'xpack.apm.traceWaterfallItem.warningMessage.fallbackWarning',
@@ -38,9 +41,13 @@ export interface TraceWaterfallItem extends TraceItem {
 export function useTraceWaterfall({
   traceItems,
   isFiltered = false,
+  errors,
+  onErrorClick,
 }: {
   traceItems: TraceItem[];
   isFiltered?: boolean;
+  errors?: Error[];
+  onErrorClick?: OnErrorClick;
 }) {
   const waterfall = useMemo(() => {
     try {
@@ -63,6 +70,16 @@ export function useTraceWaterfall({
           })
         : [];
 
+      const errorMarks =
+        rootItem && errors
+          ? getWaterfallErrorsMarks({
+              errors,
+              traceItems: traceWaterfall,
+              rootItem,
+              onErrorClick,
+            })
+          : [];
+
       return {
         rootItem,
         traceState,
@@ -72,6 +89,7 @@ export function useTraceWaterfall({
         maxDepth: Math.max(...traceWaterfall.map((item) => item.depth)),
         legends,
         colorBy,
+        errorMarks,
       };
     } catch (e) {
       return {
@@ -82,11 +100,52 @@ export function useTraceWaterfall({
         duration: 0,
         maxDepth: 0,
         colorBy: WaterfallLegendType.Type,
+        errorMarks: [],
       };
     }
-  }, [traceItems, isFiltered]);
+  }, [traceItems, isFiltered, errors, onErrorClick]);
 
   return waterfall;
+}
+
+function getWaterfallErrorsMarks({
+  errors,
+  traceItems,
+  rootItem,
+  onErrorClick,
+}: {
+  errors: Error[];
+  traceItems: TraceWaterfallItem[];
+  rootItem: TraceItem;
+  onErrorClick?: OnErrorClick;
+}): ErrorMark[] {
+  const rootTimestampUs = rootItem.timestampUs;
+  const traceItemsByIdMap = new Map(traceItems.map((item) => [item.id, item]));
+  return errors.map((error) => {
+    const parent = error.parent?.id ? traceItemsByIdMap.get(error.parent?.id) : undefined;
+    const docId = error.transaction?.id || error.span?.id;
+    return {
+      type: 'errorMark',
+      error,
+      id: error.id,
+      verticalLine: false,
+      offset: error.timestamp.us - rootTimestampUs,
+      skew: getClockSkew({ itemTimestamp: error.timestamp.us, itemDuration: 0, parent }),
+      serviceColor: parent?.color ?? '',
+      onClick:
+        onErrorClick && docId
+          ? () => {
+              onErrorClick({
+                traceId: rootItem.traceId,
+                docId,
+                errorCount: 1,
+                errorDocId: error.id,
+                docIndex: error.index,
+              });
+            }
+          : undefined,
+    };
+  });
 }
 
 export function getColorByType(legends: IWaterfallLegend[]) {

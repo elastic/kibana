@@ -104,7 +104,7 @@ export const FlyoutWrapper = ({
           {(navigateToLensEditor || toolbar) && (
             <>
               <EuiFlexGroup
-                gutterSize="s"
+                gutterSize="xs"
                 justifyContent="spaceBetween"
                 alignItems="center"
                 responsive={false}

@@ -32,6 +32,26 @@ describe('Navigation Tree', () => {
     );
   });
 
+  it('shows AI Assistant and hides Agents when AI Assistant is enabled', () => {
+    const { body } = createNavigationTree({});
+
+    const aiAssistantNode = body.find((item) => item.link === 'observabilityAIAssistant');
+    const agentsNode = body.find((item) => item.link === 'agent_builder');
+
+    expect(aiAssistantNode).toBeDefined();
+    expect(agentsNode).toBeUndefined();
+  });
+
+  it('shows Agents and hides AI Assistant when AI Assistant is disabled', () => {
+    const { body } = createNavigationTree({ showAiAssistant: false });
+
+    const aiAssistantNode = body.find((item) => item.link === 'observabilityAIAssistant');
+    const agentsNode = body.find((item) => item.link === 'agent_builder');
+
+    expect(aiAssistantNode).toBeUndefined();
+    expect(agentsNode).toBeDefined();
+  });
+
   describe('filterForFeatureAvailability', () => {
     it('should return empty array if feature flag is false', () => {
       const node = {

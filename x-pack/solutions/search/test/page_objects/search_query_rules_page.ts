@@ -195,6 +195,12 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
       async expectRuleFlyoutToExist() {
         await testSubjects.existOrFail(this.TEST_IDS.RULE_FLYOUT);
       },
+      async expectRuleFlyoutNotToExist() {
+        await testSubjects.missingOrFail(this.TEST_IDS.RULE_FLYOUT);
+      },
+      async expectUpdateButtonIsEnabled() {
+        await testSubjects.isEnabled(this.TEST_IDS.RULE_FLYOUT_UPDATE_BUTTON);
+      },
       async clickUpdateButton() {
         await testSubjects.click(this.TEST_IDS.RULE_FLYOUT_UPDATE_BUTTON);
       },

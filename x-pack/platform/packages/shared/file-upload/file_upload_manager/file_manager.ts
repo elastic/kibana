@@ -90,6 +90,8 @@ export interface UploadStatus {
   indexSearchable: boolean;
   allDocsSearchable: boolean;
   errors: Array<{ title: string; error: any }>;
+  totalDocs: number;
+  totalFailedDocs: number;
 }
 
 export class FileUploadManager {
@@ -157,6 +159,8 @@ export class FileUploadManager {
     allDocsSearchable: false,
     errors: [],
     overallImportProgress: 0,
+    totalDocs: 0,
+    totalFailedDocs: 0,
   });
   public readonly uploadStatus$ = this._uploadStatus$.asObservable();
 
@@ -178,7 +182,7 @@ export class FileUploadManager {
     this.http = dependencies.http;
     this.notifications = dependencies.notifications;
 
-    this.uploadSessionId = Math.random().toString(36).substring(2, 15);
+    this.uploadSessionId = FileUploadTelemetryService.generateId();
     this.setExistingIndexName(existingIndexName);
     this.initializedWithExistingIndex = existingIndexName !== null;
 
@@ -352,6 +356,10 @@ export class FileUploadManager {
     }
   }
 
+  /**
+   * Removes files that have clashing mappings and cannot be imported together.
+   * Files marked with ERROR clash type will be removed from the file list.
+   */
   public async removeClashingFiles() {
     const fileClashes = this._uploadStatus$.getValue().fileClashes;
     const filesToDestroy: FileWrapper[] = [];
@@ -371,6 +379,11 @@ export class FileUploadManager {
     });
   }
 
+  /**
+   * Creates a function to analyze a file at the specified index with custom overrides.
+   * @param index - The index of the file to analyze
+   * @returns A function that accepts overrides and performs the file analysis
+   */
   public analyzeFileWithOverrides(index: number) {
     return async (overrides: InputOverrides) => {
       const files = this.getFiles();
@@ -382,17 +395,34 @@ export class FileUploadManager {
     };
   }
 
+  /**
+   * Gets the current upload status including file clashes, analysis status, and import progress.
+   * @returns The current upload status
+   */
   public getUploadStatus() {
     return this._uploadStatus$.getValue();
   }
 
+  /**
+   * Checks if the file upload manager was initialized with an existing index.
+   * @returns True if initialized with an existing index, false otherwise
+   */
   public getInitializedWithExistingIndex() {
     return this.initializedWithExistingIndex;
   }
 
+  /**
+   * Gets the name of the existing index being used for import.
+   * @returns The existing index name or null if none is set
+   */
   public getExistingIndexName() {
     return this._existingIndexName$.getValue();
   }
+
+  /**
+   * Sets the existing index name and resets the analysis status.
+   * @param name - The index name to set, or null to clear
+   */
   public setExistingIndexName(name: string | null) {
     this.setStatus({
       analysisStatus: STATUS.NOT_STARTED,
@@ -407,10 +437,18 @@ export class FileUploadManager {
     }
   }
 
+  /**
+   * Checks if this upload is targeting an existing index.
+   * @returns True if uploading to an existing index, false otherwise
+   */
   public isExistingIndexUpload() {
     return this.getExistingIndexName() !== null;
   }
 
+  /**
+   * Gets the current array of file wrappers being managed.
+   * @returns Array of FileWrapper instances
+   */
   public getFiles() {
     return this.files$.getValue();
   }
@@ -466,6 +504,10 @@ export class FileUploadManager {
     };
   }
 
+  /**
+   * Updates the pipelines for all files with the provided array.
+   * @param pipelines - Array of pipelines corresponding to each file
+   */
   public updatePipelines(pipelines: Array<IngestPipeline | undefined>) {
     const files = this.getFiles();
     files.forEach((file, i) => {
@@ -473,18 +515,34 @@ export class FileUploadManager {
     });
   }
 
+  /**
+   * Gets the current index mappings.
+   * @returns The current mappings configuration
+   */
   public getMappings() {
     return this._mappings$.getValue();
   }
 
+  /**
+   * Updates the index mappings configuration.
+   * @param mappings - New mappings as object or JSON string
+   */
   public updateMappings(mappings: MappingTypeMapping | string) {
     this.updateSettingsOrMappings('mappings', mappings);
   }
 
+  /**
+   * Gets the current index settings.
+   * @returns The current index settings configuration
+   */
   public getSettings() {
     return this._settings$.getValue();
   }
 
+  /**
+   * Updates the index settings configuration.
+   * @param settings - New settings as object or JSON string
+   */
   public updateSettings(settings: IndicesIndexSettings | string) {
     this.updateSettingsOrMappings('settings', settings);
   }
@@ -526,10 +584,20 @@ export class FileUploadManager {
     }
   }
 
+  /**
+   * Gets whether a data view should be automatically created after import.
+   * @returns True if auto-creating data view, false otherwise
+   */
   public getAutoCreateDataView() {
     return this.autoCreateDataView;
   }
 
+  /**
+   * Imports all files into the specified index with optional data view creation.
+   * @param indexName - Name of the target index
+   * @param dataViewName - Optional name for the data view to create
+   * @returns Promise resolving to import results or null if cancelled
+   */
   public async import(
     indexName: string,
     dataViewName?: string | null
@@ -690,16 +758,29 @@ export class FileUploadManager {
 
     checkImportAborted();
 
-    const totalDocCount = files.reduce((acc, file) => {
-      const { docCount, failures } = file.getStatus();
-      const count = docCount - failures.length;
-      return acc + count;
-    }, 0);
+    // Calculate document counts across all imported files
+    const documentCounts = files.reduce(
+      (totals, file) => {
+        const { docCount, failures } = file.getStatus();
+        totals.totalDocs += docCount;
+        totals.totalDocFailures += failures.length;
+        return totals;
+      },
+      {
+        totalDocs: 0,
+        totalDocFailures: 0,
+      }
+    );
 
-    this.docCountService.startAllDocsSearchableCheck(indexName, totalDocCount);
+    this.docCountService.startAllDocsSearchableCheck(
+      indexName,
+      documentCounts.totalDocs - documentCounts.totalDocFailures
+    );
 
     this.setStatus({
       fileImport: STATUS.COMPLETED,
+      totalDocs: documentCounts.totalDocs,
+      totalFailedDocs: documentCounts.totalDocFailures,
     });
 
     if (this.removePipelinesAfterImport) {
@@ -829,7 +910,7 @@ export class FileUploadManager {
       };
 
       pipelines.forEach((pipeline) => {
-        if (pipeline === undefined) {
+        if (pipeline === undefined || pipeline.processors === undefined) {
           return;
         }
         pipeline.processors.push({
@@ -869,6 +950,52 @@ export class FileUploadManager {
       });
     }
   }
+
+  /**
+   * Renames target fields in CSV processors across all file pipelines.
+   * @param changes - Array of field name changes to apply
+   */
+  public renamePipelineTargetFields(
+    changes: {
+      oldName: string;
+      newName: string;
+    }[]
+  ) {
+    // Filter out changes where oldName equals newName (no actual difference)
+    const actualChanges = changes.filter((change) => change.oldName !== change.newName);
+
+    if (actualChanges.length === 0) {
+      return;
+    }
+
+    // Update pipeline configurations for all files
+    const files = this.getFiles();
+    for (const file of files) {
+      file.renameTargetFields(actualChanges);
+    }
+  }
+
+  /**
+   * Removes all convert processors from all file pipelines.
+   */
+  public removeConvertProcessors() {
+    const files = this.getFiles();
+    for (const file of files) {
+      file.removeConvertProcessors();
+    }
+  }
+
+  /**
+   * Updates date field processors in all file pipelines based on current mappings.
+   * @param mappings - Current index mappings to validate against
+   */
+  public updateDateFields(mappings: MappingTypeMapping) {
+    const files = this.getFiles();
+    for (const file of files) {
+      file.updateDateField(mappings);
+    }
+  }
+
   private sendTelemetryProvider(
     files: FileWrapper[],
     startTime: number,

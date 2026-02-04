@@ -308,7 +308,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // verify Lens opens a visualization
         await retry.waitFor('lens visualization', async () => {
           const elements = await testSubjects.getVisibleTextAll('lns-dimensionTrigger');
-          return elements[0] === 'Top 5 values of painString';
+          return elements[0] === 'Top 9 values of painString';
         });
       });
 
@@ -404,7 +404,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // verify Lens opens a visualization
         await retry.waitFor('lens visualization', async () => {
           const elements = await testSubjects.getVisibleTextAll('lns-dimensionTrigger');
-          return elements[0] === 'Top 5 values of painBool';
+          return elements[0] === 'Top 9 values of painBool';
         });
       });
 

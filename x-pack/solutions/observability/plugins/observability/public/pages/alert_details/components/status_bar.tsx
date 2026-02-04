@@ -70,7 +70,7 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.observability.pages.alertDetails.pageTitle.workflowTags"
-                defaultMessage="Workflow Tags:"
+                defaultMessage="Workflow tags:"
               />
             </EuiText>
             <TagsList tags={workflowTags} ignoreEmpty color="default" />

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
@@ -38,6 +38,8 @@ test.describe(
       await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
+
+      await pageObjects.streams.waitForModifiedFieldsDetection();
 
       // Simulate network failure
       await page.route('**/streams/**/_ingest', async (route) => {
@@ -75,6 +77,8 @@ test.describe(
       await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
+
+      await pageObjects.streams.waitForModifiedFieldsDetection();
 
       await pageObjects.streams.saveStepsListChanges();
       await pageObjects.streams.confirmChangesInReviewModal();

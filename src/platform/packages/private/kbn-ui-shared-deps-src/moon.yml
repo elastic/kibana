@@ -57,7 +57,7 @@ tasks:
       - /src/platform/packages/shared/shared-ux/error_boundary/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-rison/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/shared-ux/code_editor/impl/**/*.{js,ts,tsx}
-      - /src/platform/packages/shared/kbn-esql-ast/**/*.{js,ts,tsx}
+      - /src/platform/packages/shared/kbn-esql-language/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-ebt-tools/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/react/kibana_context/common/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/react/kibana_context/root/**/*.{js,ts,tsx}

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ESQLTimeSpanLiteral } from '@kbn/esql-ast';
-import { Builder, TIME_SPAN_UNITS } from '@kbn/esql-ast';
+import type { ESQLTimeSpanLiteral } from '@kbn/esql-language';
+import { Builder, TIME_SPAN_UNITS } from '@kbn/esql-language';
 
 const timespanStringRegexp = new RegExp(
   `^["']?([0-9]+)?\\s*?(${TIME_SPAN_UNITS.join('|')})["']?$`,

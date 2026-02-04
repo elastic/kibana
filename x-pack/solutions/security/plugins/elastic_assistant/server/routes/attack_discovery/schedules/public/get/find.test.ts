@@ -18,11 +18,6 @@ import {
 } from '../../../../../__mocks__/attack_discovery_schedules.mock';
 import type { AttackDiscoveryScheduleDataClient } from '../../../../../lib/attack_discovery/schedules/data_client';
 import { performChecks } from '../../../../helpers';
-import { getKibanaFeatureFlags } from '../../../helpers/get_kibana_feature_flags';
-
-jest.mock('../../../helpers/get_kibana_feature_flags', () => ({
-  getKibanaFeatureFlags: jest.fn(),
-}));
 
 jest.mock('../../../../helpers', () => ({
   performChecks: jest.fn(),
@@ -72,9 +67,6 @@ describe('findAttackDiscoverySchedulesRoute', () => {
     );
     (performChecks as jest.Mock).mockResolvedValue({
       isSuccess: true,
-    });
-    (getKibanaFeatureFlags as jest.Mock).mockResolvedValue({
-      attackDiscoveryPublicApiEnabled: true,
     });
     findAttackDiscoverySchedulesRoute(server.router);
     findAttackDiscoverySchedule.mockResolvedValue(
@@ -140,106 +132,6 @@ describe('findAttackDiscoverySchedulesRoute', () => {
         success: false,
       },
       status_code: 500,
-    });
-  });
-
-  describe('public API feature flag behavior', () => {
-    describe('when the public API is disabled', () => {
-      let featureFlagServer: ReturnType<typeof serverMock.create>;
-      let featureFlagContext: ReturnType<typeof requestContextMock.createTools>['context'];
-
-      beforeEach(() => {
-        jest.clearAllMocks();
-        featureFlagServer = serverMock.create();
-        const { context: freshContext } = requestContextMock.createTools();
-        featureFlagContext = freshContext;
-
-        featureFlagContext.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
-          mockSchedulingDataClient
-        );
-
-        (performChecks as jest.Mock).mockResolvedValue({
-          isSuccess: true,
-        });
-        (getKibanaFeatureFlags as jest.Mock).mockResolvedValue({
-          attackDiscoveryPublicApiEnabled: false,
-        });
-
-        findAttackDiscoverySchedulesRoute(featureFlagServer.router);
-      });
-
-      it('returns a 403 response when the public API is disabled', async () => {
-        const response = await featureFlagServer.inject(
-          findAttackDiscoverySchedulesRequest(),
-          requestContextMock.convertContext(featureFlagContext)
-        );
-
-        expect(response.status).toEqual(403);
-        expect(response.body).toEqual({
-          message: { error: 'Attack discovery public API is disabled', success: false },
-          status_code: 403,
-        });
-      });
-    });
-
-    describe('when the public API is enabled', () => {
-      let featureFlagServer: ReturnType<typeof serverMock.create>;
-      let featureFlagContext: ReturnType<typeof requestContextMock.createTools>['context'];
-
-      beforeEach(() => {
-        jest.clearAllMocks();
-        featureFlagServer = serverMock.create();
-        const { context: freshContext } = requestContextMock.createTools();
-        featureFlagContext = freshContext;
-
-        findAttackDiscoverySchedule.mockResolvedValue(
-          getFindAttackDiscoverySchedulesMock([
-            getAttackDiscoveryScheduleMock(basicAttackDiscoveryScheduleMock),
-          ])
-        );
-
-        featureFlagContext.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
-          mockSchedulingDataClient
-        );
-        (performChecks as jest.Mock).mockResolvedValue({
-          isSuccess: true,
-        });
-        (getKibanaFeatureFlags as jest.Mock).mockResolvedValue({
-          attackDiscoveryPublicApiEnabled: true,
-        });
-
-        findAttackDiscoverySchedulesRoute(featureFlagServer.router);
-      });
-
-      it('proceeds with normal execution when the public API is enabled', async () => {
-        const response = await featureFlagServer.inject(
-          findAttackDiscoverySchedulesRequest(),
-          requestContextMock.convertContext(featureFlagContext)
-        );
-
-        expect(response.status).toEqual(200);
-        expect(response.body).toEqual({
-          page: 1,
-          per_page: 10,
-          total: 1,
-          data: [
-            expect.objectContaining({
-              name: 'Test Schedule',
-              schedule: {
-                interval: '100m',
-              },
-              params: {
-                alerts_index_pattern: '.alerts-security.alerts-default',
-                api_config: mockApiConfig,
-                end: 'now',
-                size: 25,
-                start: 'now-24h',
-              },
-              enabled: true,
-            }),
-          ],
-        });
-      });
     });
   });
 });

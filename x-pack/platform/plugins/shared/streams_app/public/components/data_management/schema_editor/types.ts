@@ -66,6 +66,7 @@ export interface SchemaEditorProps {
   withFieldSimulation?: boolean;
   withTableActions?: boolean;
   withToolbar?: boolean;
+  enableGeoPointSuggestions?: boolean;
 }
 
 export const isSchemaFieldTyped = (field: SchemaField): field is MappedSchemaField => {

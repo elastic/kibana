@@ -27,8 +27,7 @@ import { lensApiStateSchema } from '../schema';
  * - Validates against the general lensApiStateSchema
  */
 export function validateConverter(attributes: LensAttributes, schema: Type<any>) {
-  const builder = new LensConfigBuilder();
-
+  const builder = new LensConfigBuilder(undefined, true);
   const newApiConfig = builder.toAPIFormat(attributes);
 
   expect(() => {

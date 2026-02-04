@@ -16,7 +16,6 @@ import type { Observable } from 'rxjs';
 import {
   interval,
   of,
-  from,
   BehaviorSubject,
   map,
   distinctUntilChanged,
@@ -28,6 +27,7 @@ import {
   shareReplay,
   retry,
   timer,
+  defer,
 } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -101,10 +101,17 @@ export function mapNodesVersionCompatibility(
       nodesInfoRequestError: nodesInfoResponse.nodesInfoRequestError,
     };
   }
+
+  // Sort by version first, then by IP for stable ordering
+  const sortNodes = (a: NodeInfo, b: NodeInfo) => {
+    const versionCompare = a.version.localeCompare(b.version);
+    return versionCompare !== 0 ? versionCompare : a.ip.localeCompare(b.ip);
+  };
+
   const nodes = Object.keys(nodesInfoResponse.nodes)
-    .sort() // Sorting ensures a stable node ordering for comparison
     .map((key) => nodesInfoResponse.nodes[key])
-    .map((node) => Object.assign({}, node, { name: getHumanizedNodeName(node) }));
+    .map((node) => Object.assign({}, node, { name: getHumanizedNodeName(node) }))
+    .sort(sortNodes); // Sorting ensures stable ordering for comparison
 
   // Aggregate incompatible ES nodes.
   const incompatibleNodes = nodes.filter(
@@ -155,6 +162,7 @@ function compareNodesInfoErrorMessages(
 // Returns true if two NodesVersionCompatibility entries match
 function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompatibility) {
   const nodesEqual = (n: NodeInfo, m: NodeInfo) => n.ip === m.ip && n.version === m.version;
+
   return (
     curr.isCompatible === prev.isCompatible &&
     curr.incompatibleNodes.length === prev.incompatibleNodes.length &&
@@ -195,16 +203,16 @@ export const pollEsNodesVersion = ({
     switchMap((checkInterval) => interval(checkInterval)),
     startWith(0),
     exhaustMap(() => {
-      return from(
-        internalClient.nodes.info(
+      return defer(() => {
+        return internalClient.nodes.info(
           {
             node_id: '_all',
             metric: '_none',
             filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
           },
           { requestTimeout: HEALTH_CHECK_REQUEST_TIMEOUT }
-        )
-      ).pipe(
+        );
+      }).pipe(
         retry({
           count: healthCheckRetry,
           delay: (e) => {

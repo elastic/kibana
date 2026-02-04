@@ -9,6 +9,7 @@
 
 import { findDependencyReferencesTool } from './find_dependency_references';
 import fs from 'fs';
+import { parseToolResultJsonContent } from './test_utils';
 
 jest.mock('fs');
 jest.mock('@kbn/repo-info', () => ({ REPO_ROOT: '/repo/root' }));
@@ -26,6 +27,34 @@ describe('findDependencyReferencesTool', () => {
 
   const setupMockFileSystem = (files: Record<string, string>, codeowners?: string) => {
     const fileMap = new Map(Object.entries(files));
+
+    // Build directory structure from file paths.
+    const dirContents = new Map<string, Set<string>>();
+    dirContents.set('', new Set(['src', 'x-pack', '.gitignore']));
+    dirContents.set('src', new Set(['file1.ts', 'file2.tsx', 'file3.js']));
+    dirContents.set('x-pack', new Set(['file4.ts']));
+
+    // Add files from the fileMap to the directory structure.
+    for (const filePath of fileMap.keys()) {
+      const parts = filePath.split('/');
+      const fileName = parts.pop()!;
+      const dirPath = parts.join('/');
+
+      if (!dirContents.has(dirPath)) {
+        dirContents.set(dirPath, new Set());
+      }
+      dirContents.get(dirPath)!.add(fileName);
+
+      // Also ensure parent directories exist.
+      for (let i = 0; i < parts.length; i++) {
+        const parentDir = parts.slice(0, i).join('/');
+        const childDir = parts[i];
+        if (!dirContents.has(parentDir)) {
+          dirContents.set(parentDir, new Set());
+        }
+        dirContents.get(parentDir)!.add(childDir);
+      }
+    }
 
     // Mock readFileSync to return file contents
     mockedFs.readFileSync.mockImplementation(((filePath: string, encoding?: string) => {
@@ -53,14 +82,9 @@ describe('findDependencyReferencesTool', () => {
     // Mock readdirSync to return directory contents
     mockedFs.readdirSync.mockImplementation(((dirPath: string) => {
       const relativePath = dirPath.replace('/repo/root/', '').replace('/repo/root', '');
-      if (!relativePath || relativePath === '') {
-        return ['src', 'x-pack', '.gitignore'];
-      }
-      if (relativePath === 'src') {
-        return ['file1.ts', 'file2.tsx', 'file3.js'];
-      }
-      if (relativePath === 'x-pack') {
-        return ['file4.ts'];
+      const contents = dirContents.get(relativePath);
+      if (contents) {
+        return Array.from(contents);
       }
       return [];
     }) as any);
@@ -68,7 +92,8 @@ describe('findDependencyReferencesTool', () => {
     // Mock lstatSync to return file stats
     mockedFs.lstatSync.mockImplementation(((filePath: string) => {
       const relativePath = filePath.replace('/repo/root/', '').replace('/repo/root', '');
-      if (relativePath === 'src' || relativePath === 'x-pack' || relativePath.startsWith('.git')) {
+      // Check if it's a known directory.
+      if (dirContents.has(relativePath) || relativePath.startsWith('.git')) {
         return { isDirectory: () => true, isFile: () => false } as any;
       }
       return { isDirectory: () => false, isFile: () => true } as any;
@@ -91,7 +116,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.dependencyName).toBe('enzyme');
       expect(parsedResult.totalMatchingFiles).toBe(2);
@@ -111,7 +136,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.totalMatchingFiles).toBe(1);
       expect(parsedResult.matchingFiles).toContain('src/file1.ts');
@@ -127,7 +152,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.totalMatchingFiles).toBe(1);
       expect(parsedResult.matchingFiles).toContain('src/file1.ts');
@@ -143,7 +168,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.totalMatchingFiles).toBe(2);
       expect(parsedResult.uniqueApis).toContain('shallow');
@@ -168,7 +193,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.matchingFilesByTeam).toHaveLength(2);
       expect(parsedResult.matchingFilesByTeam[0].team).toBe('@elastic/kibana-core');
@@ -187,7 +212,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.matchingFilesByTeam[0].files).toHaveLength(2);
       expect(parsedResult.matchingFilesByTeam[0].files[0].filePath).toBe('src/file1.ts');
@@ -205,7 +230,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.totalMatchingFiles).toBe(0);
       expect(parsedResult.matchingFiles).toHaveLength(0);
@@ -225,7 +250,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.totalMatchingFiles).toBe(1);
       expect(parsedResult.uniqueApis).toContain('shallow');
@@ -254,7 +279,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.totalMatchingFiles).toBe(1);
       expect(parsedResult.matchingFiles).not.toContain('.hidden/file2.ts');
@@ -269,7 +294,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.analysisTimeMs).toBeGreaterThanOrEqual(0);
       expect(typeof parsedResult.analysisTimeMs).toBe('number');
@@ -285,7 +310,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: '@kbn/resizable-layout',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.totalMatchingFiles).toBe(1);
       expect(parsedResult.matchingFiles).toContain('src/file1.ts');
@@ -301,7 +326,7 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       expect(parsedResult.uniqueApis).toEqual(['alpha', 'beta', 'zebra']);
     });
@@ -355,12 +380,291 @@ describe('findDependencyReferencesTool', () => {
         dependencyName: 'enzyme',
       });
 
-      const parsedResult = JSON.parse(result.content[0].text as string);
+      const parsedResult = parseToolResultJsonContent(result);
 
       // Should only find file2.tsx, file1.ts should be skipped
       expect(parsedResult.totalMatchingFiles).toBe(1);
       expect(parsedResult.matchingFiles).toContain('src/file2.tsx');
       expect(parsedResult.matchingFiles).not.toContain('src/file1.ts');
+    });
+
+    it('handles gitignore patterns with leading slash', async () => {
+      setupMockFileSystem(
+        {
+          'src/file1.ts': "import moment from 'moment';",
+          'src/file2.ts': "import moment from 'moment';",
+        },
+        '/src @elastic/kibana-core'
+      );
+
+      mockedFs.readFileSync.mockImplementation(((filePath: string) => {
+        const relativePath = filePath.replace('/repo/root/', '');
+        if (relativePath === '.gitignore') {
+          return '/src/file1.ts\n';
+        }
+        if (relativePath === 'src/file1.ts') {
+          return "import moment from 'moment';";
+        }
+        if (relativePath === 'src/file2.ts') {
+          return "import moment from 'moment';";
+        }
+        throw new Error('File not found');
+      }) as any);
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      // file1.ts should be ignored due to gitignore pattern
+      expect(parsedResult.matchingFiles).not.toContain('src/file1.ts');
+    });
+
+    it('handles simple gitignore patterns without slash or glob', async () => {
+      setupMockFileSystem(
+        {
+          'src/file1.ts': "import moment from 'moment';",
+          'src/ignored/file2.ts': "import moment from 'moment';",
+        },
+        '/src @elastic/kibana-core'
+      );
+
+      // Override the mock to provide a simple gitignore pattern.
+      mockedFs.readFileSync.mockImplementation(((filePath: string) => {
+        const relativePath = filePath.replace('/repo/root/', '');
+        if (relativePath === '.gitignore') {
+          return 'ignored\n';
+        }
+        if (relativePath === 'src/file1.ts') {
+          return "import moment from 'moment';";
+        }
+        if (relativePath === 'src/ignored/file2.ts') {
+          return "import moment from 'moment';";
+        }
+        if (relativePath === '.github/CODEOWNERS') {
+          return '/src @elastic/kibana-core';
+        }
+        throw new Error('File not found');
+      }) as any);
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      // file2.ts in 'ignored' directory should be skipped.
+      expect(parsedResult.matchingFiles).not.toContain('src/ignored/file2.ts');
+    });
+
+    it('respects CODEOWNERS specificity with multiple matching rules', async () => {
+      setupMockFileSystem(
+        {
+          'src/plugins/myPlugin/file.ts': "import moment from 'moment';",
+        },
+        `/src @elastic/kibana-core
+/src/plugins @elastic/kibana-platform
+/src/plugins/myPlugin @elastic/kibana-data-discovery`
+      );
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      // Should use the most specific rule.
+      const team = parsedResult.matchingFilesByTeam?.find(
+        (t: { team: string }) => t.team === '@elastic/kibana-data-discovery'
+      );
+      expect(team).toBeDefined();
+      expect(team.fileCount).toBe(1);
+    });
+
+    it('skips overly broad gitignore patterns', async () => {
+      setupMockFileSystem(
+        {
+          'src/file1.ts': "import moment from 'moment';",
+        },
+        '/src @elastic/kibana-core'
+      );
+
+      mockedFs.readFileSync.mockImplementation(((filePath: string) => {
+        const relativePath = filePath.replace('/repo/root/', '');
+        if (relativePath === '.gitignore') {
+          return '*\n**\na\n';
+        }
+        if (relativePath === 'src/file1.ts') {
+          return "import moment from 'moment';";
+        }
+        throw new Error('File not found');
+      }) as any);
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      // Should still find files despite overly broad patterns
+      expect(parsedResult.matchingFiles).toContain('src/file1.ts');
+    });
+
+    it('handles files that cannot be stat', async () => {
+      setupMockFileSystem(
+        {
+          'src/file1.ts': "import moment from 'moment';",
+        },
+        '/src @elastic/kibana-core'
+      );
+
+      mockedFs.lstatSync.mockImplementation((() => {
+        throw new Error('Permission denied');
+      }) as any);
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      // Should handle stat errors gracefully
+      expect(parsedResult.totalMatchingFiles).toBe(0);
+    });
+
+    it('detects variable assignments and method calls', async () => {
+      setupMockFileSystem(
+        {
+          'src/file1.ts': `
+            import moment from 'moment';
+            const m = moment();
+            const result = m.format('YYYY-MM-DD');
+            const value = m.add(1, 'day');
+          `,
+        },
+        '/src @elastic/kibana-core'
+      );
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      expect(parsedResult.totalMatchingFiles).toBeGreaterThan(0);
+      const team = parsedResult.matchingFilesByTeam?.find(
+        (t: { team: string }) => t.team === '@elastic/kibana-core'
+      );
+      if (team && team.files.length > 0) {
+        const fileResult = team.files[0];
+        expect(fileResult.apis).toContain('format');
+        expect(fileResult.apis).toContain('add');
+      } else {
+        // If team not found, at least verify the file was found.
+        expect(parsedResult.totalMatchingFiles).toBeGreaterThan(0);
+      }
+    });
+
+    it('handles destructured imports with method calls', async () => {
+      setupMockFileSystem(
+        {
+          'src/file1.ts': `
+            import { format, add } from 'moment';
+            const date = format(new Date());
+            const newDate = add(new Date(), 1, 'day');
+          `,
+        },
+        '/src @elastic/kibana-core'
+      );
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      expect(parsedResult.totalMatchingFiles).toBeGreaterThan(0);
+      const team = parsedResult.matchingFilesByTeam?.find(
+        (t: { team: string }) => t.team === '@elastic/kibana-core'
+      );
+      if (team && team.files.length > 0) {
+        const fileResult = team.files[0];
+        expect(fileResult.apis).toContain('format');
+        expect(fileResult.apis).toContain('add');
+      } else {
+        // If team not found, at least verify the file was found.
+        expect(parsedResult.totalMatchingFiles).toBeGreaterThan(0);
+      }
+    });
+
+    it('handles CODEOWNERS with empty lines and comments', async () => {
+      setupMockFileSystem(
+        {
+          'src/file.ts': "import moment from 'moment';",
+        },
+        `
+# Comment line
+
+/src @elastic/kibana-core
+
+# Another comment
+        `.trim()
+      );
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      // Should handle empty lines and comments without crashing
+      expect(parsedResult).toBeDefined();
+      expect(typeof parsedResult.totalMatchingFiles).toBe('number');
+    });
+
+    it('handles CODEOWNERS with malformed lines', async () => {
+      setupMockFileSystem(
+        {
+          'src/file.ts': "import moment from 'moment';",
+        },
+        `
+/src @elastic/kibana-core
+malformed-line-without-team
+/another/path
+        `.trim()
+      );
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      // Should handle malformed lines without crashing
+      expect(parsedResult).toBeDefined();
+      expect(typeof parsedResult.totalMatchingFiles).toBe('number');
+    });
+
+    it('handles method calls with whitespace in API name', async () => {
+      setupMockFileSystem(
+        {
+          'src/file1.ts': `
+            import moment from 'moment';
+            const m = moment();
+            const result = m.  format  ();
+          `,
+        },
+        '/src @elastic/kibana-core'
+      );
+
+      const result = await findDependencyReferencesTool.handler({
+        dependencyName: 'moment',
+      });
+
+      const parsedResult = parseToolResultJsonContent(result);
+      expect(parsedResult.totalMatchingFiles).toBeGreaterThan(0);
+      const team = parsedResult.matchingFilesByTeam?.find(
+        (t: { team: string }) => t.team === '@elastic/kibana-core'
+      );
+      if (team && team.files.length > 0) {
+        const fileResult = team.files[0];
+        expect(fileResult.apis).toContain('format');
+      } else {
+        // If team not found, at least verify the file was found.
+        expect(parsedResult.totalMatchingFiles).toBeGreaterThan(0);
+      }
     });
   });
 

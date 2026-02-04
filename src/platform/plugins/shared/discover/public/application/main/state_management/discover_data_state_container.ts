@@ -24,12 +24,13 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram/types';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
+import { isEqual, sortBy } from 'lodash';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
@@ -81,7 +82,6 @@ export interface DataTotalHitsMsg extends DataMsg {
 
 export interface DiscoverLatestFetchDetails {
   abortController?: AbortController;
-  visContext?: UnifiedHistogramVisContext;
 }
 
 export interface DiscoverDataStateContainer {
@@ -131,7 +131,11 @@ export interface DiscoverDataStateContainer {
   /**
    * Available Inspector Adaptor allowing to get details about recent requests to ES
    */
-  inspectorAdapters: { requests: RequestAdapter; lensRequests?: RequestAdapter };
+  inspectorAdapters: {
+    requests: RequestAdapter;
+    lensRequests?: RequestAdapter;
+    cascadeRequests?: RequestAdapter;
+  };
   /**
    * Return the initial fetch status
    *  UNINITIALIZED: data is not fetched initially, without user triggering it
@@ -151,7 +155,6 @@ export function getDataStateContainer({
   internalState,
   runtimeStateManager,
   savedSearchContainer,
-  setDataView,
   injectCurrentTab,
   getCurrentTab,
 }: {
@@ -160,7 +163,6 @@ export function getDataStateContainer({
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   savedSearchContainer: DiscoverSavedSearchContainer;
-  setDataView: (dataView: DataView) => void;
   injectCurrentTab: TabActionInjector;
   getCurrentTab: () => TabState;
 }): DiscoverDataStateContainer {
@@ -169,6 +171,8 @@ export function getDataStateContainer({
   const inspectorAdapters = { requests: new RequestAdapter() };
   const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails | null>(1);
   const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
+  let numberOfFetches = 0;
+  let unsubscribeIsRequested = false;
 
   /**
    * The observable to trigger data fetching in UI
@@ -179,7 +183,7 @@ export function getDataStateContainer({
   const getInitialFetchStatus = () => {
     const shouldSearchOnPageLoad =
       uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      savedSearchContainer.getState().id !== undefined ||
+      internalState.getState().persistedDiscoverSession?.id !== undefined ||
       !timefilter.getRefreshInterval().pause ||
       searchSessionManager.hasSearchSessionIdInURL();
     return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
@@ -237,7 +241,6 @@ export function getDataStateContainer({
     data,
     main$: dataSubjects.main$,
     refetch$,
-    searchSource: savedSearchContainer.getState().searchSource,
     searchSessionManager,
   }).pipe(
     filter(() => validateTimeRange(timefilter.getTime(), toastNotifications)),
@@ -257,6 +260,12 @@ export function getDataStateContainer({
     const subscription = fetch$
       .pipe(
         mergeMap(async ({ options }) => {
+          numberOfFetches += 1;
+          if (unsubscribeIsRequested) {
+            unsubscribeIsRequested = false;
+            subscription.unsubscribe();
+          }
+
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
           const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
             selectTabRuntimeState(runtimeStateManager, currentTabId);
@@ -287,12 +296,13 @@ export function getDataStateContainer({
             getCurrentTab,
           };
 
-          abortController?.abort();
-          abortControllerFetchMore?.abort();
+          abortController?.abort(AbortReason.REPLACED);
+          abortControllerFetchMore?.abort(AbortReason.REPLACED);
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
-            const fetchMoreTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchMore');
+            const fetchMoreTracker =
+              scopedEbtManager.trackQueryPerformanceEvent('discoverFetchMore');
 
             // Calculate query range in seconds
             const timeRange = timefilter.getAbsoluteTime();
@@ -304,8 +314,8 @@ export function getDataStateContainer({
             });
 
             fetchMoreTracker.reportEvent({
-              key1: 'query_range_secs',
-              value1: queryRangeSeconds,
+              queryRangeSeconds,
+              requests: inspectorAdapters.requests?.getRequestsSince(fetchMoreTracker.startTime),
             });
 
             return;
@@ -325,7 +335,7 @@ export function getDataStateContainer({
           await scopedProfilesManager.resolveDataSourceProfile(
             {
               dataSource: getCurrentTab().appState.dataSource,
-              dataView: savedSearchContainer.getState().searchSource.getField('index'),
+              dataView: currentDataView$.getValue(),
               query: getCurrentTab().appState.query,
             },
             resetFetchChart$
@@ -349,7 +359,8 @@ export function getDataStateContainer({
 
           abortController = new AbortController();
 
-          const isEsqlQuery = isOfAggregateQueryType(getCurrentTab().appState.query);
+          const query = getCurrentTab().appState.query;
+          const isEsqlQuery = isOfAggregateQueryType(query);
           const latestFetchDetails: DiscoverLatestFetchDetails = {
             abortController,
           };
@@ -362,7 +373,7 @@ export function getDataStateContainer({
           }
 
           const prevAutoRefreshDone = autoRefreshDone;
-          const fetchAllTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchAll');
+          const fetchAllTracker = scopedEbtManager.trackQueryPerformanceEvent('discoverFetchAll');
 
           // Calculate query range in seconds
           const timeRange = timefilter.getAbsoluteTime();
@@ -376,6 +387,46 @@ export function getDataStateContainer({
               if (isEsqlQuery && !abortController.signal.aborted) {
                 // defer triggering chart fetching until after main request completes for ES|QL mode
                 fetchChart$.next(latestFetchDetails);
+              }
+
+              // Update cascaded documents state based on the fetched query,
+              // defaulting to the first available group whenever the available groups change
+              if (isEsqlQuery && services.discoverFeatureFlags.getCascadeLayoutEnabled()) {
+                const { availableCascadeGroups, selectedCascadeGroups } =
+                  getCurrentTab().cascadedDocumentsState;
+
+                const newAvailableGroups = getESQLStatsQueryMeta(query.esql).groupByFields.map(
+                  (group) => group.field
+                );
+
+                const haveAvilableGroupsChanged = !isEqual(
+                  sortBy(availableCascadeGroups),
+                  sortBy(newAvailableGroups)
+                );
+
+                const newSelectedGroups = haveAvilableGroupsChanged
+                  ? newAvailableGroups.length > 0
+                    ? [newAvailableGroups[0]]
+                    : []
+                  : selectedCascadeGroups;
+
+                internalState.dispatch(
+                  injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
+                    cascadedDocumentsState: {
+                      availableCascadeGroups: newAvailableGroups,
+                      selectedCascadeGroups: newSelectedGroups,
+                    },
+                  })
+                );
+              } else {
+                internalState.dispatch(
+                  injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
+                    cascadedDocumentsState: {
+                      availableCascadeGroups: [],
+                      selectedCascadeGroups: [],
+                    },
+                  })
+                );
               }
 
               const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
@@ -415,8 +466,8 @@ export function getDataStateContainer({
           });
 
           fetchAllTracker.reportEvent({
-            key1: 'query_range_secs',
-            value1: queryRangeSeconds,
+            queryRangeSeconds,
+            requests: inspectorAdapters.requests?.getRequestsSince(fetchAllTracker.startTime),
           });
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
@@ -432,18 +483,26 @@ export function getDataStateContainer({
       .subscribe();
 
     return () => {
-      subscription.unsubscribe();
+      if (numberOfFetches > 0) {
+        subscription.unsubscribe();
+      } else {
+        // to let the initial fetch to execute properly before unsubscribing
+        unsubscribeIsRequested = true;
+      }
     };
   }
 
   const fetchQuery = async () => {
     const query = getCurrentTab().appState.query;
-    const currentDataView = savedSearchContainer.getState().searchSource.getField('index');
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
+    const currentDataView = currentDataView$.getValue();
 
     if (isOfAggregateQueryType(query)) {
       const nextDataView = await getEsqlDataView(query, currentDataView, services);
       if (nextDataView !== currentDataView) {
-        setDataView(nextDataView);
+        internalState.dispatch(
+          injectCurrentTab(internalStateActions.assignNextDataView)({ dataView: nextDataView })
+        );
       }
     }
 
@@ -462,8 +521,8 @@ export function getDataStateContainer({
   };
 
   const cancel = () => {
-    abortController?.abort();
-    abortControllerFetchMore?.abort();
+    abortController?.abort(AbortReason.CANCELED);
+    abortControllerFetchMore?.abort(AbortReason.CANCELED);
   };
 
   const getAbortController = () => {

@@ -7,7 +7,7 @@
 
 import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
 import { setup, assign, fromObservable, fromEventObservable } from 'xstate5';
-import { Observable, filter, map, switchMap, timeout, catchError, throwError, of } from 'rxjs';
+import { Observable, filter, map, switchMap, timeout, catchError, throwError, of, tap } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { SampleDocument, Streams } from '@kbn/streams-schema';
 import { isEmpty, isNumber } from 'lodash';
@@ -19,10 +19,12 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types'
 import type { Condition } from '@kbn/streamlang';
 import { conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
 import { processCondition } from '../../utils';
+import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 
 export interface RoutingSamplesMachineDeps {
   data: DataPublicPluginStart;
   timeState$: TimefilterHook['timeState$'];
+  telemetryClient: StreamsTelemetryClient;
 }
 
 export type RoutingSamplesActorRef = ActorRefFrom<typeof routingSamplesMachine>;
@@ -57,6 +59,7 @@ export type RoutingSamplesEvent =
   | {
       type: 'routingSamples.setSelectedPreview';
       preview: RoutingSamplesContext['selectedPreview'];
+      condition: Condition;
     }
   | {
       type: 'routingSamples.updatePreviewName';
@@ -71,6 +74,7 @@ export interface SearchParams extends RoutingSamplesInput {
 export interface CollectorParams {
   data: DataPublicPluginStart;
   input: RoutingSamplesInput;
+  telemetryClient?: StreamsTelemetryClient;
 }
 
 const SAMPLES_SIZE = 100;
@@ -176,6 +180,10 @@ export const routingSamplesMachine = setup({
       actions: [
         {
           type: 'setSelectedPreview',
+          params: ({ event }) => event,
+        },
+        {
+          type: 'updateCondition',
           params: ({ event }) => event,
         },
       ],
@@ -297,20 +305,24 @@ export const routingSamplesMachine = setup({
 export const createRoutingSamplesMachineImplementations = ({
   data,
   timeState$,
+  telemetryClient,
 }: RoutingSamplesMachineDeps): MachineImplementationsFrom<typeof routingSamplesMachine> => ({
   actors: {
-    collectDocuments: createDocumentsCollectorActor({ data }),
+    collectDocuments: createDocumentsCollectorActor({ data, telemetryClient }),
     collectDocumentsCount: createDocumentsCountCollectorActor({ data }),
     subscribeTimeUpdates: createTimeUpdatesActor({ timeState$ }),
   },
 });
 
-export function createDocumentsCollectorActor({ data }: Pick<RoutingSamplesMachineDeps, 'data'>) {
+export function createDocumentsCollectorActor({
+  data,
+  telemetryClient,
+}: Pick<RoutingSamplesMachineDeps, 'data' | 'telemetryClient'>) {
   return fromObservable<
     SampleDocument[],
     Pick<SearchParams, 'condition' | 'definition' | 'documentMatchFilter'>
   >(({ input }) => {
-    return collectDocuments({ data, input });
+    return collectDocuments({ data, input, telemetryClient });
   });
 }
 
@@ -331,16 +343,35 @@ function createTimeUpdatesActor({ timeState$ }: Pick<RoutingSamplesMachineDeps, 
   );
 }
 
-function collectDocuments({ data, input }: CollectorParams): Observable<SampleDocument[]> {
+function collectDocuments({
+  data,
+  input,
+  telemetryClient,
+}: CollectorParams): Observable<SampleDocument[]> {
   const abortController = new AbortController();
 
   const { start, end } = getAbsoluteTimestamps(data);
   const params = buildDocumentsSearchParams({ ...input, start, end });
 
   return new Observable((observer) => {
+    let registerFetchLatency: () => void = () => {};
+
     const subscription = data.search
       .search({ params }, { abortSignal: abortController.signal, retrieveResults: true })
       .pipe(
+        tap({
+          subscribe: () => {
+            if (telemetryClient) {
+              registerFetchLatency = telemetryClient.startTrackingPartitioningSamplesFetchLatency({
+                stream_name: input.definition.stream.name,
+                stream_type: 'wired',
+              });
+            }
+          },
+          finalize: () => {
+            registerFetchLatency();
+          },
+        }),
         filter((result) => !isRunningResponse(result) || !isEmpty(result.rawResponse.hits.hits)),
         timeout(SEARCH_TIMEOUT_MS),
         map((result) => result.rawResponse.hits.hits.map((hit) => hit._source)),

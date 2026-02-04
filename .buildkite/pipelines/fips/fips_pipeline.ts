@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { emitPipeline, getPipeline } from '#pipeline-utils';
+import { emitPipeline, getAgentImageConfig, getPipeline } from '#pipeline-utils';
 
 (async () => {
   const pipeline: string[] = [];
 
   try {
+    pipeline.push(getAgentImageConfig({ returnYaml: true }));
     pipeline.push(getPipeline('.buildkite/pipelines/fips.yml', false));
 
     emitPipeline(pipeline);

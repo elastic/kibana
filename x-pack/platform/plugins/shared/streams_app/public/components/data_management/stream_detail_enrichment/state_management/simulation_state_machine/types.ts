@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { SampleDocument } from '@kbn/streams-schema';
-import type { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { IToasts } from '@kbn/core/public';
-import type { Query } from '@kbn/es-query';
 import type { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
-import type { PreviewDocsFilterOption } from './simulation_documents_search';
+import type { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { SampleDocument } from '@kbn/streams-schema';
 import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import type { PreviewDocsFilterOption } from './simulation_documents_search';
 
 export type Simulation = APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
 export type DetectedField = Simulation['detected_fields'][number];
@@ -46,11 +46,14 @@ export type SimulationEvent =
   | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
   | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
   | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
+  | { type: 'simulation.filterByCondition'; conditionId: string }
+  | { type: 'simulation.clearConditionFilter' }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
   | { type: 'simulation.receive_samples'; samples: SampleDocumentWithUIAttributes[] }
   | { type: 'simulation.receive_steps'; steps: StreamlangStepWithUIAttributes[] }
+  | { type: 'simulation.updateSteps'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'simulation.reset' }
   | { type: 'step.change'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'step.delete'; steps: StreamlangStepWithUIAttributes[] };
@@ -68,7 +71,9 @@ export interface SimulationContext {
   };
   steps: StreamlangStepWithUIAttributes[];
   samples: SampleDocumentWithUIAttributes[];
+  selectedConditionId?: string;
   simulation?: Simulation;
+  baseSimulation?: Simulation;
   streamName: string;
   streamType: 'wired' | 'classic' | 'unknown';
 }

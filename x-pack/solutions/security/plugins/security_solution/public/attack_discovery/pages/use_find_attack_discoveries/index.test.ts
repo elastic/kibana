@@ -14,16 +14,11 @@ import React from 'react';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_FIND,
-  ATTACK_DISCOVERY_INTERNAL_FIND,
   transformAttackDiscoveryAlertFromApi,
 } from '@kbn/elastic-assistant-common';
-import type {
-  AttackDiscoveryFindInternalResponse,
-  AttackDiscoveryFindResponse,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryFindResponse } from '@kbn/elastic-assistant-common';
 
 import { useFindAttackDiscoveries, useInvalidateFindAttackDiscoveries } from '.';
-import { getMockAttackDiscoveryAlerts } from '../mock/mock_attack_discovery_alerts';
 import { ERROR_FINDING_ATTACK_DISCOVERIES } from './translations';
 
 const mockAddError = jest.fn();
@@ -45,13 +40,6 @@ jest.mock('../../../common/hooks/use_app_toasts', () => ({
 const mockHttp: HttpSetup = {
   fetch: jest.fn(),
 } as unknown as HttpSetup;
-
-const mockUseKibanaFeatureFlags = jest.fn().mockReturnValue({
-  attackDiscoveryPublicApiEnabled: false,
-});
-jest.mock('../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
-}));
 
 let queryClient: QueryClient;
 const defaultProps = {
@@ -100,254 +88,121 @@ describe('useFindAttackDiscoveries', () => {
   });
 
   it('returns data when the request succeeds', async () => {
-    const mockData = {
+    const timestamp = '2025-01-02T03:04:05.678Z';
+
+    const apiResponse: AttackDiscoveryFindResponse = {
       connector_names: ['GPT-4o'],
-      data: getMockAttackDiscoveryAlerts(),
-      total: getMockAttackDiscoveryAlerts().length,
+      data: [
+        {
+          id: '1',
+          timestamp,
+          title: 'T',
+          alert_ids: [],
+          connector_id: 'c',
+          connector_name: 'GPT-4o',
+          details_markdown: 'd',
+          generation_uuid: 'g',
+          summary_markdown: 's',
+        },
+      ],
+      total: 1,
       page: 1,
       per_page: 10,
-      unique_alert_ids_count: getMockAttackDiscoveryAlerts().length,
+      unique_alert_ids_count: 1,
     };
-    (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(mockData);
+
+    (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(apiResponse);
+
+    const expected = {
+      connector_names: apiResponse.connector_names,
+      data: apiResponse.data.map((d) => transformAttackDiscoveryAlertFromApi(d)),
+      page: apiResponse.page,
+      per_page: apiResponse.per_page,
+      total: apiResponse.total,
+      unique_alert_ids_count: apiResponse.unique_alert_ids_count,
+      unique_alert_ids: apiResponse.unique_alert_ids ?? undefined,
+    };
 
     const { result } = renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
       wrapper,
     });
 
     await waitFor(() => {
-      expect(result.current.data).toEqual(mockData);
+      expect(result.current.data).toEqual(expected);
     });
   });
 
-  describe('when attackDiscoveryPublicApiEnabled is false', () => {
-    beforeEach(() => {
-      // default stub; individual tests will override with specific responses
-      (mockHttp.fetch as jest.Mock).mockResolvedValue({});
+  it('calls GET with the public API route', async () => {
+    (mockHttp.fetch as jest.Mock).mockResolvedValue({});
+    renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
+      wrapper,
     });
 
-    it('calls GET with the internal API route', async () => {
-      renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
-        wrapper,
-      });
-
-      await waitFor(() => {
-        expect(mockHttp.fetch).toHaveBeenCalledWith(
-          ATTACK_DISCOVERY_INTERNAL_FIND,
-          expect.any(Object)
-        );
-      });
-    });
-
-    it('calls GET with the internal API version', async () => {
-      renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
-        wrapper,
-      });
-
-      await waitFor(() => {
-        expect(mockHttp.fetch).toHaveBeenCalledWith(
-          expect.any(String),
-          expect.objectContaining({
-            version: API_VERSIONS.internal.v1,
-          })
-        );
-      });
-    });
-
-    it('returns the internal-shaped data unmodified when using the internal API', async () => {
-      const expected: AttackDiscoveryFindInternalResponse = {
-        connector_names: ['GPT-4o'],
-        data: getMockAttackDiscoveryAlerts(),
-        total: getMockAttackDiscoveryAlerts().length,
-        page: 1,
-        per_page: 10,
-        unique_alert_ids_count: getMockAttackDiscoveryAlerts().length,
-      };
-
-      (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(expected);
-
-      const { result } = renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
-        wrapper,
-      });
-
-      await waitFor(() => {
-        expect(result.current.data).toEqual(expected);
-      });
-    });
-
-    it('does NOT include the with_replacements parameter in the request query when using the internal API', async () => {
-      renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
-        wrapper,
-      });
-
-      await waitFor(() => {
-        // internal API should NOT receive a `with_replacements` parameter at all
-        expect(mockHttp.fetch).toHaveBeenCalledWith(
-          expect.any(String),
-          expect.objectContaining({
-            query: expect.not.objectContaining({ with_replacements: expect.anything() }),
-          })
-        );
-      });
-    });
-
-    it('does NOT include the enable_field_rendering parameter in the request query when using the internal API', async () => {
-      renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
-        wrapper,
-      });
-
-      await waitFor(() => {
-        // internal API should NOT receive an `enable_field_rendering` parameter at all
-        expect(mockHttp.fetch).toHaveBeenCalledWith(
-          expect.any(String),
-          expect.objectContaining({
-            query: expect.not.objectContaining({ enable_field_rendering: expect.anything() }),
-          })
-        );
-      });
+    await waitFor(() => {
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        ATTACK_DISCOVERY_FIND,
+        expect.objectContaining({
+          version: API_VERSIONS.public.v1,
+        })
+      );
     });
   });
 
-  describe('when attackDiscoveryPublicApiEnabled is true', () => {
-    beforeEach(() => {
-      mockUseKibanaFeatureFlags.mockReturnValue({
-        attackDiscoveryPublicApiEnabled: true,
-      });
-      (mockHttp.fetch as jest.Mock).mockResolvedValue({});
+  it('calls GET with the public API version', async () => {
+    (mockHttp.fetch as jest.Mock).mockResolvedValue({});
+    renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
+      wrapper,
     });
 
-    it('calls GET with the public API route', async () => {
-      renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
-        wrapper,
-      });
+    await waitFor(() => {
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          version: API_VERSIONS.public.v1,
+        })
+      );
+    });
+  });
 
-      await waitFor(() => {
-        expect(mockHttp.fetch).toHaveBeenCalledWith(
-          ATTACK_DISCOVERY_FIND,
-          expect.objectContaining({
-            version: API_VERSIONS.public.v1,
-          })
-        );
-      });
+  it('includes `with_replacements: false` in the request query', async () => {
+    (mockHttp.fetch as jest.Mock).mockResolvedValue({});
+    renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
+      wrapper,
     });
 
-    it('calls GET with the public API version', async () => {
-      renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
-        wrapper,
-      });
+    await waitFor(() => {
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          query: expect.objectContaining({ with_replacements: false }),
+        })
+      );
+    });
+  });
 
-      await waitFor(() => {
-        expect(mockHttp.fetch).toHaveBeenCalledWith(
-          expect.any(String),
-          expect.objectContaining({
-            version: API_VERSIONS.public.v1,
-          })
-        );
-      });
+  it('includes `enable_field_rendering: true` in the request query', async () => {
+    (mockHttp.fetch as jest.Mock).mockResolvedValue({});
+    renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
+      wrapper,
     });
 
-    it('returns transformed, UI-shaped data when using the public API', async () => {
-      const timestamp = '2025-01-02T03:04:05.678Z';
-
-      const apiResponse: AttackDiscoveryFindResponse = {
-        connector_names: ['GPT-4o'],
-        data: [
-          // minimal API-shaped item; transform will determine the internal shape
-          {
-            id: '1',
-            timestamp,
-            title: 'T',
-            alert_ids: [],
-            connector_id: 'c',
-            connector_name: 'GPT-4o',
-            details_markdown: 'd',
-            generation_uuid: 'g',
-            summary_markdown: 's',
-          },
-        ],
-        total: 1,
-        page: 1,
-        per_page: 10,
-        unique_alert_ids_count: 1,
-      };
-
-      (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(apiResponse);
-
-      const expected: AttackDiscoveryFindInternalResponse = {
-        connector_names: apiResponse.connector_names,
-        data: apiResponse.data.map((d) => transformAttackDiscoveryAlertFromApi(d)),
-        page: apiResponse.page,
-        per_page: apiResponse.per_page,
-        total: apiResponse.total,
-        unique_alert_ids_count: apiResponse.unique_alert_ids_count,
-        unique_alert_ids: apiResponse.unique_alert_ids ?? undefined,
-      };
-
-      const { result } = renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
-        wrapper,
-      });
-
-      await waitFor(() => {
-        expect(result.current.data).toEqual(expected);
-      });
-    });
-
-    it('includes `with_replacements: false` in the request query when using the public API', async () => {
-      renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
-        wrapper,
-      });
-
-      await waitFor(() => {
-        expect(mockHttp.fetch).toHaveBeenCalledWith(
-          expect.any(String),
-          expect.objectContaining({
-            query: expect.objectContaining({ with_replacements: false }),
-          })
-        );
-      });
-    });
-
-    it('includes `enable_field_rendering: true` in the request query when using the public API', async () => {
-      renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
-        wrapper,
-      });
-
-      await waitFor(() => {
-        expect(mockHttp.fetch).toHaveBeenCalledWith(
-          expect.any(String),
-          expect.objectContaining({
-            query: expect.objectContaining({ enable_field_rendering: true }),
-          })
-        );
-      });
+    await waitFor(() => {
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          query: expect.objectContaining({ enable_field_rendering: true }),
+        })
+      );
     });
   });
 });
 
 describe('useInvalidateFindAttackDiscoveries', () => {
-  it('calls invalidateQueries with the internal generations route when the feature flag is false', () => {
-    const invalidateQueries = jest.fn();
-
-    useQueryClientMock.mockReturnValue({ invalidateQueries } as unknown as ReturnType<
-      typeof useQueryClient
-    >);
-
-    mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: false }); // <-- feature flag disabled
-
-    const { result } = renderHook(() => useInvalidateFindAttackDiscoveries());
-    result.current();
-
-    expect(invalidateQueries).toHaveBeenCalledWith(['GET', ATTACK_DISCOVERY_INTERNAL_FIND], {
-      refetchType: 'all',
-    });
-  });
-
-  it('calls invalidateQueries with the public generations route when the feature flag is true', () => {
+  it('calls invalidateQueries with the public API route', () => {
     const invalidateQueries = jest.fn();
     useQueryClientMock.mockReturnValue({ invalidateQueries } as unknown as ReturnType<
       typeof useQueryClient
     >);
-
-    mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: true }); // <-- feature flag
 
     const { result } = renderHook(() => useInvalidateFindAttackDiscoveries());
     result.current();

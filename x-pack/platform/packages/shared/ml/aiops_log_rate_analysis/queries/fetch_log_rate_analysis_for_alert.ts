@@ -26,12 +26,13 @@ import { LOG_RATE_ANALYSIS_TYPE } from '../log_rate_analysis_type';
 
 import { fetchIndexInfo } from './fetch_index_info';
 import { fetchSignificantTermPValues } from './fetch_significant_term_p_values';
+import { fetchSignificantCategories } from './fetch_significant_categories';
 
 const MAX_CONCURRENT_QUERIES = 5;
 const CHUNK_SIZE = 50;
 
 interface QueueItem {
-  fn: typeof fetchSignificantTermPValues;
+  fn: typeof fetchSignificantCategories | typeof fetchSignificantTermPValues;
   fieldNames: string[];
 }
 
@@ -141,10 +142,7 @@ export async function runLogRateAnalysis({
       })
   );
 
-  // For log rate analysis on contextual insights on alerting pages,
-  // we only consider keyword fields as field candidates.
-  // See https://github.com/elastic/kibana/issues/235562 for more details.
-  const { keywordFieldCandidates } = indexInfo;
+  const { keywordFieldCandidates, textFieldCandidates } = indexInfo;
 
   const logRateAnalysisType = getLogRateAnalysisTypeForCounts({
     baselineCount: indexInfo.baselineTotalDocCount,
@@ -152,8 +150,8 @@ export async function runLogRateAnalysis({
     windowParameters,
   });
 
-  // Return early if there are no keyword field candidates.
-  if (keywordFieldCandidates.length === 0) {
+  // Return early if there are no field candidates.
+  if (keywordFieldCandidates.length === 0 && textFieldCandidates.length === 0) {
     return {
       logRateAnalysisType,
       significantItems: [],
@@ -198,9 +196,11 @@ export async function runLogRateAnalysis({
     );
   }, MAX_CONCURRENT_QUERIES);
 
-  // Push the actual items to the queue.
+  // Push the actual items to the queue. We don't need to chunk the text fields
+  // since they are just `message` and `error.message`.
   significantItemsQueue.push(
     [
+      { fn: fetchSignificantCategories, fieldNames: textFieldCandidates },
       ...chunk(keywordFieldCandidates, CHUNK_SIZE).map((fieldNames) => ({
         fn: fetchSignificantTermPValues,
         fieldNames,

@@ -19,41 +19,21 @@ describe('useShowEisPromotionalContent', () => {
     jest.clearAllMocks();
   });
 
-  it('should show the promo when cloud is enabled and promo is not skipped', () => {
-    const { result } = renderHook(() =>
-      useShowEisPromotionalContent({ promoId, isCloudEnabled: true })
-    );
-
-    expect(result.current.isPromoVisible).toBe(true);
-  });
-
-  it('should not show the promo when cloud is disabled (not a cloud user)', () => {
-    const { result } = renderHook(() =>
-      useShowEisPromotionalContent({ promoId, isCloudEnabled: false })
-    );
-
-    expect(result.current.isPromoVisible).toBe(false);
-  });
-
   it('should not show the promo if it was skipped previously', () => {
     localStorage.setItem(localStorageKey, 'true');
 
-    const { result } = renderHook(() =>
-      useShowEisPromotionalContent({ promoId, isCloudEnabled: true })
-    );
+    const { result } = renderHook(() => useShowEisPromotionalContent({ promoId }));
 
     expect(result.current.isPromoVisible).toBe(false);
   });
 
-  it('should hide the promo and set localStorage when onSkipTour is called', () => {
-    const { result } = renderHook(() =>
-      useShowEisPromotionalContent({ promoId, isCloudEnabled: true })
-    );
+  it('should hide the promo and set localStorage when OnDismissPromo is called', () => {
+    const { result } = renderHook(() => useShowEisPromotionalContent({ promoId }));
 
     expect(result.current.isPromoVisible).toBe(true);
 
     act(() => {
-      result.current.onSkipTour();
+      result.current.onDismissPromo();
     });
 
     expect(localStorage.getItem(localStorageKey)).toBe('true');
@@ -64,15 +44,15 @@ describe('useShowEisPromotionalContent', () => {
     localStorage.setItem(localStorageKey, 'true');
 
     const { result, rerender } = renderHook(
-      (props: { promoId: string; isCloudEnabled: boolean }) => useShowEisPromotionalContent(props),
+      (props: { promoId: string }) => useShowEisPromotionalContent(props),
       {
-        initialProps: { promoId, isCloudEnabled: true },
+        initialProps: { promoId },
       }
     );
 
     expect(result.current.isPromoVisible).toBe(false);
 
-    rerender({ promoId, isCloudEnabled: true });
+    rerender({ promoId });
 
     expect(result.current.isPromoVisible).toBe(false);
   });

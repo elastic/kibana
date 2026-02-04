@@ -65,7 +65,7 @@ describe('buildStreamRows', () => {
       'metrics-c.child2',
       'metrics-c.child3',
     ];
-    const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction);
+    const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction, {});
     expect(rows.map((r) => r.stream.name)).toEqual(expected);
   });
 
@@ -84,7 +84,7 @@ describe('buildStreamRows', () => {
       'logs-a.child2',
       'logs-a.child1',
     ];
-    const rows = buildStreamRows(allStreams, 'nameSortKey', 'desc' as Direction);
+    const rows = buildStreamRows(allStreams, 'nameSortKey', 'desc' as Direction, {});
     expect(rows.map((r) => r.stream.name)).toEqual(expected);
   });
 
@@ -103,7 +103,7 @@ describe('buildStreamRows', () => {
       'logs-b.child2 (3.0h)',
       'logs-b.child3 (5.0h)',
     ];
-    const rows = buildStreamRows(allStreams, 'retentionMs', 'asc' as Direction);
+    const rows = buildStreamRows(allStreams, 'retentionMs', 'asc' as Direction, {});
     expect(rows.map((r) => `${r.stream.name} (${ms(r.retentionMs)})`)).toEqual(expected);
   });
 
@@ -122,12 +122,12 @@ describe('buildStreamRows', () => {
       'logs-a.child3 (6.0h)',
       'logs-a.child2 (4.0h)',
     ];
-    const rows = buildStreamRows(allStreams, 'retentionMs', 'desc' as Direction);
+    const rows = buildStreamRows(allStreams, 'retentionMs', 'desc' as Direction, {});
     expect(rows.map((r) => `${r.stream.name} (${ms(r.retentionMs)})`)).toEqual(expected);
   });
 
   it('always lists a child immediately after its parent', () => {
-    const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction);
+    const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction, {});
     const indexOf = (n: string) => rows.findIndex((r) => r.stream.name === n);
     expect(indexOf('logs-a.child1')).toBeGreaterThan(indexOf('logs-a'));
     expect(indexOf('logs-a.child2')).toBeGreaterThan(indexOf('logs-a'));
@@ -172,7 +172,7 @@ describe('filterCollapsedStreamRows', () => {
     cChild1,
   ]).map(enrichStream);
 
-  const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction);
+  const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction, {});
 
   it('returns all rows when no streams are collapsed', () => {
     const collapsed = new Set<string>();
@@ -254,7 +254,8 @@ describe('filterCollapsedStreamRows', () => {
     const rowsWithGrandchild = buildStreamRows(
       streamsWithGrandchild,
       'nameSortKey',
-      'asc' as Direction
+      'asc' as Direction,
+      {}
     );
     const collapsed = new Set<string>(['logs-a.child1']);
     const filtered = filterCollapsedStreamRows(rowsWithGrandchild, collapsed, 'nameSortKey');

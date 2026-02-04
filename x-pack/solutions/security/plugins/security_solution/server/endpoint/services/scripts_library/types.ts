@@ -6,8 +6,15 @@
  */
 
 import type { Readable } from 'stream';
-import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
-import type { EndpointScript } from '../../../../common/endpoint/types';
+import type {
+  CreateScriptRequestBody,
+  PatchUpdateRequestBody,
+  ListScriptsRequestQuery,
+} from '../../../../common/api/endpoint/scripts_library';
+import type {
+  EndpointScript,
+  EndpointScriptListApiResponse,
+} from '../../../../common/endpoint/types';
 
 export type { ScriptsLibrarySavedObjectAttributes } from '../../lib/scripts_library';
 
@@ -17,12 +24,14 @@ export interface ScriptsLibraryClientInterface {
    * Updates an existing script with the data provided. This method accepts partial
    * script data allowing for only certain fields to be updated
    */
-  update: (script: Partial<CreateScriptRequestBody>) => Promise<EndpointScript>;
+  update: (script: ScriptUpdateParams) => Promise<EndpointScript>;
   get: (scriptId: string) => Promise<EndpointScript>;
-  list: () => Promise<void>;
+  list: (options?: ListScriptsRequestQuery) => Promise<EndpointScriptListApiResponse>;
   delete: (scriptId: string) => Promise<void>;
   download: (scriptId: string) => Promise<ScriptDownloadResponse>;
 }
+
+export type ScriptUpdateParams = Partial<PatchUpdateRequestBody> & { id: string };
 
 export interface ScriptDownloadResponse {
   stream: Readable;

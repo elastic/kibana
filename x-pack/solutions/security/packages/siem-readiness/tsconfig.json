@@ -17,7 +17,6 @@
   "kbn_references": [
     "@kbn/kibana-react-plugin",
     "@kbn/core",
-    "@kbn/i18n",
     "@kbn/react-query",
   ]
 }

@@ -67,6 +67,7 @@ describe('Datatable Visualization', () => {
         layerId: 'aaa',
         layerType: LayerTypes.DATA,
         columns: [],
+        showRowNumbers: true,
       });
     });
 
@@ -946,6 +947,26 @@ describe('Datatable Visualization', () => {
           }).density
         ).toEqual([DENSITY]);
       }
+    });
+
+    it('sets showRowNumbers based on state', () => {
+      expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).showRowNumbers).toEqual(
+        undefined
+      );
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          showRowNumbers: true,
+        }).showRowNumbers
+      ).toEqual([true]);
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          showRowNumbers: false,
+        }).showRowNumbers
+      ).toEqual([false]);
     });
 
     describe('palette/colorMapping/colorMode', () => {

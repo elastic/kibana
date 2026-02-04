@@ -9,16 +9,17 @@
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { removePackagesFromPackageMap } from '@kbn/repo-packages';
+import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 import { resolve, join } from 'path';
 import { scanCopy, deleteAll, copyAll } from '../lib';
-import type { Task, Platform, Solution } from '../lib';
+import type { Task, Platform } from '../lib';
 import { getNodeDownloadInfo } from './nodejs';
 
 export const CreateArchivesSources: Task = {
   description: 'Creating platform-specific archive source directories',
   async run(config, log, build) {
-    async function removeSolutions(solutionsToRemove: Solution[], platform: Platform) {
+    async function removeSolutions(solutionsToRemove: KibanaSolution[], platform: Platform) {
       const solutionPluginNames: string[] = [];
 
       for (const solution of solutionsToRemove) {
@@ -91,11 +92,12 @@ export const CreateArchivesSources: Task = {
             'serverless.security.{search_ai_lake,essentials,complete}.yml',
           ];
           const configFiles = ['serverless.yml'];
-          switch (platform.getSolution()) {
+          const solutionId = platform.getSolutionId();
+          switch (solutionId) {
             case 'workplaceai':
               configFiles.push(...WORKPLACE_AI_CONFIGS);
               break;
-            case 'elasticsearch':
+            case 'search':
               configFiles.push(...ELASTICSEARCH_CONFIGS);
               break;
             case 'observability':
@@ -105,6 +107,7 @@ export const CreateArchivesSources: Task = {
               configFiles.push(...SECURITY_CONFIGS);
               break;
             default:
+              // we push all of the solution config files for non-solution specific serverless builds
               configFiles.push(
                 ...WORKPLACE_AI_CONFIGS,
                 ...ELASTICSEARCH_CONFIGS,
@@ -122,12 +125,10 @@ export const CreateArchivesSources: Task = {
           );
 
           // Remove non-target solutions
-          const targetSolution = platform.getSolution();
-          const ARTIFACT_SOLUTIONS = KIBANA_SOLUTIONS.map((s) =>
-            s === 'search' ? 'elasticsearch' : s
-          );
-          if (targetSolution && ARTIFACT_SOLUTIONS.includes(targetSolution)) {
-            const solutionsToRemove = ARTIFACT_SOLUTIONS.filter((s) => s !== targetSolution);
+          if (solutionId && KIBANA_SOLUTIONS.includes(solutionId)) {
+            const solutionsToRemove: KibanaSolution[] = KIBANA_SOLUTIONS.filter(
+              (s) => s !== solutionId
+            );
             await removeSolutions(solutionsToRemove, platform);
           }
         } else if (config.isRelease) {

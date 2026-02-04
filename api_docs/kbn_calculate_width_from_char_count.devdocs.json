@@ -32,6 +32,8 @@
           "> | undefined) => number"
         ],
         "path": "src/platform/packages/shared/kbn-calculate-width-from-char-count/src/calculate_width_from_char_count.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-calculate-width-from-char-count/src/calculate_width_from_char_count.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,6 +67,8 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-calculate-width-from-char-count/src/calculate_width_from_char_count.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -84,6 +90,8 @@
           "> | undefined) => number"
         ],
         "path": "src/platform/packages/shared/kbn-calculate-width-from-char-count/src/calculate_width_from_entries.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -98,6 +106,8 @@
               "string[] | Record<string, any>[]"
             ],
             "path": "src/platform/packages/shared/kbn-calculate-width-from-char-count/src/calculate_width_from_entries.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -113,6 +123,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-calculate-width-from-char-count/src/calculate_width_from_entries.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -130,6 +142,8 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-calculate-width-from-char-count/src/calculate_width_from_entries.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false

@@ -16,9 +16,9 @@ import {
   updateOptionsSchema,
   createResultSchema,
 } from '@kbn/content-management-utils';
-import { SCHEMA_SEARCH_MODEL_VERSION_8 } from '../../../saved_objects/schema';
+import { SCHEMA_SEARCH_MODEL_VERSION_10 } from '../../../saved_objects/schema';
 
-const savedSearchSavedObjectSchema = savedObjectSchema(SCHEMA_SEARCH_MODEL_VERSION_8);
+const savedSearchSavedObjectSchema = savedObjectSchema(SCHEMA_SEARCH_MODEL_VERSION_10);
 
 const savedSearchCreateOptionsSchema = schema.maybe(
   schema.object({
@@ -56,7 +56,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: savedSearchCreateOptionsSchema,
       },
       data: {
-        schema: SCHEMA_SEARCH_MODEL_VERSION_8,
+        schema: SCHEMA_SEARCH_MODEL_VERSION_10,
       },
     },
     out: {
@@ -71,7 +71,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: savedSearchUpdateOptionsSchema,
       },
       data: {
-        schema: SCHEMA_SEARCH_MODEL_VERSION_8,
+        schema: SCHEMA_SEARCH_MODEL_VERSION_10,
       },
     },
   },

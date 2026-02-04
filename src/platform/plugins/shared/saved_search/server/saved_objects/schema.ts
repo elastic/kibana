@@ -202,5 +202,27 @@ export const SCHEMA_SEARCH_MODEL_VERSION_9_SO_API_WORKAROUND = schema.object({
   tabs: schema.maybe(tabsV8),
 });
 
-export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8>;
-export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_8>;
+const DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10 =
+  DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8.extends({
+    chartInterval: schema.maybe(schema.string()),
+  });
+
+const SCHEMA_DISCOVER_SESSION_TAB_VERSION_10 = SCHEMA_DISCOVER_SESSION_TAB_VERSION_8.extends({
+  attributes: DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10,
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_10 = SCHEMA_SEARCH_MODEL_VERSION_8.extends({
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_10, { minSize: 1 }),
+});
+
+const { tabs: tabsV10, ...restV10Props } = SCHEMA_SEARCH_MODEL_VERSION_10.getPropSchemas();
+
+export const SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND = schema.object({
+  ...restV10Props,
+  tabs: schema.maybe(tabsV10),
+});
+
+export type DiscoverSessionTabAttributes = TypeOf<
+  typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10
+>;
+export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_10>;

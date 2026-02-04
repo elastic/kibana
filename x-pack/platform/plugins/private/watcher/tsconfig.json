@@ -1,7 +1,7 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "__jest__/**/*",
@@ -37,10 +37,9 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/code-editor",
+    "@kbn/code-editor-mock",
     "@kbn/react-kibana-context-render",
-    "@kbn/licensing-types",
+    "@kbn/licensing-types"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

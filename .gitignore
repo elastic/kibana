@@ -19,10 +19,10 @@ target
 /build
 .jruby
 .idea
-.claude
+.claude/*.local.json
 .cursor
+!x-pack/solutions/security/test/security_solution_cypress/.cursor/
 .windsurf
-claude.md
 *.iml
 *.log
 types.eslint.config.js
@@ -111,6 +111,10 @@ x-pack/platform/plugins/shared/fleet/cypress.config.d.ts
 x-pack/platform/plugins/shared/fleet/cypress.config.js
 x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.d.ts
 x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.js
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.d.ts
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.js
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.space_awareness.d.ts
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.space_awareness.js
 x-pack/platform/plugins/shared/osquery/cypress.config.d.ts
 x-pack/platform/plugins/shared/osquery/cypress.config.js
 x-pack/solutions/search/plugins/enterprise_search/cypress.config.d.ts
@@ -171,14 +175,9 @@ oas_docs/output/kibana.serverless.tmp*.yaml
 oas_docs/output/kibana.tmp*.yaml
 oas_docs/output/kibana.new.yaml
 oas_docs/output/kibana.serverless.new.yaml
+oas_docs/bundle.json
+oas_docs/bundle.serverless.json
 
-# Security Solution Playwright
-x-pack/solutions/security/test/security_solution_playwright/test-results/
-x-pack/solutions/security/test/security_solution_playwright/playwright-report/
-x-pack/solutions/security/test/security_solution_playwright/blob-report/
-x-pack/solutions/security/test/security_solution_playwright/playwright/.cache/
-x-pack/solutions/security/test/security_solution_playwright/.auth/
-x-pack/solutions/security/test/security_solution_playwright/.env
 .codeql
 .dependency-graph-log.json
 
@@ -186,3 +185,6 @@ x-pack/solutions/security/test/security_solution_playwright/.env
 src/platform/plugins/shared/console/packaging/react/translations
 
 .moon/cache
+
+# Batched commits marker, e.g.: from quick checks
+.collect_commits_marker

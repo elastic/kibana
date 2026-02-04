@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 
 test.describe('Storage explorer page', { tag: ['@ess'] }, () => {
@@ -61,6 +61,7 @@ test.describe('Storage explorer page', { tag: ['@ess'] }, () => {
 
   test('Data breakdown tab displays correct values per index', async ({
     pageObjects: { profilingStorageExplorerPage },
+    config,
   }) => {
     await profilingStorageExplorerPage.gotoWithTimeRange(rangeFrom, rangeTo);
 
@@ -75,6 +76,14 @@ test.describe('Storage explorer page', { tag: ['@ess'] }, () => {
       { indexName: 'events', docSize: '3,242' },
     ];
 
+    // eslint-disable-next-line playwright/no-conditional-in-test
+    const expectedData = config.isCloud
+      ? indexData.map((data) => ({
+          ...data,
+          docSize: (parseInt(data.docSize.replace(/,/g, ''), 10) * 2).toLocaleString(),
+        }))
+      : indexData;
+
     // Cloud ECH data
     // TODO check why it is different: https://github.com/elastic/kibana/issues/241822
     // const indexData = [
@@ -84,7 +93,7 @@ test.describe('Storage explorer page', { tag: ['@ess'] }, () => {
     //   { indexName: 'metrics', docSize: '0' },
     //   { indexName: 'events', docSize: '6,484' },
     // ];
-    for (const { indexName, docSize } of indexData) {
+    for (const { indexName, docSize } of expectedData) {
       await expect(
         profilingStorageExplorerPage.page.getByTestId(`${indexName}_docSize`)
       ).toContainText(docSize);

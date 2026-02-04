@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import type { MouseEventHandler, ReactElement } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { EuiContextMenuPanelDescriptor, IconType } from '@elastic/eui';
 import {
@@ -43,6 +43,8 @@ import {
 } from '../../panel_actions';
 import type { AnyApiAction } from '../../panel_actions/types';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
+import { PresentationPanelQuickActionContext } from './presentation_panel_quick_action_context';
+import { DEFAULT_QUICK_ACTION_IDS } from '../constants';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {
@@ -61,24 +63,6 @@ const getContextMenuAriaLabel = (title?: string, index?: number) => {
     defaultMessage: 'Panel options',
   });
 };
-
-const QUICK_ACTION_IDS = {
-  edit: [
-    'editPanel',
-    'ACTION_CONFIGURE_IN_LENS',
-    'ACTION_CUSTOMIZE_PANEL',
-    'ACTION_OPEN_IN_DISCOVER',
-    'ACTION_VIEW_SAVED_SEARCH',
-    'CONVERT_LEGACY_MARKDOWN',
-  ],
-  view: [
-    'ACTION_SHOW_CONFIG_PANEL',
-    'ACTION_OPEN_IN_DISCOVER',
-    'ACTION_VIEW_SAVED_SEARCH',
-    'openInspector',
-    'togglePanel',
-  ],
-} as const;
 
 const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'] as const;
 
@@ -133,22 +117,32 @@ export const PresentationPanelHoverActions = ({
 
   const { euiTheme } = useEuiTheme();
 
-  const [title, description, hidePanelTitle, hasLockedHoverActions, parentHideTitle] =
-    useBatchedOptionalPublishingSubjects(
-      api?.title$,
-      api?.description$,
-      api?.hideTitle$,
-      api?.hasLockedHoverActions$,
-      (api?.parentApi as Partial<PublishesTitle>)?.hideTitle$
-    );
+  const [
+    title,
+    description,
+    hidePanelTitle,
+    hasLockedHoverActions,
+    parentHideTitle,
+    disabledActionIds,
+  ] = useBatchedOptionalPublishingSubjects(
+    api?.title$,
+    api?.description$,
+    api?.hideTitle$,
+    api?.hasLockedHoverActions$,
+    (api?.parentApi as Partial<PublishesTitle>)?.hideTitle$,
+    api?.disabledActionIds$
+  );
 
   const hideTitle = hidePanelTitle || parentHideTitle;
   const showDescription = description && (!title || hideTitle);
 
-  const quickActionIds = useMemo(
-    () => QUICK_ACTION_IDS[viewMode === 'edit' ? 'edit' : 'view'],
-    [viewMode]
-  );
+  const contextActionIds = useContext(PresentationPanelQuickActionContext);
+  const quickActionIds = useMemo(() => {
+    const actionMode = viewMode === 'edit' ? 'edit' : 'view';
+    return (contextActionIds?.[actionMode] ?? DEFAULT_QUICK_ACTION_IDS[actionMode])?.filter(
+      (actionId) => actionId && (disabledActionIds ?? [])?.indexOf(actionId) === -1
+    );
+  }, [viewMode, contextActionIds, disabledActionIds]);
 
   const onClose = useCallback(() => {
     setIsContextMenuOpen(false);
@@ -264,10 +258,9 @@ export const PresentationPanelHoverActions = ({
       })()) as AnyApiAction[];
       if (canceled) return;
 
-      const disabledActions = api.disabledActionIds$?.value;
-      if (disabledActions) {
+      if (disabledActionIds) {
         compatibleActions = compatibleActions.filter(
-          (action) => disabledActions.indexOf(action.id) === -1
+          (action) => disabledActionIds.indexOf(action.id) === -1
         );
       }
 
@@ -301,7 +294,16 @@ export const PresentationPanelHoverActions = ({
     return () => {
       canceled = true;
     };
-  }, [actionPredicate, api, getActions, isContextMenuOpen, onClose, viewMode, quickActionIds]);
+  }, [
+    actionPredicate,
+    api,
+    getActions,
+    isContextMenuOpen,
+    onClose,
+    viewMode,
+    quickActionIds,
+    disabledActionIds,
+  ]);
 
   const quickActionElements = useMemo(() => {
     if (!api || quickActions.length < 1) return [];
@@ -428,13 +430,19 @@ export const PresentationPanelHoverActions = ({
     [setDragHandle, euiTheme.size.xs]
   );
 
-  const hasHoverActions = quickActionElements.length || contextMenuPanels.lastIndexOf.length;
+  const hasHoverActions = useMemo(() => {
+    if (quickActionElements.length) return true;
+    return contextMenuPanels.every(({ items }) => items?.length);
+  }, [quickActionElements, contextMenuPanels]);
 
   return (
     <>
       {children}
       {api && hasHoverActions && (
-        <div className={classNames('embPanel__hoverActions', className)}>
+        <div
+          className={classNames('embPanel__hoverActions', className)}
+          data-test-subj={`hover-actions-${api.uuid}`}
+        >
           {dragHandle}
           {/* Wrapping all "right actions" in a span so that flex space-between works as expected */}
           <span>

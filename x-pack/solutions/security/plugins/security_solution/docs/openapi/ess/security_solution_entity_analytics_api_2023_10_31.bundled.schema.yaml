@@ -499,9 +499,10 @@ paths:
                       message: Invalid monitored field
                       username: john.doe
                   stats:
-                    failed: 1
-                    successful: 1
-                    total: 2
+                    failedOperations: 1
+                    successfulOperations: 1
+                    totalOperations: 2
+                    uploaded: 1
                 type: object
                 properties:
                   errors:
@@ -2014,11 +2015,6 @@ components:
         category_2_score:
           format: double
           type: number
-        category_3_count:
-          type: integer
-        category_3_score:
-          format: double
-          type: number
         criticality_level:
           $ref: '#/components/schemas/AssetCriticalityLevel'
         criticality_modifier:
@@ -2043,15 +2039,32 @@ components:
           items:
             $ref: '#/components/schemas/RiskScoreInput'
           type: array
-        is_privileged_user:
-          type: boolean
+        modifiers:
+          description: A list of modifiers that were applied to the risk score calculation.
+          items:
+            type: object
+            properties:
+              contribution:
+                format: double
+                type: number
+              metadata:
+                additionalProperties: true
+                type: object
+              modifier_value:
+                format: double
+                type: number
+              subtype:
+                type: string
+              type:
+                type: string
+            required:
+              - type
+              - contribution
+          type: array
         notes:
           items:
             type: string
           type: array
-        privileged_user_modifier:
-          format: double
-          type: number
       required:
         - '@timestamp'
         - id_field
@@ -2304,16 +2317,19 @@ components:
     PrivmonUserCsvUploadStats:
       type: object
       properties:
-        failed:
+        failedOperations:
           type: integer
-        successful:
+        successfulOperations:
           type: integer
-        total:
+        totalOperations:
+          type: integer
+        uploaded:
           type: integer
       required:
-        - successful
-        - failed
-        - total
+        - successfulOperations
+        - uploaded
+        - failedOperations
+        - totalOperations
     RiskEngineScheduleNowErrorResponse:
       type: object
       properties:

@@ -109,7 +109,7 @@ describe('getExpressionRendererProps', () => {
           query: { query: '', language: 'kuery' },
           filters: [],
         },
-        projectRouting: 'ALL',
+        projectRouting: '_alias:*',
         timeRange: { from: 'now-15m', to: 'now' },
         disableTriggers: false,
         settings: {
@@ -126,7 +126,7 @@ describe('getExpressionRendererProps', () => {
       expect(result.params).toBeDefined();
       expect(result.params?.searchContext).toEqual(
         expect.objectContaining({
-          projectRouting: 'ALL',
+          projectRouting: '_alias:*',
         })
       );
     });

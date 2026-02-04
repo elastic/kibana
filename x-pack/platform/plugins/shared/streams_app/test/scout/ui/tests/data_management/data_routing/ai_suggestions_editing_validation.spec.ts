@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 import {
@@ -77,7 +77,9 @@ test.describe('Stream data routing - AI suggestions editing validation', { tag: 
     await nameInput.fill('test.name');
 
     await expect(
-      page.getByText('Stream name cannot contain the "." character', { exact: false })
+      page.getByText('The child stream logs.test does not exist. Please create it first.', {
+        exact: false,
+      })
     ).toBeVisible();
   });
 

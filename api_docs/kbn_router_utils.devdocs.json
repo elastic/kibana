@@ -33,6 +33,8 @@
           "RouterLinkProps"
         ],
         "path": "src/platform/packages/shared/kbn-router-utils/src/get_router_link_props/index.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,6 +49,8 @@
               "GetRouterLinkPropsDeps"
             ],
             "path": "src/platform/packages/shared/kbn-router-utils/src/get_router_link_props/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

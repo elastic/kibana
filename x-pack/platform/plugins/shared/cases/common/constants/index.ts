@@ -13,6 +13,12 @@ export * from './application';
 export * from './observables';
 export { LENS_ATTACHMENT_TYPE } from './visualizations';
 
+/**
+ * Cases connector limits.
+ */
+export const MAX_OPEN_CASES = 20;
+export const DEFAULT_MAX_OPEN_CASES = 5;
+
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
 
@@ -24,9 +30,11 @@ export const CASE_SAVED_OBJECT = 'cases' as const;
 export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings' as const;
 export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions' as const;
 export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments' as const;
+export const CASE_ATTACHMENT_SAVED_OBJECT = 'cases-attachments' as const;
 export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure' as const;
 export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
 export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const;
+export const CASE_TEMPLATE_SAVED_OBJECT = 'cases-templates' as const;
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
@@ -37,6 +45,7 @@ export const SAVED_OBJECT_TYPES = [
   CASE_USER_ACTION_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
 ];
 
 /**
@@ -167,7 +176,7 @@ export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
  */
 
 export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
-  alerts: { sync: true, enabled: true, isExperimental: false },
+  alerts: { sync: true, enabled: true, isExperimental: false, read: true, all: true },
   metrics: [],
   observables: { enabled: true, autoExtract: false },
   events: { enabled: false },
@@ -301,3 +310,15 @@ export const MAX_CUSTOM_OBSERVABLE_TYPES = 10;
 export const CASE_PAGE_VIEW_EVENT_TYPE = 'case_page_view' as const;
 
 export const CASE_ATTACH_EVENTS_EVENT_TYPE = 'case_attach_events' as const;
+
+export const CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE =
+  'case_view_attachments_tab_clicked' as const;
+
+export const CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE =
+  'case_view_attachments_sub_tab_clicked' as const;
+
+/**
+ * Exporting this to make it easier to track the usage across the codebase
+ * via lsp references.
+ */
+export const CASE_EXTENDED_FIELDS = 'extended_fields' as const;

@@ -17,6 +17,20 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../primitive.gen';
+import { OriginalSource } from '../../common_attributes.gen';
+
+export type DeleteDataStreamRequestParams = z.infer<typeof DeleteDataStreamRequestParams>;
+export const DeleteDataStreamRequestParams = z.object({
+  /**
+   * The integration identifier
+   */
+  integration_id: NonEmptyString,
+  /**
+   * The data stream identifier
+   */
+  data_stream_id: NonEmptyString,
+});
+export type DeleteDataStreamRequestParamsInput = z.input<typeof DeleteDataStreamRequestParams>;
 
 export type StopAutoImportDataStreamRequestParams = z.infer<
   typeof StopAutoImportDataStreamRequestParams
@@ -34,3 +48,47 @@ export const StopAutoImportDataStreamRequestParams = z.object({
 export type StopAutoImportDataStreamRequestParamsInput = z.input<
   typeof StopAutoImportDataStreamRequestParams
 >;
+
+export type UploadSamplesToDataStreamRequestParams = z.infer<
+  typeof UploadSamplesToDataStreamRequestParams
+>;
+export const UploadSamplesToDataStreamRequestParams = z.object({
+  /**
+   * The integration identifier
+   */
+  integration_id: NonEmptyString,
+  /**
+   * The data stream identifier
+   */
+  data_stream_id: NonEmptyString,
+});
+export type UploadSamplesToDataStreamRequestParamsInput = z.input<
+  typeof UploadSamplesToDataStreamRequestParams
+>;
+
+export type UploadSamplesToDataStreamRequestBody = z.infer<
+  typeof UploadSamplesToDataStreamRequestBody
+>;
+export const UploadSamplesToDataStreamRequestBody = z.object({
+  /**
+   * The samples to upload
+   */
+  samples: z.array(z.string()),
+  /**
+   * The original source of the samples
+   */
+  originalSource: OriginalSource,
+});
+export type UploadSamplesToDataStreamRequestBodyInput = z.input<
+  typeof UploadSamplesToDataStreamRequestBody
+>;
+
+export type UploadSamplesToDataStreamResponse = z.infer<typeof UploadSamplesToDataStreamResponse>;
+export const UploadSamplesToDataStreamResponse = z
+  .object({
+    /**
+     * Indicates if the samples are uploaded successfully.
+     */
+    success: z.boolean().optional(),
+  })
+  .strict();

@@ -101,6 +101,7 @@ export function defineActionTypes(
   actions.registerType(getSystemActionType());
   actions.registerType(getSystemActionTypeWithKibanaPrivileges());
   actions.registerType(getSystemActionTypeWithConnectorAdapter());
+  actions.registerType(getSystemActionTypeAllowingMultipleInstances());
 
   /** Sub action framework */
 
@@ -685,6 +686,54 @@ function getSystemActionTypeWithConnectorAdapter() {
           params,
           reference,
           source: 'action:test.system-action-connector-adapter',
+        },
+      });
+
+      return { status: 'ok', actionId };
+    },
+  };
+
+  return result;
+}
+
+function getSystemActionTypeAllowingMultipleInstances() {
+  const result: ActionType<{}, {}, { index?: string; reference?: string }> = {
+    id: 'test.system-action-allow-multiple',
+    name: 'Test system action allowing multiple instances',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    allowMultipleSystemActions: true,
+    validate: {
+      params: {
+        schema: z
+          .object({
+            index: z.string().optional(),
+            reference: z.string().optional(),
+          })
+          .strict(),
+      },
+      config: {
+        schema: z.any(),
+      },
+      secrets: {
+        schema: z.any(),
+      },
+    },
+    isSystemActionType: true,
+    async executor({ params, services, actionId }) {
+      const { index, reference } = params;
+
+      if (index == null || reference == null) {
+        return { status: 'ok', actionId };
+      }
+
+      await services.scopedClusterClient.index({
+        index,
+        refresh: 'wait_for',
+        body: {
+          params,
+          reference,
+          source: 'action:test.system-action-allow-multiple',
         },
       });
 

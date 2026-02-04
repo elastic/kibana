@@ -100,6 +100,7 @@ export const ADVANCED_SETTINGS_URL = '/app/management/kibana/settings';
 export const ENTITY_ANALYTICS_DASHBOARD_URL = '/app/security/entity_analytics';
 export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL =
   '/app/security/entity_analytics_privileged_user_monitoring';
+export const ENTITY_ANALYTICS_THREAT_HUNTING_URL = '/app/security/entity_analytics_threat_hunting';
 
 // Asset Inventory
 export const ASSET_INVENTORY_URL = '/app/security/asset_inventory';
@@ -112,3 +113,6 @@ export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
 // Alerting
 export const STACK_RULES_URL = 'app/management/insightsAndAlerting/triggersActions/rules';
 export const MAINTENANCE_WINDOW_URL = 'app/management/insightsAndAlerting/maintenanceWindows';
+
+// AI Rule Creation
+export const AI_RULE_CREATION_URL = '/app/security/rules/ai_rule_creation';

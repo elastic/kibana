@@ -13,7 +13,6 @@ import pMap from 'p-map';
 
 import { FLEET_ELASTIC_AGENT_PACKAGE, FleetError } from '../../../../../../common';
 import { type KibanaAssetReference, KibanaSavedObjectType } from '../../../../../../common/types';
-import { createKibanaRequestFromAuth } from '../../../../request_utils';
 import { appContextService } from '../../../../app_context';
 import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
@@ -83,7 +82,7 @@ export async function createAlertingRuleFromTemplate(
       data: {
         alertTypeId: ruleTypeId,
         ...rest,
-        enabled: true,
+        enabled: false,
         actions: [],
         consumer: 'alerts',
       }, // what value for consumer will make sense?
@@ -109,7 +108,7 @@ export async function createAlertingRuleFromTemplate(
 export async function stepCreateAlertingRules(
   context: Pick<
     InstallContext,
-    'logger' | 'savedObjectsClient' | 'packageInstallContext' | 'spaceId' | 'authorizationHeader'
+    'logger' | 'savedObjectsClient' | 'packageInstallContext' | 'spaceId' | 'request'
   >
 ) {
   const { logger, savedObjectsClient, packageInstallContext, spaceId } = context;
@@ -121,10 +120,8 @@ export async function stepCreateAlertingRules(
   }
 
   await withPackageSpan('Install elastic agent rules', async () => {
-    const rulesClient = context.authorizationHeader
-      ? await appContextService
-          .getAlertingStart()
-          ?.getRulesClientWithRequest(createKibanaRequestFromAuth(context.authorizationHeader))
+    const rulesClient = context.request
+      ? await appContextService.getAlertingStart()?.getRulesClientWithRequest(context.request)
       : undefined;
 
     const alertTemplateAssets: ArchiveAsset[] = [];

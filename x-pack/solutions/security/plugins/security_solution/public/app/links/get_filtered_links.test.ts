@@ -16,6 +16,8 @@ import { createCoreStartMock } from '@kbn/core-lifecycle-browser-mocks/src/core_
 import type { StartPlugins } from '../../types';
 import { getManagementFilteredLinks } from '../../management/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { of } from 'rxjs';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 
 const mockGetManagementFilteredLinks = getManagementFilteredLinks as jest.MockedFunction<
   typeof getManagementFilteredLinks
@@ -40,6 +42,8 @@ describe('getFilteredLinks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock uiSettings.get$ to return an observable that emits immediately
+    mockCore.uiSettings.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
   });
 
   it('returns filtered links including AI Value links', async () => {
@@ -86,9 +90,9 @@ describe('getFilteredLinks', () => {
     expect(mockGetManagementFilteredLinks).toHaveBeenCalledWith(mockCore, mockPlugins);
   });
 
-  describe('`securitySolution.attacksAlertsAlignment` feature flag', () => {
-    it('includes correct base links in the result when feature flag is disabled', async () => {
-      mockCore.featureFlags.getBooleanValue.mockReturnValue(false);
+  describe('`securitySolution:enableAlertsAndAttacksAlignment` setting', () => {
+    it('includes correct base links in the result when setting is disabled', async () => {
+      mockCore.uiSettings.get.mockReturnValue(false);
       mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
       const result = await getFilteredLinks(mockCore, mockPlugins);
@@ -106,8 +110,8 @@ describe('getFilteredLinks', () => {
       expect(resultIds).toContain('ai_value'); // AI Value is now included statically
     });
 
-    it('includes all base links in the result when feature flag is enabled', async () => {
-      mockCore.featureFlags.getBooleanValue.mockReturnValue(true);
+    it('includes all base links in the result when setting is enabled', async () => {
+      mockCore.uiSettings.get.mockReturnValue(true);
       mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
       const result = await getFilteredLinks(mockCore, mockPlugins);

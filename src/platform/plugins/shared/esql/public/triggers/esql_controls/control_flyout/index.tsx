@@ -221,6 +221,7 @@ export function ESQLControlsFlyout({
         valuesRetrieval={valuesField}
         timeRange={timeRange}
         currentApp={currentApp}
+        esqlVariables={esqlVariables}
       />
     ) : (
       <IdentifierControlForm

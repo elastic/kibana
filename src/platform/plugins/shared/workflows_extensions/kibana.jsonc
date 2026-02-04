@@ -10,7 +10,7 @@
     "configPath": ["workflowsExtensions"],
     "browser": true,
     "server": true,
-    "requiredPlugins": [],
+    "requiredPlugins": ["actions", "inference"],
     "extraPublicDirs": ["common"]
   }
 }

@@ -15,6 +15,7 @@ import {
   ALERT_INSTANCE_ID,
   ALERT_SEVERITY_IMPROVING,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -122,6 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(OPEN_OR_ACTIVE.has(hits1[EVENT_ACTION])).to.be(true);
       expect(hits1[ALERT_FLAPPING_HISTORY]).to.be.an(Array);
       expect(hits1[ALERT_MAINTENANCE_WINDOW_IDS]).to.be.an(Array);
+      expect(hits1[ALERT_MAINTENANCE_WINDOW_NAMES]).to.be.an(Array);
       expect(typeof hits1[ALERT_REASON]).to.be('string');
       expect(typeof hits1[ALERT_RULE_EXECUTION_UUID]).to.be('string');
       expect(typeof hits1[ALERT_RULE_EXECUTION_TIMESTAMP]).to.be('string');
@@ -143,6 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.duration.us',
         'kibana.alert.flapping_history',
         'kibana.alert.maintenance_window_ids',
+        'kibana.alert.maintenance_window_names',
         'kibana.alert.reason',
         'kibana.alert.rule.execution.uuid',
         'kibana.alert.rule.execution.timestamp',

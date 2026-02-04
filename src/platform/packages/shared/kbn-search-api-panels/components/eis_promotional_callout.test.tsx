@@ -12,11 +12,7 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { EisPromotionalCallout, type EisPromotionalCalloutProps } from './eis_promotional_callout';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
-import {
-  EIS_PROMO_CALLOUT_DESCRIPTION,
-  EIS_PROMO_CALLOUT_ICON_ALT,
-  EIS_PROMO_CALLOUT_TITLE,
-} from '../translations';
+import { EIS_PROMO_CALLOUT_DESCRIPTION, EIS_CALLOUT_TITLE } from '../translations';
 
 jest.mock('../hooks/use_show_eis_promotional_content');
 
@@ -25,7 +21,7 @@ describe('EisPromotionalCallout', () => {
   const dataId = `${promoId}-eis-promo-callout`;
   const ctaLink = 'https://example.com';
   const direction: EisPromotionalCalloutProps['direction'] = 'row';
-  const mockOnSkipTour = jest.fn();
+  const mockOnDismissPromo = jest.fn();
 
   const renderEisPromotionalCallout = (props?: Partial<EisPromotionalCalloutProps>) => {
     return render(
@@ -45,7 +41,7 @@ describe('EisPromotionalCallout', () => {
     jest.clearAllMocks();
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
-      onSkipTour: mockOnSkipTour,
+      onDismissPromo: mockOnDismissPromo,
     });
   });
 
@@ -61,25 +57,24 @@ describe('EisPromotionalCallout', () => {
     expect(panel).toBeInTheDocument();
 
     // Title, description, CTA, and image
-    expect(screen.getByText(EIS_PROMO_CALLOUT_TITLE)).toBeInTheDocument();
+    expect(screen.getByText(EIS_CALLOUT_TITLE)).toBeInTheDocument();
     expect(screen.getByText(EIS_PROMO_CALLOUT_DESCRIPTION)).toBeInTheDocument();
     expect(screen.getByTestId('eisPromoCalloutCtaBtn')).toBeInTheDocument();
-    expect(screen.getByAltText(EIS_PROMO_CALLOUT_ICON_ALT)).toBeInTheDocument();
   });
 
-  it('calls onSkipTour when dismiss button is clicked', () => {
+  it('calls onDismissPromo when dismiss button is clicked', () => {
     renderEisPromotionalCallout();
 
-    const dismissButton = screen.getByLabelText('Dismiss');
+    const dismissButton = screen.getByTestId('euiDismissCalloutButton');
     fireEvent.click(dismissButton);
 
-    expect(mockOnSkipTour).toHaveBeenCalledTimes(1);
+    expect(mockOnDismissPromo).toHaveBeenCalledTimes(1);
   });
 
   it('does not render callout when promo is not visible', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: false,
-      onSkipTour: mockOnSkipTour,
+      onDismissPromo: mockOnDismissPromo,
     });
 
     renderEisPromotionalCallout();

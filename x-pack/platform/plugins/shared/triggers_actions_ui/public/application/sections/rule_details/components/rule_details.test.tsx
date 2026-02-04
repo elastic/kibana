@@ -20,8 +20,7 @@ import type {
   GetDescriptionFieldsFn,
   RuleType,
 } from '../../../../types';
-import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiBadge, EuiButtonEmpty } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiPageHeader, type EuiPageHeaderProps } from '@elastic/eui';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import {
   RuleExecutionStatusErrorReasons,
@@ -47,6 +46,10 @@ const queryClient = new QueryClient({
 });
 
 jest.mock('../../../../common/lib/kibana');
+
+const { getIsExperimentalFeatureEnabled } = jest.requireMock(
+  '../../../../common/get_experimental_features'
+);
 
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
@@ -228,7 +231,7 @@ describe('rule_details', () => {
       expect(
         shallowWithIntl(
           <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-        ).find('EuiPageHeader')
+        ).find(EuiPageHeader)
       ).toBeTruthy();
     });
 
@@ -322,25 +325,30 @@ describe('rule_details', () => {
         .toMatchInlineSnapshot(`
         <EuiPanel
           borderRadius="none"
+          className="euiCallOut euiCallOut--danger"
           color="danger"
-          css="unknown styles"
           data-test-subj="ruleErrorBanner"
           grow={false}
           paddingSize="s"
           panelRef={null}
         >
-          <p
-            className="euiCallOutHeader__title"
+          <EuiTitle
+            css="unknown styles"
+            size="xxs"
           >
-            <EuiIcon
-              aria-hidden="true"
-              color="inherit"
-              css="unknown styles"
-              size="m"
-              type="error"
-            />
-            Cannot run rule
-          </p>
+            <p
+              className="euiCallOutHeader__title"
+            >
+              <EuiIcon
+                aria-hidden="true"
+                color="inherit"
+                css="unknown styles"
+                size="m"
+                type="error"
+              />
+              Cannot run rule
+            </p>
+          </EuiTitle>
           <EuiSpacer
             size="s"
           />
@@ -523,7 +531,8 @@ describe('rule_details', () => {
     });
 
     describe('links', () => {
-      it('links to the app that created the rule', () => {
+      it('renders view in app button in management context', () => {
+        (getIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
         const rule = mockRule();
         expect(
           shallowWithIntl(
@@ -532,12 +541,22 @@ describe('rule_details', () => {
         ).toBeTruthy();
       });
 
+      it('renders view linked object button in rules app context', () => {
+        (getIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+        const rule = mockRule();
+        expect(
+          shallowWithIntl(
+            <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+          ).find('ViewLinkedObject')
+        ).toBeTruthy();
+      });
+
       it('links to the Edit flyout', () => {
         const rule = mockRule();
         const pageHeaderProps = shallowWithIntl(
           <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
         )
-          .find('EuiPageHeader')
+          .find(EuiPageHeader)
           .props() as EuiPageHeaderProps;
         const rightSideItems = pageHeaderProps.rightSideItems;
         expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
@@ -601,7 +620,7 @@ describe('rule_details', () => {
       const pageHeaderProps = shallowWithIntl(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       )
-        .find('EuiPageHeader')
+        .find(EuiPageHeader)
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
       expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
@@ -665,7 +684,7 @@ describe('rule_details', () => {
       const pageHeaderProps = shallowWithIntl(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       )
-        .find('EuiPageHeader')
+        .find(EuiPageHeader)
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
       expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
@@ -700,6 +719,7 @@ describe('rule_details', () => {
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
         isDeprecated: false,
+        source: 'stack',
       },
     ];
     ruleTypeRegistry.has.mockReturnValue(true);

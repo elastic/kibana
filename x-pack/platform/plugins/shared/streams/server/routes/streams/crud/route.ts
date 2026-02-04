@@ -8,11 +8,12 @@
 import { z } from '@kbn/zod';
 import { badData } from '@hapi/boom';
 import { Streams } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-settings-ids';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
 import { readStream } from './read_stream';
+import { createClassicStreamRoute } from './create_classic_stream_route';
+import { validateClassicStreamRoute } from './validate_classic_stream_route';
 
 export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name} 2023-10-31',
@@ -38,14 +39,14 @@ export const readStreamRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<Streams.all.GetResponse> => {
-    const { assetClient, attachmentClient, streamsClient, scopedClusterClient } =
+    const { queryClient, attachmentClient, streamsClient, scopedClusterClient } =
       await getScopedClients({
         request,
       });
 
     const body = await readStream({
       name: params.path.name,
-      assetClient,
+      queryClient,
       attachmentClient,
       scopedClusterClient,
       streamsClient,
@@ -119,15 +120,6 @@ export const editStreamRoute = createServerRoute({
       throw badData('Streams are not enabled for Wired streams.');
     }
 
-    const core = await context.core;
-    const groupStreamsEnabled = await core.uiSettings.client.get(
-      OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS
-    );
-
-    if (Streams.GroupStream.UpsertRequest.is(params.body) && !groupStreamsEnabled) {
-      throw badData('Streams are not enabled for Group streams.');
-    }
-
     return await streamsClient.upsertStream({
       request: params.body,
       name: params.path.name,
@@ -169,4 +161,6 @@ export const crudRoutes = {
   ...listStreamsRoute,
   ...editStreamRoute,
   ...deleteStreamRoute,
+  ...createClassicStreamRoute,
+  ...validateClassicStreamRoute,
 };

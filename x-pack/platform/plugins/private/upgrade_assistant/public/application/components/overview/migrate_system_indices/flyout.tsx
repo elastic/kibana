@@ -93,6 +93,12 @@ const i18nTexts = {
       defaultMessage: 'Status',
     }
   ),
+  tableCaption: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.featuresTableCaption',
+    {
+      defaultMessage: 'System indices migration status',
+    }
+  ),
   errorTooltipLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.errorTooltipLabel',
     {
@@ -279,6 +285,7 @@ export const SystemIndicesFlyout = ({
               itemIdToExpandedRowMap={expandedRows}
               pagination={true}
               sorting={true}
+              tableCaption={i18nTexts.tableCaption}
             />
           </>
         )}

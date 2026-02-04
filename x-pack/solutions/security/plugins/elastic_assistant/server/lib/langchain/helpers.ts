@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   DefendInsightsPostRequestBody,
   Message,
-  AttackDiscoveryPostInternalRequestBody,
+  PostAttackDiscoveryGenerateRequestBody,
   ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
 import type { BaseMessage } from '@langchain/core/messages';
@@ -39,7 +39,7 @@ export const requestHasRequiredAnonymizationParams = (
     unknown,
     unknown,
     | ExecuteConnectorRequestBody
-    | AttackDiscoveryPostInternalRequestBody
+    | PostAttackDiscoveryGenerateRequestBody
     | DefendInsightsPostRequestBody
   >
 ): boolean => {

@@ -7,14 +7,9 @@
 
 import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  ALERT_WORKFLOW_STATUS,
-  ALERT_WORKFLOW_STATUS_UPDATED_AT,
-  ALERT_WORKFLOW_USER,
-  ALERT_WORKFLOW_REASON,
-} from '@kbn/rule-data-utils';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
 import { AlertStatusEnum } from '../../../../../common/api/model';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -29,6 +24,10 @@ import {
   getSessionIDfromKibanaRequest,
   createAlertStatusPayloads,
 } from '../../../telemetry/insights';
+import {
+  setWorkflowStatusHandler,
+  getUpdateSignalStatusScript,
+} from '../common/set_workflow_status_handler';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -41,7 +40,7 @@ export const setSignalsStatusRoute = (
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [ALERTS_API_READ],
         },
       },
     })
@@ -101,18 +100,14 @@ export const setSignalsStatusRoute = (
 
         try {
           if ('signal_ids' in request.body) {
-            const { signal_ids: signalIds } = request.body;
-
-            const body = await updateSignalsStatusByIds(
-              status,
-              signalIds,
-              spaceId,
-              esClient,
-              user,
-              reason
-            );
-
-            return response.ok({ body });
+            // Use common handler for "by IDs" case
+            const getIndexPattern = async () => `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+            return setWorkflowStatusHandler({
+              context,
+              request,
+              response,
+              getIndexPattern,
+            });
           } else {
             const { conflicts, query } = request.body;
 
@@ -140,28 +135,8 @@ export const setSignalsStatusRoute = (
     );
 };
 
-const updateSignalsStatusByIds = async (
-  status: SetAlertsStatusRequestBody['status'],
-  signalsId: string[],
-  spaceId: string,
-  esClient: ElasticsearchClient,
-  user: AuthenticatedUser | null,
-  reason?: string
-) =>
-  esClient.updateByQuery({
-    index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-    refresh: true,
-    script: getUpdateSignalStatusScript(status, user, reason),
-    query: {
-      bool: {
-        filter: { terms: { _id: signalsId } },
-      },
-    },
-    ignore_unavailable: true,
-  });
-
 /**
- * Please avoid using `updateSignalsStatusByQuery` when possible, use `updateSignalsStatusByIds` instead.
+ * Please avoid using `updateSignalsStatusByQuery` when possible, use the common handler with "by IDs" instead.
  *
  * This method calls `updateByQuery` with `refresh: true` which is expensive on serverless.
  */
@@ -186,28 +161,3 @@ const updateSignalsStatusByQuery = async (
     },
     ignore_unavailable: true,
   });
-
-const getUpdateSignalStatusScript = (
-  status: SetAlertsStatusRequestBody['status'],
-  user: AuthenticatedUser | null,
-  reason?: string
-) => ({
-  source: `
-    if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null && ctx._source['${ALERT_WORKFLOW_STATUS}'] != '${status}') {
-      ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}';
-      ctx._source['${ALERT_WORKFLOW_USER}'] = ${
-    user?.profile_uid ? `'${user.profile_uid}'` : 'null'
-  };
-      ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = '${new Date().toISOString()}';
-
-      ${
-        reason
-          ? `ctx._source['${ALERT_WORKFLOW_REASON}'] = '${reason}';`
-          : `ctx._source.remove('${ALERT_WORKFLOW_REASON}')`
-      }
-    }
-    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-      ctx._source.signal.status = '${status}'
-    }`,
-  lang: 'painless',
-});

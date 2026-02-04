@@ -14,9 +14,12 @@ import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { ElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-server';
 import type { FeatureFlagsSetup } from '@kbn/core-feature-flags-server';
-import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type {
+  CoreRequestHandlerContext,
+  RequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
 import type { HttpResources } from '@kbn/core-http-resources-server';
-import type { HttpServiceSetup } from '@kbn/core-http-server';
+import type { HttpServiceSetup, KibanaRequest } from '@kbn/core-http-server';
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import type { LoggingServiceSetup } from '@kbn/core-logging-server';
 import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
@@ -81,6 +84,8 @@ export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStar
   deprecations: DeprecationsServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
+  /** {@link RequestHandlerContextFactory} */
+  createRequestHandlerContext: RequestHandlerContextFactory;
   /** @internal {@link CoreUsageDataSetup} */
   coreUsageData: CoreUsageDataSetup;
   /** {@link PluginsServiceSetup} */
@@ -109,3 +114,7 @@ export type StartServicesAccessor<
   TPluginsStart extends object = object,
   TStart = unknown
 > = () => Promise<[CoreStart, TPluginsStart, TStart]>;
+
+export type RequestHandlerContextFactory = (
+  request: KibanaRequest
+) => Promise<CoreRequestHandlerContext>;

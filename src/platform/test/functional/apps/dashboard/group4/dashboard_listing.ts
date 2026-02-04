@@ -168,11 +168,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(searchFilter).to.equal('nodashboardsnamedme');
       });
 
-      it('stays on listing page if title matches two dashboards', async function () {
+      it('allows dashboards that differ only by casing', async function () {
         await dashboard.clickNewDashboard();
         await dashboard.saveDashboard('two words', {
           saveAsNew: true,
-          needsConfirm: true,
+          needsConfirm: false,
         });
         await dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();

@@ -21,6 +21,7 @@ import {
 
 import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 import { appContextService } from './app_context';
+import { getSpaceForAgentPolicy } from './spaces/helpers';
 
 export class PolicyWatcher {
   private subscription: Subscription | undefined;
@@ -93,7 +94,7 @@ export class PolicyWatcher {
                   updated_by: 'system',
                 },
                 ...(policyContent.space_ids?.length
-                  ? { namespace: policyContent.space_ids[0] }
+                  ? { namespace: getSpaceForAgentPolicy(policyContent) }
                   : {}),
               };
               return updatedPolicy;

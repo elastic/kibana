@@ -24,6 +24,8 @@
           "<P, Q, B, any>) => boolean"
         ],
         "path": "src/core/packages/http/server-utils/src/request.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
               "<P, Q, B, any>"
             ],
             "path": "src/core/packages/http/server-utils/src/request.ts",
+            "lineNumber": 33,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -66,6 +70,8 @@
           "<P, Q, B, any>"
         ],
         "path": "src/core/packages/http/server-utils/src/request.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -82,6 +88,8 @@
               "RawRequest"
             ],
             "path": "src/core/packages/http/server-utils/src/request.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -100,6 +108,8 @@
               "<P, Q, B> | undefined"
             ],
             "path": "src/core/packages/http/server-utils/src/request.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -117,6 +127,8 @@
               "boolean"
             ],
             "path": "src/core/packages/http/server-utils/src/request.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

@@ -479,6 +479,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.events.populate_file_data',
+    first_supported_version: '9.3.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.populate_file_data',
+      {
+        defaultMessage:
+          'Enable collection of entropy and header bytes on file events. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.kernel.connect',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -1214,7 +1225,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.kernel.capture_mode',
       {
         defaultMessage:
-          "Control whether kprobes or eBPF are used to gather data. Options are 'kprobe', 'ebpf', or 'auto'. 'auto' uses eBPF if possible, otherwise it uses 'kprobe'. Default: auto.",
+          "Control whether kprobes, eBPF or Quark is used to gather data. Options are 'kprobe', 'ebpf', 'quark' or 'auto'. 'auto' uses 'quark' if possible (and supported), then tries legacy 'ebpf', and otherwise it uses 'kprobe'. 'quark' is supported by Endpoint versions 9.3 and newer. Default: auto.",
       }
     ),
   },
@@ -1335,6 +1346,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           "Prevent permission checking from using the 'open'/'openat' syscalls when running on kernels which require 'FAN_OPEN_PERM' (older than 5.0). This will avoid potential deadlocks with other antivirus products at the cost of racy hash-based trusted application entries. Ignored when running on newer kernels. Default: false.",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.fanotify.enable_ns_jumping',
+    first_supported_version: '9.3.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.enable_ns_jumping',
+      {
+        defaultMessage:
+          'Enter the mount namespace of processes when they generate fanotify events. For 9.2 and earlier, default: false. For 9.3 and later, default: true.',
       }
     ),
   },
@@ -2573,6 +2595,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.mitigations.policies.redirection_guard',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.mitigations.policies.redirection_guard',
+      {
+        defaultMessage:
+          'Set to false to opt out of Windows Redirection Guard on Win10/Win11 21H2 and later. Default: true.',
+      }
+    ),
+  },
+  {
     key: 'linux.advanced.agent.orphaned_remediation',
     first_supported_version: '9.2',
     documentation: i18n.translate(
@@ -2668,6 +2701,92 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Maintain a minimum percentage of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional space, will no longer function. Default: no limit.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.response_actions.get_file.max_parallel_uploads',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.response_actions.get_file.max_parallel_uploads',
+      {
+        defaultMessage:
+          'Maximum number of parallel uploads for get-file response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.response_actions.get_file.max_parallel_uploads',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.response_actions.get_file.max_parallel_uploads',
+      {
+        defaultMessage:
+          'Maximum number of parallel uploads for get-file response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.response_actions.get_file.max_parallel_uploads',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.response_actions.get_file.max_parallel_uploads',
+      {
+        defaultMessage:
+          'Maximum number of parallel uploads for get-file response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.response_actions.get_file.upload_streams_count',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.response_actions.get_file.upload_streams_count',
+      {
+        defaultMessage:
+          'Maximum number of upload streams for get-file response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.response_actions.get_file.upload_streams_count',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.response_actions.get_file.upload_streams_count',
+      {
+        defaultMessage:
+          'Number of parallel streams per upload for get-file response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.response_actions.get_file.upload_streams_count',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.response_actions.get_file.upload_streams_count',
+      {
+        defaultMessage:
+          'Number of parallel streams per upload for get-file response action. Default: 1.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.script_capture',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.script_capture',
+      {
+        defaultMessage: 'Capture script content for process create events. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.script_max_size',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.script_max_size',
+      {
+        defaultMessage: 'Maximum size of script being captured in bytes. Default 1024.',
       }
     ),
   },

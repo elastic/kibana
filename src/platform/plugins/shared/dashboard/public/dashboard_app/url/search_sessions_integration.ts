@@ -15,9 +15,8 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createQueryParamObservable, getQueryParams } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
 import { map } from 'rxjs';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { SEARCH_SESSION_ID } from '../../../common/page_bundle_constants';
-import type { DashboardLocatorParams, DashboardState } from '../../../common/types';
+import type { DashboardLocatorParams } from '../../../common/types';
 import type { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 import { dataService } from '../../services/kibana_services';
 
@@ -79,17 +78,10 @@ function getLocatorParams({
 }): DashboardLocatorParams {
   const savedObjectId = dashboardApi.savedObjectId$.value;
 
-  const panels = dashboardInternalApi.serializeLayout() as Pick<
+  const { panels, pinned_panels } = dashboardInternalApi.serializeLayout() as Pick<
     DashboardLocatorParams,
-    'panels' | 'references'
+    'panels' | 'pinned_panels'
   >;
-
-  const { controlGroupInput, controlGroupReferences } = dashboardInternalApi.serializeControls();
-
-  const combinedReferences = [
-    ...(panels?.references ?? []),
-    ...(controlGroupReferences ?? []),
-  ] as unknown as DashboardState['references'] & SerializableRecord;
 
   return {
     viewMode: dashboardApi.viewMode$.value ?? 'view',
@@ -101,17 +93,16 @@ function getLocatorParams({
     searchSessionId: shouldRestoreSearchSession
       ? dataService.search.session.getSessionId()
       : undefined,
-    timeRange: shouldRestoreSearchSession
+    time_range: shouldRestoreSearchSession
       ? dataService.query.timefilter.timefilter.getAbsoluteTime()
       : dataService.query.timefilter.timefilter.getTime(),
-    refreshInterval: shouldRestoreSearchSession
+    refresh_interval: shouldRestoreSearchSession
       ? {
           pause: true, // force pause refresh interval when restoring a session
           value: 0,
         }
       : undefined,
-    controlGroupInput,
-    panels: panels?.panels,
-    references: combinedReferences,
+    pinned_panels,
+    panels,
   };
 }

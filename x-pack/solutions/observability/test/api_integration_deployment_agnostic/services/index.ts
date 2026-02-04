@@ -11,6 +11,7 @@ import { ApmApiProvider } from './apm_api';
 import { SloApiProvider } from './slo_api';
 import { SynthtraceProvider } from './synthtrace';
 import { ObservabilityAIAssistantApiProvider } from './observability_ai_assistant_api';
+import { ObservabilityAgentBuilderApiProvider } from './observability_agent_builder_api';
 import { SyntheticsParamsApiProvider } from './synthetics_params_api';
 
 export type {
@@ -27,6 +28,7 @@ export const services = {
   sloApi: SloApiProvider,
   synthtrace: SynthtraceProvider,
   observabilityAIAssistantApi: ObservabilityAIAssistantApiProvider,
+  observabilityAgentBuilderApi: ObservabilityAgentBuilderApiProvider,
   syntheticsParamsApi: SyntheticsParamsApiProvider,
 };
 

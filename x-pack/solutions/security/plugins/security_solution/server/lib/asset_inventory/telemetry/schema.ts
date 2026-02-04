@@ -72,6 +72,10 @@ export const assetInventoryUsageSchema: MakeSchemaFrom<AssetInventoryUsage> = {
         type: 'keyword',
         _meta: { description: 'Cloud provider (aws, azure, gcp)' },
       },
+      account_type: {
+        type: 'keyword',
+        _meta: { description: 'Account type: single or organization' },
+      },
       packagePolicyIds: {
         type: 'array',
         items: {

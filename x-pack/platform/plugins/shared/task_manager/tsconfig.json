@@ -40,6 +40,9 @@
     "@kbn/spaces-utils",
     "@kbn/licensing-types",
     "@kbn/lazy-object",
+    "@kbn/security-plugin-types-server",
+    "@kbn/connector-specs",
+    "@kbn/es-errors",
   ],
   "exclude": ["target/**/*"]
 }

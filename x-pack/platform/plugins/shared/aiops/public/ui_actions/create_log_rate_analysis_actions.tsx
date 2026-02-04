@@ -67,7 +67,7 @@ export function createAddLogRateAnalysisEmbeddableAction(
             LogRateAnalysisEmbeddableApi
           >({
             panelType: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
-            serializedState: { rawState: {} },
+            serializedState: {},
             maybePanelId: uuid,
           });
 

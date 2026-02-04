@@ -5,18 +5,54 @@
  * 2.0.
  */
 
-import type { Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { MAINTENANCE_WINDOWS_APP_ID } from '../common';
+import type {
+  MaintenanceWindowsPublicSetupDependencies,
+  MaintenanceWindowsPublicStartDependencies,
+} from './types';
+export class MaintenanceWindowsPublicPlugin
+  implements
+    Plugin<
+      void,
+      void,
+      MaintenanceWindowsPublicSetupDependencies,
+      MaintenanceWindowsPublicStartDependencies
+    >
+{
+  constructor(private readonly initContext: PluginInitializerContext) {}
 
-export class MaintenanceWindowsPublicPlugin implements Plugin<{}, {}, {}, {}> {
-  constructor() {}
+  public setup(core: CoreSetup, plugins: MaintenanceWindowsPublicSetupDependencies) {
+    const kibanaVersion = this.initContext.env.packageInfo.version;
+    plugins.management.sections.section.insightsAndAlerting.registerApp({
+      id: MAINTENANCE_WINDOWS_APP_ID,
+      title: i18n.translate('xpack.maintenanceWindows.management.section.title', {
+        defaultMessage: 'Maintenance Windows',
+      }),
+      async mount(params: ManagementAppMountParams) {
+        const { renderApp } = await import('./application');
 
-  public setup() {
-    return {};
+        const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+          CoreStart,
+          MaintenanceWindowsPublicStartDependencies,
+          unknown
+        ];
+
+        return renderApp({
+          core: coreStart,
+          plugins: pluginsStart,
+          mountParams: params,
+          kibanaVersion,
+        });
+      },
+    });
+
+    return;
   }
 
-  public start() {
-    return {};
-  }
+  public start(): void {}
 
-  public stop() {}
+  public stop(): void {}
 }

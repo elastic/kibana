@@ -19,7 +19,14 @@ import { setUnifiedDocViewerServices } from '../../plugin';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { merge } from 'lodash';
 import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
-import type { TraceIndexes } from '@kbn/discover-utils/src';
+import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
+import { hasErrorFields } from './utils/has_error_fields';
+
+jest.mock('@kbn/presentation-panel-plugin/public/kibana_services', () => ({
+  uiActions: {
+    getAction: jest.fn(),
+  },
+}));
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -30,6 +37,14 @@ jest.mock('@elastic/eui', () => ({
     children?: string;
     dangerouslySetInnerHTML?: { __html: string };
   }) => <code data-test-subj="codeBlock">{children ?? dangerouslySetInnerHTML?.__html ?? ''}</code>,
+}));
+
+jest.mock('./utils/has_error_fields', () => ({
+  hasErrorFields: jest.fn(),
+}));
+
+jest.mock('./sub_components/similar_errors', () => ({
+  SimilarErrors: () => <div data-test-subj="docViewerSimilarErrorsSection" />,
 }));
 
 const DATASET_NAME = 'logs.overview';
@@ -143,7 +158,7 @@ setUnifiedDocViewerServices(
   merge(mockUnifiedDocViewerServices, getCustomUnifedDocViewerServices())
 );
 
-const indexes: TraceIndexes = {
+const indexes: ObservabilityIndexes = {
   apm: {
     errors: 'apm-error-index',
     traces: 'apm-trace-index',
@@ -387,10 +402,12 @@ describe('LogsOverview with APM links', () => {
         ).not.toBeInTheDocument();
       });
 
-      it('should render trace id link', () => {
-        expect(
-          screen.queryByTestId('unifiedDocViewLogsOverviewTraceIdHighlightLink')
-        ).toBeInTheDocument();
+      it('should render trace id without a link', () => {
+        const traceId = screen.getByTestId('unifiedDocViewLogsOverviewTraceID');
+        expect(traceId).toBeInTheDocument();
+
+        const traceLink = traceId.querySelector('a');
+        expect(traceLink).toBeNull();
       });
     });
   });
@@ -408,5 +425,39 @@ describe('LogsOverview content breakdown', () => {
     const message = JSON.stringify(json);
     renderLogsOverview({ hit: buildHit({ message }) });
     expect(screen.queryByTestId('codeBlock')?.innerHTML).toBe(JSON.stringify(json, null, 2));
+  });
+});
+
+describe('LogsOverview SimilarErrors section', () => {
+  beforeEach(() => {
+    Element.prototype.scrollIntoView = jest.fn();
+    jest.clearAllMocks();
+  });
+
+  it('should render SimilarErrors section when traceId is present and hasErrorFields returns true', () => {
+    (hasErrorFields as jest.Mock).mockReturnValue(true);
+
+    renderLogsOverview({ hit: buildHit({ 'trace.id': '123' }) });
+
+    expect(hasErrorFields).toHaveBeenCalled();
+    expect(screen.queryByTestId('docViewerSimilarErrorsSection')).toBeInTheDocument();
+  });
+
+  it('should not render SimilarErrors section when hasErrorFields returns false', () => {
+    (hasErrorFields as jest.Mock).mockReturnValue(false);
+
+    renderLogsOverview({ hit: buildHit() });
+
+    expect(hasErrorFields).toHaveBeenCalled();
+    expect(screen.queryByTestId('docViewerSimilarErrorsSection')).not.toBeInTheDocument();
+  });
+
+  it('should not render SimilarErrors section when traceId is not present', () => {
+    (hasErrorFields as jest.Mock).mockReturnValue(false);
+
+    renderLogsOverview({ hit: buildHit({ 'trace.id': undefined }) });
+
+    expect(hasErrorFields).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('docViewerSimilarErrorsSection')).not.toBeInTheDocument();
   });
 });

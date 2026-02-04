@@ -6,11 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import { generateEsql } from '@kbn/onechat-genai-utils';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import type { ToolHandlerResult } from '@kbn/onechat-server/tools';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 const nlToEsqlToolSchema = z.object({
   query: z.string().describe('A natural language query to generate an ES|QL query from.'),

@@ -421,8 +421,6 @@ const response = await workflowsExecutionEngine.executeWorkflow(
   },
   request // KibanaRequest object
 );
-
-console.log(`Execution ID: ${response.workflowExecutionId}`);
 ```
 
 ---
@@ -820,8 +818,6 @@ const response = await workflowsExecutionEngine.executeWorkflow(
   },
   request // KibanaRequest object
 );
-
-console.log(`Execution started: ${response.workflowExecutionId}`);
 ```
 
 ### Example 2: Execute a Single Step
@@ -835,8 +831,6 @@ const response = await workflowsExecutionEngine.executeWorkflowStep(
     inputs: { customValue: 'test' }
   }
 );
-
-console.log(`Step execution ID: ${response.workflowExecutionId}`);
 ```
 
 ### Example 3: Cancel a Workflow

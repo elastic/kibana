@@ -25,7 +25,11 @@ Object {
         "field": "foo",
         "if": "
   try {
-  if (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\"))) {
+  
+  def val_attributes_status = $('attributes.status', null); if (val_attributes_status instanceof List && val_attributes_status.size() == 1) { val_attributes_status = val_attributes_status[0]; }
+  
+  
+  if ((val_attributes_status !== null && ((val_attributes_status instanceof Number && val_attributes_status.toString() == \\"active\\") || val_attributes_status == \\"active\\"))) {
     return true;
   }
   return false;
@@ -75,7 +79,11 @@ Object {
         "field": "attributes.not_flag",
         "if": "
   try {
-  if (!(($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\")))) {
+  
+  def val_attributes_status = $('attributes.status', null); if (val_attributes_status instanceof List && val_attributes_status.size() == 1) { val_attributes_status = val_attributes_status[0]; }
+  
+  
+  if (!((val_attributes_status !== null && ((val_attributes_status instanceof Number && val_attributes_status.toString() == \\"active\\") || val_attributes_status == \\"active\\")))) {
     return true;
   }
   return false;
@@ -91,7 +99,12 @@ Object {
         "field": "attributes.not_nested",
         "if": "
   try {
-  if (!((($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == 1)) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == 2))))) {
+  
+  def val_attributes_a = $('attributes.a', null); if (val_attributes_a instanceof List && val_attributes_a.size() == 1) { val_attributes_a = val_attributes_a[0]; }
+  def val_attributes_b = $('attributes.b', null); if (val_attributes_b instanceof List && val_attributes_b.size() == 1) { val_attributes_b = val_attributes_b[0]; }
+  
+  
+  if (!(((val_attributes_a !== null && ((val_attributes_a instanceof Number && val_attributes_a.toString() == \\"1\\") || val_attributes_a == 1)) || (val_attributes_b !== null && ((val_attributes_b instanceof Number && val_attributes_b.toString() == \\"2\\") || val_attributes_b == 2))))) {
     return true;
   }
   return false;
@@ -114,7 +127,14 @@ Object {
         "field": "attributes.boolean_true_test",
         "if": "
   try {
-  if (($('attributes.is_active', null) !== null && (($('attributes.is_active', null) instanceof Number && $('attributes.is_active', null).toString() == \\"true\\") || $('attributes.is_active', null) == true)) && ($('attributes.is_active_str', null) !== null && (($('attributes.is_active_str', null) instanceof Number && $('attributes.is_active_str', null).toString() == \\"true\\") || $('attributes.is_active_str', null) == \\"true\\")) && ($('attributes.is_inactive', null) !== null && (($('attributes.is_inactive', null) instanceof Number && $('attributes.is_inactive', null).toString() != \\"true\\") || $('attributes.is_inactive', null) != true)) && ($('attributes.is_inactive_str', null) !== null && (($('attributes.is_inactive_str', null) instanceof Number && $('attributes.is_inactive_str', null).toString() != \\"true\\") || $('attributes.is_inactive_str', null) != \\"true\\"))) {
+  
+  def val_attributes_is_active = $('attributes.is_active', null); if (val_attributes_is_active instanceof List && val_attributes_is_active.size() == 1) { val_attributes_is_active = val_attributes_is_active[0]; }
+  def val_attributes_is_active_str = $('attributes.is_active_str', null); if (val_attributes_is_active_str instanceof List && val_attributes_is_active_str.size() == 1) { val_attributes_is_active_str = val_attributes_is_active_str[0]; }
+  def val_attributes_is_inactive = $('attributes.is_inactive', null); if (val_attributes_is_inactive instanceof List && val_attributes_is_inactive.size() == 1) { val_attributes_is_inactive = val_attributes_is_inactive[0]; }
+  def val_attributes_is_inactive_str = $('attributes.is_inactive_str', null); if (val_attributes_is_inactive_str instanceof List && val_attributes_is_inactive_str.size() == 1) { val_attributes_is_inactive_str = val_attributes_is_inactive_str[0]; }
+  
+  
+  if ((val_attributes_is_active !== null && ((val_attributes_is_active instanceof Number && val_attributes_is_active.toString() == \\"true\\") || val_attributes_is_active == true)) && (val_attributes_is_active_str !== null && ((val_attributes_is_active_str instanceof Number && val_attributes_is_active_str.toString() == \\"true\\") || val_attributes_is_active_str == \\"true\\")) && (val_attributes_is_inactive !== null && ((val_attributes_is_inactive instanceof Number && val_attributes_is_inactive.toString() != \\"true\\") || val_attributes_is_inactive != true)) && (val_attributes_is_inactive_str !== null && ((val_attributes_is_inactive_str instanceof Number && val_attributes_is_inactive_str.toString() != \\"true\\") || val_attributes_is_inactive_str != \\"true\\"))) {
     return true;
   }
   return false;
@@ -130,7 +150,14 @@ Object {
         "field": "attributes.boolean_false_test",
         "if": "
   try {
-  if (($('attributes.is_disabled', null) !== null && (($('attributes.is_disabled', null) instanceof Number && $('attributes.is_disabled', null).toString() == \\"false\\") || $('attributes.is_disabled', null) == false)) && ($('attributes.is_disabled_str', null) !== null && (($('attributes.is_disabled_str', null) instanceof Number && $('attributes.is_disabled_str', null).toString() == \\"false\\") || $('attributes.is_disabled_str', null) == \\"false\\")) && ($('attributes.is_enabled', null) !== null && (($('attributes.is_enabled', null) instanceof Number && $('attributes.is_enabled', null).toString() != \\"false\\") || $('attributes.is_enabled', null) != false)) && ($('attributes.is_enabled_str', null) !== null && (($('attributes.is_enabled_str', null) instanceof Number && $('attributes.is_enabled_str', null).toString() != \\"false\\") || $('attributes.is_enabled_str', null) != \\"false\\"))) {
+  
+  def val_attributes_is_disabled = $('attributes.is_disabled', null); if (val_attributes_is_disabled instanceof List && val_attributes_is_disabled.size() == 1) { val_attributes_is_disabled = val_attributes_is_disabled[0]; }
+  def val_attributes_is_disabled_str = $('attributes.is_disabled_str', null); if (val_attributes_is_disabled_str instanceof List && val_attributes_is_disabled_str.size() == 1) { val_attributes_is_disabled_str = val_attributes_is_disabled_str[0]; }
+  def val_attributes_is_enabled = $('attributes.is_enabled', null); if (val_attributes_is_enabled instanceof List && val_attributes_is_enabled.size() == 1) { val_attributes_is_enabled = val_attributes_is_enabled[0]; }
+  def val_attributes_is_enabled_str = $('attributes.is_enabled_str', null); if (val_attributes_is_enabled_str instanceof List && val_attributes_is_enabled_str.size() == 1) { val_attributes_is_enabled_str = val_attributes_is_enabled_str[0]; }
+  
+  
+  if ((val_attributes_is_disabled !== null && ((val_attributes_is_disabled instanceof Number && val_attributes_is_disabled.toString() == \\"false\\") || val_attributes_is_disabled == false)) && (val_attributes_is_disabled_str !== null && ((val_attributes_is_disabled_str instanceof Number && val_attributes_is_disabled_str.toString() == \\"false\\") || val_attributes_is_disabled_str == \\"false\\")) && (val_attributes_is_enabled !== null && ((val_attributes_is_enabled instanceof Number && val_attributes_is_enabled.toString() != \\"false\\") || val_attributes_is_enabled != false)) && (val_attributes_is_enabled_str !== null && ((val_attributes_is_enabled_str instanceof Number && val_attributes_is_enabled_str.toString() != \\"false\\") || val_attributes_is_enabled_str != \\"false\\"))) {
     return true;
   }
   return false;
@@ -146,7 +173,14 @@ Object {
         "field": "attributes.numeric_450_test",
         "if": "
   try {
-  if (($('attributes.status_code', null) !== null && (($('attributes.status_code', null) instanceof Number && $('attributes.status_code', null).toString() == \\"450\\") || $('attributes.status_code', null) == 450)) && ($('attributes.status_code_str', null) !== null && (($('attributes.status_code_str', null) instanceof Number && $('attributes.status_code_str', null).toString() == \\"450\\") || $('attributes.status_code_str', null) == \\"450\\")) && ($('attributes.other_code', null) !== null && (($('attributes.other_code', null) instanceof Number && $('attributes.other_code', null).toString() != \\"450\\") || $('attributes.other_code', null) != 450)) && ($('attributes.other_code_str', null) !== null && (($('attributes.other_code_str', null) instanceof Number && $('attributes.other_code_str', null).toString() != \\"450\\") || $('attributes.other_code_str', null) != \\"450\\"))) {
+  
+  def val_attributes_status_code = $('attributes.status_code', null); if (val_attributes_status_code instanceof List && val_attributes_status_code.size() == 1) { val_attributes_status_code = val_attributes_status_code[0]; }
+  def val_attributes_status_code_str = $('attributes.status_code_str', null); if (val_attributes_status_code_str instanceof List && val_attributes_status_code_str.size() == 1) { val_attributes_status_code_str = val_attributes_status_code_str[0]; }
+  def val_attributes_other_code = $('attributes.other_code', null); if (val_attributes_other_code instanceof List && val_attributes_other_code.size() == 1) { val_attributes_other_code = val_attributes_other_code[0]; }
+  def val_attributes_other_code_str = $('attributes.other_code_str', null); if (val_attributes_other_code_str instanceof List && val_attributes_other_code_str.size() == 1) { val_attributes_other_code_str = val_attributes_other_code_str[0]; }
+  
+  
+  if ((val_attributes_status_code !== null && ((val_attributes_status_code instanceof Number && val_attributes_status_code.toString() == \\"450\\") || val_attributes_status_code == 450)) && (val_attributes_status_code_str !== null && ((val_attributes_status_code_str instanceof Number && val_attributes_status_code_str.toString() == \\"450\\") || val_attributes_status_code_str == \\"450\\")) && (val_attributes_other_code !== null && ((val_attributes_other_code instanceof Number && val_attributes_other_code.toString() != \\"450\\") || val_attributes_other_code != 450)) && (val_attributes_other_code_str !== null && ((val_attributes_other_code_str instanceof Number && val_attributes_other_code_str.toString() != \\"450\\") || val_attributes_other_code_str != \\"450\\"))) {
     return true;
   }
   return false;
@@ -162,7 +196,15 @@ Object {
         "field": "attributes.mixed_coercion_test",
         "if": "
   try {
-  if (($('attributes.response_time', null) !== null && (($('attributes.response_time', null) instanceof String && Float.parseFloat($('attributes.response_time', null)) > 100) || $('attributes.response_time', null) > 100)) && ($('attributes.response_time_str', null) !== null && (($('attributes.response_time_str', null) instanceof String && Float.parseFloat($('attributes.response_time_str', null)) > 100) || $('attributes.response_time_str', null) > 100)) && ($('attributes.port', null) !== null && (($('attributes.port', null) instanceof Number && $('attributes.port', null) >= 8000 && $('attributes.port', null) <= 9000) || ($('attributes.port', null) instanceof String && Float.parseFloat($('attributes.port', null)) >= 8000 && Float.parseFloat($('attributes.port', null)) <= 9000))) && ($('attributes.is_enabled', null) !== null && (($('attributes.is_enabled', null) instanceof Number && $('attributes.is_enabled', null).toString() == \\"true\\") || $('attributes.is_enabled', null) == true)) && ($('attributes.count_str', null) !== null && (($('attributes.count_str', null) instanceof Number && $('attributes.count_str', null).toString() == \\"42\\") || $('attributes.count_str', null) == \\"42\\"))) {
+  
+  def val_attributes_response_time = $('attributes.response_time', null); if (val_attributes_response_time instanceof List && val_attributes_response_time.size() == 1) { val_attributes_response_time = val_attributes_response_time[0]; }
+  def val_attributes_response_time_str = $('attributes.response_time_str', null); if (val_attributes_response_time_str instanceof List && val_attributes_response_time_str.size() == 1) { val_attributes_response_time_str = val_attributes_response_time_str[0]; }
+  def val_attributes_port = $('attributes.port', null); if (val_attributes_port instanceof List && val_attributes_port.size() == 1) { val_attributes_port = val_attributes_port[0]; }
+  def val_attributes_is_enabled = $('attributes.is_enabled', null); if (val_attributes_is_enabled instanceof List && val_attributes_is_enabled.size() == 1) { val_attributes_is_enabled = val_attributes_is_enabled[0]; }
+  def val_attributes_count_str = $('attributes.count_str', null); if (val_attributes_count_str instanceof List && val_attributes_count_str.size() == 1) { val_attributes_count_str = val_attributes_count_str[0]; }
+  
+  
+  if ((val_attributes_response_time !== null && ((val_attributes_response_time instanceof String && Float.parseFloat(val_attributes_response_time) > 100) || val_attributes_response_time > 100)) && (val_attributes_response_time_str !== null && ((val_attributes_response_time_str instanceof String && Float.parseFloat(val_attributes_response_time_str) > 100) || val_attributes_response_time_str > 100)) && (val_attributes_port !== null && ((val_attributes_port instanceof Number && val_attributes_port >= 8000 && val_attributes_port <= 9000) || (val_attributes_port instanceof String && Float.parseFloat(val_attributes_port) >= 8000 && Float.parseFloat(val_attributes_port) <= 9000))) && (val_attributes_is_enabled !== null && ((val_attributes_is_enabled instanceof Number && val_attributes_is_enabled.toString() == \\"true\\") || val_attributes_is_enabled == true)) && (val_attributes_count_str !== null && ((val_attributes_count_str instanceof Number && val_attributes_count_str.toString() == \\"42\\") || val_attributes_count_str == \\"42\\"))) {
     return true;
   }
   return false;
@@ -181,10 +223,91 @@ exports[`transpile (Streamlang DSL to ingest pipeline) should transpile a variet
 Object {
   "processors": Array [
     Object {
+      "script": Object {
+        "if": undefined,
+        "ignore_failure": undefined,
+        "lang": "painless",
+        "source": "def fields = [];
+boolean allPresent = true;
+
+if (ctx.containsKey('field1') && ctx['field1'] != null) {
+  fields.add(ctx['field1'].toString());
+} else {
+  allPresent = false;
+}
+
+if (ctx.containsKey('field2') && ctx['field2'] != null) {
+  fields.add(ctx['field2'].toString());
+} else {
+  allPresent = false;
+}
+
+if (ctx.containsKey('field3') && ctx['field3'] != null) {
+  fields.add(ctx['field3'].toString());
+} else {
+  allPresent = false;
+}
+
+if (false || allPresent) {
+  ctx['my_joined_field'] = fields.stream().collect(Collectors.joining(', '));
+}",
+        "tag": undefined,
+      },
+    },
+    Object {
+      "script": Object {
+        "description": undefined,
+        "if": undefined,
+        "ignore_failure": undefined,
+        "lang": "painless",
+        "source": "def fromValues = [];
+  boolean allFieldsPresent = true;
+
+  if (ctx.containsKey('first_name') && ctx['first_name'] != null) {
+  fromValues.add(ctx['first_name'].toString());
+} else {
+  allFieldsPresent = false;
+}
+fromValues.add(' ');if (ctx.containsKey('last_name') && ctx['last_name'] != null) {
+  fromValues.add(ctx['last_name'].toString());
+} else {
+  allFieldsPresent = false;
+}
+
+
+  if (allFieldsPresent || false) {
+    ctx['full_name'] = fromValues.stream().collect(Collectors.joining(''));
+  }",
+        "tag": undefined,
+      },
+    },
+    Object {
+      "uppercase": Object {
+        "field": "message",
+        "target_field": "message_uppercase",
+      },
+    },
+    Object {
+      "lowercase": Object {
+        "field": "message",
+        "target_field": "message_lowercase",
+      },
+    },
+    Object {
+      "trim": Object {
+        "field": "message",
+        "target_field": "message_trimmed",
+      },
+    },
+    Object {
       "drop": Object {
         "if": "
   try {
-  if (($('https.status_code', null) !== null && (($('https.status_code', null) instanceof Number && $('https.status_code', null).toString() == \\"200\\") || $('https.status_code', null) == 200))) {
+  
+  def val_https_status_code = $('https.status_code', null); if (val_https_status_code instanceof List && val_https_status_code.size() == 1) { val_https_status_code = val_https_status_code[0]; }
+  
+  
+  if ((val_https_status_code !== null && ((val_https_status_code instanceof Number && val_https_status_code.toString() == \\"200\\") || val_https_status_code == 200))) {
     return true;
   }
   return false;
@@ -199,7 +322,11 @@ Object {
         "field": "http.status_code",
         "if": "
   try {
-  if (($('http.error', null) !== null && (($('http.error', null) instanceof Number && $('http.error', null).toString() == \\"404\\") || $('http.error', null) == 404))) {
+  
+  def val_http_error = $('http.error', null); if (val_http_error instanceof List && val_http_error.size() == 1) { val_http_error = val_http_error[0]; }
+  
+  
+  if ((val_http_error !== null && ((val_http_error instanceof Number && val_http_error.toString() == \\"404\\") || val_http_error == 404))) {
     return true;
   }
   return false;
@@ -216,7 +343,11 @@ Object {
         "field": "message",
         "if": "
   try {
-  if (($('log_level', null) !== null && (($('log_level', null) instanceof Number && $('log_level', null).toString() == \\"ERROR\\") || $('log_level', null) == \\"ERROR\\"))) {
+  
+  def val_log_level = $('log_level', null); if (val_log_level instanceof List && val_log_level.size() == 1) { val_log_level = val_log_level[0]; }
+  
+  
+  if ((val_log_level !== null && ((val_log_level instanceof Number && val_log_level.toString() == \\"ERROR\\") || val_log_level == \\"ERROR\\"))) {
     return true;
   }
   return false;
@@ -239,6 +370,20 @@ Object {
       "set": Object {
         "field": "attributes.status",
         "value": "active",
+      },
+    },
+    Object {
+      "script": Object {
+        "description": "Math processor: price * quantity",
+        "lang": "painless",
+        "source": "ctx['total'] = ($('price', null) * $('quantity', null));",
+      },
+    },
+    Object {
+      "script": Object {
+        "description": "Math processor: attributes.price * attributes.quantity + attributes.tax",
+        "lang": "painless",
+        "source": "ctx['attributes.total'] = (($('attributes.price', null) * $('attributes.quantity', null)) + $('attributes.tax', null));",
       },
     },
     Object {
@@ -280,7 +425,11 @@ Object {
         "field": "attributes.flag",
         "if": "
   try {
-  if (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\"))) {
+  
+  def val_attributes_status = $('attributes.status', null); if (val_attributes_status instanceof List && val_attributes_status.size() == 1) { val_attributes_status = val_attributes_status[0]; }
+  
+  
+  if ((val_attributes_status !== null && ((val_attributes_status instanceof Number && val_attributes_status.toString() == \\"active\\") || val_attributes_status == \\"active\\"))) {
     return true;
   }
   return false;
@@ -296,7 +445,11 @@ Object {
         "field": "attributes.prod_flag",
         "if": "
   try {
-  if (($('attributes.env', null) !== null && (($('attributes.env', null) instanceof Number && $('attributes.env', null).toString() == \\"prod\\") || $('attributes.env', null) == \\"prod\\"))) {
+  
+  def val_attributes_env = $('attributes.env', null); if (val_attributes_env instanceof List && val_attributes_env.size() == 1) { val_attributes_env = val_attributes_env[0]; }
+  
+  
+  if ((val_attributes_env !== null && ((val_attributes_env instanceof Number && val_attributes_env.toString() == \\"prod\\") || val_attributes_env == \\"prod\\"))) {
     return true;
   }
   return false;
@@ -312,7 +465,12 @@ Object {
         "field": "attributes.prod_flag",
         "if": "
   try {
-  if (($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == 1)) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == 2))) {
+  
+  def val_attributes_a = $('attributes.a', null); if (val_attributes_a instanceof List && val_attributes_a.size() == 1) { val_attributes_a = val_attributes_a[0]; }
+  def val_attributes_b = $('attributes.b', null); if (val_attributes_b instanceof List && val_attributes_b.size() == 1) { val_attributes_b = val_attributes_b[0]; }
+  
+  
+  if ((val_attributes_a !== null && ((val_attributes_a instanceof Number && val_attributes_a.toString() == \\"1\\") || val_attributes_a == 1)) || (val_attributes_b !== null && ((val_attributes_b instanceof Number && val_attributes_b.toString() == \\"2\\") || val_attributes_b == 2))) {
     return true;
   }
   return false;
@@ -328,7 +486,13 @@ Object {
         "field": "attributes.department_flag",
         "if": "
   try {
-  if ((($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == 1)) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == 2))) && ($('attributes.department', null) !== null && (($('attributes.department', null) instanceof Number && $('attributes.department', null).toString() == \\"legal\\") || $('attributes.department', null) == \\"legal\\"))) {
+  
+  def val_attributes_a = $('attributes.a', null); if (val_attributes_a instanceof List && val_attributes_a.size() == 1) { val_attributes_a = val_attributes_a[0]; }
+  def val_attributes_b = $('attributes.b', null); if (val_attributes_b instanceof List && val_attributes_b.size() == 1) { val_attributes_b = val_attributes_b[0]; }
+  def val_attributes_department = $('attributes.department', null); if (val_attributes_department instanceof List && val_attributes_department.size() == 1) { val_attributes_department = val_attributes_department[0]; }
+  
+  
+  if (((val_attributes_a !== null && ((val_attributes_a instanceof Number && val_attributes_a.toString() == \\"1\\") || val_attributes_a == 1)) || (val_attributes_b !== null && ((val_attributes_b instanceof Number && val_attributes_b.toString() == \\"2\\") || val_attributes_b == 2))) && (val_attributes_department !== null && ((val_attributes_department instanceof Number && val_attributes_department.toString() == \\"legal\\") || val_attributes_department == \\"legal\\"))) {
     return true;
   }
   return false;
@@ -344,7 +508,12 @@ Object {
         "field": "attributes.test",
         "if": "
   try {
-  if (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\")) || (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"inactive\\") || $('attributes.status', null) == \\"inactive\\")) && ($('attributes.read_only', null) !== null && (($('attributes.read_only', null) instanceof Number && $('attributes.read_only', null).toString() == \\"false\\") || $('attributes.read_only', null) == false)))) {
+  
+  def val_attributes_status = $('attributes.status', null); if (val_attributes_status instanceof List && val_attributes_status.size() == 1) { val_attributes_status = val_attributes_status[0]; }
+  def val_attributes_read_only = $('attributes.read_only', null); if (val_attributes_read_only instanceof List && val_attributes_read_only.size() == 1) { val_attributes_read_only = val_attributes_read_only[0]; }
+  
+  
+  if ((val_attributes_status !== null && ((val_attributes_status instanceof Number && val_attributes_status.toString() == \\"active\\") || val_attributes_status == \\"active\\")) || ((val_attributes_status !== null && ((val_attributes_status instanceof Number && val_attributes_status.toString() == \\"inactive\\") || val_attributes_status == \\"inactive\\")) && (val_attributes_read_only !== null && ((val_attributes_read_only instanceof Number && val_attributes_read_only.toString() == \\"false\\") || val_attributes_read_only == false)))) {
     return true;
   }
   return false;

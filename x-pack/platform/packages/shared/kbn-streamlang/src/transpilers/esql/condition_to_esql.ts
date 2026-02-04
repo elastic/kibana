@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Builder, type ESQLAstItem, type ESQLSingleAstItem } from '@kbn/esql-ast';
+import { Builder, type ESQLAstItem, type ESQLSingleAstItem } from '@kbn/esql-language';
 import {
   type Condition,
   isAlwaysCondition,
@@ -113,6 +113,12 @@ export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
       return Builder.expression.func.call('ENDS_WITH', [
         field,
         Builder.expression.literal.string(String(condition.endsWith)),
+      ]);
+    }
+    if ('includes' in condition) {
+      return Builder.expression.func.call('MV_CONTAINS', [
+        field,
+        esqlLiteralFromAny(condition.includes),
       ]);
     }
   } else if (isAndCondition(condition)) {

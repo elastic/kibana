@@ -9,10 +9,10 @@
 
 import * as React from 'react';
 import {
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiRange,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
@@ -25,7 +25,9 @@ export interface BasicPrinterProps {
 export const BasicPrinter: React.FC<BasicPrinterProps> = ({ src }) => {
   const [lowercase, setLowercase] = React.useState(false);
   const [multiline, setMultiline] = React.useState(false);
-  const [pipeTab, setPipeTab] = React.useState('  ');
+  const [pipeTabValue, setPipeTab] = React.useState(2);
+
+  const pipeTab = ' '.repeat(pipeTabValue);
 
   return (
     <EuiFlexGroup style={{ maxWidth: 1200 }} alignItems={'flexStart'}>
@@ -60,7 +62,17 @@ export const BasicPrinter: React.FC<BasicPrinterProps> = ({ src }) => {
 
         {!!multiline && (
           <EuiFormRow label="Pipe tab" helpText="Tabbing before command pipe">
-            <EuiFieldText compressed value={pipeTab} onChange={(e) => setPipeTab(e.target.value)} />
+            <EuiRange
+              min={0}
+              max={10}
+              value={pipeTabValue}
+              onChange={(e) => {
+                const inputValue = Number(e.currentTarget.value);
+                setPipeTab(inputValue);
+              }}
+              showInput
+              aria-label="Indentation before pipe"
+            />
           </EuiFormRow>
         )}
       </EuiFlexItem>

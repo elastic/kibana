@@ -41,7 +41,7 @@ export class WorkflowTaskScheduler {
       try {
         const taskId = await this.scheduleWorkflowTask(workflow.id, spaceId, trigger, request);
         scheduledTaskIds.push(taskId);
-        this.logger.info(
+        this.logger.debug(
           `Scheduled workflow task for workflow ${workflow.id}, trigger ${trigger.type}, task ID: ${taskId}`
         );
       } catch (error) {
@@ -71,7 +71,7 @@ export class WorkflowTaskScheduler {
       const freqText = getReadableFrequency(schedule.rrule.freq);
       const intervalText = getReadableInterval(schedule.rrule.freq, schedule.rrule.interval);
 
-      this.logger.info(
+      this.logger.debug(
         `RRule schedule created for workflow ${workflowId}: ${freqText} every ${schedule.rrule.interval} ${intervalText}`
       );
     }
@@ -125,7 +125,7 @@ export class WorkflowTaskScheduler {
       const taskIds = tasks.docs.map((task) => task.id);
       if (taskIds.length > 0) {
         await this.taskManager.bulkRemove(taskIds);
-        this.logger.info(`Unscheduled ${taskIds.length} tasks for workflow ${workflowId}`);
+        this.logger.debug(`Unscheduled ${taskIds.length} tasks for workflow ${workflowId}`);
       }
     } catch (error) {
       this.logger.error(`Failed to unschedule tasks for workflow ${workflowId}: ${error}`);

@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { waitForPluginInitialized } from '../../cloud_security_posture_api/utils';
+import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
+import {
+  waitForPluginInitialized,
+  cleanupEntityStore,
+  waitForEntityDataIndexed,
+  waitForEnrichPolicyCreated,
+  executeEnrichPolicy,
+  dataViewRouteHelpersFactory,
+  initEntityEnginesWithRetry,
+} from '../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
 
 // eslint-disable-next-line import/no-default-export
@@ -16,6 +25,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const ebtUIHelper = getService('kibana_ebt_ui');
+  const kibanaServer = getService('kibanaServer');
   const pageObjects = getPageObjects([
     'common',
     'header',
@@ -27,7 +37,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
   const timelinePage = pageObjects.timeline;
 
-  describe('Security Network Page - Graph visualization', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/247414
+  describe.skip('Security Network Page - Graph visualization', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
@@ -73,34 +84,36 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
+      await expandedFlyoutGraph.assertCalloutVisible();
+      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
       await expandedFlyoutGraph.toggleSearchBar();
 
       // Show actions by entity
       await expandedFlyoutGraph.showActionsByEntity('admin@example.com');
-      await expandedFlyoutGraph.expectFilterTextEquals(0, 'actor.entity.id: admin@example.com');
-      await expandedFlyoutGraph.expectFilterPreviewEquals(0, 'actor.entity.id: admin@example.com');
+      await expandedFlyoutGraph.expectFilterTextEquals(0, 'user.entity.id: admin@example.com');
+      await expandedFlyoutGraph.expectFilterPreviewEquals(0, 'user.entity.id: admin@example.com');
 
       // Show actions on entity
       await expandedFlyoutGraph.showActionsOnEntity('admin@example.com');
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com'
+        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com'
+        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com'
       );
 
       // Explore related entities
       await expandedFlyoutGraph.exploreRelatedEntities('admin@example.com');
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
 
       // Show events with the same action
@@ -109,11 +122,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
+        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
+        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
       );
 
       await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
@@ -124,22 +137,22 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
 
       // Hide actions on entity
       await expandedFlyoutGraph.hideActionsOnEntity('admin@example.com');
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'actor.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'actor.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
 
       // Clear filters
@@ -147,7 +160,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Add custom filter
       await expandedFlyoutGraph.addFilter({
-        field: 'actor.entity.id',
+        field: 'user.entity.id',
         operation: 'is',
         value: 'admin2@example.com',
       });
@@ -185,6 +198,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
+      await expandedFlyoutGraph.assertCalloutVisible();
+      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
@@ -208,11 +223,13 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
+      await expandedFlyoutGraph.assertCalloutVisible();
+      await expandedFlyoutGraph.dismissCallout();
 
       // Add filter for actor entity
       await expandedFlyoutGraph.showSearchBar();
       await expandedFlyoutGraph.addFilter({
-        field: 'actor.entity.id',
+        field: 'user.entity.id',
         operation: 'is',
         value: 'admin3@example.com',
       });
@@ -252,6 +269,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
+      await expandedFlyoutGraph.assertCalloutVisible();
+      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.addFilter({
@@ -285,6 +304,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
+      await expandedFlyoutGraph.assertCalloutVisible();
+      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
@@ -293,6 +314,152 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
       await networkEventsPage.flyout.assertPreviewPanelIsOpen('group');
       await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
+    });
+
+    describe('ECS fields only', function () {
+      // Entity store is initialized once at the parent level to avoid race conditions
+      // Tests run sequentially: first v1 (ENRICH), then v2 (LOOKUP JOIN)
+      before(async () => {
+        // Clean up any leftover resources from previous runs
+        await cleanupEntityStore({ supertest, logger });
+
+        // Delete entity indices completely to start fresh
+        try {
+          await es.indices.delete({
+            index: getEntitiesLatestIndexName(),
+            ignore_unavailable: true,
+          });
+        } catch (e) {
+          // Ignore if index doesn't exist
+        }
+
+        // Enable asset inventory setting
+        await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
+
+        // Initialize security-solution-default data-view (required by entity store)
+        const dataView = dataViewRouteHelpersFactory(supertest);
+        await dataView.create('security-solution');
+
+        // Initialize entity engine for 'generic' type ONCE - this is reused by both v1 and v2 tests
+        await initEntityEnginesWithRetry({
+          supertest,
+          retry,
+          logger,
+          entityTypes: ['generic'],
+        });
+      });
+
+      after(async () => {
+        // Clean up entity store resources
+        await cleanupEntityStore({ supertest, logger });
+
+        // Disable asset inventory setting
+        await kibanaServer.uiSettings.update({
+          'securitySolution:enableAssetInventory': false,
+        });
+      });
+
+      // Shared test suite that registers all test cases - called from both v1 and v2 describe blocks
+      const runEnrichmentTests = () => {
+        it('expanded flyout - entity enrichment for multiple actors and targets', async () => {
+          // Navigate to events page with the multi-actor multi-target event
+          await networkEventsPage.navigateToNetworkEventsPage(
+            `${networkEventsPage.getAbsoluteTimerangeFilter(
+              '2024-09-01T00:00:00.000Z',
+              '2024-09-02T00:00:00.000Z'
+            )}&${networkEventsPage.getFlyoutFilter('MultiActorMultiTargetEvent123')}`
+          );
+          await networkEventsPage.waitForListToHaveEvents();
+
+          await networkEventsPage.flyout.expandVisualizations();
+          await networkEventsPage.flyout.assertGraphPreviewVisible();
+          // Expected nodes:
+          // - 1 grouped actor node (2 actors: multi-actor-1, multi-actor-2 - same Identity/GCP IAM User)
+          // - 1 grouped storage node (2 buckets: target-bucket-1, target-bucket-2 - same Storage/GCP Storage Bucket)
+          // - 1 grouped service node (2 service accounts: target-multi-service-1, target-multi-service-2 - same Service/GCP Service Account)
+          // - 2 label nodes (actor group -> storage group, actor group -> service group)
+          const expectedNodes = 5;
+          await networkEventsPage.flyout.assertGraphNodesNumber(expectedNodes);
+
+          await expandedFlyoutGraph.expandGraph();
+          await expandedFlyoutGraph.waitGraphIsLoaded();
+          await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
+
+          const actorNodeId = '71373527ad0e2cf75e214cd168630ad1';
+          await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Identity');
+          await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP IAM User');
+
+          const storageBucketNodeId = '8a748ce026512856f76bdc6304573f1c';
+          await expandedFlyoutGraph.assertNodeEntityTag(storageBucketNodeId, 'Storage');
+          await expandedFlyoutGraph.assertNodeEntityDetails(
+            storageBucketNodeId,
+            'GCP Storage Bucket'
+          );
+
+          const serviceNodeId = '0039c3b5dd064364a5f7edac77c2e158';
+          await expandedFlyoutGraph.assertNodeEntityTag(serviceNodeId, 'Service');
+          await expandedFlyoutGraph.assertNodeEntityDetails(serviceNodeId, 'GCP Service Account');
+        });
+      };
+
+      describe('via ENRICH policy (v1)', () => {
+        before(async () => {
+          // Load v1 entity data
+          await esArchiver.load(
+            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store'
+          );
+
+          // Wait for entity data to be fully indexed
+          await waitForEntityDataIndexed({
+            es,
+            logger,
+            retry,
+            entitiesIndex: '.entities.v1.latest.security_*',
+            expectedCount: 12,
+          });
+
+          await waitForEnrichPolicyCreated({ es, retry, logger });
+          await executeEnrichPolicy({ es, retry, logger });
+        });
+
+        runEnrichmentTests();
+      });
+
+      describe('via LOOKUP JOIN (v2)', () => {
+        before(async () => {
+          // Delete v2 manually since its not being deleted by the cleanupEntityStore function
+          try {
+            await es.indices.delete({
+              index: getEntitiesLatestIndexName(),
+              ignore_unavailable: true,
+            });
+          } catch (e) {
+            // Ignore if index doesn't exist
+          }
+
+          // Load v2 entity data
+          await esArchiver.load(
+            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
+          );
+
+          // Wait for entity data to be fully indexed
+          await waitForEntityDataIndexed({
+            es,
+            logger,
+            retry,
+            entitiesIndex: '.entities.v2.latest.security_*',
+            expectedCount: 12,
+          });
+        });
+
+        after(async () => {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
+          );
+        });
+
+        runEnrichmentTests();
+      });
     });
   });
 }

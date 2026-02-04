@@ -23,6 +23,7 @@ import type {
 import type { ApiExecutionContext } from './types';
 import { getNamespacesBoolFilter } from '../search';
 import type { NamespacesBoolFilter } from '../search/search_dsl/query_params';
+import { getRootFields } from '../utils';
 
 export interface PerformSearchParams {
   options: SavedObjectsSearchOptions;
@@ -60,6 +61,17 @@ export async function performSearch<T extends SavedObjectsRawDocSource, A = unkn
   if (!type.length) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
       'options.type must be a string or an array of strings'
+    );
+  }
+
+  const rootFields = getRootFields();
+
+  const forbiddenRuntimeMappings = Object.keys(esOptions.runtime_mappings ?? {}).filter((key) =>
+    rootFields.includes(key)
+  );
+  if (forbiddenRuntimeMappings.length > 0) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      `'runtime_mappings' contains forbidden fields: ${forbiddenRuntimeMappings.join(', ')}`
     );
   }
 

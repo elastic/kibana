@@ -6,8 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Parser, isSubQuery } from '@kbn/esql-ast';
-import type { ESQLSource, ESQLCommand } from '@kbn/esql-ast';
+import { Parser, getIndexFromPromQLParams, isSubQuery } from '@kbn/esql-language';
+import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@kbn/esql-language';
+
+function getPromQLSourcesFromAst(commands: ESQLCommand[]): string[] {
+  const promqlCommand = commands.find(({ name }) => name === 'promql');
+  if (!promqlCommand) {
+    return [];
+  }
+
+  const index = getIndexFromPromQLParams(promqlCommand as ESQLAstPromqlCommand);
+  return index ? [index] : [];
+}
 
 function getSourcesFromAst(commands: ESQLCommand[]): string[] {
   const sourceCommand = commands.find(({ name }) => ['from', 'ts'].includes(name));
@@ -50,7 +60,8 @@ export function getIndexPatternFromESQLQuery(esql?: string): string {
 
   // Get sources from main query
   const mainSources = getSourcesFromAst(root.commands);
-  allSources.push(...mainSources);
+  const promqlSources = getPromQLSourcesFromAst(root.commands);
+  allSources.push(...mainSources, ...promqlSources);
 
   // Get sources from subqueries
   const sourceCommand = root.commands.find(({ name }) => ['from', 'ts'].includes(name));

@@ -6,14 +6,20 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { pickBy } from 'lodash';
+
 import type {
   FormBasedLayer,
   GaugeVisualizationState,
   MetricVisualizationState,
   TextBasedLayer,
 } from '@kbn/lens-common';
+
 import type { LensAttributes } from '../../types';
 import type { LensApiState } from '../../schema';
+import { isTextBasedLayer } from '../utils';
+import type { AnyMetricLensStateColumn } from '../columns/types';
 
 export function getSharedChartLensStateToAPI(
   config: Pick<LensAttributes, 'title' | 'description'>
@@ -53,4 +59,69 @@ export function getDatasourceLayers(
     ...(textBasedLayers && Object.keys(textBasedLayers).length ? textBasedLayers : {}),
     ...(indexPatternLayers && Object.keys(indexPatternLayers).length ? indexPatternLayers : {}),
   };
+}
+
+export function getLensStateLayer(
+  layers: Record<string, Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer>,
+  visLayerId: string | undefined
+) {
+  // Filter to keep non-linked layers (layers without linkToLayers or with linkToLayers set to null)
+  // Also keep ES|QL layers with non-empty columns, as old layers persist after chart type switches and have empty columns
+  const mainLayers = Object.entries(layers).filter(
+    ([, l]) =>
+      !('linkToLayers' in l) ||
+      l.linkToLayers == null ||
+      (isTextBasedLayer(l) && l.columns.length > 0)
+  );
+
+  const visLayer = visLayerId ? mainLayers.find(([id, l]) => id === visLayerId) : undefined;
+
+  return visLayer ?? mainLayers[0];
+}
+
+type OptionalProperties<T extends Record<string, any> | undefined> = Pick<
+  T,
+  { [K in keyof T]-?: {} extends Pick<T, K> ? K : never }[keyof T]
+>;
+
+/**
+ * Strips out undefined properties from an object.
+ *
+ * Pass only properties that can be undefined.
+ */
+export function stripUndefined<T extends Record<string, any> | undefined>(
+  obj: OptionalProperties<T>
+): OptionalProperties<T> {
+  return pickBy(obj, (value) => value !== undefined) as OptionalProperties<T>;
+}
+
+/**
+ * Processes converted metric columns and their optional reference columns,
+ * assigning IDs.
+ */
+export function processMetricColumnsWithReferences<T extends AnyMetricLensStateColumn>(
+  convertedMetrics: T[][],
+  getAccessorName: (index: number) => string,
+  getRefAccessorName: (index: number) => string
+): Array<{ column: T; id: string }> {
+  const result: Array<{ column: T; id: string }> = [];
+
+  for (const [index, convertedColumns] of Object.entries(convertedMetrics)) {
+    const [mainMetric, refMetric] = convertedColumns;
+    const id = getAccessorName(Number(index));
+    result.push({ column: mainMetric, id });
+
+    if (refMetric) {
+      // Use a different format for reference column ids
+      // as visualization doesn't know about them, so wrong id could be generated on that side
+      const refId = getRefAccessorName(Number(index));
+      // Rewrite the main metric's reference to match the new ID
+      if ('references' in mainMetric && Array.isArray(mainMetric.references)) {
+        mainMetric.references = [refId];
+      }
+      result.push({ column: refMetric, id: refId });
+    }
+  }
+
+  return result;
 }

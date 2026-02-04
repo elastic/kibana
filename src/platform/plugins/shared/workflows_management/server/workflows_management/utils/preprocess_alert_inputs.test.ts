@@ -7,20 +7,54 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { preprocessAlertInputs } from './preprocess_alert_inputs';
+import type { WorkflowsRequestHandlerContext } from '../../types';
 
 describe('preprocessAlertInputs', () => {
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockEsClient: { mget: jest.Mock };
   let mockLogger: ReturnType<typeof loggerMock.create>;
+  let mockContext: WorkflowsRequestHandlerContext;
+
+  const createMockRuleType = (ruleTypeId: string) => ({
+    id: ruleTypeId,
+    name: 'Test Rule Type',
+    alerts: {
+      formatAlert: jest.fn((source: Record<string, unknown>) => {
+        // Add signal property if signal-mappable fields are present
+        const hasSignalFields =
+          source['kibana.alert.depth'] ||
+          source['kibana.alert.original_time'] ||
+          source['kibana.alert.reason'];
+        return hasSignalFields ? { ...source, signal: {} } : source;
+      }),
+    },
+  });
 
   beforeEach(() => {
     mockEsClient = {
       mget: jest.fn(),
-    } as any;
+    };
 
     mockLogger = loggerMock.create();
+
+    const mockRuleTypeRegistryMap = new Map();
+    mockRuleTypeRegistryMap.set('test-rule-type', createMockRuleType('test-rule-type'));
+    mockRuleTypeRegistryMap.set(QUERY_RULE_TYPE_ID, createMockRuleType(QUERY_RULE_TYPE_ID));
+
+    mockContext = {
+      core: Promise.resolve({
+        elasticsearch: {
+          client: {
+            asCurrentUser: mockEsClient,
+          },
+        },
+      }),
+      alerting: Promise.resolve({
+        listTypes: jest.fn(() => mockRuleTypeRegistryMap),
+      }),
+    } as any;
   });
 
   describe('when inputs are not alert trigger type', () => {
@@ -32,13 +66,7 @@ describe('preprocessAlertInputs', () => {
         },
       };
 
-      const result = await preprocessAlertInputs(
-        inputs,
-        'default',
-        mockEsClient,
-        mockLogger,
-        'workflow-123'
-      );
+      const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
 
       expect(result).toEqual(inputs);
       expect(mockEsClient.mget).not.toHaveBeenCalled();
@@ -49,13 +77,7 @@ describe('preprocessAlertInputs', () => {
         otherField: 'value',
       };
 
-      const result = await preprocessAlertInputs(
-        inputs,
-        'default',
-        mockEsClient,
-        mockLogger,
-        'workflow-123'
-      );
+      const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
 
       expect(result).toEqual(inputs);
       expect(mockEsClient.mget).not.toHaveBeenCalled();
@@ -69,13 +91,7 @@ describe('preprocessAlertInputs', () => {
         },
       };
 
-      const result = await preprocessAlertInputs(
-        inputs,
-        'default',
-        mockEsClient,
-        mockLogger,
-        'workflow-123'
-      );
+      const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
 
       expect(result).toEqual(inputs);
       expect(mockEsClient.mget).not.toHaveBeenCalled();
@@ -106,10 +122,14 @@ describe('preprocessAlertInputs', () => {
         docs: [
           {
             found: true,
+            _id: 'alert-1',
+            _index: '.alerts-test-default',
             _source: alertSource1,
           },
           {
             found: true,
+            _id: 'alert-2',
+            _index: '.alerts-test-default',
             _source: alertSource2,
           },
         ],
@@ -125,13 +145,7 @@ describe('preprocessAlertInputs', () => {
         },
       };
 
-      const result = await preprocessAlertInputs(
-        inputs,
-        'default',
-        mockEsClient,
-        mockLogger,
-        'workflow-123'
-      );
+      const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
 
       expect(mockEsClient.mget).toHaveBeenCalledWith({
         docs: [
@@ -170,10 +184,14 @@ describe('preprocessAlertInputs', () => {
         docs: [
           {
             found: true,
+            _id: 'alert-1',
+            _index: '.alerts-test-default',
             _source: alertSource1,
           },
           {
             found: true,
+            _id: 'alert-2',
+            _index: '.alerts-test-default',
             _source: alertSource2,
           },
         ],
@@ -189,13 +207,7 @@ describe('preprocessAlertInputs', () => {
         },
       };
 
-      const result = await preprocessAlertInputs(
-        inputs,
-        'default',
-        mockEsClient,
-        mockLogger,
-        'workflow-123'
-      );
+      const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Multiple rules detected')
@@ -215,9 +227,13 @@ describe('preprocessAlertInputs', () => {
         docs: [
           {
             found: false,
+            _id: 'alert-1',
+            _index: '.alerts-test-default',
           },
           {
             found: false,
+            _id: 'alert-2',
+            _index: '.alerts-test-default',
           },
         ],
       });
@@ -233,7 +249,7 @@ describe('preprocessAlertInputs', () => {
       };
 
       await expect(
-        preprocessAlertInputs(inputs, 'default', mockEsClient, mockLogger, 'workflow-123')
+        preprocessAlertInputs(inputs, mockContext, 'default', mockLogger)
       ).rejects.toThrow('No alerts found with the provided IDs');
 
       expect(mockLogger.warn).toHaveBeenCalledTimes(2);
@@ -250,6 +266,8 @@ describe('preprocessAlertInputs', () => {
         docs: [
           {
             found: true,
+            _id: 'alert-1',
+            _index: '.alerts-test-default',
             _source: alertSourceWithoutRule,
           },
         ],
@@ -263,7 +281,7 @@ describe('preprocessAlertInputs', () => {
       };
 
       await expect(
-        preprocessAlertInputs(inputs, 'default', mockEsClient, mockLogger, 'workflow-123')
+        preprocessAlertInputs(inputs, mockContext, 'default', mockLogger)
       ).rejects.toThrow('Could not extract rule information from alerts');
     });
 
@@ -279,7 +297,7 @@ describe('preprocessAlertInputs', () => {
       };
 
       await expect(
-        preprocessAlertInputs(inputs, 'default', mockEsClient, mockLogger, 'workflow-123')
+        preprocessAlertInputs(inputs, mockContext, 'default', mockLogger)
       ).rejects.toThrow('Elasticsearch connection failed');
 
       expect(mockLogger.error).toHaveBeenCalledWith(
@@ -294,6 +312,8 @@ describe('preprocessAlertInputs', () => {
         docs: [
           {
             found: true,
+            _id: 'alert-1',
+            _index: '.alerts-test-default',
             _source: alertSource,
           },
         ],
@@ -308,13 +328,7 @@ describe('preprocessAlertInputs', () => {
         anotherField: { nested: 'value' },
       };
 
-      const result = await preprocessAlertInputs(
-        inputs,
-        'default',
-        mockEsClient,
-        mockLogger,
-        'workflow-123'
-      );
+      const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
 
       expect(result.otherField).toBe('should be preserved');
       expect(result.anotherField).toEqual({ nested: 'value' });
@@ -331,6 +345,8 @@ describe('preprocessAlertInputs', () => {
         docs: [
           {
             found: true,
+            _id: 'alert-1',
+            _index: '.alerts-test-default',
             _source: alertSourceWithoutTags,
           },
         ],
@@ -343,13 +359,7 @@ describe('preprocessAlertInputs', () => {
         },
       };
 
-      const result = await preprocessAlertInputs(
-        inputs,
-        'default',
-        mockEsClient,
-        mockLogger,
-        'workflow-123'
-      );
+      const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
 
       const event = result.event as { rule: { tags: string[] } };
       expect(event.rule.tags).toEqual([]);
@@ -388,6 +398,8 @@ describe('preprocessAlertInputs', () => {
             docs: [
               {
                 found: true,
+                _id: 'alert-1',
+                _index: '.alerts-test-default',
                 _source: alertSource,
               },
             ],
@@ -401,7 +413,7 @@ describe('preprocessAlertInputs', () => {
           };
 
           await expect(
-            preprocessAlertInputs(inputs, 'default', mockEsClient, mockLogger, 'workflow-123')
+            preprocessAlertInputs(inputs, mockContext, 'default', mockLogger)
           ).rejects.toThrow('Could not extract rule information from alerts');
         }
       });
@@ -422,10 +434,14 @@ describe('preprocessAlertInputs', () => {
           docs: [
             {
               found: true,
+              _id: 'alert-1',
+              _index: '.alerts-test-default',
               _source: alertSource1,
             },
             {
               found: true,
+              _id: 'alert-2',
+              _index: '.alerts-test-default',
               _source: alertSource2,
             },
           ],
@@ -441,13 +457,7 @@ describe('preprocessAlertInputs', () => {
           },
         };
 
-        const result = await preprocessAlertInputs(
-          inputs,
-          'default',
-          mockEsClient,
-          mockLogger,
-          'workflow-123'
-        );
+        const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
 
         // Should only have one rule (deduplicated)
         const event = result.event as { rule: { id: string; name: string }; alerts: unknown[] };
@@ -468,10 +478,14 @@ describe('preprocessAlertInputs', () => {
           docs: [
             {
               found: true,
+              _id: 'alert-1',
+              _index: '.alerts-test-default',
               _source: alertSource1,
             },
             {
               found: true,
+              _id: 'alert-2',
+              _index: '.alerts-test-default',
               _source: alertSource2,
             },
           ],
@@ -488,13 +502,7 @@ describe('preprocessAlertInputs', () => {
         };
 
         // Should still succeed with the valid alert
-        const result = await preprocessAlertInputs(
-          inputs,
-          'default',
-          mockEsClient,
-          mockLogger,
-          'workflow-123'
-        );
+        const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
 
         const event = result.event as { rule: { id: string }; alerts: unknown[] };
         expect(event.rule.id).toBe('rule-uuid-123');
@@ -514,6 +522,8 @@ describe('preprocessAlertInputs', () => {
           docs: [
             {
               found: true,
+              _id: 'alert-1',
+              _index: '.alerts-test-default',
               _source: alertSource,
             },
           ],
@@ -526,13 +536,7 @@ describe('preprocessAlertInputs', () => {
           },
         };
 
-        const result = await preprocessAlertInputs(
-          inputs,
-          'default',
-          mockEsClient,
-          mockLogger,
-          'workflow-123'
-        );
+        const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
 
         const event = result.event as { alerts: Array<{ signal?: unknown }> };
         expect(event.alerts[0]).toHaveProperty('signal');
@@ -547,10 +551,14 @@ describe('preprocessAlertInputs', () => {
           docs: [
             {
               found: true,
+              _id: 'alert-1',
+              _index: '.alerts-test-default',
               _source: alertSource,
             },
             {
               found: false,
+              _id: 'alert-2',
+              _index: '.alerts-test-default',
             },
           ],
         });
@@ -565,13 +573,7 @@ describe('preprocessAlertInputs', () => {
           },
         };
 
-        const result = await preprocessAlertInputs(
-          inputs,
-          'default',
-          mockEsClient,
-          mockLogger,
-          'workflow-123'
-        );
+        const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
 
         const event = result.event as { alerts: unknown[] };
         expect(event.alerts.length).toBe(1);

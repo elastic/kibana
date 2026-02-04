@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { renderHook, act, waitFor } from '@testing-library/react';
-import type { ControlPanelsState, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
 import { BehaviorSubject, Observable, skip } from 'rxjs';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -269,9 +269,7 @@ describe('useESQLVariables', () => {
       expect(mockControlGroupAPI.addNewPanel).toHaveBeenCalledWith({
         panelType: 'esqlControl',
         serializedState: {
-          rawState: {
-            ...mockControlState,
-          },
+          ...mockControlState,
         },
       });
       expect(mockOnTextLangQueryChange).not.toHaveBeenCalled();
@@ -326,7 +324,7 @@ describe('useESQLVariables', () => {
           controlType: 'STATIC_VALUES' as EsqlControlType,
           order: 0,
         },
-      };
+      } as unknown as ControlPanelsState<ESQLControlState>;
 
       act(() => {
         mockControlGroupAPI.simulateInput({
@@ -366,7 +364,7 @@ describe('useESQLVariables', () => {
           controlType: 'STATIC_VALUES' as EsqlControlType,
           order: 0,
         },
-      };
+      } as unknown as ControlPanelsState<ESQLControlState>;
 
       act(() => {
         mockControlGroupAPI.simulateInput({

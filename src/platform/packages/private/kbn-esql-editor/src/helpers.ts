@@ -10,13 +10,9 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { CoreStart } from '@kbn/core/public';
-import type { ESQLSourceResult } from '@kbn/esql-types';
-import { SOURCES_TYPES, SOURCES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import type { ILicense } from '@kbn/licensing-types';
 import { monaco } from '@kbn/monaco';
-import type { MapCache } from 'lodash';
+import { uniqBy, type MapCache } from 'lodash';
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
@@ -29,20 +25,6 @@ import {
 const KEYCODE_ARROW_UP = 38;
 const KEYCODE_ARROW_DOWN = 40;
 
-interface IntegrationsResponse {
-  items: Array<{
-    name: string;
-    title?: string;
-    dataStreams: Array<{
-      name: string;
-      title?: string;
-    }>;
-  }>;
-}
-
-const INTEGRATIONS_API = '/api/fleet/epm/packages/installed';
-const API_VERSION = '2023-10-31';
-
 export const useDebounceWithOptions = (
   fn: Function,
   { skipFirstRender }: { skipFirstRender: boolean } = { skipFirstRender: false },
@@ -50,7 +32,7 @@ export const useDebounceWithOptions = (
   deps?: React.DependencyList | undefined
 ) => {
   const isFirstRender = useRef(true);
-  const newDeps = [...(deps || []), isFirstRender];
+  const newDeps = deps || [];
 
   return useDebounce(
     () => {
@@ -80,50 +62,45 @@ const maxWarningLength = 1000;
 export const parseWarning = (warning: string): MonacoMessage[] => {
   // we limit the length to reduce ReDoS risks
   const truncatedWarning = warning.substring(0, maxWarningLength);
-  if (quotedWarningMessageRegexp.test(truncatedWarning)) {
-    const matches = truncatedWarning.match(quotedWarningMessageRegexp);
-    if (matches) {
-      return matches.map((message) => {
-        // replaces the quotes only if they are not escaped,
-        let warningMessage = message.replace(/(?<!\\)"|\\/g, '');
-        let startColumn = 1;
-        let startLineNumber = 1;
-        // initialize the length to 10 in case no error word found
-        let errorLength = 10;
-        // if there's line number encoded in the message use it as new positioning
-        // and replace the actual message without it
-        if (/Line (\d+):(\d+):/.test(warningMessage)) {
-          const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
-            warningMessage.split(':');
-          // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
-          warningMessage = additionalInfoMessage ?? innerMessage;
-          if (!Number.isNaN(Number(encodedColumn))) {
-            startColumn = Number(encodedColumn);
-            startLineNumber = Number(encodedLine.replace('Line ', ''));
-          }
-          const openingSquareBracketIndex = warningMessage.indexOf('[');
-          if (openingSquareBracketIndex !== -1) {
-            const closingSquareBracketIndex = warningMessage.indexOf(
-              ']',
-              openingSquareBracketIndex
-            );
-            if (closingSquareBracketIndex !== -1) {
-              errorLength = warningMessage.length - openingSquareBracketIndex - 1;
-            }
+  const matches = truncatedWarning.match(quotedWarningMessageRegexp);
+  if (matches) {
+    return matches.map((message) => {
+      // replaces the quotes only if they are not escaped,
+      let warningMessage = message.replace(/(?<!\\)"|\\/g, '');
+      let startColumn = 1;
+      let startLineNumber = 1;
+      // initialize the length to 10 in case no error word found
+      let errorLength = 10;
+      // if there's line number encoded in the message use it as new positioning
+      // and replace the actual message without it
+      if (/Line (\d+):(\d+):/.test(warningMessage)) {
+        const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
+          warningMessage.split(':');
+        // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
+        warningMessage = additionalInfoMessage ?? innerMessage;
+        if (!Number.isNaN(Number(encodedColumn))) {
+          startColumn = Number(encodedColumn);
+          startLineNumber = Number(encodedLine.replace('Line ', ''));
+        }
+        const openingSquareBracketIndex = warningMessage.indexOf('[');
+        if (openingSquareBracketIndex !== -1) {
+          const closingSquareBracketIndex = warningMessage.indexOf(']', openingSquareBracketIndex);
+          if (closingSquareBracketIndex !== -1) {
+            errorLength = warningMessage.length - openingSquareBracketIndex - 1;
           }
         }
+      }
 
-        return {
-          message: warningMessage.trimStart(),
-          startColumn,
-          startLineNumber,
-          endColumn: startColumn + errorLength - 1,
-          endLineNumber: startLineNumber,
-          severity: monaco.MarkerSeverity.Warning,
-          code: 'warningFromES',
-        };
-      });
-    }
+      return {
+        message: warningMessage.trimStart(),
+        startColumn,
+        startLineNumber,
+        endColumn: startColumn + errorLength - 1,
+        endLineNumber: startLineNumber,
+        severity: monaco.MarkerSeverity.Warning,
+        code: 'warningFromES',
+      };
+    });
   }
   // unknown warning message
   return [
@@ -202,20 +179,6 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
   });
 };
 
-export const getIndicesList = async (
-  core: Pick<CoreStart, 'http'>,
-  areRemoteIndicesAvailable: boolean
-) => {
-  const scope = areRemoteIndicesAvailable ? 'all' : 'local';
-  const response = await core.http.get(`${SOURCES_AUTOCOMPLETE_ROUTE}${scope}`).catch((error) => {
-    // eslint-disable-next-line no-console
-    console.error('Failed to fetch the sources', error);
-    return [];
-  });
-
-  return response as ESQLSourceResult[];
-};
-
 // refresh the esql cache entry after 10 minutes
 const CACHE_INVALIDATE_DELAY = 10 * 60 * 1000;
 
@@ -226,50 +189,6 @@ export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
       cache.delete(esqlQuery);
     }
   }
-};
-
-const getIntegrations = async (core: Pick<CoreStart, 'application' | 'http'>) => {
-  const fleetCapabilities = core.application.capabilities.fleet;
-  if (!fleetCapabilities?.read) {
-    return [];
-  }
-  // Ideally we should use the Fleet plugin constants to fetch the integrations
-  // import { EPM_API_ROUTES, API_VERSIONS } from '@kbn/fleet-plugin/common';
-  // but it complicates things as we need to use an x-pack plugin as dependency to get 2 constants
-  // and this needs to be done in various places in the codebase which use the editor
-  // https://github.com/elastic/kibana/issues/186061
-  const response = (await core.http
-    .get(INTEGRATIONS_API, { query: { showOnlyActiveDataStreams: true }, version: API_VERSION })
-    .catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error('Failed to fetch integrations', error);
-    })) as IntegrationsResponse;
-
-  return (
-    response?.items
-      ?.filter(({ dataStreams }) => dataStreams.length)
-      .map((source) => ({
-        name: source.name,
-        hidden: false,
-        title: source.title,
-        dataStreams: source.dataStreams,
-        type: SOURCES_TYPES.INTEGRATION,
-      })) ?? []
-  );
-};
-
-export const getESQLSources = async (
-  core: Pick<CoreStart, 'application' | 'http'>,
-  getLicense: (() => Promise<ILicense | undefined>) | undefined
-) => {
-  const ls = await getLicense?.();
-  const ccrFeature = ls?.getFeature('ccr');
-  const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
-  const [allIndices, integrations] = await Promise.all([
-    getIndicesList(core, areRemoteIndicesAvailable),
-    getIntegrations(core),
-  ]);
-  return [...allIndices, ...integrations];
 };
 
 export const onMouseDownResizeHandler = (
@@ -335,12 +254,16 @@ export const onKeyDownResizeHandler = (
 
 export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
   return css`
+    .monaco-editor .suggest-details .scrollbar {
+      display: none !important;
+    }
+
     .monaco-hover {
-      display: block !important;
       background-color: ${theme.euiTheme.colors.backgroundBasePlain} !important;
       line-height: 1.5rem;
       border-radius: ${theme.euiTheme.border.radius.medium} !important;
       box-shadow: ${theme.euiTheme.shadows.l.down} !important;
+      z-index: ${theme.euiTheme.levels.flyout};
     }
 
     // Fixes inline suggestions hover styles and only
@@ -393,15 +316,21 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .suggest-details-container {
       border-radius: ${theme.euiTheme.border.radius.medium};
       ${euiShadow(theme, 'l')}
+      // Suggestions must be rendered above flyouts
+      z-index: ${theme.euiTheme.levels.toast} !important;
     }
 
     .suggest-details-container {
       background-color: ${theme.euiTheme.colors.backgroundBasePlain};
       line-height: 1.5rem;
     }
+
     .suggest-details {
-      padding-left: ${theme.euiTheme.size.s};
+      padding-left: ${theme.euiTheme.size.m};
+      padding-right: ${theme.euiTheme.size.m};
+      text-align: justify;
     }
+
     .monaco-list .monaco-scrollable-element .monaco-list-row.focused {
       border-radius: ${theme.euiTheme.border.radius.medium};
     }
@@ -409,11 +338,52 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .suggest-details > .monaco-scrollable-element > .body > .header > .type {
       white-space: normal !important;
     }
+
+    .suggest-details .rendered-markdown h1 {
+      display: block;
+      margin-top: ${theme.euiTheme.size.m};
+      font-size: ${theme.euiTheme.size.base};
+      font-weight: ${theme.euiTheme.font.weight.bold};
+    }
+
+    .suggest-details [data-code] {
+      overflow-x: auto !important;
+    }
   `;
 };
 
 export const filterDataErrors = (errors: (MonacoMessage & { code: string })[]): MonacoMessage[] => {
   return errors.filter((error) => {
-    return !['unknownIndex', 'unknownColumn'].includes(error.code);
+    return !['unknownIndex', 'unknownColumn', 'unmappedColumnWarning'].includes(error.code);
+  });
+};
+
+/**
+ * Filters warning messages that overlap with error messages ranges.
+ */
+export const filterOutWarningsOverlappingWithErrors = (
+  errors: MonacoMessage[],
+  warnings: MonacoMessage[]
+): MonacoMessage[] => {
+  const hasOverlap = (warning: MonacoMessage) => {
+    return errors.some((error) => {
+      const isOverlappingLine =
+        warning.startLineNumber <= error.endLineNumber &&
+        warning.endLineNumber >= error.startLineNumber;
+      const isOverlappingColumn =
+        warning.startColumn <= error.endColumn && warning.endColumn >= error.startColumn;
+
+      return isOverlappingLine && isOverlappingColumn;
+    });
+  };
+
+  return warnings.filter((warning) => !hasOverlap(warning));
+};
+
+export const filterDuplicatedWarnings = (
+  warnings: (MonacoMessage & { code: string })[]
+): MonacoMessage[] => {
+  return uniqBy(warnings, (warning) => {
+    return warning.message;
   });
 };

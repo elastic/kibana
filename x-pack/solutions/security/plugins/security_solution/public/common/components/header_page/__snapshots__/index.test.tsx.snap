@@ -32,7 +32,7 @@ exports[`HeaderPage it renders 1`] = `
   data-test-subj="header-page"
 >
   <header
-    class="euiPageHeader emotion-euiPageHeader"
+    class="euiPageHeader emotion-euiPageHeader-transparent"
   >
     <div
       class="emotion-euiPageHeaderContent"

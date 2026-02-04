@@ -163,7 +163,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.deriv', {
         defaultMessage: 'DERIV',
       }),
-      preview: false,
+      preview: true,
       license: undefined,
       description: {
         markdownContent: i18n.translate('languageDocumentation.documentationESQL.deriv.markdown', {
@@ -172,7 +172,7 @@ export const functions = {
   Calculates the derivative over time of a numeric field using linear regression.
 
   \`\`\`esql
-  TS k8s
+  TS datenanos-k8s
   | WHERE pod == "three"
   | STATS max_deriv = MAX(DERIV(network.cost)) BY time_bucket = BUCKET(@timestamp,5minute), pod
   \`\`\`
@@ -380,7 +380,7 @@ export const functions = {
           {
             defaultMessage: `
   ### PERCENTILE OVER TIME
-  Calculates the percentile over time of a numeric field.
+  Calculates the percentile over time of a field.
 
   \`\`\`esql
   TS k8s

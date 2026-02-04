@@ -32,6 +32,8 @@
           "({ feedbackButtonMessage, feedbackSnippetId, promptViewMessage, surveyUrl, className, }: FeedbackSnippetProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/feedback_snippet/src/feedback_snippet.tsx",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "FeedbackSnippetProps"
             ],
             "path": "src/platform/packages/shared/shared-ux/feedback_snippet/src/feedback_snippet.tsx",
+            "lineNumber": 43,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

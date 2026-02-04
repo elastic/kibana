@@ -12,7 +12,13 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { GroupingAggregation, NamedAggregation } from '@kbn/grouping';
 import { isNoneGroup } from '@kbn/grouping';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { DynamicGroupingProps } from '@kbn/grouping/src';
+import type {
+  DynamicGroupingProps,
+  GroupChildComponentRenderer,
+  GroupingSort,
+  GroupingBucket,
+  ParsedGroupingAggregation,
+} from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../../data_view_manager/constants';
@@ -53,6 +59,10 @@ interface OwnProps {
   globalQuery: Query;
   groupingLevel?: number;
   /**
+   * Sort order for the grouping results.
+   */
+  sort?: GroupingSort;
+  /**
    * Function that returns the group aggregations by field.
    * This is then used to render values in the EuiAccordion `extraAction` section.
    */
@@ -67,7 +77,7 @@ interface OwnProps {
   pageIndex: number;
   pageSize: number;
   parentGroupingFilter?: string;
-  renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
+  renderChildComponent: GroupChildComponentRenderer<AlertsGroupingAggregation>;
   runtimeMappings: RunTimeMappings;
   selectedGroup: string;
   setPageIndex: (newIndex: number) => void;
@@ -75,6 +85,9 @@ interface OwnProps {
   signalIndexName: string | undefined;
   tableId: TableIdLiteral;
   to: string;
+
+  /** Optional array of custom controls to display in the toolbar alongside the group selector */
+  additionalToolbarControls?: JSX.Element[];
 
   /**
    * If you're not using this property, multi-value fields will be transformed into a string
@@ -84,7 +97,7 @@ interface OwnProps {
    *
    * Using this property will create a bucket for each value of the multi-value fields in question.
    * Following the example above, a field with the ['mac1', 'mac2'] value will be grouped
-   * in 2 groups: one for mac1 and a second formac2.
+   * in 2 groups: one for mac1 and a second for mac2.
    */
   multiValueFieldsToFlatten?: string[];
 
@@ -92,6 +105,17 @@ interface OwnProps {
    * Data view scope
    */
   pageScope?: PageScope;
+
+  /**
+   * A callback function that is invoked whenever the grouping aggregations are updated.
+   * It receives the parsed aggregation data as its only argument. This can be used to
+   * react to changes in the grouped data, for example, to extract information from
+   * the aggregation results.
+   */
+  onAggregationsChange?: (
+    aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>,
+    groupingLevel?: number
+  ) => void;
 }
 
 export type AlertsTableComponentProps = OwnProps;
@@ -103,6 +127,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   globalFilters,
   globalQuery,
   groupingLevel,
+  sort,
   groupStatsAggregations,
   groupTakeActionItems,
   loading,
@@ -118,8 +143,10 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   signalIndexName,
   tableId,
   to,
+  additionalToolbarControls = [],
   multiValueFieldsToFlatten,
   pageScope = PageScope.alerts,
+  onAggregationsChange,
 }) => {
   const {
     services: { uiSettings },
@@ -191,6 +218,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({
       groupStatsAggregations,
+      sort,
       additionalFilters,
       selectedGroup,
       uniqueValue,
@@ -212,6 +240,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     to,
     uniqueValue,
     multiValueFieldsToFlatten,
+    sort,
   ]);
 
   const emptyGlobalQuery = useMemo(() => getGlobalQuery([]), [getGlobalQuery]);
@@ -259,6 +288,12 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   useEffect(() => {
+    if (!isLoadingGroups) {
+      onAggregationsChange?.(aggs, groupingLevel);
+    }
+  }, [aggs, groupingLevel, isLoadingGroups, onAggregationsChange]);
+
+  useEffect(() => {
     if (!isNoneGroup([selectedGroup])) {
       queriedGroup.current =
         queryGroups?.runtime_mappings?.groupByField?.script?.params?.selectedGroup ?? '';
@@ -288,15 +323,20 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const getTakeActionItems = useCallback(
-    (groupFilters: Filter[], groupNumber: number) => {
+    (
+      groupFilters: Filter[],
+      groupNumber: number,
+      groupBucket: GroupingBucket<AlertsGroupingAggregation>
+    ) => {
       const takeActionParams = {
         groupNumber,
         query: getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
         selectedGroup,
         tableId,
+        groupBucket,
       };
 
-      return groupTakeActionItems?.(takeActionParams) ?? { items: [], panels: [] };
+      return groupTakeActionItems?.(takeActionParams);
     },
     [defaultFilters, getGlobalQuery, groupTakeActionItems, selectedGroup, tableId]
   );
@@ -314,7 +354,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         activePage: pageIndex,
         data: aggs,
         groupingLevel,
-        inspectButton: inspect,
+        additionalToolbarControls: [...additionalToolbarControls, inspect],
         isLoading: loading || isLoadingGroups,
         itemsPerPage: pageSize,
         onChangeGroupsItemsPerPage,
@@ -340,6 +380,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       pageSize,
       renderChildComponent,
       selectedGroup,
+      additionalToolbarControls,
     ]
   );
 };

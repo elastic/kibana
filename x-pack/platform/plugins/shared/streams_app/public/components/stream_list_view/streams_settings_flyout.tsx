@@ -31,7 +31,6 @@ import {
   useGeneratedHtmlId,
   EuiText,
   EuiLink,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
@@ -40,6 +39,7 @@ import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
+import { getFormattedError } from '../../util/errors';
 
 export function StreamsSettingsFlyout({
   onClose,
@@ -81,7 +81,7 @@ export function StreamsSettingsFlyout({
         setWiredChecked(status.enabled === true);
         setCanManageWiredElasticsearch(Boolean(status.can_manage));
       } catch (error) {
-        core.notifications.toasts.addError(error, {
+        core.notifications.toasts.addError(getFormattedError(error), {
           title: i18n.translate('xpack.streams.streamsListView.fetchWiredStatusErrorToastTitle', {
             defaultMessage: 'Error fetching wired streams status',
           }),
@@ -105,12 +105,10 @@ export function StreamsSettingsFlyout({
         setWiredChecked(true);
         refreshStreams();
       } catch (error) {
-        core.notifications.toasts.addError(error, {
+        core.notifications.toasts.addError(getFormattedError(error), {
           title: i18n.translate('xpack.streams.streamsListView.enableWiredStreamsErrorToastTitle', {
             defaultMessage: 'Error updating wired streams setting',
           }),
-          toastMessage:
-            error?.body?.message || (error instanceof Error ? error.message : String(error)),
           toastLifeTimeMs: 5000,
         });
       } finally {
@@ -129,12 +127,10 @@ export function StreamsSettingsFlyout({
       setShowDisableModal(false);
       setDisableConfirmChecked(false);
     } catch (error) {
-      core.notifications.toasts.addError(error, {
+      core.notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate('xpack.streams.streamsListView.enableWiredStreamsErrorToastTitle', {
           defaultMessage: 'Error updating wired streams setting',
         }),
-        toastMessage:
-          error?.body?.message || (error instanceof Error ? error.message : String(error)),
         toastLifeTimeMs: 5000,
       });
     } finally {
@@ -159,15 +155,13 @@ export function StreamsSettingsFlyout({
               })
         );
       } catch (error) {
-        core.notifications.toasts.addError(error, {
+        core.notifications.toasts.addError(getFormattedError(error), {
           title: i18n.translate(
             'xpack.streams.streamsListView.significantEventsToggleErrorToastTitle',
             {
               defaultMessage: 'Error updating Significant events setting',
             }
           ),
-          toastMessage:
-            error?.body?.message || (error instanceof Error ? error.message : String(error)),
           toastLifeTimeMs: 5000,
         });
       }
@@ -328,25 +322,23 @@ output.elasticsearch:
               title={
                 <h3>
                   <EuiFlexGroup gutterSize="s">
-                    <EuiFlexItem>
-                      {i18n.translate('xpack.streams.streamsListView.significantEventsTitle', {
-                        defaultMessage: 'Significant events',
+                    {i18n.translate('xpack.streams.streamsListView.significantEventsTitle', {
+                      defaultMessage: 'Significant events',
+                    })}
+                    <EuiBetaBadge
+                      label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
+                        defaultMessage: 'Technical Preview',
                       })}
-                      <EuiBetaBadge
-                        label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
-                          defaultMessage: 'Technical Preview',
-                        })}
-                        tooltipContent={i18n.translate(
-                          'xpack.streams.streamsListView.betaBadgeDescription',
-                          {
-                            defaultMessage:
-                              'This functionality is experimental and not supported. It may change or be removed at any time.',
-                          }
-                        )}
-                        alignment="middle"
-                        size="s"
-                      />
-                    </EuiFlexItem>
+                      tooltipContent={i18n.translate(
+                        'xpack.streams.streamsListView.betaBadgeDescription',
+                        {
+                          defaultMessage:
+                            'This functionality is experimental and not supported. It may change or be removed at any time.',
+                        }
+                      )}
+                      alignment="middle"
+                      size="s"
+                    />
                   </EuiFlexGroup>
                 </h3>
               }

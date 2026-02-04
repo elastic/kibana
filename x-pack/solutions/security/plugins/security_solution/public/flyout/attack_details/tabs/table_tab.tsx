@@ -43,7 +43,7 @@ const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
  * Table view displayed in the attack details panel Table tab
  */
 export const TableTab = memo(() => {
-  const { browserFields, dataFormattedForFieldBrowser } = useAttackDetailsContext();
+  const { browserFields, dataFormattedForFieldBrowser, attackId } = useAttackDetailsContext();
   const smallFontSize = useEuiFontSize('xs').fontSize;
   const [pagination, setPagination] = useState<{ pageIndex: number }>({
     pageIndex: 0,
@@ -62,7 +62,10 @@ export const TableTab = memo(() => {
     [pagination]
   );
 
-  const columns = useMemo(() => getTableTabColumns(), []);
+  const columns = useMemo(
+    () => getTableTabColumns({ browserFields, attackId }),
+    [attackId, browserFields]
+  );
 
   const items = useMemo(
     () =>

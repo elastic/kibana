@@ -48,6 +48,7 @@ import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/pu
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
@@ -66,6 +67,7 @@ import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plu
 
 import { css, injectGlobal } from '@emotion/css';
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -157,6 +159,7 @@ export interface VisualizationsStartDeps {
   navigation: NavigationStart;
   presentationUtil: PresentationUtilPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
+  cps?: CPSPluginStart;
   spaces?: SpacesPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   share?: SharePluginStart;
@@ -164,6 +167,7 @@ export interface VisualizationsStartDeps {
   screenshotMode: ScreenshotModePluginStart;
   fieldFormats: FieldFormatsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   usageCollection: UsageCollectionStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   contentManagement: ContentManagementPublicStart;
@@ -404,9 +408,11 @@ export class VisualizationsPlugin
           visEditorsRegistry,
           listingViewRegistry,
           unifiedSearch: pluginsStart.unifiedSearch,
+          kql: pluginsStart.kql,
           serverless: pluginsStart.serverless,
           noDataPage: pluginsStart.noDataPage,
           contentManagement: pluginsStart.contentManagement,
+          cps: pluginsStart.cps,
         };
 
         params.element.classList.add(styles.visAppWrapper);
@@ -470,13 +476,12 @@ export class VisualizationsPlugin
           {
             panelType: VISUALIZE_EMBEDDABLE_TYPE,
             serializedState: {
-              rawState: {
-                savedObjectId: savedObject.id,
-              },
-              references: [],
+              savedObjectId: savedObject.id,
             },
           },
-          true
+          {
+            displaySuccessMessage: true,
+          }
         );
       },
       savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,

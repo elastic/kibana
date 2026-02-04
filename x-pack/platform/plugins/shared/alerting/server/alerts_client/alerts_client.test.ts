@@ -21,6 +21,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_MUTED,
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_PREVIOUS_ACTION_GROUP,
@@ -169,6 +170,7 @@ const fetchedAlert1 = {
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
@@ -202,6 +204,7 @@ const fetchedAlert2 = {
   [ALERT_FLAPPING_HISTORY]: [true, false],
   [ALERT_INSTANCE_ID]: '2',
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
@@ -243,6 +246,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
   [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: ['test-name1', 'test-name2'],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
@@ -277,6 +281,7 @@ const getOngoingIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
   [ALERT_SEVERITY_IMPROVING]: undefined,
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
   ...overrides,
 });
@@ -295,6 +300,7 @@ const getRecoveredIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
   [ALERT_SEVERITY_IMPROVING]: true,
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
   ...overrides,
 });
@@ -377,6 +383,7 @@ describe('Alerts Client', () => {
               eventEndTime: new Date().toISOString(),
               status: MaintenanceWindowStatus.Running,
               id: 'test-id1',
+              title: 'test-name1',
             },
             {
               ...getMockMaintenanceWindow(),
@@ -384,6 +391,7 @@ describe('Alerts Client', () => {
               eventEndTime: new Date().toISOString(),
               status: MaintenanceWindowStatus.Running,
               id: 'test-id2',
+              title: 'test-name2',
             },
           ],
           maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id2'],
@@ -672,7 +680,7 @@ describe('Alerts Client', () => {
           });
         });
 
-        test('should not index new alerts if the activeCount is less than the rule alertDelay', async () => {
+        test('should set alert status "delayed" if activeCount is less than the rule alertDelay', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
             ...alertsClientParams,
             rule: { ...alertsClientParams.rule, alertDelay: 3 },
@@ -682,22 +690,15 @@ describe('Alerts Client', () => {
 
           // Report 1 new alerts
           const alertExecutorService = alertsClient.factory();
-          alertExecutorService.create('1').scheduleActions('default');
+          const alert = alertExecutorService.create('1').scheduleActions('default');
 
           await alertsClient.processAlerts();
           alertsClient.determineFlappingAlerts();
-          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
-          alertsClient.logAlerts(logAlertsOpts);
+          alertsClient.determineDelayedAlerts({ ...determineDelayedAlertsOpts, alertDelay: 3 });
 
           await alertsClient.persistAlerts();
 
-          expect(clusterClient.bulk).not.toHaveBeenCalled();
-          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
-            eventLogger: alertingEventLogger,
-            request: fakeRequest,
-            ruleTypeCategory: 'test',
-            spaceId: 'space1',
-          });
+          expect(alert.isDelayed()).toBe(true);
         });
 
         test('should update ongoing alerts in existing index', async () => {
@@ -857,6 +858,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
                 [ALERT_MUTED]: false,
                 [ALERT_PENDING_RECOVERED_COUNT]: 0,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
@@ -954,12 +956,14 @@ describe('Alerts Client', () => {
 
           await alertsClient.persistAlerts();
 
-          expect(spy).toHaveBeenCalledTimes(2);
+          expect(spy).toHaveBeenCalledTimes(4);
           expect(spy).toHaveBeenNthCalledWith(1, 'active');
-          expect(spy).toHaveBeenNthCalledWith(2, 'recovered');
+          expect(spy).toHaveBeenNthCalledWith(2, 'delayed');
+          expect(spy).toHaveBeenNthCalledWith(3, 'recovered');
+          expect(spy).toHaveBeenNthCalledWith(4, 'delayed');
 
           expect(logger.error).toHaveBeenCalledWith(
-            `Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active alerts ${ruleInfo}.`,
+            `Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active or delayed alerts ${ruleInfo}.`,
             logTags
           );
           spy.mockRestore();
@@ -1186,6 +1190,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
                 [ALERT_MUTED]: false,
                 [ALERT_PENDING_RECOVERED_COUNT]: 0,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
@@ -1241,6 +1246,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
                 [ALERT_MUTED]: false,
                 [ALERT_PENDING_RECOVERED_COUNT]: 0,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
@@ -3041,6 +3047,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '1',
                 [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: ['test-name1', 'test-name2'],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -3077,6 +3084,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '2',
                 [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: ['test-name1', 'test-name2'],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -3327,6 +3335,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '1',
                 [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: ['test-name1', 'test-name2'],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -3432,6 +3441,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING_HISTORY]: [true, false],
                 [ALERT_INSTANCE_ID]: '1',
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -3538,6 +3548,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_INSTANCE_ID]: '1',
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',

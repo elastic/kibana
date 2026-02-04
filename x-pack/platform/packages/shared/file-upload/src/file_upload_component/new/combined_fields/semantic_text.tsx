@@ -111,7 +111,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
       (pipelines: IngestPipeline[]) => {
         return cloneDeep(pipelines).map((p) => {
           if (renameToFieldOption !== null) {
-            p.processors.push({
+            p.processors!.push({
               set: {
                 field: renameToFieldOption,
                 copy_from: selectedFieldOption,

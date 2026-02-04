@@ -189,7 +189,7 @@ const DEV_PATTERNS = [
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
-  'src/platform/packages/shared/kbn-esql-ast/scripts/**/*',
+  'src/platform/packages/shared/kbn-esql-language/scripts/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -816,7 +816,7 @@ module.exports = {
             /* Files that ARE allowed to use devDependencies */
             devDependencies: [...DEV_PATTERNS],
             peerDependencies: true,
-            packageDir: '.',
+            packageDir: __dirname,
           },
         ],
       },
@@ -933,6 +933,7 @@ module.exports = {
     {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
+        '@kbn/eslint/no_wrapped_error_in_logger': 'error',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
         '@kbn/eslint/no_deprecated_imports': ['warn', ...DEPRECATED_IMPORTS],
         'no-restricted-modules': [
@@ -1139,7 +1140,7 @@ module.exports = {
         'x-pack/solutions/observability/packages/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/platform/plugins/shared/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/platform/plugins/shared/streams_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/packages/shared/kbn-unified-metrics-grid/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'src/platform/packages/shared/kbn-unified-chart-section-viewer/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
@@ -1256,8 +1257,8 @@ module.exports = {
         'x-pack/solutions/security/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_ess/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_serverless/common/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/shared/timelines/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/shared/timelines/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/plugins/shared/cases/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/plugins/shared/cases/common/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
@@ -1298,7 +1299,7 @@ module.exports = {
         'x-pack/solutions/security/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_ess/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/timelines/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
@@ -1313,7 +1314,7 @@ module.exports = {
         'x-pack/solutions/security/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/platform/plugins/shared/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
@@ -1334,7 +1335,7 @@ module.exports = {
         'x-pack/solutions/security/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_ess/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/timelines/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}',
       ],
@@ -1368,7 +1369,7 @@ module.exports = {
         'x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/shared/timelines/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/plugins/shared/cases/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
@@ -1589,11 +1590,10 @@ module.exports = {
     {
       files: [
         'src/platform/packages/shared/kbn-scout/src/playwright/**/*.ts',
-        'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
-        'x-pack/solutions/security/packages/kbn-scout-security/src/playwright/**/*.ts',
-        'src/platform/{packages,plugins}/**/test/scout/**/*.ts',
-        'x-pack/platform/{packages,plugins}/**/test/scout/**/*.ts',
-        'x-pack/solutions/**/{packages,plugins}/**/test/scout/**/*.ts',
+        'x-pack/solutions/**/packages/kbn-scout-*/src/playwright/**/*.ts',
+        'src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
       ],
       excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
@@ -1850,7 +1850,7 @@ module.exports = {
       },
     },
     {
-      files: ['src/platform/packages/shared/kbn-connector-specs/src/icons/**/*.{ts,tsx}'],
+      files: ['src/platform/packages/shared/kbn-connector-specs/src/specs/**/icon/*.{ts,tsx}'],
       rules: {
         'import/no-default-export': 'off',
       },
@@ -1957,30 +1957,6 @@ module.exports = {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
       },
     },
-    /**
-     * Allows snake_case variables in the server, because that's how we return API properties
-     */
-    {
-      files: ['x-pack/solutions/search/plugins/enterprise_search/server/**/*.{ts,tsx}'],
-      rules: {
-        '@typescript-eslint/naming-convention': [
-          'error',
-          {
-            selector: 'variable',
-            modifiers: ['destructured'],
-            format: null,
-            leadingUnderscore: 'allow',
-            trailingUnderscore: 'allow',
-          },
-          {
-            selector: 'variable',
-            format: ['camelCase', 'UPPER_CASE'],
-            leadingUnderscore: 'allow',
-            trailingUnderscore: 'allow',
-          },
-        ],
-      },
-    },
     {
       // Source files only - allow `any` in test/mock files
       files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
@@ -2067,7 +2043,7 @@ module.exports = {
           {
             devDependencies: true,
             peerDependencies: true,
-            packageDir: '.',
+            packageDir: __dirname,
           },
         ],
       },
@@ -2554,10 +2530,7 @@ module.exports = {
         // TODO @kibana/operations
         'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
-        'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)
-
-        // FIXME PhilippeOberti @kbn/timelines-plugin depends on security-solution-plugin (security/private) (timelines is going to disappear)
-        'x-pack/platform/plugins/shared/timelines/**',
+        'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)*',
 
         // For now, we keep the exception to let tests depend on anything.
         // Ideally, we need to classify the solution specific ones to reduce CI times
@@ -2603,8 +2576,8 @@ module.exports = {
     },
     {
       files: [
-        'src/platform/plugins/**/test/scout/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/scout/**/*.ts',
+        'src/platform/plugins/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts',
       ],
       rules: {
         'no-restricted-imports': [
@@ -2620,12 +2593,18 @@ module.exports = {
                 message: "Platform tests should import only from '@kbn/scout'.",
               },
             ],
+            patterns: [
+              {
+                group: ['@kbn/scout-*', '@playwright/test/**', 'playwright/**'],
+                message: "Platform tests should import only from '@kbn/scout'.",
+              },
+            ],
           },
         ],
       },
     },
     {
-      files: ['x-pack/solutions/observability/plugins/**/test/scout/**/*.ts'],
+      files: ['x-pack/solutions/observability/plugins/**/test/{scout,scout_*}/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2659,7 +2638,37 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/security/plugins/**/test/scout/**/*.ts'],
+      files: ['x-pack/solutions/search/plugins/**/test/{scout,scout_*}/**/*.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@kbn/scout',
+                message: "Search solution tests should import from '@kbn/scout-search' instead.",
+              },
+              {
+                name: '@playwright/test',
+                message: "Search solution tests should import from '@kbn/scout-search' instead.",
+              },
+              {
+                name: 'playwright',
+                message: "Search solution tests should import from '@kbn/scout-search' instead.",
+              },
+            ],
+            patterns: [
+              {
+                group: ['@kbn/scout/**', '@playwright/test/**', 'playwright/**'],
+                message: "Search solution tests should import from '@kbn/scout-search' instead.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2695,13 +2704,25 @@ module.exports = {
     {
       // Custom rules for scout tests
       files: [
-        'src/platform/plugins/**/test/scout/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/scout/**/*.ts',
-        'x-pack/solutions/**/plugins/test/scout/**/*.ts',
+        'src/platform/plugins/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/*.ts',
       ],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
+        '@kbn/eslint/scout_max_one_describe': 'error',
+        '@kbn/eslint/scout_test_file_naming': 'error',
+        '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
+        '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
+        '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
+      },
+    },
+    {
+      // Ensure correct expect import path in solutions scout API tests
+      files: ['x-pack/solutions/**/plugins/**/test/scout/api/**/*.ts'],
+      rules: {
+        '@kbn/eslint/scout_expect_import': 'error',
       },
     },
     {
@@ -2723,6 +2744,7 @@ module.exports = {
         'src/platform/plugins/shared/**/*.ts',
         'x-pack/solutions/**/*.ts',
         'x-pack/plugins/**/*.ts',
+        'x-pack/platform/plugins/shared/**/*.ts',
       ],
       excludedFiles: [
         '**/*.{test,spec}.ts',
@@ -2738,12 +2760,21 @@ module.exports = {
         '**/json_schemas/**',
         // Can use fs for telemetry collection
         'src/platform/plugins/shared/telemetry/**',
+        'x-pack/solutions/security/packages/test-api-clients/**',
+        // Will be migrated to automatic_import_v2 that relies on SOs
+        'x-pack/platform/plugins/shared/automatic_import/**',
       ],
       rules: {
         '@kbn/eslint/require_kbn_fs': [
-          'warn',
+          'error',
           {
-            restrictedMethods: ['writeFile', 'writeFileSync', 'createWriteStream'],
+            restrictedMethods: [
+              'writeFile',
+              'writeFileSync',
+              'createWriteStream',
+              'appendFile',
+              'appendFileSync',
+            ],
             disallowedMessage:
               'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
           },

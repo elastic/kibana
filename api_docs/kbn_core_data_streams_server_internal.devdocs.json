@@ -25,6 +25,8 @@
           "{ readonly migrations: Readonly<{} & { skip: boolean; }>; }"
         ],
         "path": "src/core/packages/data-streams/server-internal/src/config.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -24,6 +24,8 @@ import { isActionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate5/react';
 import React from 'react';
 import type { ActionBlockProps } from '.';
+import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
+import { selectValidationErrors } from '../../../state_management/stream_enrichment_state_machine/selectors';
 import { ConditionDisplay } from '../../../../shared';
 import { getStepPanelColour } from '../../../utils';
 import { BlockDisableOverlay } from '../block_disable_overlay';
@@ -31,6 +33,7 @@ import { StepContextMenu } from '../context_menu';
 import { ProcessorMetricBadges } from './processor_metrics';
 import { ProcessorStatusIndicator } from './processor_status_indicator';
 import { getStepDescription } from './utils';
+import { DragHandle } from '../../draggable_step_wrapper';
 
 export const ActionBlockListItem = (props: ActionBlockProps) => {
   const { euiTheme } = useEuiTheme();
@@ -41,6 +44,13 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
     stepRef,
     (snapshot) => snapshot.context.isNew || snapshot.context.isUpdated
   );
+
+  const validationErrors = useStreamEnrichmentSelector((state) => {
+    const errors = selectValidationErrors(state.context);
+    return errors.get(step.customIdentifier) || [];
+  });
+
+  const hasValidationErrors = validationErrors.length > 0;
 
   // For the inner description we once again invert the colours
   const descriptionPanelColour = getStepPanelColour(level + 1);
@@ -65,6 +75,11 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
+            {!readOnly && (
+              <EuiFlexItem grow={false}>
+                <DragHandle />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <ProcessorStatusIndicator
                 stepRef={stepRef}
@@ -119,12 +134,35 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                 </EuiToolTip>
               </EuiFlexGroup>
             </EuiFlexItem>
-            {(processorMetrics || isUnsaved || !readOnly) && (
+            {(processorMetrics || hasValidationErrors || isUnsaved || !readOnly) && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="xs">
                   {processorMetrics && (
                     <EuiFlexItem>
                       <ProcessorMetricBadges {...processorMetrics} />
+                    </EuiFlexItem>
+                  )}
+                  {hasValidationErrors && (
+                    <EuiFlexItem>
+                      <EuiToolTip
+                        content={
+                          <div>
+                            {validationErrors.map((error, idx) => (
+                              <div key={idx}>{error.message}</div>
+                            ))}
+                          </div>
+                        }
+                      >
+                        <EuiBadge color="danger" iconType="warning">
+                          {i18n.translate(
+                            'xpack.streams.streamDetailView.managementTab.enrichment.validationErrorBadge',
+                            {
+                              defaultMessage: '{count, plural, one {# error} other {# errors}}',
+                              values: { count: validationErrors.length },
+                            }
+                          )}
+                        </EuiBadge>
+                      </EuiToolTip>
                     </EuiFlexItem>
                   )}
                   {isUnsaved && (

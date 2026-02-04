@@ -98,7 +98,11 @@
     "@kbn/langgraph-checkpoint-saver",
     "@kbn/lists-plugin",
     "@kbn/connector-schemas",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/management-settings-ids",
+    "@kbn/agent-builder-plugin",
+    "@kbn/cloud-plugin",
   ],
   "exclude": [
     "target/**/*",

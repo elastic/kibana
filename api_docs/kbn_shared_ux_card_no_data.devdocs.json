@@ -22,6 +22,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/no_data_card.tsx",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/no_data_card.tsx",
+            "lineNumber": 18,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,6 +67,8 @@
           "({ children, ...dependencies }: React.PropsWithChildren<KibanaDependencies>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/services.tsx",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -77,6 +83,8 @@
               "React.PropsWithChildren<KibanaDependencies>"
             ],
             "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/services.tsx",
+            "lineNumber": 36,
+            "columnNumber": 95,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,6 +114,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/services.tsx",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -128,6 +138,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/services.tsx",
+            "lineNumber": 24,
+            "columnNumber": 79,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -155,6 +167,8 @@
           ", \"icon\"> & { title?: string | undefined; description?: React.ReactNode; canAccessFleet?: boolean | undefined; buttonText?: string | undefined; buttonIsDisabled?: boolean | undefined; disabledButtonTooltipText?: string | undefined; href?: string | undefined; docsLink?: string | undefined; onClick?: ((e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; 'data-test-subj'?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/card/no_data/types/index.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -172,6 +186,8 @@
           "KibanaDependencies"
         ],
         "path": "src/platform/packages/shared/shared-ux/card/no_data/types/index.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -191,6 +207,8 @@
           ", \"icon\"> & { title?: string | undefined; description?: React.ReactNode; canAccessFleet?: boolean | undefined; buttonText?: string | undefined; buttonIsDisabled?: boolean | undefined; disabledButtonTooltipText?: string | undefined; href?: string | undefined; docsLink?: string | undefined; onClick?: ((e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; 'data-test-subj'?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/card/no_data/types/index.ts",
+        "lineNumber": 96,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -214,6 +232,8 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/card/no_data/types/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

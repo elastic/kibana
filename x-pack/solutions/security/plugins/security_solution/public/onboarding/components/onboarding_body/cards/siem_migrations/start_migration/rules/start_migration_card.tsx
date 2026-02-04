@@ -6,13 +6,12 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   BasicMissingPrivilegesCallOut,
   MissingPrivilegesDescription,
 } from '../../../../../../../common/components/missing_privileges';
 import { useUpsellingComponent } from '../../../../../../../common/hooks/use_upselling';
-import { PanelText } from '../../../../../../../common/components/panel_text';
 import { RuleMigrationDataInputWrapper } from '../../../../../../../siem_migrations/rules/components/data_input_flyout/data_input_wrapper';
 import { SiemMigrationTaskStatus } from '../../../../../../../../common/siem_migrations/constants';
 import { OnboardingCardId } from '../../../../../../constants';
@@ -24,7 +23,6 @@ import type { StartMigrationCardMetadata } from '../common/types';
 import { RuleMigrationsPanels } from './rule_migrations_panels';
 import { useStyles } from '../common/start_migration_card.styles';
 import { UploadRulesSectionPanel } from './upload_rules_panel';
-import { START_MIGRATION_CARD_FOOTER_NOTE } from '../common/translations';
 
 const StartMigrationsBody: OnboardingCardComponent = React.memo(
   ({ setComplete, isCardComplete, setExpandedCardId, checkComplete }) => {
@@ -66,10 +64,6 @@ const StartMigrationsBody: OnboardingCardComponent = React.memo(
               expandConnectorsCard={expandConnectorsCard}
             />
           )}
-          <EuiSpacer size="m" />
-          <PanelText size="xs" subdued cursive>
-            <p>{START_MIGRATION_CARD_FOOTER_NOTE}</p>
-          </PanelText>
         </OnboardingCardContentPanel>
       </RuleMigrationDataInputWrapper>
     );

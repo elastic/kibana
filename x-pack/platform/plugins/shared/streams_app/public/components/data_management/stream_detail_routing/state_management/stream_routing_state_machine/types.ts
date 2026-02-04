@@ -40,6 +40,7 @@ export interface StreamRoutingContext {
   suggestedRuleId: string | null;
   editingSuggestionIndex: number | null;
   editedSuggestion: PartitionSuggestion | null;
+  isRefreshing: boolean;
 }
 
 export type StreamRoutingEvent =

@@ -12,15 +12,51 @@ import type {
   DissectProcessor,
   GrokProcessor,
   ManualIngestPipelineProcessor,
+  MathProcessor,
   RenameProcessor,
   SetProcessor,
   DropDocumentProcessor,
   ReplaceProcessor,
+  UppercaseProcessor,
+  LowercaseProcessor,
+  TrimProcessor,
+  JoinProcessor,
+  ConcatProcessor,
 } from '../../../../types/processors';
 import type { StreamlangDSL } from '../../../../types/streamlang';
 
 export const comprehensiveTestDSL: StreamlangDSL = {
   steps: [
+    {
+      action: 'join',
+      from: ['field1', 'field2', 'field3'],
+      to: 'my_joined_field',
+      delimiter: ', ',
+    } as JoinProcessor,
+    {
+      action: 'concat',
+      from: [
+        { type: 'field', value: 'first_name' },
+        { type: 'literal', value: ' ' },
+        { type: 'field', value: 'last_name' },
+      ],
+      to: 'full_name',
+    } as ConcatProcessor,
+    {
+      action: 'uppercase',
+      from: 'message',
+      to: 'message_uppercase',
+    } as UppercaseProcessor,
+    {
+      action: 'lowercase',
+      from: 'message',
+      to: 'message_lowercase',
+    } as LowercaseProcessor,
+    {
+      action: 'trim',
+      from: 'message',
+      to: 'message_trimmed',
+    } as TrimProcessor,
     {
       action: 'drop_document',
       where: {
@@ -63,6 +99,18 @@ export const comprehensiveTestDSL: StreamlangDSL = {
       to: 'attributes.status',
       value: 'active',
     } as SetProcessor,
+    // Math processor - simple arithmetic
+    {
+      action: 'math',
+      expression: 'price * quantity',
+      to: 'total',
+    } as MathProcessor,
+    // Math processor - with dotted field paths
+    {
+      action: 'math',
+      expression: 'attributes.price * attributes.quantity + attributes.tax',
+      to: 'attributes.total',
+    } as MathProcessor,
     // Grok parsing
     {
       action: 'grok',
@@ -101,7 +149,7 @@ export const comprehensiveTestDSL: StreamlangDSL = {
     } as SetProcessor,
     // Multiple steps under a condition (where block)
     {
-      where: {
+      condition: {
         field: 'attributes.env',
         eq: 'prod',
         steps: [
@@ -115,7 +163,7 @@ export const comprehensiveTestDSL: StreamlangDSL = {
     },
     // Nested conditionals
     {
-      where: {
+      condition: {
         or: [
           { field: 'attributes.a', eq: 1 }, // condition A
           { field: 'attributes.b', eq: 2 }, // condition B
@@ -127,7 +175,7 @@ export const comprehensiveTestDSL: StreamlangDSL = {
             value: 'prod-env',
           } as SetProcessor,
           {
-            where: {
+            condition: {
               field: 'attributes.department',
               eq: 'legal',
               steps: [
@@ -188,7 +236,7 @@ export const notConditionsTestDSL: StreamlangDSL = {
       },
     } as SetProcessor,
     {
-      where: {
+      condition: {
         not: {
           or: [
             { field: 'attributes.a', eq: 1 },

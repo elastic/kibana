@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getProjectRoutingAccess, getReadonlyMessage } from './access_control';
+export { getProjectRoutingAccess } from './access_control';
 export { createProjectFetcher } from './project_fetcher';

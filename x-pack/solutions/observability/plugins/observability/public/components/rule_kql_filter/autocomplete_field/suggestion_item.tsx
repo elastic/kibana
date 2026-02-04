@@ -8,8 +8,8 @@
 import React from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiIcon, euiPaletteColorBlind, useEuiTheme } from '@elastic/eui';
-import type { QuerySuggestion } from '@kbn/unified-search-plugin/public';
-import { QuerySuggestionTypes } from '@kbn/unified-search-plugin/public';
+import type { QuerySuggestion } from '@kbn/kql/public';
+import { QuerySuggestionTypes } from '@kbn/kql/public';
 import { transparentize } from 'polished';
 import { css } from '@emotion/react';
 

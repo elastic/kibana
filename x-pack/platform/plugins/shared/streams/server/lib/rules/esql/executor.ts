@@ -53,6 +53,14 @@ export async function getRuleExecutor(
     logger,
   });
 
+  if (results.length === 0) {
+    return {
+      state: {
+        previousOriginalDocumentIds: [],
+      },
+    };
+  }
+
   const alertDocIdToDocumentIdMap = new Map<string, string>();
   const alerts = results.map((result) => {
     const alertDocId = objectHash([result._id, rule.id, spaceId]);
@@ -71,7 +79,8 @@ export async function getRuleExecutor(
 
   const { createdAlerts, errors } = await alertWithPersistence(
     alerts,
-    true,
+    // keep refresh false to optimize performance as we don't need to read these alerts back immediately
+    false,
     MAX_ALERTS_PER_EXECUTION
   );
 

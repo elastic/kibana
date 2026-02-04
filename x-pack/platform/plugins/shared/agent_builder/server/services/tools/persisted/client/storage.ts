@@ -1,0 +1,62 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { ToolType } from '@kbn/agent-builder-common';
+import type { IndexStorageSettings } from '@kbn/storage-adapter';
+import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
+import { chatSystemIndex } from '@kbn/agent-builder-server';
+
+export const toolIndexName = chatSystemIndex('tools');
+
+const storageSettings = {
+  name: toolIndexName,
+  schema: {
+    properties: {
+      id: types.keyword({}),
+      type: types.keyword({}),
+      space: types.keyword({}),
+      description: types.text({}),
+      configuration: types.object({
+        dynamic: false,
+        properties: {},
+      }),
+      tags: types.keyword({}),
+      created_at: types.date({}),
+      updated_at: types.date({}),
+    },
+  },
+} satisfies IndexStorageSettings;
+
+export interface ToolProperties<TConfig extends object = Record<string, unknown>> {
+  id: string;
+  type: ToolType;
+  space: string;
+  description: string;
+  configuration: TConfig;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export type ToolStorageSettings = typeof storageSettings;
+
+export type ToolStorage = StorageIndexAdapter<ToolStorageSettings, ToolProperties>;
+
+export const createStorage = ({
+  logger,
+  esClient,
+}: {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+}): ToolStorage => {
+  return new StorageIndexAdapter<ToolStorageSettings, ToolProperties>(
+    esClient,
+    logger,
+    storageSettings
+  );
+};

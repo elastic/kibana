@@ -1798,6 +1798,7 @@ describe('update()', () => {
 
   it('should update rule flapping', async () => {
     const flapping = {
+      enabled: true,
       lookBackWindow: 10,
       statusChangeThreshold: 10,
     };
@@ -1841,7 +1842,6 @@ describe('update()', () => {
         systemActions: [],
         flapping,
       },
-      isFlappingEnabled: true,
     });
 
     expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
@@ -1859,35 +1859,6 @@ describe('update()', () => {
     );
 
     expect(result.flapping).toEqual(flapping);
-  });
-
-  it('should throw error when updating a rule with flapping if global flapping is disabled', async () => {
-    const flapping = {
-      lookBackWindow: 10,
-      statusChangeThreshold: 10,
-    };
-
-    await expect(
-      rulesClient.update({
-        id: '1',
-        data: {
-          schedule: { interval: '1m' },
-          name: 'abc',
-          tags: ['foo'],
-          params: {
-            bar: true,
-          },
-          throttle: null,
-          notifyWhen: 'onActiveAlert',
-          actions: [],
-          systemActions: [],
-          flapping,
-        },
-        isFlappingEnabled: false,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error updating rule: can not update rule flapping if global flapping is disabled"`
-    );
   });
 
   it('swallows error when invalidate API key throws', async () => {
@@ -4103,7 +4074,9 @@ describe('update()', () => {
             ],
           },
         })
-      ).rejects.toMatchInlineSnapshot(`[Error: Cannot use the same system action twice]`);
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Cannot use action system_action-id more than once for this rule]`
+      );
     });
 
     test('should throw an error if the default action does not contain the group', async () => {
@@ -4734,6 +4707,55 @@ describe('update()', () => {
           ?.investigation_guide?.blob
       ).toEqual('new blob');
       expect(result.artifacts).toBeDefined();
+    });
+  });
+
+  describe('rule migration', () => {
+    test('migrates legacy lastRun.outcomeMsg string to string[]', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          actions: [],
+          lastRun: {
+            outcomeMsg: 'Some message',
+          },
+          revision: 1,
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        references: [],
+      });
+
+      const result = await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+            risk_score: 40,
+            severity: 'low',
+          },
+          actions: [],
+          alertDelay: {
+            active: 10,
+          },
+        },
+      });
+
+      expect(result).toMatchObject({
+        lastRun: {
+          outcomeMsg: ['Some message'],
+        },
+      });
     });
   });
 });

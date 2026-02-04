@@ -41,6 +41,8 @@
           }
         ],
         "path": "packages/kbn-eslint-plugin-imports/src/get_import_resolver.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -56,6 +58,8 @@
               ".RuleContext"
             ],
             "path": "packages/kbn-eslint-plugin-imports/src/get_import_resolver.ts",
+            "lineNumber": 25,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

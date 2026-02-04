@@ -12,7 +12,6 @@ import type {
   PublishesReload,
   PublishesViewMode,
   PublishesUnifiedSearch,
-  SerializedPanelState,
 } from '@kbn/presentation-publishing';
 import type {
   CanAddNewPanel,
@@ -30,5 +29,5 @@ export type CanvasContainerApi = PublishesViewMode &
   PublishesReload &
   Partial<PublishesUnifiedSearch> &
   Partial<HasAppContext & PublishesUnifiedSearch> & {
-    setSerializedStateForChild: (childId: string, panelState: SerializedPanelState<object>) => void;
+    setSerializedStateForChild: (childId: string, panelState: object) => void;
   };

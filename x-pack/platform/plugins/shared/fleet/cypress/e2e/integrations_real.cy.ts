@@ -33,6 +33,7 @@ import {
   INTEGRATION_LIST,
   getIntegrationCategories,
   ADD_INTEGRATION_FLYOUT,
+  BREAKING_CHANGE_CHECKBOX_SEL,
 } from '../screens/integrations';
 import { LOADING_SPINNER, CONFIRM_MODAL } from '../screens/navigation';
 import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
@@ -76,6 +77,7 @@ function getAllIntegrations() {
     cy.wait(50);
     cy.getBySel(INTEGRATION_LIST)
       .find('.euiCard')
+      .should('be.visible')
       .each((element) => {
         const attrValue = element.attr('data-test-subj');
         if (attrValue) {
@@ -183,6 +185,7 @@ describe('Add Integration - Real API', () => {
 
   it('should upgrade policies with integration update', () => {
     const oldVersion = '0.3.3';
+    cy.intercept('GET', '**/api/fleet/epm/packages/apache/*/changelog.yml').as('getChangelog');
     installPackageWithVersion('apache', oldVersion);
     navigateTo(`app/integrations/detail/apache-${oldVersion}/policies`);
 
@@ -194,6 +197,8 @@ describe('Add Integration - Real API', () => {
     clickIfVisible(FLYOUT_CLOSE_BTN_SEL);
 
     cy.getBySel(SETTINGS_TAB).click();
+    cy.getBySel(INTEGRATION_POLICIES_UPGRADE_CHECKBOX);
+    clickIfVisible(BREAKING_CHANGE_CHECKBOX_SEL);
     cy.getBySel(UPDATE_PACKAGE_BTN).click();
     cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
@@ -205,24 +210,6 @@ describe('Add Integration - Real API', () => {
       cy.getBySel(PACKAGE_VERSION).contains(newVersion);
     });
   });
-
-  it('should filter integrations by category', () => {
-    setupIntegrations();
-    cy.getBySel(getIntegrationCategories('aws')).click({ scrollBehavior: false });
-
-    cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).contains('AWS').should('exist');
-
-    getAllIntegrations().then((items) => {
-      expect(items).to.have.length.greaterThan(29);
-    });
-
-    cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Cloud');
-    getAllIntegrations().then((items) => {
-      expect(items).to.have.length.greaterThan(3);
-    });
-    cy.getBySel(INTEGRATIONS_SEARCHBAR.REMOVE_BADGE_BUTTON).click();
-    cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).should('not.exist');
-  });
 });
 
 describe('It should handle non existing package', () => {
@@ -233,6 +220,59 @@ describe('It should handle non existing package', () => {
     cy.visit('/app/integrations/detail/packagedonotexists');
 
     cy.contains('[packagedonotexists] package not installed or found in registry').should('exist');
+  });
+});
+
+describe('Browsing integrations - Real API', () => {
+  const viewPortDimensions = [
+    [1200, 800],
+    [375, 667],
+  ];
+
+  viewPortDimensions.forEach((dimensions) => {
+    describe(`Viewport: ${dimensions[0]}x${dimensions[1]}`, () => {
+      beforeEach(() => {
+        cy.viewport(dimensions[0], dimensions[1]);
+        login();
+      });
+
+      it('should display a list of integrations', () => {
+        setupIntegrations();
+
+        // Wait for loading to complete
+        cy.getBySel(LOADING_SPINNER).should('not.exist');
+
+        // Verify that integrations are displayed
+        cy.getBySel(INTEGRATION_LIST).should('be.visible');
+        getAllIntegrations().should('have.length.greaterThan', 50);
+      });
+
+      it('should filter integrations by category', () => {
+        setupIntegrations();
+        cy.getBySel(getIntegrationCategories('aws')).click({ scrollBehavior: false });
+
+        cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).contains('AWS').should('exist');
+
+        getAllIntegrations().then((items) => {
+          expect(items).to.have.length.greaterThan(29);
+        });
+
+        cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Cloud');
+        getAllIntegrations().then((items) => {
+          expect(items).to.have.length.greaterThan(3);
+        });
+
+        cy.getBySel(INTEGRATIONS_SEARCHBAR.REMOVE_BADGE_BUTTON).click();
+        cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).should('not.exist');
+      });
+
+      it('should filter integrations by search term', () => {
+        setupIntegrations();
+
+        cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('1Password');
+        cy.getBySel(getIntegrationCard('1password')).should('be.visible');
+      });
+    });
   });
 });
 

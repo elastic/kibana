@@ -26,6 +26,8 @@
         "label": "Cluster",
         "description": [],
         "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -62,6 +66,8 @@
                   " | undefined; ssl?: boolean | undefined; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 74,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -84,6 +90,8 @@
               ") => Promise<{ installPath: string; disableEsTmpDir: boolean; }>"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -98,6 +106,8 @@
                   "InstallSourceOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 90,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -120,6 +130,8 @@
               ") => Promise<{ downloadPath: string; }>"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -134,6 +146,8 @@
                   "DownloadSnapshotOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 102,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -156,6 +170,8 @@
               ") => Promise<{ installPath: string; disableEsTmpDir: boolean; }>"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -170,6 +186,8 @@
                   "InstallSnapshotOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 117,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -192,6 +210,8 @@
               " | undefined) => Promise<{ installPath: string; disableEsTmpDir: boolean; }>"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -206,6 +226,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 132,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -222,6 +244,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 132,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -242,6 +266,8 @@
               "(installPath: string, archivePath: string, extractDirName?: string) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -256,6 +282,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 147,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -271,6 +299,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 147,
+                "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -286,6 +316,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 147,
+                "columnNumber": 72,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -306,6 +338,8 @@
               "(installPath: string, plugins: string, esJavaOpts?: string | undefined) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+            "lineNumber": 164,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -320,6 +354,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 167,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -335,6 +371,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 167,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -350,6 +388,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 167,
+                "columnNumber": 62,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -368,6 +408,8 @@
               "(installPath: string, secureSettingsFiles: string[][]) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -382,6 +424,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 181,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -397,6 +441,8 @@
                   "string[][]"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 182,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -419,6 +465,8 @@
               ") => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+            "lineNumber": 198,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -433,6 +481,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 201,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -448,6 +498,8 @@
                   "EsClusterExecOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 201,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -470,6 +522,8 @@
               ") => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+            "lineNumber": 244,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -484,6 +538,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 247,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -499,6 +555,8 @@
                   "EsClusterExecOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 247,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -519,6 +577,8 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+            "lineNumber": 293,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -537,6 +597,8 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+            "lineNumber": 300,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -557,6 +619,8 @@
               ") => Promise<string[]>"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+            "lineNumber": 540,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -571,6 +635,8 @@
                   "ServerlessOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 543,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -593,6 +659,8 @@
               ") => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+            "lineNumber": 565,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -607,6 +675,8 @@
                   "DockerOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-es/src/cluster.ts",
+                "lineNumber": 568,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -632,6 +702,8 @@
           "(hostPath: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+        "lineNumber": 741,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -646,6 +718,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+            "lineNumber": 746,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -675,6 +749,8 @@
           ") => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+        "lineNumber": 451,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -695,6 +771,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+            "lineNumber": 454,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -714,6 +792,8 @@
           "(resourcePath: string) => object"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/read_roles_from_resource.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -728,6 +808,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/read_roles_from_resource.ts",
+            "lineNumber": 26,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -747,6 +829,8 @@
           "(resourcePath: string) => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/read_roles_from_resource.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -761,6 +845,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/read_roles_from_resource.ts",
+            "lineNumber": 14,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -780,6 +866,8 @@
           "(defaults: {}) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/cli.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -794,6 +882,8 @@
               "{}"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/cli.ts",
+            "lineNumber": 45,
+            "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -823,6 +913,8 @@
           ") => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+        "lineNumber": 436,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -843,6 +935,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+            "lineNumber": 439,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -866,6 +960,8 @@
           "\"basic\" | \"trial\""
         ],
         "path": "src/platform/packages/shared/kbn-es/src/artifact.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -881,6 +977,8 @@
           "\"elastic_serverless\""
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/serverless_file_realm.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -896,6 +994,8 @@
           "\"changeme\""
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/serverless_file_realm.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -911,6 +1011,8 @@
           "Omit<ServerlessEsNodeArgs, \"image\">[]"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+        "lineNumber": 332,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -923,6 +1025,8 @@
         "label": "SERVERLESS_ROLES_ROOT_PATH",
         "description": [],
         "path": "src/platform/packages/shared/kbn-es/src/paths.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -938,6 +1042,8 @@
           "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -950,6 +1056,8 @@
         "label": "STATEFUL_ROLES_ROOT_PATH",
         "description": [],
         "path": "src/platform/packages/shared/kbn-es/src/paths.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -962,6 +1070,8 @@
         "label": "SYSTEM_INDICES_SUPERUSER",
         "description": [],
         "path": "src/platform/packages/shared/kbn-es/src/utils/native_realm.js",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

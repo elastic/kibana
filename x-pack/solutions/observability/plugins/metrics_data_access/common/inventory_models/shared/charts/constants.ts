@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { LegendValue } from '@elastic/charts';
+import type { XYLegendValue } from '@kbn/chart-expressions-common';
 import type { LensXYConfigBase } from '@kbn/lens-embeddable-utils';
 
 export const DEFAULT_XY_FITTING_FUNCTION: Pick<LensXYConfigBase, 'fittingFunction'> = {
@@ -24,6 +26,12 @@ export const DEFAULT_XY_LEGEND: Pick<LensXYConfigBase, 'legend'> = {
     show: true,
   },
 };
+export const DEFAULT_LEGEND_STATS: XYLegendValue[] = [
+  LegendValue.Average,
+  LegendValue.Min,
+  LegendValue.Max,
+  LegendValue.LastNonNullValue,
+];
 
 export const DEFAULT_XY_YBOUNDS: Pick<LensXYConfigBase, 'yBounds'> = {
   yBounds: {

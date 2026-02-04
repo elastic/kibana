@@ -17,6 +17,7 @@
     "requiredPlugins": [
       "controls",
       "unifiedSearch",
+      "kql",
       "lens",
       "licensing",
       "features",
@@ -37,6 +38,7 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "cps",
       "customIntegrations",
       "embeddableEnhanced",
       "home",

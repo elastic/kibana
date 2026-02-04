@@ -13,6 +13,7 @@ import type { ProjectRouting } from '@kbn/es-query';
 import type { ICPSManager } from '../types';
 import { ProjectRoutingAccess } from '../types';
 import { DisabledProjectPicker, ProjectPicker } from './project_picker';
+import { ProjectPickerSettings } from './project_picker_settings';
 
 interface ProjectPickerContainerProps {
   cpsManager: ICPSManager;
@@ -25,16 +26,17 @@ interface ProjectPickerContainerProps {
  */
 export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ cpsManager }) => {
   const { projectRouting, updateProjectRouting } = useProjectRouting(cpsManager);
-  const accessInfo = useObservable(cpsManager.getProjectPickerAccess$(), {
-    access: ProjectRoutingAccess.DISABLED,
-    readonlyMessage: undefined,
-  });
+  const access = useObservable(cpsManager.getProjectPickerAccess$(), ProjectRoutingAccess.DISABLED);
 
   const fetchProjects = useCallback(() => {
     return cpsManager.fetchProjects();
   }, [cpsManager]);
 
-  if (accessInfo.access === ProjectRoutingAccess.DISABLED) {
+  const resetProjectPicker = useCallback(() => {
+    updateProjectRouting(cpsManager.getDefaultProjectRouting());
+  }, [cpsManager, updateProjectRouting]);
+
+  if (access === ProjectRoutingAccess.DISABLED) {
     return <DisabledProjectPicker />;
   }
 
@@ -43,8 +45,8 @@ export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ 
       projectRouting={projectRouting}
       onProjectRoutingChange={updateProjectRouting}
       fetchProjects={fetchProjects}
-      isReadonly={accessInfo.access === ProjectRoutingAccess.READONLY}
-      readonlyCustomTitle={accessInfo.readonlyMessage}
+      isReadonly={access === ProjectRoutingAccess.READONLY}
+      settingsComponent={<ProjectPickerSettings onResetToDefaults={resetProjectPicker} />}
     />
   );
 };

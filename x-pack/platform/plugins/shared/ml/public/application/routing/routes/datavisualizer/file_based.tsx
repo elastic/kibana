@@ -25,7 +25,7 @@ export const fileBasedRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  id: 'filedatavisualizer',
+  id: 'fileUpload',
   path: createPath(ML_PAGES.DATA_VISUALIZER_FILE),
   title: i18n.translate('xpack.ml.dataVisualizer.file.docTitle', {
     defaultMessage: 'File Data Visualizer',

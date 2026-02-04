@@ -81,4 +81,12 @@ export type {
   SavedObjectsBulkDeleteStatus,
   SavedObjectsBulkDeleteResponse,
 } from './bulk_delete';
+export type {
+  SavedObjectsChangeAccessControlOptions,
+  SavedObjectsChangeAccessControlResponse,
+  SavedObjectsChangeAccessControlResponseObject,
+  SavedObjectsChangeAccessControlObject,
+  SavedObjectsChangeOwnershipOptions,
+  SavedObjectsChangeAccessModeOptions,
+} from './change_access_control';
 export type { SavedObjectsSearchOptions, SavedObjectsSearchResponse } from './search';

@@ -43,7 +43,6 @@
     "@kbn/lens-plugin",
     "@kbn/security-plugin",
     "@kbn/triggers-actions-ui-plugin",
-    "@kbn/timelines-plugin",
     "@kbn/spaces-plugin",
     "@kbn/i18n",
     "@kbn/rison",
@@ -84,6 +83,7 @@
     "@kbn/core-http-server",
     "@kbn/setup-node-env",
     "@kbn/core-http-server",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/react-kibana-mount"
   ]
 }

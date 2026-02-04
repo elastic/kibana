@@ -21,6 +21,7 @@ import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
 export interface SecondaryMenuProps {
   badgeType?: BadgeType;
   children: ReactNode;
+  isNew?: boolean;
   isPanel?: boolean;
   title: string;
 }
@@ -32,7 +33,7 @@ interface SecondaryMenuComponent
 }
 
 const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
-  ({ badgeType, children, isPanel = false, title }, ref) => {
+  ({ badgeType, children, title, isNew = false }, ref) => {
     const { euiTheme } = useEuiTheme();
     const headerStyle = useMenuHeaderStyle();
 
@@ -44,9 +45,7 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
 
     const titleStyles = css`
       ${headerStyle}
-      background: ${isPanel
-        ? euiTheme.colors.backgroundBaseSubdued
-        : euiTheme.colors.backgroundBasePlain};
+      background: ${euiTheme.colors.backgroundBasePlain};
       border-radius: ${euiTheme.border.radius.medium};
     `;
 
@@ -55,7 +54,10 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
         <EuiTitle css={titleStyles} size="xs">
           <div css={titleWithBadgeStyles}>
             <h4>{title}</h4>
-            {badgeType && <BetaBadge type={badgeType} alignment="text-bottom" />}
+            {/* Always show non-new badges, only show new ones if isNew check allows it */}
+            {badgeType && (badgeType !== 'new' || isNew) && (
+              <BetaBadge type={badgeType} alignment="text-bottom" />
+            )}
           </div>
         </EuiTitle>
         {children}

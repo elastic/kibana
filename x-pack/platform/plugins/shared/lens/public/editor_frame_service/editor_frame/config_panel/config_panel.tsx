@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, memo, useCallback } from 'react';
+import React, { useEffect, useMemo, memo, useCallback } from 'react';
 import { EuiForm, euiBreakpoint, useEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { css } from '@emotion/react';
@@ -38,6 +37,7 @@ import {
   selectVisualization,
   selectSelectedLayerId,
   registerLibraryAnnotationGroup,
+  selectCanEditTextBasedQuery,
 } from '../../../state_management';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
@@ -62,10 +62,11 @@ export function ConfigPanel(
 ) {
   const { datasourceMap } = useEditorFrameService();
   const { activeVisualization, indexPatternService } = props;
+  const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
   const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
     (state) => state.lens
   );
-  const selectedLayerId = useLensSelector(selectSelectedLayerId);
+  const selectedLayerIdFromState = useLensSelector(selectSelectedLayerId);
 
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -77,6 +78,36 @@ export function ConfigPanel(
     [activeVisualization, visualization.state]
   );
 
+  // Determine if there is only one layer, or if multiple layers exist but only one is visible.
+  // This avoids some rerendering when there's just one layer but the selectedLayerId hadn't been set yet.
+  const { isOnlyLayer, selectedLayerId } = useMemo(() => {
+    if (layerIds.length === 1) {
+      return { isOnlyLayer: true, selectedLayerId: layerIds[0] };
+    }
+
+    const visibleLayerIds = layerIds.filter((id) => {
+      const config = activeVisualization.getConfiguration({
+        layerId: id,
+        frame: props.framePublicAPI,
+        state: visualization.state,
+      });
+      return !config.hidden;
+    });
+
+    const isOnlyVisibleLayer = visibleLayerIds.length === 1;
+
+    return {
+      isOnlyLayer: isOnlyVisibleLayer,
+      selectedLayerId: isOnlyVisibleLayer ? visibleLayerIds[0] : selectedLayerIdFromState,
+    };
+  }, [
+    activeVisualization,
+    props.framePublicAPI,
+    visualization.state,
+    layerIds,
+    selectedLayerIdFromState,
+  ]);
+
   const focusLayerTabsContent = () => {
     setTimeout(() => {
       const element = document.getElementById(LENS_LAYER_TABS_CONTENT_ID);
@@ -84,14 +115,13 @@ export function ConfigPanel(
     }, 0);
   };
 
-  // need to use this instead of plain useEffect to compare actual values of layerIds
-  // not just comparing the array references.
-  useShallowCompareEffect(() => {
-    if (selectedLayerId) {
+  useEffect(() => {
+    // Do not trigger in ES|QL mode, as the focus should remain in the editor.
+    if (selectedLayerId && !canEditTextBasedQuery) {
       focusLayerTabsContent();
     }
     // Needs layerIds to refocus when layers are removed
-  }, [selectedLayerId, layerIds]);
+  }, [canEditTextBasedQuery, selectedLayerId, layerIds.length]);
 
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
@@ -274,23 +304,6 @@ export function ConfigPanel(
   const registerLibraryAnnotationGroupFunction = useCallback<
     LayerPanelProps['registerLibraryAnnotationGroup']
   >((groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)), [dispatchLens]);
-
-  const isOnlyLayer = useMemo(() => {
-    if (layerIds.length === 1) {
-      return true;
-    }
-
-    const visibleLayerIds = layerIds.filter((id) => {
-      const config = activeVisualization.getConfiguration({
-        layerId: id,
-        frame: props.framePublicAPI,
-        state: visualization.state,
-      });
-      return !config.hidden;
-    });
-
-    return visibleLayerIds.length === 1;
-  }, [activeVisualization, props.framePublicAPI, visualization.state, layerIds]);
 
   const layerConfig = useMemo(() => {
     if (!selectedLayerId) return;

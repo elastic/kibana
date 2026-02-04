@@ -103,7 +103,7 @@ describe('ProjectPicker', () => {
   });
 
   describe('projectRouting change events', () => {
-    it('should call onProjectRoutingChange with ALL when "All projects" is clicked', async () => {
+    it('should call onProjectRoutingChange with PROJECT_ROUTING.ALL when "All projects" is clicked', async () => {
       const onProjectRoutingChange = jest.fn();
       await renderProjectPicker({
         projectRouting: PROJECT_ROUTING.ORIGIN,

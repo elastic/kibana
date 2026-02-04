@@ -24,7 +24,6 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/es-query'
   - '@kbn/i18n-react'
-  - '@kbn/i18n'
 tags:
   - plugin
   - prod

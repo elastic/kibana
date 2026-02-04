@@ -12,6 +12,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { QueryNotFoundError } from '../../lib/streams/errors/query_not_found_error';
 import { createServerRoute } from '../create_server_route';
 import { assertEnterpriseLicense } from '../utils/assert_enterprise_license';
+import { assertFeatureNotChanged } from '../utils/assert_feature_not_changed';
 
 export interface ListQueriesResponse {
   queries: StreamQuery[];
@@ -49,7 +50,7 @@ const listQueriesRoute = createServerRoute({
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListQueriesResponse> {
-    const { assetClient, streamsClient, licensing } = await getScopedClients({ request });
+    const { queryClient, streamsClient, licensing } = await getScopedClients({ request });
     await assertEnterpriseLicense(licensing);
     await streamsClient.ensureStream(params.path.name);
 
@@ -57,10 +58,10 @@ const listQueriesRoute = createServerRoute({
       path: { name: streamName },
     } = params;
 
-    const { [streamName]: queryAssets } = await assetClient.getAssetLinks([streamName], ['query']);
+    const { [streamName]: queryLinks } = await queryClient.getStreamToQueryLinksMap([streamName]);
 
     return {
-      queries: queryAssets.map((queryAsset) => queryAsset.query),
+      queries: queryLinks.map((queryLink) => queryLink.query),
     };
   },
 });
@@ -96,6 +97,11 @@ const upsertQueryRoute = createServerRoute({
     await assertEnterpriseLicense(licensing);
 
     await streamsClient.ensureStream(streamName);
+    await assertFeatureNotChanged({
+      queryClient,
+      streamName,
+      queries: [{ id: queryId, feature: body.feature }],
+    });
     await queryClient.upsert(streamName, {
       id: queryId,
       title: body.title,
@@ -103,6 +109,8 @@ const upsertQueryRoute = createServerRoute({
       kql: {
         query: body.kql.query,
       },
+      severity_score: body.severity_score,
+      evidence: body.evidence,
     });
 
     return {
@@ -133,7 +141,7 @@ const deleteQueryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, logger }): Promise<DeleteQueryResponse> => {
-    const { streamsClient, queryClient, licensing, assetClient } = await getScopedClients({
+    const { streamsClient, queryClient, licensing } = await getScopedClients({
       request,
     });
     await assertEnterpriseLicense(licensing);
@@ -144,7 +152,7 @@ const deleteQueryRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
 
-    const queryLink = await assetClient.bulkGetByIds(streamName, 'query', [queryId]);
+    const queryLink = await queryClient.bulkGetByIds(streamName, [queryId]);
     if (queryLink.length === 0) {
       throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
     }
@@ -206,6 +214,12 @@ const bulkQueriesRoute = createServerRoute({
     } = params;
 
     await streamsClient.ensureStream(streamName);
+
+    const indexOperations = operations.flatMap((op) =>
+      'index' in op ? [{ id: op.index.id, feature: op.index.feature }] : []
+    );
+    await assertFeatureNotChanged({ queryClient, streamName, queries: indexOperations });
+
     await queryClient.bulk(streamName, operations);
 
     logger

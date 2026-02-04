@@ -22,6 +22,7 @@ import type {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
+import type { ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
@@ -45,7 +46,6 @@ import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { InspectorOptions } from '@kbn/inspector-plugin/public';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
-import type { CanAddNewPanel } from '@kbn/presentation-containers';
 import type { Ast } from '@kbn/interpreter';
 import type {
   IndexPatternMap,
@@ -65,6 +65,8 @@ import type { LegacyMetricState } from '../visualizations/legacy_metric/types';
 import type { MetricVisualizationState } from '../visualizations/metric/types';
 import type { LensPartitionVisualizationState } from '../visualizations/partition/types';
 import type { DatatableVisualizationState } from '../visualizations/datatable/types';
+import type { ChoroplethChartState } from '../visualizations/region_map/types';
+import type { LensTagCloudState } from '../visualizations/tagcloud/types';
 import type { LensTableRowContextMenuEvent } from '../visualizations/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -296,6 +298,10 @@ export type LensComponentProps = Simplify<
        * Toggle inline editing feature
        */
       canEditInline?: boolean;
+      /**
+       * Optional search term to highlight in the panel title
+       */
+      titleHighlight?: string;
     }
 >;
 
@@ -322,7 +328,9 @@ type ComponentProps = LensComponentProps & LensPublicCallbacks;
 type ComponentSerializedProps = TypedLensSerializedState;
 
 type LensRendererPrivateProps = ComponentSerializedProps & ComponentProps;
-export type LensRendererProps = LensRendererPrivateProps;
+export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title'> & {
+  hidePanelTitles?: boolean;
+};
 
 /**
  * The LensRuntimeState is the state stored for a dashboard panel
@@ -392,6 +400,8 @@ export type LensInternalApi = Simplify<
       updateBlockingError: (newBlockingError: Error | undefined) => void;
       resetAllMessages: () => void;
       getDisplayOptions: () => VisualizationDisplayOptions;
+      updateEditingState: (inProgress: boolean) => void;
+      isEditingInProgress: () => boolean;
     }
 >;
 
@@ -431,6 +441,9 @@ export interface StructuredDatasourceStates {
   textBased?: TextBasedPersistedState;
 }
 
+/** The supported datasource identifiers */
+export type SupportedDatasourceId = keyof StructuredDatasourceStates;
+
 /** Utility type to build typed version for each chart */
 type TypedLensAttributes<TVisType, TVisState> = Simplify<
   Omit<LensDocument, 'savedObjectId' | 'type' | 'state' | 'visualizationType'> & {
@@ -463,6 +476,8 @@ export type TypedLensSerializedState = Simplify<
       | TypedLensAttributes<'lnsDatatable', DatatableVisualizationState>
       | TypedLensAttributes<'lnsLegacyMetric', LegacyMetricState>
       | TypedLensAttributes<'lnsMetric', MetricVisualizationState>
+      | TypedLensAttributes<'lnsChoropleth', ChoroplethChartState>
+      | TypedLensAttributes<'lnsTagcloud', LensTagCloudState>
       | TypedLensAttributes<string, unknown>;
   }
 >;
@@ -477,6 +492,6 @@ export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 
 export interface ESQLVariablesCompatibleDashboardApi {
   esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
-  controlGroupApi$: PublishingSubject<Partial<CanAddNewPanel> | undefined>;
+  controlGroupApi$: PublishingSubject<Partial<ControlGroupRendererApi> | undefined>;
   children$: PublishingSubject<{ [key: string]: unknown }>;
 }

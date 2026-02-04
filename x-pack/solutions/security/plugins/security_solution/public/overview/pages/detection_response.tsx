@@ -54,10 +54,10 @@ const DetectionResponseComponent = () => {
   const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
 
   const { signalIndexName } = useSignalIndex();
-  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
+  const { hasAlertsRead, hasIndexRead } = useAlertsPrivileges();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canReadCases = userCasesPermissions.read;
-  const canReadAlerts = hasKibanaREAD && hasIndexRead;
+  const canReadAlerts = hasAlertsRead && hasIndexRead;
   const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
   const additionalFilters = useMemo(() => (filterQuery ? [filterQuery] : []), [filterQuery]);
 

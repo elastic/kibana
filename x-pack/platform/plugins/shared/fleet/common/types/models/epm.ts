@@ -18,7 +18,12 @@ import type {
 } from '../../constants';
 import type { CloudConnectors, ValueOf } from '..';
 
-import type { PackageSpecManifest, PackageSpecIcon, PackageSpecCategory } from './package_spec';
+import type {
+  PackageSpecManifest,
+  PackageSpecIcon,
+  PackageSpecCategory,
+  RegistryVarGroup,
+} from './package_spec';
 
 export type InstallationStatus = typeof installationStatuses;
 
@@ -66,6 +71,7 @@ export enum KibanaAssetType {
   securityRule = 'security_rule',
   cloudSecurityPostureRuleTemplate = 'csp_rule_template',
   alertingRuleTemplate = 'alerting_rule_template',
+  sloTemplate = 'slo_template',
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
   tag = 'tag',
@@ -86,6 +92,7 @@ export enum KibanaSavedObjectType {
   securityRule = 'security-rule',
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
   alertingRuleTemplate = 'alerting_rule_template',
+  sloTemplate = 'slo_template',
   osqueryPackAsset = 'osquery-pack-asset',
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
@@ -254,6 +261,7 @@ export enum RegistryPolicyTemplateKeys {
   deployment_modes = 'deployment_modes',
   configuration_links = 'configuration_links',
   fips_compatible = 'fips_compatible',
+  dynamic_signal_types = 'dynamic_signal_types',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -279,6 +287,7 @@ export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.template_path]: string;
   [RegistryPolicyTemplateKeys.required_vars]?: RegistryRequiredVars;
   [RegistryPolicyTemplateKeys.vars]?: RegistryVarsEntry[];
+  [RegistryPolicyTemplateKeys.dynamic_signal_types]?: boolean;
 }
 
 export type RegistryPolicyTemplate =
@@ -295,6 +304,7 @@ export enum RegistryInputKeys {
   required_vars = 'required_vars',
   vars = 'vars',
   deployment_modes = 'deployment_modes',
+  hide_in_var_group_options = 'hide_in_var_group_options',
 }
 
 export type RegistryInputGroup = 'logs' | 'metrics';
@@ -309,6 +319,7 @@ export interface RegistryInput {
   [RegistryInputKeys.required_vars]?: RegistryRequiredVars;
   [RegistryInputKeys.vars]?: RegistryVarsEntry[];
   [RegistryInputKeys.deployment_modes]?: string[];
+  [RegistryInputKeys.hide_in_var_group_options]?: Record<string, string[]>;
 }
 
 export enum RegistryStreamKeys {
@@ -320,6 +331,7 @@ export enum RegistryStreamKeys {
   vars = 'vars',
   template_path = 'template_path',
   ingestion_method = 'ingestion_method',
+  var_groups = 'var_groups',
 }
 
 export interface RegistryStream {
@@ -331,6 +343,7 @@ export interface RegistryStream {
   [RegistryStreamKeys.vars]?: RegistryVarsEntry[];
   [RegistryStreamKeys.template_path]: string;
   [RegistryStreamKeys.ingestion_method]?: string;
+  [RegistryStreamKeys.var_groups]?: RegistryVarGroup[];
 }
 
 export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };

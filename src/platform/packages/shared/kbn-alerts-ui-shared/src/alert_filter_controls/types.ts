@@ -7,13 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ControlGroupRendererApi } from '@kbn/control-group-renderer';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type {
-  ControlGroupRenderer,
-  OptionsListDSLControlState,
-  ControlGroupRuntimeState,
-  ControlGroupRendererApi,
-} from '@kbn/controls-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export type FilterUrlFormat = Record<
@@ -38,7 +34,7 @@ export type FilterControlConfig = Omit<OptionsListDSLControlState, 'dataViewId'>
 
 export type FilterGroupHandler = ControlGroupRendererApi;
 
-export interface FilterGroupProps extends Pick<ControlGroupRuntimeState, 'chainingSystem'> {
+export interface FilterGroupProps {
   query?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
@@ -71,7 +67,6 @@ export interface FilterGroupProps extends Pick<ControlGroupRuntimeState, 'chaini
   /**
    * The control embeddable renderer
    */
-  ControlGroupRenderer: typeof ControlGroupRenderer;
   Storage: typeof Storage;
   storageKey?: string;
   disableLocalStorageSync?: boolean;

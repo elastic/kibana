@@ -68,4 +68,25 @@ describe('for the last expression', () => {
     expect(numberInput.value).toBe('');
     expect(selectInput.value).toBe('s');
   });
+
+  it('renders with recommended time size warning', async () => {
+    const user = userEvent.setup();
+    const onChangeWindowSize = jest.fn();
+    const onChangeWindowUnit = jest.fn();
+    renderWithIntl(
+      <ForLastExpression
+        errors={{ timeWindowSize: [] }}
+        timeWindowSize={2}
+        timeWindowUnit={'m'}
+        isTimeSizeBelowRecommended={true}
+        onChangeWindowSize={onChangeWindowSize}
+        onChangeWindowUnit={onChangeWindowUnit}
+      />
+    );
+    expect(screen.getByTestId('forLastExpression')).toHaveTextContent('2 minutes');
+
+    await user.click(screen.getByTestId('forLastExpression'));
+    expect(screen.getByText('For the last')).toBeInTheDocument();
+    expect(screen.getByText('Value is too low, possible alerting noise')).toBeInTheDocument();
+  });
 });

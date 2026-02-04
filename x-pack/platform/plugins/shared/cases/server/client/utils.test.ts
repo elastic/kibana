@@ -20,6 +20,7 @@ import {
   constructSearch,
   convertSortField,
   transformTemplateCustomFields,
+  removeAttributesFromFilter,
 } from './utils';
 import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
 import type { CustomFieldsConfiguration } from '../../common/types/domain';
@@ -1647,6 +1648,259 @@ describe('utils', () => {
         owner: 'theOwner',
         type: 'externalReference',
       });
+    });
+  });
+
+  describe('removeAttributesFromFilter', () => {
+    it('removes attributes from a simple literal node', () => {
+      expect(
+        removeAttributesFromFilter({
+          isQuoted: false,
+          type: 'literal',
+          value: 'cases.attributes.tags',
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "isQuoted": false,
+          "type": "literal",
+          "value": "cases.tags",
+        }
+      `);
+    });
+
+    it('removes attributes from nested filter correctly', () => {
+      expect(
+        removeAttributesFromFilter({
+          arguments: [
+            {
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'cases.attributes.tags',
+                },
+              ],
+              function: 'or',
+              type: 'function',
+            },
+          ],
+          function: 'and',
+          type: 'function',
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.tags",
+                },
+              ],
+              "function": "or",
+              "type": "function",
+            },
+          ],
+          "function": "and",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('removes attributes from multiple field paths in a single filter', () => {
+      expect(
+        removeAttributesFromFilter({
+          arguments: [
+            {
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'cases.attributes.status',
+                },
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'open',
+                },
+              ],
+              function: 'is',
+              type: 'function',
+            },
+            {
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'cases.attributes.severity',
+                },
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'high',
+                },
+              ],
+              function: 'is',
+              type: 'function',
+            },
+          ],
+          function: 'and',
+          type: 'function',
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.status",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "open",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.severity",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "high",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "and",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('removes attributes from nested field paths', () => {
+      expect(
+        removeAttributesFromFilter({
+          arguments: [
+            {
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'cases.attributes.created_by.username',
+                },
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'user1',
+                },
+              ],
+              function: 'is',
+              type: 'function',
+            },
+          ],
+          function: 'and',
+          type: 'function',
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.created_by.username",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "user1",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "and",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('removes multiple occurrences of attributes in a single value', () => {
+      expect(
+        removeAttributesFromFilter({
+          isQuoted: false,
+          type: 'literal',
+          value: 'cases.attributes.field1.attributes.field2',
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "isQuoted": false,
+          "type": "literal",
+          "value": "cases.field1.field2",
+        }
+      `);
+    });
+
+    it('does not modify values that do not contain .attributes.', () => {
+      const input: KueryNode = {
+        isQuoted: false,
+        type: 'literal',
+        value: 'cases.tags',
+      };
+      const result = removeAttributesFromFilter(input);
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "isQuoted": false,
+          "type": "literal",
+          "value": "cases.tags",
+        }
+      `);
+      // Ensure original is not mutated
+      expect(input.value).toBe('cases.tags');
+    });
+
+    it('does not mutate the original node', () => {
+      const original: KueryNode = {
+        arguments: [
+          {
+            arguments: [
+              {
+                isQuoted: false,
+                type: 'literal',
+                value: 'cases.attributes.tags',
+              },
+            ],
+            function: 'or',
+            type: 'function',
+          },
+        ],
+        function: 'and',
+        type: 'function',
+      };
+      const originalValue = original.arguments[0].arguments[0].value;
+      const result = removeAttributesFromFilter(original);
+
+      // Original should remain unchanged
+      expect(original.arguments[0].arguments[0].value).toBe(originalValue);
+      expect(original.arguments[0].arguments[0].value).toBe('cases.attributes.tags');
+
+      // Result should have modified value
+      expect(result?.arguments[0].arguments[0].value).toBe('cases.tags');
     });
   });
 });

@@ -99,6 +99,7 @@
       "platform/plugins/private/monitoring"
     ],
     "xpack.observability": "solutions/observability/plugins/observability",
+    "xpack.observabilityAgentBuilder": "solutions/observability/plugins/observability_agent_builder",
     "xpack.observabilityAiAssistant": [
       "platform/plugins/shared/observability_ai_assistant",
       "solutions/observability/plugins/observability_ai_assistant_app"
@@ -110,7 +111,7 @@
     "xpack.observabilityLogsOverview": [
       "platform/packages/shared/logs-overview/src/components"
     ],
-    "xpack.onechat": ["platform/plugins/shared/onechat", "platform/packages/shared/onechat"],
+    "xpack.agentBuilder": ["platform/plugins/shared/agent_builder", "platform/packages/shared/agent-builder"],
     "xpack.osquery": [
       "platform/plugins/shared/osquery"
     ],
@@ -162,7 +163,7 @@
     ],
     "xpack.taskManager": "legacy/platform/plugins/shared/task_manager",
     "xpack.threatIntelligence": "solutions/security/plugins/threat_intelligence",
-    "xpack.timelines": "platform/plugins/shared/timelines",
+    "xpack.timelines": "solutions/security/plugins/timelines",
     "xpack.transform": "platform/plugins/private/transform",
     "xpack.triggersActionsUI": "platform/plugins/shared/triggers_actions_ui",
     "xpack.upgradeAssistant": [

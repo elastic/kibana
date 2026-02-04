@@ -13,6 +13,7 @@
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -39,6 +40,7 @@ export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflowStep: ExecuteWorkflowStep;
   cancelWorkflowExecution: CancelWorkflowExecution;
   workflowEventLoggerService: IWorkflowEventLoggerService;
+  scheduleWorkflow: ScheduleWorkflow;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
@@ -52,6 +54,7 @@ export interface WorkflowsExecutionEnginePluginStartDeps {
   actions: ActionsPluginStartContract;
   cloud: CloudStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  licensing: LicensingPluginStart;
 }
 
 export type ExecuteWorkflow = (
@@ -71,3 +74,9 @@ export type CancelWorkflowExecution = (
   workflowExecutionId: string,
   spaceId: string
 ) => Promise<void>;
+
+export type ScheduleWorkflow = (
+  workflow: WorkflowExecutionEngineModel,
+  context: Record<string, any>,
+  request: KibanaRequest
+) => Promise<ExecuteWorkflowResponse>;

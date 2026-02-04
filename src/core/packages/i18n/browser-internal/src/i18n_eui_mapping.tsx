@@ -43,40 +43,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { index },
         description: 'ARIA and displayed label on a checkbox to select a single table row',
       }),
-    'euiBasicTable.tableCaptionWithPagination': ({ tableCaption, page, pageCount }: EuiValues) =>
-      i18n.translate('core.euiBasicTable.tableCaptionWithPagination', {
-        defaultMessage: '{tableCaption}; Page {page} of {pageCount}.',
-        values: { tableCaption, page, pageCount },
-        description: 'Screen reader text to describe the size of a paginated table',
-      }),
-    'euiBasicTable.tableAutoCaptionWithPagination': ({
-      itemCount,
-      totalItemCount,
-      page,
-      pageCount,
-    }: EuiValues) =>
-      i18n.translate('core.euiBasicTable.tableAutoCaptionWithPagination', {
-        defaultMessage:
-          'This table contains {itemCount} rows out of {totalItemCount} rows; Page {page} of {pageCount}.',
-        values: { itemCount, totalItemCount, page, pageCount },
-        description: 'Screen reader text to describe the size of a paginated table',
-      }),
-    'euiBasicTable.tableSimpleAutoCaptionWithPagination': ({
-      itemCount,
-      page,
-      pageCount,
-    }: EuiValues) =>
-      i18n.translate('core.euiBasicTable.tableSimpleAutoCaptionWithPagination', {
-        defaultMessage: 'This table contains {itemCount} rows; Page {page} of {pageCount}.',
-        values: { itemCount, page, pageCount },
-        description: 'Screen reader text to describe the size of a paginated table',
-      }),
-    'euiBasicTable.tableAutoCaptionWithoutPagination': ({ itemCount }: EuiValues) =>
-      i18n.translate('core.euiBasicTable.tableAutoCaptionWithoutPagination', {
-        defaultMessage: 'This table contains {itemCount} rows.',
-        values: { itemCount },
-        description: 'Screen reader text to describe the size of a table',
-      }),
     'euiBasicTable.tablePagination': ({ tableCaption }: EuiValues) =>
       i18n.translate('core.euiBasicTable.tablePagination', {
         defaultMessage: 'Pagination for table: {tableCaption}',
@@ -88,6 +54,29 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     }),
     'euiBasicTable.deselectRows': i18n.translate('core.euiBasicTable.deselectRows', {
       defaultMessage: 'Deselect rows',
+    }),
+    'euiBasicTable.caption.itemCountPart.withTotalItemCount': ({
+      itemCount,
+      totalItemCount,
+    }: EuiValues) =>
+      i18n.translate('core.euiBasicTable.caption.itemCountPart.withTotalItemCount', {
+        defaultMessage: 'Showing {itemCount} of {totalItemCount} data rows.',
+        values: { itemCount, totalItemCount },
+        description: 'Screen reader text to describe the shown item count and total item count.',
+      }),
+    'euiBasicTable.caption.paginationPart.withPageCount': ({ page, pageCount }: EuiValues) =>
+      i18n.translate('core.euiBasicTable.caption.paginationPart.withPageCount', {
+        defaultMessage: 'Page {page} of {pageCount}.',
+        values: { page, pageCount },
+        description: 'Screen reader text to describe the shown page and total page count.',
+      }),
+    'euiBasicTable.caption.tableName': i18n.translate('core.euiBasicTable.caption.tableName', {
+      defaultMessage: 'Data table',
+      description: 'Screen reader text to announce the table.',
+    }),
+    'euiBasicTable.caption.emptyState': i18n.translate('core.euiBasicTable.caption.emptyState', {
+      defaultMessage: '(empty)',
+      description: 'Screen reader text to announce the empty table.',
     }),
     'euiBottomBar.customScreenReaderAnnouncement': ({ landmarkHeading }: EuiValues) =>
       i18n.translate('core.euiBottomBar.customScreenReaderAnnouncement', {
@@ -271,7 +260,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnSelector.dragHandleAriaLabel': i18n.translate(
       'core.euiColumnSelector.dragHandleAriaLabel',
       {
-        defaultMessage: 'Drag handle',
+        defaultMessage: 'drag handle',
       }
     ),
     'euiColumnSelector.hideAll': i18n.translate('core.euiColumnSelector.hideAll', {
@@ -799,6 +788,15 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'You can still continue tabbing through other global page landmarks.',
       }
     ),
+    'euiFlyoutMenu.back': i18n.translate('core.euiFlyoutMenu.back', {
+      defaultMessage: 'Back',
+    }),
+    'euiFlyoutMenu.history': i18n.translate('core.euiFlyoutMenu.history', {
+      defaultMessage: 'History',
+    }),
+    'euiFlyoutManaged.defaultTitle': i18n.translate('core.euiFlyoutManaged.defaultTitle', {
+      defaultMessage: 'Unknown Flyout',
+    }),
     'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {
       defaultMessage: 'Please address the highlighted errors.',
     }),
@@ -1369,6 +1367,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Next {displayInterval}',
         values: { displayInterval },
       }),
+    'euiTimeWindowButtons.invalidZoomInLabel': i18n.translate(
+      'core.euiTimeWindowButtons.invalidZoomInLabel',
+      { defaultMessage: 'Cannot zoom in invalid time window' }
+    ),
+    'euiTimeWindowButtons.cannotZoomInLabel': i18n.translate(
+      'core.euiTimeWindowButtons.cannotZoomInLabel',
+      { defaultMessage: 'Cannot zoom in any further' }
+    ),
+    'euiTimeWindowButtons.zoomInLabel': i18n.translate('core.euiTimeWindowButtons.zoomInLabel', {
+      defaultMessage: 'Zoom in',
+    }),
     'euiQuickSelect.fullDescription': ({ timeTense, timeValue, timeUnit }: EuiValues) =>
       i18n.translate('core.euiQuickSelect.fullDescription', {
         defaultMessage: 'Currently set to {timeTense} {timeValue} {timeUnit}.',

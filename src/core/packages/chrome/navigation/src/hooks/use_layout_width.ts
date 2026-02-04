@@ -11,7 +11,7 @@ import { useEffect } from 'react';
 
 export const COLLAPSED_WIDTH = 48;
 export const EXPANDED_WIDTH = 100;
-export const SIDE_PANEL_WIDTH = 240;
+export const SIDE_PANEL_WIDTH = 248;
 
 interface UseLayoutWidthArgs {
   isCollapsed: boolean;

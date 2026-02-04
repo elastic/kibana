@@ -8,6 +8,7 @@ import React, { useEffect } from 'react';
 import { LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import { FLEET_LOG_INDICES } from '@kbn/fleet-plugin/common';
 import { OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE } from '../../../common';
 import { useHasData } from '../../hooks/use_has_data';
 import { useKibana } from '../../utils/kibana_react';
@@ -15,7 +16,6 @@ import { APM_APP_LOCATOR_ID } from '../../components/alert_sources/get_apm_app_u
 
 export function LandingPage() {
   const { pricing } = useKibana().services;
-
   const hasCompleteLandingPage = pricing.isFeatureAvailable(
     OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE.id
   );
@@ -34,7 +34,9 @@ function ObservabilityCompleteLandingPage() {
   useEffect(() => {
     async function redirectToLanding() {
       if (isAllRequestsComplete) {
-        const { hasData: hasLogsData } = await logsDataAccess.services.logDataService.getStatus();
+        const { hasData: hasLogsData } = await logsDataAccess.services.logDataService.getStatus({
+          excludeIndices: FLEET_LOG_INDICES,
+        });
         const hasApmData = hasDataMap.apm?.hasData;
 
         const locators = getLocators(share);
@@ -60,7 +62,9 @@ function ObservabilityLogsEssentialsLandingPage() {
 
   useEffect(() => {
     async function redirectToLanding() {
-      const { hasData: hasLogsData } = await logsDataAccess.services.logDataService.getStatus();
+      const { hasData: hasLogsData } = await logsDataAccess.services.logDataService.getStatus({
+        excludeIndices: FLEET_LOG_INDICES,
+      });
 
       const locators = getLocators(share);
 

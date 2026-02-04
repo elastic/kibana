@@ -13,10 +13,14 @@ import { NewChat } from '@kbn/elastic-assistant';
 
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { css } from '@emotion/react';
+import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { DefineStepRule } from '../../../common/types';
 import type { FormHook, ValidationError } from '../../../../shared_imports';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
+import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 
 import * as i18n from './translations';
 
@@ -96,7 +100,26 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
     return `${i18n.DETECTION_RULES_CREATE_FORM_CONVERSATION_ID} - ${query ?? 'query'}`;
   }, [getFields]);
 
-  if (!hasAssistantPrivilege) {
+  const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const attachmentData = useMemo(() => {
+    const queryField = getFields().queryBar;
+    const { query } = (queryField.value as DefineStepRule['queryBar']).query;
+    return {
+      attachmentType: SecurityAgentBuilderAttachments.rule,
+      attachmentData: {
+        text: JSON.stringify({ query: query ?? '', queryLanguage: language }),
+        attachmentLabel: languageName,
+      },
+      attachmentPrompt: i18n.ASK_ASSISTANT_USER_PROMPT(languageName),
+    };
+  }, [getFields, language, languageName]);
+
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(attachmentData);
+
+  if (
+    (isAgentChatExperienceEnabled && !hasAgentBuilderPrivilege) ||
+    (!isAgentChatExperienceEnabled && !hasAssistantPrivilege)
+  ) {
     return null;
   }
 
@@ -108,7 +131,16 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
         id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.askAssistantHelpText"
         defaultMessage="{AiAssistantNewChatLink} to help resolve this error."
         values={{
-          AiAssistantNewChatLink: (
+          AiAssistantNewChatLink: isAgentChatExperienceEnabled ? (
+            <NewAgentBuilderAttachment
+              onClick={openAgentBuilderFlyout}
+              size="xs"
+              telemetry={{
+                pathway: 'rule_creation',
+                attachments: ['rule'],
+              }}
+            />
+          ) : (
             <NewChat
               asLink={true}
               category="detection-rules"

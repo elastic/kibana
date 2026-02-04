@@ -36,6 +36,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         security_ai_prompt: [],
         security_rule: [],
         alerting_rule_template: [],
+        slo_template: [],
         tag: [],
         osquery_pack_asset: [],
         osquery_saved_query: [],

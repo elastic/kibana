@@ -19,6 +19,7 @@ project:
     sourceRoot: src/platform/packages/shared/serverless/settings/observability_project
 dependsOn:
   - '@kbn/management-settings-ids'
+  - '@kbn/workflows'
 tags:
   - shared-common
   - package

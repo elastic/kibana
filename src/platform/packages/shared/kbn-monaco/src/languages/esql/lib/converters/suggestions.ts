@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ISuggestionItem } from '@kbn/esql-language/src/commands/registry/types';
 import { monaco } from '../../../../monaco_imports';
 import type { MonacoAutocompleteCommandDefinition } from '../types';
 import { offsetRangeToMonacoRange } from '../shared/utils';

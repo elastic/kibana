@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { termQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
+import { termQuery } from '@kbn/observability-utils-common/es/queries/term_query';
 import { METRICSET_INTERVAL, METRICSET_NAME } from '@kbn/apm-types/es_fields';
 import { DATASTREAM_DATASET, type DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { estypes } from '@elastic/elasticsearch';

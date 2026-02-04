@@ -39,7 +39,7 @@ export const setup = (props = {}) => {
     actions: {
       async selectFollowerIndexAt(index) {
         const table = new EuiTableTestHarness('followerIndexListTable');
-        const checkbox = within(table.rows[index]).getByRole('checkbox');
+        const checkbox = within(table.getRows()[index]).getByRole('checkbox');
         await result.user.click(checkbox);
       },
 
@@ -56,7 +56,7 @@ export const setup = (props = {}) => {
 
       async openTableRowContextMenuAt(index) {
         const table = new EuiTableTestHarness('followerIndexListTable');
-        const actionsCell = within(table.rows[index]).getAllByRole('cell').pop();
+        const actionsCell = within(table.getRows()[index]).getAllByRole('cell').pop();
         const btn = within(actionsCell).getByRole('button');
         await result.user.click(btn);
       },

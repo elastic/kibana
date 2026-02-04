@@ -87,17 +87,7 @@ const generateTransformPutRequest = ({
       max_page_search_size: maxPageSearchSize,
     },
     pivot: {
-      group_by: {
-        ...definition.identityFields.reduce(
-          (acc, id) => ({
-            ...acc,
-            [`entity.identity.${id.field}`]: {
-              terms: { field: id.field },
-            },
-          }),
-          {}
-        ),
-      },
+      group_by: generatePivotGroup(definition.identityFields),
       aggs: {
         ...generateLatestMetricAggregations(definition),
         ...generateLatestMetadataAggregations(definition),
@@ -110,6 +100,18 @@ const generateTransformPutRequest = ({
     },
   };
 };
+
+export function generatePivotGroup(identityFields: EntityDefinition['identityFields']) {
+  return identityFields.reduce(
+    (acc, id) => ({
+      ...acc,
+      [`entity.identity.${id.field}`]: {
+        terms: { field: id.field },
+      },
+    }),
+    {}
+  );
+}
 
 function generateFilters(definition: EntityDefinition) {
   const filter = {

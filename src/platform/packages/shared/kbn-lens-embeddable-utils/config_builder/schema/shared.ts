@@ -17,6 +17,19 @@ import {
 } from './constants';
 import { filterSchema, unifiedSearchFilterSchema } from './filter';
 
+export const labelSharedProp = {
+  /**
+   * Label for the operation
+   */
+  label: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Label for the operation',
+      },
+    })
+  ),
+};
+
 export const sharedPanelInfoSchema = {
   /**
    * The title of the chart displayed in the panel.
@@ -47,7 +60,7 @@ export const sharedPanelInfoSchema = {
       },
     })
   ),
-  filters: schema.maybe(schema.arrayOf(unifiedSearchFilterSchema)),
+  filters: schema.maybe(schema.arrayOf(unifiedSearchFilterSchema, { maxSize: 100 })),
 };
 
 export const dslOnlyPanelInfoSchema = {
@@ -116,9 +129,33 @@ export const collapseBySchema = schema.oneOf(
      */
     schema.literal('min'),
   ],
-  { meta: { description: 'Collapse by function description' } }
+  {
+    meta: {
+      id: 'collapseBy',
+      description: 'Collapse by function description',
+    },
+  }
 );
 
 const layerSettingsSchemaWrapped = schema.object(layerSettingsSchema);
 
 export type LayerSettingsSchema = TypeOf<typeof layerSettingsSchemaWrapped>;
+
+export const axisTitleSchemaProps = {
+  value: schema.maybe(
+    schema.string({ defaultValue: '', meta: { description: 'Axis title text' } })
+  ),
+  visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the title' } })),
+};
+
+export const legendTruncateAfterLinesSchema = schema.maybe(
+  schema.number({
+    defaultValue: 1,
+    min: 1,
+    max: 10,
+    meta: {
+      description: 'Maximum lines before truncating legend items (1-10)',
+      id: 'legendTruncateAfterLines',
+    },
+  })
+);

@@ -6,7 +6,7 @@
  */
 
 import { rangeQuery, kqlQuery, termQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { maybe } from '../../../../common/utils/maybe';
 import {
@@ -150,7 +150,9 @@ export async function getErrorSampleDetails({
 
   const source = 'error' in hit._source ? hit._source : undefined;
 
-  const errorFromFields = unflattenKnownApmEventFields(hit.fields, requiredFields);
+  const errorFromFields = accessKnownApmEventFields(hit.fields)
+    .requireFields(requiredFields)
+    .unflatten();
 
   const transactionId = errorFromFields.transaction?.id ?? errorFromFields.span?.id;
   const traceId = errorFromFields.trace?.id;

@@ -15,6 +15,7 @@ import { isNeverCondition } from '@kbn/streamlang';
 import {
   migrateRoutingIfConditionToStreamlang,
   migrateOldProcessingArrayToStreamlang,
+  migrateWhereBlocksToCondition,
 } from './migrate_to_streamlang_on_read';
 
 export function migrateOnRead(definition: Record<string, unknown>): Streams.all.Definition {
@@ -108,30 +109,6 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     hasBeenMigrated = true;
   }
 
-  // Add metadata to Group stream if missing
-  if (isObject(migratedDefinition.group) && !('metadata' in migratedDefinition.group)) {
-    migratedDefinition = {
-      ...migratedDefinition,
-      group: {
-        ...migratedDefinition.group,
-        metadata: {},
-      },
-    };
-    hasBeenMigrated = true;
-  }
-
-  // Add tags to Group stream if missing
-  if (isObject(migratedDefinition.group) && !('tags' in migratedDefinition.group)) {
-    migratedDefinition = {
-      ...migratedDefinition,
-      group: {
-        ...migratedDefinition.group,
-        tags: [],
-      },
-    };
-    hasBeenMigrated = true;
-  }
-
   // Add failure_store to ingest streams if missing
   if (isObject(migratedDefinition.ingest) && !('failure_store' in migratedDefinition.ingest)) {
     const streamName = migratedDefinition.name;
@@ -150,6 +127,20 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     hasBeenMigrated = true;
   }
 
+  // Migrate where blocks to use 'condition' property instead of 'where'
+  if (
+    isObject(migratedDefinition.ingest) &&
+    isObject((migratedDefinition.ingest as any).processing) &&
+    Array.isArray((migratedDefinition.ingest as any).processing.steps)
+  ) {
+    const steps = (migratedDefinition.ingest as any).processing.steps;
+    const migratedSteps = migrateWhereBlocksToCondition(steps);
+
+    if (migratedSteps.migrated) {
+      set(migratedDefinition, 'ingest.processing.steps', migratedSteps.steps);
+      hasBeenMigrated = true;
+    }
+  }
   // Add required updated_at to all stream types
   if (typeof migratedDefinition.updated_at !== 'string') {
     migratedDefinition = {

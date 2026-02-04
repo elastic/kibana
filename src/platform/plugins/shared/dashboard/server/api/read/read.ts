@@ -20,9 +20,11 @@ export async function read(
   const { core } = await requestCtx.resolve(['core']);
   const {
     saved_object: savedObject,
-    alias_purpose: aliasPurpose,
-    alias_target_id: aliasTargetId,
     outcome,
+
+    alias_purpose,
+
+    alias_target_id,
   } = await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
     DASHBOARD_SAVED_OBJECT_TYPE,
     id
@@ -33,8 +35,8 @@ export async function read(
     ...response,
     meta: {
       ...response.meta,
-      ...(aliasPurpose && { aliasPurpose }),
-      ...(aliasTargetId && { aliasTargetId }),
+      alias_target_id,
+      alias_purpose,
       outcome,
     },
   };

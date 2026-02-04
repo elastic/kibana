@@ -6,36 +6,38 @@
  */
 
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { StateProvider } from '../../../mappings_state_context';
 import type { SearchResult as Result } from '../../../types';
-
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { SearchResult } from './search_result';
 
 describe('SearchResult', () => {
+  const renderComponent = (props: React.ComponentProps<typeof SearchResult>) => {
+    return render(
+      <I18nProvider>
+        <StateProvider>
+          <SearchResult {...props} />
+        </StateProvider>
+      </I18nProvider>
+    );
+  };
+
   it('should render an empty prompt if the result is empty', () => {
     const result: Result[] = [];
 
-    const tree = mountWithIntl(
-      <StateProvider>
-        <SearchResult
-          result={result}
-          documentFieldsState={{
-            fieldToEdit: undefined,
-            status: 'idle',
-            editor: 'default',
-          }}
-        />
-      </StateProvider>
-    );
+    renderComponent({
+      result,
+      documentFieldsState: {
+        fieldToEdit: undefined,
+        status: 'idle',
+        editor: 'default',
+      },
+    });
 
-    expect(
-      tree
-        .find('SearchResult')
-        .find('[data-test-subj="mappingsEditorSearchResultEmptyPrompt"]')
-        .exists()
-    ).toBe(true);
+    const emptyPrompt = screen.getByTestId('mappingsEditorSearchResultEmptyPrompt');
+    expect(emptyPrompt).toBeInTheDocument();
   });
 
   it('should render a list of fields if the result is not empty', () => {
@@ -55,19 +57,16 @@ describe('SearchResult', () => {
       },
     ] as Result[];
 
-    const tree = mountWithIntl(
-      <StateProvider>
-        <SearchResult
-          result={result}
-          documentFieldsState={{
-            fieldToEdit: undefined,
-            status: 'idle',
-            editor: 'default',
-          }}
-        />
-      </StateProvider>
-    );
+    renderComponent({
+      result,
+      documentFieldsState: {
+        fieldToEdit: undefined,
+        status: 'idle',
+        editor: 'default',
+      },
+    });
 
-    expect(tree.find('[data-test-subj="mappingsEditorSearchResult"]').exists()).toBe(true);
+    const searchResult = screen.getByTestId('mappingsEditorSearchResult');
+    expect(searchResult).toBeInTheDocument();
   });
 });

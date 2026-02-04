@@ -8,6 +8,7 @@
 import type { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
+import type { ProjectRouting } from '@kbn/es-query';
 import type {
   LensStoreDeps,
   LensAppState,
@@ -120,7 +121,9 @@ async function loadFromLocatorState(
   loaderSharedArgs: LoaderSharedArgs,
   { notifications, data }: LensStoreDeps['lensServices'],
   emptyState: PreloadedState,
-  autoApplyDisabled: boolean
+  autoApplyDisabled: boolean,
+  projectRouting?: ProjectRouting,
+  hideTextBasedEditor?: boolean
 ) {
   const { lens } = store.getState();
   const locatorReferences = 'references' in initialState ? initialState.references : undefined;
@@ -169,6 +172,8 @@ async function loadFromLocatorState(
       ),
       isLoading: false,
       annotationGroups,
+      projectRouting,
+      hideTextBasedEditor,
     })
   );
 
@@ -183,7 +188,9 @@ async function loadFromEmptyState(
   loaderSharedArgs: LoaderSharedArgs,
   { data }: LensStoreDeps['lensServices'],
   activeDatasourceId: string | undefined,
-  autoApplyDisabled: boolean
+  autoApplyDisabled: boolean,
+  projectRouting?: ProjectRouting,
+  hideTextBasedEditor?: boolean
 ) {
   const { lens } = store.getState();
   const { datasourceStates, indexPatterns, indexPatternRefs } = await initializeSources(
@@ -216,6 +223,8 @@ async function loadFromEmptyState(
           {}
         ),
         isLoading: false,
+        projectRouting,
+        hideTextBasedEditor,
       },
       initialContext: loaderSharedArgs.initialContext,
     })
@@ -232,7 +241,9 @@ async function loadFromSavedObject(
   loaderSharedArgs: LoaderSharedArgs,
   { data, chrome }: LensStoreDeps['lensServices'],
   autoApplyDisabled: boolean,
-  inlineEditing?: boolean
+  inlineEditing?: boolean,
+  projectRouting?: ProjectRouting,
+  hideTextBasedEditor?: boolean
 ) {
   const { doc, sharingSavedObjectProps, managed } = persisted;
   if (savedObjectId) {
@@ -319,6 +330,8 @@ async function loadFromSavedObject(
       isLoading: false,
       annotationGroups,
       managed,
+      projectRouting,
+      hideTextBasedEditor,
     })
   );
 
@@ -330,15 +343,17 @@ async function loadFromSavedObject(
 export async function loadInitial(
   store: MiddlewareAPI,
   storeDeps: LensStoreDeps,
-  { redirectCallback, initialInput, history, inlineEditing }: InitialAppState,
+  { redirectCallback, initialInput, history, inlineEditing, hideTextBasedEditor }: InitialAppState,
   autoApplyDisabled: boolean
 ) {
   const { lensServices, datasourceMap, initialContext, initialStateFromLocator, visualizationMap } =
     storeDeps;
   const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
     getPreloadedState(storeDeps);
-  const { notifications, data } = lensServices;
+  const { notifications, data, cps } = lensServices;
   const { lens } = store.getState();
+
+  const projectRouting = cps?.cpsManager?.getProjectRouting();
 
   const loaderSharedArgs: LoaderSharedArgs = {
     visualizationMap,
@@ -370,6 +385,7 @@ export async function loadInitial(
       };
       data.query.timefilter.timefilter.setTime(newTimeRange);
     }
+
     // URL Reporting is using the locator params but also passing the savedObjectId
     // so be sure to not go here as there's no full snapshot URL
     if (!initialInput) {
@@ -380,7 +396,9 @@ export async function loadInitial(
           loaderSharedArgs,
           lensServices,
           emptyState,
-          autoApplyDisabled
+          autoApplyDisabled,
+          projectRouting,
+          hideTextBasedEditor
         );
       } catch ({ message }) {
         notifications.toasts.addDanger({
@@ -403,6 +421,7 @@ export async function loadInitial(
     if (newFilters) {
       data.query.filterManager.setAppFilters(newFilters);
     }
+
     try {
       return loadFromEmptyState(
         store,
@@ -410,7 +429,9 @@ export async function loadInitial(
         loaderSharedArgs,
         lensServices,
         activeDatasourceId,
-        autoApplyDisabled
+        autoApplyDisabled,
+        projectRouting,
+        hideTextBasedEditor
       );
     } catch ({ message }) {
       notifications.toasts.addDanger({
@@ -431,7 +452,9 @@ export async function loadInitial(
           loaderSharedArgs,
           lensServices,
           autoApplyDisabled,
-          inlineEditing
+          inlineEditing,
+          projectRouting,
+          hideTextBasedEditor
         );
       } catch ({ message }) {
         notifications.toasts.addDanger({

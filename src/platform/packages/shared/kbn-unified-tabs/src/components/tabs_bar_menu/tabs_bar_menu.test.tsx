@@ -11,6 +11,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TabsBarMenu } from './tabs_bar_menu';
+import type { TabItem } from '../../types';
+import { TabStatus, type RecentlyClosedTabItem } from '../../types';
 
 const mockTabs = [
   { id: 'tab1', label: 'Tab 1' },
@@ -18,9 +20,9 @@ const mockTabs = [
   { id: 'tab3', label: 'Tab 3' },
 ];
 
-const mockRecentlyClosedTabs = [
-  { id: 'closed1', label: 'Closed Tab 1' },
-  { id: 'closed2', label: 'Closed Tab 2' },
+const mockRecentlyClosedTabs: RecentlyClosedTabItem[] = [
+  { id: 'closed1', label: 'Closed Tab 1', closedAt: 0 },
+  { id: 'closed2', label: 'Closed Tab 2', closedAt: 0 },
 ];
 
 const tabsBarMenuButtonTestId = 'unifiedTabs_tabsBarMenuButton';
@@ -122,7 +124,9 @@ describe('TabsBarMenu', () => {
     const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
     await user.click(menuButton);
 
-    const closedTabOption = (await screen.findAllByTitle(mockRecentlyClosedTabs[0].label))[0];
+    const closedTabOption = await screen.findByTestId(
+      `unifiedTabs_tabsMenu_recentlyClosedTab_${mockRecentlyClosedTabs[0].id}`
+    );
     await user.click(closedTabOption);
 
     expect(mockOnSelectClosedTab).toHaveBeenCalledWith(mockRecentlyClosedTabs[0]);
@@ -154,7 +158,58 @@ describe('TabsBarMenu', () => {
     const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
     await user.click(menuButton);
 
-    const selectedTabOption = (await screen.findAllByTitle(mockTabs[0].label))[0];
+    const selectedTabOption = (await screen.findAllByText(mockTabs[0].label))[0];
     expect(selectedTabOption.closest('[aria-selected="true"]')).toBeInTheDocument();
+  });
+
+  it('displays relative time for recently closed tabs with timestamps', async () => {
+    const user = userEvent.setup();
+    const now = Date.now();
+    const propsWithTimestamps = {
+      ...defaultProps,
+      recentlyClosedItems: [
+        { id: 'closed1', label: 'Tab 1', closedAt: now - 5 * 60 * 1000 }, // 5 minutes
+        { id: 'closed2', label: 'Tab 2', closedAt: now - 10 * 60 * 1000 }, // 10 minutes
+      ],
+    };
+
+    render(<TabsBarMenu {...propsWithTimestamps} />);
+
+    const menuButton = screen.getByTestId(tabsBarMenuButtonTestId);
+    await user.click(menuButton);
+
+    expect(await screen.findByText('Recently closed')).toBeVisible();
+    expect(await screen.findByText(/5 minutes ago/i)).toBeVisible();
+    expect(await screen.findByText(/10 minutes ago/i)).toBeVisible();
+  });
+
+  it('shows preview when callback is provided', async () => {
+    const user = userEvent.setup();
+    const now = Date.now();
+    const propsWithTimestamps = {
+      ...defaultProps,
+      getPreviewData: (item: TabItem) => ({
+        title: `Preview of ${item.label}`,
+        query: { language: 'esql', query: 'SELECT * FROM table' },
+        status: TabStatus.DEFAULT,
+      }),
+      recentlyClosedItems: [
+        { id: 'closed1', label: 'Closed Tab 1', closedAt: now - 5 * 60 * 1000 }, // 5 minutes
+        { id: 'closed2', label: 'Closed Tab 2', closedAt: now - 10 * 60 * 1000 }, // 10 minutes
+      ],
+    };
+
+    render(<TabsBarMenu {...propsWithTimestamps} />);
+
+    const menuButton = screen.getByTestId(tabsBarMenuButtonTestId);
+    await user.click(menuButton);
+
+    expect(await screen.findByText('Recently closed')).toBeVisible();
+
+    // Hover over the closed tab item
+    await user.hover(screen.getByText('Closed Tab 1'));
+
+    // Wait for the preview to appear
+    expect(await screen.findByText('Preview of Closed Tab 1')).toBeVisible();
   });
 });

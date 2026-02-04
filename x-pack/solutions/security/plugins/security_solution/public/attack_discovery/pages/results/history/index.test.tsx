@@ -35,7 +35,42 @@ jest.mock('react-router-dom-v5-compat', () => ({
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useDateFormat: jest.fn(),
-  useKibana: jest.fn(),
+  useKibana: jest.fn(() => ({
+    services: {
+      application: {
+        capabilities: {
+          siemV2: { crud_alerts: true, read_alerts: true },
+          siemV3: { configurations: true },
+          siemV4: { configurations: true },
+          siemV5: { configurations: true },
+        },
+        navigateToUrl: jest.fn(),
+      },
+      cases: {
+        helpers: {
+          canUseCases: jest.fn().mockReturnValue({
+            all: true,
+            connectors: true,
+            create: true,
+            delete: true,
+            push: true,
+            read: true,
+            settings: true,
+            update: true,
+          }),
+        },
+        hooks: {
+          useCasesAddToExistingCase: jest.fn(),
+          useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
+          useCasesAddToNewCaseFlyout: jest.fn(),
+        },
+        ui: { getCasesContext: mockCasesContext },
+      },
+      theme: {
+        getTheme: jest.fn().mockReturnValue({ darkMode: false }),
+      },
+    },
+  })),
   useToasts: jest.fn(() => ({
     addError: jest.fn(),
     addSuccess: jest.fn(),
@@ -130,13 +165,6 @@ jest.mock('./use_ids_from_url', () => ({
     ids: ['alert-1'],
     setIdsUrl: jest.fn(),
   }),
-}));
-
-const mockUseKibanaFeatureFlags = jest
-  .fn()
-  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
-jest.mock('../../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
 }));
 
 const historyMock = {

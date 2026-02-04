@@ -6,11 +6,11 @@
  */
 
 import { cleanMarkdown, generateAssistantComment } from '../../../../../common/task/util/comments';
-import type { GraphNode, MigrateRuleGraphParams } from '../../types';
+import type { GraphNode, ModelWithTools } from '../../types';
 import { QRADAR_DEPENDENCIES_RESOLVE_PROMPT } from './prompts';
 
 interface GetCreateResolveDepsNodeParams {
-  model: MigrateRuleGraphParams['model'];
+  model: ModelWithTools;
 }
 
 export const getResolveDepsNode = ({ model }: GetCreateResolveDepsNodeParams): GraphNode => {
@@ -22,10 +22,20 @@ export const getResolveDepsNode = ({ model }: GetCreateResolveDepsNodeParams): G
       title: state.original_rule.title,
       description: state.original_rule.description,
       query,
+      resources: {
+        lookups: state.resources.lookup,
+      },
     });
 
     const response = await modelWithTools.invoke([...resolveMessage, ...(state.messages ?? [])]);
 
+    const hasToolCall =
+      'tool_calls' in response && response?.tool_calls && response?.tool_calls?.length > 0;
+
+    if (hasToolCall) {
+      // we don't generate comments for tool calls but only the final response
+      return { messages: [response], comments: [] };
+    }
     const comments = [generateAssistantComment(cleanMarkdown(response.text))];
 
     return { messages: [response], nl_query: response.text, comments };

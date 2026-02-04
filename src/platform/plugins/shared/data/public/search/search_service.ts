@@ -17,6 +17,7 @@ import type {
   PluginInitializerContext,
   StartServicesAccessor,
 } from '@kbn/core/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
@@ -28,6 +29,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ICPSManager } from '@kbn/cps-utils';
 import type { SearchSourceDependencies } from '../../common/search';
 import {
   cidrFunction,
@@ -95,6 +97,7 @@ export interface SearchServiceStartDependencies {
   screenshotMode: ScreenshotModePluginStart;
   share: SharePluginStart;
   scriptedFieldsEnabled: boolean;
+  cps?: CPSPluginStart;
 }
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
@@ -105,6 +108,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private sessionService!: ISessionService;
   private sessionsClient!: ISessionsClient;
   private searchSessionEBTManager!: ISearchSessionEBTManager;
+  private cpsManager?: ICPSManager;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -128,8 +132,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getStartServices,
       this.searchSessionEBTManager,
       this.sessionsClient,
-      nowProvider,
-      this.usageCollector
+      nowProvider
     );
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
@@ -144,6 +147,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       usageCollector: this.usageCollector!,
       session: this.sessionService,
       searchConfig: this.initializerContext.config.get().search,
+      getCPSManager: () => this.cpsManager,
     });
 
     expressions.registerFunction(
@@ -238,9 +242,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       fieldFormats,
       dataViews,
       inspector,
-      screenshotMode,
       scriptedFieldsEnabled,
       share,
+      cps,
     }: SearchServiceStartDependencies
   ): ISearchStart {
     const { http, uiSettings, chrome, application, notifications, ...startServices } = coreStart;
@@ -259,6 +263,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       notifications,
       ...startServices,
     };
+
+    this.cpsManager = cps?.cpsManager;
 
     const searchSourceDependencies: SearchSourceDependencies = {
       aggs,

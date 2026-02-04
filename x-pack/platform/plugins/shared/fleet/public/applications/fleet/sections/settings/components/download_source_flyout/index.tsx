@@ -59,7 +59,9 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
   );
 
   const [isFirstLoad, setIsFirstLoad] = React.useState(true);
-  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(true);
+  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(
+    'disabled'
+  );
   const useSecretsStorage = secretsToggleState === true;
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
     sslKey: false,
@@ -67,8 +69,8 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
   const { enableSSLSecrets } = ExperimentalFeaturesService.get();
 
   const fleetStatus = useFleetStatus();
-  if (fleetStatus.isSecretsStorageEnabled !== undefined && secretsToggleState === 'disabled') {
-    setSecretsToggleState(fleetStatus.isSecretsStorageEnabled);
+  if (fleetStatus.isSSLSecretsStorageEnabled !== undefined && secretsToggleState === 'disabled') {
+    setSecretsToggleState(fleetStatus.isSSLSecretsStorageEnabled);
   }
 
   const onToggleSecretStorage = (secretEnabled: boolean) => {

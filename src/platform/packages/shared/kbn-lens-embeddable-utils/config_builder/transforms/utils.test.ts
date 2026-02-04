@@ -147,13 +147,16 @@ describe('buildDatasourceStates', () => {
           type: 'esql',
           query: 'from test | limit 10',
         },
-        metric: {
-          operation: 'value',
-          label: 'test',
-          column: 'test',
-          fit: false,
-          alignments: { labels: 'left', value: 'left' },
-        },
+        metrics: [
+          {
+            type: 'primary',
+            operation: 'value',
+            label: 'test',
+            column: 'test',
+            fit: false,
+            alignments: { labels: 'left', value: 'left' },
+          },
+        ],
         sampling: 1,
         ignore_global_filters: false,
       },
@@ -165,7 +168,7 @@ describe('buildDatasourceStates', () => {
         "layers": Object {
           "textBased": Object {
             "layers": Object {
-              "metric_0": Object {
+              "layer_0": Object {
                 "columns": Array [
                   Object {
                     "columnId": "test",
@@ -182,7 +185,7 @@ describe('buildDatasourceStates', () => {
           },
         },
         "usedDataviews": Object {
-          "metric_0": Object {
+          "layer_0": Object {
             "index": "test",
             "timeFieldName": "@timestamp",
             "type": "adHocDataView",
@@ -272,6 +275,7 @@ describe('buildDatasetState', () => {
 
     const result = buildDatasetState(
       textBasedLayer,
+      'layer_0',
       {},
       [],
       [
@@ -280,8 +284,7 @@ describe('buildDatasetState', () => {
           id: 'my-index',
           name: 'indexpattern-datasource-layer-layer_0',
         },
-      ],
-      'layer_0'
+      ]
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -298,7 +301,7 @@ describe('buildDatasetState', () => {
       columnOrder: [],
     } as FormBasedLayer;
 
-    const result = buildDatasetState(formBasedLayer, {}, [], [], 'layer_0');
+    const result = buildDatasetState(formBasedLayer, 'layer_0', {}, [], []);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "id": "my-dataview-id",
@@ -316,13 +319,14 @@ describe('buildDatasetState', () => {
 
     const result = buildDatasetState(
       formBasedLayer,
+      'layer_1',
       {
         'my-adhoc-dataview-id': {
-          id: 'test-id',
+          index: 'test-id',
           title: 'my-adhoc-dataview-id',
           timeFieldName: '@timestamp',
         },
-      },
+      } as Record<string, unknown>,
       [],
       [
         {
@@ -330,8 +334,7 @@ describe('buildDatasetState', () => {
           id: 'my-adhoc-dataview-id',
           name: 'indexpattern-datasource-layer-layer_1',
         },
-      ],
-      'layer_1'
+      ]
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -415,13 +418,16 @@ describe('filtersAndQueryToLensState', () => {
         type: 'esql',
         query: 'from test | limit 10',
       },
-      metric: {
-        operation: 'value',
-        label: 'test',
-        column: 'test',
-        fit: false,
-        alignments: { labels: 'left', value: 'left' },
-      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'value',
+          label: 'test',
+          column: 'test',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+        },
+      ],
       sampling: 1,
       ignore_global_filters: false,
       filters: [
@@ -447,13 +453,16 @@ describe('filtersAndQueryToLensState', () => {
         type: 'esql',
         query: 'from test | limit 10',
       },
-      metric: {
-        operation: 'value',
-        label: 'test',
-        column: 'test',
-        fit: false,
-        alignments: { labels: 'left', value: 'left' },
-      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'value',
+          label: 'test',
+          column: 'test',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+        },
+      ],
       sampling: 1,
       ignore_global_filters: false,
     };

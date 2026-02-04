@@ -20,7 +20,7 @@ const mockOtelFields = {
   'service.version': {
     name: 'service.version',
     description:
-      'The version string of the service API or implementation. The format is not defined by these conventions.',
+      'The version string of the service component. The format is not defined by these conventions.',
     type: 'keyword',
     example: '2.0.0',
   },
@@ -248,7 +248,7 @@ describe('OtelFieldsRepository', () => {
 
       expect(field!.name).toBe('service.version');
       expect(field!.description).toBe(
-        'The version string of the service API or implementation. The format is not defined by these conventions.'
+        'The version string of the service component. The format is not defined by these conventions.'
       );
       expect(field!.type).toBe('keyword');
       expect(field!.example).toBe('2.0.0');

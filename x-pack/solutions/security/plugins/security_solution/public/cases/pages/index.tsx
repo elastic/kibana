@@ -30,7 +30,9 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { getEndpointDetailsPath } from '../../management/common/routing';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useInsertTimeline } from '../components/use_insert_timeline';
+import { NoPrivileges } from '../../common/components/no_privileges';
 import { useUserPrivileges } from '../../common/components/user_privileges';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
 import { useFetchAlertData } from './use_fetch_alert_data';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
@@ -52,7 +54,11 @@ const CaseContainerComponent: React.FC = () => {
   const { openFlyout } = useExpandableFlyoutApi();
   const {
     timelinePrivileges: { read: canSeeTimeline },
+    rulesPrivileges: {
+      rules: { read: canReadRules },
+    },
   } = useUserPrivileges();
+  const { hasAlertsRead, hasAlertsAll } = useAlertsPrivileges();
 
   const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
 
@@ -95,6 +101,14 @@ const CaseContainerComponent: React.FC = () => {
 
   const renderAlertsTable = useCallback(
     (props: CaseViewAlertsTableProps) => {
+      if (!hasAlertsRead) {
+        return (
+          <NoPrivileges
+            pageName="alerts"
+            docLinkSelector={(docLinks) => docLinks.siem.privileges}
+          />
+        );
+      }
       //  For EASE we need to show the Alert summary page alerts table.
       if (EASE) {
         return <EaseAlertsTable id={props.id} onLoaded={props.onLoaded} query={props.query} />;
@@ -102,16 +116,16 @@ const CaseContainerComponent: React.FC = () => {
         return <AlertsTable tableType={TableId.alertsOnCasePage} {...props} />;
       }
     },
-    [EASE]
+    [EASE, hasAlertsRead]
   );
 
   const onRuleDetailsClick = useCallback(
     (ruleId: string | null | undefined) => {
-      if (ruleId) {
+      if (ruleId && canReadRules) {
         openFlyout({ right: { id: RulePanelKey, params: { ruleId } } });
       }
     },
-    [openFlyout]
+    [openFlyout, canReadRules]
   );
 
   const { onLoad: onAlertsTableLoaded } = useFetchNotes();
@@ -154,7 +168,11 @@ const CaseContainerComponent: React.FC = () => {
               CaseMetricsFeature.CONNECTORS,
               CaseMetricsFeature.LIFESPAN,
             ],
-            alerts: { isExperimental: false },
+            alerts: {
+              isExperimental: false,
+              read: hasAlertsRead,
+              all: hasAlertsAll,
+            },
             events: { enabled: true },
           },
           refreshRef,
@@ -172,9 +190,13 @@ const CaseContainerComponent: React.FC = () => {
               });
             },
           },
-          ruleDetailsNavigation: {
-            onClick: onRuleDetailsClick,
-          },
+          ...(canReadRules
+            ? {
+                ruleDetailsNavigation: {
+                  onClick: onRuleDetailsClick,
+                },
+              }
+            : {}),
           showAlertDetails,
           timelineIntegration: {
             editor_plugins: {

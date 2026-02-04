@@ -147,6 +147,9 @@ exports.EcsCustomPropertyMappings = {
                   updated_at: {
                     type: 'date',
                   },
+                  failed_auto_fill_attempts: {
+                    type: 'long',
+                  },
                 },
               },
               execution: {

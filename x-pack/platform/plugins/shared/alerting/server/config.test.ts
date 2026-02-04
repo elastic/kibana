@@ -21,9 +21,6 @@ describe('config validation', () => {
           "interval": "5m",
           "removalDelay": "1h",
         },
-        "maintenanceWindow": Object {
-          "enabled": true,
-        },
         "rules": Object {
           "maxScheduledPerMinute": 32000,
           "minimumScheduleInterval": Object {

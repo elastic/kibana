@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { Asset, AssetType } from './assets';
+export type { Query } from './queries';
 export type {
   ProcessorSuggestion,
   ProcessorPropertySuggestion,
@@ -17,8 +17,10 @@ export {
   STREAMS_TIERED_ML_FEATURE,
   STREAMS_TIERED_AI_FEATURE,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
+  ATTACHMENT_SUGGESTIONS_LIMIT,
 } from './constants';
 
+export type { StreamDocsStat } from './doc_counts';
 export {
   excludeFrozenQuery,
   kqlQuery,

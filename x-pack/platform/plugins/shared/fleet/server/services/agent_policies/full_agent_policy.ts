@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { load } from 'js-yaml';
 import deepMerge from 'deepmerge';
@@ -79,7 +77,7 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
+  options?: { standalone?: boolean; agentPolicy?: AgentPolicy; agentVersion?: string }
 ): Promise<FullAgentPolicy | null> {
   const logger = appContextService.getLogger().get('getFullAgentPolicy');
 
@@ -157,12 +155,15 @@ export async function getFullAgentPolicy(
     packageInfoCache,
     getOutputIdForAgentPolicy(dataOutput),
     agentPolicy.namespace,
-    agentPolicy.global_data_tags
+    agentPolicy.global_data_tags,
+    options?.agentVersion,
+    soClient,
+    agentPolicy.has_agent_version_conditions
   );
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    otelcolConfig = generateOtelcolConfig(agentInputs, dataOutput);
+    otelcolConfig = generateOtelcolConfig(agentInputs, dataOutput, packageInfoCache);
   }
 
   const inputs = agentInputs
@@ -577,7 +578,6 @@ export function transformOutputToFullPolicyOutput(
       }
     };
 
-    /* eslint-enable @typescript-eslint/naming-convention */
     kafkaData = {
       client_id,
       version,
@@ -600,7 +600,6 @@ export function transformOutputToFullPolicyOutput(
     if (!isShipperDisabled) {
       shipperDiskQueueData = buildShipperQueueData(shipper);
     }
-    /* eslint-disable @typescript-eslint/naming-convention */
     const {
       loadbalance,
       compression_level,
@@ -608,7 +607,6 @@ export function transformOutputToFullPolicyOutput(
       max_batch_bytes,
       mem_queue_events,
     } = shipper;
-    /* eslint-enable @typescript-eslint/naming-convention */
 
     generalShipperData = {
       loadbalance,
@@ -812,7 +810,6 @@ export function getFullMonitoringSettings(
   return monitoring;
 }
 
-/* eslint-disable @typescript-eslint/naming-convention */
 function buildShipperQueueData(shipper: ShipperOutput) {
   const {
     disk_queue_enabled,
@@ -834,7 +831,6 @@ function buildShipperQueueData(shipper: ShipperOutput) {
     },
   };
 }
-/* eslint-enable @typescript-eslint/naming-convention */
 
 export function getBinarySourceSettings(
   downloadSource: DownloadSource,

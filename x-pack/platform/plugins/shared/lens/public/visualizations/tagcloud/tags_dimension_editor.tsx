@@ -74,7 +74,7 @@ export function TagsDimensionEditor({
   );
 
   const categories = useMemo(() => {
-    return getColorCategories(currentData?.rows, state.tagAccessor);
+    return getColorCategories(currentData?.rows, state.tagAccessor ? [state.tagAccessor] : []);
   }, [currentData?.rows, state.tagAccessor]);
 
   return (

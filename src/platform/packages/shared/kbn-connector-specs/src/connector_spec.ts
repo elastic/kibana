@@ -23,8 +23,9 @@
 
 import type { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
+import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/actions-utils';
 import type { LicenseType } from '@kbn/licensing-types';
-import type { AxiosInstance } from 'axios';
+import type { AxiosHeaderValue, AxiosInstance } from 'axios';
 
 export { UISchemas } from './connector_spec_ui';
 
@@ -75,7 +76,6 @@ export interface ConnectorMetadata {
 // OAuth2, SSL/mTLS, AWS SigV4 → Phase 2 (see connector_rfc.ts)
 
 // Auth schemas defined in ./auth_types
-
 export interface GetTokenOpts {
   tokenUrl: string;
   scope?: string;
@@ -85,8 +85,11 @@ export interface GetTokenOpts {
 }
 
 export interface AuthContext {
+  getCustomHostSettings: (url: string) => CustomHostSettings | undefined;
   getToken: (opts: GetTokenOpts) => Promise<string | null>;
   logger: Logger;
+  proxySettings?: ProxySettings;
+  sslSettings: SSLSettings;
 }
 
 export interface AuthTypeSpec<T extends Record<string, unknown>> {
@@ -239,7 +242,10 @@ export interface AuthTypeDef {
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
 
-  authTypes?: Array<string | AuthTypeDef>;
+  auth?: {
+    types: Array<string | AuthTypeDef>;
+    headers?: Record<string, AxiosHeaderValue>;
+  };
 
   // Single unified schema for all connector fields (config + secrets)
   // Mark sensitive fields with withUIMeta({ sensitive: true })

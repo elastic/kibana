@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField, FieldSpec } from '@kbn/data-views-plugin/common';
 import type { EuiButtonIconProps, EuiButtonProps } from '@elastic/eui';
 import type { FieldTypeKnown, FieldBase } from '@kbn/field-utils/types';
 
@@ -103,6 +103,20 @@ export interface RenderFieldItemParams<T extends FieldListItem> {
 export type OverrideFieldGroupDetails = (
   groupName: FieldsGroupNames
 ) => Partial<FieldsGroupDetails> | undefined | null;
+
+export interface ExistingFieldsInfo {
+  fetchStatus: ExistenceFetchStatus;
+  existingFieldsByFieldNameMap: Record<string, boolean>;
+  newFields?: FieldSpec[];
+  numberOfFetches: number;
+  hasDataViewRestrictions?: boolean;
+}
+
+export interface FetchedExistingFieldsInfo {
+  dataViewId: string;
+  dataViewHash: string;
+  info: ExistingFieldsInfo;
+}
 
 export type TimeRangeUpdatesType = 'search-session' | 'timefilter';
 

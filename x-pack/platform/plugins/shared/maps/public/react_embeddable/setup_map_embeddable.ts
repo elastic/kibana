@@ -28,13 +28,12 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
         {
           panelType: MAP_SAVED_OBJECT_TYPE,
           serializedState: {
-            rawState: {
-              savedObjectId: savedObject.id,
-            },
-            references: [],
+            savedObjectId: savedObject.id,
           },
         },
-        true
+        {
+          displaySuccessMessage: true,
+        }
       );
     },
     savedObjectType: MAP_SAVED_OBJECT_TYPE,

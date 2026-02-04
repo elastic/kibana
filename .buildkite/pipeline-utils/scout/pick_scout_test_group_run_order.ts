@@ -8,17 +8,22 @@
  */
 
 import Fs from 'fs';
+import { expandAgentQueue } from '../agent_images';
 import { BuildkiteClient, type BuildkiteStep } from '../buildkite';
 import { collectEnvFromLabels } from '../pr_labels';
-import { expandAgentQueue } from '../agent_images';
 import { getRequiredEnv } from '#pipeline-utils';
 
-interface ScoutTestDiscoveryConfig {
+export interface ModuleDiscoveryInfo {
+  name: string;
   group: string;
-  path: string;
-  usesParallelWorkers: boolean;
-  configs: string[];
   type: 'plugin' | 'package';
+  configs: {
+    path: string;
+    hasTests: boolean;
+    tags: string[];
+    serverRunFlags: string[];
+    usesParallelWorkers: boolean;
+  }[];
 }
 
 // Collect environment variables to pass through to test execution steps
@@ -35,23 +40,26 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
   }
 
-  const rawScoutConfigs = JSON.parse(Fs.readFileSync(scoutConfigsPath, 'utf-8')) as Record<
-    string,
-    ScoutTestDiscoveryConfig
-  >;
-  const pluginsOrPackagesWithScoutTests: string[] = Object.keys(rawScoutConfigs);
+  const modulesWithTests = JSON.parse(
+    Fs.readFileSync(scoutConfigsPath, 'utf-8')
+  ) as ModuleDiscoveryInfo[];
 
-  if (pluginsOrPackagesWithScoutTests.length === 0) {
+  if (modulesWithTests.length === 0) {
     // no scout configs found, nothing to need to upload steps
     return;
   }
 
-  const scoutCiRunGroups = pluginsOrPackagesWithScoutTests.map((name) => ({
-    label: `Scout: [ ${rawScoutConfigs[name].group} / ${name} ] ${rawScoutConfigs[name].type}`,
-    key: name,
-    agents: expandAgentQueue(rawScoutConfigs[name].usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
-    group: rawScoutConfigs[name].group,
-  }));
+  const scoutCiRunGroups = modulesWithTests.map((module) => {
+    // Check if any config in this module uses parallel workers
+    const usesParallelWorkers = module.configs.some((config) => config.usesParallelWorkers);
+
+    return {
+      label: `Scout: [ ${module.group} / ${module.name} ] ${module.type}`,
+      key: module.name,
+      agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
+      group: module.group,
+    };
+  });
 
   // upload the step definitions to Buildkite
   bk.uploadSteps(

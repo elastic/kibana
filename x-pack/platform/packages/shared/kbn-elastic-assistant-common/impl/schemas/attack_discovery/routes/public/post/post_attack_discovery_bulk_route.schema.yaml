@@ -25,9 +25,8 @@ paths:
              }'
       x-labels: [ess, serverless]
       operationId: PostAttackDiscoveryBulk
-      x-state: Technical Preview; added in 9.2.0
       summary: Bulk update Attack discoveries
-      description: Performs bulk updates on multiple Attack discoveries, including workflow status changes and visibility settings. This endpoint allows efficient batch processing of alert modifications without requiring individual API calls for each alert. `Technical preview`
+      description: Performs bulk updates on multiple Attack discoveries, including workflow status changes and visibility settings. This endpoint allows efficient batch processing of alert modifications without requiring individual API calls for each alert.
       requestBody:
         description: Bulk update parameters for Attack discoveries
         required: true

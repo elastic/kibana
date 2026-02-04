@@ -193,8 +193,14 @@ export const WithNotificationIndicator = {
     showNotificationIndicator: true,
     notifcationIndicatorTooltipContent: 'You have unsaved changes',
     notificationIndicatorColor: 'primary',
-    notificationIndicatorSize: 'l',
-    size: 'm',
+    notificationIndicatorSize: 'm',
+    notificationIndicatorPosition: {
+      top: 2,
+      left: 25,
+    },
+    size: 's',
+    color: 'text',
+    iconType: 'save',
   },
   render: (args: {
     showNotificationIndicator: boolean;
@@ -205,6 +211,12 @@ export const WithNotificationIndicator = {
     notificationIndicatorSize: React.ComponentProps<
       typeof SplitButtonWithNotification
     >['notificationIndicatorSize'];
+    notificationIndicatorPosition?: {
+      top?: number;
+      right?: number;
+    };
+    color: React.ComponentProps<typeof SplitButton>['color'];
+    iconType: React.ComponentProps<typeof SplitButton>['iconType'];
     size: React.ComponentProps<typeof SplitButton>['size'];
   }) => (
     <SplitButtonWithNotification secondaryButtonIcon="arrowDown" {...args}>

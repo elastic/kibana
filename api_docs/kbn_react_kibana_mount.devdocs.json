@@ -40,6 +40,8 @@
           ">) => React.ReactPortal | null"
         ],
         "path": "src/platform/packages/shared/react/kibana_mount/mount_point_portal.tsx",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -62,6 +64,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/react/kibana_mount/mount_point_portal.tsx",
+            "lineNumber": 27,
+            "columnNumber": 80,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -93,6 +97,8 @@
           "<HTMLElement>"
         ],
         "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -109,6 +115,8 @@
               "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx",
+            "lineNumber": 39,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -132,6 +140,8 @@
               }
             ],
             "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx",
+            "lineNumber": 39,
+            "columnNumber": 53,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -151,6 +161,8 @@
           "() => (func?: (() => void) | undefined) => void"
         ],
         "path": "src/platform/packages/shared/react/kibana_mount/utils.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -167,6 +179,8 @@
         "label": "MountPointPortalProps",
         "description": [],
         "path": "src/platform/packages/shared/react/kibana_mount/mount_point_portal.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -183,6 +197,8 @@
               "<HTMLElement> | undefined) => void | UnsetMountPointFn"
             ],
             "path": "src/platform/packages/shared/react/kibana_mount/mount_point_portal.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -199,6 +215,8 @@
                   "<HTMLElement> | undefined"
                 ],
                 "path": "src/platform/packages/shared/react/kibana_mount/mount_point_portal.tsx",
+                "lineNumber": 21,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -215,6 +233,8 @@
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/platform/packages/shared/react/kibana_mount/mount_point_portal.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -236,6 +256,8 @@
           " | ToMountPointParamsDeprecated"
         ],
         "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

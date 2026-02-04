@@ -10,7 +10,7 @@
 import { execFile } from 'child_process';
 import { availableParallelism } from 'os';
 import { isAbsolute, join } from 'path';
-import { existsSync, readdirSync, readFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, unlinkSync } from 'fs';
 
 import type { RunOptions } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
@@ -21,6 +21,7 @@ const MAX_PARALLELISM = availableParallelism();
 const buildkiteQuickchecksFolder = join('.buildkite', 'scripts', 'steps', 'checks');
 const quickChecksList = join(buildkiteQuickchecksFolder, 'quick_checks.json');
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const COLLECT_COMMITS_MARKER_FILE = join(REPO_ROOT, '.collect_commits_marker');
 
 interface QuickCheck {
   script: string;
@@ -58,6 +59,14 @@ let logger: ToolingLog;
 void run(async ({ log, flagsReader }) => {
   logger = log;
 
+  // Clean up any existing marker file from previous runs
+  if (existsSync(COLLECT_COMMITS_MARKER_FILE)) {
+    unlinkSync(COLLECT_COMMITS_MARKER_FILE);
+  }
+
+  // Set environment variable so check scripts know where to write the marker file
+  process.env.COLLECT_COMMITS_MARKER_FILE = COLLECT_COMMITS_MARKER_FILE;
+
   const checksToRun = collectScriptsToRun({
     targetFile: flagsReader.string('file'),
     targetDir: flagsReader.string('dir'),
@@ -82,12 +91,36 @@ void run(async ({ log, flagsReader }) => {
   logger.write('--- All checks finished.');
   printResults(startTime, results);
 
+  // Check if any commits were made and push them in a single batch
+  // This allows multiple quick-check fixes to be committed and pushed together,
+  // avoiding multiple CI restarts when a PR has multiple offenses.
+  // File-changing checks run with parallelism=1 (sequentially), so commits happen
+  // one at a time without conflicts.
+  const commitsWereMade = existsSync(COLLECT_COMMITS_MARKER_FILE);
+  if (commitsWereMade) {
+    logger.write('--- Commits were made during checks. Pushing all changes now...');
+    try {
+      await pushCommits();
+      logger.write('--- Successfully pushed all commits.');
+      // Clean up marker file
+      if (existsSync(COLLECT_COMMITS_MARKER_FILE)) {
+        unlinkSync(COLLECT_COMMITS_MARKER_FILE);
+      }
+      // Still exit with error to fail the current build, a new build should be started after the push
+      logger.write('--- Build will fail to trigger a new build with the fixes.');
+      process.exitCode = 1;
+    } catch (error) {
+      logger.error(`--- Failed to push commits: ${error}`);
+      process.exitCode = 1;
+    }
+  }
+
   const failedChecks = results.filter((check) => !check.success);
   if (failedChecks.length > 0) {
     logger.write(`--- ${failedChecks.length} quick check(s) failed. ❌`);
     logger.write(`See the script(s) marked with ❌ above for details.`);
     process.exitCode = 1;
-  } else {
+  } else if (!commitsWereMade) {
     logger.write('--- All checks passed. ✅');
     return results;
   }
@@ -189,7 +222,10 @@ async function runCheckAsync(script: string): Promise<CheckResult> {
 
   return new Promise((resolve) => {
     validateScriptPath(script);
-    const scriptProcess = execFile('bash', [script]);
+    // Pass environment variables to child process, including COLLECT_COMMITS_MARKER_FILE
+    const scriptProcess = execFile('bash', [script], {
+      env: { ...process.env },
+    });
     let output = '';
     const appendToOutput = (data: string | Buffer) => (output += data.toString());
 
@@ -264,4 +300,31 @@ function validateScriptPath(scriptPath: string) {
 
 function stripRoot(script: string) {
   return script.replace(REPO_ROOT, '');
+}
+
+async function pushCommits(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const pushProcess = execFile('git', ['push'], {
+      cwd: REPO_ROOT,
+      env: { ...process.env },
+    });
+
+    let output = '';
+    const appendToOutput = (data: string | Buffer) => (output += data.toString());
+
+    pushProcess.stdout?.on('data', appendToOutput);
+    pushProcess.stderr?.on('data', appendToOutput);
+
+    pushProcess.on('exit', (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`git push failed with code ${code}: ${output}`));
+      }
+    });
+
+    pushProcess.on('error', (error) => {
+      reject(error);
+    });
+  });
 }

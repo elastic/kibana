@@ -19,14 +19,14 @@ describe('initializeSettingsManager', () => {
       const settingsManager = initializeSettingsManager({
         title: 'dashboard 1',
       });
-      expect(settingsManager.api.getSettings().syncColors).toBe(false);
+      expect(settingsManager.api.getSettings().sync_colors).toBe(false);
     });
 
-    test('Should set syncTooltips to false when value not provided', () => {
+    test('Should set sync_tooltips to false when value not provided', () => {
       const settingsManager = initializeSettingsManager({
         title: 'dashboard 1',
       });
-      expect(settingsManager.api.getSettings().syncTooltips).toBe(false);
+      expect(settingsManager.api.getSettings().sync_tooltips).toBe(false);
     });
   });
 
@@ -36,33 +36,33 @@ describe('initializeSettingsManager', () => {
         title: 'dashboard 1',
         options: {
           ...DEFAULT_DASHBOARD_OPTIONS,
-          useMargins: false,
+          use_margins: false,
         },
       });
-      settingsManager.api.setSettings({ timeRestore: true });
+      settingsManager.api.setSettings({ time_restore: true });
       const settings = settingsManager.api.getSettings();
-      expect(settings.timeRestore).toBe(true);
-      expect(settings.useMargins).toBe(false);
+      expect(settings.time_restore).toBe(true);
+      expect(settings.use_margins).toBe(false);
     });
   });
 
-  describe('startComparing$', () => {
+  describe('startComparing', () => {
     test('Should return no changes when there are no changes', (done) => {
       const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
       const settingsManager = initializeSettingsManager(lastSavedState$.value);
-      settingsManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+      settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
         expect(changes).toMatchInlineSnapshot(`Object {}`);
         done();
       });
     });
 
-    test('Should return timeRestore change when timeRestoreChanges', (done) => {
+    test('Should return time_restore change when time_restoreChanges', (done) => {
       const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
       const settingsManager = initializeSettingsManager(lastSavedState$.value);
-      settingsManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+      settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
         expect(changes).toMatchInlineSnapshot(`
           Object {
-            "timeRestore": false,
+            "time_restore": false,
           }
         `);
         done();
@@ -70,22 +70,23 @@ describe('initializeSettingsManager', () => {
       const currentSettings = settingsManager.api.getSettings();
       settingsManager.api.setSettings({
         ...currentSettings,
-        timeRestore: !currentSettings.timeRestore,
+        time_restore: !currentSettings.time_restore,
       });
     });
 
     test('Should return only changed keys when there are changes', (done) => {
       const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
       const settingsManager = initializeSettingsManager(lastSavedState$.value);
-      settingsManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+      settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
         expect(changes).toMatchInlineSnapshot(`
           Object {
             "options": Object {
-              "hidePanelTitles": true,
-              "syncColors": false,
-              "syncCursor": true,
-              "syncTooltips": false,
-              "useMargins": true,
+              "auto_apply_filters": true,
+              "hide_panel_titles": true,
+              "sync_colors": false,
+              "sync_cursor": true,
+              "sync_tooltips": false,
+              "use_margins": true,
             },
             "title": "updated title",
           }
@@ -96,7 +97,7 @@ describe('initializeSettingsManager', () => {
       settingsManager.api.setSettings({
         ...currentSettings,
         title: 'updated title',
-        hidePanelTitles: !currentSettings.hidePanelTitles,
+        hide_panel_titles: !currentSettings.hide_panel_titles,
       });
     });
   });
@@ -110,7 +111,7 @@ describe('initializeSettingsManager', () => {
       const settingsManager = initializeSettingsManager(state);
       const settings = settingsManager.api.getSettings();
 
-      expect(settings.projectRoutingRestore).toBe(false);
+      expect(settings.project_routing_restore).toBe(false);
     });
 
     test('Should set projectRoutingRestore to true when project_routing is a string', () => {
@@ -121,7 +122,7 @@ describe('initializeSettingsManager', () => {
       const settingsManager = initializeSettingsManager(state);
       const settings = settingsManager.api.getSettings();
 
-      expect(settings.projectRoutingRestore).toBe(true);
+      expect(settings.project_routing_restore).toBe(true);
     });
   });
 });

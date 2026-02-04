@@ -42,6 +42,7 @@ import {
   SERVERLESS_SECRETS_PATH,
   SERVERLESS_JWKS_PATH,
   SERVERLESS_IDP_METADATA_PATH,
+  SERVERLESS_OPERATOR_PATH,
 } from '../paths';
 import * as waitClusterUtil from './wait_until_cluster_ready';
 import * as waitForSecurityIndexUtil from './wait_for_security_index';
@@ -117,7 +118,7 @@ const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, pa
 }, []);
 
 const volumeCmdTest = async (volumeCmd: string[]) => {
-  expect(volumeCmd).toHaveLength(22);
+  expect(volumeCmd).toHaveLength(24);
   expect(volumeCmd).toEqual(
     expect.arrayContaining([
       ...getESp12Volume(),
@@ -125,7 +126,8 @@ const volumeCmdTest = async (volumeCmd: string[]) => {
       `${baseEsPath}:/objectstore:z`,
       `stateless.object_store.bucket=${serverlessDir}`,
       `${SERVERLESS_SECRETS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
-      `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/jwks.json:z`,
+      `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}jwks/jwks.json:z`,
+      `${SERVERLESS_OPERATOR_PATH}:${SERVERLESS_CONFIG_PATH}operator`,
     ])
   );
 
@@ -480,7 +482,7 @@ describe('resolveEsArgs()', () => {
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.order=0",
         "--env",
-        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/secrets/idp_metadata.xml",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/idp_metadata.xml",
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=urn:mock-idp",
         "--env",
@@ -547,7 +549,7 @@ describe('resolveEsArgs()', () => {
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.order=0",
         "--env",
-        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/secrets/idp_metadata.xml",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/idp_metadata.xml",
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=urn:mock-idp",
         "--env",
@@ -564,6 +566,8 @@ describe('resolveEsArgs()', () => {
         "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.name=http://saml.elastic-cloud.com/attributes/name",
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.mail=http://saml.elastic-cloud.com/attributes/email",
+        "--env",
+        "serverless.project_type=elasticsearch_general_purpose",
         "--env",
         "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
@@ -592,7 +596,7 @@ describe('resolveEsArgs()', () => {
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.order=0",
         "--env",
-        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/secrets/idp_metadata.xml",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/idp_metadata.xml",
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=urn:mock-idp",
         "--env",
@@ -618,7 +622,7 @@ describe('resolveEsArgs()', () => {
         "--env",
         "serverless.organization_id=org1234567890",
         "--env",
-        "serverless.project_type=elasticsearch",
+        "serverless.project_type=elasticsearch_general_purpose",
         "--env",
         "serverless.project_id=abcde1234567890",
         "--env",
@@ -664,7 +668,7 @@ describe('setupServerlessVolumes()', () => {
       basePath: baseEsPath,
     });
 
-    volumeCmdTest(volumeCmd);
+    await volumeCmdTest(volumeCmd);
     await expect(Fsp.access(serverlessObjectStorePath)).resolves.not.toThrow();
   });
 
@@ -673,7 +677,7 @@ describe('setupServerlessVolumes()', () => {
 
     const volumeCmd = await setupServerlessVolumes(log, { projectType, basePath: baseEsPath });
 
-    volumeCmdTest(volumeCmd);
+    await volumeCmdTest(volumeCmd);
     await expect(
       Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)
     ).resolves.not.toThrow();
@@ -688,7 +692,7 @@ describe('setupServerlessVolumes()', () => {
       clean: true,
     });
 
-    volumeCmdTest(volumeCmd);
+    await volumeCmdTest(volumeCmd);
     await expect(
       Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)
     ).rejects.toThrowError();
@@ -717,7 +721,7 @@ describe('setupServerlessVolumes()', () => {
     const pathsNotIncludedInCmd = requiredPaths.filter(
       (path) => !volumeCmd.some((cmd) => cmd.includes(path))
     );
-    expect(volumeCmd).toHaveLength(24);
+    expect(volumeCmd).toHaveLength(26);
     expect(pathsNotIncludedInCmd).toEqual([]);
   });
 

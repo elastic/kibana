@@ -19,7 +19,7 @@ export const DatasetFilter: React.FunctionComponent<{
   selectedDatasets: string[];
   onToggleDataset: (dataset: string) => void;
 }> = memo(({ selectedDatasets, onToggleDataset }) => {
-  const { unifiedSearch, data } = useStartServices();
+  const { kql, data } = useStartServices();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [datasetValues, setDatasetValues] = useState<string[]>([AGENT_DATASET]);
@@ -57,7 +57,7 @@ export const DatasetFilter: React.FunctionComponent<{
           fields: fieldsMap,
         });
 
-        const values = await unifiedSearch.autocomplete.getValueSuggestions({
+        const values = await kql.autocomplete.getValueSuggestions({
           indexPattern: newDataView,
           field: DATASET_FIELD as DataViewField,
           query: '',
@@ -73,7 +73,7 @@ export const DatasetFilter: React.FunctionComponent<{
       setIsLoading(false);
     };
     fetchValues();
-  }, [data.dataViews, unifiedSearch.autocomplete, datasetValuesToOptions]);
+  }, [data.dataViews, kql.autocomplete, datasetValuesToOptions]);
 
   return (
     <EuiPopover

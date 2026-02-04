@@ -6,7 +6,6 @@
  */
 
 import { join } from 'path';
-import { writeFile } from 'fs/promises';
 import os from 'os';
 import AdmZip from 'adm-zip';
 
@@ -20,9 +19,7 @@ export function generateTempPath() {
 
 export async function unzipFile(content: string) {
   const decoded = Buffer.from(content, 'base64');
-  const pathToZip = generateTempPath();
-  await writeFile(pathToZip, decoded);
-  const zip = new AdmZip(pathToZip);
+  const zip = new AdmZip(decoded);
   const zipEntries = zip.getEntries();
 
   let allData = '';
@@ -31,5 +28,6 @@ export async function unzipFile(content: string) {
     const entryData = entry.getData().toString();
     allData += entryData;
   }
+
   return allData;
 }

@@ -205,6 +205,14 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "entity": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
                 "full_name": {
                   "fields": {
                     "text": {
@@ -682,6 +690,14 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "entity": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
                 "full_name": {
                   "fields": {
                     "text": {
@@ -1004,6 +1020,22 @@
           "properties": {
             "version": {
               "type": "keyword"
+            }
+          }
+        },
+        "entity": {
+          "properties": {
+            "id": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "target": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
             }
           }
         },
@@ -2081,6 +2113,26 @@
                 },
                 "static_score_norm": {
                   "type": "float"
+                }
+              }
+            },
+            "entity": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "target": {
+              "properties": {
+                "entity": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
                 }
               }
             },
@@ -5253,6 +5305,14 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "entity": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
                 "full_name": {
                   "fields": {
                     "text": {
@@ -5324,6 +5384,14 @@
             "name": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "entity": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
             },
             "node": {
               "properties": {
@@ -5418,6 +5486,14 @@
                 "name": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "entity": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
                 },
                 "node": {
                   "properties": {
@@ -5935,6 +6011,14 @@
                 "email": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "entity": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
                 },
                 "full_name": {
                   "fields": {
@@ -8286,6 +8370,14 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "entity": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
                 "full_name": {
                   "fields": {
                     "text": {
@@ -8348,6 +8440,14 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "entity": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
                 "full_name": {
                   "fields": {
                     "text": {
@@ -8399,6 +8499,14 @@
             "email": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "entity": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
             },
             "full_name": {
               "fields": {
@@ -8479,6 +8587,14 @@
                 "email": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "entity": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
                 },
                 "full_name": {
                   "fields": {
@@ -8673,10 +8789,6 @@
       "index": {
         "auto_expand_replicas": "0-1",
         "hidden": "true",
-        "lifecycle": {
-          "name": ".alerts-ilm-policy",
-          "rollover_alias": ".alerts-security.alerts-default"
-        },
         "mapping": {
           "ignore_malformed": "true",
           "total_fields": {

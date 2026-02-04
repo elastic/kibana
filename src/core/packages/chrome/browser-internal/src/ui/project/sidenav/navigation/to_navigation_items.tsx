@@ -20,6 +20,7 @@ import type {
   SideNavLogo,
 } from '@kbn/core-chrome-navigation/types';
 import type { SolutionId } from '@kbn/core-chrome-browser';
+import { toSentenceCase } from '@kbn/shared-ux-label-formatter';
 
 import { AppDeepLinkIdToIcon } from './known_icons_mappings';
 import type { PanelStateManager } from './panel_state_manager';
@@ -161,7 +162,7 @@ export const toNavigationItems = (
       maybeMarkActive(child, 2, navNode);
       return {
         id: child.id,
-        label: warnIfMissing(child, 'title', 'Missing Title 😭'),
+        label: toSentenceCase(warnIfMissing(child, 'title', 'Missing Title 😭')),
         href: warnIfMissing(child, 'href', 'Missing Href 😭'),
         isExternal: child.isExternalLink,
         'data-test-subj': getTestSubj(child),
@@ -212,7 +213,7 @@ export const toNavigationItems = (
 
             return {
               id: child.id,
-              label: child.title,
+              label: child.title && toSentenceCase(child.title),
               items: secondaryItems,
             };
           })
@@ -236,7 +237,7 @@ export const toNavigationItems = (
 
     return {
       id: navNode.id,
-      label: warnIfMissing(navNode, 'title', 'Missing Title 😭'),
+      label: toSentenceCase(warnIfMissing(navNode, 'title', 'Missing Title 😭')),
       iconType: getIcon(navNode),
       href: itemHref,
       sections: secondarySections,
@@ -262,6 +263,7 @@ export const toNavigationItems = (
   if (!SKIP_WARNINGS) {
     warnAboutDuplicateIds(logoItem, primaryItems, footerItems);
     warnAboutDuplicateIcons(logoItem, primaryItems, footerItems);
+    warnAboutTooManyNewItems(primaryItems, footerItems);
   }
 
   return {
@@ -413,6 +415,60 @@ function warnAboutDuplicateIds(
     (id, count) =>
       `ID "${id}" is used ${count} times in navigation items. Each navigation item must have a unique ID.`
   );
+}
+
+function warnAboutTooManyNewItems(primaryItems: MenuItem[], footerItems: MenuItem[]) {
+  if (SKIP_WARNINGS) return;
+
+  const maxNewItemsPerLevel = 2;
+  const allMenuItems = [...primaryItems, ...footerItems];
+  const newPrimaryItems: MenuItem[] = [];
+  const isNew = (item: MenuItem | SecondaryMenuItem) => item.badgeType === 'new';
+
+  const getHiddenItems = (items: { label: string }[]) =>
+    items
+      .slice(maxNewItemsPerLevel)
+      .map((item) => item.label)
+      .join(', ');
+
+  allMenuItems.forEach((item) => {
+    const isNewPrimaryItem = isNew(item);
+    const hasNewSecondaryItems = item.sections?.some((section) => section.items.some(isNew));
+
+    if (isNewPrimaryItem || hasNewSecondaryItems) {
+      newPrimaryItems.push(item);
+    }
+  });
+
+  // Warn if too many new primary items
+  if (newPrimaryItems.length > maxNewItemsPerLevel) {
+    const hiddenItems = getHiddenItems(newPrimaryItems);
+    warnOnce(
+      `Max of ${maxNewItemsPerLevel} new primary items reached. The following will not show new indicators: ${hiddenItems}.`
+    );
+  }
+
+  newPrimaryItems.slice(0, maxNewItemsPerLevel).forEach((item) => {
+    const isNewPrimaryItem = isNew(item);
+    const hasNewSecondaryItems = item.sections?.some((section) => section.items.some(isNew));
+
+    // Warn if primary is new AND has new secondary children items in submenu
+    if (isNewPrimaryItem && hasNewSecondaryItems) {
+      warnOnce(
+        `New primary item "${item.label}" should not have new secondary children items. They will not show new badges, only their parent will.`
+      );
+    }
+
+    // Warn if too many new secondary items per parent
+    const newSecondaryItems =
+      item.sections?.flatMap((section) => section.items.filter(isNew)) ?? [];
+    if (newSecondaryItems.length > maxNewItemsPerLevel) {
+      const hiddenItems = getHiddenItems(newSecondaryItems);
+      warnOnce(
+        `Too many new secondary items in "${item.label}". The following will not show new badges: ${hiddenItems}.`
+      );
+    }
+  });
 }
 
 const FALLBACK_ICON = 'broom' as const;

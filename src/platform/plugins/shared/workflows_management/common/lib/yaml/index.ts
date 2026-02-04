@@ -11,7 +11,7 @@ export { getPathAtOffset, getPathFromAncestors } from '@kbn/workflows/common/uti
 export { getStepNodeAtPosition } from './get_step_node_at_position';
 export { getStepNode } from './get_step_node';
 export { getStepNodesWithType } from './get_step_nodes_with_type';
-export { getTriggerNodes } from './get_trigger_nodes';
+export { getTriggerNodes, getTriggersPair } from './get_trigger_nodes';
 export { getTriggerNodesWithType } from './get_trigger_nodes_with_type';
 export { parseWorkflowYamlToJSON } from './parse_workflow_yaml_to_json';
 export { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';

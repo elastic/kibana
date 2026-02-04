@@ -58,6 +58,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
     accountId: '',
     region: '',
     schema: preferredSchema,
+    includeTimeseries: true,
   });
 
   const dataNode = first(nodes);

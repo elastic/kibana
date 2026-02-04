@@ -485,7 +485,7 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
 
       await scheduler.scheduleWorkflowTasks(workflow, 'default');
 
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         expect.stringContaining('RRule schedule created')
       );
     });

@@ -191,6 +191,114 @@ export function initRoutes(
 
   router.post(
     {
+      path: '/api/sample_tasks/bulk_update_schedules_with_api_key',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          taskIds: schema.arrayOf(schema.string()),
+          schedule: schema.oneOf([
+            schema.object({ interval: schema.maybe(schema.string()) }),
+            schema.object({
+              rrule: schema.object({
+                freq: schema.number(),
+                interval: schema.number(),
+                tzid: schema.string(),
+                byhour: schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 23 }))),
+                byminute: schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 59 }))),
+                byweekday: schema.maybe(schema.arrayOf(schema.string())),
+                bymonthday: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 }))),
+              }),
+            }),
+          ]),
+          regenerateApiKey: schema.maybe(schema.boolean({ defaultValue: false })),
+        }),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const taskManager = await taskManagerStart;
+      const { taskIds, schedule, regenerateApiKey } = req.body;
+
+      const taskResult = await taskManager.bulkUpdateSchedules(taskIds, schedule, {
+        request: req,
+        regenerateApiKey,
+      });
+
+      return res.ok({ body: taskResult });
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/sample_tasks/bulk_update_schedules_with_fake_request`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          taskIds: schema.arrayOf(schema.string()),
+          schedule: schema.oneOf([
+            schema.object({ interval: schema.maybe(schema.string()) }),
+            schema.object({
+              rrule: schema.object({
+                freq: schema.number(),
+                interval: schema.number(),
+                tzid: schema.string(),
+                byhour: schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 23 }))),
+                byminute: schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 59 }))),
+                byweekday: schema.maybe(schema.arrayOf(schema.string())),
+                bymonthday: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 }))),
+              }),
+            }),
+          ]),
+        }),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ) {
+      const { taskIds, schedule } = req.body;
+      try {
+        const taskManager = await taskManagerStart;
+        const security = await securityStart;
+
+        const apiKeyCreateResult = await security?.authc.apiKeys.grantAsInternalUser(req, {
+          name: `test task-manager bulk update schedules from fake request`,
+          role_descriptors: {},
+          metadata: { managed: true },
+        });
+
+        const fakeRawRequest: FakeRawRequest = {
+          headers: {
+            authorization: `ApiKey ${apiKeyCreateResult?.api_key}`,
+          },
+          path: '/',
+        };
+        const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+        return res.ok({
+          body: await taskManager.bulkUpdateSchedules(taskIds, schedule, { request: fakeRequest }),
+        });
+      } catch (err) {
+        return res.ok({ body: { taskIds, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
       path: `/api/sample_tasks/run_soon`,
       security: {
         authz: {
@@ -619,6 +727,32 @@ export function initRoutes(
       return res.ok({
         body: node,
       });
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/invalidate_api_key_task/run_soon`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization because it is used only for testing',
+        },
+      },
+      validate: {},
+    },
+    async function (
+      _: RequestHandlerContext,
+      __: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const taskId = 'invalidate_api_keys';
+      try {
+        const taskManager = await taskManagerStart;
+        return res.ok({ body: await taskManager.runSoon(taskId) });
+      } catch (err) {
+        return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
     }
   );
 }

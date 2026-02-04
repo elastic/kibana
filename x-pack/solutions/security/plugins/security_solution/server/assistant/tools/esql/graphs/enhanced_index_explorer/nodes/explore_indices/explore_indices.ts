@@ -6,15 +6,15 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { indexExplorer } from '@kbn/onechat-genai-utils';
-import type { ScopedModel } from '@kbn/onechat-server';
+import { indexExplorer } from '@kbn/agent-builder-genai-utils';
+import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CreateLlmInstance } from '../../../../utils/common';
 import type { EnhancedIndexExplorerAnnotation } from '../../state';
 
 /**
- * Converts a createLlmInstance result to a ScopedModel for use with onechat utilities
+ * Converts a createLlmInstance result to a ScopedModel for use with agentBuilder utilities
  */
 const convertToScopedModel = async (
   createLlmInstance: CreateLlmInstance,
@@ -63,10 +63,10 @@ export const exploreIndices = ({
 
     const { query, limit = 10, indexPattern = '*' } = input;
 
-    // Convert createLlmInstance result to ScopedModel for onechat compatibility
+    // Convert createLlmInstance result to ScopedModel for agentBuilder compatibility
     const model = await convertToScopedModel(createLlmInstance, inference, request, connectorId);
 
-    // Use the indexExplorer utility from onechat
+    // Use the indexExplorer utility from agentBuilder
     const response = await indexExplorer({
       nlQuery: query,
       indexPattern,

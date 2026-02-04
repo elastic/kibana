@@ -7,33 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ControlGroupRuntimeState,
-  OptionsListDSLControlState,
-  ControlPanelState,
-} from '@kbn/controls-plugin/public';
-
 import { isEmpty, isEqual, pick } from 'lodash';
+import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { FilterControlConfig } from './types';
 
 export const getPanelsInOrderFromControlsState = (controlState: ControlGroupRuntimeState) => {
-  const panels = controlState.initialChildControlState;
+  const panels = controlState.initialChildControlState ?? {};
   return Object.values(panels).sort((a, b) => a.order - b.order);
 };
 
 export const getFilterItemObjListFromControlState = (controlState: ControlGroupRuntimeState) => {
   const panels = getPanelsInOrderFromControlsState(controlState);
   return panels.map((panel) => {
-    const { fieldName, selectedOptions, title, existsSelected, exclude, hideActionBar } =
-      panel as ControlPanelState<OptionsListDSLControlState>;
-
+    const { fieldName, selectedOptions, title, existsSelected, exclude, displaySettings } =
+      panel as OptionsListDSLControlState;
     return {
       fieldName: fieldName as string,
       selectedOptions: selectedOptions ?? [],
       title,
       existsSelected: existsSelected ?? false,
       exclude: exclude ?? false,
-      hideActionBar: hideActionBar ?? false,
+      displaySettings: {
+        hideActionBar: displaySettings?.hideActionBar ?? false,
+      },
     };
   });
 };

@@ -124,6 +124,7 @@ function buildEuiGridColumn({
   sortedColumns,
   disableCellActions = false,
   dataGridRef,
+  hideFilteringOnComputedColumns,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -150,6 +151,7 @@ function buildEuiGridColumn({
   sortedColumns?: EuiDataGridColumnSortingConfig[];
   disableCellActions?: boolean;
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
+  hideFilteringOnComputedColumns?: boolean;
 }) {
   const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
     dataView,
@@ -200,11 +202,11 @@ function buildEuiGridColumn({
       cellActions = dataViewField
         ? buildCellActions(
             dataViewField,
-            isPlainRecord,
             toastNotifications,
             valueToStringConverter,
             onFilter,
-            dataGridRef
+            dataGridRef,
+            hideFilteringOnComputedColumns
           )
         : EMPTY_CELL_ACTIONS;
 
@@ -357,6 +359,7 @@ export function getEuiGridColumns({
   onResize,
   sortedColumns,
   dataGridRef,
+  hideFilteringOnComputedColumns,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -384,6 +387,7 @@ export function getEuiGridColumns({
   onResize: UnifiedDataTableProps['onResize'];
   sortedColumns?: EuiDataGridColumnSortingConfig[];
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
+  hideFilteringOnComputedColumns?: boolean;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
   const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
@@ -416,6 +420,7 @@ export function getEuiGridColumns({
       sortedColumns,
       disableCellActions,
       dataGridRef,
+      hideFilteringOnComputedColumns,
     })
   );
 }

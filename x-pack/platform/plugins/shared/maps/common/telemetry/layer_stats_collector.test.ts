@@ -73,7 +73,9 @@ const expecteds = [
 const testsToRun = mapSavedObjects.map(
   (savedObject: SavedObject<StoredMapAttributes>, index: number) => {
     return [
-      transformMapAttributesOut(savedObject.attributes, savedObject.references),
+      transformMapAttributesOut(savedObject.attributes, (targetName: string) =>
+        savedObject.references.find(({ name }) => name === targetName)
+      ),
       expecteds[index],
     ] as const;
   }

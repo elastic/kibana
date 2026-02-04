@@ -135,6 +135,9 @@ export function ClustersTable({ clusters }: Props) {
 
   return (
     <EuiBasicTable
+      tableCaption={i18n.translate('inspector.requests.clusters.table.caption', {
+        defaultMessage: 'Cluster details',
+      })}
       items={
         sortField
           ? items.sort(Comparators.property(sortField, Comparators.default(sortDirection)))

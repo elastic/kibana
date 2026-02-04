@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type http from 'http';
-import getPort from 'get-port';
-import expect from '@kbn/expect';
 import { getSFCServer } from '@kbn/actions-simulators-plugin/server/plugin';
+import expect from '@kbn/expect';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { ObjectRemover } from '../../../../common/lib';
+import getPort from 'get-port';
+import type http from 'http';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ObjectRemover } from '../../../../common/lib';
 
 export default function createSingleFileConnectorTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -153,7 +153,7 @@ export default function createSingleFileConnectorTest({ getService }: FtrProvide
             expect(resp.body).to.eql({
               connector_id: defaultSingleFileConnectorId,
               status: 'error',
-              message: `error calling connector, unexpected error`,
+              message: `some error message`,
               errorSource: TaskErrorSource.USER,
             });
           });
@@ -208,6 +208,8 @@ export default function createSingleFileConnectorTest({ getService }: FtrProvide
           .expect(200);
 
         expect(response.body.data.key).to.eql(key);
+        expect(response.body.data['x-test-header']).to.eql('i-am-a-test-header-value');
+        expect(response.body.data['kbn-xsrf']).to.eql('foo');
       });
     });
   });

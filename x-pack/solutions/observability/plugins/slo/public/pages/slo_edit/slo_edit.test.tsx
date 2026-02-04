@@ -5,32 +5,33 @@
  * 2.0.
  */
 
-import type { ILicense } from '@kbn/licensing-types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import type { ILicense } from '@kbn/licensing-types';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { useFetchDataViews } from '@kbn/observability-plugin/public';
-import { HeaderMenuPortal, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 import React from 'react';
 import Router from 'react-router-dom';
 import { BehaviorSubject } from 'rxjs';
-import { paths } from '../../../common/locators/paths';
 import { buildSlo } from '../../data/slo/slo';
+import { useCreateRule } from '../../hooks/use_create_burn_rate_rule';
 import { useCreateDataView } from '../../hooks/use_create_data_view';
 import { useCreateSlo } from '../../hooks/use_create_slo';
 import { useFetchApmSuggestions } from '../../hooks/use_fetch_apm_suggestions';
 import { useFetchIndices } from '../../hooks/use_fetch_indices';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
-import { usePermissions } from '../../hooks/use_permissions';
-import { useCreateRule } from '../../hooks/use_create_burn_rate_rule';
-import { useUpdateSlo } from '../../hooks/use_update_slo';
+import { useFetchSloTemplate } from '../../hooks/use_fetch_slo_template';
 import { useKibana } from '../../hooks/use_kibana';
+import { usePermissions } from '../../hooks/use_permissions';
+import { useUpdateSlo } from '../../hooks/use_update_slo';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
-import { SLO_EDIT_FORM_DEFAULT_VALUES } from './constants';
 import { SloEditPage } from './slo_edit';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -42,6 +43,7 @@ jest.mock('@kbn/observability-plugin/public');
 jest.mock('../../hooks/use_fetch_indices');
 jest.mock('../../hooks/use_create_data_view');
 jest.mock('../../hooks/use_fetch_slo_details');
+jest.mock('../../hooks/use_fetch_slo_template');
 jest.mock('../../hooks/use_create_slo');
 jest.mock('../../hooks/use_update_slo');
 jest.mock('../../hooks/use_fetch_apm_suggestions');
@@ -58,7 +60,8 @@ const useKibanaMock = useKibana as jest.Mock;
 const useFetchIndicesMock = useFetchIndices as jest.Mock;
 const useFetchDataViewsMock = useFetchDataViews as jest.Mock;
 const useCreateDataViewMock = useCreateDataView as jest.Mock;
-const useFetchSloMock = useFetchSloDetails as jest.Mock;
+const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;
+const useFetchSloTemplateMock = useFetchSloTemplate as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useUpdateSloMock = useUpdateSlo as jest.Mock;
 const useCreateRuleMock = useCreateRule as jest.Mock;
@@ -66,11 +69,6 @@ const useFetchApmSuggestionsMock = useFetchApmSuggestions as jest.Mock;
 const usePermissionsMock = usePermissions as jest.Mock;
 const useFetcherMock = useFetcher as jest.Mock;
 
-const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
-HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
-
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
 const mockNavigate = jest.fn();
 const mockBasePathPrepend = jest.fn();
 const licenseMock = licensingMock.createLicenseMock();
@@ -118,8 +116,8 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
       },
       notifications: {
         toasts: {
-          addError: mockAddError,
-          addSuccess: mockAddSuccess,
+          addError: jest.fn(),
+          addSuccess: jest.fn(),
         },
       },
       observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
@@ -147,8 +145,10 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
   });
 };
 
+const SLO_ID = 'slo-1234';
+
 describe('SLO Edit Page', () => {
-  const mockCreate = jest.fn(() => Promise.resolve({ id: 'mock-slo-id' }));
+  const mockCreate = jest.fn(() => Promise.resolve({ id: SLO_ID }));
   const mockUpdate = jest.fn();
   const mockCreateRule = jest.fn();
 
@@ -202,7 +202,7 @@ describe('SLO Edit Page', () => {
       isLoading: false,
       isSuccess: false,
       isError: false,
-      mutateAsync: mockCreateRule,
+      mutate: mockCreateRule,
     });
 
     useUpdateSloMock.mockReturnValue({
@@ -225,260 +225,225 @@ describe('SLO Edit Page', () => {
 
   afterEach(cleanup);
 
-  describe('when the incorrect license is found', () => {
+  describe('create SLO flow', () => {
     beforeEach(() => {
-      licenseMock.hasAtLeast.mockReturnValue(false);
-    });
-
-    it('navigates to the SLO List page', async () => {
-      jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '1234' });
+      jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
       jest
         .spyOn(Router, 'useLocation')
-        .mockReturnValue({ pathname: '/slos/1234/edit', search: '', state: '', hash: '' });
+        .mockReturnValue({ pathname: '/slos/create', search: '', state: '', hash: '' });
+      useFetchSloDetailsMock.mockReturnValue({ isInitialLoading: false, data: undefined });
+      useFetchSloTemplateMock.mockReturnValue({ isInitialLoading: false, data: undefined });
+    });
 
-      useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
+    it('with invalid license triggers a redirect to the SLO Welcome page', async () => {
+      licenseMock.hasAtLeast.mockReturnValue(false);
+
+      render(<SloEditPage />);
+
+      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
+    });
+
+    it('with no read permission triggers a redirect to the SLO welcome page', async () => {
+      usePermissionsMock.mockReturnValue({
+        isLoading: false,
+        data: {
+          hasAllWriteRequested: false,
+          hasAllReadRequested: false,
+        },
+      });
+
+      render(<SloEditPage />);
+
+      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
+    });
+
+    it('with no write permission triggers a redirect to the SLO List page', async () => {
+      usePermissionsMock.mockReturnValue({
+        isLoading: false,
+        data: {
+          hasAllWriteRequested: false,
+          hasAllReadRequested: true,
+        },
+      });
 
       render(<SloEditPage />);
 
       expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
     });
-  });
 
-  describe('when the license is null', () => {
-    beforeEach(() => {
-      mockKibana(null);
+    it('renders an empty SLO Edit Form', async () => {
+      const { queryByTestId } = render(<SloEditPage />);
+
+      expect(queryByTestId('sloEditPage')).toBeTruthy();
+      expect(queryByTestId('sloForm')).toBeTruthy();
+
+      expect(queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
+      // Show default values from the kql indicator
+      expect(queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue('sli.kql.custom');
+      expect(queryByTestId('indexSelectionSelectedValue')).toBeNull();
+
+      // other sections are hidden
+      expect(queryByTestId('sloEditFormObjectiveSection')).toBeNull();
+      expect(queryByTestId('sloEditFormDescriptionSection')).toBeNull();
     });
 
-    it('does not navigate to the SLO List page', async () => {
-      jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '1234' });
+    it('renders the SLO Edit Form with prefilled values from the URL', async () => {
+      history.replace(
+        '/slos/create?_a=(name:CartServiceLatency,indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration))'
+      );
+
+      useFetchApmSuggestionsMock.mockReturnValue({
+        suggestions: ['cartService'],
+        isLoading: false,
+      });
+
+      const { queryByTestId, getByTestId } = render(<SloEditPage />);
+
+      expect(queryByTestId('sloEditPage')).toBeTruthy();
+      expect(queryByTestId('sloForm')).toBeTruthy();
+
+      expect(queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
+      expect(queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue(
+        'sli.apm.transactionDuration'
+      );
+      expect(queryByTestId('apmLatencyServiceSelector')).toHaveTextContent('cartService');
+      expect(queryByTestId('apmLatencyEnvironmentSelector')).toHaveTextContent('prod');
+
+      expect(queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
+      expect(queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
+
+      expect(getByTestId('sloFormSubmitButton')).toBeEnabled();
+
+      await waitFor(() => {
+        fireEvent.click(getByTestId('sloFormSubmitButton'));
+      });
+
+      expect(mockCreate).toHaveBeenCalled();
+    });
+
+    it('renders the SLO Edit Form with prefilled values from a template', async () => {
+      history.replace('/slos/create?fromTemplateId=template-1234');
+
+      const sloTemplate = {
+        templateId: 'template-1234',
+        name: 'My template',
+        description: 'This is my template',
+        indicator: {
+          type: 'sli.kql.custom',
+          params: {
+            index: 'some-index',
+            filter: 'template: foo',
+            good: 'http_status: 2xx',
+            total: 'http_status: *',
+            timestampField: '@timestamp',
+          },
+        },
+        budgetingMethod: 'occurrences',
+        objective: {
+          target: 0.95,
+        },
+      };
+      useFetchSloTemplateMock.mockReturnValue({ isInitialLoading: false, data: sloTemplate });
+
+      const { queryByTestId, getByTestId } = render(<SloEditPage />);
+
+      expect(queryByTestId('sloEditPage')).toBeTruthy();
+      expect(queryByTestId('sloForm')).toBeTruthy();
+
+      expect(queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
+      expect(queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue('sli.kql.custom');
+      expect(queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
+      expect(queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
+
+      expect(queryByTestId('sloFormNameInput')).toHaveValue('My template');
+      expect(queryByTestId('sloFormDescriptionTextArea')).toHaveValue('This is my template');
+
+      expect(getByTestId('sloFormSubmitButton')).toBeEnabled();
+
+      await waitFor(() => {
+        fireEvent.click(getByTestId('sloFormSubmitButton'));
+        expect(mockCreate).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('edit SLO flow', () => {
+    let slo: SLOWithSummaryResponse;
+    beforeEach(() => {
+      jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: SLO_ID });
       jest
         .spyOn(Router, 'useLocation')
-        .mockReturnValue({ pathname: '/slos/1234/edit', search: '', state: '', hash: '' });
+        .mockReturnValue({ pathname: `/slos/edit/${SLO_ID}`, search: '', state: '', hash: '' });
+      slo = buildSlo({ id: SLO_ID });
+      useFetchSloDetailsMock.mockReturnValue({ isInitialLoading: false, data: slo });
+      useFetchSloTemplateMock.mockReturnValue({ isInitialLoading: false, data: undefined });
+    });
 
-      useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
+    it('with invalid license triggers a redirect to the SLO welcome page', async () => {
+      licenseMock.hasAtLeast.mockReturnValue(false);
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).not.toBeCalledWith(mockBasePathPrepend(paths.slos));
-    });
-  });
-
-  describe('when the correct license is found', () => {
-    beforeEach(() => {
-      licenseMock.hasAtLeast.mockReturnValue(true);
+      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
     });
 
-    describe('with no write permission', () => {
-      beforeEach(() => {
-        usePermissionsMock.mockReturnValue({
-          isLoading: false,
-          data: {
-            hasAllWriteRequested: false,
-            hasAllReadRequested: true,
-          },
-        });
+    it('with no read permission triggers a redirect to the SLO welcome page', async () => {
+      usePermissionsMock.mockReturnValue({
+        isLoading: false,
+        data: {
+          hasAllWriteRequested: false,
+          hasAllReadRequested: false,
+        },
       });
 
-      it('redirects to the slo list page', async () => {
-        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '1234' });
-        jest
-          .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: '/slos/1234/edit', search: '', state: '', hash: '' });
+      render(<SloEditPage />);
 
-        useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
-
-        render(<SloEditPage />);
-
-        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
-      });
+      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
     });
 
-    describe('with no read permission', () => {
-      beforeEach(() => {
-        usePermissionsMock.mockReturnValue({
-          isLoading: false,
-          data: {
-            hasAllWriteRequested: false,
-            hasAllReadRequested: false,
-          },
-        });
+    it('with no write permission triggers a redirect to the SLO List page', async () => {
+      usePermissionsMock.mockReturnValue({
+        isLoading: false,
+        data: {
+          hasAllWriteRequested: false,
+          hasAllReadRequested: true,
+        },
       });
+      render(<SloEditPage />);
 
-      it('redirects to the slo welcome page', async () => {
-        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '1234' });
-        jest
-          .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: '/slos/1234/edit', search: '', state: '', hash: '' });
-
-        useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
-
-        render(<SloEditPage />);
-
-        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
-      });
+      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
     });
 
-    describe('when no sloId route param is provided', () => {
-      beforeEach(() => {
-        useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
-      });
+    it('prefills the form with the SLO values', async () => {
+      const { queryByTestId } = render(<SloEditPage />);
 
-      it('renders the SLO Edit page in pristine state', async () => {
-        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
-        jest
-          .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: '/slos/1234/edit', search: '', state: '', hash: '' });
+      expect(queryByTestId('sloEditPage')).toBeTruthy();
+      expect(queryByTestId('sloForm')).toBeTruthy();
 
-        const { queryByTestId } = render(<SloEditPage />);
+      // all sections are visible
+      expect(queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
+      expect(queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
+      expect(queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
 
-        expect(queryByTestId('slosEditPage')).toBeTruthy();
-        expect(queryByTestId('sloForm')).toBeTruthy();
+      expect(queryByTestId('sloFormBudgetingMethodSelect')).toHaveValue(slo.budgetingMethod);
+      expect(queryByTestId('sloFormTimeWindowDurationSelect')).toHaveValue(slo.timeWindow.duration);
+      expect(queryByTestId('sloFormObjectiveTargetInput')).toHaveValue(slo.objective.target * 100);
 
-        expect(queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
-        // Show default values from the kql indicator
-        expect(queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue('sli.kql.custom');
-        expect(queryByTestId('indexSelectionSelectedValue')).toBeNull();
-
-        // other sections are hidden
-        expect(queryByTestId('sloEditFormObjectiveSection')).toBeNull();
-        expect(queryByTestId('sloEditFormDescriptionSection')).toBeNull();
-      });
-
-      it('prefills the form with values from URL', () => {
-        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
-
-        history.replace(
-          '/slos/create?_a=(indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration))'
-        );
-        jest
-          .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: '/slos/create', search: '', state: '', hash: '' });
-
-        useFetchApmSuggestionsMock.mockReturnValue({
-          suggestions: ['cartService'],
-          isLoading: false,
-        });
-
-        const { queryByTestId } = render(<SloEditPage />);
-
-        expect(queryByTestId('slosEditPage')).toBeTruthy();
-        expect(queryByTestId('sloForm')).toBeTruthy();
-
-        expect(queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
-        expect(queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue(
-          'sli.apm.transactionDuration'
-        );
-        expect(queryByTestId('apmLatencyServiceSelector')).toHaveTextContent('cartService');
-        expect(queryByTestId('apmLatencyEnvironmentSelector')).toHaveTextContent('prod');
-
-        expect(queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
-        expect(queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
-      });
+      expect(queryByTestId('sloFormNameInput')).toHaveValue(slo.name);
+      expect(queryByTestId('sloFormDescriptionTextArea')).toHaveValue(slo.description);
     });
 
-    describe('when a sloId route param is provided', () => {
-      it('prefills the form with the SLO values', async () => {
-        const slo = buildSlo({ id: '123Foo' });
-        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
-        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123Foo' });
+    it('calls the updateSlo hook if all required values are filled in', async () => {
+      const { getByTestId } = render(<SloEditPage />);
 
-        jest
-          .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: '/slos/123Foo/edit', search: '', state: '', hash: '' });
+      expect(getByTestId('sloFormSubmitButton')).toBeEnabled();
 
-        const { queryByTestId } = render(<SloEditPage />);
-
-        expect(queryByTestId('slosEditPage')).toBeTruthy();
-        expect(queryByTestId('sloForm')).toBeTruthy();
-
-        // all sections are visible
-        expect(queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
-        expect(queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
-        expect(queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
-
-        expect(queryByTestId('sloFormBudgetingMethodSelect')).toHaveValue(slo.budgetingMethod);
-        expect(queryByTestId('sloFormTimeWindowDurationSelect')).toHaveValue(
-          slo.timeWindow.duration
-        );
-        expect(queryByTestId('sloFormObjectiveTargetInput')).toHaveValue(
-          slo.objective.target * 100
-        );
-
-        expect(queryByTestId('sloFormNameInput')).toHaveValue(slo.name);
-        expect(queryByTestId('sloFormDescriptionTextArea')).toHaveValue(slo.description);
+      await waitFor(() => {
+        fireEvent.click(getByTestId('sloFormSubmitButton'));
       });
 
-      it('calls the updateSlo hook if all required values are filled in', async () => {
-        const slo = buildSlo({ id: '123' });
-        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
-        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
-
-        const { queryByTestId } = render(<SloEditPage />);
-
-        expect(queryByTestId('sloFormSubmitButton')).toBeEnabled();
-        fireEvent.click(queryByTestId('sloFormSubmitButton')!);
-
-        expect(mockUpdate).toMatchInlineSnapshot(`[MockFunction]`);
-      });
-
-      it('prefills the form with the provided URL values and the default values', () => {
-        const slo = buildSlo({ id: '123' });
-        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
-
-        history.push(
-          '/slos/edit/123?_a=(name:%27updated-name%27,indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration),objective:(target:0.92))'
-        );
-        jest
-          .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: '/slos/edit/123', search: '', state: '', hash: '' });
-
-        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
-
-        useFetchApmSuggestionsMock.mockReturnValue({
-          suggestions: ['cartService'],
-          isLoading: false,
-        });
-
-        const { queryByTestId } = render(<SloEditPage />);
-
-        // all sections are visible
-        expect(queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
-        expect(queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
-        expect(queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
-
-        expect(queryByTestId('indexSelectionSelectedValue')).toBeNull();
-        expect(queryByTestId('sloFormBudgetingMethodSelect')).toHaveValue(
-          SLO_EDIT_FORM_DEFAULT_VALUES.budgetingMethod
-        );
-        expect(queryByTestId('sloFormTimeWindowDurationSelect')).toHaveValue(
-          SLO_EDIT_FORM_DEFAULT_VALUES.timeWindow.duration
-        );
-        expect(queryByTestId('sloFormObjectiveTargetInput')).toHaveValue(92);
-
-        expect(queryByTestId('sloFormNameInput')).toHaveValue('updated-name');
-        expect(queryByTestId('sloFormDescriptionTextArea')).toHaveValue('');
-      });
-    });
-
-    describe('when submitting has completed successfully', () => {
-      it('navigates to the SLO List page', async () => {
-        const slo = buildSlo();
-        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
-        jest
-          .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: '/slos/edit/123', search: '', state: '', hash: '' });
-        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
-
-        const { getByTestId } = render(<SloEditPage />);
-
-        expect(getByTestId('sloFormSubmitButton')).toBeEnabled();
-
-        await waitFor(() => {
-          fireEvent.click(getByTestId('sloFormSubmitButton'));
-        });
-
-        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
-      });
+      expect(mockUpdate).toHaveBeenCalled();
+      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
     });
   });
 });

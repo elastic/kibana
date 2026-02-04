@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ServerStepDefinition } from './step_registry/types';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
 
@@ -22,9 +24,7 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @param definition - The step server-side definition
    * @throws Error if definition for the same step type ID is already registered
    */
-  // Accept any input and output types to avoid type inference issues within the plugin
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  registerStepDefinition(definition: ServerStepDefinition<any, any>): void;
+  registerStepDefinition(definition: ServerStepDefinition): void;
 }
 
 /**
@@ -43,5 +43,7 @@ export interface WorkflowsExtensionsServerPluginSetupDeps {}
 /**
  * Dependencies for the server plugin start phase.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsExtensionsServerPluginStartDeps {}
+export interface WorkflowsExtensionsServerPluginStartDeps {
+  actions: ActionsPluginStartContract;
+  inference: InferenceServerStart;
+}

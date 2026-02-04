@@ -67,25 +67,178 @@ describe('Update profile routes', () => {
     it('correctly defines route.', () => {
       const bodySchema = (routeConfig.validate as any).body as ObjectType;
       expect(() => bodySchema.validate(0)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [object] but got [number]"`
+        `"expected a plain object value, but found [number] instead."`
       );
       expect(() => bodySchema.validate('avatar')).toThrowErrorMatchingInlineSnapshot(
-        `"could not parse record value from json input"`
+        `"could not parse object value from json input"`
       );
       expect(() => bodySchema.validate(true)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [object] but got [boolean]"`
-      );
-      expect(() => bodySchema.validate(null)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [object] but got [null]"`
-      );
-      expect(() => bodySchema.validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [object] but got [undefined]"`
+        `"expected a plain object value, but found [boolean] instead."`
       );
 
       expect(bodySchema.validate({})).toEqual({});
       expect(
-        bodySchema.validate({ title: 'some-title', content: { deepProperty: { type: 'basic' } } })
-      ).toEqual({ title: 'some-title', content: { deepProperty: { type: 'basic' } } });
+        bodySchema.validate({
+          avatar: { initials: 'some-initials', color: 'some-color', imageUrl: 'some-image-url' },
+          userSettings: { darkMode: 'dark', contrastMode: 'high' },
+        })
+      ).toEqual({
+        avatar: { initials: 'some-initials', color: 'some-color', imageUrl: 'some-image-url' },
+        userSettings: { darkMode: 'dark', contrastMode: 'high' },
+      });
+    });
+
+    it('rejects invalid darkMode enum values.', () => {
+      const bodySchema = (routeConfig.validate as any).body as ObjectType;
+
+      // Valid values should pass
+      expect(
+        bodySchema.validate({
+          userSettings: { darkMode: 'system' },
+        })
+      ).toEqual({ userSettings: { darkMode: 'system' } });
+
+      expect(
+        bodySchema.validate({
+          userSettings: { darkMode: 'dark' },
+        })
+      ).toEqual({ userSettings: { darkMode: 'dark' } });
+
+      expect(
+        bodySchema.validate({
+          userSettings: { darkMode: 'light' },
+        })
+      ).toEqual({ userSettings: { darkMode: 'light' } });
+
+      expect(
+        bodySchema.validate({
+          userSettings: { darkMode: 'space_default' },
+        })
+      ).toEqual({ userSettings: { darkMode: 'space_default' } });
+
+      // Invalid values should fail
+      expect(() =>
+        bodySchema.validate({
+          userSettings: { darkMode: 'invalid' },
+        })
+      ).toThrow();
+
+      expect(() =>
+        bodySchema.validate({
+          userSettings: { darkMode: 'INVALID' },
+        })
+      ).toThrow();
+
+      expect(() =>
+        bodySchema.validate({
+          userSettings: { darkMode: 123 },
+        })
+      ).toThrow();
+    });
+
+    it('rejects invalid contrastMode enum values.', () => {
+      const bodySchema = (routeConfig.validate as any).body as ObjectType;
+
+      // Valid values should pass
+      expect(
+        bodySchema.validate({
+          userSettings: { contrastMode: 'system' },
+        })
+      ).toEqual({ userSettings: { contrastMode: 'system' } });
+
+      expect(
+        bodySchema.validate({
+          userSettings: { contrastMode: 'standard' },
+        })
+      ).toEqual({ userSettings: { contrastMode: 'standard' } });
+
+      expect(
+        bodySchema.validate({
+          userSettings: { contrastMode: 'high' },
+        })
+      ).toEqual({ userSettings: { contrastMode: 'high' } });
+
+      // Invalid values should fail
+      expect(() =>
+        bodySchema.validate({
+          userSettings: { contrastMode: 'invalid' },
+        })
+      ).toThrow();
+
+      expect(() =>
+        bodySchema.validate({
+          userSettings: { contrastMode: 'INVALID' },
+        })
+      ).toThrow();
+
+      expect(() =>
+        bodySchema.validate({
+          userSettings: { contrastMode: 123 },
+        })
+      ).toThrow();
+    });
+
+    it('rejects avatar initials exceeding max length.', () => {
+      const bodySchema = (routeConfig.validate as any).body as ObjectType;
+      const MAX_STRING_FIELD_LENGTH = 1024;
+
+      // Valid length should pass
+      const validInitials = 'a'.repeat(MAX_STRING_FIELD_LENGTH);
+      expect(
+        bodySchema.validate({
+          avatar: { initials: validInitials },
+        })
+      ).toEqual({ avatar: { color: null, imageUrl: null, initials: validInitials } });
+
+      const invalidInitials = 'a'.repeat(MAX_STRING_FIELD_LENGTH + 1);
+      expect(() =>
+        bodySchema.validate({
+          avatar: { initials: invalidInitials },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[avatar.initials]: types that failed validation:
+        - [avatar.initials.0]: value has length [1025] but it must have a maximum length of [1024].
+        - [avatar.initials.1]: expected value to equal [null]"
+      `);
+    });
+
+    it('rejects avatar color exceeding max length.', () => {
+      const bodySchema = (routeConfig.validate as any).body as ObjectType;
+      const MAX_STRING_FIELD_LENGTH = 1024;
+
+      const validColor = 'a'.repeat(MAX_STRING_FIELD_LENGTH);
+      expect(
+        bodySchema.validate({
+          avatar: { color: validColor },
+        })
+      ).toEqual({ avatar: { color: validColor, imageUrl: null, initials: null } });
+
+      const invalidColor = 'a'.repeat(MAX_STRING_FIELD_LENGTH + 1);
+      expect(() =>
+        bodySchema.validate({
+          avatar: { color: invalidColor },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[avatar.color]: types that failed validation:
+        - [avatar.color.0]: value has length [1025] but it must have a maximum length of [1024].
+        - [avatar.color.1]: expected value to equal [null]"
+      `);
+    });
+
+    it('allows null values for avatar initials and color.', () => {
+      const bodySchema = (routeConfig.validate as any).body as ObjectType;
+
+      expect(
+        bodySchema.validate({
+          avatar: { initials: null, color: null },
+        })
+      ).toEqual({ avatar: { imageUrl: null, initials: null, color: null } });
+    });
+
+    it('validates body size limit is configured correctly.', () => {
+      const MAX_USER_PROFILE_DATA_SIZE_BYTES = 1000 * 1024;
+
+      expect(routeConfig.options?.body?.maxBytes).toBe(MAX_USER_PROFILE_DATA_SIZE_BYTES);
     });
 
     it('fails if session is not found.', async () => {
@@ -144,7 +297,6 @@ describe('Update profile routes', () => {
           darkMode: 'dark',
           contrastMode: 'high',
         },
-        'solutionNavigationTour:completed': true,
       };
 
       await expect(
@@ -191,6 +343,39 @@ describe('Update profile routes', () => {
 
       expect(userProfileService.update).toBeCalledTimes(1);
       expect(userProfileService.update).toBeCalledWith('u_some_id', { some: 'property' });
+    });
+
+    it('rejects invalid avatar color.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({ body: { avatar: { color: 'invalid' } } }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 400 }));
+
+      expect(userProfileService.update).not.toHaveBeenCalled();
+    });
+    it('accepts valid avatar color.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({ body: { avatar: { color: '#000000' } } }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
+
+      expect(userProfileService.update).toBeCalledTimes(1);
     });
   });
 });

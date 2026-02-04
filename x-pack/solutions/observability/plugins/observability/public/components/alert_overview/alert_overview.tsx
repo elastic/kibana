@@ -95,6 +95,13 @@ export const AlertOverview = memo(
           },
         },
         {
+          id: ColumnIDs.WORKFLOW_TAGS,
+          key: i18n.translate('xpack.observability.alertFlyout.overviewTab.workflowTags', {
+            defaultMessage: 'Workflow tags',
+          }),
+          value: alert.fields['kibana.alert.workflow_tags'] as string[],
+        },
+        {
           id: ColumnIDs.SOURCE,
           key: i18n.translate('xpack.observability.alertFlyout.overviewTab.sources', {
             defaultMessage: 'Affected entity / source',

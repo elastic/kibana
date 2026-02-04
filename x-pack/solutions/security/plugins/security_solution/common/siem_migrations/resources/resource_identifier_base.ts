@@ -15,6 +15,7 @@ import {
 import type { ItemDocument, OriginalItem } from '../types';
 import type { SplunkResourceType } from '../model/vendor/common/splunk.gen';
 import type { QradarResourceType } from '../model/vendor/common/qradar.gen';
+import { qradarResourceIdentifier } from './qradar';
 
 export interface SiemMigrationResourceTypeByVendor {
   splunk: SplunkResourceType;
@@ -24,6 +25,7 @@ export interface SiemMigrationResourceTypeByVendor {
 /** Currently resource identification is only needed for Splunk since this for Qradar we identify resources by LLM */
 const identifiers: Record<ResourceSupportedVendor, VendorResourceIdentifier> = {
   splunk: splResourceIdentifier,
+  qradar: qradarResourceIdentifier,
 };
 
 // Type for a class that extends the ResourceIdentifier abstract class
@@ -44,7 +46,9 @@ export abstract class ResourceIdentifier<I> {
     this.identifier = identifiers[this.vendor];
   }
 
-  public fromQuery(query: string): SiemMigrationResourceBase[] {
+  public fromQuery(
+    query: string
+  ): SiemMigrationResourceBase[] | Promise<SiemMigrationResourceBase[]> {
     return this.identifier(query);
   }
 
@@ -69,25 +73,33 @@ export abstract class ResourceIdentifier<I> {
     ];
   }
 
-  public fromResource(resource: SiemMigrationResourceData): SiemMigrationResourceBase[] {
-    if (resource.type === 'macro' && resource.content) {
+  public async fromResource(
+    resource: SiemMigrationResourceData
+  ): Promise<SiemMigrationResourceBase[]> {
+    if (resource.type === 'macro' && resource.content && this.vendor === 'splunk') {
       return this.identifier(resource.content);
     }
-    return [];
+    return Promise.resolve([]);
   }
 
-  public fromResources(resources: SiemMigrationResourceData[]): SiemMigrationResourceBase[] {
+  public async fromResources(
+    resources: SiemMigrationResourceData[]
+  ): Promise<SiemMigrationResourceBase[]> {
+    if (this.vendor !== 'splunk') {
+      return [];
+    }
     const lookups = new Set<string>();
     const macros = new Set<string>();
-    resources.forEach((resource) => {
-      this.fromResource(resource).forEach((identifiedResource) => {
+    for (const resource of resources) {
+      const resourcesFromResource = await this.fromResource(resource);
+      resourcesFromResource.forEach((identifiedResource) => {
         if (identifiedResource.type === 'macro') {
           macros.add(identifiedResource.name);
         } else if (identifiedResource.type === 'lookup') {
           lookups.add(identifiedResource.name);
         }
       });
-    });
+    }
     return [
       ...Array.from(macros).map<SiemMigrationResourceBase>((name) => ({ type: 'macro', name })),
       ...Array.from(lookups).map<SiemMigrationResourceBase>((name) => ({ type: 'lookup', name })),

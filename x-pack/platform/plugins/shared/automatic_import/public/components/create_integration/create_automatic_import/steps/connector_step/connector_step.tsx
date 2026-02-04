@@ -24,7 +24,7 @@ import {
   ELASTIC_LLM_USAGE_COSTS,
   ELASTIC_LLM_THIRD_PARTY,
   ELASTIC_LLM_TOUR_PERFORMANCE,
-} from '@kbn/elastic-assistant/impl/tour/elastic_llm/translations';
+} from '@kbn/elastic-assistant/impl/tour/common/translations';
 import { isElasticManagedLlmConnector } from '@kbn/elastic-assistant/impl/connectorland/helpers';
 import {
   AuthorizationWrapper,

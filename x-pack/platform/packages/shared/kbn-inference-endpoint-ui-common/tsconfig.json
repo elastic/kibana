@@ -28,6 +28,11 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/spaces-plugin",
     "@kbn/projects-solutions-groups",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/search-api-panels",
+    "@kbn/kibana-react-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/deeplinks-management",
+    "@kbn/connector-schemas"
   ]
 }

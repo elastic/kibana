@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import expect from '@kbn/expect';
 
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';

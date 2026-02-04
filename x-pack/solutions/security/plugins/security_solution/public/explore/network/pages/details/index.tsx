@@ -82,8 +82,8 @@ const NetworkDetailsComponent: React.FC = () => {
   );
 
   const { signalIndexName } = useSignalIndex();
-  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
-  const canReadAlerts = hasKibanaREAD && hasIndexRead;
+  const { hasAlertsRead, hasIndexRead } = useAlertsPrivileges();
+  const canReadAlerts = hasAlertsRead && hasIndexRead;
 
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);

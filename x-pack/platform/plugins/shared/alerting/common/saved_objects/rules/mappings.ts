@@ -65,11 +65,10 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         actionTypeId: {
           type: 'keyword',
         },
+        params: {
+          type: 'flattened',
+        },
         // NO NEED TO BE INDEXED
-        // params: {
-        //   dynamic: false,
-        //   properties: {},
-        // },
         // frequency: {
         //   properties: {
         //     summary: {

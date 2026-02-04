@@ -95,8 +95,10 @@ export async function getLensServices(
     spaces,
     share,
     unifiedSearch,
+    kql,
     serverless,
     contentManagement,
+    cps,
   } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -131,8 +133,10 @@ export async function getLensServices(
     spaces,
     share,
     unifiedSearch,
+    kql,
     locator,
     serverless,
+    cps,
     ...coreStart,
   };
 }
@@ -217,7 +221,7 @@ export async function mountApp(
       embeddableId = initialContext.embeddableId;
     }
     if (stateTransfer && props?.state) {
-      const { state: rawState, isCopied } = props;
+      const { state, isCopied } = props;
       stateTransfer.navigateToWithEmbeddablePackages<LensSerializedAPIConfig>(
         mergedOriginatingApp,
         {
@@ -226,9 +230,7 @@ export async function mountApp(
             {
               embeddableId: isCopied ? undefined : embeddableId,
               type: LENS_EMBEDDABLE_TYPE,
-              serializedState: {
-                rawState,
-              },
+              serializedState: state,
               searchSessionId: data.search.session.getSessionId(),
             },
           ],

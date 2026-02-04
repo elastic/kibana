@@ -357,7 +357,7 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
     class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexEnd-stretch-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -797,7 +797,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
     class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexEnd-stretch-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"

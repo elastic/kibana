@@ -978,11 +978,16 @@ export async function getAgentTemplateAssetsMap({
 export async function getPackageKnowledgeBase(options: {
   esClient: ElasticsearchClient;
   pkgName: string;
+  abortController?: AbortController;
 }): Promise<PackageKnowledgeBase | undefined> {
-  const { esClient, pkgName } = options;
+  const { esClient, pkgName, abortController } = options;
 
   try {
-    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(esClient, pkgName);
+    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(
+      esClient,
+      pkgName,
+      abortController
+    );
 
     if (knowledgeBaseItems.length === 0) {
       return undefined;

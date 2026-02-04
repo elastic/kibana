@@ -25,7 +25,7 @@ steps:
 
   - command: .buildkite/scripts/steps/test/ftr_configs.sh
     env:
-      FTR_CONFIG: 'x-pack/platform/test/onechat/smoke_tests/config.stateful.ts'
+      FTR_CONFIG: 'x-pack/platform/test/agent_builder/smoke_tests/config.stateful.ts'
       FTR_CONFIG_GROUP_KEY: 'ftr-agent-builder-smoke-tests'
       FTR_GEN_AI: '1'
     label: Agent Builder API Smoke Tests

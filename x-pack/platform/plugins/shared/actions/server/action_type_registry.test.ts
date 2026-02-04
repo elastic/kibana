@@ -235,6 +235,7 @@ describe('actionTypeRegistry', () => {
           supportedFeatureIds: ['alerting'],
           isSystemActionType: false,
           isDeprecated: false,
+          source: 'stack',
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -292,6 +293,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: false,
           validate: { params: expect.any(Object) },
           isDeprecated: false,
+          source: 'stack',
         },
         {
           id: 'my-connector-type-with-subaction',
@@ -304,6 +306,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: false,
           validate: { params: expect.any(Object) },
           isDeprecated: false,
+          source: 'stack',
         },
       ]);
 
@@ -449,6 +452,7 @@ describe('actionTypeRegistry', () => {
           supportedFeatureIds: ['alerting'],
           isSystemActionType: false,
           isDeprecated: false,
+          source: 'stack',
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -481,6 +485,7 @@ describe('actionTypeRegistry', () => {
           supportedFeatureIds: ['alerting'],
           isSystemActionType: true,
           isDeprecated: false,
+          source: 'stack',
         },
       ]);
     });
@@ -514,6 +519,7 @@ describe('actionTypeRegistry', () => {
           subFeature: 'endpointSecurity',
           supportedFeatureIds: ['siem'],
           isDeprecated: false,
+          source: 'stack',
         },
       ]);
     });
@@ -932,6 +938,58 @@ describe('actionTypeRegistry', () => {
 
       const result = registry.isDeprecated('test.action');
       expect(result).toBe(true);
+    });
+  });
+
+  describe('register() - optional executor and params', () => {
+    const defaultValidateNoParams = {
+      config: { schema: z.object({}) },
+      secrets: { schema: z.object({}) },
+    };
+
+    it('allows workflows-only connectors to be registered without executor and params', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      const workflowsConnector = getConnectorType({
+        id: 'workflows-connector',
+        name: 'Workflows Connector',
+        supportedFeatureIds: ['workflows'],
+        executor: undefined,
+        validate: defaultValidateNoParams,
+      });
+
+      expect(() => actionTypeRegistry.register(workflowsConnector)).not.toThrow();
+      expect(actionTypeRegistry.has('workflows-connector')).toBe(true);
+      expect(mockTaskManager.registerTaskDefinitions).not.toHaveBeenCalled();
+    });
+
+    it('skips task registration for workflows connectors without executor and params', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      mockTaskManager.registerTaskDefinitions.mockClear();
+
+      const workflowsConnector = getConnectorType({
+        id: 'workflows-connector-no-executor-params',
+        name: 'Workflows Connector No Executor Params',
+        supportedFeatureIds: ['workflows'],
+        executor: undefined,
+        validate: defaultValidateNoParams,
+      });
+
+      actionTypeRegistry.register(workflowsConnector);
+
+      expect(mockTaskManager.registerTaskDefinitions).not.toHaveBeenCalled();
+    });
+
+    it('requires both executor and params for connectors with multiple feature IDs including workflows', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      const workflowsConnector = getConnectorType({
+        id: 'workflows-connector-multi-feature',
+        name: 'Workflows Connector Multi Feature',
+        supportedFeatureIds: ['workflows', 'alerting'],
+      });
+      // Keep both executor and params for multi-feature connectors
+      expect(() => actionTypeRegistry.register(workflowsConnector)).not.toThrow();
+      expect(actionTypeRegistry.has('workflows-connector-multi-feature')).toBe(true);
+      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalled();
     });
   });
 });

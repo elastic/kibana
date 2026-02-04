@@ -3,7 +3,7 @@ info:
   title: Create script schema
   version: '2023-10-31'
 paths:
-  /api/endpoint/action/scripts_library:
+  /api/endpoint/scripts_library:
     post:
       summary: Create script
       operationId: EndpointScriptLibraryCreateScript
@@ -60,6 +60,11 @@ components:
           type: object
           format: binary
           description: The script file upload
+        tags:
+          type: array
+          description: Tags to categorize the script
+          items:
+            $ref: './common.yaml#/components/schemas/EndpointScriptTags'
         description:
           type: string
           description: Description of the script and its purpose/functionality
@@ -72,7 +77,7 @@ components:
         requiresInput:
           type: boolean
           description: Whether the script requires input arguments
-        executable:
+        pathToExecutable:
           type: string
           description: >
             Used only for when the uploaded script is an archive (.zip file for example).

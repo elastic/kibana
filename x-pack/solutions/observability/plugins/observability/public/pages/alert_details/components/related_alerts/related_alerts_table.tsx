@@ -12,6 +12,7 @@ import { ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { RELATED_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import type { AlertsTableSortCombinations } from '@kbn/response-ops-alerts-table/types';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import { getRelatedColumns } from './get_related_columns';
 import { getBuildRelatedAlertsQuery } from '../../hooks/related_alerts/get_build_related_alerts_query';
 import type { AlertData } from '../../../../hooks/use_fetch_alert_detail';
@@ -19,7 +20,6 @@ import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext }
 import { observabilityFeatureId } from '../../../..';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useKibana } from '../../../../utils/kibana_react';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../../../common/constants';
 import { AlertsTableCellValue } from '../../../../components/alerts_table/common/cell_value';
 import { casesFeatureIdV2 } from '../../../../../common';
 import { useFilterProximalParam } from '../../hooks/use_filter_proximal_param';
@@ -68,7 +68,7 @@ export function RelatedAlertsTable({ alertData }: Props) {
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
+    <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="relatedAlertsTable">
       <EuiSpacer size="s" />
       <RelatedAlertsTableFilter />
       <AlertsTable<ObservabilityAlertsTableContext>

@@ -53,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
       'kibana.alert.duration.us',
       'kibana.alert.flapping_history',
       'kibana.alert.maintenance_window_ids',
+      'kibana.alert.maintenance_window_names',
       'kibana.alert.reason',
       'kibana.alert.rule.execution.uuid',
       'kibana.alert.rule.execution.timestamp',

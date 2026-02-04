@@ -16,6 +16,7 @@ import type {
   RemoveProcessor,
   ConvertProcessor,
   ReplaceProcessor,
+  MathProcessor,
 } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -253,7 +254,27 @@ apiTest.describe(
               where: { field: 'response_size', range: { gt: 1000, lte: 5000 } },
             } as SetProcessor,
 
-            // Step 24: Clean up referer field - remove query parameters for privacy
+            // Step 24: Calculate response time in seconds using math processor
+            // Note: Using * 0.001 instead of / 1000 to force floating-point arithmetic
+            // (JavaScript/TinyMath doesn't preserve .0 suffix, so 1000.0 becomes 1000)
+            {
+              action: 'math',
+              expression: 'response_time_ms * 0.001',
+              to: 'response_time_sec',
+              where: { field: 'response_time_ms', exists: true },
+            } as MathProcessor,
+
+            // Step 25: Calculate throughput (bytes per second) using math processor
+            // Note: Multiply response_size by 1000/response_time_ms to get bytes per second
+            // Using 1000.0 pattern but JS loses .0, so we use multiply by decimal
+            {
+              action: 'math',
+              expression: 'response_size * 1000 / response_time_ms',
+              to: 'throughput_bytes_per_sec',
+              where: { field: 'response_time_ms', gt: 0 },
+            } as MathProcessor,
+
+            // Step 27: Clean up referer field - remove query parameters for privacy
             {
               action: 'replace',
               from: 'referer',
@@ -262,7 +283,7 @@ apiTest.describe(
               where: { field: 'referer', exists: true },
             } as ReplaceProcessor,
 
-            // Step 25: Remove temporary timestamp field after date conversion
+            // Step 28: Remove temporary timestamp field after date conversion
             // Unconditional removal to actually drop the field (not just nullify it)
             // ignore_missing: true to avoid errors when field doesn't exist
             {
@@ -349,6 +370,8 @@ apiTest.describe(
           'traffic.source': '',
           'device.type': '',
           'size.category': '',
+          response_time_sec: 0.1, // Math processor output: response_time_ms * 0.001
+          throughput_bytes_per_sec: 10000, // Math processor output: response_size * 1000 / response_time_ms
           tags: [''],
           'source.ip': '',
           'http.request.method': '',
@@ -522,6 +545,18 @@ apiTest.describe(
         expect(largeIngestDocs).toHaveLength(largeEsqlDocs.length);
         expect(smallIngestDocs).toHaveLength(smallEsqlDocs.length);
         expect(mediumIngestDocs).toHaveLength(mediumEsqlDocs.length);
+
+        // *** TEST SECTION: MATH PROCESSOR VERIFICATION ***
+        // Test math processor: response_time_sec = response_time_ms * 0.001
+        // Document 1 has response_time_ms = 150, so response_time_sec should be 0.15
+        expect(doc1Ingest?.response_time_sec).toBe(0.15);
+        expect(doc1Esql?.response_time_sec).toBe(0.15);
+
+        // Test math processor: throughput = response_size * 1000 / response_time_ms
+        // Document 1 has response_size = 1234, response_time_ms = 150
+        // throughput = 1234 * 1000 / 150 = 8226 (integer division)
+        expect(doc1Ingest?.throughput_bytes_per_sec).toBe(8226);
+        expect(doc1Esql?.throughput_bytes_per_sec).toBe(8226);
 
         // *** TEST SECTION: COMMON FIELDS VERIFICATION ***
         // Verify common fields across all processed documents

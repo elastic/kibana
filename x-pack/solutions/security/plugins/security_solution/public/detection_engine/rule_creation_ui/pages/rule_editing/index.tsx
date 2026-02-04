@@ -35,7 +35,6 @@ import type {
 import { useRule, useUpdateRule } from '../../../rule_management/logic';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import {
   getDetectionEngineUrl,
   getRuleDetailsUrl,
@@ -75,20 +74,15 @@ import { usePrebuiltRulesCustomizationStatus } from '../../../rule_management/lo
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
-  const [
-    {
-      loading: userInfoLoading,
-      isSignalIndexExists,
-      isAuthenticated,
-      hasEncryptionKey,
-      canUserCRUD,
-    },
-  ] = useUserData();
+  const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
+    useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const { application, triggersActionsUi } = useKibana().services;
   const { navigateToApp } = application;
 
@@ -522,7 +516,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       path: getDetectionEngineUrl(),
     });
     return null;
-  } else if (!hasUserCRUDPermission(canUserCRUD)) {
+  } else if (!canEditRules) {
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(ruleId ?? ''),

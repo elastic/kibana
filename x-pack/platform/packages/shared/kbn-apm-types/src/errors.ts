@@ -19,9 +19,16 @@ export interface ErrorData {
 }
 
 export interface Error {
+  id: string;
+  index?: string;
+  parent?: { id?: string };
+  trace?: { id?: string };
+  span?: { id?: string };
+  transaction?: { id?: string };
+  service: { name: string };
   eventName?: string;
   error: ErrorData;
-  timestamp?: TimestampUs | undefined;
+  timestamp: TimestampUs;
 }
 
 export interface ErrorsByTraceId {

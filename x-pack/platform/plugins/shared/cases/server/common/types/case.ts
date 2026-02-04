@@ -69,6 +69,7 @@ export type CaseTransformedAttributes = CaseAttributes;
 export type CaseTransformedAttributesWithAttachmentStats = CaseAttributes & {
   total_comments: number;
   total_alerts: number;
+  total_events: number;
 };
 
 export const CaseTransformedAttributesRt = CaseAttributesRt;
@@ -83,10 +84,15 @@ export const getPartialCaseTransformedAttributesRt = (): Type<
 
   return exact(
     /**
-     * We add the `total_comments` and `total_alerts` properties to allow the
+     * We add the `total_comments`, `total_alerts`, and `total_events` properties to allow the
      * attachments stats to be updated.
      */
-    partial({ ...caseTransformedAttributesProps, total_comments: number, total_alerts: number })
+    partial({
+      ...caseTransformedAttributesProps,
+      total_comments: number,
+      total_alerts: number,
+      total_events: number,
+    })
   );
 };
 

@@ -397,6 +397,64 @@ paths:
       summary: Terminate a process
       tags:
         - Security Endpoint Management API
+  /api/endpoint/action/memory_dump:
+    post:
+      description: Generates memory dumps on the targeted host.
+      operationId: EndpointGenerateMemoryDump
+      requestBody:
+        content:
+          application/json:
+            examples:
+              ProcessMemoryDump:
+                summary: Generate a memory dump from the host machine
+                value:
+                  agent_type: endpoint
+                  comment: Generating memory dump for investigation
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    entity_id: abc123
+                    type: process
+            schema:
+              $ref: '#/components/schemas/MemoryDumpRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                MemoryDumpSuccessResponse:
+                  summary: Memory dump action successfully created
+                  value:
+                    data:
+                      agents:
+                        - ed518850-681a-4d60-bb98-e22640cae2a8
+                      agentState:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          isCompleted: false
+                          wasSuccessful: false
+                      agentType: endpoint
+                      command: memory-dump
+                      createdBy: elastic
+                      hosts:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          name: gke-node-1235412
+                      id: 233db9ea-6733-4849-9226-5a7039c7161d
+                      isCompleted: false
+                      isExpired: false
+                      outputs: {}
+                      parameters:
+                        entity_id: abc123
+                        type: process
+                      startedAt: '2022-07-29T19:08:49.126Z'
+                      status: pending
+                      wasSuccessful: false
+              schema:
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
+          description: Action request was successfully created
+      summary: Generate a memory dump from the host machine
+      tags:
+        - Security Endpoint Management API
   /api/endpoint/action/running_procs:
     post:
       description: Get a list of all processes running on an endpoint.
@@ -443,10 +501,10 @@ paths:
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
-                    inputParams: >-
+                    scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
+                    scriptInput: >-
                       --delete --paths-to-delete
                       /tmp/temp_file.txt,/tmp/random_file.txt
-                    script: 1111-2222-3333-4444-5555-6666-7777-8888
             schema:
               $ref: '#/components/schemas/RunScriptRouteRequestBody'
         required: true
@@ -747,6 +805,83 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Endpoint Management API
+  /api/endpoint/scripts_library:
+    get:
+      description: Retrieve a list of scripts
+      operationId: EndpointScriptLibraryListScripts
+      parameters:
+        - description: Page number of the results to return. Defaults to 1.
+          in: query
+          name: page
+          required: false
+          schema:
+            $ref: '#/components/schemas/Page'
+        - description: >-
+            Number of results to return per page. Defaults to 10. Max value is
+            1000.
+          in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/ApiPageSize'
+        - description: The field to sort the results by. Defaults to name.
+          in: query
+          name: sortField
+          required: false
+          schema:
+            $ref: '#/components/schemas/ApiSortField'
+        - description: The direction to sort the results by. Defaults to asc (ascending).
+          in: query
+          name: sortDirection
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortDirection'
+        - description: >
+            A KQL query string to filter the list of scripts. Nearly all fields
+            in the script object are searchable.
+          in: query
+          name: kuery
+          required: false
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Kuery'
+              - example: platform:windows
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                response:
+                  summary: List of scripts response example
+                  value:
+                    data: []
+                    page: 1
+                    pageSize: 10
+                    sortDirection: asc
+                    sortField: name
+                    total: 100
+              schema:
+                type: object
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/EndpointScript'
+                    type: array
+                  page:
+                    $ref: '#/components/schemas/Page'
+                  pageSize:
+                    $ref: '#/components/schemas/ApiPageSize'
+                  sortDirection:
+                    $ref: '#/components/schemas/SortDirection'
+                  sortField:
+                    $ref: '#/components/schemas/ApiSortField'
+                  total:
+                    description: The total number of scripts matching the query
+                    type: integer
+          description: List of scripts response
+      summary: Get a list of scripts
+      tags:
+        - Security Endpoint Management API
 components:
   schemas:
     ActionDetailsResponse:
@@ -757,6 +892,7 @@ components:
           get-file: '#/components/schemas/GetFile'
           isolate: '#/components/schemas/Isolate'
           kill-process: '#/components/schemas/KillProcess'
+          memory-dump: '#/components/schemas/MemoryDump'
           running-processes: '#/components/schemas/RunningProcesses'
           runscript: '#/components/schemas/Runscript'
           scan: '#/components/schemas/Scan'
@@ -776,6 +912,7 @@ components:
         - $ref: '#/components/schemas/Unisolate'
         - $ref: '#/components/schemas/SuspendProcess'
         - $ref: '#/components/schemas/RunningProcesses'
+        - $ref: '#/components/schemas/MemoryDump'
     ActionStateSuccessResponse:
       type: object
       properties:
@@ -837,6 +974,21 @@ components:
         - crowdstrike
         - microsoft_defender_endpoint
       example: endpoint
+      type: string
+    ApiPageSize:
+      allOf:
+        - $ref: '#/components/schemas/PageSize'
+        - maximum: 1000
+    ApiSortField:
+      description: Determines which field is used to sort the results.
+      enum:
+        - name
+        - createdAt
+        - createdBy
+        - updatedAt
+        - updatedBy
+        - fileSize
+      example: updatedAt
       type: string
     Cancel:
       allOf:
@@ -941,6 +1093,7 @@ components:
         - scan
         - runscript
         - cancel
+        - memory-dump
       minLength: 1
       type: string
     Commands:
@@ -1069,6 +1222,97 @@ components:
               revision: 2
       type: object
       properties: {}
+    EndpointScript:
+      type: object
+      properties:
+        createdAt:
+          format: date-time
+          type: string
+        createdBy:
+          example: elastic
+          type: string
+        description:
+          description: Description of the script and its purpose/functionality
+          example: Collects host data for investigation
+          type: string
+        downloadUri:
+          description: >-
+            URI to download the script file. Note that this is the relative path
+            and does not include the space (if applicable)
+          example: >-
+            /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+          type: string
+        example:
+          type: string
+        fileHash:
+          description: SHA256 hash of the script file that was uploaded
+          example: abf573681eb54aac5e05e35bf186d4d31abe45ecf242461490523f11d2a8fbb8
+          type: string
+        fileName:
+          description: Name of the script file that was uploaded
+          example: collect_host_data.sh
+          type: string
+        fileSize:
+          description: Size of the script file that was uploaded in bytes
+          example: 12345
+          type: integer
+        id:
+          example: 123e4567-e89b-12d3-a456-426655440000
+          format: uuid
+          type: string
+        instructions:
+          description: >-
+            Instructions for using the script, including details around its
+            supported input arguments
+          type: string
+        name:
+          example: Collect host data
+          type: string
+        pathToExecutable:
+          description: >
+            The relative path to the file included in the archive that should be
+            executed once its contents are extracted. Applicable only for
+            scripts uploaded as an archive (.zip file for example).
+          type: string
+        platform:
+          items:
+            $ref: '#/components/schemas/EndpointScriptPlatform'
+          type: array
+        requiresInput:
+          type: boolean
+        tags:
+          description: Tags that categorize the script
+          items:
+            $ref: '#/components/schemas/EndpointScriptTags'
+          type: array
+        updatedAt:
+          format: date-time
+          type: string
+        updatedBy:
+          example: admin
+          type: string
+        version:
+          type: string
+    EndpointScriptPlatform:
+      enum:
+        - linux
+        - macos
+        - windows
+      type: string
+    EndpointScriptTags:
+      enum:
+        - remediationAction
+        - dataCollection
+        - networkDiagnostics
+        - networkAction
+        - systemInventory
+        - forensicCollection
+        - threatHunting
+        - discovery
+        - systemManagement
+        - userManagement
+        - troubleshooting
+      type: string
     Execute:
       allOf:
         - $ref: '#/components/schemas/ResponseActionDetails'
@@ -1156,7 +1400,11 @@ components:
                 command:
                   $ref: '#/components/schemas/Command'
                 timeout:
-                  $ref: '#/components/schemas/Timeout'
+                  description: >-
+                    The maximum timeout value in seconds before the command is
+                    terminated.
+                  minimum: 1
+                  type: integer
               required:
                 - command
           required:
@@ -1677,6 +1925,153 @@ components:
         - scriptName
       title: Microsoft Defender Endpoint Run Script Parameters
       type: object
+    MemoryDump:
+      allOf:
+        - $ref: '#/components/schemas/ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    properties:
+                      code:
+                        type: string
+                      disk_free_space:
+                        description: >-
+                          The free space on the host machine in bytes after the
+                          memory dump is written to disk
+                        type: number
+                      file_size:
+                        description: The size of the memory dump compressed file in bytes
+                        type: string
+                      path:
+                        description: >-
+                          The path to the memory dump compressed file on the
+                          host machine
+                        type: string
+                    title: Memory dump output
+                    type: object
+              type: object
+            parameters:
+              oneOf:
+                - properties:
+                    type:
+                      description: Kernel-level memory dump
+                      enum:
+                        - kernel
+                      type: string
+                  required:
+                    - type
+                  title: Kernel memory dump
+                  type: object
+                - properties:
+                    pid:
+                      description: The process ID (PID)
+                      type: number
+                    type:
+                      description: Process-level memory dump using a process ID
+                      enum:
+                        - process
+                      type: string
+                  required:
+                    - type
+                    - pid
+                  title: Process memory dump with PID
+                  type: object
+                - properties:
+                    entity_id:
+                      description: The process entity ID
+                      type: string
+                    type:
+                      description: Process-level memory dump using an entity ID
+                      enum:
+                        - process
+                      type: string
+                  required:
+                    - type
+                    - entity_id
+                  title: Process memory dump with entity ID
+                  type: object
+          required:
+            - parameters
+    MemoryDumpRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              description: >-
+                If this action is associated with any alerts, they can be
+                specified here. The action will be logged in any cases
+                associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            case_ids:
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - description: Dump the entire kernel memory.
+                  type: object
+                  properties:
+                    type:
+                      enum:
+                        - kernel
+                      type: string
+                  required:
+                    - type
+                - description: Dump the entire memory of a process using the PID.
+                  type: object
+                  properties:
+                    pid:
+                      type: number
+                    type:
+                      enum:
+                        - process
+                      type: string
+                  required:
+                    - type
+                    - pid
+                - description: Dump the entire memory of a process using the entity ID.
+                  type: object
+                  properties:
+                    entity_id:
+                      type: string
+                    type:
+                      enum:
+                        - process
+                      type: string
+                  required:
+                    - type
+                    - entity_id
+          required:
+            - parameters
     MetadataListResponse:
       example:
         data:
@@ -2311,21 +2706,21 @@ components:
         endpoint_ids:
           - endpoint-id-1
         parameters:
-          inputParams: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
-          script: 1111-2222-3333-4444-5555-6666-7777-8888
+          scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
+          scriptInput: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
       properties:
-        inputParams:
-          description: The input parameter arguments for the script that was selected.
-          minLength: 1
-          type: string
-        script:
+        scriptId:
           description: >-
             The script ID from SentinelOne scripts library that will be
             executed.
           minLength: 1
           type: string
+        scriptInput:
+          description: The input parameter arguments for the script that was selected.
+          minLength: 1
+          type: string
       required:
-        - script
+        - scriptId
       title: SentinelOne Run Script Parameters
       type: object
     SortDirection:
@@ -2486,10 +2881,6 @@ components:
           wasSuccessful: true
       type: object
       properties: {}
-    Timeout:
-      description: The maximum timeout value in milliseconds (optional)
-      minimum: 1
-      type: integer
     Type:
       description: Type of response action
       enum:

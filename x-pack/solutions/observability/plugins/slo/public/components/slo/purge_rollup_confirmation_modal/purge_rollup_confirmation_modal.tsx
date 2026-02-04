@@ -24,16 +24,10 @@ import React from 'react';
 interface Props {
   onCancel: () => void;
   onConfirm: (purgePolicy: BulkPurgePolicyInput, force: boolean) => void;
-  modalTitle: string;
   purgePolicyHelpText: string;
 }
 
-export function PurgeRollupConfirmationModal({
-  modalTitle,
-  purgePolicyHelpText,
-  onCancel,
-  onConfirm,
-}: Props) {
+export function PurgeRollupConfirmationModal({ purgePolicyHelpText, onCancel, onConfirm }: Props) {
   const [purgeDate, setPurgeDate] = React.useState<Moment | null>(moment());
   const [purgeType, setPurgeType] = React.useState<string>('fixed_age');
   const [forcePurge, setForgePurge] = React.useState<boolean>(false);
@@ -61,7 +55,9 @@ export function PurgeRollupConfirmationModal({
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
-      title={modalTitle}
+      title={i18n.translate('xpack.slo.purgeConfirmationModal.title', {
+        defaultMessage: 'Purge rollup data',
+      })}
       titleProps={{ id: modalTitleId }}
       buttonColor="danger"
       data-test-subj="sloPurgeConfirmationModal"
@@ -78,7 +74,7 @@ export function PurgeRollupConfirmationModal({
       <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate('xpack.slo.purgeConfirmationModal.purgeTypeLabel', {
-          defaultMessage: 'Choose basis by which to purge data',
+          defaultMessage: 'Purge data based on',
         })}
       >
         <EuiRadioGroup

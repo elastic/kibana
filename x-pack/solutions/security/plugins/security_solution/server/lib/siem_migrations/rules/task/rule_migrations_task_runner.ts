@@ -23,6 +23,7 @@ import { nullifyMissingProperties } from '../../common/task/util/nullify_missing
 import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_runner';
 import { RuleMigrationTelemetryClient } from './rule_migrations_telemetry_client';
 import { getRulesMigrationTools } from './agent/tools';
+import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/types';
 
 export type RuleMigrationTaskInput = Pick<MigrateRuleState, 'id' | 'original_rule' | 'resources'>;
 export type RuleMigrationTaskOutput = MigrateRuleState;
@@ -39,6 +40,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
 
   constructor(
     public readonly migrationId: string,
+    public readonly vendor: SiemMigrationVendor,
     protected readonly request: KibanaRequest,
     public readonly startedBy: AuthenticatedUser,
     public readonly abortController: AbortController,
@@ -46,7 +48,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
     protected readonly logger: Logger,
     protected readonly dependencies: SiemMigrationsClientDependencies
   ) {
-    super(migrationId, request, startedBy, abortController, data, logger, dependencies);
+    super(migrationId, vendor, request, startedBy, abortController, data, logger, dependencies);
     this.retriever = new RuleMigrationsRetriever(this.migrationId, {
       data: this.data,
       rules: this.dependencies.rulesClient,
@@ -69,15 +71,14 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
       rulesClient: this.data,
     });
 
-    const modelWithTools = model.bindTools(Object.values(toolMap));
-
     const modelName = this.actionsClientChat.getModelName(model);
 
     const telemetryClient = new RuleMigrationTelemetryClient(
       this.dependencies.telemetry,
       this.logger,
       this.migrationId,
-      modelName
+      modelName,
+      this.vendor
     );
 
     const esqlKnowledgeBase = new EsqlKnowledgeBase(
@@ -89,7 +90,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
 
     const agent = getRuleMigrationAgent({
       esqlKnowledgeBase,
-      model: modelWithTools,
+      model,
       ruleMigrationsRetriever: this.retriever,
       logger: this.logger,
       telemetryClient,

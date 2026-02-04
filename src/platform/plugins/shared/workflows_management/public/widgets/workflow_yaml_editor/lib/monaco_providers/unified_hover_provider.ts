@@ -9,6 +9,7 @@
 
 import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
+import type { JsonValue } from '@kbn/utility-types';
 import type {
   HoverContext,
   ParameterContext,
@@ -19,7 +20,11 @@ import { getMonacoConnectorHandler } from './provider_registry';
 import { getPathAtOffset } from '../../../../../common/lib/yaml';
 import { performComputation } from '../../../../entities/workflows/store/workflow_detail/utils/computation';
 import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
+import type { ExecutionContext } from '../execution_context/build_execution_context';
 import { getInterceptedHover } from '../hover/get_intercepted_hover';
+import { evaluateExpression } from '../template_expression/evaluate_expression';
+import { parseTemplateAtPosition } from '../template_expression/parse_template_at_position';
+import { formatValueAsJson } from '../template_expression/resolve_path_value';
 
 export const UNIFIED_HOVER_PROVIDER_ID = 'unified-hover-provider';
 
@@ -31,9 +36,11 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
   __providerId: string = UNIFIED_HOVER_PROVIDER_ID;
 
   private readonly getYamlDocument: () => YAML.Document | null;
+  private readonly getExecutionContext?: () => ExecutionContext | null;
 
   constructor(config: ProviderConfig) {
     this.getYamlDocument = config.getYamlDocument;
+    this.getExecutionContext = config.getExecutionContext;
   }
 
   async provideHover(
@@ -89,6 +96,13 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         return null;
       }
 
+      // Third: Check if cursor is inside a template expression {{ }}
+      const templateInfo = parseTemplateAtPosition(model, position);
+      if (templateInfo && templateInfo.isInsideTemplate) {
+        // Handle template expression hover (only if execution context is available)
+        return this.handleTemplateExpressionHover(model, position, templateInfo);
+      }
+
       // Get YAML document
       const yamlDocument = this.getYamlDocument();
       if (!yamlDocument) {
@@ -109,6 +123,12 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       //   stepContext: context.stepContext,
       //   parameterContext: context.parameterContext,
       // });
+
+      // Only show connector hover for specific fields (type, or connector parameters)
+      // Don't show hover for arbitrary string values in the YAML
+      if (!this.shouldShowConnectorHover(context)) {
+        return null;
+      }
 
       // Find appropriate Monaco handler
       const handler = getMonacoConnectorHandler(context.connectorType);
@@ -136,16 +156,10 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         return null;
       }
 
-      // Calculate range for hover
-      const range = this.calculateHoverRange(model, position, context);
-      if (!range) {
-        // console.log('UnifiedHoverProvider: Could not calculate hover range');
-        return null;
-      }
-
       // console.log('UnifiedHoverProvider: Returning hover content');
+      // Don't return a range for connector hovers - this prevents Monaco from highlighting
+      // Only template expression hovers should have ranges to show the blue highlight
       return {
-        range,
         contents: [hoverContent],
       };
     } catch (error) {
@@ -319,50 +333,137 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
   }
 
   /**
-   * Calculate the appropriate range for the hover
+   * Determine if we should show connector hover for this context
+   * Only show for the 'type' field or relevant parameter fields
    */
-  private calculateHoverRange(
+  private shouldShowConnectorHover(context: HoverContext): boolean {
+    const yamlPath = context.yamlPath;
+
+    // Always show hover when hovering on the 'type' field itself
+    if (yamlPath.includes('type')) {
+      return true;
+    }
+
+    // Show hover if we're in a parameter context (e.g., hovering on a parameter name or its value)
+    // But only if we have parameter metadata from the connector
+    if (context.parameterContext) {
+      return true;
+    }
+
+    // For everything else (like random string values in the document), don't show connector hover
+    return false;
+  }
+
+  /**
+   * Handle hover for template expressions {{ }}
+   */
+  private handleTemplateExpressionHover(
     model: monaco.editor.ITextModel,
     position: monaco.Position,
-    context: HoverContext
-  ): monaco.Range | null {
-    try {
-      // If we have a step context and are hovering over the type, use the type node range
-      if (context.stepContext?.typeNode && context.yamlPath.includes('type')) {
-        const typeNode = context.stepContext.typeNode;
-        if (typeNode?.range) {
-          const [startOffset, , endOffset] = typeNode.range;
-          const startPos = model.getPositionAt(startOffset);
-          const endPos = model.getPositionAt(endOffset);
-
-          return new monaco.Range(
-            startPos.lineNumber,
-            startPos.column,
-            endPos.lineNumber,
-            endPos.column
-          );
-        }
-      }
-
-      return null;
-    } catch (error) {
-      // console.warn('UnifiedHoverProvider: Error calculating range', error);
+    templateInfo: ReturnType<typeof parseTemplateAtPosition>
+  ): monaco.languages.Hover | null {
+    if (!templateInfo || !this.getExecutionContext) {
       return null;
     }
+
+    const executionContext = this.getExecutionContext();
+    if (!executionContext) {
+      return null;
+    }
+
+    try {
+      // Determine what to evaluate
+      let value: JsonValue | undefined;
+      let evaluatedPath: string;
+
+      if (templateInfo.filters.length > 0 && templateInfo.isOnFilter) {
+        // Cursor is on the filter part - evaluate with filters
+        evaluatedPath = templateInfo.expression;
+        value = evaluateExpression({
+          expression: templateInfo.expression,
+          context: executionContext,
+        });
+      } else {
+        // Cursor is on the variable path (not filter) - resolve path only
+        evaluatedPath = templateInfo.pathUpToCursor.join('.');
+        value = evaluateExpression({
+          expression: evaluatedPath,
+          context: executionContext,
+        });
+      }
+
+      // Format hover content
+      let hoverContent: monaco.IMarkdownString;
+      if (value === undefined) {
+        hoverContent = {
+          value: `**\`${evaluatedPath}\`** is undefined in the current execution context.`,
+        };
+      } else {
+        const jsonValue = formatValueAsJson(value, true);
+        const valueType = this.getValueType(value);
+        const content = [
+          `**Value at \`${evaluatedPath}\`** _(${valueType})_`,
+          '',
+          '```javascript',
+          jsonValue || '(empty)',
+          '```',
+        ].join('\n');
+
+        hoverContent = {
+          value: content,
+          isTrusted: true,
+          supportHtml: true,
+        };
+      }
+
+      // Return hover with range - Monaco will use editor.hoverHighlightBackground from theme
+      return {
+        range: templateInfo.templateRange,
+        contents: [hoverContent],
+      };
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /**
+   * Get human-readable type of value
+   */
+  private getValueType(value: JsonValue): string {
+    if (value === null) {
+      return 'null';
+    }
+
+    if (Array.isArray(value)) {
+      return `array[${value.length}]`;
+    }
+
+    const type = typeof value;
+
+    if (type === 'object') {
+      const keys = Object.keys(value);
+      return `object{${keys.length}}`;
+    }
+
+    return type;
   }
 }
 
 /**
  * Create and register unified hover provider
  */
-export function createUnifiedHoverProvider(config: ProviderConfig): monaco.languages.HoverProvider {
+export function createUnifiedHoverProvider(
+  config: ProviderConfig & { getExecutionContext?: () => ExecutionContext | null }
+): monaco.languages.HoverProvider {
   return new UnifiedHoverProvider(config);
 }
 
 /**
  * Register unified hover provider with Monaco
  */
-export function registerUnifiedHoverProvider(config: ProviderConfig): monaco.IDisposable {
-  const hoverProvider = createUnifiedHoverProvider(config);
+export function registerUnifiedHoverProvider(
+  config: ProviderConfig & { getExecutionContext?: () => ExecutionContext | null }
+): monaco.IDisposable {
+  const hoverProvider = new UnifiedHoverProvider(config);
   return monaco.languages.registerHoverProvider('yaml', hoverProvider);
 }

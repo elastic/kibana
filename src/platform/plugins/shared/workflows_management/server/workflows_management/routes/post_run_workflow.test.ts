@@ -9,6 +9,7 @@
 
 import { registerPostRunWorkflowRoute } from './post_run_workflow';
 import {
+  createMockRequestHandlerContext,
   createMockResponse,
   createMockRouterInstance,
   createMockWorkflowsApi,
@@ -17,15 +18,19 @@ import {
 } from './test_utils';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
+jest.mock('../lib/with_license_check');
+
 describe('POST /api/workflows/{id}/run', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;
   let mockSpaces: any;
+  let mockContext: ReturnType<typeof createMockRequestHandlerContext>;
 
   beforeEach(() => {
     mockRouter = createMockRouterInstance();
     workflowsApi = createMockWorkflowsApi();
     mockSpaces = createSpacesMock();
+    mockContext = createMockRequestHandlerContext();
     jest.clearAllMocks();
   });
 
@@ -84,18 +89,6 @@ describe('POST /api/workflows/{id}/run', () => {
       };
       const mockResponse = createMockResponse();
 
-      const mockContext = {
-        core: Promise.resolve({
-          elasticsearch: {
-            client: {
-              asCurrentUser: {
-                mget: jest.fn(),
-              },
-            },
-          },
-        }),
-      };
-
       await routeHandler(mockContext, mockRequest, mockResponse);
 
       expect(workflowsApi.getWorkflow).toHaveBeenCalledWith('workflow-123', 'default');
@@ -142,29 +135,20 @@ describe('POST /api/workflows/{id}/run', () => {
         'kibana.alert.rule.rule_type_id': 'test-rule-type',
       };
 
-      const mockEsClient = {
-        mget: jest.fn().mockResolvedValue({
-          docs: [
-            {
-              found: true,
-              _source: mockAlertSource,
-            },
-          ],
-        }),
-      };
+      const mockMget = jest.fn().mockResolvedValue({
+        docs: [
+          { _id: 'alert-1', _index: '.alerts-test-default', found: true, _source: mockAlertSource },
+        ],
+      });
+
+      const testMockContext = createMockRequestHandlerContext(
+        { elasticsearchClient: { mget: mockMget } },
+        ['test-rule-type']
+      );
 
       workflowsApi.getWorkflow = jest.fn().mockResolvedValue(mockWorkflow);
       workflowsApi.runWorkflow = jest.fn().mockResolvedValue(mockExecutionId);
 
-      const mockContext = {
-        core: Promise.resolve({
-          elasticsearch: {
-            client: {
-              asCurrentUser: mockEsClient,
-            },
-          },
-        }),
-      };
       const mockRequest = {
         params: { id: 'workflow-123' },
         body: {
@@ -180,9 +164,9 @@ describe('POST /api/workflows/{id}/run', () => {
       };
       const mockResponse = createMockResponse();
 
-      await routeHandler(mockContext, mockRequest, mockResponse);
+      await routeHandler(testMockContext, mockRequest, mockResponse);
 
-      expect(mockEsClient.mget).toHaveBeenCalled();
+      expect(mockMget).toHaveBeenCalled();
       expect(workflowsApi.runWorkflow).toHaveBeenCalled();
       const runWorkflowCall = (workflowsApi.runWorkflow as jest.Mock).mock.calls[0];
       const processedInputs = runWorkflowCall[2];
@@ -197,7 +181,7 @@ describe('POST /api/workflows/{id}/run', () => {
       });
     });
 
-    it('should handle alert preprocessing errors gracefully', async () => {
+    it('should return error when alert preprocessing fails', async () => {
       const mockWorkflow = {
         id: 'workflow-123',
         name: 'Test Workflow',
@@ -210,23 +194,14 @@ describe('POST /api/workflows/{id}/run', () => {
         yaml: 'name: Test Workflow',
       };
 
-      const mockExecutionId = 'execution-123';
-      const mockEsClient = {
-        mget: jest.fn().mockRejectedValue(new Error('Elasticsearch error')),
-      };
+      const mockMget = jest.fn().mockRejectedValue(new Error('Elasticsearch error'));
+
+      const testMockContext = createMockRequestHandlerContext(
+        { elasticsearchClient: { mget: mockMget } },
+        ['test-rule-type']
+      );
 
       workflowsApi.getWorkflow = jest.fn().mockResolvedValue(mockWorkflow);
-      workflowsApi.runWorkflow = jest.fn().mockResolvedValue(mockExecutionId);
-
-      const mockContext = {
-        core: Promise.resolve({
-          elasticsearch: {
-            client: {
-              asCurrentUser: mockEsClient,
-            },
-          },
-        }),
-      };
       const mockRequest = {
         params: { id: 'workflow-123' },
         body: {
@@ -242,36 +217,23 @@ describe('POST /api/workflows/{id}/run', () => {
       };
       const mockResponse = createMockResponse();
 
-      await routeHandler(mockContext, mockRequest, mockResponse);
+      await routeHandler(testMockContext, mockRequest, mockResponse);
 
-      // Should fall back to original inputs when preprocessing fails
-      expect(workflowsApi.runWorkflow).toHaveBeenCalledWith(
-        expect.any(Object),
-        'default',
-        mockRequest.body.inputs,
-        mockRequest
+      // Should return an error when preprocessing fails
+      expect(mockMget).toHaveBeenCalled();
+      expect(workflowsApi.runWorkflow).not.toHaveBeenCalled();
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: 500,
+          body: expect.objectContaining({
+            message: expect.stringContaining('Elasticsearch error'),
+          }),
+        })
       );
-      expect(mockResponse.ok).toHaveBeenCalledWith({
-        body: {
-          workflowExecutionId: mockExecutionId,
-        },
-      });
     });
 
     it('should return 404 when workflow is not found', async () => {
       workflowsApi.getWorkflow = jest.fn().mockResolvedValue(null);
-
-      const mockContext = {
-        core: Promise.resolve({
-          elasticsearch: {
-            client: {
-              asCurrentUser: {
-                mget: jest.fn(),
-              },
-            },
-          },
-        }),
-      };
       const mockRequest = {
         params: { id: 'non-existent-workflow' },
         body: {
@@ -299,18 +261,6 @@ describe('POST /api/workflows/{id}/run', () => {
       };
 
       workflowsApi.getWorkflow = jest.fn().mockResolvedValue(mockWorkflow);
-
-      const mockContext = {
-        core: Promise.resolve({
-          elasticsearch: {
-            client: {
-              asCurrentUser: {
-                mget: jest.fn(),
-              },
-            },
-          },
-        }),
-      };
       const mockRequest = {
         params: { id: 'workflow-123' },
         body: {
@@ -345,18 +295,6 @@ describe('POST /api/workflows/{id}/run', () => {
       };
 
       workflowsApi.getWorkflow = jest.fn().mockResolvedValue(mockWorkflow);
-
-      const mockContext = {
-        core: Promise.resolve({
-          elasticsearch: {
-            client: {
-              asCurrentUser: {
-                mget: jest.fn(),
-              },
-            },
-          },
-        }),
-      };
       const mockRequest = {
         params: { id: 'workflow-123' },
         body: {
@@ -380,18 +318,6 @@ describe('POST /api/workflows/{id}/run', () => {
     it('should handle API errors gracefully', async () => {
       const errorMessage = 'Workflow execution engine failed';
       workflowsApi.getWorkflow = jest.fn().mockRejectedValue(new Error(errorMessage));
-
-      const mockContext = {
-        core: Promise.resolve({
-          elasticsearch: {
-            client: {
-              asCurrentUser: {
-                mget: jest.fn(),
-              },
-            },
-          },
-        }),
-      };
       const mockRequest = {
         params: { id: 'workflow-123' },
         body: {
@@ -430,18 +356,6 @@ describe('POST /api/workflows/{id}/run', () => {
       workflowsApi.getWorkflow = jest.fn().mockResolvedValue(mockWorkflow);
       workflowsApi.runWorkflow = jest.fn().mockResolvedValue(mockExecutionId);
       mockSpaces.getSpaceId = jest.fn().mockReturnValue('custom-space');
-
-      const mockContext = {
-        core: Promise.resolve({
-          elasticsearch: {
-            client: {
-              asCurrentUser: {
-                mget: jest.fn(),
-              },
-            },
-          },
-        }),
-      };
       const mockRequest = {
         params: { id: 'workflow-123' },
         body: {
@@ -491,18 +405,6 @@ describe('POST /api/workflows/{id}/run', () => {
 
       workflowsApi.getWorkflow = jest.fn().mockResolvedValue(mockWorkflow);
       workflowsApi.runWorkflow = jest.fn().mockRejectedValue(new Error('Execution engine error'));
-
-      const mockContext = {
-        core: Promise.resolve({
-          elasticsearch: {
-            client: {
-              asCurrentUser: {
-                mget: jest.fn(),
-              },
-            },
-          },
-        }),
-      };
       const mockRequest = {
         params: { id: 'workflow-123' },
         body: {

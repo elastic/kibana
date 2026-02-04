@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { type ComponentProps, useEffect, useRef, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiShowFor, EuiToolTip } from '@elastic/eui';
 import type { EuiToolTip as EuiToolTipRef } from '@elastic/eui';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
@@ -15,6 +15,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { AIAssistantAppService } from '@kbn/ai-assistant';
 import { useAIAssistantAppService, ChatFlyout, FlyoutPositionMode } from '@kbn/ai-assistant';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
 import { SharedProviders } from '../../utils/shared_providers';
@@ -120,8 +121,8 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
   }, [service.conversations.predefinedConversation$, setFlyoutSettings]);
 
   useEffect(() => {
-    const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((event) => {
-      if (event.assistant === 'observability') {
+    const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((selection) => {
+      if (selection === AIAssistantType.Observability) {
         service.conversations.openNewConversation({ messages: [] });
         aiAssistantManagementSelection.completeOpenChat();
       }
@@ -156,7 +157,28 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     };
   }, [service.conversations]);
 
-  const EuiButtonBasicOrEmpty = isServerless ? EuiButtonEmpty : EuiButton;
+  // wraps EuiButton and EuiButtonIcon and accepts props for both
+  const AiAssistantButton: React.FC<
+    ComponentProps<typeof EuiButton> & ComponentProps<typeof EuiButtonIcon>
+  > = (props) => (
+    <>
+      <EuiShowFor sizes={['m', 'l', 'xl']}>
+        {isServerless ? (
+          <EuiButtonEmpty {...props} data-test-subj="observabilityAiAssistantAppNavControlButton" />
+        ) : (
+          <EuiButton {...props} data-test-subj="observabilityAiAssistantAppNavControlButton" />
+        )}
+      </EuiShowFor>
+      <EuiShowFor sizes={['xs', 's']}>
+        <EuiButtonIcon
+          {...props}
+          display={isServerless ? 'empty' : 'base'}
+          data-test-subj="observabilityAiAssistantAppNavControlButtonIcon"
+        />
+      </EuiShowFor>
+    </>
+  );
+
   const tooltipRef = useRef<EuiToolTipRef | null>(null);
   const hideToolTip = () => tooltipRef.current?.hideToolTip();
 
@@ -171,12 +193,11 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
         disableScreenReaderOutput
         onMouseOut={hideToolTip}
       >
-        <EuiButtonBasicOrEmpty
+        <AiAssistantButton
           aria-label={i18n.translate(
             'xpack.observabilityAiAssistant.navControl.assistantNavLinkAriaLabel',
             { defaultMessage: 'Open the AI Assistant' }
           )}
-          data-test-subj="observabilityAiAssistantAppNavControlButton"
           onClick={() => {
             hideToolTip();
             service.conversations.openNewConversation({
@@ -191,7 +212,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
           {i18n.translate('xpack.observabilityAiAssistant.navControl.assistantNavLink', {
             defaultMessage: 'AI Assistant',
           })}
-        </EuiButtonBasicOrEmpty>
+        </AiAssistantButton>
       </EuiToolTip>
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceContext.Provider value={chatService.value}>

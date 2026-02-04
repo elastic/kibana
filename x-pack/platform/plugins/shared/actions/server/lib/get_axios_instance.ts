@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AxiosInstance } from 'axios';
+import type { AxiosHeaderValue, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type { GetTokenOpts } from '@kbn/connector-specs';
@@ -29,6 +29,7 @@ interface GetAxiosInstanceOpts {
 type ValidatedSecrets = Record<string, unknown>;
 
 export interface GetAxiosInstanceWithAuthFnOpts {
+  additionalHeaders?: Record<string, AxiosHeaderValue>;
   connectorId: string;
   connectorTokenClient?: ConnectorTokenClientContract;
   secrets: ValidatedSecrets;
@@ -41,7 +42,12 @@ export const getAxiosInstanceWithAuth = ({
   configurationUtilities,
   logger,
 }: GetAxiosInstanceOpts): GetAxiosInstanceWithAuthFn => {
-  return async ({ connectorId, secrets, connectorTokenClient }: GetAxiosInstanceWithAuthFnOpts) => {
+  return async ({
+    additionalHeaders,
+    connectorId,
+    secrets,
+    connectorTokenClient,
+  }: GetAxiosInstanceWithAuthFnOpts) => {
     let authTypeId: string | undefined;
     try {
       authTypeId = (secrets as { authType?: string }).authType || 'none';
@@ -59,8 +65,15 @@ export const getAxiosInstanceWithAuth = ({
         beforeRedirect: getBeforeRedirectFn(configurationUtilities),
       });
 
+      // add any additional headers that should be included in every request
+      if (additionalHeaders) {
+        Object.keys(additionalHeaders).forEach((key) => {
+          axiosInstance.defaults.headers.common[key] = additionalHeaders[key];
+        });
+      }
+
       // create a request interceptor to inject custom http/https agents based on the URL
-      axiosInstance.interceptors.request.use((config) => {
+      axiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
         if (config.url) {
           const { httpAgent, httpsAgent } = getCustomAgents(
             configurationUtilities,
@@ -86,6 +99,7 @@ export const getAxiosInstanceWithAuth = ({
       }
 
       const configureCtx = {
+        getCustomHostSettings: (url: string) => configurationUtilities.getCustomHostSettings(url),
         getToken: async (opts: GetTokenOpts) => {
           return await getOAuthClientCredentialsAccessToken({
             connectorId,
@@ -106,6 +120,8 @@ export const getAxiosInstanceWithAuth = ({
           });
         },
         logger,
+        proxySettings: configurationUtilities.getProxySettings(),
+        sslSettings: configurationUtilities.getSSLSettings(),
       };
 
       // use the registered auth type to configure authentication for the axios instance

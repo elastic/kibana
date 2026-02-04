@@ -7,23 +7,19 @@
 
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { enablePrivmonSetting, disablePrivmonSetting } from '../../utils';
 import { PrivMonUtils } from './utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('entityAnalyticsApi');
-  const kibanaServer = getService('kibanaServer');
   const privMonUtils = PrivMonUtils(getService);
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring Engine Schedule', () => {
     describe('schedule now', () => {
       beforeEach(async () => {
-        await enablePrivmonSetting(kibanaServer);
         await privMonUtils.initPrivMonEngine();
       });
 
       afterEach(async () => {
-        await disablePrivmonSetting(kibanaServer);
         await api.deleteMonitoringEngine({ query: { data: true } });
       });
 

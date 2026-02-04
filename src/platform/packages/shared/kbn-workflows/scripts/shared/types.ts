@@ -10,11 +10,17 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import type { InternalConnectorContract } from '../../types/latest';
 
+export interface Operation {
+  id: string | undefined;
+  path: string;
+  method: string;
+}
+
 export interface ContractMeta
   extends Omit<InternalConnectorContract, 'paramsSchema' | 'outputSchema'> {
   fileName: string;
   contractName: string;
-  operationIds: string[];
+  operations: Operation[];
   paramsSchemaString: string;
   outputSchemaString: string;
   schemaImports: string[];
@@ -23,4 +29,11 @@ export interface ContractMeta
 
 export interface OperationObjectWithOperationId extends OpenAPIV3.OperationObject {
   operationId: string;
+}
+
+export interface ParameterTypes {
+  headerParams: string[];
+  pathParams: string[];
+  urlParams: string[];
+  bodyParams: string[];
 }

@@ -19,6 +19,12 @@ import {
   alertingAuthorizationFilterOpts,
   RULE_TYPE_CHECKS_CONCURRENCY,
 } from '../../../../rules_client/common/constants';
+import {
+  extractGapDurationSums,
+  calculateHighestPriorityGapFillStatus,
+  type GapDurationBucket,
+  RULE_GAP_AGGREGATIONS,
+} from '../utils';
 import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
 
 export async function getGapsSummaryByRuleIds(
@@ -116,21 +122,7 @@ export async function getGapsSummaryByRuleIds(
               size: 10000,
             },
             aggs: {
-              totalUnfilledDurationMs: {
-                sum: {
-                  field: 'kibana.alert.rule.gap.unfilled_duration_ms',
-                },
-              },
-              totalInProgressDurationMs: {
-                sum: {
-                  field: 'kibana.alert.rule.gap.in_progress_duration_ms',
-                },
-              },
-              totalFilledDurationMs: {
-                sum: {
-                  field: 'kibana.alert.rule.gap.filled_duration_ms',
-                },
-              },
+              ...RULE_GAP_AGGREGATIONS,
             },
           },
         },
@@ -138,24 +130,24 @@ export async function getGapsSummaryByRuleIds(
     );
 
     interface UniqueRuleIdsAgg {
-      buckets: Array<{
-        key: string;
-        totalUnfilledDurationMs: { value: number };
-        totalInProgressDurationMs: { value: number };
-        totalFilledDurationMs: { value: number };
-      }>;
+      buckets: Array<GapDurationBucket>;
     }
 
     const uniqueRuleIdsAgg = aggs.aggregations?.unique_rule_ids as UniqueRuleIdsAgg;
     const resultBuckets = uniqueRuleIdsAgg?.buckets ?? [];
 
     const result: GetGapsSummaryByRuleIdsResponse = {
-      data: resultBuckets.map((bucket) => ({
-        ruleId: bucket.key,
-        totalUnfilledDurationMs: bucket.totalUnfilledDurationMs.value,
-        totalInProgressDurationMs: bucket.totalInProgressDurationMs.value,
-        totalFilledDurationMs: bucket.totalFilledDurationMs.value,
-      })),
+      data: resultBuckets.map((bucket) => {
+        const sums = extractGapDurationSums(bucket);
+        const gapFillStatus = calculateHighestPriorityGapFillStatus(sums);
+        return {
+          ruleId: bucket.key,
+          totalUnfilledDurationMs: sums.totalUnfilledDurationMs,
+          totalInProgressDurationMs: sums.totalInProgressDurationMs,
+          totalFilledDurationMs: sums.totalFilledDurationMs,
+          ...(gapFillStatus ? { gapFillStatus } : {}),
+        };
+      }),
     };
 
     return result;

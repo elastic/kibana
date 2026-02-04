@@ -28,7 +28,10 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import { ScriptsLibraryClient } from './services/scripts_library';
+import {
+  ScriptsLibraryClient,
+  type ScriptsLibraryClientInterface,
+} from './services/scripts_library';
 import { EndpointError } from '../../common/endpoint/errors';
 import {
   installScriptsLibraryIndexTemplates,
@@ -479,23 +482,18 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    if (!this.startDependencies.config[key]) {
+    if (!Object.prototype.hasOwnProperty.call(this.startDependencies.config, key)) {
       throw new EndpointError(`Missing config value for key: ${key}`);
     }
 
     return this.startDependencies.config[key];
   }
 
-  getScriptsLibraryClient(
-    spaceId: string,
-    username: string,
-    esClient: ElasticsearchClient
-  ): ScriptsLibraryClient {
+  getScriptsLibraryClient(spaceId: string, username: string): ScriptsLibraryClientInterface {
     return new ScriptsLibraryClient({
       spaceId,
       username,
       endpointService: this,
-      esClient,
     });
   }
 }

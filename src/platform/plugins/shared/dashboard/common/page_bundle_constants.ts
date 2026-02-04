@@ -8,6 +8,14 @@
  */
 
 export const LANDING_PAGE_PATH = '/list';
+/** The application ID for the Dashboard app. */
 export const DASHBOARD_APP_ID = 'dashboards';
 export const SEARCH_SESSION_ID = 'searchSessionId';
+/** The number of columns in the dashboard grid layout. */
 export const DASHBOARD_GRID_COLUMN_COUNT = 48;
+
+export const DEFAULT_DASHBOARD_NAVIGATION_OPTIONS = {
+  open_in_new_tab: false,
+  use_time_range: true,
+  use_filters: true,
+};

@@ -6,7 +6,12 @@
  */
 
 import moment from 'moment';
-import { type ElasticsearchClient, type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  type AnalyticsServiceSetup,
+  type ElasticsearchClient,
+  type Logger,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import type {
   RunContext,
   TaskManagerSetupContract,
@@ -26,6 +31,7 @@ import { createEntitySnapshotIndex } from '../../elasticsearch_assets/entity_sna
 import { getEntitiesIndexName, getEntitiesResetIndexName } from '../../utils';
 import { entityStoreTaskLogMessageFactory } from '../utils';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
+import { ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT } from '../../../../telemetry/event_based/events';
 
 function getTaskId(namespace: string, entityType: EntityType): string {
   return `${TYPE}:${entityType}:${namespace}:${VERSION}`;
@@ -38,10 +44,12 @@ const minifyPainless = flow(removeComments, removeNewlines, condenseMultipleSpac
 
 export function registerEntityStoreSnapshotTask({
   logger,
+  telemetry,
   taskManager,
   getStartServices,
 }: {
   logger: Logger;
+  telemetry: AnalyticsServiceSetup;
   taskManager: TaskManagerSetupContract | undefined;
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
 }): void {
@@ -67,8 +75,9 @@ export function registerEntityStoreSnapshotTask({
       createTaskRunner: (context: RunContext) => {
         return {
           async run() {
-            return runTask({
+            return runSnapshotTask({
               logger,
+              telemetry,
               context,
               esClientGetter,
             });
@@ -191,12 +200,14 @@ const removeAllFieldsAndResetTimestamp: string = minifyPainless(`
     ctx._source = newDoc;
     `);
 
-export async function runTask({
+export async function runSnapshotTask({
   logger,
+  telemetry,
   context,
   esClientGetter,
 }: {
   logger: Logger;
+  telemetry: AnalyticsServiceSetup;
   context: RunContext;
   esClientGetter: () => Promise<ElasticsearchClient>;
 }): Promise<{
@@ -207,13 +218,27 @@ export async function runTask({
   const abort: AbortController = context.abortController;
   const msg = entityStoreTaskLogMessageFactory(taskId);
   const esClient: ElasticsearchClient = await esClientGetter();
+  const taskStartTime = moment().utc();
+  const snapshotDate = rewindToYesterday(taskStartTime.toDate());
+  const event = {
+    entityType: '',
+    namespace: '',
+    snapshotDate,
+    snapshotIndex: '',
+    entityCount: 0,
+    durationMs: 0,
+    success: false,
+    errorMessage: '',
+  };
+
   try {
-    const taskStartTime = moment().utc();
-    const snapshotDate = rewindToYesterday(taskStartTime.toDate());
     logger.info(msg('running task'));
 
     const entityType = context.taskInstance.params.entityType as EntityType;
     const namespace = context.taskInstance.params.namespace as string;
+    event.entityType = entityType;
+    event.namespace = namespace;
+
     if (namespace === '') {
       const err = `Task ${taskId} expected vaild namespace in params, got ""`;
       logger.error(msg(err));
@@ -239,6 +264,7 @@ export async function runTask({
       namespace,
       snapshotDate,
     });
+    event.snapshotIndex = snapshotIndex;
 
     logger.info(msg(`reindexing entities to ${snapshotIndex}`));
     const snapshotReindexResponse = await esClient.reindex(
@@ -256,6 +282,7 @@ export async function runTask({
     logger.info(
       msg(`reindexed to ${snapshotIndex}: ${prettyReindexResponse(snapshotReindexResponse)}`)
     );
+    event.entityCount = snapshotReindexResponse.created ?? 0;
 
     const resetIndex = getEntitiesResetIndexName(entityType, namespace);
     logger.info(msg(`removing old entries from ${resetIndex}`));
@@ -298,12 +325,19 @@ export async function runTask({
     const taskDurationInSeconds = moment(taskCompletionTime).diff(moment(taskStartTime), 'seconds');
     updatedState.lastSnapshotTookSeconds = taskDurationInSeconds;
     logger.info(msg(`task run completed in ${taskDurationInSeconds} seconds`));
+    event.durationMs = moment(taskCompletionTime).diff(moment(taskStartTime));
+    event.success = true;
+
+    telemetry.reportEvent(ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT.eventType, event);
 
     return {
       state: updatedState,
     };
   } catch (e) {
     logger.error(msg(`error running task, received ${e.message}`));
+    event.errorMessage = e.message;
+    event.durationMs = moment(moment.utc()).diff(moment(taskStartTime));
+    telemetry.reportEvent(ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT.eventType, event);
     throw e;
   }
 }

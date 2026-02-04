@@ -11,7 +11,6 @@ import type {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type {
   DynamicActionsSerializedState,
   EmbeddableDynamicActionsManager,
@@ -35,7 +34,7 @@ export interface StartContract {
   initializeEmbeddableDynamicActions: (
     uuid: string,
     getTitle: () => string | undefined,
-    state: SerializedPanelState<DynamicActionsSerializedState>
+    state: DynamicActionsSerializedState
   ) => EmbeddableDynamicActionsManager;
 }
 
@@ -53,7 +52,7 @@ export class EmbeddableEnhancedPlugin
       initializeEmbeddableDynamicActions: (
         uuid: string,
         getTitle: () => string | undefined,
-        state: SerializedPanelState<DynamicActionsSerializedState>
+        state: DynamicActionsSerializedState
       ) => {
         return initializeDynamicActionsManager(uuid, getTitle, state, plugins);
       },

@@ -25,10 +25,13 @@ import {
   EuiSpacer,
   EuiTitle,
   keys,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import type { HttpSetup, IToasts } from '@kbn/core/public';
+import { EisCloudConnectPromoTour } from '@kbn/search-api-panels';
+import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 import * as LABELS from '../translations';
 import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
 import { FieldType, isMapWithStringValues } from '../types/types';
@@ -57,6 +60,7 @@ import { AuthenticationFormItems } from './configuration/authentication_form_ite
 import { ProviderSecretHiddenField } from './hidden_fields/provider_secret_hidden_field';
 import { ProviderConfigHiddenField } from './hidden_fields/provider_config_hidden_field';
 import { useProviders } from '../hooks/use_providers';
+import { useKibana } from '../hooks/use_kibana';
 
 // Custom trigger button CSS
 export const buttonCss = css`
@@ -101,6 +105,7 @@ interface InferenceServicesProps {
     allowContextWindowLength?: boolean;
     reenterSecretsOnEdit?: boolean;
     allowTemperature?: boolean;
+    enableEisPromoTour?: boolean;
   };
   http: HttpSetup;
   toasts: IToasts;
@@ -117,9 +122,14 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     isPreconfigured,
     currentSolution,
     reenterSecretsOnEdit,
+    enableEisPromoTour,
   },
 }) => {
+  const {
+    services: { application, cloud },
+  } = useKibana();
   const { data: providers, isLoading } = useProviders(http, toasts);
+  const { euiTheme } = useEuiTheme();
   const [updatedProviders, setUpdatedProviders] = useState<InferenceProvider[] | undefined>(
     undefined
   );
@@ -128,6 +138,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
   const [selectedTaskType, setSelectedTaskType] = useState<string>(DEFAULT_TASK_TYPE);
   const [solutionFilter, setSolutionFilter] = useState<SolutionView | undefined>();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   const { updateFieldValues, setFieldValue, validateFields, isSubmitting } = useFormContext();
   const [optionalProviderFormFields, setOptionalProviderFormFields] = useState<ConfigEntryView[]>(
@@ -224,13 +235,11 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const newProvider = updatedProviders?.find(
         (p) => p.service === (config.provider === '' ? providerSelected : config.provider)
       );
+      const overrides = newProvider ? getOverrides(newProvider) : undefined;
+      const newProviderSchema: ConfigEntryView[] = newProvider
+        ? mapProviderFields(taskType, newProvider, overrides)
+        : [];
       if (newProvider) {
-        const overrides = getOverrides(newProvider);
-        const newProviderSchema: ConfigEntryView[] = mapProviderFields(
-          taskType,
-          newProvider,
-          overrides
-        );
         setProviderSchema(newProviderSchema);
       }
 
@@ -255,7 +264,9 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           newProvider?.configurations[k]?.supported_task_types &&
           newProvider?.configurations[k].supported_task_types.includes(taskType)
         ) {
-          newConfig[k] = newProvider?.configurations[k]?.default_value ?? null;
+          // Get default value from schema (which includes overridden defaults from INTERNAL_OVERRIDE_FIELDS)
+          const schemaField = newProviderSchema.find((f) => f.key === k);
+          newConfig[k] = schemaField?.default_value ?? null;
         }
       });
 
@@ -307,11 +318,8 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
       newProviderSchema.forEach((fieldConfig) => {
         if (!fieldConfig.sensitive) {
-          if (fieldConfig && !!fieldConfig.default_value) {
-            defaultProviderConfig[fieldConfig.key] = fieldConfig.default_value;
-          } else {
-            defaultProviderConfig[fieldConfig.key] = null;
-          }
+          // default_value now includes overridden defaults from INTERNAL_OVERRIDE_FIELDS
+          defaultProviderConfig[fieldConfig.key] = fieldConfig.default_value;
         } else {
           defaultProviderSecrets[fieldConfig.key] = null;
         }
@@ -522,13 +530,24 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
   const isInternalProvider = config?.provider === 'elasticsearch'; // To display link for model_ids for Elasticsearch provider
 
+  useEffect(() => {
+    // Trigger once on mount, then clean up
+    const delay = parseInt(euiTheme.animation.normal ?? '0', 10);
+
+    const timeout = window.setTimeout(() => {
+      setIsFlyoutOpen(true);
+    }, delay);
+
+    return () => clearTimeout(timeout);
+  }, [euiTheme.animation.normal]);
+
   return !isLoading ? (
     <>
       <UseField path="config.provider" config={providerConfigConfig}>
         {(field) => {
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
           const selectInput = providerSuperSelect(isInvalid);
-          return (
+          const formRow = (
             <EuiFormRow
               id="providerSelectBox"
               fullWidth
@@ -562,6 +581,18 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
                 </EuiInputPopover>
               </>
             </EuiFormRow>
+          );
+          return enableEisPromoTour ? (
+            <EisCloudConnectPromoTour
+              promoId="eisInferenceEndpointFlyout"
+              navigateToApp={() => application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
+              isSelfManaged={!cloud?.isCloudEnabled}
+              isReady={isFlyoutOpen}
+            >
+              {formRow}
+            </EisCloudConnectPromoTour>
+          ) : (
+            formRow
           );
         }}
       </UseField>

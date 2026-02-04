@@ -33,4 +33,5 @@ export const gapBaseSchema = schema.object({
   in_progress_duration_ms: schema.number(),
   deleted: schema.maybe(schema.boolean()),
   updated_at: schema.maybe(schema.string()),
+  failed_auto_fill_attempts: schema.maybe(schema.number()),
 });

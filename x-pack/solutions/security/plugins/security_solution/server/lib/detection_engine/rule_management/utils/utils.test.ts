@@ -290,6 +290,27 @@ describe('utils', () => {
         data: [expected],
       });
     });
+
+    test('includes warnings when provided', () => {
+      const warnings = [
+        {
+          type: 'some_warning_type',
+          message: 'Some warning',
+          actionPath: '',
+        },
+      ];
+      const output = transformFindAlerts(
+        {
+          page: 1,
+          perPage: 1,
+          total: 1,
+          data: [getRuleMock(getQueryRuleParams())],
+        },
+        warnings
+      );
+
+      expect(output.warnings).toEqual(warnings);
+    });
   });
 
   describe('transform', () => {
