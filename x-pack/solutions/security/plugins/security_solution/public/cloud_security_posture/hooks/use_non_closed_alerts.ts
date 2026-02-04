@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { v4 as uuid } from 'uuid';
 import { FILTER_CLOSED } from '@kbn/securitysolution-data-table/common/types';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsByStatus } from '../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
@@ -25,6 +26,7 @@ export const useNonClosedAlerts = ({
   from: string;
   queryId: string;
 }) => {
+  const uniqueQueryId = useMemo(() => uuid(), []);
   const { signalIndexName } = useSignalIndex();
 
   const entityFilter = useMemo(() => ({ field, value }), [field, value]);
@@ -32,7 +34,7 @@ export const useNonClosedAlerts = ({
   const { items: alertsData } = useAlertsByStatus({
     entityFilter,
     signalIndexName,
-    queryId,
+    queryId: `${queryId}${uniqueQueryId}`,
     to,
     from,
     // TODO: Asset Inventory - remove temp runtime mappings
