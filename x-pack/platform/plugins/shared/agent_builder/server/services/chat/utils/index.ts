@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
+export {
+  createConversationUpdatedEvent,
+  createConversationCreatedEvent,
+  createRoundResendingEvent,
+} from './events';
 export { generateTitle } from './generate_title';
 export { handleCancellation } from './handle_cancellation';
 export { executeAgent$ } from './execute_agent';

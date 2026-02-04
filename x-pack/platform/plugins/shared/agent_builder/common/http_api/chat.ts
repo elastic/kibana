@@ -28,6 +28,7 @@ export interface ChatRequestBodyPayload {
   prompts?: Record<string, PromptResponse>;
   browser_api_tools?: BrowserApiToolMetadata[];
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
+  resend?: boolean;
 }
 
 export type ChatResponse = Omit<
