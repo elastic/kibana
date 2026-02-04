@@ -3001,7 +3001,8 @@
     "dynamic": false,
     "properties": {
       "content": {
-        "type": "text"
+        "type": "text",
+        "index":false
       },
       "description": {
         "type": "text"
