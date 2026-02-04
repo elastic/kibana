@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingElastic,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -174,15 +175,38 @@ export function StreamListView() {
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}
-                size="s"
-                disabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
+              <EuiToolTip
+                content={
+                  !canManageStreamsKibana
+                    ? i18n.translate(
+                        'xpack.streams.streamsListView.createClassicStreamButtonDisabledKibanaTooltip',
+                        {
+                          defaultMessage:
+                            'You need the Kibana manage streams privilege to create classic streams.',
+                        }
+                      )
+                    : !canManageClassicElasticsearch
+                    ? i18n.translate(
+                        'xpack.streams.streamsListView.createClassicStreamButtonDisabledElasticsearchTooltip',
+                        {
+                          defaultMessage:
+                            'You need the Elasticsearch manage_index_templates privilege to create classic streams.',
+                        }
+                      )
+                    : undefined
+                }
               >
-                {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
-                  defaultMessage: 'Create classic stream',
-                })}
-              </EuiButton>
+                <EuiButton
+                  data-test-subj="streamsCreateClassicStreamButton"
+                  onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}
+                  size="s"
+                  disabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
+                >
+                  {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
+                    defaultMessage: 'Create classic stream',
+                  })}
+                </EuiButton>
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         }
