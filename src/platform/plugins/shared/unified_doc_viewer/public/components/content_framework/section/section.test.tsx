@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { ContentFrameworkSection, type ContentFrameworkSectionProps } from './section';
@@ -71,8 +72,6 @@ describe('ContentFrameworkSection', () => {
     fireEvent.click(screen.getByTestId('unifiedDocViewerSectionActionButton-fullScreen'));
     expect(defaultProps.actions?.[1].onClick).toHaveBeenCalled();
   });
-
-  // Link interception behavior is tested in `link_action_utils.test.ts`.
 
   it('renders children inside the panel', () => {
     render(<ContentFrameworkSection {...defaultProps} />);
