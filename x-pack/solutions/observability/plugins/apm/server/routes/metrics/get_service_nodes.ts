@@ -17,7 +17,7 @@ import {
   METRIC_OTEL_JVM_PROCESS_THREADS_COUNT,
   VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP,
   VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP,
-  LABEL_TYPE,
+  ATTRIBUTE_OTEL_JVM_MEMORY_TYPE,
   HOST_NAME,
 } from '../../../common/es_fields/apm';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
@@ -222,7 +222,7 @@ async function getOTelServiceNodes({
           },
           heapMemory: {
             filter: {
-              term: { [LABEL_TYPE]: VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP },
+              term: { [ATTRIBUTE_OTEL_JVM_MEMORY_TYPE]: VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP },
             },
             aggs: {
               usage: {
@@ -234,7 +234,7 @@ async function getOTelServiceNodes({
           },
           nonHeapMemory: {
             filter: {
-              term: { [LABEL_TYPE]: VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP },
+              term: { [ATTRIBUTE_OTEL_JVM_MEMORY_TYPE]: VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP },
             },
             aggs: {
               usage: {
@@ -254,7 +254,9 @@ async function getOTelServiceNodes({
     },
   };
 
-  const response = await apmEventClient.search('get_otel_service_nodes', params);
+  const response = await apmEventClient.search('get_otel_service_nodes', params, {
+    skipProcessorEventFilter: true,
+  });
 
   if (!response.aggregations) {
     return [];

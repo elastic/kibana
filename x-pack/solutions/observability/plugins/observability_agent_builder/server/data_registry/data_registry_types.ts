@@ -132,6 +132,15 @@ interface InfraHostsResponse {
   nodes: InfraEntityMetricsItem[];
 }
 
+export interface JvmMetricsNode {
+  name: string;
+  cpu: number | null;
+  heapMemory: number | null;
+  hostName: string | null | undefined;
+  nonHeapMemory: number | null;
+  threadCount: number | null;
+}
+
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrorDetails: (params: {
     request: KibanaRequest;
@@ -195,4 +204,13 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     query: Record<string, unknown> | undefined;
     hostNames?: string[];
   }) => Promise<InfraHostsResponse>;
+
+  apmApplicationMetrics: (params: {
+    request: KibanaRequest;
+    serviceName: string;
+    serviceEnvironment: string;
+    start: string;
+    end: string;
+    kuery?: string;
+  }) => Promise<JvmMetricsNode[]>;
 }

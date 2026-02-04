@@ -63,7 +63,9 @@ const hasOTelMetrics = async ({
     _source: false,
   };
 
-  const response = await apmEventClient.search('has_otel_process_metrics', params);
+  const response = await apmEventClient.search('has_otel_process_metrics', params, {
+    skipProcessorEventFilter: true,
+  });
 
   return response.hits.hits.length > 0;
 };

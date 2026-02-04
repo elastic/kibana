@@ -89,6 +89,7 @@ const START_TIME_OFFSETS = {
   downstream: 24 * 60, // 24 hours
   logs: 15,
   changePoints: 6 * 60, // 6 hours
+  applicationMetrics: 15,
 } as const;
 
 async function fetchAlertContext({
@@ -127,6 +128,11 @@ async function fetchAlertContext({
     {
       key: 'apmDownstreamDependencies' as const,
       startOffset: START_TIME_OFFSETS.downstream,
+      params: { serviceName, serviceEnvironment },
+    },
+    {
+      key: 'apmApplicationMetrics' as const, // Currently JVM only; will expand to other runtimes
+      startOffset: START_TIME_OFFSETS.applicationMetrics,
       params: { serviceName, serviceEnvironment },
     },
     {
@@ -236,11 +242,12 @@ function generateAlertSummary({
     - Keep it concise (~100–150 words total).
 
     Signal priority (use what exists, skip what doesn't):
-    1) Downstream dependencies: dependency metrics that may indicate issues
-    2) Change points: sudden shifts in throughput/latency/failure rate
-    3) Log categories: error messages and exception patterns
-    4) Errors: exception patterns with downstream context
-    5) Service summary: instance counts, versions, anomalies, and metadata
+    1) Application metrics: high CPU usage, memory pressure, or thread count spikes
+    2) Downstream dependencies: dependency metrics that may indicate issues
+    3) Change points: sudden shifts in throughput/latency/failure rate
+    4) Log categories: error messages and exception patterns
+    5) Errors: exception patterns with downstream context
+    6) Service summary: instance counts, versions, anomalies, and metadata
 
     ${getEntityLinkingInstructions({ urlPrefix })}
   `);
