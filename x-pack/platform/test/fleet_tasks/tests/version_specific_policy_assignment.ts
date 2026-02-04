@@ -19,7 +19,6 @@ export default function (providerContext: FtrProviderContextWithServices) {
   const TASK_INTERVAL = 30000; // as set in the config
 
   let policyId: string;
-  let packagePolicyId: string;
 
   async function waitForTask() {
     // Sleep for the duration of the task interval plus buffer for processing
@@ -45,56 +44,28 @@ export default function (providerContext: FtrProviderContextWithServices) {
   }
 
   describe('Version specific policy assignment', () => {
+    const testPolicyName = 'Version Specific Test Policy';
+
     before(async () => {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
       // Create an agent policy with version conditions enabled
+      // Note: We don't add package policies because the system package doesn't have
+      // version conditions, which would reset has_agent_version_conditions to false.
+      // The core reassignment logic works without package policies.
       const { body: agentPolicyResponse } = await supertest
         .post('/api/fleet/agent_policies')
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Version Specific Test Policy',
+          name: testPolicyName,
           namespace: 'default',
           has_agent_version_conditions: true,
         })
         .expect(200);
       policyId = agentPolicyResponse.item.id;
-
-      // Install a package and create a package policy
-      // Using system package as it's commonly available
-      const { body: installResponse } = await supertest
-        .post('/api/fleet/epm/packages/system')
-        .set('kbn-xsrf', 'xxxx')
-        .send({ force: true })
-        .expect(200);
-      const installedVersion = installResponse.items?.[0]?.version || installResponse.item?.version;
-
-      const { body: packagePolicyResponse } = await supertest
-        .post('/api/fleet/package_policies')
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'system-test',
-          namespace: 'default',
-          policy_id: policyId,
-          package: {
-            name: 'system',
-            version: installedVersion,
-          },
-          inputs: {},
-        })
-        .expect(200);
-      packagePolicyId = packagePolicyResponse.item.id;
     });
 
     after(async () => {
-      // Cleanup package policy
-      if (packagePolicyId) {
-        await supertest
-          .delete(`/api/fleet/package_policies/${packagePolicyId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
-      }
-
       // Cleanup agent policy
       if (policyId) {
         await supertest
