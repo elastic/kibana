@@ -11,8 +11,7 @@ import { generateLogsData } from '../../fixtures/generators';
 
 const TEST_STREAM = 'logs-nginx-default';
 
-// Failing: See https://github.com/elastic/kibana/issues/251123
-test.describe.skip('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
     const currentTime = Date.now();
     const generateLogs = generateLogsData(logsSynthtraceEsClient);
@@ -152,8 +151,18 @@ test.describe.skip('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     };
     // Go to Retention tab
     await pageObjects.streams.clickRetentionTab();
+    // Scroll to date picker within the first ingestion rate panel
+    // eslint-disable-next-line playwright/no-nth-methods
+    const firstIngestionRatePanel = page.testSubj.locator('ingestionRatePanel').first();
+    await expect(firstIngestionRatePanel).toBeVisible();
+    await firstIngestionRatePanel.scrollIntoViewIfNeeded();
 
-    await pageObjects.streams.setAbsoluteTimeRange(timeRange);
+    // Set time range within the ingestion rate panel container
+    await pageObjects.datePicker.setAbsoluteRangeInRootContainer({
+      to: timeRange.to,
+      from: timeRange.from,
+      containerLocator: firstIngestionRatePanel,
+    });
 
     // Verify time range is displayed correctly on Retention tab
     await pageObjects.streams.verifyDatePickerTimeRange(timeRange);

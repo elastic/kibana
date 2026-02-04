@@ -50,7 +50,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
     core.savedObjects.registerType<LinksState>(linksSavedObjectType);
 
     plugins.embeddable.registerTransforms(LINKS_EMBEDDABLE_TYPE, {
-      ...transforms,
+      getTransforms: () => transforms,
       // TODO register schema when its ready to be public
     });
 
