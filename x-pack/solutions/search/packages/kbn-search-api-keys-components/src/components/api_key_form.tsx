@@ -44,7 +44,6 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true, minWidt
         copyValue={apiKey}
         dataTestSubj="apiKeyFormAPIKey"
         copyValueDataTestSubj="APIKeyButtonCopy"
-        minWidth={minWidth}
         actions={[
           <EuiButtonIcon
             iconType={status === Status.showPreviewKey ? 'eyeClosed' : 'eye'}

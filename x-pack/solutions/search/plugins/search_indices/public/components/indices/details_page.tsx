@@ -309,11 +309,11 @@ export const SearchIndexDetailsPage = () => {
                 <EuiFlexItem>
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
                     <EuiFlexGroup css={{ overflow: 'auto' }} wrap>
-                      <EuiFlexItem grow={false}>
+                      <EuiFlexItem grow={false} css={{ minWidth: 400 }}>
                         <ConnectionDetails />
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <ApiKeyForm minWidth={400} />
+                      <EuiFlexItem grow={false} css={{ minWidth: 400 }}>
+                        <ApiKeyForm />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <EuiFlexItem css={{ maxWidth: 'fit-content' }}>

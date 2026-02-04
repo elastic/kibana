@@ -24,7 +24,6 @@ export const ConnectionDetails: React.FC = () => {
       copyValue={elasticsearchUrl}
       dataTestSubj="connectionDetailsEndpoint"
       copyValueDataTestSubj="connectionDetailsEndpointCopy"
-      minWidth={400}
     />
   );
 };
