@@ -23,9 +23,14 @@ export interface CloudConnectStatusResult {
 /** @public */
 export type CloudConnectStatusHook = () => CloudConnectStatusResult;
 
+const defaultCloudConnectStatusHook: CloudConnectStatusHook = () => ({
+  isCloudConnected: false,
+  isLoading: false,
+});
+
 export class AddDataService {
   private addDataTabs: Record<string, AddDataTab> = {};
-  private cloudConnectStatusHook: CloudConnectStatusHook | undefined;
+  private cloudConnectStatusHook: CloudConnectStatusHook = defaultCloudConnectStatusHook;
 
   public setup() {
     return {
@@ -52,7 +57,7 @@ export class AddDataService {
     return Object.values(this.addDataTabs);
   }
 
-  public getCloudConnectStatusHook(): CloudConnectStatusHook | undefined {
+  public getCloudConnectStatusHook(): CloudConnectStatusHook {
     return this.cloudConnectStatusHook;
   }
 }

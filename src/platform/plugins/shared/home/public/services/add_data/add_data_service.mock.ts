@@ -22,7 +22,10 @@ const createMock = (): jest.Mocked<PublicMethodsOf<AddDataService>> => {
   const service = {
     setup: jest.fn(),
     getAddDataTabs: jest.fn(() => []),
-    getCloudConnectStatusHook: jest.fn(() => undefined),
+    getCloudConnectStatusHook: jest.fn(() => () => ({
+      isCloudConnected: false,
+      isLoading: false,
+    })),
   };
   service.setup.mockImplementation(createSetupMock);
   return service;

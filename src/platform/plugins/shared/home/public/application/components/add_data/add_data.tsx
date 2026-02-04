@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { FC, MouseEvent } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
@@ -58,10 +58,12 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
     });
 
   // Check cloud connect status
-  const useCloudConnectStatus = addDataService.getCloudConnectStatusHook();
-  const cloudConnectStatus = useCloudConnectStatus?.();
-  const isCloudConnectStatusLoading = cloudConnectStatus?.isLoading ?? false;
-  const isAlreadyConnected = cloudConnectStatus?.isCloudConnected ?? false;
+  const useCloudConnectStatus = useMemo(
+    () => addDataService.getCloudConnectStatusHook(),
+    [addDataService]
+  );
+  const { isLoading: isCloudConnectStatusLoading, isCloudConnected: isAlreadyConnected } =
+    useCloudConnectStatus();
 
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
   const hasCloudConnectPermission = Boolean(
