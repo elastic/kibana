@@ -20,10 +20,10 @@ Then run the tests in another terminal:
 
 ```bash
 // ESS (stateful)
-npx playwright test --config=src/platform/plugins/shared/dashboard/test/scout_oas_schema/api/parallel.playwright.config.ts --grep=@ess --project=local
+npx playwright test --config=src/platform/plugins/shared/dashboard/test/scout_oas_schema/api/playwright.config.ts --grep=@ess --project=local
 
 // Serverless
-npx playwright test --config=src/platform/plugins/shared/dashboard/test/scout_oas_schema/api/parallel.playwright.config.ts --grep=@svlSearch --project=local
+npx playwright test --config=src/platform/plugins/shared/dashboard/test/scout_oas_schema/api/playwright.config.ts --grep=@svlSearch --project=local
 ```
 
 ### Server Configuration
@@ -32,6 +32,7 @@ The custom server config is located at:
 `src/platform/packages/shared/kbn-scout/src/servers/configs/custom/oas_schema/`
 
 It extends the default config and adds:
+
 ```
 --server.oas.enabled=true
 ```
