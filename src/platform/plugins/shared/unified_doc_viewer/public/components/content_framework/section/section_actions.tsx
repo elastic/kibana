@@ -28,10 +28,6 @@ export interface SectionActionsProps {
   actions: Action[];
 }
 
-function isPlainLeftClick(e: React.MouseEvent) {
-  return e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
-}
-
 export const SectionActions = ({ actions }: SectionActionsProps) => {
   if (!actions.length) return null;
   const size = 'xs';
