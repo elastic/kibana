@@ -55,10 +55,10 @@ the `tie_breaker_id` field to ensure all lists are sorted and returned correctly
  
       */
   cursor: FindListItemsCursor.optional(),
-  /** 
+  /**
       * Filters the returned results according to the value of the specified field,
 using the <field name>:<field value> syntax.
- 
+
       */
   filter: FindListItemsFilter.optional(),
 });
