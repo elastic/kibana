@@ -122,7 +122,7 @@ export const command = {
       }),
       time('pre-build webpack bundles for packages', async () => {
         log.info('pre-build webpack bundles for packages');
-        await moonRun([':build-webpack'], {
+        await moonRun(':build-webpack', {
           pipe: !quiet,
           quiet,
           noCache: forceInstall,
