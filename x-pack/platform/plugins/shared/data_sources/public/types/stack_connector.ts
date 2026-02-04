@@ -6,30 +6,35 @@
  */
 
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ConnectorResponse } from '@kbn/actions-plugin/common/routes/connector/response';
 
 /**
- * API response type for GET /api/actions/connector/{id}
+ * Request payload for creating a stack connector.
+ * Re-exported from @kbn/actions-plugin to ensure sync with API.
  *
- * This is the raw response from the Actions plugin API (snake_case).
+ * POST /api/actions/connector
  */
-export interface StackConnectorApiResponse {
-  id: string;
-  name: string;
-  config?: Record<string, unknown>;
-  connector_type_id: string;
-  is_missing_secrets?: boolean;
-  is_preconfigured: boolean;
-  is_deprecated: boolean;
-  is_system_action: boolean;
-  is_connector_type_deprecated: boolean;
-  referenced_by_count?: number;
-}
+export type { CreateConnectorRequestBody as CreateStackConnectorRequest } from '@kbn/actions-plugin/common/routes/connector/apis/create';
+
+/**
+ * Request payload for updating a stack connector.
+ * Re-exported from @kbn/actions-plugin to ensure sync with API.
+ *
+ * PUT /api/actions/connector/{id}
+ */
+export type { UpdateConnectorBody as UpdateStackConnectorRequest } from '@kbn/actions-plugin/common/routes/connector/apis/update';
+
+/**
+ * API response from creating, updating, or getting a stack connector.
+ * Re-exported from @kbn/actions-plugin to ensure sync with API.
+ */
+export type StackConnectorApiResponse = ConnectorResponse;
 
 /**
  * Transform a stack connector API response from snake_case to camelCase.
  *
- * @param data - Raw API response
- * @returns Transformed ActionConnector
+ * @param data - Raw API response (snake_case)
+ * @returns Transformed ActionConnector (camelCase)
  */
 export const transformStackConnectorResponse = (
   data: StackConnectorApiResponse
@@ -38,7 +43,6 @@ export const transformStackConnectorResponse = (
     connector_type_id: actionTypeId,
     is_preconfigured: isPreconfigured,
     is_deprecated: isDeprecated,
-    referenced_by_count: referencedByCount,
     is_missing_secrets: isMissingSecrets,
     is_system_action: isSystemAction,
     is_connector_type_deprecated: isConnectorTypeDeprecated,
@@ -49,8 +53,7 @@ export const transformStackConnectorResponse = (
     actionTypeId,
     isPreconfigured,
     isDeprecated,
-    referencedByCount,
-    isMissingSecrets,
+    isMissingSecrets: isMissingSecrets ?? false,
     isSystemAction,
     isConnectorTypeDeprecated,
     secrets: {}, // Secrets are never returned from API for security
