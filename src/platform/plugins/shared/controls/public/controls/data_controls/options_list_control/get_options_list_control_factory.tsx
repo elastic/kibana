@@ -387,34 +387,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
                 displaySettings: state.displaySettings ?? {},
               }}
             >
-              {/* <EuiTitle size="xxs">
-                <figcaption>
-                  <h2>Test</h2>
-                </figcaption>
-              </EuiTitle> */}
-              {isPinned ? (
-                <OptionsListControl />
-              ) : (
-                <EuiFormRow
-                  fullWidth
-                  label="Text field"
-                  css={({ euiTheme }) => css`
-                    padding: 4px 8px;
-                    width: 100%;
-                    row-gap: 2px;
-                    label {
-                      font-size: 1rem;
-                      font-weight: ${euiTheme.font.weight.regular};
-                      color: ${euiTheme.colors.textSubdued};
-                    }
-                    .euiFormRow__fieldWrapper {
-                      height: 100%;
-                    }
-                  `}
-                >
-                  <OptionsListControl />
-                </EuiFormRow>
-              )}
+              <OptionsListControl isPinned={isPinned} />
             </OptionsListControlContext.Provider>
           );
         },

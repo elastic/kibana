@@ -17,7 +17,11 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiInputPopover,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
   EuiToken,
   EuiToolTip,
   htmlIdGenerator,
@@ -61,6 +65,9 @@ const optionListControlStyles = {
       fontWeight: `${euiTheme.font.weight.regular} !important` as 'normal',
       color: `${euiTheme.colors.textSubdued} !important`,
       padding: `0`,
+      '&.optionsList--pinned': {
+        padding: `0 ${euiTheme.size.s}`,
+      },
       '&:hover::before': {
         background: `${euiTheme.colors.backgroundBasePlain} !important`,
       },
@@ -99,8 +106,10 @@ const optionListControlStyles = {
 };
 
 export const OptionsListControl = ({
+  isPinned,
   disableMultiValueEmptySelection = false,
 }: {
+  isPinned: boolean;
   disableMultiValueEmptySelection?: boolean;
 }) => {
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
@@ -223,6 +232,7 @@ export const OptionsListControl = ({
       isLoading={loading}
       iconType={'arrowDown'}
       // iconSize={'s'}
+      className={isPinned ? `optionsList--pinned` : undefined}
       data-test-subj={`optionsList-control-${componentApi.uuid}`}
       css={styles.filterButton}
       onClick={() => setPopoverOpen(!isPopoverOpen)}
@@ -242,34 +252,75 @@ export const OptionsListControl = ({
   );
 
   return (
-    <EuiFilterGroup
-      className={'kbnGridLayout--hideDragHandle'}
-      fullWidth
-      compressed={isCompressed(componentApi)}
-      css={optionListControlStyles.filterGroup}
-      data-control-id={componentApi.uuid}
-      data-shared-item
-    >
-      <EuiInputPopover
-        title="test"
-        ownFocus
-        input={button}
-        repositionOnScroll
-        isOpen={isPopoverOpen}
-        panelPaddingSize="none"
-        panelMinWidth={MIN_POPOVER_WIDTH}
-        className="optionsList__inputButtonOverride"
-        css={styles.inputButtonOverride}
-        initialFocus={'[data-test-subj=optionsList-control-search-input]'}
-        closePopover={() => setPopoverOpen(false)}
-        panelClassName="optionsList__popoverOverride"
-        panelProps={{
-          title: panelTitle ?? defaultPanelTitle,
-          'aria-label': OptionsListStrings.popover.getAriaLabel(panelTitle ?? defaultPanelTitle!),
-        }}
+    <ConditionallyWrapWithLabel label={panelTitle ?? defaultPanelTitle} isPinned={isPinned}>
+      <EuiFilterGroup
+        className={'kbnGridLayout--hideDragHandle'}
+        fullWidth
+        compressed={isCompressed(componentApi)}
+        css={optionListControlStyles.filterGroup}
+        data-control-id={componentApi.uuid}
+        data-shared-item
       >
-        <OptionsListPopover disableMultiValueEmptySelection={disableMultiValueEmptySelection} />
-      </EuiInputPopover>
-    </EuiFilterGroup>
+        <EuiInputPopover
+          title="test"
+          ownFocus
+          input={button}
+          repositionOnScroll
+          isOpen={isPopoverOpen}
+          panelPaddingSize="none"
+          panelMinWidth={MIN_POPOVER_WIDTH}
+          className="optionsList__inputButtonOverride"
+          css={styles.inputButtonOverride}
+          initialFocus={'[data-test-subj=optionsList-control-search-input]'}
+          closePopover={() => setPopoverOpen(false)}
+          panelClassName="optionsList__popoverOverride"
+          panelProps={{
+            title: panelTitle ?? defaultPanelTitle,
+            'aria-label': OptionsListStrings.popover.getAriaLabel(panelTitle ?? defaultPanelTitle!),
+          }}
+        >
+          <OptionsListPopover disableMultiValueEmptySelection={disableMultiValueEmptySelection} />
+        </EuiInputPopover>
+      </EuiFilterGroup>
+    </ConditionallyWrapWithLabel>
+  );
+};
+
+const ConditionallyWrapWithLabel = ({
+  isPinned,
+  label,
+  children,
+}: React.PropsWithChildren<{
+  isPinned: boolean;
+  label: string | undefined;
+}>) => {
+  return isPinned ? (
+    children
+  ) : (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="xs"
+      css={css`
+        padding: 4px 8px;
+      `}
+    >
+      <EuiFlexItem
+        css={css`
+          flex-grow: 0;
+        `}
+      >
+        <EuiText
+          size="s"
+          color="subdued"
+          css={css`
+            line-height: 1rem;
+          `}
+          component="p"
+        >
+          {label}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>{children} </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
