@@ -26,6 +26,7 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
         await testSubjects.existOrFail('search-field-endpoints');
         await testSubjects.existOrFail('type-field-endpoints');
         await testSubjects.existOrFail('service-field-endpoints');
+        await testSubjects.existOrFail('sortFieldEndpoints');
 
         const table = await testSubjects.find('inferenceEndpointTable');
         const rows = await table.findAllByClassName('euiTableRow');
@@ -126,6 +127,66 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
 
         await elserCopyEndpointId.click();
         expect((await browser.getClipboardValue()).includes('.elser-2-elasticsearch')).to.be(true);
+      },
+
+      async expectSortDropdownToBeVisible() {
+        await testSubjects.existOrFail('sortFieldEndpoints');
+        await testSubjects.existOrFail('sortButton');
+      },
+
+      async expectSortDropdownOptions() {
+        // Open the sort dropdown
+        await testSubjects.click('sortButton');
+
+        // Verify all sort options are displayed
+        const sortOptions = await testSubjects.findAll('euiSelectableListItem');
+        expect(sortOptions.length).to.equal(4);
+
+        // Get the text of all options
+        const optionTexts = await Promise.all(sortOptions.map((option) => option.getVisibleText()));
+        expect(optionTexts).to.contain('Endpoint');
+        expect(optionTexts).to.contain('Service');
+        expect(optionTexts).to.contain('Type');
+        expect(optionTexts).to.contain('Model');
+
+        // Close the dropdown by clicking the button again
+        await testSubjects.click('sortButton');
+      },
+
+      async expectSortByField(fieldName: string) {
+        // Open the sort dropdown
+        await testSubjects.click('sortButton');
+
+        // Find and click the specified sort option
+        const sortOptions = await testSubjects.findAll('euiSelectableListItem');
+        for (const option of sortOptions) {
+          const text = await option.getVisibleText();
+          if (text === fieldName) {
+            await option.click();
+            break;
+          }
+        }
+
+        // Verify the table is still displayed after sorting
+        await testSubjects.existOrFail('inferenceEndpointTable');
+      },
+
+      async expectColumnHeaderSorting() {
+        // Click on the Endpoint column header to sort
+        const table = await testSubjects.find('inferenceEndpointTable');
+        const headers = await table.findAllByCssSelector('th button');
+
+        // Find and click the Endpoint column header (first sortable column)
+        for (const header of headers) {
+          const text = await header.getVisibleText();
+          if (text.includes('Endpoint')) {
+            await header.click();
+            break;
+          }
+        }
+
+        // Verify the table is still displayed after sorting
+        await testSubjects.existOrFail('inferenceEndpointTable');
       },
     },
 
