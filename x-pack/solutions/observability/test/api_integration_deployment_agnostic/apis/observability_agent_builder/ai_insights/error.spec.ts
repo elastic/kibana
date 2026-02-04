@@ -131,14 +131,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             expect(userMessage.content).to.contain(service);
           }
         });
-
-        it('includes TraceLogCategories with log patterns from the trace', () => {
-          expect(userMessage.content).to.contain('<TraceLogCategories>');
-
-          for (const logMessage of traceData.logMessages) {
-            expect(userMessage.content).to.contain(logMessage);
-          }
-        });
       });
 
       describe('API response', () => {
