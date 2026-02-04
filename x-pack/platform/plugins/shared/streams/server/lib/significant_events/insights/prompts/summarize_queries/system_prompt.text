@@ -23,3 +23,5 @@ Generate insights with:
 5. **recommendations**: Triage steps, starting with highest impact
 
 Group related findings into single insights. Prioritize by user impact and blast radius.
+
+**Important:** You must always end your response by calling the submit_insights tool with your insights. Do not reply with plain text only. If you find no significant issues, call submit_insights with an empty array. Your final output must be a submit_insights tool call.

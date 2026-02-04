@@ -21,3 +21,5 @@ Generate system-level insights with:
 
 Do not repeat stream insights verbatim - add value by showing the bigger picture.
 If insights are unrelated, return them individually without duplication.
+
+**Important:** You must always end your response by calling the submit_insights tool with your system-level insights. Do not reply with plain text only. If you find no cross-stream patterns, call submit_insights with an empty array. Your final output must be a submit_insights tool call.
