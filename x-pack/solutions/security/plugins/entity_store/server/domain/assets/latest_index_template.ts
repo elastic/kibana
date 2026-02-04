@@ -41,7 +41,7 @@ export const getLatestEntityIndexTemplateConfig = (
       definitionId: definition.id,
     }),
   ],
-  priority: 100, // TODO: 200
+  priority: 200,
   template: {
     aliases: {
       [getEntitiesAliasPattern({ type: definition.type, dataset: ENTITY_LATEST })]: {},
@@ -66,6 +66,7 @@ export const getLatestEntityIndexTemplateConfig = (
       index: {
         codec: 'best_compression',
         mapping: { total_fields: { limit: 2000 } },
+        mode: 'lookup',
       },
     },
   },

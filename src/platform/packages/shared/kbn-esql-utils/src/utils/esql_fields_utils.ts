@@ -8,6 +8,13 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import { isAssignment, isColumn, LeafPrinter, singleItems, Walker } from '@kbn/esql-language';
+import type {
+  ESQLColumn,
+  ESQLList,
+  ESQLLiteral,
+  ESQLProperNode,
+} from '@kbn/esql-language/src/types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 const SPATIAL_FIELDS = ['geo_point', 'geo_shape', 'point', 'shape'];
@@ -72,4 +79,68 @@ export const isESQLColumnGroupable = (column: DatatableColumn): boolean => {
 export const isESQLFieldGroupable = (field: FieldSpec): boolean => {
   if (field.timeSeriesMetric === 'counter') return false;
   return isGroupable(field.type, field.esTypes?.[0]);
+};
+
+/**
+ * Returns the expression that defines the value of the field.
+ *
+ * If the field is defined using an assignement expression, it returns the right side of the assignment.
+ * i.e. in `STATS foo = bar + 1`, it returns `bar + 1`.
+ *
+ * If the field is not defined using an assignment, it returns the field argument itself.
+ * i.e. in `STATS count()`, it returns `count()`.
+ */
+export const getFieldDefinitionFromArg = (fieldArgument: ESQLProperNode): ESQLProperNode => {
+  if (isAssignment(fieldArgument) && isColumn(fieldArgument.args[0])) {
+    const [_, definition] = singleItems(fieldArgument.args);
+    return definition;
+  }
+  return fieldArgument;
+};
+
+export type Terminal = ESQLColumn | ESQLLiteral | ESQLList;
+/**
+ * Retrieves a list of terminal nodes that were found in the field definition.
+ */
+export const getFieldTerminals = (fieldArgument: ESQLProperNode) => {
+  const terminals: Array<Terminal> = [];
+
+  const definition = getFieldDefinitionFromArg(fieldArgument);
+
+  Walker.walk(definition, {
+    visitLiteral(node) {
+      terminals.push(node);
+    },
+    visitColumn(node) {
+      terminals.push(node);
+    },
+    visitListLiteral(node) {
+      terminals.push(node);
+    },
+  });
+
+  return terminals;
+};
+
+/**
+ * Retrieves a formatted list of field names which were used for the new field
+ * construction. For example, in the below example, `x` and `y` are the
+ * existing "used" fields:
+ *
+ * ```
+ * STATS foo = agg(x) BY y, bar = x
+ * ```
+ */
+export const getUsedFields = (fieldArgument: ESQLProperNode) => {
+  const usedFields: Set<string> = new Set();
+
+  const definition = getFieldDefinitionFromArg(fieldArgument);
+
+  Walker.walk(definition, {
+    visitColumn(node) {
+      usedFields.add(LeafPrinter.column(node));
+    },
+  });
+
+  return usedFields;
 };

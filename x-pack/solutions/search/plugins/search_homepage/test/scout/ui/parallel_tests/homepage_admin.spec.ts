@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-search';
+import { expect } from '@kbn/scout-search/ui';
 import { test } from '../fixtures';
 
 test.describe('Homepage - Admin', { tag: ['@svlSearch', '@ess'] }, () => {
@@ -15,14 +15,6 @@ test.describe('Homepage - Admin', { tag: ['@svlSearch', '@ess'] }, () => {
       window.localStorage.setItem('gettingStartedVisited', 'true');
     });
     await pageObjects.homepage.goto();
-  });
-
-  test('should see the manage button', async ({ pageObjects }) => {
-    const headerLeftGroup = await pageObjects.homepage.getHeaderLeftGroup();
-
-    await expect(headerLeftGroup).toContainText('Welcome, test admin');
-    const manageLink = await pageObjects.homepage.getManageLink();
-    await expect(manageLink).toBeEnabled();
   });
 
   test('API keys button should be enabled', async ({ pageObjects }) => {

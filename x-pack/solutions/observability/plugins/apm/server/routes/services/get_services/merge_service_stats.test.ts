@@ -86,7 +86,9 @@ describe('mergeServiceStats', () => {
     ]);
   });
 
-  it('shows services that only have trace data', () => {
+  it('excludes alerts from services not found in APM data', () => {
+    // Services with only alert data (no APM service stats) should NOT appear
+    // This prevents phantom services (e.g., wildcard "*" from SLO alerts) from showing
     expect(
       mergeServiceStats({
         serviceStats: [
@@ -98,13 +100,13 @@ describe('mergeServiceStats', () => {
         healthStatuses: [
           {
             healthStatus: ServiceHealthStatus.healthy,
-            serviceName: 'opbeans-java',
+            serviceName: 'opbeans-java', // Not in serviceStats - will be excluded
           },
         ],
         alertCounts: [
           {
             alertsCount: 2,
-            serviceName: 'opbeans-java',
+            serviceName: 'opbeans-java', // Not in serviceStats - will be excluded
           },
         ],
         sloStats: [
@@ -121,10 +123,6 @@ describe('mergeServiceStats', () => {
         ],
       })
     ).toEqual([
-      {
-        alertsCount: 2,
-        serviceName: 'opbeans-java',
-      },
       {
         agentName: 'java',
         environments: ['staging'],

@@ -42,6 +42,7 @@
     "@kbn/lazy-object",
     "@kbn/security-plugin-types-server",
     "@kbn/connector-specs",
+    "@kbn/es-errors",
     "@kbn/core-http-server",
   ],
   "exclude": ["target/**/*"]

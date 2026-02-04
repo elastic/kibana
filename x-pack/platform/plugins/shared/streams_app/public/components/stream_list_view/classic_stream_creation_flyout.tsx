@@ -17,6 +17,8 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useTimeRange } from '../../hooks/use_time_range';
+import { getFormattedError } from '../../util/errors';
 
 interface ClassicStreamCreationFlyoutProps {
   onClose: () => void;
@@ -37,6 +39,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
   } = useKibana();
 
   const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
   const isIlmAvailable = !!indexLifecycleManagement?.apiService;
 
   const templatesListFetch = useStreamsAppFetch(async () => {
@@ -108,12 +111,12 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
 
         router.push('/{key}/management/{tab}', {
           path: { key: streamName, tab: 'retention' },
-          query: {},
+          query: { rangeFrom, rangeTo },
         });
 
         onClose();
       } catch (error) {
-        core.notifications.toasts.addError(error as Error, {
+        core.notifications.toasts.addError(getFormattedError(error), {
           title: i18n.translate(
             'xpack.streams.classicStreamCreationFlyout.streamCreationFailedToastTitle',
             {
@@ -124,7 +127,15 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
         });
       }
     },
-    [streamsRepositoryClient, signal, core.notifications.toasts, router, onClose]
+    [
+      streamsRepositoryClient,
+      signal,
+      core.notifications.toasts,
+      router,
+      onClose,
+      rangeFrom,
+      rangeTo,
+    ]
   );
 
   const handleValidate = useCallback(
@@ -152,7 +163,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
 
         return { errorType: null };
       } catch (error) {
-        core.notifications.toasts.addError(error as Error, {
+        core.notifications.toasts.addError(getFormattedError(error), {
           title: i18n.translate(
             'xpack.streams.classicStreamCreationFlyout.streamValidationFailedToastTitle',
             {

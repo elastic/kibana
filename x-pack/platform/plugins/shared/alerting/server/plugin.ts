@@ -437,15 +437,13 @@ export class AlertingPlugin {
       });
     }
 
-    if (this?.config?.gapAutoFillScheduler?.enabled ?? false) {
-      registerGapAutoFillSchedulerTask({
-        taskManager: plugins.taskManager,
-        logger: this.logger,
-        getRulesClientWithRequest: (request) => this?.getRulesClientWithRequest?.(request),
-        eventLogger: this.eventLogger!,
-        schedulerConfig: this.config.gapAutoFillScheduler,
-      });
-    }
+    registerGapAutoFillSchedulerTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      getRulesClientWithRequest: (request) => this?.getRulesClientWithRequest?.(request),
+      eventLogger: this.eventLogger!,
+      schedulerConfig: this.config.gapAutoFillScheduler,
+    });
 
     // Routes
     const router = core.http.createRouter<AlertingRequestHandlerContext>();

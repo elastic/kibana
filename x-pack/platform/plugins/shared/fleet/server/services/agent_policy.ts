@@ -20,6 +20,7 @@ import type {
   SavedObjectsUpdateResponse,
   SavedObjectsFindOptions,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
@@ -32,6 +33,8 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { withSpan } from '@kbn/apm-utils';
 
+import { copyPackagePolicy } from '../../common/services/copy_package_policy_utils';
+
 import { catchAndSetErrorStackTrace } from '../errors/utils';
 
 import {
@@ -42,8 +45,6 @@ import {
   policyHasFleetServer,
   policyHasSyntheticsIntegration,
 } from '../../common/services';
-
-import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -105,6 +106,11 @@ import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
 } from '../constants';
 
+import {
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+} from '../../common/services/version_specific_policies_utils';
+
 import { appContextService } from '.';
 
 import { mapAgentPolicySavedObjectToAgentPolicy } from './agent_policies/utils';
@@ -137,6 +143,7 @@ import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 import { getSpaceForAgentPolicy, getSpaceForAgentPolicySO } from './spaces/helpers';
 import { getVersionSpecificPolicies } from './utils/version_specific_policies';
+import { scheduleReassignAgentsToVersionSpecificPoliciesTask } from './agent_policies/reassign_agents_to_version_specific_policies_task';
 
 function normalizeKuery(savedObjectType: string, kuery: string) {
   if (savedObjectType === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE) {
@@ -416,7 +423,7 @@ class AgentPolicyService {
     options: {
       id?: string;
       user?: AuthenticatedUser;
-      authorizationHeader?: HTTPAuthorizationHeader | null;
+      request?: KibanaRequest;
       skipDeploy?: boolean;
       hasFleetServer?: boolean;
     } = {}
@@ -510,7 +517,7 @@ class AgentPolicyService {
       monitoringEnabled,
       spaceId,
       user,
-      authorizationHeader,
+      request,
       force,
       forcePackagePolicyCreation,
     },
@@ -525,7 +532,7 @@ class AgentPolicyService {
       monitoringEnabled?: string[];
       spaceId: string;
       user?: AuthenticatedUser;
-      authorizationHeader?: HTTPAuthorizationHeader | null;
+      request?: KibanaRequest;
       /** Pass force to all following calls: package install, policy creation */
       force?: boolean;
       /** Pass force only to package policy creation */
@@ -546,7 +553,7 @@ class AgentPolicyService {
       monitoringEnabled,
       spaceId,
       user,
-      authorizationHeader,
+      request,
       force,
       forcePackagePolicyCreation,
     });
@@ -572,9 +579,10 @@ class AgentPolicyService {
             spaceId,
             user,
             bumpRevision: false,
-            authorizationHeader,
             force,
-          }
+          },
+          undefined,
+          request
         );
 
         createdPackagePolicyIds.push(createdPackagePolicy.id);
@@ -753,7 +761,7 @@ class AgentPolicyService {
       if (typeof id === 'string') {
         return {
           ...options,
-          id,
+          id: removeVersionSuffixFromPolicyId(id),
           type: savedObjectType,
           namespaces: isSpacesEnabled && options.spaceId ? [options.spaceId] : undefined,
         };
@@ -763,7 +771,7 @@ class AgentPolicyService {
 
       return {
         ...options,
-        id: id.id,
+        id: removeVersionSuffixFromPolicyId(id.id),
         namespaces:
           isSpacesEnabled && spaceForThisAgentPolicy ? [spaceForThisAgentPolicy] : undefined,
         type: savedObjectType,
@@ -956,7 +964,7 @@ class AgentPolicyService {
       user?: AuthenticatedUser;
       force?: boolean;
       spaceId?: string;
-      authorizationHeader?: HTTPAuthorizationHeader | null;
+      request?: KibanaRequest;
       skipValidation?: boolean;
       bumpRevision?: boolean;
       requestSpaceId?: string;
@@ -1033,7 +1041,7 @@ class AgentPolicyService {
         esClient,
         packagesToInstall,
         spaceId: options?.spaceId || DEFAULT_SPACE_ID,
-        authorizationHeader: options?.authorizationHeader,
+        request: options?.request,
         force: options?.force,
       });
     }
@@ -1119,12 +1127,10 @@ class AgentPolicyService {
         const newPackagePolicies = await pMap(
           basePackagePolicies,
           async (packagePolicy: PackagePolicy) => {
-            const { id: packagePolicyId, version, ...newPackagePolicy } = packagePolicy;
-
             const updatedPackagePolicy = {
-              ...newPackagePolicy,
+              ...copyPackagePolicy(packagePolicy),
               name: await incrementPackagePolicyCopyName(soClient, packagePolicy.name),
-            };
+            } as NewPackagePolicy & { id: undefined };
             return updatedPackagePolicy;
           }
         );
@@ -1836,6 +1842,16 @@ class AgentPolicyService {
       }
     );
     t.end();
+
+    if (appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
+      const versionSpecificAgentPolicyIds = fleetServerPolicies
+        .map((fsp) => fsp.policy_id)
+        .filter((id) => hasVersionSuffix(id));
+      await scheduleReassignAgentsToVersionSpecificPoliciesTask(
+        appContextService.getTaskManagerStart()!,
+        versionSpecificAgentPolicyIds
+      );
+    }
   }
 
   public async deleteFleetServerPoliciesForPolicyId(

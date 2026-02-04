@@ -10,15 +10,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiMarkdownFormat,
   EuiPanel,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TaskStatus } from '@kbn/streams-schema';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
+import type { Insight } from '@kbn/streams-schema';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useInsightsApi } from '../../../../hooks/use_insights_api';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -26,6 +26,7 @@ import { useTaskPolling } from '../../../../hooks/use_task_polling';
 import { getFormattedError } from '../../../../util/errors';
 import { ConnectorListButton } from '../../../connector_list_button/connector_list_button';
 import { FeedbackButtons } from './feedback_buttons';
+import { InsightCard } from './insight_card';
 
 export function Summary({ count }: { count: number }) {
   const aiFeatures = useAIFeatures();
@@ -54,10 +55,15 @@ export function Summary({ count }: { count: number }) {
     getTaskStatus();
   }, [getTaskStatus]);
 
+  const previousTaskStatusRef = useRef<TaskStatus | undefined>(undefined);
+
   useEffect(() => {
+    const previousStatus = previousTaskStatusRef.current;
+    previousTaskStatusRef.current = task?.status;
+
     if (task?.status === TaskStatus.Failed) {
       notifications.toasts.addError(getFormattedError(new Error(task.error)), {
-        title: i18n.translate('xpack.streams.summary.insightsSummaryPanelErrorTitle', {
+        title: i18n.translate('xpack.streams.insights.errorTitle', {
           defaultMessage: 'Error generating insights',
         }),
       });
@@ -65,15 +71,26 @@ export function Summary({ count }: { count: number }) {
     }
 
     if (task?.status === TaskStatus.Completed) {
-      setSummary(task.summary);
+      if (previousStatus === TaskStatus.InProgress && task.insights.length === 0) {
+        notifications.toasts.addInfo({
+          title: i18n.translate('xpack.streams.insights.noInsightsTitle', {
+            defaultMessage: 'No insights found',
+          }),
+          text: i18n.translate('xpack.streams.insights.noInsightsDescription', {
+            defaultMessage:
+              'The AI could not generate any insights from the current significant events. Try again later when more events are available.',
+          }),
+        });
+      }
+      setInsights(task.insights);
     }
   }, [task, notifications.toasts]);
 
   useTaskPolling(task, getInsightsDiscoveryTaskStatus, getTaskStatus);
 
-  const [summary, setSummary] = useState<string | null>(null);
+  const [insights, setInsights] = useState<Insight[] | null>(null);
 
-  const onGenerateSummaryClick = async () => {
+  const onGenerateInsightsClick = async () => {
     if (!aiFeatures?.genAiConnectors.selectedConnector) {
       return;
     }
@@ -81,7 +98,7 @@ export function Summary({ count }: { count: number }) {
     await scheduleTask(aiFeatures?.genAiConnectors.selectedConnector);
   };
 
-  const onRegenerateSummaryClick = async () => {
+  const onRegenerateInsightsClick = async () => {
     if (!aiFeatures?.genAiConnectors.selectedConnector) {
       return;
     }
@@ -89,7 +106,7 @@ export function Summary({ count }: { count: number }) {
     await acknowledgeInsightsDiscoveryTask();
     await scheduleTask(aiFeatures?.genAiConnectors.selectedConnector);
 
-    setSummary(null);
+    setInsights(null);
   };
 
   const onCancelClick = async () => {
@@ -102,22 +119,13 @@ export function Summary({ count }: { count: number }) {
     task?.status === TaskStatus.BeingCanceled ||
     isSchedulingTask;
 
-  if (summary) {
+  if (insights && insights.length > 0) {
     return (
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiPanel hasBorder paddingSize="none">
             <EuiPanel color="subdued" hasShadow={false}>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <h2>
-                      {i18n.translate('xpack.streams.summary.insightsSummaryPanelLabel', {
-                        defaultMessage: 'Insights summary',
-                      })}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
+              <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
                   <FeedbackButtons />
                 </EuiFlexItem>
@@ -125,12 +133,12 @@ export function Summary({ count }: { count: number }) {
                   <EuiButton
                     fill={true}
                     iconType="refresh"
-                    onClick={onRegenerateSummaryClick}
+                    onClick={onRegenerateInsightsClick}
                     disabled={isSchedulingTask}
                     isLoading={isSchedulingTask}
-                    data-test-subj="significant_events_regenerate_summary_button"
+                    data-test-subj="significant_events_regenerate_insights_button"
                   >
-                    {i18n.translate('xpack.streams.summary.regenerateInsightsButtonLabel', {
+                    {i18n.translate('xpack.streams.insights.regenerateButtonLabel', {
                       defaultMessage: 'Re-generate insights',
                     })}
                   </EuiButton>
@@ -138,7 +146,13 @@ export function Summary({ count }: { count: number }) {
               </EuiFlexGroup>
             </EuiPanel>
             <EuiPanel hasShadow={false}>
-              <EuiMarkdownFormat>{summary}</EuiMarkdownFormat>
+              <EuiFlexGroup direction="column" gutterSize="m">
+                {insights.map((insight, idx) => (
+                  <EuiFlexItem key={idx}>
+                    <InsightCard insight={insight} index={idx} />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
             </EuiPanel>
           </EuiPanel>
         </EuiFlexItem>
@@ -195,19 +209,13 @@ export function Summary({ count }: { count: number }) {
                     iconType: 'sparkles',
                     children:
                       task?.status === TaskStatus.InProgress
-                        ? i18n.translate(
-                            'xpack.streams.significantEventsSummary.generatingInsightsButtonLabel',
-                            {
-                              defaultMessage: 'Generating insights',
-                            }
-                          )
-                        : i18n.translate(
-                            'xpack.streams.significantEventsSummary.generateSummaryButtonLabel',
-                            {
-                              defaultMessage: 'Generate insights',
-                            }
-                          ),
-                    onClick: onGenerateSummaryClick,
+                        ? i18n.translate('xpack.streams.insights.generatingButtonLabel', {
+                            defaultMessage: 'Generating insights',
+                          })
+                        : i18n.translate('xpack.streams.insights.generateButtonLabel', {
+                            defaultMessage: 'Generate insights',
+                          }),
+                    onClick: onGenerateInsightsClick,
                     isDisabled: isGenerateButtonPending,
                     isLoading: isGenerateButtonPending,
                     'data-test-subj': 'significant_events_generate_insights_button',
@@ -222,10 +230,10 @@ export function Summary({ count }: { count: number }) {
                     data-test-subj="significant_events_cancel_insights_generation_button"
                   >
                     {task?.status === TaskStatus.BeingCanceled
-                      ? i18n.translate('xpack.streams.summary.cancellingTaskButtonLabel', {
+                      ? i18n.translate('xpack.streams.insights.cancellingTaskButtonLabel', {
                           defaultMessage: 'Cancelling',
                         })
-                      : i18n.translate('xpack.streams.summary.cancelTaskButtonLabel', {
+                      : i18n.translate('xpack.streams.insights.cancelTaskButtonLabel', {
                           defaultMessage: 'Cancel',
                         })}
                   </EuiButton>

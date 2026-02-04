@@ -31,6 +31,7 @@ import { AdditionalChargesCallout } from '../grok/additional_charges_callout';
 import { GenerateSuggestionButton } from '../../../../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useDissectPatternSuggestion } from './use_dissect_pattern_suggestion';
 import type { AIFeatures } from '../../../../../../../hooks/use_ai_features';
+import { registerDissectSuggestion, clearDissectSuggestion } from '../../../../dev_console_helpers';
 
 export const DissectPatternAISuggestions = ({
   aiFeatures,
@@ -59,6 +60,22 @@ export const DissectPatternAISuggestions = ({
         )
     );
   }, [previewDocuments, fieldValue]);
+
+  // Register/clear suggestion in dev console helper
+  React.useEffect(() => {
+    if (suggestionsState.value) {
+      registerDissectSuggestion({
+        dissectProcessor: suggestionsState.value.dissectProcessor,
+        simulationResult: suggestionsState.value.simulationResult,
+      });
+    } else {
+      clearDissectSuggestion();
+    }
+
+    return () => {
+      clearDissectSuggestion();
+    };
+  }, [suggestionsState.value]);
 
   // Show inline message when LLM couldn't generate suggestions
   if (

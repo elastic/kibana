@@ -22,7 +22,7 @@
       "licensing"
     ],
     "optionalPlugins": ["ml", "spaces"],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "extraPublicDirs": []
   }
 }
