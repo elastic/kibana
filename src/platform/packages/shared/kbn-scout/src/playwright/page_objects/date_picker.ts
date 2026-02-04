@@ -114,7 +114,7 @@ export class DatePicker {
       ).toHaveText(to);
     }
 
-    await getTestSubjLocator('querySubmitButton').click();
+    await this.page.locator('[data-test-subj="querySubmitButton"]:not([disabled])').click();
   }
 
   async setAbsoluteRange({ from, to }: { from: string; to: string }) {
