@@ -116,4 +116,23 @@ export class ReactFlowServiceMapPage {
   async getPopoverTitle() {
     return this.serviceMapPopoverTitle.textContent();
   }
+
+  /* Accessibility helpers */
+  async focusNode(nodeId: string) {
+    const node = this.getNodeById(nodeId);
+    await node.focus();
+  }
+
+  async isNodeFocused(nodeId: string): Promise<boolean> {
+    return this.page.evaluate((id) => {
+      const nodeEl = document.querySelector(`[data-id="${id}"]`);
+      return nodeEl === document.activeElement || nodeEl?.contains(document.activeElement) || false;
+    }, nodeId);
+  }
+
+  async getNodeAriaLabel(nodeId: string): Promise<string | null> {
+    const node = this.getNodeById(nodeId);
+    const interactiveElement = node.locator('[role="button"]');
+    return interactiveElement.getAttribute('aria-label');
+  }
 }

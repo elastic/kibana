@@ -9,6 +9,7 @@ import type { IRouter, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { registerAuthenticateRoute } from './authenticate';
 import { registerClustersRoute } from './clusters';
+import { registerRotateApiKeyRoute } from './rotate_api_key';
 
 interface CloudConnectedStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -25,4 +26,5 @@ export interface RouteOptions {
 export function registerRoutes(options: RouteOptions) {
   registerAuthenticateRoute(options);
   registerClustersRoute(options);
+  registerRotateApiKeyRoute(options);
 }
