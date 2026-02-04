@@ -7,7 +7,6 @@
 
 import { syncEditedMonitorBulk } from './edit_monitor_bulk';
 
-// Mock telemetry
 jest.mock('../../telemetry/monitor_upgrade_sender', () => ({
   formatTelemetryUpdateEvent: jest.fn(),
   sendTelemetryEvents: jest.fn(),
@@ -85,16 +84,13 @@ describe('syncEditedMonitorBulk', () => {
         spaceId: 'default',
       });
 
-      // Should update references for both monitors
       expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledTimes(2);
 
-      // Monitor 1 should have 2 policies
       expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledWith(
         'monitor-1',
         ['monitor-1-loc-1', 'monitor-1-loc-2']
       );
 
-      // Monitor 2 should have 1 policy
       expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledWith(
         'monitor-2',
         ['monitor-2-loc-1']
@@ -154,7 +150,6 @@ describe('syncEditedMonitorBulk', () => {
       mockSyntheticsMonitorClient.editMonitors.mockResolvedValue({
         failedPolicyUpdates: [],
         publicSyncErrors: [],
-        // activePolicyIds is undefined
       });
 
       await syncEditedMonitorBulk({
@@ -189,7 +184,6 @@ describe('syncEditedMonitorBulk', () => {
         },
       ] as any;
 
-      // Only monitor-1 has active policies
       const activePolicyIds = ['monitor-1-loc-1'];
 
       mockMonitorConfigRepository.bulkUpdate.mockResolvedValue({
@@ -214,7 +208,6 @@ describe('syncEditedMonitorBulk', () => {
         spaceId: 'default',
       });
 
-      // Should only update references for monitor-1
       expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledTimes(1);
       expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledWith(
         'monitor-1',

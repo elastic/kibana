@@ -8,12 +8,10 @@
 import { syncNewMonitorBulk } from './add_monitor_bulk';
 import { ConfigKey } from '../../../../common/runtime_types';
 
-// Mock uuid to return predictable IDs
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid'),
 }));
 
-// Mock telemetry
 jest.mock('../../telemetry/monitor_upgrade_sender', () => ({
   formatTelemetryEvent: jest.fn(),
   sendTelemetryEvents: jest.fn(),
@@ -41,7 +39,6 @@ describe('syncNewMonitorBulk', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset uuid mock to return sequential IDs
     let idCounter = 0;
     jest.requireMock('uuid').v4.mockImplementation(() => `monitor-${++idCounter}`);
   });
@@ -67,7 +64,7 @@ describe('syncNewMonitorBulk', () => {
       mockMonitorConfigRepository.createBulk.mockResolvedValue(createdMonitors);
       mockSyntheticsMonitorClient.addMonitors.mockResolvedValue([
         { created: createdPolicies, failed: [] },
-        [], // sync errors
+        [],
       ]);
       mockMonitorConfigRepository.updatePackagePolicyReferences.mockResolvedValue({});
 
@@ -78,17 +75,14 @@ describe('syncNewMonitorBulk', () => {
         spaceId: 'default',
       });
 
-      // Should update references for both monitors
       expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledTimes(2);
 
-      // Monitor 1 should have 2 policies
       expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledWith(
         'monitor-1',
         ['monitor-1-loc-1', 'monitor-1-loc-2'],
         undefined
       );
 
-      // Monitor 2 should have 1 policy
       expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledWith(
         'monitor-2',
         ['monitor-2-loc-1'],
@@ -124,7 +118,7 @@ describe('syncNewMonitorBulk', () => {
         {
           created: [
             { id: 'monitor-1-loc-1', name: 'Policy 1' },
-            { id: 'unknown-monitor-loc-1', name: 'Orphan Policy' }, // This shouldn't match
+            { id: 'unknown-monitor-loc-1', name: 'Orphan Policy' },
           ],
           failed: [],
         },
@@ -139,7 +133,6 @@ describe('syncNewMonitorBulk', () => {
         spaceId: 'default',
       });
 
-      // Should only update for the matching monitor
       expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledTimes(1);
       expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledWith(
         'monitor-1',

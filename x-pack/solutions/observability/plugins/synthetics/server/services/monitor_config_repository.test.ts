@@ -910,9 +910,12 @@ describe('MonitorConfigRepository', () => {
 
       await repository.updatePackagePolicyReferences(monitorId, packagePolicyIds);
 
-      expect(soClient.update).toHaveBeenCalledWith(syntheticsMonitorSavedObjectType, monitorId, {
-        references: [],
-      });
+      expect(soClient.update).toHaveBeenCalledWith(
+        syntheticsMonitorSavedObjectType,
+        monitorId,
+        {},
+        { references: [] }
+      );
     });
   });
 

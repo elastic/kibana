@@ -48,7 +48,6 @@ export async function cleanUpDuplicatedPackagePolicies(
 
     const privateLocationAPI = new SyntheticsPrivateLocation(serverSetup);
 
-    // Track expected new format policy IDs: {monitorId}-{locationId}
     const expectedNewFormatIds = new Set<string>();
 
     for await (const result of finder.find()) {
@@ -78,24 +77,20 @@ export async function cleanUpDuplicatedPackagePolicies(
       perPage: 100,
     });
 
-    // Collect all existing policy IDs
     const allExistingPolicyIds: string[] = [];
     for await (const packagePoliciesIds of policiesIterator) {
       allExistingPolicyIds.push(...packagePoliciesIds);
     }
 
-    // Determine which policies to keep and which to delete
     const { policiesToKeep, policiesToDelete } = determinePoliciesToCleanup(
       allExistingPolicyIds,
       expectedNewFormatIds,
       debugLog
     );
 
-    // Check if there are expected policies that don't exist (need sync)
     const missingPolicies = new Set(expectedNewFormatIds);
     for (const policyId of policiesToKeep) {
       missingPolicies.delete(policyId);
-      // Also remove if a legacy exists for this new format
       for (const newFormatId of expectedNewFormatIds) {
         if (policyId.startsWith(newFormatId + '-')) {
           missingPolicies.delete(newFormatId);
@@ -131,9 +126,9 @@ export async function cleanUpDuplicatedPackagePolicies(
 
 /**
  * Determines which policies to keep and which to delete:
- * 1. New format policy exists → keep it, delete all legacy variants
- * 2. Only legacy exists → keep ONE (first found), delete others
- * 3. Unknown policies (not matching any monitor) → delete
+ * 1. If new format policy exists, keep it and delete all legacy variants
+ * 2. If only legacy exists, keep ONE (first found) and delete others
+ * 3. If unknown policies (not matching any monitor) are found, delete them
  */
 export function determinePoliciesToCleanup(
   existingPolicyIds: string[],
@@ -142,21 +137,16 @@ export function determinePoliciesToCleanup(
 ): { policiesToKeep: string[]; policiesToDelete: string[] } {
   const policiesToKeep: string[] = [];
   const policiesToDelete: string[] = [];
-
-  // Track which new format IDs have their policy found
   const foundNewFormat = new Set<string>();
-  // Track legacy policies grouped by their base (new format) ID
   const legacyPoliciesByNewId = new Map<string, string[]>();
 
   for (const policyId of existingPolicyIds) {
-    // Check if this is a new format policy
     if (expectedNewFormatIds.has(policyId)) {
       foundNewFormat.add(policyId);
       policiesToKeep.push(policyId);
       continue;
     }
 
-    // Check if this is a legacy policy for a known monitor
     let matchedNewFormatId: string | null = null;
     for (const newFormatId of expectedNewFormatIds) {
       if (policyId.startsWith(newFormatId + '-')) {
@@ -166,28 +156,23 @@ export function determinePoliciesToCleanup(
     }
 
     if (matchedNewFormatId) {
-      // This is a legacy policy for a known monitor
       if (!legacyPoliciesByNewId.has(matchedNewFormatId)) {
         legacyPoliciesByNewId.set(matchedNewFormatId, []);
       }
       legacyPoliciesByNewId.get(matchedNewFormatId)!.push(policyId);
     } else {
-      // Unknown policy - not matching any expected monitor, delete it
       policiesToDelete.push(policyId);
       debugLog(`Marking unknown policy for deletion: ${policyId}`);
     }
   }
 
-  // Process legacy policies: keep one if new format doesn't exist, delete all others
   for (const [newFormatId, legacyIds] of legacyPoliciesByNewId) {
     if (foundNewFormat.has(newFormatId)) {
-      // New format exists - all legacy variants are duplicates, delete them
       policiesToDelete.push(...legacyIds);
       debugLog(
         `New format policy exists for ${newFormatId}, marking ${legacyIds.length} legacy policies for deletion`
       );
     } else {
-      // New format doesn't exist - keep first legacy, delete the rest
       const [firstLegacy, ...restLegacy] = legacyIds;
       policiesToKeep.push(firstLegacy);
       debugLog(`Keeping legacy policy: ${firstLegacy}`);

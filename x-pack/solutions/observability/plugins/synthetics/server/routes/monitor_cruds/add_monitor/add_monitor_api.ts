@@ -102,7 +102,6 @@ export class AddEditMonitorAPI {
 
       monitorSavedObject = monitorSavedObjectN;
 
-      // Update monitor with package policy references
       if (packagePolicyResult?.created && packagePolicyResult.created.length > 0) {
         const policyIds = packagePolicyResult.created.map((policy) => policy.id);
         await this.routeContext.monitorConfigRepository.updatePackagePolicyReferences(

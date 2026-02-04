@@ -54,6 +54,10 @@ describe('syncEditedMonitor', () => {
   syntheticsService.editConfig = jest.fn();
   syntheticsService.getMaintenanceWindows = jest.fn();
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('includes the isEdit flag', async () => {
     await syncEditedMonitor({
       normalizedMonitor: editedMonitor,

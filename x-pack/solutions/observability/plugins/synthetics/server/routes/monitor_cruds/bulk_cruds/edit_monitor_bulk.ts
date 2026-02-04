@@ -109,7 +109,6 @@ export const syncEditedMonitorBulk = async ({
         }
       }
 
-      // Update references for each monitor
       await Promise.all(
         [...policyIdsByMonitor.entries()].map(([monitorId, policyIds]) =>
           monitorConfigRepository.updatePackagePolicyReferences(monitorId, policyIds)

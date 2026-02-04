@@ -283,7 +283,6 @@ export const syncEditedMonitor = async ({
     const [editedMonitorSavedObject, { publicSyncErrors, failedPolicyUpdates, activePolicyIds }] =
       await Promise.all([editedSOPromise, editSyncPromise]);
 
-    // Update monitor with package policy references
     if (activePolicyIds && activePolicyIds.length > 0) {
       await monitorConfigRepository.updatePackagePolicyReferences(
         decryptedPreviousMonitor.id,

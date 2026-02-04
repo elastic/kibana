@@ -32,10 +32,10 @@ describe('determinePoliciesToCleanup', () => {
 
   it('deletes all legacy policies when new format exists', () => {
     const existingPolicyIds = [
-      'monitor1-loc1', // new format
-      'monitor1-loc1-space-a', // legacy from space-a
-      'monitor1-loc1-space-b', // legacy from space-b
-      'monitor1-loc1-space-c', // legacy from space-c
+      'monitor1-loc1',
+      'monitor1-loc1-space-a',
+      'monitor1-loc1-space-b',
+      'monitor1-loc1-space-c',
     ];
     const expectedNewFormatIds = new Set(['monitor1-loc1']);
 
@@ -55,9 +55,9 @@ describe('determinePoliciesToCleanup', () => {
 
   it('keeps first legacy when new format does not exist', () => {
     const existingPolicyIds = [
-      'monitor1-loc1-space-a', // first legacy found
-      'monitor1-loc1-space-b', // duplicate
-      'monitor1-loc1-space-c', // duplicate
+      'monitor1-loc1-space-a',
+      'monitor1-loc1-space-b',
+      'monitor1-loc1-space-c',
     ];
     const expectedNewFormatIds = new Set(['monitor1-loc1']);
 
@@ -67,7 +67,6 @@ describe('determinePoliciesToCleanup', () => {
       noopDebugLog
     );
 
-    // Keeps the first legacy found
     expect(result.policiesToKeep).toEqual(['monitor1-loc1-space-a']);
     expect(result.policiesToDelete.sort()).toEqual([
       'monitor1-loc1-space-b',
@@ -77,14 +76,11 @@ describe('determinePoliciesToCleanup', () => {
 
   it('handles multiple monitors with different scenarios', () => {
     const existingPolicyIds = [
-      // Monitor 1: has new format + legacy duplicates
       'monitor1-loc1',
       'monitor1-loc1-space-a',
       'monitor1-loc1-space-b',
-      // Monitor 2: only has legacy duplicates (not migrated yet)
       'monitor2-loc1-space-a',
       'monitor2-loc1-space-b',
-      // Unknown policy
       'some-random-policy',
     ];
     const expectedNewFormatIds = new Set(['monitor1-loc1', 'monitor2-loc1']);
@@ -95,15 +91,12 @@ describe('determinePoliciesToCleanup', () => {
       noopDebugLog
     );
 
-    expect(result.policiesToKeep.sort()).toEqual([
-      'monitor1-loc1', // new format kept
-      'monitor2-loc1-space-a', // first legacy kept (not migrated)
-    ]);
+    expect(result.policiesToKeep.sort()).toEqual(['monitor1-loc1', 'monitor2-loc1-space-a']);
     expect(result.policiesToDelete.sort()).toEqual([
-      'monitor1-loc1-space-a', // legacy deleted (new format exists)
-      'monitor1-loc1-space-b', // legacy deleted (new format exists)
-      'monitor2-loc1-space-b', // duplicate legacy deleted
-      'some-random-policy', // unknown policy deleted
+      'monitor1-loc1-space-a',
+      'monitor1-loc1-space-b',
+      'monitor2-loc1-space-b',
+      'some-random-policy',
     ]);
   });
 });

@@ -91,7 +91,6 @@ export class SyntheticsPrivateLocation {
 
   /**
    * Gets all unique spaces that have any synthetics monitors.
-   * Uses aggregation for efficiency instead of iterating through all monitors.
    */
   async getAllSpacesWithMonitors(): Promise<string[]> {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
@@ -123,7 +122,6 @@ export class SyntheticsPrivateLocation {
         },
       });
 
-      // Collect namespaces from both new and legacy monitor types
       result.aggregations?.namespaces?.buckets?.forEach((bucket) => {
         spaces.add(bucket.key);
       });
@@ -362,10 +360,7 @@ export class SyntheticsPrivateLocation {
         const newId = this.getPolicyId(config, privateLocation.id);
         const legacyIdPrefix = `${config.id}-${privateLocation.id}-`;
 
-        // Check for new format policy
         const hasNewFormatPolicy = existingPolicies?.some((policy) => policy.id === newId);
-        // Find ALL legacy policies for this config+location by matching ID prefix pattern
-        // This catches legacy policies from any space, not just spaces the monitor currently exists in
         const legacyPolicyIds =
           existingPolicies
             ?.filter((policy) => policy.id.startsWith(legacyIdPrefix) && policy.id !== newId)
@@ -389,25 +384,18 @@ export class SyntheticsPrivateLocation {
             }
 
             if (hasNewFormatPolicy) {
-              // Policy already exists with new format, just update it
               policiesToUpdate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
-              // Delete all legacy policies found
               policiesToDelete.push(...legacyPolicyIds);
             } else if (hasAnyLegacyPolicy) {
-              // Legacy policies exist - migrate to new format
-              // Delete all legacy policies and create with new ID
               policiesToDelete.push(...legacyPolicyIds);
               policiesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
             } else {
-              // No policy exists, create with new format
               policiesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
             }
           } else {
-            // Location removed from monitor - delete policy in any format
             if (hasNewFormatPolicy) {
               policiesToDelete.push(newId);
             }
-            // Delete all legacy policies found
             policiesToDelete.push(...legacyPolicyIds);
           }
         } catch (e) {
@@ -417,7 +405,6 @@ export class SyntheticsPrivateLocation {
       }
     }
 
-    // Deduplicate the delete list
     const uniqueToDelete = [...new Set(policiesToDelete)];
 
     this.server.logger.debug(
@@ -447,7 +434,6 @@ export class SyntheticsPrivateLocation {
       };
     });
 
-    // Collect all active policy IDs (created + updated)
     const activePolicyIds = [
       ...policiesToCreate.map((p) => p.id),
       ...policiesToUpdate.map((p) => p.id),
@@ -470,20 +456,13 @@ export class SyntheticsPrivateLocation {
     spaceId: string
   ) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-
-    // Get all spaces that have any synthetics monitors
     const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
-    // Include current space in case it has no monitors yet
     const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
-
-    // Use Set to automatically handle duplicates
     const policyIdsToFetch = new Set<string>();
 
     for (const config of configs) {
       for (const privateLocation of allPrivateLocations) {
-        // Add new format (space-agnostic)
         policyIdsToFetch.add(this.getPolicyId(config, privateLocation.id));
-        // Add legacy format for all spaces that have any monitors
         for (const space of allSpaces) {
           policyIdsToFetch.add(this.getLegacyPolicyId(config.id, privateLocation.id, space));
         }
@@ -550,13 +529,8 @@ export class SyntheticsPrivateLocation {
   async deleteMonitors(configs: HeartbeatConfig[], spaceId: string) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
-
-    // Get all spaces that have any synthetics monitors
     const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
-    // Include current space in case it has no monitors yet
     const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
-
-    // Use Set to automatically handle duplicates
     const policyIdsToDelete = new Set<string>();
 
     for (const config of configs) {
@@ -564,9 +538,7 @@ export class SyntheticsPrivateLocation {
       const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
       for (const privateLocation of monitorPrivateLocations) {
-        // Add new format ID
         policyIdsToDelete.add(this.getPolicyId(config, privateLocation.id));
-        // Add legacy format IDs for all spaces that have any monitors
         for (const space of allSpaces) {
           policyIdsToDelete.add(this.getLegacyPolicyId(config.id, privateLocation.id, space));
         }
@@ -584,10 +556,8 @@ export class SyntheticsPrivateLocation {
         }
       );
       const failedPolicies = result?.filter((policy) => {
-        // Ignore 404s as some policies may have already been deleted
         return !policy.success && policy?.statusCode !== 404;
       });
-      // Only throw error if all actual policies failed
       if (failedPolicies?.length > 0 && failedPolicies.length >= configs.length) {
         throw new Error(deletePolicyError(configs[0][ConfigKey.NAME]));
       }
