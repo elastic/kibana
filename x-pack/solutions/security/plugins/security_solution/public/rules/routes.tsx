@@ -114,7 +114,7 @@ const RulesContainerComponent: React.FC = () => {
             <Redirect
               to={{
                 ...location,
-                pathname: `/rules/id/${detailName}/${RuleDetailTabs.alerts}`,
+                pathname: `/rules/id/${detailName}/${RuleDetailTabs.overview}`,
                 search: location.search,
               }}
             />
