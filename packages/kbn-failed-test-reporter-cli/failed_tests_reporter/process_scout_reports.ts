@@ -39,24 +39,12 @@ const updateScoutHtmlReport = ({
   let updatedContent = fileContent;
   if (githubIssue) {
     const badgeHtml = `<span class="badge rounded-pill bg-danger" id="failure-count">${failureCount}</span>`;
-    const issueSectionHtml = `
-              <div id="github-issue-section">
-                <a id="github-issue-link" href="${githubIssue}" target="_blank">${githubIssue}</a>
-              </div>`;
+    const issueLinkHtml = `<a id="github-issue-link" href="${githubIssue}" target="_blank">${githubIssue}</a>`;
+    const trackedBranchesLine = `<strong>Failures in tracked branches</strong>: ${badgeHtml} ${issueLinkHtml}`;
 
     updatedContent = updatedContent.replace(
-      /<strong>No failures found in tracked branches<\/strong>/,
-      '<strong>Failures in tracked branches</strong>:'
-    );
-
-    updatedContent = updatedContent
-      .replace(/<span class="badge rounded-pill bg-danger" id="failure-count">.*?<\/span>/, '')
-      .replace(/<div id="github-issue-section">[\s\S]*?<\/div>/, '');
-
-    updatedContent = updatedContent.replace(
-      /<\/summary>/,
-      `</summary>
-              ${badgeHtml}${issueSectionHtml}`
+      /<div id="tracked-branches-status">[\s\S]*?<\/div>/,
+      `<div class="section" id="tracked-branches-status">${trackedBranchesLine}</div>`
     );
   }
 
