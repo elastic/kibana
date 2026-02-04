@@ -110,8 +110,8 @@ export const fromSavedObjectTabToSavedSearch = async ({
   breakdownField: tab.breakdownField,
   chartInterval: tab.chartInterval,
   density: tab.density,
-  visContext: undefined, // managed via Redux state now
-  controlGroupJson: undefined, // managed via Redux state now
+  visContext: tab.visContext, // managed via Redux state now
+  controlGroupJson: tab.controlGroupJson, // managed via Redux state now
 });
 
 export const fromTabStateToSavedObjectTab = ({
@@ -195,9 +195,11 @@ export const fromSavedSearchToSavedObjectTab = ({
     breakdownField: savedSearch.breakdownField,
     chartInterval: savedSearch.chartInterval,
     density: savedSearch.density,
-    visContext: tab.attributes?.visContext,
-    controlGroupJson: tab.attributes?.controlGroupState
-      ? JSON.stringify(tab.attributes.controlGroupState)
-      : undefined,
+    visContext: tab.attributes ? tab.attributes?.visContext : savedSearch.visContext,
+    controlGroupJson: tab.attributes
+      ? tab.attributes?.controlGroupState
+        ? JSON.stringify(tab.attributes.controlGroupState)
+        : undefined
+      : savedSearch.controlGroupJson,
   };
 };
