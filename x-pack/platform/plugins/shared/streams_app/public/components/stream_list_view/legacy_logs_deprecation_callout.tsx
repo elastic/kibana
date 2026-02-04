@@ -9,24 +9,20 @@ import React from 'react';
 import { EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
-import { LOGS_OTEL_STREAM_NAME, LOGS_ECS_STREAM_NAME } from '@kbn/streams-schema';
+import { getLegacyLogsStatus } from './utils';
 
 interface LegacyLogsDeprecationCalloutProps {
   streamsStatus: WiredStreamsStatus | undefined;
-  onEnableClick: () => void;
+  openFlyout: () => void;
 }
 
 export function LegacyLogsDeprecationCallout({
   streamsStatus,
-  onEnableClick,
+  openFlyout,
 }: LegacyLogsDeprecationCalloutProps) {
   const shouldShowCallout = React.useMemo(() => {
     if (!streamsStatus) return false;
-
-    const hasLegacyLogs = streamsStatus.logs === true;
-    const hasNewStreams =
-      streamsStatus[LOGS_OTEL_STREAM_NAME] === true && streamsStatus[LOGS_ECS_STREAM_NAME] === true;
-
+    const { hasLegacyLogs, hasNewStreams } = getLegacyLogsStatus(streamsStatus);
     return hasLegacyLogs && !hasNewStreams;
   }, [streamsStatus]);
 
@@ -54,7 +50,7 @@ export function LegacyLogsDeprecationCallout({
         <EuiButton
           color="warning"
           size="s"
-          onClick={onEnableClick}
+          onClick={openFlyout}
           data-test-subj="legacyLogsDeprecationCalloutEnableButton"
         >
           {i18n.translate('xpack.streams.legacyLogsDeprecationCallout.enableButton', {

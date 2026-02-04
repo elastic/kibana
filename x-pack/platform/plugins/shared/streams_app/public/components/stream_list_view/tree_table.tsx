@@ -18,13 +18,15 @@ import {
   EuiIconTip,
   EuiButtonIcon,
   EuiTourStep,
-  EuiBetaBadge,
+  EuiBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
 import { Streams, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
+import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { useStreamsTour } from '../streams_tour';
 import type { TableRow, SortableField } from './utils';
 import {
@@ -34,6 +36,7 @@ import {
   shouldComposeTree,
   filterStreamsByQuery,
   filterCollapsedStreamRows,
+  getLegacyLogsStatus,
 } from './utils';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
@@ -69,10 +72,14 @@ export function StreamsTreeTable({
   loading,
   streams = [],
   canReadFailureStore = false,
+  wiredStreamsStatus,
+  openFlyout,
 }: {
   streams?: ListStreamDetail[];
   canReadFailureStore?: boolean;
   loading?: boolean;
+  wiredStreamsStatus?: WiredStreamsStatus;
+  openFlyout?: () => void;
 }) {
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
@@ -416,24 +423,31 @@ export function StreamsTreeTable({
                 </EuiFlexItem>
                 {item.stream.name === LOGS_ROOT_STREAM_NAME && (
                   <EuiFlexItem grow={false}>
-                    <EuiBetaBadge
-                      label={i18n.translate(
-                        'xpack.streams.streamsTreeTable.deprecatedLogsBadgeLabel',
-                        {
-                          defaultMessage: 'DEPRECATED',
-                        }
-                      )}
-                      color="warning"
-                      size="s"
-                      data-test-subj="deprecatedLogsBadge"
-                      alignment="middle"
-                      tooltipContent={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'xpack.streams.streamsTreeTable.deprecatedLogsBadgeTooltip',
                         {
                           defaultMessage: 'The logs stream is replaced by logs.otel and logs.ecs',
                         }
                       )}
-                    />
+                    >
+                      {openFlyout && !getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams ? (
+                        <EuiBadge
+                          color="warning"
+                          onClick={openFlyout}
+                          onClickAriaLabel={i18n.translate(
+                            'xpack.streams.streamsTreeTable.deprecatedLogsBadgeAriaLabel',
+                            {
+                              defaultMessage: 'Logs stream is deprecated',
+                            }
+                          )}
+                        >
+                          Deprecated
+                        </EuiBadge>
+                      ) : (
+                        <EuiBadge color="warning"> Deprecated </EuiBadge>
+                      )}
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>

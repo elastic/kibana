@@ -11,11 +11,14 @@ import {
   getSegments,
   isDescendantOf,
   isRootStreamDefinition,
+  LOGS_ECS_STREAM_NAME,
+  LOGS_OTEL_STREAM_NAME,
   ROOT_STREAM_NAMES,
   type RootStreamName,
   Streams,
 } from '@kbn/streams-schema';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
+import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import type { Direction } from '@elastic/eui';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common/types';
@@ -214,4 +217,18 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
       : 'wired',
     ...(children && { children }),
   };
+};
+
+export const getLegacyLogsStatus = (
+  streamsStatus: WiredStreamsStatus | undefined
+): { hasLegacyLogs: boolean; hasNewStreams: boolean } => {
+  if (!streamsStatus) {
+    return { hasLegacyLogs: false, hasNewStreams: false };
+  }
+
+  const hasLegacyLogs = streamsStatus.logs === true;
+  const hasNewStreams =
+    streamsStatus[LOGS_OTEL_STREAM_NAME] === true && streamsStatus[LOGS_ECS_STREAM_NAME] === true;
+
+  return { hasLegacyLogs, hasNewStreams };
 };

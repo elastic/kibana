@@ -231,12 +231,14 @@ export function StreamListView() {
             />
             <LegacyLogsDeprecationCallout
               streamsStatus={wiredStreamsStatus}
-              onEnableClick={() => setIsSettingsFlyoutOpen(true)}
+              openFlyout={() => setIsSettingsFlyoutOpen(true)}
             />
             <StreamsTreeTable
               loading={streamsListFetch.loading}
               streams={streamsListFetch.value?.streams}
               canReadFailureStore={streamsListFetch.value?.canReadFailureStore}
+              wiredStreamsStatus={wiredStreamsStatus}
+              openFlyout={() => setIsSettingsFlyoutOpen(true)}
             />
           </>
         )}
