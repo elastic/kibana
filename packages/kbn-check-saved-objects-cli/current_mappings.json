@@ -3002,7 +3002,7 @@
     "properties": {
       "content": {
         "type": "text",
-        "index":false
+        "index": false
       },
       "description": {
         "type": "text"

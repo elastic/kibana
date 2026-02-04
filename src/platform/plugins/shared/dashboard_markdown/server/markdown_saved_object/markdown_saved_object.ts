@@ -44,6 +44,7 @@ export const markdownSavedObjectType: SavedObjectsType = {
       description: { type: 'text' },
       content: {
         type: 'text',
+        index: false,
       },
     },
   },
