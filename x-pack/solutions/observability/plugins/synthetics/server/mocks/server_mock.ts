@@ -18,7 +18,12 @@ export const getServerMock = () => {
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),
       get: jest.fn(),
-      update: jest.fn(),
+      update: jest.fn().mockResolvedValue({
+        id: 'test-id',
+        type: 'synthetics-monitor',
+        attributes: {},
+        references: [],
+      }),
       createPointInTimeFinder: jest.fn().mockImplementation(({ perPage, type: soType }) => ({
         close: jest.fn(async () => {}),
         find: jest.fn().mockReturnValue({

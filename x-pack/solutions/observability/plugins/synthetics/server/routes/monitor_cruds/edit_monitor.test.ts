@@ -105,7 +105,8 @@ describe('syncEditedMonitor', () => {
 
     expect(routeContext.monitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledWith(
       '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
-      activePolicyIds
+      activePolicyIds,
+      'synthetics-monitor'
     );
   });
 

@@ -191,8 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       const packagePolicy = apiResponse.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newBrowserMonitorId + '-' + loc.id + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newBrowserMonitorId + '-' + loc.id
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);

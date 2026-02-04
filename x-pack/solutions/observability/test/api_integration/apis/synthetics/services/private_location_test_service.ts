@@ -164,21 +164,13 @@ export class PrivateLocationTestService {
       .expect(200);
   }
 
-  async getPackagePolicy({
-    monitorId,
-    locId,
-    spaceId = 'default',
-  }: {
-    monitorId: string;
-    locId: string;
-    spaceId?: string;
-  }) {
+  async getPackagePolicy({ monitorId, locId }: { monitorId: string; locId: string }) {
     const apiResponse = await this.supertest.get(
       '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
     );
 
     return apiResponse.body.items.find(
-      (pkgPolicy: PackagePolicy) => pkgPolicy.id === `${monitorId}-${locId}-${spaceId}`
+      (pkgPolicy: PackagePolicy) => pkgPolicy.id === `${monitorId}-${locId}`
     );
   }
 }
