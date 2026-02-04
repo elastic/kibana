@@ -556,58 +556,49 @@ describe('VarGroupSelector', () => {
     };
 
     it('should return iac_template_url when cloud connector option with template is selected', () => {
-      const result = getIacTemplateUrlFromVarGroupSelection(
-        [varGroupWithIacTemplateUrl],
-        { credential_type: 'cloud_connectors' }
-      );
+      const result = getIacTemplateUrlFromVarGroupSelection([varGroupWithIacTemplateUrl], {
+        credential_type: 'cloud_connectors',
+      });
       expect(result).toBe('https://example.com/cloudformation-template.yaml');
     });
 
     it('should return azure iac_template_url when azure connector is selected', () => {
-      const result = getIacTemplateUrlFromVarGroupSelection(
-        [varGroupWithIacTemplateUrl],
-        { credential_type: 'azure_connector' }
-      );
+      const result = getIacTemplateUrlFromVarGroupSelection([varGroupWithIacTemplateUrl], {
+        credential_type: 'azure_connector',
+      });
       expect(result).toBe('https://example.com/arm-template.json');
     });
 
     it('should return undefined when selected option has no iac_template_url', () => {
-      const result = getIacTemplateUrlFromVarGroupSelection(
-        [varGroupWithIacTemplateUrl],
-        { credential_type: 'manual' }
-      );
+      const result = getIacTemplateUrlFromVarGroupSelection([varGroupWithIacTemplateUrl], {
+        credential_type: 'manual',
+      });
       expect(result).toBeUndefined();
     });
 
     it('should return undefined when varGroups is undefined', () => {
-      const result = getIacTemplateUrlFromVarGroupSelection(
-        undefined,
-        { credential_type: 'cloud_connectors' }
-      );
+      const result = getIacTemplateUrlFromVarGroupSelection(undefined, {
+        credential_type: 'cloud_connectors',
+      });
       expect(result).toBeUndefined();
     });
 
     it('should return undefined when varGroups is empty', () => {
-      const result = getIacTemplateUrlFromVarGroupSelection(
-        [],
-        { credential_type: 'cloud_connectors' }
-      );
+      const result = getIacTemplateUrlFromVarGroupSelection([], {
+        credential_type: 'cloud_connectors',
+      });
       expect(result).toBeUndefined();
     });
 
     it('should return undefined when no selection matches any var_group', () => {
-      const result = getIacTemplateUrlFromVarGroupSelection(
-        [varGroupWithIacTemplateUrl],
-        { other_group: 'some_value' }
-      );
+      const result = getIacTemplateUrlFromVarGroupSelection([varGroupWithIacTemplateUrl], {
+        other_group: 'some_value',
+      });
       expect(result).toBeUndefined();
     });
 
     it('should return undefined when varGroupSelections is empty', () => {
-      const result = getIacTemplateUrlFromVarGroupSelection(
-        [varGroupWithIacTemplateUrl],
-        {}
-      );
+      const result = getIacTemplateUrlFromVarGroupSelection([varGroupWithIacTemplateUrl], {});
       expect(result).toBeUndefined();
     });
 
@@ -617,17 +608,14 @@ describe('VarGroupSelector', () => {
           name: 'auth_method',
           title: 'Auth Method',
           selector_title: 'Select auth',
-          options: [
-            { name: 'api_key', title: 'API Key', vars: ['key'] },
-          ],
+          options: [{ name: 'api_key', title: 'API Key', vars: ['key'] }],
         },
         varGroupWithIacTemplateUrl,
       ];
 
-      const result = getIacTemplateUrlFromVarGroupSelection(
-        multipleVarGroups,
-        { credential_type: 'cloud_connectors' }
-      );
+      const result = getIacTemplateUrlFromVarGroupSelection(multipleVarGroups, {
+        credential_type: 'cloud_connectors',
+      });
       expect(result).toBe('https://example.com/cloudformation-template.yaml');
     });
   });
