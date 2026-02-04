@@ -6,7 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import {
   RULES_SETTINGS_TEST_SUBJECTS,
   RULE_TYPE_MODAL_TEST_SUBJECTS,
@@ -464,6 +464,61 @@ export class RulesPage {
 
   public get observabilityCategory() {
     return this.ruleTypeModal.locator('.euiFacetButton[title="Observability"]');
+  }
+
+  // KQL Filter / Metric Row methods
+
+  /**
+   * Gets the aggregation expression for metric A
+   */
+  public get aggregationExpressionA() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.AGGREGATION_NAME_A);
+  }
+
+  /**
+   * Gets the aggregation type select dropdown
+   */
+  public get aggregationTypeSelect() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.AGGREGATION_TYPE_SELECT);
+  }
+
+  /**
+   * Gets the KQL search field
+   */
+  public get kqlSearchField() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.KQL_SEARCH_FIELD);
+  }
+
+  /**
+   * Gets the KQL suggestions panel
+   */
+  public get kqlSuggestionsPanel() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.KQL_SUGGESTIONS_PANEL);
+  }
+
+  /**
+   * Opens the metric row popover by clicking on the aggregation expression
+   */
+  async openMetricRowPopover() {
+    await expect(this.aggregationExpressionA).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await this.aggregationExpressionA.click();
+    await expect(this.aggregationTypeSelect).toBeVisible({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Selects COUNT aggregation type to show the KQL filter
+   */
+  async selectCountAggregation() {
+    await this.aggregationTypeSelect.selectOption('count');
+    await expect(this.kqlSearchField).toBeVisible({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Types in the KQL search field
+   */
+  async typeInKqlFilter(text: string) {
+    await this.kqlSearchField.click();
+    await this.kqlSearchField.fill(text);
   }
 
   // Rule Status Dropdown methods

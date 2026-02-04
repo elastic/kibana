@@ -18,6 +18,8 @@ export const CONFIRM_CLEAR_CHAT = '[data-test-subj="confirmModalConfirmButton"]'
 export const CONNECTOR_MISSING_CALLOUT = '[data-test-subj="connectorMissingCallout"]';
 export const CONNECTOR_SELECT = (c: string) => `[data-test-subj="connector-${c}"]`;
 export const CONNECTOR_SELECTOR = '[data-test-subj="connector-selector"]';
+export const CONNECTOR_SELECTOR_LIST =
+  '[data-test-subj="aiAssistantConnectorSelector"] .euiSelectableList__list';
 export const CONVERSATION_MESSAGE = '[data-test-subj="messageText"]';
 export const CONVERSATION_MESSAGE_ERROR =
   '[data-test-subj="errorComment"] [data-test-subj="messageText"]';

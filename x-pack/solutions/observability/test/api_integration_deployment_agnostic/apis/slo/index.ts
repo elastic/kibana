@@ -23,5 +23,8 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./find_slo_instances'));
     loadTestFile(require.resolve('./get_slo_template'));
     loadTestFile(require.resolve('./find_slo_templates'));
+    loadTestFile(require.resolve('./health_scan'));
+    loadTestFile(require.resolve('./search_slo_definitions'));
+    loadTestFile(require.resolve('./get_slo_grouped_stats'));
   });
 }

@@ -352,21 +352,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.clickGo();
 
         const expectedEntries = [
-          '200 - win 8',
-          '200 - win xp',
-          '200 - ios',
-          '200 - osx',
-          '200 - win 7',
-          '404 - ios',
-          '503 - ios',
-          '503 - osx',
-          '503 - win 7',
-          '503 - win 8',
-          '503 - win xp',
-          '404 - osx',
-          '404 - win 7',
-          '404 - win 8',
-          '404 - win xp',
+          '200 › win 8',
+          '200 › win xp',
+          '200 › ios',
+          '200 › osx',
+          '200 › win 7',
+          '404 › ios',
+          '503 › ios',
+          '503 › osx',
+          '503 › win 7',
+          '503 › win 8',
+          '503 › win xp',
+          '404 › osx',
+          '404 › win 7',
+          '404 › win 8',
+          '404 › win xp',
         ];
         const legendEntries = await visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);

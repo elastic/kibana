@@ -271,6 +271,7 @@ export type {
   ExpressionWrapperProps,
   GetStateType,
   StructuredDatasourceStates,
+  SupportedDatasourceId,
   LensByValueInput,
   TypedLensSerializedState,
   ESQLVariablesCompatibleDashboardApi,
@@ -317,6 +318,7 @@ export {
   DEFAULT_ROW_HEIGHT,
   DEFAULT_ROW_HEIGHT_LINES,
   ROW_HEIGHT_LINES_KEYS,
+  LEGACY_SINGLE_ROW_HEIGHT_MODE,
 } from './visualizations/datatable/constants';
 export {
   LENS_GAUGE_ID,

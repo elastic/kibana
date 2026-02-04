@@ -308,6 +308,12 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       })}
       onTableChange={() => {}}
       data-test-subj={'mlNodesAllocatedModels'}
+      tableCaption={i18n.translate(
+        'xpack.ml.trainedModels.nodesList.modelsList.allocatedModelsTableCaption',
+        {
+          defaultMessage: 'Allocated machine learning models',
+        }
+      )}
     />
   );
 };

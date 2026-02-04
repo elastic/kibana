@@ -25,8 +25,9 @@ import { createTabsStorageManager } from '../tabs_storage_manager';
 import { DiscoverSearchSessionManager } from '../discover_search_session';
 
 describe('InternalStateStore', () => {
+  const services = createDiscoverServicesMock();
+
   const createTestStore = async () => {
-    const services = createDiscoverServicesMock();
     const urlStateStorage = createKbnUrlStateStorage();
     const runtimeStateManager = createRuntimeStateManager();
     const tabsStorageManager = createTabsStorageManager({

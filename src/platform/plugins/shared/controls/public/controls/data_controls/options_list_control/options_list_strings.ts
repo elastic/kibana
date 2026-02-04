@@ -162,7 +162,7 @@ export const OptionsListStrings = {
       switch (fieldType) {
         case 'ip': {
           return i18n.translate('controls.optionsList.popover.invalidSearch.ip', {
-            defaultMessage: 'Your search is not a valid IP address.',
+            defaultMessage: 'Your search is not a valid IP address or CIDR notation.',
           });
         }
         case 'number': {

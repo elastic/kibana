@@ -36,13 +36,15 @@ import {
 } from './saved_objects';
 import {
   DefaultResourceInstaller,
+  DefaultSLODefinitionRepository,
   DefaultSummaryTransformManager,
   DefaultTransformManager,
-  DefaultSLODefinitionRepository,
 } from './services';
 import { DefaultSLOSettingsRepository } from './services/slo_settings_repository';
+import { DefaultSLOTemplateRepository } from './services/slo_template_repository';
 import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
 import { BulkDeleteTask } from './services/tasks/bulk_delete/bulk_delete_task';
+import { HealthScanTask } from './services/tasks/health_scan_task/health_scan_task';
 import { OrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task/orphan_summary_cleanup_task';
 import { TempSummaryCleanupTask } from './services/tasks/temp_summary_cleanup_task/temp_summary_cleanup_task';
 import { createTransformGenerators } from './services/transform_generators';
@@ -53,7 +55,6 @@ import type {
   SLOServerSetup,
   SLOServerStart,
 } from './types';
-import { DefaultSLOTemplateRepository } from './services/slo_template_repository';
 import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_cleanup_task/stale_instances_cleanup_task';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
@@ -270,6 +271,13 @@ export class SLOPlugin
       logFactory: this.initContext.logger,
     });
 
+    new HealthScanTask({
+      core,
+      taskManager: plugins.taskManager,
+      logFactory: this.initContext.logger,
+      config: this.config,
+    });
+
     return {};
   }
 
@@ -281,11 +289,17 @@ export class SLOPlugin
     this.staleInstancesCleanupTask?.start(plugins).catch(() => {});
 
     return {
-      getSloClientWithRequest: (request: KibanaRequest) => {
+      getSloClientWithRequest: async (request: KibanaRequest) => {
+        const spaceId =
+          (await plugins.spaces?.spacesService.getActiveSpace(request))?.id ?? 'default';
+
         return getSloClientWithRequest({
           request,
           soClient: core.savedObjects.getScopedClient(request),
           esClient: internalEsClient,
+          scopedClusterClient: core.elasticsearch.client.asScoped(request),
+          spaceId,
+          logger: this.logger,
         });
       },
     };

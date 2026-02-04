@@ -13,7 +13,11 @@ import type {
   FindSLODefinitionsResponse,
   FindSLOInstancesResponse,
   FindSLOTemplatesResponse,
+  GetHealthScanResultsResponse,
   GetSLOTemplateResponse,
+  ListHealthScanResponse,
+  PostHealthScanResponse,
+  SearchSLODefinitionResponse,
   UpdateSLOInput,
 } from '@kbn/slo-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
@@ -161,6 +165,33 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send();
+
+      return body;
+    },
+
+    async searchDefinitions(
+      roleAuthc: RoleCredentials,
+      params?: {
+        search?: string;
+        size?: number;
+        searchAfter?: string;
+        remoteName?: string;
+      },
+      expectedStatus: number = 200
+    ): Promise<SearchSLODefinitionResponse> {
+      const queryParams: Record<string, string | number> = {};
+      if (params?.search !== undefined) queryParams.search = params.search;
+      if (params?.size !== undefined) queryParams.size = params.size;
+      if (params?.searchAfter !== undefined) queryParams.searchAfter = params.searchAfter;
+      if (params?.remoteName !== undefined) queryParams.remoteName = params.remoteName;
+
+      const { body } = await supertestWithoutAuth
+        .get(`/internal/observability/slos/_search_definitions`)
+        .query(queryParams)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(expectedStatus);
 
       return body;
     },
@@ -339,6 +370,61 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
           attributes: slo,
         })
         .expect(200);
+      return body;
+    },
+
+    async scheduleHealthScan(
+      roleAuthc: RoleCredentials,
+      params?: { force?: boolean }
+    ): Promise<PostHealthScanResponse> {
+      const { body } = await supertestWithoutAuth
+        .post(`/internal/observability/slos/_health/scans`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(params ?? {})
+        .expect(200);
+
+      return body;
+    },
+
+    async getHealthScanResults(
+      scanId: string,
+      roleAuthc: RoleCredentials,
+      params?: { size?: number; searchAfter?: string; problematic?: boolean; allSpaces?: boolean }
+    ): Promise<GetHealthScanResultsResponse> {
+      const queryParams = {
+        ...(params?.size !== undefined && { size: params.size }),
+        ...(params?.searchAfter && { searchAfter: params.searchAfter }),
+        ...(params?.problematic !== undefined && { problematic: params.problematic }),
+        ...(params?.allSpaces !== undefined && { allSpaces: params.allSpaces }),
+      };
+
+      const { body } = await supertestWithoutAuth
+        .get(`/internal/observability/slos/_health/scans/${scanId}`)
+        .query(queryParams)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      return body;
+    },
+
+    async listHealthScans(
+      roleAuthc: RoleCredentials,
+      params?: { size?: number }
+    ): Promise<ListHealthScanResponse> {
+      const queryParams: Record<string, string | number> = {};
+      if (params?.size !== undefined) queryParams.size = params.size;
+
+      const { body } = await supertestWithoutAuth
+        .get(`/internal/observability/slos/_health/scans`)
+        .query(queryParams)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
       return body;
     },
   };

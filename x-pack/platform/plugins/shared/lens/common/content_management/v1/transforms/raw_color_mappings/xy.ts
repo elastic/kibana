@@ -6,16 +6,17 @@
  */
 
 import type { GeneralDatasourceStates } from '@kbn/lens-common';
-import type { XYDataLayerConfig, XYLayerConfig, XYState } from '../../../../../public';
+import type { XYLayerConfig, XYState } from '../../../../../public';
 import {
   convertToRawColorMappings,
   getColumnMetaFn,
   isDeprecatedColorMapping,
   type DeprecatedColorMappingConfig,
 } from './common';
+import type { DeprecatedSplitAccessorLayer } from '../../../v2/transforms/split_accessors/xy';
 
 /** @deprecated */
-interface DeprecatedColorMappingLayer extends Omit<XYDataLayerConfig, 'colorMapping'> {
+interface DeprecatedColorMappingLayer extends Omit<DeprecatedSplitAccessorLayer, 'colorMapping'> {
   colorMapping: DeprecatedColorMappingConfig;
 }
 
@@ -25,7 +26,16 @@ interface DeprecatedColorMappingLayer extends Omit<XYDataLayerConfig, 'colorMapp
  * @deprecated
  */
 export interface DeprecatedColorMappingsXYState extends Omit<XYState, 'layers'> {
-  layers: Array<XYLayerConfig | DeprecatedColorMappingLayer>;
+  layers: Array<DeprecatedColorMappingLayer | XYLayerConfig>;
+}
+
+function isDeprecatedColorMappingLayer(
+  layer: DeprecatedColorMappingLayer | XYLayerConfig
+): layer is DeprecatedColorMappingLayer {
+  return (
+    layer.layerType === 'data' &&
+    (layer.colorMapping?.assignments != null || layer.colorMapping?.specialAssignments != null)
+  );
 }
 
 export const convertXYToRawColorMappings = (
@@ -40,20 +50,18 @@ export const convertXYToRawColorMappings = (
   if (!hasDeprecatedColorMappings) return state as XYState;
 
   const convertedLayers = state.layers.map<XYLayerConfig>((layer) => {
-    if (
-      layer.layerType === 'data' &&
-      (layer.colorMapping?.assignments || layer.colorMapping?.specialAssignments)
-    ) {
-      const accessor = layer.splitAccessor;
-      const columnMeta = accessor ? getColumnMeta?.(layer.layerId, accessor) : null;
+    if (isDeprecatedColorMappingLayer(layer)) {
+      const accessors =
+        'splitAccessor' in layer && layer.splitAccessor != null ? [layer.splitAccessor] : undefined;
+      const columnMeta = accessors ? getColumnMeta?.(layer.layerId, accessors) : null;
 
       return {
         ...layer,
         colorMapping: convertToRawColorMappings(layer.colorMapping, columnMeta),
-      } satisfies XYDataLayerConfig;
+      };
     }
 
-    return layer as XYLayerConfig;
+    return layer;
   });
 
   return {

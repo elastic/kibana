@@ -10,6 +10,8 @@ import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { OutputsForAgentPolicy } from '../../../../../../../../server/types';
+
 import type { Agent, AgentPolicy } from '../../../../../types';
 
 import { AgentDetailsOverviewSection } from './agent_details_overview';
@@ -23,7 +25,8 @@ const FlexItemWithMinWidth = styled(EuiFlexItem)`
 export const AgentDetailsContent: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
-}> = memo(({ agent, agentPolicy }) => {
+  outputs?: OutputsForAgentPolicy;
+}> = memo(({ agent, agentPolicy, outputs }) => {
   return (
     <>
       <EuiFlexGroup alignItems="flexStart">
@@ -37,7 +40,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <AgentDetailsOverviewSection agent={agent} agentPolicy={agentPolicy} />
+          <AgentDetailsOverviewSection agent={agent} agentPolicy={agentPolicy} outputs={outputs} />
         </FlexItemWithMinWidth>
         <FlexItemWithMinWidth>
           <EuiTitle size="s">
@@ -49,7 +52,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <AgentDetailsIntegrations agent={agent} agentPolicy={agentPolicy} />
+          <AgentDetailsIntegrations agent={agent} agentPolicy={agentPolicy} outputs={outputs} />
         </FlexItemWithMinWidth>
       </EuiFlexGroup>
     </>
