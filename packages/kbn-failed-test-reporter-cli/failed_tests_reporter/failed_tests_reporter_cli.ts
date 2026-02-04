@@ -58,7 +58,7 @@ run(
         isPr = !!process.env.ghprbPullId;
 
         const isMainOrVersion = branch === 'main' || branch.match(/^\d+\.(x|\d+)$/);
-        if (!isMainOrVersion || isPr) {
+        if (!isMainOrVersion) {
           log.info('Failure issues only created on main/version branch jobs');
           updateGithub = false;
         }
