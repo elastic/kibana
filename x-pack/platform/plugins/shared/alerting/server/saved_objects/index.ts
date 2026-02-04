@@ -147,6 +147,9 @@ export function setupSavedObjects(
         createdAt: {
           type: 'date',
         },
+        uiamApiKey: {
+          type: 'text',
+        },
       },
     },
     modelVersions: apiKeyPendingInvalidationModelVersions,

@@ -72,6 +72,7 @@ export async function runInvalidate(opts: RunInvalidateOpts) {
           savedObjectTypesToQuery: opts.savedObjectTypesToQuery,
         });
       apiKeyIdsToExclude.forEach(({ id }) => excludedSOIds.add(id));
+
       totalInvalidated += await invalidateApiKeysAndDeletePendingApiKeySavedObject({
         apiKeyIdsToInvalidate,
         uiamApiKeysToInvalidate,

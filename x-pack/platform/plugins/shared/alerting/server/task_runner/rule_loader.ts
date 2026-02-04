@@ -68,7 +68,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     );
   }
 
-  const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey, uiamApiKey);
+  const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey, uiamApiKey, 'es');
   const rule = getAlertFromRaw({
     id: ruleId,
     includeLegacyId: false,

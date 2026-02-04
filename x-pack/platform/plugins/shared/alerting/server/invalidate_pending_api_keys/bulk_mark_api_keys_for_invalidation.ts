@@ -19,32 +19,32 @@ export const bulkMarkApiKeysForInvalidation = async (
       return;
     }
 
+    const apiKeysToInvalidate = apiKeys.map((key) => {
+      let apiKeyId;
+      let apiKeyValue;
+
+      const [id, apiKey] = Buffer.from(key, 'base64').toString().split(':');
+
+      // TODO get the prefix from security plugin
+      if (apiKey && apiKey.startsWith('essu_')) {
+        apiKeyId = id;
+        apiKeyValue = apiKey;
+      } else {
+        apiKeyId = id;
+      }
+
+      return {
+        attributes: {
+          apiKeyId,
+          createdAt: new Date().toISOString(),
+          ...(apiKeyValue ? { uiamApiKey: apiKeyValue } : {}),
+        },
+        type: API_KEY_PENDING_INVALIDATION_TYPE,
+      };
+    });
+
     try {
-      await savedObjectsClient.bulkCreate(
-        apiKeys.map((key) => {
-          let apiKeyId;
-          let apiKeyValue;
-
-          const [id, apiKey] = Buffer.from(key, 'base64').toString().split(':');
-
-          // TODO get the prefix from security plugin
-          if (apiKey && apiKey.indexOf('essu_') !== -1) {
-            apiKeyId = id;
-            apiKeyValue = apiKey;
-          } else {
-            apiKeyId = id;
-          }
-
-          return {
-            attributes: {
-              apiKeyId,
-              createdAt: new Date().toISOString(),
-              ...(apiKeyValue ? { uiamApiKey: apiKeyValue } : {}),
-            },
-            type: API_KEY_PENDING_INVALIDATION_TYPE,
-          };
-        })
-      );
+      await savedObjectsClient.bulkCreate(apiKeysToInvalidate);
     } catch (e) {
       logger.error(
         `Failed to bulk mark list of API keys [${apiKeys

@@ -57,18 +57,17 @@ export async function getApiKeyIdsToInvalidate({
             apiKeyPendingInvalidationSO.id
           );
 
-        const uiamApiKey = decryptedApiKeyPendingInvalidationObject.attributes.uiamApiKey;
+        const { uiamApiKey, apiKeyId } = decryptedApiKeyPendingInvalidationObject.attributes;
         if (uiamApiKey) {
-          const [uiamApiKeyId, uiamApiKeyValue] = uiamApiKey.split(':');
           uiamApiKeys.push({
             id: decryptedApiKeyPendingInvalidationObject.id,
-            apiKeyId: uiamApiKeyId,
-            uiamApiKey: uiamApiKeyValue!,
+            apiKeyId,
+            uiamApiKey,
           });
         } else {
           apiKeyIds.push({
             id: decryptedApiKeyPendingInvalidationObject.id,
-            apiKeyId: decryptedApiKeyPendingInvalidationObject.attributes.apiKeyId,
+            apiKeyId,
           });
         }
       })
@@ -76,17 +75,17 @@ export async function getApiKeyIdsToInvalidate({
   } else {
     // No decryption needed, return the apiKeyId as-is
     apiKeySOsPendingInvalidation.saved_objects.forEach((apiKeyPendingInvalidationSO) => {
-      const uiamApiKey = apiKeyPendingInvalidationSO.attributes.uiamApiKey;
+      const { uiamApiKey, apiKeyId } = apiKeyPendingInvalidationSO.attributes;
       if (uiamApiKey) {
         uiamApiKeys.push({
           id: apiKeyPendingInvalidationSO.id,
-          apiKeyId: apiKeyPendingInvalidationSO.attributes.apiKeyId,
-          uiamApiKey: apiKeyPendingInvalidationSO.attributes.uiamApiKey!,
+          apiKeyId,
+          uiamApiKey,
         });
       } else {
         apiKeyIds.push({
           id: apiKeyPendingInvalidationSO.id,
-          apiKeyId: apiKeyPendingInvalidationSO.attributes.apiKeyId,
+          apiKeyId,
         });
       }
     });
@@ -112,14 +111,6 @@ export async function getApiKeyIdsToInvalidate({
   const apiKeyIdsToInvalidate: ApiKeyIdAndSOId[] = [];
   const uiamApiKeysToInvalidate: UiamApiKeyAndSOId[] = [];
   const apiKeyIdsToExclude: ApiKeyIdAndSOId[] = [];
-
-  apiKeyIds.forEach(({ id, apiKeyId }) => {
-    if (apiKeyIdsInUseBuckets.find((bucket) => bucket.key === apiKeyId)) {
-      apiKeyIdsToExclude.push({ id, apiKeyId });
-    } else {
-      apiKeyIdsToInvalidate.push({ id, apiKeyId });
-    }
-  });
 
   apiKeyIds.forEach(({ id, apiKeyId }) => {
     if (apiKeyIdsInUseBuckets.find((bucket) => bucket.key === apiKeyId)) {

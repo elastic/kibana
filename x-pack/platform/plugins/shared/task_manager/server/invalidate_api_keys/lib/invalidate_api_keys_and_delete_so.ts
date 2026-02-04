@@ -56,10 +56,12 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
   // UIAM APIKey invalidation
   if (uiamApiKeysToInvalidate && uiamApiKeysToInvalidate.length > 0) {
     for (const { uiamApiKey, apiKeyId, id } of uiamApiKeysToInvalidate) {
-      const response = await invalidateUiamAPIKeys(
-        { uiamApiKey, apiKeyId },
-        invalidateUiamApiKeyFn
-      );
+      let response;
+      try {
+        response = await invalidateUiamAPIKeys({ uiamApiKey, apiKeyId }, invalidateUiamApiKeyFn);
+      } catch (e) {
+        throw new Error(`Failed to invalidate UIAM API Key id: "${apiKeyId}". Error: ${e.message}`);
+      }
 
       if (response.apiKeysEnabled === true && response.result.error_count > 0) {
         logger.error(`Failed to invalidate UIAM APIKey id: "${apiKeyId}"`);
