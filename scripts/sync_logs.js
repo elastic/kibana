@@ -105,6 +105,23 @@ function readKibanaConfig(configPath, log) {
   return baseConfig;
 }
 
+/**
+ * Parse an ISO-style date string as UTC.
+ * JavaScript's Date constructor parses strings without a timezone (e.g. "2024-01-01T00:00:00")
+ * as local time, which causes a timezone offset when comparing to UTC (e.g. @timestamp, Date.now()).
+ * Treating from/to as UTC keeps the translation consistent with Elasticsearch and "now".
+ */
+function parseDateAsUtc(s) {
+  if (!s || typeof s !== 'string') return null;
+  var trimmed = s.trim();
+  if (!trimmed) return null;
+  // Already has timezone designator (Z or ±hh:mm or ±hhmm)?
+  if (/Z|[+-]\d{2}:?\d{2}$/.test(trimmed)) {
+    return new Date(trimmed);
+  }
+  return new Date(trimmed + 'Z');
+}
+
 function parseConfig(log) {
   if (log === void 0) {
     log = function () {};
@@ -229,7 +246,7 @@ function parseConfig(log) {
     process.exit(1);
   }
   if (config.from && config.to) {
-    if (new Date(config.from) >= new Date(config.to)) {
+    if (parseDateAsUtc(config.from) >= parseDateAsUtc(config.to)) {
       console.error('Error: --from must be before --to.');
       process.exit(1);
     }
@@ -363,8 +380,8 @@ function transform(docs, config, useFromToRange) {
 
   if (config.translateTimestamps) {
     if (useFromToRange) {
-      sourceRangeStart = new Date(config.from).getTime();
-      sourceRange = new Date(config.to).getTime() - sourceRangeStart;
+      sourceRangeStart = parseDateAsUtc(config.from).getTime();
+      sourceRange = parseDateAsUtc(config.to).getTime() - sourceRangeStart;
     } else {
       // This case is for default live mode (no from/to)
       sourceRange = 24 * 60 * 60 * 1000;
@@ -378,6 +395,9 @@ function transform(docs, config, useFromToRange) {
     }
   }
 
+  // In live mode, all documents get the current time so they appear to arrive "now".
+  var batchNowMs = config.translateTimestamps === 'live' ? new Date().getTime() : undefined;
+
   for (var i = 0; i < docs.length; i++) {
     var doc = docs[i];
     stripDataStreamFields(doc);
@@ -385,7 +405,9 @@ function transform(docs, config, useFromToRange) {
       doc._index = config.targetIndex;
     }
     if (config.translateTimestamps && doc._source && doc._source['@timestamp']) {
-      if (sourceRange > 0) {
+      if (config.translateTimestamps === 'live' && batchNowMs !== undefined) {
+        doc._source['@timestamp'] = new Date(batchNowMs).toISOString();
+      } else if (sourceRange > 0) {
         var originalTimestampMs = new Date(doc._source['@timestamp']).getTime();
         var now = new Date().getTime();
         var targetEnd = now;
@@ -642,14 +664,14 @@ function main() {
     var useFromToRange = false;
 
     if (isLiveSampleMode) {
-      startTime = new Date(config.from);
-      endTime = new Date(config.to);
+      startTime = parseDateAsUtc(config.from);
+      endTime = parseDateAsUtc(config.to);
       useFromToRange = true;
     } else if (isHistoricalBackfillMode) {
       historicalCycle += 1;
       useFromToRange = true;
-      var loopStartTime = new Date(config.from);
-      var loopEndTime = new Date(config.to);
+      var loopStartTime = parseDateAsUtc(config.from);
+      var loopEndTime = parseDateAsUtc(config.to);
       var currentSyncTime = new Date(
         loopStartTime.getTime() + (historicalCycle - 1) * config.intervalSeconds * 1000
       );
