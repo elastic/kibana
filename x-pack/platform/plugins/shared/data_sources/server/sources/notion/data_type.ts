@@ -25,10 +25,12 @@ export const notionDataSource: DataSource = {
     oauthBaseUrl: 'https://localhost:8052',
   },
 
-  stackConnector: {
-    type: '.notion',
-    config: {},
-  },
+  stackConnectors: [
+    {
+      type: '.notion',
+      config: {},
+    },
+  ],
 
   workflows: {
     directory: __dirname + '/workflows',

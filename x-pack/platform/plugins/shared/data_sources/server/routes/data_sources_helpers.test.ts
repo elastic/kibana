@@ -166,7 +166,7 @@ describe('createConnectorAndRelatedResources', () => {
       },
     };
     const mockDataSource = {
-      stackConnector: { type: actionTypeId, config: {} },
+      stackConnectors: [{ type: actionTypeId, config: {} }],
       workflows: { directory: '/path/to/workflows' },
     } as Partial<DataSource>;
 
@@ -243,7 +243,7 @@ describe('createConnectorAndRelatedResources', () => {
       attributes: { workflowIds: ['workflow-1'], toolIds: [], kscIds: ['ksc-1'] },
     };
     const mockDataSource = {
-      stackConnector: { type: actionTypeId, config: {} },
+      stackConnectors: [{ type: actionTypeId, config: {} }],
       workflows: { directory: '/path/to/workflows' },
     } as Partial<DataSource>;
 

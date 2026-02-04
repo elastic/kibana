@@ -106,7 +106,7 @@ export interface DataSource {
    * Stack connector configuration.
    * Stack connectors are the only model for executing workflow actions against the third party.
    */
-  stackConnector: StackConnectorConfig;
+  stackConnectors: StackConnectorConfig[];
 
   /** OAuth configuration for authentication */
   oauthConfiguration?: EARSOAuthConfiguration | CustomOAuthConfiguration;

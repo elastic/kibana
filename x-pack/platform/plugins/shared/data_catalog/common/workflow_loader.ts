@@ -27,36 +27,56 @@ function hasAgentBuilderToolTag(yamlContent: string): boolean {
  *
  * @throws Error if the directory doesn't exist or can't be read
  */
-export async function loadWorkflows(config: WorkflowsConfig): Promise<WorkflowInfo[]> {
+export async function loadWorkflows(
+  stackConnectorIds: Record<string, string>,
+  config: WorkflowsConfig
+): Promise<WorkflowInfo[]> {
   const { directory, templateInputs } = config;
 
+  const workflowInfos: WorkflowInfo[] = [];
   try {
-    const files = await fs.readdir(directory);
+    for (const stackConnectorType of Object.keys(stackConnectorIds)) {
+      const files = await fs.readdir(join(directory, stackConnectorType));
 
-    // Filter for YAML files
-    const yamlFiles = files.filter((file) => {
-      const ext = extname(file);
-      return ext === '.yaml' || ext === '.yml';
-    });
+      const stackConnectorId = stackConnectorIds[stackConnectorType];
 
-    if (yamlFiles.length === 0) {
-      throw new Error(`No YAML workflow files found in directory: ${directory}`);
+      const typedTemplateInputs = {
+        ...templateInputs,
+        stackConnectorId,
+      };
+
+      // Filter for YAML files
+      const yamlFiles = files.filter((file) => {
+        const ext = extname(file);
+        return ext === '.yaml' || ext === '.yml';
+      });
+
+      if (yamlFiles.length === 0) {
+        throw new Error(`No YAML workflow files found in directory: ${directory}`);
+      }
+
+      // Load and process each YAML file
+      const workflowInfo = await Promise.all(
+        yamlFiles.map(async (fileName) => {
+          const filePath = join(directory, stackConnectorType, fileName);
+          const rawContent = await fs.readFile(filePath, 'utf-8');
+          const content = Mustache.render(
+            rawContent,
+            typedTemplateInputs ?? {},
+            {},
+            TEMPLATE_DELIMITERS
+          );
+          const shouldGenerateABTool = hasAgentBuilderToolTag(content);
+
+          return {
+            content,
+            shouldGenerateABTool,
+          };
+        })
+      );
+      workflowInfos.push(...workflowInfo);
     }
-
-    // Load and process each YAML file
-    return await Promise.all(
-      yamlFiles.map(async (fileName) => {
-        const filePath = join(directory, fileName);
-        const rawContent = await fs.readFile(filePath, 'utf-8');
-        const content = Mustache.render(rawContent, templateInputs ?? {}, {}, TEMPLATE_DELIMITERS);
-        const shouldGenerateABTool = hasAgentBuilderToolTag(content);
-
-        return {
-          content,
-          shouldGenerateABTool,
-        };
-      })
-    );
+    return workflowInfos;
   } catch (error) {
     if (error instanceof Error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') {

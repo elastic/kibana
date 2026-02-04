@@ -134,58 +134,61 @@ export async function createDataSourceAndRelatedResources(
   const toolIds: string[] = [];
   const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
-  let finalStackConnectorId: string;
+  const stackConnectorConfigs = dataSource.stackConnectors;
+  const stackConnectorIds: Record<string, string> = {};
 
-  // Pattern 1: Reuse existing stack connector (from flyout)
-  if (stackConnectorId) {
-    logger.info(`Reusing existing stack connector: ${stackConnectorId}`);
-    finalStackConnectorId = stackConnectorId;
-  }
-  // Pattern 2: Create new stack connector (direct API call)
-  else {
-    const stackConnectorConfig = dataSource.stackConnector;
-    const stackConnector: ActionResult = await createStackConnector(
-      actions,
-      request,
-      stackConnectorConfig,
-      name,
-      credentials,
-      logger
-    );
+  for (const stackConnectorConfig of stackConnectorConfigs) {
+    let finalStackConnectorId: string;
 
-    finalStackConnectorId = stackConnector.id;
-  }
+    const connectorType = stackConnectorConfig.type.startsWith('.')
+      ? stackConnectorConfig.type.slice(1)
+      : stackConnectorConfig.type;
 
-  const stackConnector = dataSource.stackConnector;
-  if (stackConnector.type === '.mcp' && stackConnector.importedTools) {
-    logger.info(`imported tools: ${stackConnector.importedTools}`);
-    const importedToolIds = await importMcpTools(
-      toolRegistry,
-      actions,
-      request,
-      finalStackConnectorId,
-      stackConnector.importedTools,
-      name,
-      logger
-    );
-    toolIds.push(...importedToolIds);
+    // Pattern 1: Reuse existing stack connector (from flyout) - only for first connector
+    if (stackConnectorId) {
+      finalStackConnectorId = stackConnectorId;
+    }
+    // Pattern 2: Create new stack connector (direct API call)
+    else {
+      const stackConnector: ActionResult = await createStackConnector(
+        actions,
+        request,
+        stackConnectorConfig,
+        name,
+        credentials,
+        logger
+      );
+
+      finalStackConnectorId = stackConnector.id;
+    }
+
+    stackConnectorIds[connectorType] = finalStackConnectorId;
+
+    if (stackConnectorConfig.type === '.mcp' && stackConnectorConfig.importedTools) {
+      const importedToolIds = await importMcpTools(
+        toolRegistry,
+        actions,
+        request,
+        finalStackConnectorId,
+        stackConnectorConfig.importedTools,
+        name,
+        logger
+      );
+      toolIds.push(...importedToolIds);
+    }
   }
 
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
-  // const workflowInfos = dataSource.generateWorkflows(finalStackConnectorId);
 
-  // Merge stackConnectorId into workflows' templateInputs
+  // Merge stackConnectorId and token into workflows' templateInputs
   const templateInputs = {
     ...dataSource.workflows.templateInputs,
-    stackConnectorId: finalStackConnectorId,
   };
-  const workflowInfos = await loadWorkflows({
+  const workflowInfos = await loadWorkflows(stackConnectorIds, {
     directory: dataSource.workflows.directory,
     templateInputs,
   });
-
-  logger.info(`Creating workflows and tools for data source '${name}'`);
 
   for (const workflowInfo of workflowInfos) {
     // Extract the original workflow name from YAML and prefix it with the data source name
@@ -232,7 +235,7 @@ export async function createDataSourceAndRelatedResources(
     updatedAt: now,
     workflowIds,
     toolIds,
-    kscIds: [finalStackConnectorId],
+    kscIds: Object.values(stackConnectorIds),
   });
 
   return savedObject.id;
