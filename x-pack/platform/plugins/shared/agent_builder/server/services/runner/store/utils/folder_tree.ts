@@ -6,7 +6,7 @@
  */
 
 import type {
-  FilestoreVersionedEntry,
+  FilestoreEntry,
   IFileStore,
   LsEntry,
   DirEntryWithChildren,
@@ -81,7 +81,7 @@ function buildTreeLines(
 ): void {
   // Separate directories and files
   const dirs = entries.filter((e): e is DirEntryWithChildren => e.type === 'dir');
-  const files = entries.filter((e): e is FilestoreVersionedEntry => e.type === 'file');
+  const files = entries.filter((e): e is FilestoreEntry => e.type === 'file');
 
   // Sort directories alphabetically by their basename
   dirs.sort((a, b) => {
