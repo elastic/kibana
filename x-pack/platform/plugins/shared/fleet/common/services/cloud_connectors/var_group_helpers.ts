@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { RegistryVarGroup, RegistryVarGroupOption } from '../../types/models/package_spec';
+import { isCloudProvider, type CloudProvider } from '../../types';
+import type { NewPackagePolicy, NewPackagePolicyInput } from '../../types';
+import type { RegistryVarGroup } from '../../types/models/package_spec';
 
-/**
- * Mapping of var_group names to selected option names
- */
-export interface VarGroupSelection {
-  [groupName: string]: string;
-}
+import { getSelectedOption, type VarGroupSelection } from '../var_group_helpers';
+
+// Re-export generic var_group helpers from common/services
+export { getSelectedOption, type VarGroupSelection } from '../var_group_helpers';
 
 /**
  * Result of checking if a cloud connector option is selected
@@ -21,25 +21,8 @@ export interface CloudConnectorOptionResult {
   /** Whether a cloud connector option is currently selected */
   isCloudConnector: boolean;
   /** The cloud provider (e.g., 'aws', 'azure') if cloud connector is selected */
-  provider?: string;
+  provider?: CloudProvider;
 }
-
-/**
- * Gets the full RegistryVarGroupOption object for the currently selected option in a var_group.
- *
- * @param varGroup - The var_group to search
- * @param selectedOptionName - The name of the selected option
- * @returns The selected option or undefined
- */
-export const getSelectedOption = (
-  varGroup: RegistryVarGroup,
-  selectedOptionName: string | undefined
-): RegistryVarGroupOption | undefined => {
-  if (!selectedOptionName) {
-    return undefined;
-  }
-  return varGroup.options.find((opt) => opt.name === selectedOptionName);
-};
 
 /**
  * Checks if any selected var_group option has a `provider` field, indicating Cloud Connector support.
@@ -64,10 +47,10 @@ export const getCloudConnectorOption = (
     }
 
     const selectedOption = getSelectedOption(varGroup, selectedName);
-    if (selectedOption?.provider) {
+    if (selectedOption && isCloudProvider(selectedOption.provider)) {
       return {
         isCloudConnector: true,
-        provider: selectedOption.provider as string,
+        provider: selectedOption.provider,
       };
     }
   }
@@ -132,6 +115,41 @@ export const getIacTemplateUrlFromVarGroupSelection = (
     if (selectedOption?.iac_template_url) {
       return selectedOption.iac_template_url as string;
     }
+  }
+  return undefined;
+};
+
+/**
+ * Detects the target cloud provider from either:
+ * 1. var_group selections (new approach - provider field in selected option)
+ * 2. Input type matching (legacy approach - input.type contains aws|azure|gcp)
+ *
+ * @param packagePolicy - The package policy to check
+ * @param varGroups - The var_groups from package info
+ * @returns The detected cloud provider or undefined
+ */
+export const detectTargetCsp = (
+  packagePolicy: NewPackagePolicy,
+  varGroups: RegistryVarGroup[] | undefined
+): CloudProvider | undefined => {
+  // First, check var_group selections for provider field (new approach)
+  if (varGroups && packagePolicy.var_group_selections) {
+    const cloudConnectorOption = getCloudConnectorOption(
+      varGroups,
+      packagePolicy.var_group_selections
+    );
+    if (cloudConnectorOption.isCloudConnector && cloudConnectorOption.provider) {
+      return cloudConnectorOption.provider;
+    }
+  }
+
+  // Fallback to legacy input type detection
+  const input = packagePolicy.inputs?.find(
+    (pinput: NewPackagePolicyInput) => pinput.enabled === true
+  );
+  const match = input?.type.match(/aws|azure|gcp/)?.[0];
+  if (isCloudProvider(match)) {
+    return match;
   }
   return undefined;
 };

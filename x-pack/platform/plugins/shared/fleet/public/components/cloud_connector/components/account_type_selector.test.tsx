@@ -36,21 +36,10 @@ describe('AccountTypeSelector', () => {
   describe('rendering', () => {
     it('renders account type label', () => {
       renderSelector();
-      expect(screen.getByText('Account Type')).toBeInTheDocument();
-    });
-
-    it('renders Organization option', () => {
-      renderSelector();
+      expect(screen.getByText('Cloud Connector Account Type')).toBeInTheDocument();
       expect(screen.getByText('Organization')).toBeInTheDocument();
-    });
-
-    it('renders Single Account option', () => {
-      renderSelector();
       expect(screen.getByText('Single Account')).toBeInTheDocument();
-    });
 
-    it('renders with correct test subjects', () => {
-      renderSelector();
       expect(screen.getByTestId('cloudConnectorAccountTypeSelector')).toBeInTheDocument();
       expect(screen.getByTestId('cloudConnectorAccountTypeOrganization')).toBeInTheDocument();
       expect(screen.getByTestId('cloudConnectorAccountTypeSingleAccount')).toBeInTheDocument();

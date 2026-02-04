@@ -17,10 +17,12 @@ import {
   shouldShowVar,
   computeDefaultVarGroupSelections,
   isVarRequiredByVarGroup,
+} from '../../../services/var_group_helpers';
+import {
   getSelectedOption,
   getCloudConnectorOption,
   getIacTemplateUrlFromVarGroupSelection,
-} from '../../../services/var_group_helpers';
+} from '../../../../../../../../../common/services/cloud_connectors';
 
 import { VarGroupSelector } from './var_group_selector';
 

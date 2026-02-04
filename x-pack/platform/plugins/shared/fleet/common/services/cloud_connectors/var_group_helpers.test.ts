@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { NewPackagePolicy } from '../../types';
 import type { RegistryVarGroup } from '../../types/models/package_spec';
 
 import {
@@ -12,6 +13,7 @@ import {
   getCloudConnectorOption,
   getCloudConnectorVars,
   getIacTemplateUrlFromVarGroupSelection,
+  detectTargetCsp,
   type VarGroupSelection,
 } from './var_group_helpers';
 
@@ -221,6 +223,87 @@ describe('var_group_helpers (cloud connector)', () => {
       const selections: VarGroupSelection = { auth_method: 'manual' };
       const result = getIacTemplateUrlFromVarGroupSelection(varGroups, selections);
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('detectTargetCsp', () => {
+    const createMockPackagePolicy = (overrides: Partial<NewPackagePolicy> = {}): NewPackagePolicy =>
+      ({
+        name: 'test-policy',
+        namespace: 'default',
+        description: '',
+        enabled: true,
+        inputs: [],
+        policy_ids: [],
+        ...overrides,
+      } as NewPackagePolicy);
+
+    it('should return provider from var_group selection when cloud connector is selected', () => {
+      const varGroups = createMockVarGroups();
+      const packagePolicy = createMockPackagePolicy({
+        var_group_selections: { auth_method: 'cloud_connector' },
+      });
+      const result = detectTargetCsp(packagePolicy, varGroups);
+      expect(result).toBe('aws');
+    });
+
+    it('should return undefined when non-cloud-connector option is selected', () => {
+      const varGroups = createMockVarGroups();
+      const packagePolicy = createMockPackagePolicy({
+        var_group_selections: { auth_method: 'manual' },
+      });
+      const result = detectTargetCsp(packagePolicy, varGroups);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when no var_group_selections', () => {
+      const varGroups = createMockVarGroups();
+      const packagePolicy = createMockPackagePolicy();
+      const result = detectTargetCsp(packagePolicy, varGroups);
+      expect(result).toBeUndefined();
+    });
+
+    it('should fallback to input type detection when no var_groups', () => {
+      const packagePolicy = createMockPackagePolicy({
+        inputs: [{ type: 'aws-cloudwatch', enabled: true }] as NewPackagePolicy['inputs'],
+      });
+      const result = detectTargetCsp(packagePolicy, undefined);
+      expect(result).toBe('aws');
+    });
+
+    it('should fallback to input type detection for azure', () => {
+      const packagePolicy = createMockPackagePolicy({
+        inputs: [{ type: 'azure-logs', enabled: true }] as NewPackagePolicy['inputs'],
+      });
+      const result = detectTargetCsp(packagePolicy, undefined);
+      expect(result).toBe('azure');
+    });
+
+    it('should fallback to input type detection for gcp', () => {
+      const packagePolicy = createMockPackagePolicy({
+        inputs: [{ type: 'gcp-pubsub', enabled: true }] as NewPackagePolicy['inputs'],
+      });
+      const result = detectTargetCsp(packagePolicy, undefined);
+      expect(result).toBe('gcp');
+    });
+
+    it('should return undefined when input type does not match any provider', () => {
+      const packagePolicy = createMockPackagePolicy({
+        inputs: [{ type: 'logfile', enabled: true }] as NewPackagePolicy['inputs'],
+      });
+      const result = detectTargetCsp(packagePolicy, undefined);
+      expect(result).toBeUndefined();
+    });
+
+    it('should prioritize var_group detection over input type detection', () => {
+      const varGroups = createMockVarGroups();
+      const packagePolicy = createMockPackagePolicy({
+        var_group_selections: { auth_method: 'cloud_connector' },
+        inputs: [{ type: 'azure-logs', enabled: true }] as NewPackagePolicy['inputs'],
+      });
+      // var_group has aws provider, input has azure - should return aws from var_group
+      const result = detectTargetCsp(packagePolicy, varGroups);
+      expect(result).toBe('aws');
     });
   });
 });

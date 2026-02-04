@@ -88,7 +88,7 @@ export const useVarGroupCloudConnector = ({
 
   return {
     isCloudConnector: cloudConnectorOption.isCloudConnector,
-    cloudProvider: cloudConnectorOption.provider as CloudProvider | undefined,
+    cloudProvider: cloudConnectorOption.provider,
     iacTemplateUrl,
     cloudConnectorVars,
     handleCloudConnectorUpdate,

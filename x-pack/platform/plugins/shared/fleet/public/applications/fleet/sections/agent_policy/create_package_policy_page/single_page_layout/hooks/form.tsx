@@ -47,10 +47,7 @@ import {
   sendCreatePackagePolicyForRq,
 } from '../../../../../hooks';
 import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
-import type {
-  CreatePackagePolicyResponse,
-  NewPackagePolicyInput,
-} from '../../../../../../../../common';
+import type { CreatePackagePolicyResponse } from '../../../../../../../../common';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
@@ -60,7 +57,7 @@ import {
 import { getMaxPackageName } from '../../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
-import { getCloudConnectorOption } from '../../../../../../../../common/services/cloud_connectors';
+import { detectTargetCsp } from '../../../../../../../../common/services/cloud_connectors';
 import { validatePackagePolicy, validationHasErrors } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 import type { PackagePolicyFormState } from '../../types';
@@ -216,40 +213,6 @@ async function savePackagePolicy(
   });
 
   return result;
-}
-
-/**
- * Detects the target cloud provider from either:
- * 1. var_group selections (new approach - provider field in selected option)
- * 2. Input type matching (legacy approach - input.type contains aws|azure|gcp)
- */
-function detectTargetCsp(
-  packagePolicy: NewPackagePolicy,
-  varGroups: RegistryVarGroup[] | undefined
-): CloudProvider | undefined {
-  // First, check var_group selections for provider field (new approach)
-  if (varGroups && packagePolicy.var_group_selections) {
-    const cloudConnectorOption = getCloudConnectorOption(
-      varGroups,
-      packagePolicy.var_group_selections
-    );
-    if (cloudConnectorOption.isCloudConnector && cloudConnectorOption.provider) {
-      const { provider } = cloudConnectorOption;
-      if (provider === 'aws' || provider === 'azure' || provider === 'gcp') {
-        return provider;
-      }
-    }
-  }
-
-  // Fallback to legacy input type detection
-  const input = packagePolicy.inputs?.find(
-    (pinput: NewPackagePolicyInput) => pinput.enabled === true
-  );
-  const match = input?.type.match(/aws|azure|gcp/)?.[0];
-  if (match === 'aws' || match === 'azure' || match === 'gcp') {
-    return match;
-  }
-  return undefined;
 }
 
 // Update the agentless policy with cloud connector info in the new agent policy when the package policy input `aws.support_cloud_connectors is updated
