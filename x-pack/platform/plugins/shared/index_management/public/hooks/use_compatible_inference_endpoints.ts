@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
+import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { useLicense } from './use_license';
 
 const COMPATIBLE_TASK_TYPES = ['text_embedding', 'sparse_embedding'] as const;
@@ -18,8 +18,8 @@ type CompatibleTaskType = (typeof COMPATIBLE_TASK_TYPES)[number];
 const LICENSE_TIER_ENTERPRISE = 'enterprise';
 const LICENSE_TIER_PLATINUM = 'platinum';
 const INFERENCE_ENDPOINT_LICENSE_MAP: Record<string, LicenseType> = {
-  [defaultInferenceEndpoints.ELSER]: LICENSE_TIER_PLATINUM,
-  [defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID]: LICENSE_TIER_ENTERPRISE,
+  [ServiceProviderKeys.elasticsearch]: LICENSE_TIER_PLATINUM,
+  [ServiceProviderKeys.elastic]: LICENSE_TIER_ENTERPRISE,
 };
 
 interface EndpointDefinition {
@@ -65,7 +65,7 @@ export const useCompatibleInferenceEndpoints = (
 
       const isElserInEis =
         endpoint.inference_id === defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID;
-      const requiredLicense = INFERENCE_ENDPOINT_LICENSE_MAP[endpoint.inference_id];
+      const requiredLicense = INFERENCE_ENDPOINT_LICENSE_MAP[endpoint.service];
       // If no license requirement is specified, assume access is granted.
       const accessible = requiredLicense ? isAtLeast(requiredLicense) : true;
       if (accessible) {
@@ -85,6 +85,13 @@ export const useCompatibleInferenceEndpoints = (
         description,
       });
     });
+
+    const hasAnyDisabled = endpointDefinitions.some((e) => !e.accessible);
+
+    if (hasAnyDisabled) {
+      endpointDefinitions.sort((a, b) => Number(b.accessible) - Number(a.accessible));
+    }
+
     return {
       defaultInferenceId,
       endpointDefinitions,
