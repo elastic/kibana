@@ -163,14 +163,3 @@ export const visualizationElement = {
     chartType: 'chart-type',
   },
 };
-
-export interface DashboardElementAttributes {
-  toolResultId?: string;
-}
-
-export const dashboardElement = {
-  tagName: 'dashboard',
-  attributes: {
-    toolResultId: 'tool-result-id',
-  },
-};
