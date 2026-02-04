@@ -114,6 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
         'agent_policies_read',
         'settings_all',
         'settings_read',
+        'generate_report',
       ],
       fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
       actions: ['all', 'read', 'minimal_all', 'minimal_read', 'endpoint_security_execute'],
