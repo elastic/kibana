@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pLimit from 'p-limit';
 import type { PhoenixClient } from '@arizeai/phoenix-client';
 import { createClient } from '@arizeai/phoenix-client';
 import type { DatasetInfo } from '@arizeai/phoenix-client/dist/esm/types/datasets';
@@ -292,32 +291,5 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
 
   async getRanExperiments(): Promise<RanExperiment[]> {
     return this.experiments;
-  }
-
-  /**
-   * Phoenix-only helper retained for parity/debugging.
-   */
-  async getDatasets(ids: string[]): Promise<DatasetInfo[]> {
-    const limiter = pLimit(5);
-
-    const datasets = await Promise.all(
-      ids.map(async (id) => {
-        return limiter(() =>
-          this.phoenixClient
-            .GET('/v1/datasets/{id}', {
-              params: { path: { id } },
-            })
-            .then((response) => {
-              const dataset = response.data?.data;
-              if (!dataset) {
-                throw new Error(`Could not find dataset for ${id}`);
-              }
-              return dataset;
-            })
-        );
-      })
-    );
-
-    return datasets;
   }
 }
