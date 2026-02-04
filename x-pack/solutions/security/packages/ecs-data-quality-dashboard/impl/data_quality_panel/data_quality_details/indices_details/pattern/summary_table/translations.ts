@@ -54,3 +54,10 @@ export const VIEW_HISTORY = i18n.translate(
     defaultMessage: 'View history',
   }
 );
+
+export const SUMMARY_TABLE_CAPTION = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.caption',
+  {
+    defaultMessage: 'Index summary',
+  }
+);
