@@ -179,7 +179,7 @@ function VerticalOverflowContent({
 }: PropsWithChildren<VerticalOverflowContentProps>): JSX.Element {
   return (
     <div
-      className={`eui-yScroll ${css`
+      className={`eui-yScroll eui-xScroll ${css`
         max-height: ${maxHeight}px;
       `}`}
     >
