@@ -495,7 +495,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   const docViewerContext = useMemo(
     () => ({
       originalSample:
-        originalSamples && currentDoc ? originalSamples[currentDoc.index].document : undefined,
+        originalSamples && currentDoc ? originalSamples[currentDoc.index]?.document : undefined,
     }),
     [currentDoc, originalSamples]
   );

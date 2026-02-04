@@ -250,4 +250,34 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
 
   // Note: Individual processor type tests (uppercase, lowercase, trim, etc.) have been
   // removed as they are covered by API tests in processing_simulate.spec.ts
+
+  // Regression test for https://github.com/elastic/observability-error-backlog/issues/440
+  // When a document flyout is open and the user changes the preview filter, the flyout
+  // should not crash due to out-of-bounds array access
+  test('should not crash when filtering samples while document flyout is open', async ({
+    pageObjects,
+  }) => {
+    // Add a processor that drops some documents
+    await pageObjects.streams.clickAddProcessor();
+    await pageObjects.streams.selectProcessorType('Drop document');
+    await pageObjects.streams.fillConditionEditor({
+      field: 'log.level',
+      operator: 'equals',
+      value: 'info',
+    });
+    await pageObjects.streams.clickSaveProcessor();
+
+    // Open a document in the flyout by clicking on a row
+    await pageObjects.streams.clickPreviewTableRowExpand(0);
+    await pageObjects.streams.expectDocumentFlyoutVisible();
+
+    // Change the preview filter to show only dropped documents
+    // This changes the samples array while currentDoc is still set
+    await pageObjects.streams.clickProcessorPreviewTab('Dropped');
+
+    // Verify the page didn't crash - the flyout should still be visible or cleanly closed
+    // and the preview table should still show rows
+    const rows = await pageObjects.streams.getPreviewTableRows();
+    expect(rows.length).toBeGreaterThan(0);
+  });
 });
