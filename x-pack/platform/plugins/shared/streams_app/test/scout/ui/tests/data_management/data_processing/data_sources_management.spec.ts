@@ -11,8 +11,7 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 
-// Failing: See https://github.com/elastic/kibana/issues/250734
-test.describe.skip(
+test.describe(
   'Stream data processing - data sources management',
   { tag: ['@ess', '@svlOblt'] },
   () => {
