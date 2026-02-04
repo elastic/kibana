@@ -7,7 +7,7 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
-import type { PackagePolicyConfigRecord, NewPackagePolicy, PackageInfo } from '../../../common';
+import type { PackagePolicyConfigRecord } from '../../../common';
 import type { AwsCloudConnectorVars, AzureCloudConnectorVars } from '../../../common/types';
 
 import {
@@ -23,7 +23,6 @@ import {
   CLOUD_CONNECTOR_NAME_MAX_LENGTH,
 } from './utils';
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from './constants';
-import { getMockPolicyAWS, getMockPackageInfoAWS } from './test/mock';
 import type { CloudConnectorCredentials } from './types';
 import { AWS_PROVIDER, AZURE_PROVIDER } from './constants';
 
