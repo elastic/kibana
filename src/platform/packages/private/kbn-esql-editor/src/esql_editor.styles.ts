@@ -55,7 +55,6 @@ export const esqlEditorStyles = (
     },
     historyContainer: {
       border: 'none',
-      backgroundColor: euiTheme.colors.lightestShade,
       width: '100%',
       position: 'relative' as const,
       marginTop: 0,

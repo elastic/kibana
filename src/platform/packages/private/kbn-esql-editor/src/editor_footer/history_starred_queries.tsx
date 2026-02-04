@@ -134,8 +134,8 @@ export const getTableColumns = (
                 content={i18n.translate('esqlEditor.query.querieshistory.success', {
                   defaultMessage: 'Query ran successfully',
                 })}
-                type="checkInCircleFilled"
-                color="success"
+                type="checkCircle"
+                color="text"
                 size="m"
                 iconProps={{
                   'data-test-subj': 'ESQLEditor-queryHistory-success',
@@ -150,7 +150,7 @@ export const getTableColumns = (
                   defaultMessage: 'Query failed',
                 })}
                 type="error"
-                color="danger"
+                color="text"
                 size="m"
                 iconProps={{
                   'data-test-subj': 'ESQLEditor-queryHistory-error',
@@ -165,7 +165,7 @@ export const getTableColumns = (
                   defaultMessage: 'Query failed',
                 })}
                 type="warning"
-                color="warning"
+                color="text"
                 size="m"
                 iconProps={{
                   'data-test-subj': 'ESQLEditor-queryHistory-warning',
@@ -372,13 +372,6 @@ export function QueryList({
   const starredQueriesCellStyling = cssFavoriteHoverWithinEuiTableRow(theme.euiTheme);
 
   const tableStyling = css`
-    .euiTable {
-      background-color: ${euiTheme.colors.lightestShade};
-    }
-    .euiTable tbody tr:nth-child(odd) {
-      background-color: ${euiTheme.colors.lightestShade};
-      filter: brightness(97%);
-    }
     .euiTableRowCell {
       vertical-align: top;
       border: none;
@@ -704,9 +697,8 @@ export function HistoryAndStarredQueriesTabs({
         alignItems="center"
         justifyContent="spaceBetween"
         css={css`
-          background-color: ${euiTheme.colors.lightestShade};
           padding: ${euiTheme.size.s};
-          border-block-end: ${euiTheme.border.thin};
+          border-block-start: ${euiTheme.border.thin};
         `}
       >
         <EuiTabs bottomBorder={false} size="s">
