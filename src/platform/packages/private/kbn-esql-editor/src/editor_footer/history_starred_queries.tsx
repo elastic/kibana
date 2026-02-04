@@ -648,6 +648,11 @@ export function HistoryAndStarredQueriesTabs({
           defaultMessage: 'Recent',
         }),
         dataTestSubj: 'history-queries-tab',
+        append: (
+          <EuiNotificationBadge className="eui-alignCenter" size="m" color="subdued">
+            {historyItems?.length}
+          </EuiNotificationBadge>
+        ),
         content: historyQueryList,
       },
       effectiveStarredQueriesService !== null && {
@@ -664,7 +669,13 @@ export function HistoryAndStarredQueriesTabs({
         content: starredQueryList,
       },
     ]);
-  }, [effectiveStarredQueriesService, historyQueryList, starredQueries?.length, starredQueryList]);
+  }, [
+    effectiveStarredQueriesService,
+    historyItems?.length,
+    historyQueryList,
+    starredQueries?.length,
+    starredQueryList,
+  ]);
 
   const [selectedTabId, setSelectedTabId] = useRestorableState(
     'historySelectedTabId',
