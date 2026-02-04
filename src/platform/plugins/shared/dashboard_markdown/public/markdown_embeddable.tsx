@@ -124,9 +124,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       },
       onReset: (lastSaved) => {
         titleManager.reinitializeState(lastSaved);
-        if (!savedObjectId) {
-          markdownStateManager.reinitializeState(lastSaved as MarkdownByValueState);
-        }
+        markdownStateManager.reinitializeState(lastSaved as MarkdownByValueState);
       },
     });
 
