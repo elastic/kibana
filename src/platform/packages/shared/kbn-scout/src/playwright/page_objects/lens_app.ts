@@ -17,7 +17,7 @@ export class LensApp {
   }
 
   getConvertToEsqModal() {
-    return this.page.getByTestId('lnsConverToEsqlModal');
+    return this.page.getByTestId('lnsConvertToEsqlModal');
   }
 
   getConvertToEsqModalConfirmButton() {
