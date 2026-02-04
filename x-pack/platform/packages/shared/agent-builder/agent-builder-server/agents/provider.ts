@@ -16,6 +16,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type {
   ModelProvider,
@@ -28,6 +29,7 @@ import type {
 } from '../runner';
 import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
+import type { ToolRegistry } from '../tools';
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
@@ -64,6 +66,10 @@ export interface AgentHandlerContext {
    */
   esClient: IScopedClusterClient;
   /**
+   * Saved objects client scoped to the current user.
+   */
+  savedObjectsClient?: SavedObjectsClientContract;
+  /**
    * Inference model provider scoped to the current user.
    * Can be used to access the inference APIs or chatModel.
    */
@@ -72,6 +78,11 @@ export interface AgentHandlerContext {
    * Tool provider that can be used to list or execute tools.
    */
   toolProvider: ToolProvider;
+  /**
+   * Tool registry for accessing internal tool definitions.
+   * Used for features like tool-specific result summarization.
+   */
+  toolRegistry: ToolRegistry;
   /**
    * AgentBuilder runner scoped to the current execution.
    */
