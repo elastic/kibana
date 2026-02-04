@@ -167,22 +167,8 @@ export class FeatureClient {
   }
 
   async getAllFeatures(streams: string[]): Promise<{ hits: Feature[]; total: number }> {
-    const filterClauses: QueryDslQueryContainer[] = [
-      {
-        bool: {
-          should: [
-            { bool: { must_not: { exists: { field: FEATURE_EXPIRES_AT } } } },
-            ...dateRangeQuery(Date.now(), undefined, FEATURE_EXPIRES_AT),
-          ],
-          minimum_should_match: 1,
-        },
-      },
-    ];
-
-    if (streams.length) {
-      filterClauses.push({
-        terms: { [STREAM_NAME]: streams },
-      });
+    if (streams.length === 0) {
+      return { hits: [], total: 0 };
     }
 
     const featuresResponse = await this.clients.storageClient.search({
@@ -190,7 +176,7 @@ export class FeatureClient {
       track_total_hits: true,
       query: {
         bool: {
-          filter: filterClauses,
+          filter: [{ terms: { [STREAM_NAME]: streams } }],
         },
       },
     });
