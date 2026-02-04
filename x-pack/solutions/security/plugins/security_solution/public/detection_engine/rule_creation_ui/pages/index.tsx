@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EuiResizableContainerActions } from '@elastic/eui/src/components/resizable_container/types';
 import React, { memo } from 'react';
 import * as i18n from './translations';
@@ -17,6 +17,7 @@ const CustomHeaderPage: React.FC<
     togglePanel: EuiResizableContainerActions['togglePanel'] | undefined;
     isRulePreviewVisible: boolean;
     setIsRulePreviewVisible: (value: React.SetStateAction<boolean>) => void;
+    addToChatButton?: React.ReactNode;
   }
 > = ({
   backOptions,
@@ -25,20 +26,32 @@ const CustomHeaderPage: React.FC<
   togglePanel,
   isRulePreviewVisible,
   setIsRulePreviewVisible,
+  backComponent,
+  addToChatButton,
 }) => (
-  <HeaderPage backOptions={backOptions} isLoading={isLoading} title={title}>
-    <EuiButton
-      data-test-subj="preview-container"
-      isSelected={isRulePreviewVisible}
-      fill={isRulePreviewVisible}
-      iconType="visBarVerticalStacked"
-      onClick={() => {
-        togglePanel?.('preview', { direction: 'left' });
-        setIsRulePreviewVisible((isVisible) => !isVisible);
-      }}
-    >
-      {i18n.RULE_PREVIEW_TITLE}
-    </EuiButton>
+  <HeaderPage
+    backOptions={backOptions}
+    isLoading={isLoading}
+    title={title}
+    backComponent={backComponent}
+  >
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      {addToChatButton && <EuiFlexItem grow={false}>{addToChatButton}</EuiFlexItem>}
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          data-test-subj="preview-container"
+          isSelected={isRulePreviewVisible}
+          fill={isRulePreviewVisible}
+          iconType="visBarVerticalStacked"
+          onClick={() => {
+            togglePanel?.('preview', { direction: 'left' });
+            setIsRulePreviewVisible((isVisible) => !isVisible);
+          }}
+        >
+          {i18n.RULE_PREVIEW_TITLE}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </HeaderPage>
 );
 
