@@ -96,6 +96,8 @@ export interface ActionTypeExecutorOptions<
   request?: KibanaRequest;
   connectorUsageCollector: ConnectorUsageCollector;
   connectorTokenClient?: ConnectorTokenClientContract;
+  authMode?: 'shared' | 'personal';
+  profileUid?: string;
 }
 
 export type ActionResult = Connector;
@@ -272,6 +274,7 @@ export interface RawAction extends Record<string, unknown> {
   isMissingSecrets: boolean;
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
+  authMode?: 'shared' | 'personal';
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {
@@ -297,12 +300,37 @@ export interface ResponseSettings {
 }
 
 export interface ConnectorToken extends SavedObjectAttributes {
+  id?: string;
   connectorId: string;
   tokenType: string;
   token: string;
-  expiresAt: string;
+  expiresAt?: string;
   createdAt: string;
   updatedAt?: string;
+  refreshToken?: string;
+  refreshTokenExpiresAt?: string;
+}
+
+export interface UserConnectorToken extends SavedObjectAttributes {
+  id?: string;
+  profileUid: string;
+  connectorId: string;
+  credentialType: string;
+  credentials: SavedObjectAttributes;
+  expiresAt?: string;
+  refreshTokenExpiresAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type OAuthPersonalCredentials = SavedObjectAttributes & {
+  accessToken: string;
+  refreshToken?: string;
+};
+
+export interface UserConnectorOAuthToken extends UserConnectorToken {
+  credentialType: 'oauth';
+  credentials: OAuthPersonalCredentials;
 }
 
 // This unallowlist should only contain connector types that require a request or API key for

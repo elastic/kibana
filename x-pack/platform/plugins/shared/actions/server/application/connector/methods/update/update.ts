@@ -60,8 +60,18 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   }
   const { attributes, references, version } =
     await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
-  const { actionTypeId } = attributes;
+  const { actionTypeId, authMode: existingAuthMode } = attributes;
   const { name, config, secrets } = action;
+
+  // Prevent authMode from being changed after creation
+  if (action.authMode !== undefined && action.authMode !== existingAuthMode) {
+    throw Boom.badRequest(
+      i18n.translate('xpack.actions.serverSideErrors.authModeCannotBeChanged', {
+        defaultMessage: 'Authentication mode cannot be changed after connector creation.',
+      })
+    );
+  }
+
   const actionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
   const validatedActionTypeConfig = validateConfig(actionType, config, {

@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-
 import { EuiIcon } from '@elastic/eui';
 import type { ConnectorIconProps } from '../../../types';
 import sharepointIcon from './sharepoint.svg';

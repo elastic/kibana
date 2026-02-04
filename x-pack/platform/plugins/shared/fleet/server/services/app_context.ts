@@ -30,6 +30,10 @@ import type { LockManagerService } from '@kbn/lock-manager';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
+
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+
 import type { FleetConfigType } from '../../common/types';
 import {
   allowedExperimentalValues,

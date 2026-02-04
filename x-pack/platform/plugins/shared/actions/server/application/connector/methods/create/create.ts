@@ -18,7 +18,7 @@ import { tryCatch } from '../../../../lib';
 
 export async function create({
   context,
-  action: { actionTypeId, name, config, secrets },
+  action: { actionTypeId, name, config, secrets, authMode },
   options,
 }: ConnectorCreateParams): Promise<ActionResult> {
   const id = options?.id || SavedObjectsUtils.generateId();
@@ -116,6 +116,10 @@ export async function create({
     })
   );
 
+  // POC: Hardcode SharePoint connector to use personal auth mode for testing
+  const effectiveAuthMode =
+    actionTypeId === '.sharepointOnline' ? 'personal' : authMode ?? 'shared';
+
   const result = await tryCatch(
     async () =>
       await context.unsecuredSavedObjectsClient.create(
@@ -126,6 +130,7 @@ export async function create({
           isMissingSecrets: false,
           config: validatedActionTypeConfig as SavedObjectAttributes,
           secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+          authMode: effectiveAuthMode,
         },
         { id }
       )

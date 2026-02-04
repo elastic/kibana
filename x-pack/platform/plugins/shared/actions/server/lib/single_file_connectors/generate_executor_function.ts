@@ -29,6 +29,8 @@ export const generateExecutorFunction = ({
       actionId: connectorId,
       config,
       connectorTokenClient,
+      authMode,
+      profileUid,
       globalAuthHeaders,
       params,
       secrets,
@@ -39,6 +41,8 @@ export const generateExecutorFunction = ({
     const axiosInstance = await getAxiosInstanceWithAuth({
       connectorId,
       connectorTokenClient,
+      authMode,
+      profileUid,
       additionalHeaders: globalAuthHeaders,
       secrets,
     });

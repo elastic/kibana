@@ -45,7 +45,7 @@ export class CrowdStrikeTokenManager {
     const now = new Date();
     now.setSeconds(now.getSeconds() - 5); // 5-second safety margin
 
-    const isExpired = token.expiresAt < now.toISOString();
+    const isExpired = token.expiresAt ? token.expiresAt < now.toISOString() : false;
 
     if (isExpired) {
       this.logger.debug(`Cached access token expired at [${token.expiresAt}]`);

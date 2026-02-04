@@ -72,10 +72,15 @@ import { getActionsConfigurationUtilities } from './actions_config';
 import { defineRoutes } from './routes';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
+  initializeOAuthStateCleanupTask,
+  scheduleOAuthStateCleanupTask,
+} from './lib/oauth_state_cleanup_task';
+import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+  USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
 import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
@@ -104,6 +109,7 @@ import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured
 import { createSystemConnectors } from './create_system_actions';
 import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
+import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth } from './lib/get_axios_instance';
 
@@ -214,6 +220,7 @@ const includedHiddenTypes = [
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+  USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 ];
 
 export class ActionsPlugin
@@ -378,11 +385,22 @@ export class ActionsPlugin
       });
     }
 
+    // Initialize OAuth state cleanup task
+    initializeOAuthStateCleanupTask(this.logger, plugins.taskManager, core);
+
     const subActionFramework = createSubActionConnectorFramework({
       actionTypeRegistry,
       logger: this.logger,
       actionsConfigUtils,
     });
+
+    // Initialize OAuth rate limiter
+    const oauthRateLimiter = new OAuthRateLimiter({
+      config: this.actionsConfig.oAuthRateLimit,
+    });
+    this.logger.info(
+      `OAuth rate limiter initialized with authorize limit: ${this.actionsConfig.oAuthRateLimit.authorize.limit}`
+    );
 
     // Routes
     defineRoutes({
@@ -390,6 +408,9 @@ export class ActionsPlugin
       licenseState: this.licenseState,
       actionsConfigUtils,
       usageCounter: this.usageCounter,
+      logger: this.logger,
+      core,
+      oauthRateLimiter,
     });
 
     return {
@@ -642,6 +663,7 @@ export class ActionsPlugin
     this.eventLogService!.isEsContextReady()
       .then(() => {
         scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
+        scheduleOAuthStateCleanupTask(this.logger, plugins.taskManager);
       })
       .catch(() => {});
 
