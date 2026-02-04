@@ -40,14 +40,6 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
         const result = await create(ctx, req.body);
         return res.ok({ body: result });
       } catch (e) {
-        if (e.isBoom && e.output.statusCode === 409) {
-          return res.conflict({
-            body: {
-              message: `A markdown panel with ID ${req.body.id} already exists.`,
-            },
-          });
-        }
-
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();
         }
