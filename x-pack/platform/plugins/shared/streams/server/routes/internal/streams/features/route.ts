@@ -6,12 +6,12 @@
  */
 
 import { z } from '@kbn/zod';
-import { baseFeatureSchema, type Feature } from '@kbn/streams-schema';
+import { baseFeatureSchema, featureSchema, type Feature } from '@kbn/streams-schema';
+import { v4 as uuid } from 'uuid';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
-import { getFeatureId } from '../../../../lib/streams/feature/feature_client';
 import {
   type IdentifyFeaturesResult,
   type FeaturesIdentificationTaskParams,
@@ -59,7 +59,7 @@ export const upsertFeatureRoute = createServerRoute({
             ...params.body,
             status: 'active' as const,
             last_seen: new Date().toISOString(),
-            id: getFeatureId(params.path.name, params.body),
+            uuid: uuid(),
           },
         },
       },
@@ -70,7 +70,7 @@ export const upsertFeatureRoute = createServerRoute({
 });
 
 export const deleteFeatureRoute = createServerRoute({
-  endpoint: 'DELETE /internal/streams/{name}/features/{id}',
+  endpoint: 'DELETE /internal/streams/{name}/features/{uuid}',
   options: {
     access: 'internal',
     summary: 'Deletes a feature for a stream',
@@ -82,7 +82,7 @@ export const deleteFeatureRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string(), id: z.string() }),
+    path: z.object({ name: z.string(), uuid: z.string() }),
   }),
   handler: async ({
     params,
@@ -97,7 +97,7 @@ export const deleteFeatureRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
-    await featureClient.deleteFeature(params.path.name, params.path.id);
+    await featureClient.deleteFeature(params.path.name, params.path.uuid);
 
     return { acknowledged: true };
   },
@@ -143,6 +143,62 @@ export const listFeaturesRoute = createServerRoute({
     return {
       features,
     };
+  },
+});
+
+export const bulkFeaturesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/features/_bulk',
+  options: {
+    access: 'internal',
+    summary: 'Bulk changes to features',
+    description: 'Add or delete features in bulk for a given stream',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string() }),
+    body: z.object({
+      operations: z.array(
+        z.union([
+          z.object({
+            index: z.object({
+              feature: featureSchema,
+            }),
+          }),
+          z.object({
+            delete: z.object({
+              id: z.string(),
+            }),
+          }),
+        ])
+      ),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ acknowledged: boolean }> => {
+    const { featureClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const {
+      path: { name },
+      body: { operations },
+    } = params;
+
+    await streamsClient.ensureStream(name);
+
+    await featureClient.bulk(name, operations);
+
+    return { acknowledged: true };
   },
 });
 
@@ -278,6 +334,7 @@ export const featureRoutes = {
   ...upsertFeatureRoute,
   ...deleteFeatureRoute,
   ...listFeaturesRoute,
+  ...bulkFeaturesRoute,
   ...featuresStatusRoute,
   ...featuresTaskRoute,
 };

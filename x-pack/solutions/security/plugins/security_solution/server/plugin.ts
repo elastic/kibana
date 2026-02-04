@@ -250,7 +250,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       return;
     }
 
-    registerTools(agentBuilder, core, logger).catch((error) => {
+    registerTools(agentBuilder, core, logger, this.config.experimentalFeatures).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
     });
     registerAttachments(agentBuilder).catch((error) => {
@@ -497,6 +497,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     };
 
     // TODO We need to get the endpoint routes inside of initRoutes
+    const enableDataGeneratorRoutes =
+      pluginContext.env.mode.dev || plugins.cloud.isElasticStaffOwned === true;
     initRoutes(
       router,
       config,
@@ -514,7 +516,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.isServerless,
       core.docLinks,
       this.endpointContext,
-      trialCompanionDeps
+      trialCompanionDeps,
+      enableDataGeneratorRoutes
     );
 
     registerEndpointRoutes(router, this.endpointContext);
