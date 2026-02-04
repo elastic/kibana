@@ -69,11 +69,17 @@ export const AllRuleCoveragePanel: React.FC = () => {
 
   // Get unique integration names from enabled rules
   const relatedIntegrationNames = useMemo(() => {
-    const allIntegrations = enabledRules.flatMap((rule) => rule.related_integrations || []);
-    const packageNames = allIntegrations.map((i) => i.package);
-    const validPackages = packageNames.filter(Boolean);
-    const uniquePackages = [...new Set(validPackages)];
-    return uniquePackages;
+    const uniqueNames = new Set<string>();
+
+    enabledRules.forEach((rule) => {
+      (rule.related_integrations || []).forEach((integration) => {
+        if (integration.package) {
+          uniqueNames.add(integration.package);
+        }
+      });
+    });
+
+    return [...uniqueNames];
   }, [enabledRules]);
 
   const installedIntegrationsOptions = useMemo(() => {
