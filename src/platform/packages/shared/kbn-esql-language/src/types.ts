@@ -65,7 +65,7 @@ export type ESQLSingleAstItem =
  * EVAL ?param = 123
  * ```
  */
-export type ESQLAstField = ESQLColumn | ESQLBinaryExpression | ESQLParam;
+export type ESQLAstField = ESQLColumn | ESQLBinaryExpression | ESQLAstExpression | ESQLParam;
 
 /**
  * An array of AST nodes represents different things in different contexts.
