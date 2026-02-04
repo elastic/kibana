@@ -52,7 +52,7 @@ describe('fetchConnector', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/internal/actions/connector/test-connector",
+        "/api/actions/connector/test-connector",
       ]
     `);
   });
