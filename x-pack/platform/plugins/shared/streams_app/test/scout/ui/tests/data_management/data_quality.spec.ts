@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
 import { generateLogsData } from '../../fixtures/generators';
 
@@ -151,8 +151,18 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     };
     // Go to Retention tab
     await pageObjects.streams.clickRetentionTab();
+    // Scroll to date picker within the first ingestion rate panel
+    // eslint-disable-next-line playwright/no-nth-methods
+    const firstIngestionRatePanel = page.testSubj.locator('ingestionRatePanel').first();
+    await expect(firstIngestionRatePanel).toBeVisible();
+    await firstIngestionRatePanel.scrollIntoViewIfNeeded();
 
-    await pageObjects.streams.setAbsoluteTimeRange(timeRange);
+    // Set time range within the ingestion rate panel container
+    await pageObjects.datePicker.setAbsoluteRangeInRootContainer({
+      to: timeRange.to,
+      from: timeRange.from,
+      containerLocator: firstIngestionRatePanel,
+    });
 
     // Verify time range is displayed correctly on Retention tab
     await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
