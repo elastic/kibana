@@ -16,6 +16,10 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
@@ -29,6 +33,7 @@ export interface AgentBuilderSetupDependencies {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
   inference: InferenceServerSetup;
+  taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
   features: FeaturesPluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -42,6 +47,7 @@ export interface AgentBuilderStartDependencies {
   cloud?: CloudStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface AttachmentsSetup {

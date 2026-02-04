@@ -7,6 +7,8 @@
 
 export type {
   AttachmentTypeDefinition,
+  AttachmentFindQuery,
+  AttachmentFindResult,
   AttachmentRepresentation,
   TextAttachmentRepresentation,
   AttachmentValidationResult,
@@ -14,6 +16,16 @@ export type {
   AttachmentFormatContext,
   AttachmentResolveContext,
 } from './type_definition';
+export type {
+  SmlAttachmentChunk,
+  SmlAttachmentData,
+  SmlAttachmentDataContext,
+  SmlAttachmentListContext,
+  SmlAttachmentListItem,
+  SmlAttachmentPermissions,
+  SmlAttachmentTypeDefinition,
+  SmlUpdateAction,
+} from './sml';
 export type {
   AttachmentBoundedTool,
   BuiltinAttachmentBoundedTool,

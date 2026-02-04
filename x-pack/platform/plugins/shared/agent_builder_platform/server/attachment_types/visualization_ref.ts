@@ -19,6 +19,7 @@ import {
   type LensApiSchemaType,
   type LensAttributes,
 } from '@kbn/lens-embeddable-utils/config_builder';
+import { listConversationAttachmentsForType } from './sml_helpers';
 
 /**
  * Creates the definition for the `visualization_ref` attachment type.
@@ -78,6 +79,27 @@ export const createVisualizationRefAttachmentType = (): AttachmentTypeDefinition
       return `A visualization_ref attachment contains a reference to a saved Lens visualization. The reference includes the saved object ID and type. Use attachment_read to resolve the referenced content when needed.`;
     },
     getTools: () => [],
+    sml: {
+      list: ({ esClient }) =>
+        listConversationAttachmentsForType({
+          esClient,
+          attachmentType: AttachmentType.visualizationRef,
+        }),
+      fetchFrequency: () => '10m',
+      getSmlData: (attachment) => {
+        const now = new Date().toISOString();
+        return {
+          chunks: [
+            {
+              type: AttachmentType.visualizationRef,
+              content: JSON.stringify(attachment.data),
+              createdAt: now,
+              updatedAt: now,
+            },
+          ],
+        };
+      },
+    },
   };
 };
 

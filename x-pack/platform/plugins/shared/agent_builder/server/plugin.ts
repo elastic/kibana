@@ -23,6 +23,8 @@ import { registerUISettings } from './ui_settings';
 import { getRunAgentStepDefinition } from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
 import { registerAgentBuilderHandlerContext } from './request_handler_context';
+import { createSmlSearchTool } from './services/tools/builtin/sml/sml_search';
+import { registerSmlCrawlerTask } from './services/sml/task';
 import { createAgentBuilderUsageCounter } from './telemetry/usage_counters';
 import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
@@ -82,6 +84,18 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
     });
 
+    serviceSetups.tools.register(
+      createSmlSearchTool({
+        getSmlService: () => this.serviceManager.internalStart?.sml,
+      })
+    );
+
+    registerSmlCrawlerTask({
+      taskManager: setupDeps.taskManager,
+      logger: this.logger.get('sml').get('crawler_task'),
+      getSmlService: () => this.serviceManager.internalStart?.sml,
+    });
+
     registerFeatures({ features: setupDeps.features });
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
@@ -124,13 +138,14 @@ export class AgentBuilderPlugin
 
   start(
     { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
-    { inference, spaces, actions }: AgentBuilderStartDependencies
+    { inference, spaces, actions, taskManager }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
       elasticsearch,
       inference,
+      taskManager,
       spaces,
       actions,
       uiSettings,
@@ -156,5 +171,7 @@ export class AgentBuilderPlugin
     };
   }
 
-  stop() {}
+  stop() {
+    this.serviceManager.stopServices();
+  }
 }

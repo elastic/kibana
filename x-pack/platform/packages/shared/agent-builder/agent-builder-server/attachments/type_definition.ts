@@ -10,6 +10,7 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { AttachmentBoundedTool } from './tools';
+import type { SmlAttachmentTypeDefinition } from './sml';
 
 /**
  * Server-side definition of an attachment type.
@@ -62,6 +63,17 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    * Whether attachments of this type are read-only. Defaults to true.
    */
   isReadonly?: boolean;
+  /**
+   * Optional search hook for by-reference attachments (e.g., saved objects).
+   */
+  find?: (
+    query: AttachmentFindQuery,
+    context: AttachmentResolveContext
+  ) => MaybePromise<AttachmentFindResult<TType, TContent>[]>;
+  /**
+   * Optional SML capabilities for indexing attachments into the semantic metadata layer.
+   */
+  sml?: SmlAttachmentTypeDefinition<TType, TContent>;
 }
 
 /**
@@ -81,6 +93,20 @@ export interface AttachmentResolveContext extends AttachmentFormatContext {
    * Optional to keep the core attachment contract generic and allow non-Kibana environments.
    */
   savedObjectsClient?: SavedObjectsClientContract;
+}
+
+export interface AttachmentFindQuery {
+  search?: string;
+  page?: number;
+  perPage?: number;
+}
+
+export interface AttachmentFindResult<TType extends string = string, TContent = unknown> {
+  id: string;
+  type: TType;
+  title: string;
+  description?: string;
+  data: TContent;
 }
 
 /**

@@ -18,11 +18,13 @@ import { RunnerFactoryImpl } from './runner';
 import { ConversationServiceImpl } from './conversation';
 import { createChatService } from './chat';
 import { type AttachmentService, createAttachmentService } from './attachments';
+import { SmlService } from './sml';
 
 interface ServiceInstances {
   tools: ToolsService;
   agents: AgentsService;
   attachments: AttachmentService;
+  sml?: SmlService;
 }
 
 export class ServiceManager {
@@ -52,6 +54,7 @@ export class ServiceManager {
     spaces,
     elasticsearch,
     inference,
+    taskManager,
     uiSettings,
     savedObjects,
     actions,
@@ -115,6 +118,18 @@ export class ServiceManager {
       spaces,
     });
 
+    const sml = new SmlService({
+      logger: logger.get('sml'),
+      elasticsearch,
+      savedObjects,
+      attachmentsService: attachments,
+    });
+
+    sml.start(taskManager).catch((error) => {
+      logger.get('sml').error(`Failed to start SML service: ${error?.message ?? error}`);
+      logger.get('sml').debug(error);
+    });
+
     const chat = createChatService({
       logger: logger.get('chat'),
       inference,
@@ -133,8 +148,13 @@ export class ServiceManager {
       conversations,
       runnerFactory,
       chat,
+      sml,
     };
 
     return this.internalStart;
+  }
+
+  stopServices(): void {
+    this.internalStart?.sml?.stop();
   }
 }
