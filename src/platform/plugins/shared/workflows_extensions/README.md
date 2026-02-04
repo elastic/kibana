@@ -12,7 +12,7 @@ Future extension points (such as triggers) will also be registered through this 
 
 ## Important: Internal vs External Steps
 
-**⚠️ CRITICAL CONVENTION**: The `workflows_extensions` plugin contains **internal, workflows-team owned** step implementations only. These are located in:
+**⚠️ IMPORTANT CONVENTION**: The `workflows_extensions` plugin contains **internal, workflows-team owned** step implementations only. These are located in:
 - `server/steps/` - Internal server-side step handlers
 - `public/steps/` - Internal public-side step definitions
 
