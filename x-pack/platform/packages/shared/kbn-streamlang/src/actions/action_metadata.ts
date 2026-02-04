@@ -656,9 +656,12 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
   to: user_agent`,
       },
       {
-        description: i18n.translate('xpack.streamlang.actionMetadata.userAgent.examples.properties', {
-          defaultMessage: 'Extract only specific properties',
-        }),
+        description: i18n.translate(
+          'xpack.streamlang.actionMetadata.userAgent.examples.properties',
+          {
+            defaultMessage: 'Extract only specific properties',
+          }
+        ),
         yaml: `- action: user_agent
   from: attributes.user_agent_string
   to: attributes.browser

@@ -650,7 +650,15 @@ export const convertFormStateToProcessor = (
     }
 
     if (formState.action === 'user_agent') {
-      const { from, to, regex_file, properties, extract_device_type, ignore_failure, ignore_missing } = formState;
+      const {
+        from,
+        to,
+        regex_file,
+        properties,
+        extract_device_type,
+        ignore_failure,
+        ignore_missing,
+      } = formState;
       return {
         processorDefinition: {
           action: 'user_agent',
