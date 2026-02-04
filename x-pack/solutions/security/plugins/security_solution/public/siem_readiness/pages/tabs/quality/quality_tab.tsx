@@ -34,6 +34,7 @@ import {
   getQualityCaseTitle,
   getQualityCaseTags,
 } from './quality_add_case_details';
+import { ViewCasesButton } from '../../components/view_cases_button';
 
 // Extended IndexInfo with computed fields
 interface IndexInfoWithStatus extends IndexInfo, Record<string, unknown> {
@@ -363,19 +364,24 @@ export const QualityTab: React.FC = () => {
           </EuiText>
         </EuiFlexItem>
         {hasIncompatibleIndices && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconSide="right"
-              size="s"
-              iconType="plusInCircle"
-              onClick={handleCreateCase}
-              data-test-subj="createNewCaseButton"
-            >
-              {i18n.translate('xpack.securitySolution.siemReadiness.quality.createCase', {
-                defaultMessage: 'Create new case',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          <>
+            <EuiFlexItem grow={false}>
+              <ViewCasesButton caseTagsArray={getQualityCaseTags()} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconSide="right"
+                size="s"
+                iconType="plusInCircle"
+                onClick={handleCreateCase}
+                data-test-subj="createNewCaseButton"
+              >
+                {i18n.translate('xpack.securitySolution.siemReadiness.quality.createCase', {
+                  defaultMessage: 'Create new case',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </>
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
