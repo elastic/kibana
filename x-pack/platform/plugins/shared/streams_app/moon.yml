@@ -108,6 +108,8 @@ dependsOn:
   - '@kbn/timerange'
   - '@kbn/inference-common'
   - '@kbn/esql'
+  - '@kbn/inference-endpoint-ui-common'
+  - '@kbn/stack-connectors-plugin'
 tags:
   - plugin
   - prod
