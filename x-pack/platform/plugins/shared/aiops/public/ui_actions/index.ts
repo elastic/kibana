@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { type UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import {
+  ADD_PANEL_TRIGGER,
   CATEGORIZE_FIELD_TRIGGER,
   CONTEXT_MENU_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';

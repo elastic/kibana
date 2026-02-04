@@ -24,7 +24,6 @@ import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizatio
 import {
   ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
   ACTION_CONVERT_TO_LENS,
-  DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
   ACTION_CONVERT_AGG_BASED_TO_LENS,
 } from '@kbn/visualizations-plugin/public';
 import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
@@ -32,16 +31,7 @@ import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import {
-  ACTION_VISUALIZE_FIELD,
-  VISUALIZE_FIELD_TRIGGER,
-  ADD_PANEL_TRIGGER,
-  ACTION_VISUALIZE_LENS_FIELD,
-} from '@kbn/ui-actions-plugin/public';
-import {
-  VISUALIZE_EDITOR_TRIGGER,
-  AGG_BASED_VISUALIZATION_TRIGGER,
-} from '@kbn/visualizations-plugin/public';
+import { ACTION_VISUALIZE_FIELD, ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { SharePluginSetup, ExportShare, SharePluginStart } from '@kbn/share-plugin/public';
@@ -84,8 +74,13 @@ import {
   LENS_ITEM_LATEST_VERSION,
 } from '@kbn/lens-common/content_management/constants';
 import {
+  ADD_PANEL_TRIGGER,
+  AGG_BASED_VISUALIZATION_TRIGGER,
   CONTEXT_MENU_TRIGGER,
+  DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
+  VISUALIZE_EDITOR_TRIGGER,
+  VISUALIZE_FIELD_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {

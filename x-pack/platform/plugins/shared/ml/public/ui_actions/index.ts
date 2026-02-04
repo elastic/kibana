@@ -6,9 +6,10 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
-import { CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER } from '@kbn/ml-ui-actions';
-import { type UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import {
+  ADD_PANEL_TRIGGER,
+  CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
   CONTEXT_MENU_TRIGGER,
   EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
   SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
