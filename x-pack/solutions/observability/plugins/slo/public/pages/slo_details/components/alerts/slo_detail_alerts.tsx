@@ -8,15 +8,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { Fragment } from 'react';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useKibana } from '../../../../hooks/use_kibana';
+import type { SloDetailsAlertsProps } from '.';
 
-export interface Props {
-  slo: SLOWithSummaryResponse;
-}
-
-export function SloDetailsAlerts({ slo }: Props) {
+export function SloDetailsPageAlerts({ slo }: SloDetailsAlertsProps) {
   const { data, http, notifications, fieldFormats, application, licensing, cases, settings } =
     useKibana().services;
   return (
