@@ -29,6 +29,7 @@ import type { HttpStart } from '@kbn/core/public';
 import type { FormValues } from '../form/types';
 import { ErrorCallOut } from './error_callout';
 import { useCreateRule } from '../form/hooks/use_create_rule';
+import { useDefaultGroupBy } from '../form/hooks/use_default_group_by';
 import { RuleFields } from '../form/rule_fields';
 
 export interface ESQLRuleFormFlyoutProps {
@@ -64,6 +65,7 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
     mode: 'onBlur',
     defaultValues: {
       name: '',
+      description: '',
       tags: [],
       schedule: {
         custom: '5m',
@@ -77,6 +79,9 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
   const { http, data, dataViews, notifications } = services;
   const flyoutTitleId = 'ruleV2FormFlyoutTitle';
   const formId = 'ruleV2Form';
+
+  // Extract default grouping from the query's STATS ... BY clause
+  const { defaultGroupBy } = useDefaultGroupBy({ query });
 
   const handleClose = () => {
     if (onClose) {
@@ -96,7 +101,11 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
 
   useEffect(() => {
     setValue('query', query);
-  }, [query, setValue]);
+    // Set default grouping from query's BY clause if available
+    if (defaultGroupBy.length > 0) {
+      setValue('groupingKey', defaultGroupBy);
+    }
+  }, [query, defaultGroupBy, setValue]);
 
   return (
     <EuiForm id={formId} component="form" onSubmit={handleSubmit(onSubmit)}>

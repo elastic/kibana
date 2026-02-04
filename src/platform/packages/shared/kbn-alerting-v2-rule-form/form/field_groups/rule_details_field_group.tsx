@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFieldText, EuiComboBox, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText, EuiTextArea, EuiComboBox, EuiSwitch } from '@elastic/eui';
 import { Controller, type Control, type FieldErrors } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { FieldGroup } from './field_group';
@@ -20,6 +20,7 @@ interface RuleDetailsFieldGroupProps {
 }
 
 const NAME_ROW_ID = 'ruleV2FormNameField';
+const DESCRIPTION_ROW_ID = 'ruleV2FormDescriptionField';
 
 export const RuleDetailsFieldGroup: React.FC<RuleDetailsFieldGroupProps> = ({
   control,
@@ -48,6 +49,24 @@ export const RuleDetailsFieldGroup: React.FC<RuleDetailsFieldGroupProps> = ({
             }),
           }}
           render={({ field: { ref, ...field } }) => <EuiFieldText {...field} inputRef={ref} />}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        id={DESCRIPTION_ROW_ID}
+        label={i18n.translate('xpack.esqlRuleForm.descriptionLabel', {
+          defaultMessage: 'Description',
+        })}
+        helpText={i18n.translate('xpack.esqlRuleForm.descriptionHelpText', {
+          defaultMessage: 'Optional description for this rule.',
+        })}
+      >
+        <Controller
+          name="description"
+          control={control}
+          render={({ field: { ref, ...field } }) => (
+            <EuiTextArea {...field} inputRef={ref} rows={2} />
+          )}
         />
       </EuiFormRow>
 

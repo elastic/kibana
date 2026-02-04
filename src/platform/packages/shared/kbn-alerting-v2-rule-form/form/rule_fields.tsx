@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import type { FieldErrors, Control, UseFormSetValue } from 'react-hook-form';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -38,6 +39,7 @@ export const RuleFields: React.FC<RuleFieldsProps> = ({
   return (
     <>
       <RuleDetailsFieldGroup control={control} errors={errors} />
+      <EuiSpacer size="m" />
       <RuleExecutionFieldGroup
         control={control}
         errors={errors}

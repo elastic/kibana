@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -38,8 +38,12 @@ export function CreateESQLRuleFlyout({
     (stateContainer.getCurrentTab().appState.query as AggregateQuery)?.esql || ''
   );
 
-  const { http, data, dataViews, notifications } = services;
+  const { http, data, dataViews, notifications, history } = services;
   const [queryError, setQueryError] = useState<Error | undefined>(undefined);
+
+  // Use a ref to avoid stale closure issues with onClose
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     const querySubscription = createAppStateObservable(stateContainer.appState$).subscribe(
@@ -55,11 +59,17 @@ export function CreateESQLRuleFlyout({
       setQueryError(changes.error);
     });
 
+    // Listen for route changes to close the flyout
+    const unlisten = history.listen(() => {
+      onCloseRef.current();
+    });
+
     return () => {
       querySubscription.unsubscribe();
       queryErrorSubscription.unsubscribe();
+      unlisten();
     };
-  }, [stateContainer.appState$, stateContainer.dataState.data$.main$]);
+  }, [stateContainer.appState$, stateContainer.dataState.data$.main$, history]);
 
   return (
     <ESQLRuleFormFlyout

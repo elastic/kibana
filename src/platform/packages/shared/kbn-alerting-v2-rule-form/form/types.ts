@@ -9,6 +9,7 @@
 
 export interface FormValues {
   name: string;
+  description: string;
   tags: string[];
   schedule: {
     custom: string;

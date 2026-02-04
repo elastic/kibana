@@ -117,3 +117,16 @@ Both components require the following Kibana services:
 | `dataViews` | Data views plugin for time field options |
 | `notifications` | (Flyout only) For success/error toasts |
 
+## Development
+
+### Storybook
+
+This package includes Storybook stories for visual development and testing.
+
+To run Storybook:
+
+```bash
+yarn storybook alerting_v2_rule_form
+```
+
+Stories are located in `flyout/__stories__/`.
