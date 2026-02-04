@@ -32,3 +32,6 @@ export * as attachmentApiV1 from './attachment/v1';
 export * as metricsApiV1 from './metrics/v1';
 export * as customFieldsApiV1 from './custom_field/v1';
 export * as observableApiV1 from './observable/v1';
+
+// V2
+export * as attachmentApiV2 from './attachment/v2';
