@@ -118,7 +118,7 @@ export const RelatedCases: React.FC<RelatedCasesProps> = ({ eventId }) => {
             defaultMessage: 'Related cases',
           }
         )}
-        message=={
+        message={
           <FormattedMessage
             id="xpack.securitySolution.flyout.left.insights.correlations.relatedCasesNoDataDescription"
             defaultMessage="No related cases."
