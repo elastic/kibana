@@ -15,16 +15,16 @@
             }
         ] */
 
-import prConfigs from '../../../pull_requests.json';
-import { runPreBuild } from './pre_build';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
-  getAgentImageConfig,
   emitPipeline,
+  getAgentImageConfig,
   getPipeline,
   prHasFIPSLabel,
 } from '#pipeline-utils';
+import prConfigs from '../../../pull_requests.json';
+import { runPreBuild } from './pre_build';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
