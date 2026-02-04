@@ -52,7 +52,7 @@ export const deserializeState = async (state: VisualizeEmbeddableState | undefin
 
 export const deserializeSavedObjectState = async ({
   savedObjectId,
-  enhancements,
+  drilldowns,
   uiState,
   timeRange,
   title: embeddableTitle,
@@ -107,7 +107,7 @@ export const deserializeSavedObjectState = async ({
     savedObjectProperties,
     linkedToLibrary: true,
     ...(timeRange ? { timeRange } : {}),
-    ...(enhancements ? { enhancements } : {}),
+    ...(drilldowns ? { drilldowns } : {}),
   } as VisualizeRuntimeState;
 };
 
