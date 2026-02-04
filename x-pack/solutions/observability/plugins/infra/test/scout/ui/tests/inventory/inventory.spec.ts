@@ -11,7 +11,8 @@ import { test } from '../../fixtures';
 test.describe('Infrastructure Inventory - Onboarding', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
     await browserAuth.loginAsViewer();
-    await inventoryPage.goToPage();
+    // Skip load wait as there is no data to load in empty data test cases
+    await inventoryPage.goToPage({ skipLoadWait: true });
   });
 
   test('Renders no data page and redirects to onboarding page when no data is present', async ({
