@@ -54,6 +54,35 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
+    describe('sort functionality', () => {
+      it('displays the sort dropdown', async () => {
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectSortDropdownToBeVisible();
+      });
+
+      it('shows all sort options in dropdown', async () => {
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectSortDropdownOptions();
+      });
+
+      it('can sort by different fields using dropdown', async () => {
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectSortByField(
+          'Service'
+        );
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectSortByField(
+          'Type'
+        );
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectSortByField(
+          'Model'
+        );
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectSortByField(
+          'Endpoint'
+        );
+      });
+
+      it('can sort by clicking column headers', async () => {
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectColumnHeaderSorting();
+      });
+    });
+
     describe('create inference flyout', () => {
       it('renders successfully', async () => {
         await pageObjects.searchInferenceManagementPage.AddInferenceFlyout.expectInferenceEndpointToBeVisible();
