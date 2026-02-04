@@ -43,9 +43,9 @@ describe('computeSimulationDocDiff', () => {
 
       // temp_field should NOT be in detected_fields (not in final output)
       expect(result.detected_fields.map((f) => f.name)).not.toContain('temp_field');
-      // but SHOULD be tracked in per_processor_fields for debugging
-      expect(result.per_processor_fields.map((f) => f.name)).toContain('temp_field');
-      expect(result.per_processor_fields.find((f) => f.name === 'temp_field')?.processor_id).toBe(
+      // but SHOULD be tracked in intermediate_field_changes for debugging
+      expect(result.intermediate_field_changes.map((f) => f.name)).toContain('temp_field');
+      expect(result.intermediate_field_changes.find((f) => f.name === 'temp_field')?.processor_id).toBe(
         'processor1'
       );
     });
@@ -77,10 +77,10 @@ describe('computeSimulationDocDiff', () => {
 
       // detected_fields should be EMPTY - no new fields in final output vs input
       expect(result.detected_fields).toHaveLength(0);
-      // per_processor_fields should still track the temporary field for debugging
-      expect(result.per_processor_fields.map((f) => f.name)).toContain('http.response.bytes');
+      // intermediate_field_changes should still track the temporary field for debugging
+      expect(result.intermediate_field_changes.map((f) => f.name)).toContain('http.response.bytes');
       expect(
-        result.per_processor_fields.find((f) => f.name === 'http.response.bytes')?.processor_id
+        result.intermediate_field_changes.find((f) => f.name === 'http.response.bytes')?.processor_id
       ).toBe('set_processor');
     });
 
@@ -123,8 +123,8 @@ describe('computeSimulationDocDiff', () => {
 
       // to_be_deleted should NOT be in detected_fields (not in final output)
       expect(result.detected_fields.map((f) => f.name)).not.toContain('to_be_deleted');
-      // but SHOULD be tracked in per_processor_fields for debugging
-      expect(result.per_processor_fields.map((f) => f.name)).toContain('to_be_deleted');
+      // but SHOULD be tracked in intermediate_field_changes for debugging
+      expect(result.intermediate_field_changes.map((f) => f.name)).toContain('to_be_deleted');
     });
 
     it('should include a field that is created, modified, and kept', () => {
@@ -141,8 +141,8 @@ describe('computeSimulationDocDiff', () => {
 
       // new_field should be in detected_fields (exists in final output)
       expect(result.detected_fields.map((f) => f.name)).toContain('new_field');
-      // Should have entries from both processors in per_processor_fields
-      const perProcessorNewField = result.per_processor_fields.filter(
+      // Should have entries from both processors in intermediate_field_changes
+      const perProcessorNewField = result.intermediate_field_changes.filter(
         (f) => f.name === 'new_field'
       );
       expect(perProcessorNewField).toHaveLength(2);
@@ -180,8 +180,8 @@ describe('computeSimulationDocDiff', () => {
       expect(detectedFieldNames).not.toContain('temp1');
       expect(detectedFieldNames).not.toContain('temp2');
 
-      // All fields should be tracked in per_processor_fields
-      const perProcessorFieldNames = result.per_processor_fields.map((f) => f.name);
+      // All fields should be tracked in intermediate_field_changes
+      const perProcessorFieldNames = result.intermediate_field_changes.map((f) => f.name);
       expect(perProcessorFieldNames).toContain('temp1');
       expect(perProcessorFieldNames).toContain('temp2');
       expect(perProcessorFieldNames).toContain('kept');
@@ -218,11 +218,11 @@ describe('computeSimulationDocDiff', () => {
       const result = computeSimulationDocDiff(base, docResult, true, []);
 
       expect(result.detected_fields).toHaveLength(0);
-      expect(result.per_processor_fields).toHaveLength(0);
+      expect(result.intermediate_field_changes).toHaveLength(0);
     });
   });
 
-  describe('per_processor_fields tracking', () => {
+  describe('intermediate_field_changes tracking', () => {
     it('should track all fields touched by each processor', () => {
       const base = { existing: 'value' };
       const docResult: SuccessfulPipelineSimulateDocumentResult = {
@@ -240,12 +240,12 @@ describe('computeSimulationDocDiff', () => {
       const result = computeSimulationDocDiff(base, docResult, true, []);
 
       // processor1 should have field_a attributed to it
-      expect(result.per_processor_fields).toContainEqual({
+      expect(result.intermediate_field_changes).toContainEqual({
         processor_id: 'processor1',
         name: 'field_a',
       });
       // processor2 should have field_b attributed to it
-      expect(result.per_processor_fields).toContainEqual({
+      expect(result.intermediate_field_changes).toContainEqual({
         processor_id: 'processor2',
         name: 'field_b',
       });
@@ -300,8 +300,8 @@ describe('computeSimulationDocDiff', () => {
 
       // parent.temp should NOT be in detected_fields
       expect(result.detected_fields.map((f) => f.name)).not.toContain('parent.temp');
-      // but SHOULD be tracked in per_processor_fields
-      expect(result.per_processor_fields.map((f) => f.name)).toContain('parent.temp');
+      // but SHOULD be tracked in intermediate_field_changes
+      expect(result.intermediate_field_changes.map((f) => f.name)).toContain('parent.temp');
     });
 
     it('should handle nested fields being added and kept', () => {
