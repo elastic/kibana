@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { EditLookupIndexFlyoutDeps } from '../types';
-import { ACTION_EDIT_LOOKUP_INDEX } from './constants';
+import { ACTION_EDIT_LOOKUP_INDEX, EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID } from './constants';
 
 export function registerIndexEditorActions(deps: EditLookupIndexFlyoutDeps) {
   const { uiActions } = deps;

@@ -234,8 +234,6 @@ export type { SavedObject } from '../common';
 
 export { isTimeRange, isQuery, flattenHit, calculateBounds, tabifyAggResponse } from '../common';
 
-export { APPLY_FILTER_TRIGGER } from './triggers';
-
 /*
  * Plugin setup
  */

@@ -34,7 +34,6 @@
       "fieldFormats",
       "kibanaReact",
       "kibanaUtils",
-      "embeddable",
       "cases"
     ]
   }

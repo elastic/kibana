@@ -11,8 +11,10 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import { UPDATE_FILTER_REFERENCES_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import {
+  APPLY_FILTER_TRIGGER,
+  UPDATE_FILTER_REFERENCES_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { setCoreStart, setIndexPatterns } from './services';
 import { createSearchBar } from './search_bar/create_search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';

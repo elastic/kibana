@@ -26,6 +26,7 @@ import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -235,7 +236,7 @@ export class DiscoverPlugin
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
     plugins.uiActions.addTriggerActionAsync(
-      'CONTEXT_MENU_TRIGGER',
+      CONTEXT_MENU_TRIGGER,
       ACTION_VIEW_SAVED_SEARCH,
       async () => {
         const { ViewSavedSearchAction } = await getEmbeddableServices();

@@ -208,7 +208,6 @@ export class ReportingPublicPlugin
       visibleIn: [],
     });
 
-    console.log('CONTEXT MENU TRIGGER', CONTEXT_MENU_TRIGGER);
     uiActionsSetup.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, 'generateCsvReport', async () => {
       const { ReportingCsvPanelAction } = await import('@kbn/reporting-csv-share-panel');
       return new ReportingCsvPanelAction({

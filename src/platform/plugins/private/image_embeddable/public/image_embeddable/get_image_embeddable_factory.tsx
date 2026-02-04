@@ -17,8 +17,8 @@ import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { initializeTitleManager, titleComparators } from '@kbn/presentation-publishing';
 
+import { IMAGE_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { ImageEmbeddableState } from '../../server';
-import { IMAGE_CLICK_TRIGGER } from '../actions';
 import { ImageEmbeddable as ImageEmbeddableComponent } from '../components/image_embeddable';
 import type { FileImageMetadata } from '../imports';
 import { coreServices, filesService } from '../services/kibana_services';

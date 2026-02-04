@@ -11,7 +11,7 @@ import type { Filter, AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { UiActionsActionDefinition, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { APPLY_FILTER_TRIGGER } from '../triggers';
+import { APPLY_FILTER_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 export type ValueClickActionContext = ValueClickContext;
 export const ACTION_VALUE_CLICK = 'ACTION_VALUE_CLICK';
@@ -65,7 +65,7 @@ export function createValueClickActionDefinition(
           const { createFiltersFromValueClickAction } = await import('./filters');
           const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
           if (filters.length > 0) {
-            await getStartServices().uiActions.executeTriggerActionsAPPLY_FILTER_TRIGGER, {
+            await getStartServices().uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
               filters,
               embeddable: context.embeddable,
               timeFieldName: context.data.timeFieldName,

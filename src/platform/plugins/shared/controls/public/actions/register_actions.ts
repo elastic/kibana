@@ -15,8 +15,8 @@ import {
   CONTROL_MENU_TRIGGER,
 } from '@kbn/controls-constants';
 import { ACTION_EDIT_PANEL, ACTION_REMOVE_PANEL } from '@kbn/presentation-panel-plugin/public';
-import { ADD_PANEL_TRIGGER, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER, CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   ACTION_CLEAR_CONTROL,
   ACTION_EDIT_CONTROL_DISPLAY_SETTINGS,
