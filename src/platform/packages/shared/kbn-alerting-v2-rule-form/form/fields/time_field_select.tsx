@@ -38,7 +38,7 @@ export const TimeFieldSelect = React.forwardRef<HTMLSelectElement, Props>(
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-label={i18n.translate('xpack.esqlRuleForm.timeFieldSelect.ariaLabel', {
-          defaultMessage: 'Time field',
+          defaultMessage: 'Select time field for rule execution',
         })}
         inputRef={ref}
       />
