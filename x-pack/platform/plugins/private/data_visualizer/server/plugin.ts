@@ -34,8 +34,10 @@ export class DataVisualizerPlugin implements Plugin<void, void, SetupDeps, Start
     routes(coreSetup, this._logger);
 
     plugins.embeddable.registerTransforms(FIELD_STATS_EMBEDDABLE_TYPE, {
-      transformIn,
-      transformOut,
+      getTransforms: () => ({
+        transformIn,
+        transformOut,
+      }),
     });
   }
 
