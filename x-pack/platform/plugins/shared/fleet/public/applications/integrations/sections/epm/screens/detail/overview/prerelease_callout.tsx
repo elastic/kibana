@@ -70,7 +70,7 @@ export const OtelPackageCallout: React.FC<{
   packageInfo: PackageInfo;
 }> = ({ packageInfo }) => {
   const { docLinks } = useStartServices();
-  const packageTitle = wrapTitle(packageInfo.title, !!packageInfo.deprecated || false);
+  const packageTitle = wrapTitle({ packageInfo });
 
   return (
     <>

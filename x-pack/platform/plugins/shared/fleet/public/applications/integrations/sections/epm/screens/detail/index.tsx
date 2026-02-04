@@ -366,16 +366,7 @@ export function Detail() {
                   <EuiFlexItem grow={false}>
                     <EuiText>
                       {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                      <h1>
-                        {wrapTitle(
-                          integrationInfo?.title || packageInfo?.title || '',
-                          !!(
-                            packageInfo?.deprecated ||
-                            packageInfo?.conditions?.deprecated ||
-                            integrationInfo?.deprecated
-                          ) || false
-                        )}
-                      </h1>
+                      <h1>{wrapTitle({ packageInfo, integrationInfo })}</h1>
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -597,10 +588,7 @@ export function Detail() {
                                   : {}),
                               })}
                               missingSecurityConfiguration={missingSecurityConfiguration}
-                              packageName={wrapTitle(
-                                integrationInfo?.title || packageInfo.title,
-                                !!packageInfo.deprecated || false
-                              )}
+                              packageName={wrapTitle({ packageInfo, integrationInfo })}
                               onClick={handleAddIntegrationPolicyClick}
                             />
                           </EuiFlexItem>
@@ -627,22 +615,22 @@ export function Detail() {
       ) : undefined,
     [
       packageInfo,
-      updateAvailable,
-      isInstalled,
-      pkgkey,
-      userCanInstallPackages,
-      getHref,
-      integration,
-      agentPolicyIdFromContext,
-      missingSecurityConfiguration,
-      integrationInfo?.title,
-      handleAddIntegrationPolicyClick,
-      onVersionChange,
       showVersionSelect,
       versionLabel,
       versionOptions,
-      handleEditIntegrationClick,
+      updateAvailable,
+      isInstalled,
       isCustomPackage,
+      handleEditIntegrationClick,
+      userCanInstallPackages,
+      getHref,
+      pkgkey,
+      integration,
+      agentPolicyIdFromContext,
+      missingSecurityConfiguration,
+      integrationInfo,
+      handleAddIntegrationPolicyClick,
+      onVersionChange,
     ]
   );
 
@@ -833,12 +821,7 @@ export function Detail() {
       `}
     >
       {integrationInfo || packageInfo ? (
-        <Breadcrumbs
-          packageTitle={wrapTitle(
-            integrationInfo?.title || packageInfo?.title || '',
-            !!(packageInfo?.deprecated || integrationInfo?.deprecated) || false
-          )}
-        />
+        <Breadcrumbs packageTitle={wrapTitle({ packageInfo, integrationInfo })} />
       ) : null}
       {packageInfoError ? (
         <EuiFlexGroup alignItems="flexStart">
@@ -902,10 +885,7 @@ export function Detail() {
       )}
       {isEditOpen && (
         <EditIntegrationFlyout
-          integrationName={wrapTitle(
-            integrationInfo?.title || packageInfo?.title || 'integration',
-            !!(packageInfo?.deprecated || integrationInfo?.deprecated) || false
-          )}
+          integrationName={wrapTitle({ packageInfo, integrationInfo })}
           onClose={() => setIsEditOpen(false)}
           packageInfo={packageInfo}
           setIsEditOpen={setIsEditOpen}

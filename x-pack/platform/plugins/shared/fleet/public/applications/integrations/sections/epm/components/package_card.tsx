@@ -265,7 +265,7 @@ export function PackageCard({
         layout="horizontal"
         title={
           <CardTitle
-            title={wrapTitle(title, isDeprecated || false)}
+            title={wrapTitle({ title, deprecated: isDeprecated })}
             titleBadge={titleBadge}
           />
         }

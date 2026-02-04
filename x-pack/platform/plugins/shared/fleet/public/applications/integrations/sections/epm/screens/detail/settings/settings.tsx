@@ -334,10 +334,7 @@ export const SettingsPage: React.FC<Props> = memo(
                       <p>
                         <UpdateButton
                           name={packageInfo.name}
-                          title={wrapTitle(
-                            packageInfo.title,
-                            !!packageInfo.deprecated || false
-                          )}
+                          title={wrapTitle({ packageInfo })}
                           version={latestVersion}
                           agentPolicyIds={agentPolicyIds}
                           packagePolicyIds={packagePolicyIds}

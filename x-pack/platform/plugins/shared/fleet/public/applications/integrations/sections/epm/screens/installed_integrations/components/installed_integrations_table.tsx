@@ -162,7 +162,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                       data-test-subj={`installedIntegrationsTable.integrationNameColumn.${item.name}`}
                       grow={false}
                     >
-                      {wrapTitle(item.title, isDeprecated || false)}
+                      {wrapTitle({ title: item.title, deprecated: isDeprecated })}
                     </EuiFlexItem>
                     {isDeprecated && (
                       <EuiFlexItem grow={false}>

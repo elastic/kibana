@@ -76,7 +76,7 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
         id="xpack.fleet.integrations.rollbackPackage.rollbackPackageButtonLabel"
         defaultMessage="Rollback {title}"
         values={{
-          title: wrapTitle(packageInfo.title, !!packageInfo.deprecated || false),
+          title: wrapTitle({ packageInfo }),
         }}
       />
     </EuiButton>
