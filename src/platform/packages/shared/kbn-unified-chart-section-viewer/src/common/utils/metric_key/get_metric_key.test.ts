@@ -13,9 +13,7 @@ import { getMetricKey, createMetricFieldsMap } from './get_metric_key';
 
 describe('getMetricKey', () => {
   it('should generate key in format dataViewIndex::metricName', () => {
-    expect(getMetricKey('metrics-*', 'system.cpu.user.pct')).toBe(
-      'metrics-*::system.cpu.user.pct'
-    );
+    expect(getMetricKey('metrics-*', 'system.cpu.user.pct')).toBe('metrics-*::system.cpu.user.pct');
   });
 
   it('should handle special characters in names', () => {
