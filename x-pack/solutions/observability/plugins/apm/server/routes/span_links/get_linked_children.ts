@@ -98,7 +98,7 @@ async function fetchLinkedChildrenOfSpan({
       ? Array.isArray(source?.span?.links)
         ? source.span.links
         : [source.span.links]
-      : [];
+      : undefined;
     return {
       ...event,
       [SPAN_LINKS]:
