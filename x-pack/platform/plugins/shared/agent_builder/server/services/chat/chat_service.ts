@@ -15,7 +15,6 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import {
   type ChatEvent,
-  ConversationRoundStatus,
   type ConverseInput,
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
@@ -100,22 +99,6 @@ class ChatServiceImpl implements ChatService {
         });
 
         span?.setAttribute('elastic.connector.id', services.selectedConnectorId);
-
-        // if resend, update conversation with empty response in last round
-        if (resend && conversationId) {
-          const conversation = await services.conversationClient.get(conversationId);
-          const lastRound = conversation.rounds[conversation.rounds.length - 1];
-          lastRound.status = ConversationRoundStatus.inProgress;
-          lastRound.response = {
-            message: '',
-          };
-          conversation.rounds[conversation.rounds.length - 1] = lastRound;
-          await services.conversationClient.update({
-            id: conversationId,
-            rounds: conversation.rounds,
-          });
-        }
-
         // Get conversation and determine operation (CREATE, UPDATE, or RESEND)
         const conversation = await getConversation({
           agentId,
@@ -161,6 +144,10 @@ class ChatServiceImpl implements ChatService {
               ? getLastRoundInput(context.conversation)
               : nextInput;
 
+          const effectiveConversation = isResendOperation
+            ? { ...context.conversation, rounds: context.conversation.rounds.slice(0, -1) }
+            : context.conversation;
+
           // Execute agent
           const agentEvents$ = executeAgent$({
             agentId,
@@ -170,7 +157,7 @@ class ChatServiceImpl implements ChatService {
             structuredOutput,
             outputSchema,
             abortSignal,
-            conversation: context.conversation,
+            conversation: effectiveConversation,
             defaultConnectorId: context.selectedConnectorId,
             agentService: this.dependencies.agentService,
             browserApiTools,
