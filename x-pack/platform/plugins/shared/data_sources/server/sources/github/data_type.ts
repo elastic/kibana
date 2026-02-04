@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { MCPAuthType } from '@kbn/connector-schemas/mcp';
 import type { DataSource } from '@kbn/data-catalog-plugin';
 import { EARSSupportedOAuthProvider } from '@kbn/data-catalog-plugin';
-import { generateGithubSearchWorkflow } from './workflows';
 
 export const githubDataSource: DataSource = {
   id: 'github',
@@ -62,12 +61,7 @@ export const githubDataSource: DataSource = {
     ],
   },
 
-  generateWorkflows(stackConnectorId: string) {
-    return [
-      {
-        content: generateGithubSearchWorkflow(stackConnectorId),
-        shouldGenerateABTool: false,
-      },
-    ];
+  workflows: {
+    directory: __dirname + '/workflows',
   },
 };

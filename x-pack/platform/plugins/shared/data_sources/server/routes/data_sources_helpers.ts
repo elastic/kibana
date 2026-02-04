@@ -20,6 +20,7 @@ import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yam
 import { getNamedMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/tool_types/mcp/tool_type';
 import type { ToolRegistry } from '@kbn/agent-builder-plugin/server/services/tools';
 import { bulkCreateMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/utils';
+import { loadWorkflows } from '@kbn/data-catalog-plugin/common/workflow_loader';
 import { createStackConnector } from '../utils/create_stack_connector';
 import type {
   DataSourcesServerSetupDependencies,
@@ -172,12 +173,22 @@ export async function createDataSourceAndRelatedResources(
 
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
-  const workflowInfos = dataSource.generateWorkflows(finalStackConnectorId);
+  // const workflowInfos = dataSource.generateWorkflows(finalStackConnectorId);
+
+  // Merge stackConnectorId into workflows' templateInputs
+  const templateInputs = {
+    ...dataSource.workflows.templateInputs,
+    stackConnectorId: finalStackConnectorId,
+  };
+  const workflowInfos = await loadWorkflows({
+    directory: dataSource.workflows.directory,
+    templateInputs,
+  });
 
   logger.info(`Creating workflows and tools for data source '${name}'`);
 
   for (const workflowInfo of workflowInfos) {
-    // Extract original workflow name from YAML and prefix it with the data source name
+    // Extract the original workflow name from YAML and prefix it with the data source name
     const nameMatch = workflowInfo.content.match(/^name:\s*['"]?([^'"\n]+)['"]?/m);
     const originalName = nameMatch?.[1]?.trim() ?? 'workflow';
     const prefixedName = `${slugify(name)}.${originalName}`;
