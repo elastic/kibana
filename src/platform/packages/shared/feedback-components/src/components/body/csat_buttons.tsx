@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const options = Array.from({ length: 5 }, (_, i) => ({
   id: `${i + 1}`,
@@ -48,12 +49,15 @@ export const CsatButtons = ({
 
   return (
     <EuiFormRow
-      label={i18n.translate('feedback.body.csatButtons.titleText', {
-        defaultMessage: 'How satisfied are you with {appTitle}?',
-        values: {
-          appTitle,
-        },
-      })}
+      label={
+        <EuiText size="s">
+          <FormattedMessage
+            id="feedback.body.csatButtons.titleText"
+            defaultMessage="How satisfied are you with {appTitle}?"
+            values={{ appTitle }}
+          />
+        </EuiText>
+      }
     >
       <>
         <EuiButtonGroup

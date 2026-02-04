@@ -13,17 +13,11 @@ import { EmailInput } from './email_input';
 import { EmailConsentCheck } from './email_consent_check';
 
 export interface EmailSectionProps {
-  /** Current email value */
   email: string;
-  /** Whether the user allows email contact */
   allowEmailContact: boolean;
-  /** Callback when email contact consent changes */
   handleChangeAllowEmailContact: (allow: boolean) => void;
-  /** Callback when email value changes */
   handleChangeEmail: (email: string) => void;
-  /** Callback when email validation status changes */
   onEmailValidationChange: (isValid: boolean) => void;
-  /** Function to fetch current user email for pre-filling the input */
   getCurrentUserEmail: () => Promise<string | undefined>;
 }
 

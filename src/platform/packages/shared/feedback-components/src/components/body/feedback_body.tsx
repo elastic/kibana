@@ -18,29 +18,17 @@ import { SessionInfoDisclaimer } from './session_info_disclaimer';
 import { CsatButtons } from './csat_buttons';
 
 export interface FeedbackBodyProps {
-  /** Currently selected CSAT option ID */
   selectedCsatOptionId: string;
-  /** Answers to custom questions, keyed by question ID */
   questionAnswers: Record<string, string>;
-  /** Whether the user allows email contact */
   allowEmailContact: boolean;
-  /** Current email value */
   email: string;
-  /** Custom feedback questions to display */
   questions: FeedbackRegistryEntry[];
-  /** Title of the current app, used in CSAT prompt */
   appTitle: string;
-  /** Callback when CSAT option is selected */
   handleChangeCsatOptionId: (optionId: string) => void;
-  /** Callback when a question answer changes */
   handleChangeQuestionAnswer: (questionId: string, answer: string) => void;
-  /** Callback when email contact consent changes */
   handleChangeAllowEmailContact: (allow: boolean) => void;
-  /** Callback when email value changes */
   handleChangeEmail: (email: string) => void;
-  /** Callback when email validation status changes */
   onEmailValidationChange: (isValid: boolean) => void;
-  /** Function to fetch current user email for pre-filling the input */
   getCurrentUserEmail: () => Promise<string | undefined>;
 }
 

@@ -1,3 +1,3 @@
 # @kbn/feedback-components
 
-Feedback related components.
+Feedback form components.

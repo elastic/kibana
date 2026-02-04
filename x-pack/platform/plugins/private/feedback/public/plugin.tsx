@@ -10,6 +10,8 @@ import ReactDOM from 'react-dom';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
 import { getFeedbackQuestionsForApp } from '@kbn/feedback-registry';
 import { getAppDetails } from './src/utils';
 
@@ -18,8 +20,9 @@ interface FeedbackPluginSetupDependencies {
 }
 
 interface FeedbackPluginStartDependencies {
-  cloud?: CloudStart;
   telemetry: TelemetryPluginStart;
+  cloud?: CloudStart;
+  spaces?: SpacesPluginStart;
 }
 
 export class FeedbackPlugin implements Plugin {
@@ -30,7 +33,7 @@ export class FeedbackPlugin implements Plugin {
     return {};
   }
 
-  public start(core: CoreStart, { cloud, telemetry }: FeedbackPluginStartDependencies) {
+  public start(core: CoreStart, { cloud, telemetry, spaces }: FeedbackPluginStartDependencies) {
     const isFeedbackEnabled = core.notifications.feedback.isEnabled();
     const isTelemetryEnabled = telemetry.telemetryService.canSendTelemetry();
     const isOptedIn = telemetry.telemetryService.getIsOptedIn();
@@ -39,16 +42,18 @@ export class FeedbackPlugin implements Plugin {
       return {};
     }
 
-    const organizationId = this.organizationId;
-    const serverlessProjectType = cloud?.serverless?.projectType;
-
     core.chrome.navControls.registerRight({
       order: 1001,
       mount: (element) => {
         import('@kbn/feedback-components/src/components/feedback_trigger_button').then(
           ({ FeedbackTriggerButton }) => {
-            const appDetails = getAppDetails(core);
-            const questions = getFeedbackQuestionsForApp(appDetails.id);
+            const getAppDetailsWrapper = () => {
+              return getAppDetails(core);
+            };
+
+            const getQuestions = (appId: string): FeedbackRegistryEntry[] => {
+              return getFeedbackQuestionsForApp(appId);
+            };
 
             const getCurrentUserEmail = async (): Promise<string | undefined> => {
               if (!core.security) {
@@ -68,12 +73,13 @@ export class FeedbackPlugin implements Plugin {
               });
             };
 
-            const showSuccessToast = (title: string) => {
-              core.notifications.toasts.addSuccess({ title });
-            };
-
-            const showErrorToast = (title: string) => {
-              core.notifications.toasts.addDanger({ title });
+            const showToast = (title: string, color: 'success' | 'error') => {
+              if (color === 'success') {
+                core.notifications.toasts.addSuccess({ title });
+              }
+              if (color === 'error') {
+                core.notifications.toasts.addDanger({ title });
+              }
             };
 
             const checkTelemetryOptIn = async (): Promise<boolean> => {
@@ -88,18 +94,25 @@ export class FeedbackPlugin implements Plugin {
               }
             };
 
+            const getSolution = async (): Promise<string> => {
+              try {
+                const space = await spaces?.getActiveSpace();
+                return space?.solution || cloud?.serverless?.projectType || 'classic';
+              } catch {
+                return cloud?.serverless?.projectType || 'classic';
+              }
+            };
+
             ReactDOM.render(
               core.rendering.addContext(
                 <FeedbackTriggerButton
-                  appDetails={appDetails}
-                  questions={questions}
-                  activeSolutionNavId$={core.chrome.getActiveSolutionNavId$()}
-                  serverlessProjectType={serverlessProjectType}
-                  organizationId={organizationId}
+                  organizationId={this.organizationId}
+                  getQuestions={getQuestions}
+                  getAppDetails={getAppDetailsWrapper}
+                  getSolution={getSolution}
                   getCurrentUserEmail={getCurrentUserEmail}
                   sendFeedback={sendFeedback}
-                  showSuccessToast={showSuccessToast}
-                  showErrorToast={showErrorToast}
+                  showToast={showToast}
                   checkTelemetryOptIn={checkTelemetryOptIn}
                 />
               ),

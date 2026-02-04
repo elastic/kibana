@@ -8,7 +8,6 @@
  */
 
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import type { Observable } from 'rxjs';
 import { EuiHeaderSectionItemButton, EuiIcon, EuiToolTip, EuiModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
@@ -17,35 +16,25 @@ const LazyFeedbackContainer = lazy(() =>
   import('./feedback_container').then((m) => ({ default: m.FeedbackContainer }))
 );
 
-interface AppDetails {
-  title: string;
-  id: string;
-  url: string;
-}
-
 interface Props {
-  appDetails: AppDetails;
-  questions: FeedbackRegistryEntry[];
-  activeSolutionNavId$: Observable<string | null>;
-  serverlessProjectType?: string;
   organizationId?: string;
+  getQuestions: (appId: string) => FeedbackRegistryEntry[];
+  getAppDetails: () => { title: string; id: string; url: string };
+  getSolution: () => Promise<string>;
   getCurrentUserEmail: () => Promise<string | undefined>;
   sendFeedback: (data: Record<string, unknown>) => Promise<void>;
-  showSuccessToast: (title: string) => void;
-  showErrorToast: (title: string) => void;
+  showToast: (title: string, type: 'success' | 'error') => void;
   checkTelemetryOptIn: () => Promise<boolean>;
 }
 
 export const FeedbackTriggerButton = ({
-  appDetails,
-  questions,
-  activeSolutionNavId$,
-  serverlessProjectType,
   organizationId,
+  getQuestions,
+  getAppDetails,
+  getSolution,
   getCurrentUserEmail,
   sendFeedback,
-  showSuccessToast,
-  showErrorToast,
+  showToast,
   checkTelemetryOptIn,
 }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -102,22 +91,19 @@ export const FeedbackTriggerButton = ({
       {isModalOpen && (
         <EuiModal
           onClose={handleHideFeedbackContainer}
-          outsideClickCloses={true}
           aria-label={i18n.translate('feedback.modal.ariaLabel', {
             defaultMessage: 'Feedback form',
           })}
         >
           <Suspense fallback={null}>
             <LazyFeedbackContainer
-              appDetails={appDetails}
-              questions={questions}
-              activeSolutionNavId$={activeSolutionNavId$}
-              serverlessProjectType={serverlessProjectType}
+              getAppDetails={getAppDetails}
+              getQuestions={getQuestions}
+              getSolution={getSolution}
               organizationId={organizationId}
               getCurrentUserEmail={getCurrentUserEmail}
               sendFeedback={sendFeedback}
-              showSuccessToast={showSuccessToast}
-              showErrorToast={showErrorToast}
+              showToast={showToast}
               hideFeedbackContainer={handleHideFeedbackContainer}
             />
           </Suspense>

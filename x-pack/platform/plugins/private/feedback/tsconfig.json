@@ -10,6 +10,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/cloud-plugin",
+    "@kbn/spaces-plugin",
     "@kbn/telemetry-plugin",
     "@kbn/config-schema",
     "@kbn/feedback-registry",

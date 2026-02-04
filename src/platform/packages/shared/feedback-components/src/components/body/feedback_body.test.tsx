@@ -11,7 +11,6 @@ import React from 'react';
 import { screen, act, fireEvent } from '@testing-library/react';
 import { FeedbackBody } from './feedback_body';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { getFeedbackQuestionsForApp } from '@kbn/feedback-registry';
 
 const mockGetCurrentUserEmail = jest.fn().mockResolvedValue(undefined);
 
@@ -23,7 +22,15 @@ const mockProps = {
   onEmailValidationChange: jest.fn(),
   getCurrentUserEmail: mockGetCurrentUserEmail,
   email: '',
-  questions: getFeedbackQuestionsForApp(),
+  questions: [
+    {
+      id: 'experience',
+      type: 'experience',
+      question: 'How would you rate your experience?',
+      order: 1,
+    },
+    { id: 'improvement', type: 'text', question: 'What can we improve?', order: 2 },
+  ],
   allowEmailContact: false,
   selectedCsatOptionId: '',
   questionAnswers: {},
@@ -47,16 +54,9 @@ describe('FeedbackBody', () => {
   });
 
   it('should render feedback text inside textarea', async () => {
-    const questions = getFeedbackQuestionsForApp();
-    const questionId = questions[0]?.id || 'test-question';
-
     await act(async () => {
       renderWithI18n(
-        <FeedbackBody
-          {...mockProps}
-          questions={questions}
-          questionAnswers={{ [questionId]: 'Test feedback' }}
-        />
+        <FeedbackBody {...mockProps} questionAnswers={{ experience: 'Test feedback' }} />
       );
     });
 
@@ -64,21 +64,18 @@ describe('FeedbackBody', () => {
 
     expect(body).toBeInTheDocument();
 
-    const feedbackTextarea = screen.getByTestId(`feedback-${questionId}-text-area`);
+    const feedbackTextarea = screen.getByTestId(`feedback-experience-text-area`);
 
     expect(feedbackTextarea).toBeInTheDocument();
     expect(feedbackTextarea).toHaveValue('Test feedback');
   });
 
   it('should call handleChangeQuestionAnswer when feedback text is changed', async () => {
-    const questions = getFeedbackQuestionsForApp();
-    const questionId = questions[0]?.id || 'test-question';
-
     await act(async () => {
-      renderWithI18n(<FeedbackBody {...mockProps} questions={questions} />);
+      renderWithI18n(<FeedbackBody {...mockProps} />);
     });
 
-    const feedbackTextarea = screen.getByTestId(`feedback-${questionId}-text-area`);
+    const feedbackTextarea = screen.getByTestId(`feedback-experience-text-area`);
 
     expect(feedbackTextarea).toBeInTheDocument();
 
@@ -86,7 +83,10 @@ describe('FeedbackBody', () => {
       target: { value: 'Test feedback' },
     });
 
-    expect(mockProps.handleChangeQuestionAnswer).toHaveBeenCalledWith(questionId, 'Test feedback');
+    expect(mockProps.handleChangeQuestionAnswer).toHaveBeenCalledWith(
+      'experience',
+      'Test feedback'
+    );
     expect(mockProps.handleChangeQuestionAnswer).toHaveBeenCalledTimes(1);
   });
 

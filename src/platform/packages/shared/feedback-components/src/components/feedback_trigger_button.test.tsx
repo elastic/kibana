@@ -12,24 +12,26 @@ import { screen, waitFor } from '@testing-library/react';
 import { FeedbackTriggerButton } from './feedback_trigger_button';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import userEvent from '@testing-library/user-event';
-import { BehaviorSubject } from 'rxjs';
 
 jest.mock('./feedback_container', () => ({
   FeedbackContainer: () => <div data-test-subj="feedbackContainer">Feedback Container</div>,
 }));
 
-const createMockProps = (
-  overrides: Partial<React.ComponentProps<typeof FeedbackTriggerButton>> = {}
-) => ({
-  appDetails: { title: 'Test App', id: 'test-app', url: '/app/test-app' },
-  questions: [],
-  activeSolutionNavId$: new BehaviorSubject<string | null>(null),
-  getCurrentUserEmail: jest.fn().mockResolvedValue('test@elastic.co'),
+const createMockProps = ({
+  isTelemetryGlobalSettingEnabled,
+}: {
+  isTelemetryGlobalSettingEnabled: boolean;
+}) => ({
+  organizationId: 'org123',
+  getQuestions: jest.fn().mockReturnValue([]),
+  getAppDetails: jest
+    .fn()
+    .mockReturnValue({ title: 'Test App', id: 'testApp', url: 'http://testapp.com' }),
+  getCurrentUserEmail: jest.fn().mockResolvedValue('capybara@elastic.co'),
   sendFeedback: jest.fn().mockResolvedValue(undefined),
-  showSuccessToast: jest.fn(),
-  showErrorToast: jest.fn(),
-  checkTelemetryOptIn: jest.fn().mockResolvedValue(true),
-  ...overrides,
+  showToast: jest.fn(),
+  getSolution: jest.fn().mockResolvedValue('oblt'),
+  checkTelemetryOptIn: jest.fn().mockResolvedValue(isTelemetryGlobalSettingEnabled),
 });
 
 describe('FeedbackButton', () => {
@@ -38,7 +40,7 @@ describe('FeedbackButton', () => {
   });
 
   it('should render feedback trigger button when opted in', async () => {
-    const mockProps = createMockProps({ checkTelemetryOptIn: jest.fn().mockResolvedValue(true) });
+    const mockProps = createMockProps({ isTelemetryGlobalSettingEnabled: true });
     renderWithI18n(<FeedbackTriggerButton {...mockProps} />);
 
     await waitFor(() => {
@@ -49,7 +51,7 @@ describe('FeedbackButton', () => {
   });
 
   it('should render disabled button when not opted in', async () => {
-    const mockProps = createMockProps({ checkTelemetryOptIn: jest.fn().mockResolvedValue(false) });
+    const mockProps = createMockProps({ isTelemetryGlobalSettingEnabled: false });
     renderWithI18n(<FeedbackTriggerButton {...mockProps} />);
 
     await waitFor(() => {
@@ -60,7 +62,7 @@ describe('FeedbackButton', () => {
   });
 
   it('should open feedback container when clicked', async () => {
-    const mockProps = createMockProps({ checkTelemetryOptIn: jest.fn().mockResolvedValue(true) });
+    const mockProps = createMockProps({ isTelemetryGlobalSettingEnabled: true });
     renderWithI18n(<FeedbackTriggerButton {...mockProps} />);
 
     await waitFor(() => {

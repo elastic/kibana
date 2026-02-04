@@ -11,25 +11,27 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import userEvent from '@testing-library/user-event';
-import { BehaviorSubject } from 'rxjs';
-import { getFeedbackQuestionsForApp } from '@kbn/feedback-registry';
 import { FeedbackContainer } from './feedback_container';
 
 const mockProps = {
-  appDetails: {
-    title: 'Test App',
-    id: 'test-app',
-    url: '/app/test',
-  },
-  questions: getFeedbackQuestionsForApp('test-app'),
-  activeSolutionNavId$: new BehaviorSubject<string | null>(null),
-  serverlessProjectType: undefined,
   organizationId: 'test-org-id',
+  getQuestions: jest.fn().mockReturnValue([
+    {
+      id: 'experience',
+      type: 'experience',
+      question: 'How would you rate your experience?',
+      order: 1,
+    },
+    { id: 'improvement', type: 'text', question: 'What can we improve?', order: 2 },
+  ]),
+  getAppDetails: jest
+    .fn()
+    .mockReturnValue({ title: 'Test App', id: 'test-app', url: 'http://testapp.com' }),
   getCurrentUserEmail: jest.fn().mockResolvedValue(undefined),
   sendFeedback: jest.fn().mockResolvedValue(undefined),
-  showSuccessToast: jest.fn(),
-  showErrorToast: jest.fn(),
+  showToast: jest.fn(),
   hideFeedbackContainer: jest.fn(),
+  getSolution: jest.fn().mockResolvedValue('oblt'),
 };
 
 describe('FeedbackContainer', () => {
@@ -119,8 +121,9 @@ describe('FeedbackContainer', () => {
     await userEvent.click(sendButton);
 
     await waitFor(() => {
-      expect(mockProps.showSuccessToast).toHaveBeenCalledWith(
-        expect.stringContaining('Thanks for your feedback')
+      expect(mockProps.showToast).toHaveBeenCalledWith(
+        expect.stringContaining('Thanks for your feedback'),
+        'success'
       );
       expect(mockProps.hideFeedbackContainer).toHaveBeenCalledTimes(1);
     });

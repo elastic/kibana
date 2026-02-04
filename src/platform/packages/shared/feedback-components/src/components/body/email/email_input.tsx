@@ -14,13 +14,9 @@ import { parseOneAddress } from 'email-addresses';
 import { i18n } from '@kbn/i18n';
 
 export interface EmailInputProps {
-  /** Current email value */
   email: string;
-  /** Callback when email value changes */
   handleChangeEmail: (email: string) => void;
-  /** Callback when email validation status changes */
   onValidationChange: (isValid: boolean) => void;
-  /** Function to fetch current user email for pre-filling the input */
   getCurrentUserEmail: () => Promise<string | undefined>;
 }
 

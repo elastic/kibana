@@ -8,55 +8,33 @@
  */
 
 import React, { useState } from 'react';
-import type { Observable } from 'rxjs';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import useObservable from 'react-use/lib/useObservable';
 import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
 import { FeedbackHeader } from './header';
 import { FeedbackBody } from './body/feedback_body';
 import { FeedbackFooter } from './footer/feedback_footer';
 
-interface AppDetails {
-  title: string;
-  id: string;
-  url: string;
-}
-
 interface Props {
-  /** App details (title, id, url) */
-  appDetails: AppDetails;
-  /** Feedback questions for this app */
-  questions: FeedbackRegistryEntry[];
-  /** Observable for active solution nav ID */
-  activeSolutionNavId$: Observable<string | null>;
-  /** Serverless project type if in serverless mode */
-  serverlessProjectType?: string;
-  /** Organization ID */
   organizationId?: string;
-  /** Function to fetch current user's email */
+  getQuestions: (appId: string) => FeedbackRegistryEntry[];
+  getAppDetails: () => { title: string; id: string; url: string };
+  getSolution: () => Promise<string>;
   getCurrentUserEmail: () => Promise<string | undefined>;
-  /** Function to send feedback to the server */
   sendFeedback: (data: Record<string, unknown>) => Promise<void>;
-  /** Function to show a success toast */
-  showSuccessToast: (title: string) => void;
-  /** Function to show an error toast */
-  showErrorToast: (title: string) => void;
-  /** Callback to hide the feedback container */
+  showToast: (title: string, type: 'success' | 'error') => void;
   hideFeedbackContainer: () => void;
 }
 
 export const FeedbackContainer = ({
-  appDetails,
-  questions,
-  activeSolutionNavId$,
-  serverlessProjectType,
   organizationId,
+  getQuestions,
+  getAppDetails,
+  getSolution,
   getCurrentUserEmail,
   sendFeedback,
-  showSuccessToast,
-  showErrorToast,
+  showToast,
   hideFeedbackContainer,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
@@ -67,9 +45,8 @@ export const FeedbackContainer = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(true);
 
-  const solutionView = useObservable(activeSolutionNavId$);
-
-  const { title: appTitle, id: appId, url: appUrl } = appDetails;
+  const { title: appTitle, id: appId, url: appUrl } = getAppDetails();
+  const questions = getQuestions(appId);
 
   const isFormFilled =
     selectedCsatOptionId ||
@@ -102,19 +79,17 @@ export const FeedbackContainer = ({
     setIsEmailValid(isValid);
   };
 
-  const getSolutionType = () => {
-    return serverlessProjectType || solutionView || 'classic';
-  };
-
   const submitFeedback = async () => {
     try {
       setIsSubmitting(true);
+
+      const solution = await getSolution();
 
       const eventData = {
         app_id: appId,
         user_email: allowEmailContact && email ? email : undefined,
         allow_email_contact: allowEmailContact,
-        solution: getSolutionType(),
+        solution,
         organization_id: organizationId,
         csat_score: Number(selectedCsatOptionId) || undefined,
         questions: questions.map((question) => ({
@@ -129,18 +104,20 @@ export const FeedbackContainer = ({
 
       setIsSubmitting(false);
 
-      showSuccessToast(
+      showToast(
         i18n.translate('feedback.submissionSuccessToast.title', {
           defaultMessage: 'Thanks for your feedback!',
-        })
+        }),
+        'success'
       );
 
       hideFeedbackContainer();
     } catch (_error) {
-      showErrorToast(
+      showToast(
         i18n.translate('feedback.submissionFailureToast.title', {
           defaultMessage: 'Failed to submit feedback. Please try again later.',
-        })
+        }),
+        'error'
       );
     } finally {
       setIsSubmitting(false);
