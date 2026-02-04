@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
 import type { OnPreResponseHandler } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-types';
+import type { Observable } from 'rxjs';
 
 export function createOnPreResponseHandler(
   refresh: () => Promise<ILicense>,
   license$: Observable<ILicense>
 ): OnPreResponseHandler {
+  let license: undefined | ILicense;
+  license$.subscribe({ next: (l) => (license = l) });
   return async (req, res, t) => {
     // If we're returning an error response, refresh license info from
     // Elasticsearch in case the error is due to a change in license information
@@ -22,9 +23,18 @@ export function createOnPreResponseHandler(
     // that back-pressure should be applied, and we don't need to refresh the license in these
     // situations.
     if (res.statusCode >= 400 && res.statusCode !== 429) {
-      await refresh();
+      // refresh() should never reject, unless we are shutting down the server before the license is fetched the first time.
+      void refresh();
     }
-    const license = await firstValueFrom(license$);
+
+    if (!license) {
+      return t.next({
+        headers: {
+          'kbn-license-sig': 'unknown',
+        },
+      });
+    }
+
     return t.next({
       headers: {
         'kbn-license-sig': license.signature,

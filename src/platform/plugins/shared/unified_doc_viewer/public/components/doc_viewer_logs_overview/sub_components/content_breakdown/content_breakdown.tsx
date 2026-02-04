@@ -36,7 +36,7 @@ export const ContentBreakdown = ({
   hit: DataTableRecord;
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
 }) => {
-  const { field, value, formattedValue } = getMessageFieldWithFallbacks(formattedDoc, {
+  const { field, value, formattedValue } = getMessageFieldWithFallbacks(hit.flattened, {
     includeFormattedValue: true,
   });
 

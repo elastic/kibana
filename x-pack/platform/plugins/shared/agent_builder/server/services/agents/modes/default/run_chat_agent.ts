@@ -17,10 +17,13 @@ import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/ag
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import type { StructuredTool } from '@langchain/core/tools';
+import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
+import type { PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
+import { createResultTransformer } from '../utils/create_result_transformer';
+import { FILESTORE_ENABLED } from '../../../runner/store';
 import {
   addRoundCompleteEvent,
-  conversationToLangchainMessages,
   extractRound,
   prepareConversation,
   selectTools,
@@ -36,6 +39,7 @@ import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 import { steps } from './constants';
+import { createPromptFactory } from './prompts';
 import type { StateType } from './state';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
@@ -66,15 +70,32 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     structuredOutput = false,
     outputSchema,
     startTime = new Date(),
+    configurationOverrides,
   },
   context
 ) => {
-  const { logger, modelProvider, toolProvider, attachments, request, stateManager, events } =
-    context;
+  const {
+    logger,
+    modelProvider,
+    toolProvider,
+    toolRegistry,
+    attachments,
+    request,
+    stateManager,
+    events,
+    promptManager,
+    filestore,
+  } = context;
 
   ensureValidInput({ input: nextInput, conversation });
 
   const pendingRound = getPendingRound(conversation);
+  const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
+
+  // Only clear access tracking for a brand new round; keep it when resuming (HITL).
+  if (!pendingRound) {
+    context.attachmentStateManager.clearAccessTracking();
+  }
 
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -85,12 +106,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventEmitter: AgentEventEmitterFn = (event) => {
     manualEvents$.next(event);
   };
-
   const processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     context,
-    conversationAttachments: conversation?.attachments,
   });
 
   const selectedTools = await selectTools({
@@ -98,7 +117,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     toolProvider,
     agentConfiguration,
     attachmentsService: attachments,
+    filestore,
     request,
+    spaceId: context.spaceId,
     runner: context.runner,
   });
 
@@ -129,6 +150,23 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const cycleLimit = 10;
   const graphRecursionLimit = getRecursionLimit(cycleLimit);
 
+  // Create unified result transformer for tool result optimization
+  const resultTransformer = createResultTransformer({
+    toolRegistry,
+    filestore,
+    filestoreEnabled: FILESTORE_ENABLED,
+  });
+
+  const promptFactory = createPromptFactory({
+    configuration: resolvedConfiguration,
+    capabilities: resolvedCapabilities,
+    filestore,
+    processedConversation,
+    resultTransformer,
+    outputSchema,
+    conversationTimestamp,
+  });
+
   const agentGraph = createAgentGraph({
     logger,
     events: { emit: eventEmitter },
@@ -139,6 +177,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     structuredOutput,
     outputSchema,
     processedConversation,
+    promptFactory,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -179,13 +218,19 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
   };
 
+  // Use provided overrides, or fall back to pending round's overrides (for HITL resume)
+  const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;
+
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
+      getConversationState: () => getConversationState({ promptManager }),
       pendingRound,
       startTime,
       modelProvider,
       stateManager,
+      attachmentStateManager: context.attachmentStateManager,
+      configurationOverrides: effectiveOverrides,
     }),
     evictInternalEvents(),
     shareReplay()
@@ -205,6 +250,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   };
 };
 
+const getConversationState = ({
+  promptManager,
+}: {
+  promptManager: PromptManager;
+}): ConversationInternalState => {
+  return {
+    prompt: promptManager.dump(),
+  };
+};
+
 const createInitializerCommand = ({
   conversation,
   cycleLimit,
@@ -214,11 +269,7 @@ const createInitializerCommand = ({
   cycleLimit: number;
   agentBuilderToLangchainIdMap: ToolIdMapping;
 }): Command => {
-  const initialMessages = conversationToLangchainMessages({
-    conversation,
-  });
-
-  const initialState: Partial<StateType> = { initialMessages, cycleLimit };
+  const initialState: Partial<StateType> = { cycleLimit };
   let startAt = steps.init;
 
   const lastRound = conversation.previousRounds.length

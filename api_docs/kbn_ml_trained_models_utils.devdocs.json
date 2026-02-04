@@ -32,6 +32,8 @@
           ") => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 334,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "InferenceServiceSettings"
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 335,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -64,6 +68,8 @@
         "label": "GetModelDownloadConfigOptions",
         "description": [],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 222,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,6 +91,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 223,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -99,6 +107,8 @@
         "label": "ModelDefinition",
         "description": [],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 172,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -115,6 +125,8 @@
               "\"elser\" | \"e5\" | \"rerank\""
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 173,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -126,6 +138,8 @@
             "label": "version",
             "description": [],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 177,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -142,6 +156,8 @@
               "object"
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 178,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -153,6 +169,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -167,6 +185,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 183,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -181,6 +201,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 184,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -195,6 +217,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 185,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -211,6 +235,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 186,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -224,6 +250,8 @@
               "Indicates if model version is supported by the cluster"
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -238,6 +266,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 190,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -254,6 +284,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 191,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -270,6 +302,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 193,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -284,6 +318,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 195,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -298,6 +334,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 196,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -314,6 +352,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "lineNumber": 197,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -334,6 +374,8 @@
           "\"prepackaged\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -346,6 +388,8 @@
         "label": "BUILT_IN_MODEL_TYPE",
         "description": [],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 52,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -361,6 +405,8 @@
           "\"started\" | \"stopping\" | \"starting\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -376,6 +422,8 @@
           "\".multilingual-e5-small_linux-x86_64\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -391,6 +439,8 @@
           "\".multilingual-e5-small\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -406,6 +456,8 @@
           "\"elastic\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -421,6 +473,8 @@
           "\"elastic\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 57,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -436,6 +490,8 @@
           "\"elser\" | \"e5\" | \"rerank\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 170,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -451,6 +507,8 @@
           "string"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 208,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -466,6 +524,8 @@
           "\".elser_model_1\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -481,6 +541,8 @@
           "\".elser_model_2_linux-x86_64\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -496,6 +558,8 @@
           "\".elser_model_2\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -511,6 +575,8 @@
           "string[]"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -526,6 +592,8 @@
           "2 | 1"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 220,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -543,6 +611,8 @@
           "InferenceServiceSettings"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 332,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -558,6 +628,8 @@
           "\"lang_ident_model_1\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -573,6 +645,8 @@
           "\".multilingual-e5-small_linux-x86_64\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -588,6 +662,8 @@
           "\".elser_model_2_linux-x86_64\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -603,6 +679,8 @@
           "2 | 1"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -625,6 +703,8 @@
           " & { model_id: string; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 201,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -640,6 +720,8 @@
           "\"started\" | \"stopping\" | \"starting\" | \"downloading\" | \"downloaded\" | \"notDownloaded\" | \"downloadedInDifferentSpace\" | null"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 218,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -655,6 +737,8 @@
           "\"text_expansion\" | \"text_embedding\" | \"ner\" | \"question_answering\" | \"zero_shot_classification\" | \"text_classification\" | \"fill_mask\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -670,6 +754,8 @@
           "\"pytorch\" | \"tree_ensemble\" | \"lang_ident\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -687,6 +773,8 @@
           "{ readonly STARTED: \"started\"; readonly STARTING: \"starting\"; readonly STOPPING: \"stopping\"; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -710,6 +798,8 @@
           ", \"supported\">; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -725,6 +815,8 @@
           "{ readonly DOWNLOADING: \"downloading\"; readonly DOWNLOADED: \"downloaded\"; readonly NOT_DOWNLOADED: \"notDownloaded\"; readonly DOWNLOADED_IN_DIFFERENT_SPACE: \"downloadedInDifferentSpace\"; readonly STARTED: \"started\"; readonly STARTING: \"starting\"; readonly STOPPING: \"stopping\"; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 210,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -740,6 +832,8 @@
           "{ readonly NER: \"ner\"; readonly QUESTION_ANSWERING: \"question_answering\"; readonly ZERO_SHOT_CLASSIFICATION: \"zero_shot_classification\"; readonly TEXT_CLASSIFICATION: \"text_classification\"; readonly TEXT_EMBEDDING: \"text_embedding\"; readonly FILL_MASK: \"fill_mask\"; readonly TEXT_EXPANSION: \"text_expansion\"; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -755,6 +849,8 @@
           "{ readonly PYTORCH: \"pytorch\"; readonly TREE_ENSEMBLE: \"tree_ensemble\"; readonly LANG_IDENT: \"lang_ident\"; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

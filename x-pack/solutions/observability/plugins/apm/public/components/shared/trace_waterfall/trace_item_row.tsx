@@ -146,6 +146,8 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
                 left={leftPercent}
                 color={displayedColor}
                 segments={segments}
+                duration={item.duration}
+                composite={item.composite}
               />
               <BarDetails item={item} left={leftPercent} />
             </div>
@@ -168,6 +170,13 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
         paddingSize="none"
         forceState={state}
         arrowDisplay="none"
+        arrowProps={{
+          // EUI forces arrow display when buttonElement="div" for accessibility.
+          // Hide it since we use custom ToggleAccordionButton with role="button" and tabIndex.
+          css: css`
+            display: none;
+          `,
+        }}
         buttonContentClassName="accordion__buttonContent"
         css={css`
           .accordion__buttonContent {

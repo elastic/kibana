@@ -17,10 +17,13 @@ import { mobileServices } from '../fixtures/synthtrace/mobile_services';
 import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
 
+globalSetupHook.setTimeout(2 * 60 * 1000); // 2 minutes
+
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: ['@ess', '@svlOblt'] },
   async ({ apmSynthtraceEsClient, apiServices, log, config, esClient }) => {
+    const startTime = Date.now();
     if (!config.isCloud) {
       await apiServices.fleet.internal.setup();
       log.info('Fleet infrastructure setup completed');
@@ -83,5 +86,6 @@ globalSetupHook(
       await esClient.ml.deleteJob({ job_id: job.job_id, force: true });
       log.info(`Deleted job: ${job.job_id}`);
     }
+    log.info(`APM data ingestion took ${Date.now() - startTime} ms`);
   }
 );

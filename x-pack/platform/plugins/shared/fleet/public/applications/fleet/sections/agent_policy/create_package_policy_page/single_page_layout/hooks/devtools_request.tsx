@@ -22,7 +22,6 @@ import {
 } from '../../../../../../../../common/constants';
 import type { PackageInfo, NewAgentPolicy, NewPackagePolicy } from '../../../../../types';
 import { SelectedPolicyTab } from '../../components';
-import { ExperimentalFeaturesService } from '../../../../../services';
 import { generateCreateAgentlessPolicyDevToolsRequest } from '../../../services/devtools_request';
 
 export function useDevToolsRequest({
@@ -46,11 +45,7 @@ export function useDevToolsRequest({
     if (selectedPolicyTab === SelectedPolicyTab.NEW) {
       const packagePolicyIsSystem = packagePolicy?.package?.name === FLEET_SYSTEM_PACKAGE;
 
-      if (
-        ExperimentalFeaturesService.get().useAgentlessAPIInUI &&
-        packagePolicy.supports_agentless &&
-        !packagePolicy.supports_cloud_connector
-      ) {
+      if (packagePolicy.supports_agentless) {
         return [
           generateCreateAgentlessPolicyDevToolsRequest(packagePolicy),
           i18n.translate(

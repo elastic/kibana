@@ -38,7 +38,7 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
 }) => {
   const embeddableApi = useRef<AnomalySwimLaneEmbeddableApi>();
 
-  const rawState: AnomalySwimLaneEmbeddableState = useMemo(() => {
+  const embeddableState: AnomalySwimLaneEmbeddableState = useMemo(() => {
     if (swimlaneType === 'viewBy' && viewBy) {
       return {
         jobIds,
@@ -89,7 +89,7 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
     const timeRange$ = new BehaviorSubject<TimeRange | undefined>(timeRange);
 
     return {
-      getSerializedStateForChild: () => ({ rawState }),
+      getSerializedStateForChild: () => embeddableState,
       filters$,
       setFilters: (newFilters) => {
         filters$.next(newFilters);

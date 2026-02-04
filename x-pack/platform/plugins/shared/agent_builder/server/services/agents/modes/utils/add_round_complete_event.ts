@@ -19,7 +19,10 @@ import type {
   ToolCallStep,
   ToolProgressEvent,
   ToolResultEvent,
+  RuntimeAgentConfigurationOverrides,
 } from '@kbn/agent-builder-common';
+import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   ChatEventType,
@@ -34,12 +37,16 @@ import {
   isReasoningEvent,
   isToolCallStep,
 } from '@kbn/agent-builder-common';
-import type { RoundModelUsageStats } from '@kbn/agent-builder-common/chat';
+import type {
+  ConversationInternalState,
+  RoundModelUsageStats,
+} from '@kbn/agent-builder-common/chat';
 import type {
   ConversationStateManager,
   ModelProvider,
   ModelProviderStats,
 } from '@kbn/agent-builder-server/runner';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../default/convert_graph_events';
 import { isFinalStateEvent } from '../default/events';
@@ -57,15 +64,21 @@ export const addRoundCompleteEvent = ({
   userInput,
   startTime,
   endTime,
+  getConversationState,
   modelProvider,
   stateManager,
+  attachmentStateManager,
+  configurationOverrides,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
   startTime: Date;
   modelProvider: ModelProvider;
   stateManager: ConversationStateManager;
+  getConversationState: () => ConversationInternalState;
+  attachmentStateManager: AttachmentStateManager;
   endTime?: Date;
+  configurationOverrides?: RuntimeAgentConfigurationOverrides;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -74,6 +87,7 @@ export const addRoundCompleteEvent = ({
       shared$.pipe(
         toArray(),
         map<SourceEvents[], RoundCompleteEvent>((events) => {
+          const attachmentRefs = attachmentStateManager.getAccessedRefs();
           const round = pendingRound
             ? resumeRound({
                 pendingRound,
@@ -82,6 +96,8 @@ export const addRoundCompleteEvent = ({
                 startTime,
                 endTime,
                 modelProvider,
+                attachmentRefs,
+                configurationOverrides,
               })
             : createRound({
                 events,
@@ -89,6 +105,8 @@ export const addRoundCompleteEvent = ({
                 startTime,
                 endTime,
                 modelProvider,
+                attachmentRefs,
+                configurationOverrides,
               });
 
           round.state = buildRoundState({ round, events, stateManager });
@@ -98,6 +116,8 @@ export const addRoundCompleteEvent = ({
             data: {
               round,
               resumed: pendingRound !== undefined,
+              conversation_state: getConversationState(),
+              attachments: attachmentStateManager.getAll(),
             },
           };
 
@@ -115,6 +135,8 @@ const resumeRound = ({
   startTime,
   endTime = new Date(),
   modelProvider,
+  attachmentRefs,
+  configurationOverrides,
 }: {
   pendingRound: ConversationRound;
   events: SourceEvents[];
@@ -122,6 +144,8 @@ const resumeRound = ({
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
+  attachmentRefs: AttachmentVersionRef[];
+  configurationOverrides?: RuntimeAgentConfigurationOverrides;
 }): ConversationRound => {
   // resuming / replaying tool events for the pending step
   const lastStep = pendingRound.steps[pendingRound.steps.length - 1];
@@ -147,6 +171,8 @@ const resumeRound = ({
     startTime,
     endTime,
     modelProvider,
+    attachmentRefs,
+    configurationOverrides,
   });
 
   return mergeRounds(pendingRound, followUp);
@@ -170,7 +196,7 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     status: next.status,
     pending_prompt: next.pending_prompt,
     state: undefined, // state is recomputed after the merge
-    input: previous.input,
+    input: mergeRoundInput(previous.input, next.input),
     steps: [...previous.steps, ...next.steps],
     trace_id: traceId,
     started_at: previous.started_at,
@@ -178,9 +204,40 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     time_to_last_token: previous.time_to_last_token + next.time_to_last_token,
     model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
     response: next.response,
+    configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
   };
 
   return mergedRound;
+};
+
+const mergeRoundInput = (previous: RoundInput, next: RoundInput): RoundInput => {
+  const mergedRefs = mergeAttachmentRefs(previous.attachment_refs, next.attachment_refs);
+  return {
+    ...previous,
+    ...next,
+    ...(mergedRefs ? { attachment_refs: mergedRefs } : {}),
+  };
+};
+
+const mergeAttachmentRefs = (
+  previous?: AttachmentVersionRef[],
+  next?: AttachmentVersionRef[]
+): AttachmentVersionRef[] | undefined => {
+  if (!previous?.length && !next?.length) return undefined;
+  const merged = new Map<string, AttachmentVersionRef>();
+  for (const ref of previous ?? []) {
+    merged.set(
+      `${ref.attachment_id}:${ref.version}:${ref.actor ?? ATTACHMENT_REF_ACTOR.system}`,
+      ref
+    );
+  }
+  for (const ref of next ?? []) {
+    merged.set(
+      `${ref.attachment_id}:${ref.version}:${ref.actor ?? ATTACHMENT_REF_ACTOR.system}`,
+      ref
+    );
+  }
+  return Array.from(merged.values());
 };
 
 const createRound = ({
@@ -189,12 +246,16 @@ const createRound = ({
   startTime,
   endTime = new Date(),
   modelProvider,
+  attachmentRefs,
+  configurationOverrides,
 }: {
   events: SourceEvents[];
   input: RoundInput;
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
+  attachmentRefs: AttachmentVersionRef[];
+  configurationOverrides?: RuntimeAgentConfigurationOverrides;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
@@ -244,7 +305,10 @@ const createRound = ({
       : ConversationRoundStatus.completed,
     pending_prompt: promptRequest ? promptRequest.data.prompt : undefined,
     state: undefined,
-    input,
+    input: {
+      ...input,
+      ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
+    },
     steps: stepEvents.flatMap(eventToStep),
     trace_id: getCurrentTraceId(),
     started_at: startTime.toISOString(),
@@ -257,6 +321,7 @@ const createRound = ({
           structured_output: lastMessage.structured_output,
         }
       : { message: '' },
+    configuration_overrides: configurationOverrides,
   };
 
   return round;

@@ -30,7 +30,7 @@ export const dataDriftRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  id: 'data_drift',
+  id: 'dataDriftPage',
   path: createPath(ML_PAGES.DATA_DRIFT),
   title: i18n.translate('xpack.ml.dataVisualizer.dataDrift.docTitle', {
     defaultMessage: 'Data Drift',

@@ -107,9 +107,15 @@ export interface AlertingApiService {
       ruleId: string,
       count: number,
       spaceId?: string,
-      timeoutMs?: number
+      timeoutMs?: number,
+      dateStart?: Date
     ) => Promise<void>;
-    waitForNextExecution: (ruleId: string, spaceId?: string, timeoutMs?: number) => Promise<void>;
+    waitForNextExecution: (
+      ruleId: string,
+      spaceId?: string,
+      timeoutMs?: number,
+      dateStart?: Date
+    ) => Promise<void>;
   };
   cleanup: {
     deleteAllRules: (spaceId?: string) => Promise<void>;
@@ -624,7 +630,8 @@ export const getAlertingApiHelper = (
         ruleId: string,
         count: number,
         spaceId?: string,
-        timeoutMs: number = 30000
+        timeoutMs: number = 30000,
+        dateStart: Date = new Date()
       ) => {
         return await measurePerformanceAsync(
           log,
@@ -637,7 +644,8 @@ export const getAlertingApiHelper = (
                   path: `${buildSpacePath(
                     spaceId
                   )}/internal/alerting/rule/${ruleId}/_execution_log`,
-                  retries: 1, // Lower retries for frequent polling operations
+                  retries: 1, // Lower retries for frequent polling operations,
+                  query: { date_start: dateStart.toISOString() },
                 });
                 const logData = executionLog.data as any;
                 return logData.total;

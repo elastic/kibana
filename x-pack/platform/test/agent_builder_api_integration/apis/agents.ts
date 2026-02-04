@@ -6,12 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
   const log = getService('log');
 
   describe('Agent API', () => {
@@ -93,22 +91,6 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should return 404 when agent API is disabled', async () => {
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
-        });
-
-        await supertest
-          .post('/api/agent_builder/agents')
-          .set('kbn-xsrf', 'kibana')
-          .send(mockAgent)
-          .expect(404);
-
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
-        });
-      });
-
       it('should validate tool configuration', async () => {
         const agentWithInvalidTools = {
           ...mockAgent,
@@ -174,18 +156,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain('not found');
       });
-
-      it('should return 404 when agent API is disabled', async () => {
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
-        });
-
-        await supertest.get(`/api/agent_builder/agents/get-test-agent`).expect(404);
-
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
-        });
-      });
     });
 
     describe('GET /api/agent_builder/agents', () => {
@@ -216,18 +186,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body).to.have.property('results');
         expect(response.body.results).to.be.an('array');
         expect(response.body.results.length).to.greaterThan(1);
-      });
-
-      it('should return 404 when agent API is disabled', async () => {
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
-        });
-
-        await supertest.get('/api/agent_builder/agents').expect(404);
-
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
-        });
       });
     });
 
@@ -293,22 +251,6 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ name: 'Updated name' })
           .expect(404);
       });
-
-      it('should return 404 when agent API is disabled', async () => {
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
-        });
-
-        await supertest
-          .put(`/api/agent_builder/agents/update-test-agent`)
-          .set('kbn-xsrf', 'kibana')
-          .send({ name: 'Updated Name' })
-          .expect(404);
-
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
-        });
-      });
     });
 
     describe('DELETE /api/agent_builder/agents/delete-test-agent', () => {
@@ -344,21 +286,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain('not found');
-      });
-
-      it('should return 404 when agent API is disabled', async () => {
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
-        });
-
-        await supertest
-          .delete(`/api/agent_builder/agents/delete-test-agent`)
-          .set('kbn-xsrf', 'kibana')
-          .expect(404);
-
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
-        });
       });
     });
   });

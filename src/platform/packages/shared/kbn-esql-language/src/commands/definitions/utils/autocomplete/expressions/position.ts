@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isColumn, isFunctionExpression, isLiteral } from '../../../../../ast/is';
+import { isColumn, isFunctionExpression, isInlineCast, isLiteral } from '../../../../../ast/is';
 import { within } from '../../../../../ast/location';
 import type { ESQLSingleAstItem, ESQLFunction } from '../../../../../types';
 import type { ESQLColumnData } from '../../../../registry/types';
@@ -63,6 +63,10 @@ export function getPosition(
     if (!endsWithColumnName) {
       return 'after_complete';
     }
+  }
+
+  if (isInlineCast(expressionRoot) && !expressionRoot.incomplete) {
+    return 'after_complete';
   }
 
   // Function expression (operators or variadic functions like CONCAT)

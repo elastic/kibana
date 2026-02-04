@@ -79,12 +79,18 @@ export const wizardSteps = {
       const indexPatternsComboBox = new EuiComboBoxTestHarness('indexPatternsField');
 
       // Clear existing selections first
-      indexPatternsComboBox.clear();
+      await indexPatternsComboBox.clear();
 
       // Add each pattern
       for (const pattern of indexPatterns) {
-        indexPatternsComboBox.select(pattern);
+        // Index patterns are entered as custom values (createable combo box).
+        // Use the fast custom-value path to avoid expensive async option list heuristics.
+        indexPatternsComboBox.addCustomValue(pattern);
       }
+
+      // Close the combobox popover (portal) to avoid it intercepting later clicks
+      // and scheduling late async updates that can cause test timeouts/flakes.
+      await indexPatternsComboBox.close({ timeout: 250 });
     }
 
     if (priority !== undefined) {
@@ -133,14 +139,6 @@ export const wizardSteps = {
 
     fireEvent.click(screen.getByTestId('nextButton'));
     await screen.findByTestId('stepComponents');
-
-    // Wait for component templates to finish loading
-    // The selector will show either the list or an empty prompt
-    await waitFor(() => {
-      const hasTemplatesList = screen.queryByTestId('componentTemplatesSelection') !== null;
-      const hasEmptyPrompt = screen.queryByTestId('emptyPrompt') !== null;
-      return hasTemplatesList || hasEmptyPrompt;
-    });
   },
 
   /**

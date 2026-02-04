@@ -11,6 +11,7 @@ import React from 'react';
 import type { FC } from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isMac } from '@kbn/shared-ux-utility';
 import type { Tag } from '../types';
 
 /**
@@ -27,33 +28,6 @@ export interface TagBadgeProps {
    */
   onClick?: (tag: Tag, withModifierKey: boolean) => void;
 }
-
-/**
- * Navigator with User-Agent Client Hints API support.
- * @see https://developer.mozilla.org/en-US/docs/Web/API/NavigatorUAData
- */
-interface NavigatorWithUserAgentData extends Navigator {
-  userAgentData?: { platform?: string };
-}
-
-/**
- * Platform detection IIFE - runs once at module load.
- * Note: The `typeof navigator === 'undefined'` check is defensive code for
- * non-browser environments (SSR/Node.js) where `navigator` is not available.
- * In Jest's jsdom environment `navigator` is always defined, so exercising this
- * branch would require mutating or deleting `global.navigator`, which can interfere
- * with other tests that rely on the default navigator setup.
- */
-const isMac = (() => {
-  if (typeof navigator === 'undefined') {
-    return false;
-  }
-
-  const nav = navigator as NavigatorWithUserAgentData;
-  const platform = nav.userAgentData?.platform ?? nav.platform ?? '';
-
-  return platform.toLowerCase().includes('mac');
-})();
 
 /**
  * Renders a tag as a colored EUI badge.

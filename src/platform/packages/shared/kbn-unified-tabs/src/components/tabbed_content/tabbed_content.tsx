@@ -10,7 +10,8 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { escapeRegExp, omit, debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { TabsBar, type TabsBarProps, type TabsBarApi } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import { getTabMenuItemsFn } from '../../utils/get_tab_menu_items';
@@ -24,7 +25,14 @@ import {
   closeOtherTabs,
   closeTabsToTheRight,
 } from '../../utils/manage_tabs';
-import type { TabItem, TabsServices, TabPreviewData, TabsEBTEvent } from '../../types';
+import type {
+  TabItem,
+  TabsServices,
+  TabPreviewData,
+  TabsEBTEvent,
+  RecentlyClosedTabItem,
+  TabMenuItem,
+} from '../../types';
 import { TabsEventName } from '../../types';
 import { getNextTabNumber } from '../../utils/get_next_tab_number';
 import { MAX_ITEMS_COUNT, TAB_SWITCH_DEBOUNCE_MS } from '../../constants';
@@ -43,7 +51,7 @@ export interface TabbedContentProps
   > {
   items: TabItem[];
   selectedItemId?: string;
-  recentlyClosedItems: TabItem[];
+  recentlyClosedItems: RecentlyClosedTabItem[];
   'data-test-subj'?: string;
   services: TabsServices;
   hideTabsBar?: boolean;
@@ -54,12 +62,29 @@ export interface TabbedContentProps
   getPreviewData?: (item: TabItem) => TabPreviewData;
   onEBTEvent: (event: TabsEBTEvent) => void;
   tabContentIdOverride?: string;
+  appendRight?: React.ReactNode;
+  /** Optional function to provide additional menu items for tabs */
+  getAdditionalTabMenuItems?: (item: TabItem) => TabMenuItem[];
 }
 
 export interface TabbedContentState {
   items: TabItem[];
   selectedItem: TabItem | null;
 }
+
+const VerticalRule = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <span
+      css={css`
+        width: ${euiTheme.border.width.thin};
+        height: 28px;
+        background-color: ${euiTheme.colors.borderBasePlain};
+      `}
+    />
+  );
+};
 
 export const TabbedContent: React.FC<TabbedContentProps> = ({
   items: managedItems,
@@ -81,7 +106,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   disableInlineLabelEditing = false,
   disableDragAndDrop = false,
   disableTabsBarMenu = false,
+  appendRight,
+  getAdditionalTabMenuItems,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const tabsBarApi = useRef<TabsBarApi | null>(null);
   const [generatedId] = useState(() => tabContentIdOverride ?? htmlIdGenerator()());
   const tabContentId = tabContentIdOverride ?? generatedId;
@@ -319,35 +347,83 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       onDuplicate,
       onCloseOtherTabs,
       onCloseTabsToTheRight,
+      getAdditionalTabMenuItems,
     });
-  }, [state, maxItemsCount, onDuplicate, onCloseOtherTabs, onCloseTabsToTheRight]);
+  }, [
+    state,
+    maxItemsCount,
+    onDuplicate,
+    onCloseOtherTabs,
+    onCloseTabsToTheRight,
+    getAdditionalTabMenuItems,
+  ]);
+
+  const tabsBarContainerCss = css`
+    background-color: ${euiTheme.colors.lightestShade};
+  `;
+
+  const tabsBarComponentCss = css`
+    min-width: 0; /* Fixes an issue causing TabsBar to push appendRight to overflow as number of tabs grows */
+  `;
+
+  const appendRightContainerCss = css`
+    margin-right: ${euiTheme.size.s};
+  `;
 
   const tabsBar = (
-    <TabsBar
-      ref={tabsBarApi}
-      items={items}
-      selectedItem={selectedItem}
-      recentlyClosedItems={recentlyClosedItems}
-      unsavedItemIds={unsavedItemIds}
-      maxItemsCount={maxItemsCount}
-      tabContentId={tabContentId}
-      getTabMenuItems={getTabMenuItems}
-      services={services}
-      onAdd={onAdd}
-      onLabelEdited={onLabelEdited}
-      onSelect={onSelect}
-      onSelectRecentlyClosed={onSelectRecentlyClosed}
-      onClearRecentlyClosed={onClearRecentlyClosed}
-      onReorder={onReorder}
-      onClose={onClose}
-      getPreviewData={getPreviewData}
-      onEBTEvent={onEBTEvent}
-      customNewTabButton={customNewTabButton}
-      disableCloseButton={disableCloseButton}
-      disableInlineLabelEditing={disableInlineLabelEditing}
-      disableDragAndDrop={disableDragAndDrop}
-      disableTabsBarMenu={disableTabsBarMenu}
-    />
+    <EuiFlexGroup
+      gutterSize="xs"
+      alignItems="center"
+      wrap={false}
+      responsive={false}
+      css={tabsBarContainerCss}
+    >
+      <EuiFlexItem grow={true} css={tabsBarComponentCss}>
+        <TabsBar
+          ref={tabsBarApi}
+          items={items}
+          selectedItem={selectedItem}
+          recentlyClosedItems={recentlyClosedItems}
+          unsavedItemIds={unsavedItemIds}
+          maxItemsCount={maxItemsCount}
+          tabContentId={tabContentId}
+          getTabMenuItems={getTabMenuItems}
+          services={services}
+          onAdd={onAdd}
+          onLabelEdited={onLabelEdited}
+          onSelect={onSelect}
+          onSelectRecentlyClosed={onSelectRecentlyClosed}
+          onClearRecentlyClosed={onClearRecentlyClosed}
+          onReorder={onReorder}
+          onClose={onClose}
+          getPreviewData={getPreviewData}
+          onEBTEvent={onEBTEvent}
+          customNewTabButton={customNewTabButton}
+          disableCloseButton={disableCloseButton}
+          disableInlineLabelEditing={disableInlineLabelEditing}
+          disableDragAndDrop={disableDragAndDrop}
+          disableTabsBarMenu={disableTabsBarMenu}
+        />
+      </EuiFlexItem>
+      {appendRight ? (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            gutterSize="xs"
+            alignItems="center"
+            justifyContent="flexEnd"
+            wrap={false}
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <VerticalRule />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} css={appendRightContainerCss}>
+              {appendRight}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
   );
 
   if (!renderContent) {

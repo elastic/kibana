@@ -13,10 +13,6 @@
  */
 const TITLE_CASE_GLOSSARY = [
   'Machine Learning',
-  'Data Visualizer',
-  'Log Rate Analysis',
-  'Log Pattern Analysis',
-  'Change Point Detection',
   'Index Management',
   'Index Lifecycle Policies',
   'Snapshot and Restore',
@@ -44,7 +40,6 @@ const TITLE_CASE_GLOSSARY = [
   'Developer Tools',
   'Stack Management',
   'Alerts and Insights',
-  'AIOps labs',
   'AI',
   'Ingest and Integrations',
   'API keys',

@@ -40,6 +40,8 @@
           "[] | undefined; limit?: number | undefined; clear?: boolean | undefined; }) => Promise<void>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/load_hugging_face_datasets.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,6 +53,8 @@
             "label": "{\n  esClient,\n  logger,\n  accessToken,\n  datasets = PREDEFINED_HUGGING_FACE_DATASETS,\n  limit,\n  clear = false,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/load_hugging_face_datasets.ts",
+            "lineNumber": 42,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -142,7 +146,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                   "default",
                   "; helpers: ",
                   "default",
@@ -706,6 +710,8 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<boolean>; }; profiling: ",
                   "default",
+                  "; project: ",
+                  "default",
                   "; putScript: { (this: That, params: ",
                   "PutScriptRequest",
                   ", options?: ",
@@ -1051,6 +1057,8 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/load_hugging_face_datasets.ts",
+                "lineNumber": 43,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1071,6 +1079,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/load_hugging_face_datasets.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1082,6 +1092,8 @@
                 "label": "accessToken",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/load_hugging_face_datasets.ts",
+                "lineNumber": 45,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1103,6 +1115,8 @@
                   "[] | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/load_hugging_face_datasets.ts",
+                "lineNumber": 46,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1117,6 +1131,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/load_hugging_face_datasets.ts",
+                "lineNumber": 47,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1131,6 +1147,8 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/load_hugging_face_datasets.ts",
+                "lineNumber": 48,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1152,6 +1170,8 @@
           "One dataset to import."
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1165,6 +1185,8 @@
               "Human-readable name (purely for logging)."
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1178,6 +1200,8 @@
               "HuggingFace Hub repository id, e.g. \"BeIR/msmarco\" (required when `url` is omitted)."
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1191,6 +1215,8 @@
               "File path inside the repo, e.g. \"corpus.jsonl.gz\" (required when `url` is omitted)."
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1207,6 +1233,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1220,6 +1248,8 @@
               "Target Elasticsearch index."
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1256,6 +1286,8 @@
               ">>[] | undefined; numeric_detection?: boolean | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1272,6 +1304,8 @@
               "(raw: any) => Record<string, unknown>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1286,6 +1320,8 @@
                   "any"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/types.ts",
+                "lineNumber": 28,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1317,6 +1353,8 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/datasets/config.ts",
+        "lineNumber": 91,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

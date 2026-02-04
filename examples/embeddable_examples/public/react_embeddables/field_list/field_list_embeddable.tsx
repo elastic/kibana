@@ -9,16 +9,11 @@
 
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { Reference } from '@kbn/content-management-utils';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import {
-  DATA_VIEW_SAVED_OBJECT_TYPE,
-  type DataViewsPublicPluginStart,
-} from '@kbn/data-views-plugin/public';
+import { type DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
-  type SerializedPanelState,
   type WithAllKeys,
   initializeStateManager,
   initializeTitleManager,
@@ -30,11 +25,10 @@ import {
   UnifiedFieldListSidebarContainer,
   type UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
-import { cloneDeep } from 'lodash';
 import React, { useEffect } from 'react';
 import { merge, skip, Subscription, switchMap } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { FIELD_LIST_DATA_VIEW_REF_NAME, FIELD_LIST_ID } from './constants';
+import { FIELD_LIST_ID } from './constants';
 import type {
   FieldListApi,
   Services,
@@ -63,18 +57,8 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
 
 const deserializeState = async (
   dataViews: DataViewsPublicPluginStart,
-  serializedState?: SerializedPanelState<FieldListSerializedState>
+  serializedState?: FieldListSerializedState
 ): Promise<FieldListRuntimeState> => {
-  const state = serializedState?.rawState ? cloneDeep(serializedState?.rawState) : {};
-  // inject the reference
-  const dataViewIdRef = (serializedState?.references ?? []).find(
-    (ref) => ref.name === FIELD_LIST_DATA_VIEW_REF_NAME
-  );
-  // if the serializedState already contains a dataViewId, we don't want to overwrite it. (Unsaved state can cause this)
-  if (dataViewIdRef && state && !state.dataViewId) {
-    state.dataViewId = dataViewIdRef?.id;
-  }
-
   const [allDataViews, defaultDataViewId] = await Promise.all([
     dataViews.getIdsWithTitle(),
     dataViews.getDefaultId(),
@@ -86,11 +70,11 @@ const deserializeState = async (
       })
     );
   }
-  const initialDataViewId = state.dataViewId ?? defaultDataViewId;
+  const initialDataViewId = serializedState?.dataViewId ?? defaultDataViewId;
   const initialDataView = await dataViews.get(initialDataViewId);
   return {
     dataViewId: initialDataViewId,
-    selectedFieldNames: state.selectedFieldNames ?? [],
+    selectedFieldNames: serializedState?.selectedFieldNames ?? [],
     dataViews: [initialDataView],
   };
 };
@@ -105,7 +89,7 @@ export const getFieldListFactory = (
       const state = await deserializeState(dataViews, initialState);
       const allDataViews = await dataViews.getIdsWithTitle();
       const subscriptions = new Subscription();
-      const titleManager = initializeTitleManager(initialState?.rawState ?? {});
+      const titleManager = initializeTitleManager(initialState ?? {});
       const fieldListStateManager = initializeStateManager(state, defaultFieldListState);
 
       // Whenever the data view changes, we want to update the data views and reset the selectedFields in the field list state manager.
@@ -126,23 +110,10 @@ export const getFieldListFactory = (
       );
 
       function serializeState() {
-        const { dataViewId, selectedFieldNames } = fieldListStateManager.getLatestState();
-        const references: Reference[] = dataViewId
-          ? [
-              {
-                type: DATA_VIEW_SAVED_OBJECT_TYPE,
-                name: FIELD_LIST_DATA_VIEW_REF_NAME,
-                id: dataViewId,
-              },
-            ]
-          : [];
+        const { dataViews: selectedDataViews, ...rest } = fieldListStateManager.getLatestState();
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            // here we skip serializing the dataViewId, because the reference contains that information.
-            selectedFieldNames,
-          },
-          references,
+          ...titleManager.getLatestState(),
+          ...rest,
         };
       }
 
@@ -156,11 +127,12 @@ export const getFieldListFactory = (
           selectedFieldNames: (a, b) => {
             return (a?.slice().sort().join(',') ?? '') === (b?.slice().sort().join(',') ?? '');
           },
+          dataViewId: 'referenceEquality',
         }),
         onReset: async (lastSaved) => {
           const lastState = await deserializeState(dataViews, lastSaved);
           fieldListStateManager.reinitializeState(lastState);
-          titleManager.reinitializeState(lastSaved?.rawState);
+          titleManager.reinitializeState(lastSaved);
         },
       });
 

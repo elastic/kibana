@@ -25,6 +25,10 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   },
   overriddenVisContextAfterInvalidation: undefined,
   controlGroupState: undefined,
+  cascadedDocumentsState: {
+    availableCascadeGroups: [],
+    selectedCascadeGroups: [],
+  },
   esqlVariables: [],
   resetDefaultProfileState: {
     resetId: '',
@@ -33,5 +37,6 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
     breakdownField: false,
     hideChart: false,
   },
+  expandedDoc: undefined,
   uiState: {},
 };

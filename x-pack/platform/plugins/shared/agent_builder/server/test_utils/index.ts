@@ -16,6 +16,10 @@ export {
   type CreateScopedRunnerDepsMock,
   createRunnerDepsMock,
   type CreateRunnerDepsMock,
+  createToolHandlerContextMock,
+  type ToolHandlerContextMock,
+  createAgentHandlerContextMock,
+  type AgentHandlerContextMock,
 } from './runner';
 export {
   createToolsServiceStartMock,
@@ -43,6 +47,7 @@ export {
   createConversationClientMock,
   createConversationServiceMock,
   createEmptyConversation,
+  createRound,
   type ConversationServiceMock,
   type ConversationClientMock,
 } from './conversations';

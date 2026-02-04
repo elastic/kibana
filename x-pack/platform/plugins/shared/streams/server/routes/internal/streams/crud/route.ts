@@ -9,7 +9,7 @@ import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -60,11 +60,6 @@ export const listStreamsRoute = createServerRoute({
     });
 
     const enrichedStreams = streams.reduce<ListStreamDetail[]>((acc, { stream }) => {
-      if (Streams.GroupStream.Definition.is(stream)) {
-        acc.push({ stream });
-        return acc;
-      }
-
       const match = dataStreams.data_streams.find((dataStream) => dataStream.name === stream.name);
       acc.push({
         stream,
@@ -104,14 +99,6 @@ export const streamDetailRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients }): Promise<StreamDetailsResponse> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const streamEntity = await streamsClient.getStream(params.path.name);
-
-    if (Streams.GroupStream.Definition.is(streamEntity)) {
-      return {
-        details: {
-          count: 0,
-        },
-      };
-    }
 
     // check doc count
     const docCountResponse = await scopedClusterClient.asCurrentUser.search({

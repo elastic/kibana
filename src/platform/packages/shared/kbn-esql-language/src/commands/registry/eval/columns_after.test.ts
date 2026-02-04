@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { additionalFieldsMock } from '../../../__tests__/language/helpers';
 import { Parser, synth } from '../../../..';
-import type { ESQLColumnData } from '../types';
+import { UnmappedFieldsStrategy, type ESQLColumnData } from '../types';
 import { columnsAfter } from './columns_after';
 
 describe('EVAL > columnsAfter', () => {
@@ -19,7 +20,13 @@ describe('EVAL > columnsAfter', () => {
 
   it('adds a new column for a simple assignment', () => {
     const command = synth.cmd`EVAL baz = foo + 1`;
-    const result = columnsAfter(command, baseColumns, '');
+    const result = columnsAfter(
+      command,
+      baseColumns,
+      '',
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.FAIL
+    );
 
     expect(result).toEqual([
       {
@@ -34,7 +41,13 @@ describe('EVAL > columnsAfter', () => {
 
   it('adds multiple new columns for multiple assignments', () => {
     const command = synth.cmd`EVAL baz = foo + 1, qux = bar`;
-    const result = columnsAfter(command, baseColumns, '');
+    const result = columnsAfter(
+      command,
+      baseColumns,
+      '',
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.FAIL
+    );
 
     expect(result).toEqual([
       {
@@ -64,7 +77,13 @@ describe('EVAL > columnsAfter', () => {
       },
     } = Parser.parseQuery(queryString);
 
-    const result = columnsAfter(command, baseColumns, queryString);
+    const result = columnsAfter(
+      command,
+      baseColumns,
+      queryString,
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.FAIL
+    );
 
     expect(result).toEqual([
       {
@@ -88,7 +107,13 @@ describe('EVAL > columnsAfter', () => {
       },
     } = Parser.parseQuery(queryString);
 
-    const result = columnsAfter(command, baseColumns, queryString);
+    const result = columnsAfter(
+      command,
+      baseColumns,
+      queryString,
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.FAIL
+    );
 
     expect(result).toEqual([
       {
@@ -109,14 +134,26 @@ describe('EVAL > columnsAfter', () => {
 
   it('returns previous columns if no args', () => {
     const command = { args: [] } as any;
-    const result = columnsAfter(command, baseColumns, '');
+    const result = columnsAfter(
+      command,
+      baseColumns,
+      '',
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.FAIL
+    );
 
     expect(result).toEqual(baseColumns);
   });
 
   it('handles overwriting columns', () => {
     const command = synth.cmd`EVAL foo = "", bar = 23`;
-    const result = columnsAfter(command, baseColumns, '');
+    const result = columnsAfter(
+      command,
+      baseColumns,
+      '',
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.FAIL
+    );
 
     expect(result).toEqual([
       {
@@ -131,6 +168,48 @@ describe('EVAL > columnsAfter', () => {
         location: { min: 0, max: 0 },
         userDefined: true,
       },
+    ]);
+  });
+
+  it('handles unmapped field with LOAD strategy', () => {
+    const command = synth.cmd`EVAL newField = unmappedField`;
+    const result = columnsAfter(
+      command,
+      baseColumns,
+      '',
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.LOAD
+    );
+
+    expect(result).toEqual([
+      {
+        name: 'newField',
+        type: 'keyword',
+        location: { min: 0, max: 0 },
+        userDefined: true,
+      },
+      ...baseColumns,
+    ]);
+  });
+
+  it('handles unmapped field with NULLIFY strategy', () => {
+    const command = synth.cmd`EVAL newField = unmappedField`;
+    const result = columnsAfter(
+      command,
+      baseColumns,
+      '',
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.NULLIFY
+    );
+
+    expect(result).toEqual([
+      {
+        name: 'newField',
+        type: 'null',
+        location: { min: 0, max: 0 },
+        userDefined: true,
+      },
+      ...baseColumns,
     ]);
   });
 });

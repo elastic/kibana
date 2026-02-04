@@ -38,7 +38,7 @@ export const RulesXMLFileUpload = React.memo<RulesXMLFileUploadProps>(
         createMigration({
           migrationName,
           rules: { xml: rulesToUpload },
-          migrationSource: MigrationSource.QRADAR,
+          vendor: MigrationSource.QRADAR,
         });
       }
     }, [createMigration, migrationName, rulesToUpload]);

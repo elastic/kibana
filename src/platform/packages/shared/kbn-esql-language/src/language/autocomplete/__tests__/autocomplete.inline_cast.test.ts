@@ -17,7 +17,8 @@
  */
 
 import { getCastingTypesSuggestions } from '../../../commands/definitions/utils/autocomplete/expressions/positions/after_cast';
-import { fields, setup } from './helpers';
+import { fields, getFunctionSignaturesByReturnType, setup } from './helpers';
+import { Location } from '../../../commands/registry/types';
 
 const fieldsToTest = fields.filter(
   (field) => field.name !== 'any#Char$Field' && field.type !== 'unsupported'
@@ -46,5 +47,21 @@ describe('Inline Cast Autocomplete Suggestions', () => {
       'FROM index_a | WHERE abs(false::^)',
       getCastingTypesSuggestions('boolean')
     );
+  });
+
+  it('suggests operators after inline cast', async () => {
+    const { assertSuggestions } = await setup('^');
+    await assertSuggestions('FROM index_a | WHERE "false"::boolean ^', [
+      '| ',
+      ...getFunctionSignaturesByReturnType(
+        Location.WHERE,
+        'any',
+        {
+          operators: true,
+          skipAssign: true,
+        },
+        ['boolean']
+      ),
+    ]);
   });
 });

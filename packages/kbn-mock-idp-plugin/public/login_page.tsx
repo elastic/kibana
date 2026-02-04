@@ -50,6 +50,7 @@ export const LoginPage = ({ config }: { config: ConfigType }) => {
         full_name: values.full_name,
         email: sanitizeEmail(values.full_name),
         roles: [values.role],
+        url: window.location.href,
       });
     },
   });

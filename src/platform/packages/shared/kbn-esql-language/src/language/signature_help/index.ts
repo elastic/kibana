@@ -19,6 +19,7 @@ import { findSubquery } from '../shared/subqueries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
 import { correctQuerySyntax } from '../shared/query_syntax_helpers';
 import { getArgumentToHighlightIndex, getParameterList } from './helpers';
+import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 
 const MAX_PARAM_TYPES_TO_SHOW = 3;
 
@@ -88,11 +89,14 @@ export async function getSignatureHelp(
   );
   const columnsMap = await getColumnMap();
 
+  const unmappedFieldsStrategy = getUnmappedFieldsStrategy(root.header);
+
   // Get the formatted function signature, with type filtering based on current args
   const formattedSignature = getFormattedFunctionSignature(
     fnDefinition,
     fnNode,
     columnsMap,
+    unmappedFieldsStrategy,
     MAX_PARAM_TYPES_TO_SHOW
   );
   const parameters: string[] = getParameterList(formattedSignature);

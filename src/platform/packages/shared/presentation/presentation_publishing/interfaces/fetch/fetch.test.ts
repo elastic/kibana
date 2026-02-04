@@ -407,7 +407,7 @@ describe('onFetchContextChanged', () => {
         uuid: 'ignore me',
         parentApi: {
           ...parentApi,
-          getPanelSection$: () => new BehaviorSubject(undefined), // global panel
+          panelSection$: () => new BehaviorSubject(undefined), // global panel
         },
       };
       const subscription = fetch$(api).pipe(skip(1)).subscribe(onFetchMock);
@@ -432,7 +432,7 @@ describe('onFetchContextChanged', () => {
         uuid: 'ignore me',
         parentApi: {
           ...parentApi,
-          getPanelSection$: () => new BehaviorSubject('some section'),
+          panelSection$: () => new BehaviorSubject('some section'),
         },
       };
       const subscription = fetch$(api).pipe(skip(1)).subscribe(onFetchMock);
@@ -461,7 +461,7 @@ describe('onFetchContextChanged', () => {
             { meta: { controlledBy: 'keep me' } },
             { meta: { controlledBy: 'ignore me', group: 'some section' } },
           ]),
-          getPanelSection$: () => panelSection$,
+          panelSection$: () => panelSection$,
         },
       };
       const subscription = fetch$(api).pipe(skip(1)).subscribe(onFetchMock);

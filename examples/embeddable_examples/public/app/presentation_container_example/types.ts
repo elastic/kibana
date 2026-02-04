@@ -19,7 +19,6 @@ import type {
   PublishesDataLoading,
   PublishesTimeRange,
   PublishesUnsavedChanges,
-  SerializedPanelState,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
@@ -37,5 +36,5 @@ export type PageApi = PresentationContainer &
 
 export interface PageState {
   timeRange: TimeRange;
-  panels: Array<{ id: string; type: string; serializedState: SerializedPanelState | undefined }>;
+  panels: Array<{ id: string; type: string; serializedState: object | undefined }>;
 }

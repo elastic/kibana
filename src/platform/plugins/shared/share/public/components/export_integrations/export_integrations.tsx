@@ -59,7 +59,7 @@ interface LayoutOptionsProps {
   printLayoutChange: (evt: EuiSwitchEvent) => void;
 }
 
-interface ManagedFlyoutProps {
+export interface ManagedFlyoutProps {
   exportIntegration: ExportShareConfig;
   intl: InjectedIntl;
   isDirty: boolean;
@@ -447,6 +447,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
           {...(selectedMenuItem?.groupId === 'exportDerivatives'
             ? selectedMenuItem.config.flyoutSizing || {}
             : {})}
+          session="start"
         >
           {/* TODO: remove this global style once https://github.com/elastic/eui/issues/8801 is resolved  */}
           <Global

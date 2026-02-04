@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../fixtures';
 
 test.describe('Custom Threshold Rule - Ad-hoc Data View', { tag: ['@ess', '@svlOblt'] }, () => {
@@ -71,6 +71,9 @@ test.describe('Custom Threshold Rule - Ad-hoc Data View', { tag: ['@ess', '@svlO
     // Verify the data view was selected
     const dataViewText = await pageObjects.rulesPage.dataViewExpression.textContent();
     expect(dataViewText).toContain(AD_HOC_DATA_VIEW_PATTERN);
+
+    // Wait for form to fully initialize with default criteria
+    await pageObjects.rulesPage.waitForFormReady();
 
     // Save the rule (navigates to rule details page)
     await pageObjects.rulesPage.saveRule();

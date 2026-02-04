@@ -18,7 +18,7 @@ import {
   waitForRuleStatus,
 } from './helpers/alerting_wait_for_helpers';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { createIndexConnector, createRule } from './helpers/alerting_api_helper';
+import { createIndexConnector, createRule, updateRule } from './helpers/alerting_api_helper';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
@@ -224,6 +224,169 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source?.reason).eql(
           `system.cpu.user.pct is 90% in the last 5 mins. Alert when above 50%.`
         );
+      });
+    });
+
+    describe('noDataBehavior parameter', () => {
+      let noDataRuleId: string;
+
+      afterEach(async () => {
+        if (noDataRuleId) {
+          await supertest.delete(`/api/alerting/rule/${noDataRuleId}`).set('kbn-xsrf', 'foo');
+        }
+      });
+
+      it('should create rule with noDataBehavior: recover', async () => {
+        const createdRule = await createRule<MetricThresholdParams>({
+          supertest,
+          logger,
+          esClient,
+          ruleTypeId: InfraRuleType.MetricThreshold,
+          consumer: 'infrastructure',
+          tags: ['infrastructure'],
+          name: 'Metric threshold rule with noDataBehavior recover',
+          params: {
+            criteria: [
+              {
+                aggType: Aggregators.AVERAGE,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [0.5],
+                timeSize: 5,
+                timeUnit: 'm',
+                metric: 'system.cpu.user.pct',
+              },
+            ],
+            sourceId: 'default',
+            alertOnNoData: false,
+            noDataBehavior: 'recover',
+          },
+          schedule: { interval: '1m' },
+        });
+        noDataRuleId = createdRule.id;
+
+        expect(createdRule.params.noDataBehavior).to.eql('recover');
+      });
+
+      it('should create rule with noDataBehavior: alertOnNoData', async () => {
+        const createdRule = await createRule<MetricThresholdParams>({
+          supertest,
+          logger,
+          esClient,
+          ruleTypeId: InfraRuleType.MetricThreshold,
+          consumer: 'infrastructure',
+          tags: ['infrastructure'],
+          name: 'Metric threshold rule with noDataBehavior alertOnNoData',
+          params: {
+            criteria: [
+              {
+                aggType: Aggregators.AVERAGE,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [0.5],
+                timeSize: 5,
+                timeUnit: 'm',
+                metric: 'system.cpu.user.pct',
+              },
+            ],
+            sourceId: 'default',
+            alertOnNoData: true,
+            noDataBehavior: 'alertOnNoData',
+          },
+          schedule: { interval: '1m' },
+        });
+        noDataRuleId = createdRule.id;
+
+        expect(createdRule.params.noDataBehavior).to.eql('alertOnNoData');
+      });
+
+      it('should create rule with noDataBehavior: remainActive', async () => {
+        const createdRule = await createRule<MetricThresholdParams>({
+          supertest,
+          logger,
+          esClient,
+          ruleTypeId: InfraRuleType.MetricThreshold,
+          consumer: 'infrastructure',
+          tags: ['infrastructure'],
+          name: 'Metric threshold rule with noDataBehavior remainActive',
+          params: {
+            criteria: [
+              {
+                aggType: Aggregators.AVERAGE,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [0.5],
+                timeSize: 5,
+                timeUnit: 'm',
+                metric: 'system.cpu.user.pct',
+              },
+            ],
+            sourceId: 'default',
+            alertOnNoData: false,
+            noDataBehavior: 'remainActive',
+          },
+          schedule: { interval: '1m' },
+        });
+        noDataRuleId = createdRule.id;
+
+        expect(createdRule.params.noDataBehavior).to.eql('remainActive');
+      });
+
+      it('should update existing rule to add noDataBehavior parameter', async () => {
+        // First create a rule without noDataBehavior (simulating an existing rule)
+        const createdRule = await createRule<MetricThresholdParams>({
+          supertest,
+          logger,
+          esClient,
+          ruleTypeId: InfraRuleType.MetricThreshold,
+          consumer: 'infrastructure',
+          tags: ['infrastructure'],
+          name: 'Metric threshold rule without noDataBehavior',
+          params: {
+            criteria: [
+              {
+                aggType: Aggregators.AVERAGE,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [0.5],
+                timeSize: 5,
+                timeUnit: 'm',
+                metric: 'system.cpu.user.pct',
+              },
+            ],
+            sourceId: 'default',
+            alertOnNoData: true,
+            alertOnGroupDisappear: true,
+          },
+          schedule: { interval: '1m' },
+        });
+        noDataRuleId = createdRule.id;
+
+        // Verify the rule was created without noDataBehavior
+        expect(createdRule.params.noDataBehavior).to.be(undefined);
+
+        // Update the rule to add noDataBehavior
+        const updatedRule = await updateRule<MetricThresholdParams>({
+          supertest,
+          logger,
+          esClient,
+          ruleId: noDataRuleId,
+          name: 'Metric threshold rule with noDataBehavior',
+          params: {
+            criteria: [
+              {
+                aggType: Aggregators.AVERAGE,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [0.5],
+                timeSize: 5,
+                timeUnit: 'm',
+                metric: 'system.cpu.user.pct',
+              },
+            ],
+            sourceId: 'default',
+            alertOnNoData: false,
+            noDataBehavior: 'remainActive',
+          },
+          schedule: { interval: '1m' },
+        });
+
+        expect(updatedRule.params.noDataBehavior).to.eql('remainActive');
       });
     });
   });

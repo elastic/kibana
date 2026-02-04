@@ -34,6 +34,7 @@ import {
   findInsertIndex,
   insertAtIndex,
   reorderSteps,
+  reorderStepsByDragDrop,
 } from '../stream_enrichment_state_machine/utils';
 import { collectDescendantStepIds } from '../utils';
 import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
@@ -53,6 +54,7 @@ import {
   spawnStep,
   type StepSpawner,
 } from './utils';
+import { isNoSuggestionsError } from '../../steps/blocks/action/utils/no_suggestions_error';
 
 export type InteractiveModeActorRef = ActorRefFrom<typeof interactiveModeMachine>;
 export type InteractiveModeSnapshot = SnapshotFrom<typeof interactiveModeMachine>;
@@ -190,6 +192,59 @@ export const interactiveModeMachine = setup({
         stepRefs: [...reorderSteps(context.stepRefs, params.stepId, params.direction)],
       };
     }),
+    reorderStepsByDragDrop: enqueueActions(
+      (
+        { context, enqueue },
+        params: {
+          sourceStepId: string;
+          targetStepId: string;
+          operation: 'before' | 'after' | 'inside';
+        }
+      ) => {
+        const steps = context.stepRefs.map((ref) => ref.getSnapshot().context.step);
+        const targetStep = steps.find((s) => s.customIdentifier === params.targetStepId);
+
+        if (!targetStep) {
+          return;
+        }
+
+        // Determine the new parentId for the source step
+        let newParentId: string | null;
+
+        // Nested inside a where block
+        if (params.operation === 'inside') {
+          newParentId = params.targetStepId;
+        } else {
+          // Use sibling's parentId
+          newParentId = targetStep.parentId ?? null;
+        }
+
+        // Reorder the steps
+        const reorderedStepRefs = reorderStepsByDragDrop(
+          context.stepRefs,
+          params.sourceStepId,
+          params.targetStepId,
+          params.operation
+        );
+
+        // Update context with reordered steps
+        enqueue.assign({
+          stepRefs: [...reorderedStepRefs],
+        });
+
+        // Update the source step actor's parentId
+        const sourceStepRef = reorderedStepRefs.find((ref) => ref.id === params.sourceStepId);
+
+        if (sourceStepRef) {
+          const currentParentId = sourceStepRef.getSnapshot().context.step.parentId;
+
+          if (currentParentId !== newParentId) {
+            // Send event to child actor to update its parentId
+            enqueue.sendTo(sourceStepRef, { type: 'step.changeParent', parentId: newParentId });
+          }
+        }
+      }
+    ),
     reassignSteps: assign(({ context }) => ({
       stepRefs: [...context.stepRefs],
     })),
@@ -373,15 +428,21 @@ export const interactiveModeMachine = setup({
                 },
               ],
             },
-            onError: {
-              target: 'idle',
-              actions: [
-                {
-                  type: 'notifySuggestionFailure',
-                  params: ({ event }: { event: { error: unknown } }) => ({ event }),
-                },
-              ],
-            },
+            onError: [
+              {
+                guard: ({ event }) => isNoSuggestionsError(event.error),
+                target: 'noSuggestionsFound',
+              },
+              {
+                target: 'idle',
+                actions: [
+                  {
+                    type: 'notifySuggestionFailure',
+                    params: ({ event }: { event: { error: unknown } }) => ({ event }),
+                  },
+                ],
+              },
+            ],
           },
           on: {
             'suggestion.cancel': {
@@ -395,6 +456,16 @@ export const interactiveModeMachine = setup({
                 { type: 'syncToDSL' },
                 { type: 'sendStepsToSimulator' },
               ],
+            },
+          },
+        },
+        noSuggestionsFound: {
+          on: {
+            'suggestion.generate': {
+              target: 'generatingSuggestion',
+            },
+            'suggestion.dismiss': {
+              target: 'idle',
             },
           },
         },
@@ -445,6 +516,13 @@ export const interactiveModeMachine = setup({
                 { type: 'sendStepsToSimulator', params: ({ event }) => event },
               ],
             },
+            'step.parentChanged': {
+              actions: [
+                { type: 'reassignSteps' },
+                { type: 'syncToDSL' },
+                { type: 'sendStepsToSimulator', params: ({ event }) => event },
+              ],
+            },
             'step.edit': {
               guard: 'hasSimulatePrivileges',
               target: 'editing',
@@ -454,6 +532,14 @@ export const interactiveModeMachine = setup({
               actions: [{ type: 'reorderSteps', params: ({ event }) => event }],
               target: 'idle',
               reenter: true,
+            },
+            'step.reorderByDragDrop': {
+              guard: 'hasSimulatePrivileges',
+              actions: [{ type: 'reorderStepsByDragDrop', params: ({ event }) => event }],
+              target: 'idle',
+              reenter: true,
+              // Re-enter to trigger syncToDSL for sibling reordering.
+              // If parent changes, child will also send a step.parentChanged event (additional sync but safe).
             },
             'step.delete': {
               target: 'idle',

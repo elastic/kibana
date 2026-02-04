@@ -50,8 +50,13 @@ export type {
   ToolAvailabilityConfig,
   InternalToolAvailabilityHandler,
   InternalToolDefinition,
+  ToolReturnSummarizerFn,
+  ToolRegistry,
+  ToolListParams,
+  ToolCreateParams,
+  ToolUpdateParams,
 } from './tools';
-export { getToolResultId, createErrorResult, isToolResultId } from './tools';
+export { getToolResultId, createErrorResult, createOtherResult, isToolResultId } from './tools';
 export type {
   AgentHandlerParams,
   AgentHandlerContext,

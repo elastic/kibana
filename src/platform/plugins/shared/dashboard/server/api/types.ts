@@ -18,11 +18,19 @@ import type {
   panelGridSchema,
 } from './dashboard_state_schemas';
 
+/** A filter stored in a dashboard. */
 export type DashboardFilter = TypeOf<typeof storedFilterSchema>;
+/** A query stored in a dashboard. */
 export type DashboardQuery = TypeOf<typeof querySchema>;
+/** Display options for a dashboard. */
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
+/** Grid position and size data for a panel. */
 export type GridData = TypeOf<typeof panelGridSchema>;
+/** A panel in a dashboard containing an embeddable visualization. */
 export type DashboardPanel = TypeOf<ReturnType<typeof getPanelSchema>>;
+/** A section in a dashboard that groups panels. */
 export type DashboardSection = TypeOf<ReturnType<typeof getSectionSchema>>;
+/** The complete state of a dashboard including panels, filters, and settings. */
 export type DashboardState = Writable<TypeOf<ReturnType<typeof getDashboardStateSchema>>>;
-export type DashboardControlsState = NonNullable<DashboardState['controlGroupInput']>['controls'];
+export type DashboardPinnedPanelsState = NonNullable<DashboardState['pinned_panels']>;
+export type DashboardPinnedPanel = DashboardPinnedPanelsState[number];

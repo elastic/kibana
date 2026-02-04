@@ -115,7 +115,6 @@ export class BulkDeleteTask {
                 };
               }
             },
-            cancel: async () => {},
           };
         },
       },

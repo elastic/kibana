@@ -10,6 +10,7 @@
 import React from 'react';
 import type { EuiTourStepProps } from '@elastic/eui';
 import { EuiButton, EuiButtonEmpty, EuiText, EuiTourStep, useEuiTheme } from '@elastic/eui';
+import { useKibana } from '../hooks/use_kibana';
 import * as i18n from '../translations';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
 
@@ -59,8 +60,12 @@ export const EisTokenCostTour = ({
     promoId: `${promoId}EisCostsTour`,
   });
   const dataId = `${promoId}-eis-costs-tour`;
+  const {
+    services: { notifications },
+  } = useKibana();
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
 
-  if (!isPromoVisible || !isReady || !isCloudEnabled) {
+  if (!isPromoVisible || !isReady || !isCloudEnabled || !isTourEnabled) {
     return children;
   }
 
@@ -74,6 +79,7 @@ export const EisTokenCostTour = ({
           <p>{i18n.EIS_COSTS_TOUR_DESCRIPTION}</p>
         </EuiText>
       }
+      display="block"
       isStepOpen={isPromoVisible}
       anchorPosition={anchorPosition}
       step={1}
@@ -86,7 +92,7 @@ export const EisTokenCostTour = ({
           onClick={onDismissPromo}
           aria-label={i18n.EIS_COSTS_TOUR_DISMISS_ARIA}
         >
-          {i18n.EIS_TOUR_DISMISS}
+          {i18n.TOUR_DISMISS}
         </EuiButtonEmpty>,
         ...(ctaLink
           ? [
@@ -101,7 +107,7 @@ export const EisTokenCostTour = ({
                 iconSide="right"
                 iconType="popout"
               >
-                {i18n.EIS_TOUR_CTA}
+                {i18n.TOUR_CTA}
               </EuiButton>,
             ]
           : []),

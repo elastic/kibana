@@ -11,7 +11,8 @@ import { test, expect } from '../../../../../src/playwright';
 import { EuiComboBoxWrapper } from '../../../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../../fixtures/eui_helpers';
 
-test.describe('EUI testing wrapper: EuiComboBox', { tag: ['@svlSecurity', '@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/244455
+test.describe.skip('EUI testing wrapper: EuiComboBox', { tag: ['@svlSecurity', '@ess'] }, () => {
   test(`with multiple selections (pills)`, async ({ page, log }) => {
     const dataTestSubj = 'demoComboBox';
     await navigateToEuiTestPage(page, 'docs/components/forms/selection/combo-box/', log);

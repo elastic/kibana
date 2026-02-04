@@ -11,6 +11,22 @@ components:
         - linux
         - macos
         - windows
+
+    EndpointScriptTags:
+      type: string
+      enum:
+        - remediationAction
+        - dataCollection
+        - networkDiagnostics
+        - networkAction
+        - systemInventory
+        - forensicCollection
+        - threatHunting
+        - discovery
+        - systemManagement
+        - userManagement
+        - troubleshooting
+
     EndpointScript:
       type: object
       properties:
@@ -25,6 +41,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EndpointScriptPlatform'
+        tags:
+          type: array
+          description: Tags that categorize the script
+          items:
+            $ref: '#/components/schemas/EndpointScriptTags'
         fileName:
           type: string
           description: Name of the script file that was uploaded

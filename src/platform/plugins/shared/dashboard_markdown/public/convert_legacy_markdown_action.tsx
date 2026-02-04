@@ -66,9 +66,7 @@ export const getConvertLegacyMarkdownAction = () => ({
     await embeddable.parentApi.replacePanel(embeddable.uuid, {
       panelType: MARKDOWN_EMBEDDABLE_TYPE,
       serializedState: {
-        rawState: {
-          content: legacyContent,
-        },
+        content: legacyContent,
       },
     });
   },

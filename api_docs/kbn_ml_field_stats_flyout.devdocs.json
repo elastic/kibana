@@ -24,6 +24,8 @@
           ") => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_content.tsx",
+        "lineNumber": 52,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_content.tsx",
+            "lineNumber": 52,
+            "columnNumber": 62,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -79,6 +83,8 @@
           ") => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_flyout.tsx",
+        "lineNumber": 64,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -101,6 +107,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_flyout.tsx",
+            "lineNumber": 64,
+            "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -132,6 +140,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_flyout_provider.tsx",
+        "lineNumber": 67,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -154,6 +164,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_flyout_provider.tsx",
+            "lineNumber": 67,
+            "columnNumber": 77,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -185,6 +197,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
+        "lineNumber": 77,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -207,6 +221,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
+            "lineNumber": 77,
+            "columnNumber": 69,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -226,6 +242,8 @@
           "({ options, placeholder, singleSelection, onChange, selectedOptions, fullWidth, isDisabled, isLoading, isClearable, prepend, compressed, \"aria-label\": ariaLabel, \"data-test-subj\": dataTestSubj, titleId, }: OptionListWithFieldStatsProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/private/ml/field_stats_flyout/options_list_with_stats/option_list_with_stats.tsx",
+        "lineNumber": 55,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -240,6 +258,8 @@
               "OptionListWithFieldStatsProps"
             ],
             "path": "x-pack/platform/packages/private/ml/field_stats_flyout/options_list_with_stats/option_list_with_stats.tsx",
+            "lineNumber": 55,
+            "columnNumber": 77,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -261,6 +281,8 @@
           "() => MLJobWizardFieldStatsFlyoutProps"
         ],
         "path": "x-pack/platform/packages/private/ml/field_stats_flyout/use_field_stats_flyout_context.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -292,6 +314,8 @@
           "; populatedFields: Set<string> | undefined; }"
         ],
         "path": "x-pack/platform/packages/private/ml/field_stats_flyout/use_field_stats_trigger.tsx",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -312,6 +336,8 @@
           "\nRepresents the props for the FieldStatsFlyout component."
         ],
         "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_content.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -334,6 +360,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_content.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -356,6 +384,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_content.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -379,6 +409,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_content.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -395,6 +427,8 @@
               "object | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_content.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -411,6 +445,8 @@
           "\nRepresents the props for the FieldStatsInfoButton component."
         ],
         "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -435,6 +471,8 @@
               "; }"
             ],
             "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -448,6 +486,8 @@
               "\nThe label for the field."
             ],
             "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -472,6 +512,8 @@
               ") => void) | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -494,6 +536,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
+                "lineNumber": 45,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -516,6 +560,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -532,6 +578,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -548,6 +596,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -598,6 +648,8 @@
           ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & BaseOption<T>)"
         ],
         "path": "x-pack/platform/packages/private/ml/field_stats_flyout/options_list_with_stats/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -623,6 +675,8 @@
           "; }"
         ],
         "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_info_button.tsx",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -666,6 +720,8 @@
           " | undefined; dslQuery?: object | undefined; disablePopulatedFields?: boolean | undefined; } & { children?: React.ReactNode; }"
         ],
         "path": "x-pack/platform/packages/private/ml/field_stats_flyout/field_stats_flyout_provider.tsx",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -685,6 +741,8 @@
           "React.Context<MLJobWizardFieldStatsFlyoutProps>"
         ],
         "path": "x-pack/platform/packages/private/ml/field_stats_flyout/use_field_stats_flyout_context.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

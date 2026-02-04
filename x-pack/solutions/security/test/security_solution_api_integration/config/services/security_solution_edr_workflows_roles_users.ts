@@ -30,6 +30,43 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
     loader: new EndpointSecurityTestRolesLoader(kbnServer, log),
 
     /**
+     * Builds a `Role` definition
+     * @param options
+     */
+    buildRoleDefinition({
+      name = `role ${Math.random().toString(36)}`,
+      description = '',
+      spaces = ['*'],
+      securityPrivileges = [],
+    }: {
+      name?: string;
+      description?: string;
+      spaces?: string[];
+      /**
+       * List of privileges for Security Solution. Use the `id`'s for each privilege from here:
+       * `x-pack/solutions/security/packages/features/src/security/kibana_sub_features.ts`
+       */
+      securityPrivileges?: string[];
+    } = {}): Role {
+      const role: Role = {
+        name,
+        description,
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [
+          {
+            spaces,
+            base: [],
+            feature: {
+              [SECURITY_FEATURE_ID]: Array.from(new Set(securityPrivileges.concat('minimal_all'))),
+            },
+          },
+        ],
+      };
+
+      return role;
+    },
+
+    /**
      * Creates an user with specific values
      * @param user
      * @deprecated use `.loader.*` methods instead

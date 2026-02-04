@@ -37,23 +37,20 @@ describe('deserializeLayout', () => {
           ],
         },
       ],
-      {
-        controls: [
-          {
-            uid: 'control1',
-            type: 'someType',
-            width: 'small',
-            grow: true,
-            config: { someValue: 'test' },
-          } as unknown as PinnedControlState,
-          {
-            uid: 'control2',
-            type: 'anotherType',
-            config: { anotherValue: 1 },
-          } as unknown as PinnedControlState,
-        ],
-      },
-      () => []
+      [
+        {
+          uid: 'control1',
+          type: 'someType',
+          width: 'small',
+          grow: true,
+          config: { someValue: 'test' },
+        } as unknown as PinnedControlState,
+        {
+          uid: 'control2',
+          type: 'anotherType',
+          config: { anotherValue: 1 },
+        } as unknown as PinnedControlState,
+      ]
     );
     expect(layout.panels).toMatchInlineSnapshot(`
       Object {
@@ -89,7 +86,7 @@ describe('deserializeLayout', () => {
         },
       }
     `);
-    expect(layout.controls).toMatchInlineSnapshot(`
+    expect(layout.pinnedPanels).toMatchInlineSnapshot(`
       Object {
         "control1": Object {
           "grow": true,
@@ -108,26 +105,16 @@ describe('deserializeLayout', () => {
     expect(childState).toMatchInlineSnapshot(`
       Object {
         "1": Object {
-          "rawState": Object {
-            "title": "panel One",
-          },
-          "references": Array [],
+          "title": "panel One",
         },
         "3": Object {
-          "rawState": Object {
-            "title": "panel Three",
-          },
-          "references": Array [],
+          "title": "panel Three",
         },
         "control1": Object {
-          "rawState": Object {
-            "someValue": "test",
-          },
+          "someValue": "test",
         },
         "control2": Object {
-          "rawState": Object {
-            "anotherValue": 1,
-          },
+          "anotherValue": 1,
         },
       }
     `);

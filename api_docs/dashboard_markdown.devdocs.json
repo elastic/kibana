@@ -25,6 +25,8 @@
           "{ readonly content: string; }"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/schemas.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -40,6 +42,8 @@
           "{ readonly title?: string | undefined; readonly description?: string | undefined; readonly hidePanelTitles?: boolean | undefined; readonly content: string; }"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/schemas.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

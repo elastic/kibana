@@ -45,6 +45,7 @@ import type {
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 
+import type { KqlPluginStart } from '@kbn/kql/public';
 import {
   createRegionMapFn,
   GEOHASH_GRID,
@@ -104,6 +105,7 @@ export interface MapsPluginStartDependencies {
   cps?: CPSPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   embeddable: EmbeddableStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   fieldFormats: FieldFormatsStart;

@@ -11,4 +11,12 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-docs-utils'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/packages/kbn-docs-utils',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/packages/kbn-docs-utils/src/**/*.{ts,tsx}',
+    '!<rootDir>/packages/kbn-docs-utils/src/**/*.test.ts',
+    '!<rootDir>/packages/kbn-docs-utils/src/**/__fixtures__/**',
+  ],
+  coveragePathIgnorePatterns: ['<rootDir>/packages/kbn-docs-utils/src/integration_tests/'],
 };

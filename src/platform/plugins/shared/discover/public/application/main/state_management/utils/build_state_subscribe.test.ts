@@ -22,8 +22,8 @@ describe('buildStateSubscribe', () => {
   const stateContainer = getDiscoverStateMock({ savedSearch });
   stateContainer.dataState.refetch$.next = jest.fn();
   stateContainer.dataState.reset = jest.fn();
-  stateContainer.actions.setDataView = jest.fn();
   stateContainer.savedSearchState.update = jest.fn();
+  jest.spyOn(internalStateActions, 'assignNextDataView');
 
   const getSubscribeFn = () => {
     return buildStateSubscribe({
@@ -32,7 +32,6 @@ describe('buildStateSubscribe', () => {
       internalState: stateContainer.internalState,
       runtimeStateManager: stateContainer.runtimeStateManager,
       services: discoverServiceMock,
-      setDataView: stateContainer.actions.setDataView,
       getCurrentTab: stateContainer.getCurrentTab,
     });
   };
@@ -46,7 +45,10 @@ describe('buildStateSubscribe', () => {
       dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
     });
 
-    expect(stateContainer.actions.setDataView).toHaveBeenCalledWith(dataViewComplexMock);
+    expect(internalStateActions.assignNextDataView as jest.Mock).toHaveBeenCalledWith({
+      tabId: 'the-saved-search-id',
+      dataView: dataViewComplexMock,
+    });
     expect(stateContainer.dataState.reset).toHaveBeenCalled();
     expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
   });

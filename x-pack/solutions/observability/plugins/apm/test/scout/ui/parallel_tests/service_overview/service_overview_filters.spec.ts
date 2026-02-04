@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
-import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
+import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
 
 test.describe('Service Overview - Filters', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -72,12 +72,12 @@ test.describe('Service Overview - Filters', { tag: ['@ess', '@svlOblt'] }, () =>
     });
 
     await test.step('Select production environment', async () => {
-      await serviceDetailsPage.overviewTab.selectEnvironment('production');
+      await serviceDetailsPage.overviewTab.selectEnvironment(PRODUCTION_ENVIRONMENT);
     });
 
     await test.step('Verify URL contains environment parameter', async () => {
-      await page.waitForURL(/environment=production/);
-      expect(page.url()).toContain('environment=production');
+      await page.waitForURL(new RegExp(`environment=${PRODUCTION_ENVIRONMENT}`));
+      expect(page.url()).toContain(`environment=${PRODUCTION_ENVIRONMENT}`);
     });
   });
 

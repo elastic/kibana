@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -89,6 +89,19 @@ const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight, isLoading }) 
   const {
     euiTheme: { size, colors },
   } = useEuiTheme();
+  const [isRenderComplete, setIsRenderComplete] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isRenderComplete && containerRef.current) {
+      containerRef.current.dispatchEvent(new CustomEvent('renderComplete', { bubbles: true }));
+    }
+  }, [isRenderComplete]);
+
+  const handleMarkdownRender = useCallback(() => {
+    setIsRenderComplete(true);
+  }, []);
+
   return (
     <div
       data-test-subj="alertProcessingKeyInsightsContainer"
@@ -113,6 +126,12 @@ const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight, isLoading }) 
           alignItems="center"
           responsive={false}
           data-test-subj="alertProcessingKeyInsightsGreetingGroup"
+          // These props are necessary when rendering the component in export mode.
+          // This attribute signals the export logic that it should wait for this element
+          data-shared-item
+          // This indicates that it finished loading and therefore it can be exported
+          data-render-complete={isRenderComplete}
+          ref={containerRef}
         >
           <EuiFlexItem grow={false}>
             <EuiIcon type="logoElastic" size="m" data-test-subj="alertProcessingKeyInsightsLogo" />
@@ -127,7 +146,11 @@ const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight, isLoading }) 
         <EuiSpacer size="m" />
 
         {insight && !isLoading ? (
-          <Markdown markdown={insight} className="keyInsightMarkdown" />
+          <Markdown
+            onRender={handleMarkdownRender}
+            markdown={insight}
+            className="keyInsightMarkdown"
+          />
         ) : (
           <EuiSkeletonText lines={3} size="s" isLoading={true} />
         )}

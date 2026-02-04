@@ -32,7 +32,7 @@ const layoutManagerMock = {
     children$: new BehaviorSubject<DashboardChildren>({}),
   },
   internalApi: {
-    startComparing$: () => layoutUnsavedChanges$,
+    startComparing: () => layoutUnsavedChanges$,
     serializeLayout: () => {
       const panels = layoutUnsavedChanges$.getValue()?.panels ?? [];
       return {
@@ -52,12 +52,12 @@ const layoutManagerMock = {
 
 const settingsManagerMock = {
   internalApi: {
-    startComparing$: () => new BehaviorSubject<Partial<DashboardSettings>>({}),
+    startComparing: () => new BehaviorSubject<Partial<DashboardSettings>>({}),
   },
 } as unknown as ReturnType<typeof initializeSettingsManager>;
 const unifiedSearchManagerMock = {
   internalApi: {
-    startComparing$: () =>
+    startComparing: () =>
       new BehaviorSubject<
         Partial<Pick<DashboardState, 'filters' | 'query' | 'refresh_interval' | 'time_range'>>
       >({}),
@@ -65,8 +65,7 @@ const unifiedSearchManagerMock = {
 } as unknown as ReturnType<typeof initializeUnifiedSearchManager>;
 const projectRoutingManagerMock = {
   internalApi: {
-    startComparing$: () =>
-      new BehaviorSubject<Partial<Pick<DashboardState, 'project_routing'>>>({}),
+    startComparing: () => new BehaviorSubject<Partial<Pick<DashboardState, 'project_routing'>>>({}),
   },
 } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
 const savedObjectId$ = new BehaviorSubject<string | undefined>('dashboard1234');
@@ -140,13 +139,6 @@ describe('unsavedChangesManager', () => {
                   "type": "testType",
                 },
               ],
-              "references": Array [
-                Object {
-                  "id": "savedObject1",
-                  "name": "savedObjectRef",
-                  "type": "testType",
-                },
-              ],
               "viewMode": "edit",
             }
           `);
@@ -174,7 +166,7 @@ describe('unsavedChangesManager', () => {
       >({});
       const customProjectRoutingManagerMock = {
         internalApi: {
-          startComparing$: () => projectRoutingChanges$,
+          startComparing: () => projectRoutingChanges$,
         },
       } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
 
@@ -208,7 +200,7 @@ describe('unsavedChangesManager', () => {
       >({});
       const customProjectRoutingManagerMock = {
         internalApi: {
-          startComparing$: () => projectRoutingChanges$,
+          startComparing: () => projectRoutingChanges$,
         },
       } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
 

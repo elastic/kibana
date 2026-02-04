@@ -20,6 +20,8 @@ interface HostDocument extends Fields {
   'host.name': string;
   'metricset.name'?: string;
   'event.module'?: string;
+  'data_stream.dataset'?: string;
+  'event.dataset'?: string;
   'service.name'?: string;
   'host.ip'?: string;
   'host.os.name'?: string;

@@ -38,6 +38,8 @@ export type ApmUserAgentFields = Partial<{
 
 export interface ApmException {
   message: string;
+  type?: string;
+  stacktrace?: APMStacktrace[];
 }
 
 export interface Observer {
@@ -125,6 +127,7 @@ export type ApmFields = Fields<{
     'error.id': string;
     'error.type': string;
     'error.culprit': string;
+    'error.stack_trace': string;
     'event.ingested': string;
     'event.name': string;
     'event.action': string;
@@ -153,6 +156,7 @@ export type ApmFields = Fields<{
     'http.response.status_code': number;
     'kubernetes.pod.name': string;
     'kubernetes.pod.uid': string;
+    'kubernetes.namespace': string;
     'labels.name': string;
     'labels.telemetry_auto_version': string;
     'labels.lifecycle_state': string;
@@ -213,6 +217,7 @@ export type ApmFields = Fields<{
     'url.original': string;
     'url.domain': string;
     'url.full': string;
+    'url.path': string;
   }> &
   ApmApplicationMetricFields &
   ExperimentalFields;

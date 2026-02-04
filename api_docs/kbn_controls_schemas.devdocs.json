@@ -20,6 +20,8 @@
         "label": "HasCustomPrepend",
         "description": [],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -34,6 +36,8 @@
               "React.FunctionComponent<{}>"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -49,6 +53,8 @@
                   "P"
                 ],
                 "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1109,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -63,6 +69,8 @@
                   "any"
                 ],
                 "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1109,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -79,6 +87,8 @@
         "label": "LegacyIgnoreParentSettings",
         "description": [],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -93,6 +103,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -107,6 +119,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -121,6 +135,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -135,6 +151,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -152,9 +170,11 @@
         "label": "ControlsGroupState",
         "description": [],
         "signature": [
-          "{ readonly controls: (Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; selectedOptions?: (string | number)[] | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ timesliceStartAsPercentageOfTimeRange?: number | undefined; timesliceEndAsPercentageOfTimeRange?: number | undefined; isAnchored?: boolean | undefined; } & {}>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; availableOptions?: string[] | undefined; } & { selectedOptions: string[]; variableName: string; variableType: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esqlQuery: string; controlType: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>)[]; }"
+          "(Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; selectedOptions?: (string | number)[] | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ timesliceStartAsPercentageOfTimeRange?: number | undefined; timesliceEndAsPercentageOfTimeRange?: number | undefined; isAnchored?: boolean | undefined; } & {}>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; availableOptions?: string[] | undefined; } & { selectedOptions: string[]; variableName: string; variableType: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esqlQuery: string; controlType: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>)[]"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -170,6 +190,8 @@
           "{ readonly title?: string | undefined; readonly description?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -185,6 +207,8 @@
           "\"small\" | \"medium\" | \"large\""
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -200,6 +224,8 @@
           "{ readonly title?: string | undefined; readonly description?: string | undefined; readonly useGlobalFilters?: boolean | undefined; readonly ignoreValidations?: boolean | undefined; readonly fieldName: string; readonly dataViewId: string; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -215,6 +241,8 @@
           "Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; selectedOptions?: (string | number)[] | undefined; } & { fieldName: string; dataViewId: string; }> | Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; availableOptions?: string[] | undefined; } & { selectedOptions: string[]; variableName: string; variableType: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esqlQuery: string; controlType: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -230,6 +258,8 @@
           "{ readonly placeholder?: string | undefined; readonly hideActionBar?: boolean | undefined; readonly hideExclude?: boolean | undefined; readonly hideExists?: boolean | undefined; readonly hideSort?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -245,6 +275,8 @@
           "{ readonly sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; readonly title?: string | undefined; readonly description?: string | undefined; readonly useGlobalFilters?: boolean | undefined; readonly ignoreValidations?: boolean | undefined; readonly displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; readonly searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; readonly existsSelected?: boolean | undefined; readonly runPastTimeout?: boolean | undefined; readonly singleSelect?: boolean | undefined; readonly exclude?: boolean | undefined; readonly selectedOptions?: (string | number)[] | undefined; readonly fieldName: string; readonly dataViewId: string; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -260,6 +292,8 @@
           "{ readonly sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; readonly title?: string | undefined; readonly description?: string | undefined; readonly displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; readonly searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; readonly existsSelected?: boolean | undefined; readonly runPastTimeout?: boolean | undefined; readonly singleSelect?: boolean | undefined; readonly exclude?: boolean | undefined; readonly availableOptions?: string[] | undefined; readonly selectedOptions: string[]; readonly variableName: string; readonly variableType: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; readonly esqlQuery: string; readonly controlType: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -275,6 +309,8 @@
           "\"prefix\" | \"wildcard\" | \"exact\""
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -290,6 +326,8 @@
           "string | number"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -305,6 +343,8 @@
           "{ readonly by: \"_key\" | \"_count\"; readonly direction: \"asc\" | \"desc\"; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -320,6 +360,8 @@
           "Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & {}> & { order: number; type: \"optionsListControl\" | \"rangeSliderControl\" | \"timeSlider\" | \"esqlControl\"; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -335,6 +377,8 @@
           "Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; selectedOptions?: (string | number)[] | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ timesliceStartAsPercentageOfTimeRange?: number | undefined; timesliceEndAsPercentageOfTimeRange?: number | undefined; isAnchored?: boolean | undefined; } & {}>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; availableOptions?: string[] | undefined; } & { selectedOptions: string[]; variableName: string; variableType: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esqlQuery: string; controlType: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -350,6 +394,8 @@
           "{ readonly value?: string[] | undefined; readonly title?: string | undefined; readonly step?: number | undefined; readonly description?: string | undefined; readonly useGlobalFilters?: boolean | undefined; readonly ignoreValidations?: boolean | undefined; readonly fieldName: string; readonly dataViewId: string; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -365,6 +411,8 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -380,6 +428,8 @@
           "[number, number]"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -395,6 +445,8 @@
           "{ readonly timesliceStartAsPercentageOfTimeRange?: number | undefined; readonly timesliceEndAsPercentageOfTimeRange?: number | undefined; readonly isAnchored?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -413,20 +465,14 @@
             "pluginId": "@kbn/config-schema",
             "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.ObjectType",
-            "text": "ObjectType"
-          },
-          "<{ controls: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<(Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; selectedOptions?: (string | number)[] | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ timesliceStartAsPercentageOfTimeRange?: number | undefined; timesliceEndAsPercentageOfTimeRange?: number | undefined; isAnchored?: boolean | undefined; } & {}>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; availableOptions?: string[] | undefined; } & { selectedOptions: string[]; variableName: string; variableType: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esqlQuery: string; controlType: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>)[]>; }>"
+          "<(Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; selectedOptions?: (string | number)[] | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ timesliceStartAsPercentageOfTimeRange?: number | undefined; timesliceEndAsPercentageOfTimeRange?: number | undefined; isAnchored?: boolean | undefined; } & {}>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; availableOptions?: string[] | undefined; } & { selectedOptions: string[]; variableName: string; variableType: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esqlQuery: string; controlType: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>)[]>"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/controls_group_schema.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

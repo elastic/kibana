@@ -55,7 +55,7 @@ interface DashboardSaveModalProps {
   showStoreProjectRoutingOnSave?: boolean;
   customModalTitle?: string;
   accessControl?: Partial<SavedObjectAccessControl>;
-  isDuplicateAction?: boolean;
+  showAccessContainer?: boolean;
 }
 
 type SaveDashboardHandler = (args: {
@@ -79,7 +79,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   timeRestore,
   projectRoutingRestore,
   accessControl,
-  isDuplicateAction,
+  showAccessContainer,
 }) => {
   const [selectedTags, setSelectedTags] = React.useState<string[]>(tags ?? []);
   const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
@@ -196,7 +196,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
             </EuiFlexGroup>
           </EuiFormRow>
         ) : null}
-        {!isDuplicateAction && (
+        {showAccessContainer && (
           <>
             <EuiSpacer size="l" />
             <AccessModeContainer
@@ -218,7 +218,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
     showStoreTimeOnSave,
     showStoreProjectRoutingOnSave,
     accessControl,
-    isDuplicateAction,
+    showAccessContainer,
   ]);
 
   return (

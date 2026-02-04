@@ -104,6 +104,10 @@ export interface ConstructorOptions {
   actionExecutor: ActionExecutorContract;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   request: KibanaRequest;
+  /**
+   * Optional space override. When set, connector operations and executions will be scoped to this spaceId
+   */
+  spaceId?: string;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
@@ -126,6 +130,7 @@ export interface ActionsClientContext {
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
+  spaceId?: string;
   authorization: ActionsAuthorization;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   auditLogger?: AuditLogger;
@@ -153,6 +158,7 @@ export class ActionsClient {
     actionExecutor,
     bulkExecutionEnqueuer,
     request,
+    spaceId,
     authorization,
     auditLogger,
     usageCounter,
@@ -173,6 +179,7 @@ export class ActionsClient {
       actionExecutor,
       bulkExecutionEnqueuer,
       request,
+      spaceId,
       authorization,
       auditLogger,
       usageCounter,

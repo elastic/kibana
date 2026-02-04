@@ -65,7 +65,7 @@ export class WorkflowsPlugin
   ) {
     this.logger.debug('Workflows Management: Setup');
 
-    registerUISettings({ uiSettings: core.uiSettings });
+    registerUISettings(core, plugins);
 
     // Register workflows connector if actions plugin is available
     if (plugins.actions) {

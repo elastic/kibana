@@ -26,6 +26,7 @@ import type {
   BedrockClientSendParamsSchema,
   ConverseActionParamsSchema,
   ConverseStreamActionParamsSchema,
+  ConverseResponseSchema,
 } from '../schemas/v1';
 
 export type Config = z.input<typeof ConfigSchema>;
@@ -38,6 +39,7 @@ export type InvokeAIRawActionResponse = z.infer<typeof InvokeAIRawActionResponse
 export type RunApiLatestResponse = z.infer<typeof RunApiLatestResponseSchema>;
 export type RunActionResponse = z.infer<typeof RunActionResponseSchema>;
 export type StreamingResponse = z.infer<typeof StreamingResponseSchema>;
+export type ConverseResponse = z.infer<typeof ConverseResponseSchema>;
 export type DashboardActionParams = z.infer<typeof DashboardActionParamsSchema>;
 export type DashboardActionResponse = z.infer<typeof DashboardActionResponseSchema>;
 export type BedrockMessage = z.infer<typeof BedrockMessageSchema>;

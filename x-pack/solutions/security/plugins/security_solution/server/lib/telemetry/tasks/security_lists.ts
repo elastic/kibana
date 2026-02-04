@@ -6,7 +6,7 @@
  */
 
 import type { LogMeta, Logger } from '@kbn/core/server';
-import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
   LIST_ENDPOINT_EXCEPTION,
   LIST_ENDPOINT_EVENT_FILTER,
@@ -98,7 +98,9 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
 
         // Lists Telemetry: Endpoint Exceptions
 
-        const epExceptions = await receiver.fetchEndpointList(ENDPOINT_LIST_ID);
+        const epExceptions = await receiver.fetchEndpointList(
+          ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+        );
         if (epExceptions?.data) {
           const epExceptionsJson = templateExceptionList(
             epExceptions.data,

@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await lens.dragFieldToWorkspace('runtimefield');
         });
         await lens.waitForVisualization();
-        expect(await lens.getDatatableHeaderText(0)).to.equal('Top 5 values of runtimefield');
+        expect(await lens.getDatatableHeaderText(0)).to.equal('Top 9 values of runtimefield');
         expect(await lens.getDatatableCellText(0, 0)).to.eql('https://www.elastic.co?CN');
       });
 

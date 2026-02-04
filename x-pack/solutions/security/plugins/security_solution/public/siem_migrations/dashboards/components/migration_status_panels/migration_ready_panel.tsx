@@ -60,6 +60,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
     telemetry.reportSetupMigrationOpenResources({
       migrationId: migrationStats.id,
       missingResourcesCount: missingResourceCount,
+      vendor: migrationStats.vendor,
     });
   }, [migrationStats, openFlyout, telemetry, missingResourceCount]);
 
@@ -82,9 +83,9 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
   const { startMigration, isLoading: isStarting } = useStartMigration();
   const onStartMigrationWithSettings = useCallback(
     (settings: MigrationSettingsBase) => {
-      startMigration(migrationId, undefined, settings);
+      startMigration(migrationStats, undefined, settings);
     },
-    [migrationId, startMigration]
+    [migrationStats, startMigration]
   );
   const { modal: startMigrationModal, showModal: showStartMigrationModal } =
     useStartDashboardsMigrationModal({
@@ -131,7 +132,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
           )}
           <EuiFlexItem grow={false}>
             <StartTranslationButton
-              migrationId={migrationStats.id}
+              migrationStats={migrationStats}
               isStopped={isStopped}
               startMigration={isStopped ? startMigration : showStartMigrationModal}
               isStarting={isStarting}

@@ -15,6 +15,8 @@
         "label": "coreLifecycleMock",
         "description": [],
         "path": "src/core/packages/lifecycle/browser-mocks/src/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -145,6 +147,8 @@
               ">; plugins: { onSetup: jest.Mock<any, any, any>; onStart: jest.Mock<any, any, any>; }; }"
             ],
             "path": "src/core/packages/lifecycle/browser-mocks/src/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -160,6 +164,8 @@
                   "{ basePath?: string | undefined; pluginStartDeps?: object | undefined; pluginStartContract?: any; }"
                 ],
                 "path": "src/core/packages/lifecycle/browser-mocks/src/core_setup.mock.ts",
+                "lineNumber": 29,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -248,6 +254,8 @@
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }"
             ],
             "path": "src/core/packages/lifecycle/browser-mocks/src/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -263,6 +271,8 @@
                   "{ basePath?: string | undefined; }"
                 ],
                 "path": "src/core/packages/lifecycle/browser-mocks/src/core_start.mock.ts",
+                "lineNumber": 32,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
               }

@@ -154,7 +154,14 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<StaticLookupFo
 
     return (
       <Fragment>
-        <EuiBasicTable items={items} columns={columns} css={{ maxWidth: '400px' }} />
+        <EuiBasicTable
+          items={items}
+          columns={columns}
+          css={{ maxWidth: '400px' }}
+          tableCaption={i18n.translate('indexPatternFieldEditor.staticLookup.tableCaption', {
+            defaultMessage: 'Static lookup entries',
+          })}
+        />
         <EuiSpacer size="m" />
         <EuiButton
           iconType="plusInCircle"

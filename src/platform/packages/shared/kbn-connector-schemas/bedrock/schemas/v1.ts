@@ -156,6 +156,22 @@ export const InvokeAIRawActionParamsSchema = z
 
 export const InvokeAIRawActionResponseSchema = z.object({}).passthrough();
 
+export const ConverseResponseSchema = z
+  .object({
+    output: z.object({
+      message: z.object({}).passthrough().optional(),
+    }),
+    stopReason: z.string().optional(),
+    usage: z
+      .object({
+        inputToken: z.number().optional(),
+        outputTokens: z.number().optional(),
+        totalTokens: z.number().optional(),
+      })
+      .passthrough(),
+  })
+  .passthrough();
+
 export const RunApiLatestResponseSchema = z
   .object({
     stop_reason: z.string().optional(),

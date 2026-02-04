@@ -38,6 +38,8 @@
           "<DefaultEventMap>"
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -52,6 +54,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -66,6 +70,8 @@
                   "any"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "lineNumber": 41,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -81,6 +87,8 @@
                   "PersistedStatePath | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "lineNumber": 41,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -99,6 +107,8 @@
               "(key?: PersistedStateKey, defaultValue?: any) => any"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -113,6 +123,8 @@
                   "PersistedStateKey"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "lineNumber": 58,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -128,6 +140,8 @@
                   "any"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "lineNumber": 58,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -146,6 +160,8 @@
               "(key: any, value?: any) => this"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -160,6 +176,8 @@
                   "any"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "lineNumber": 67,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -175,6 +193,8 @@
                   "any"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "lineNumber": 67,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -193,6 +213,8 @@
               "(key: any, value?: any) => this | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -207,6 +229,8 @@
                   "any"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "lineNumber": 75,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -222,6 +246,8 @@
                   "any"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "lineNumber": 75,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -240,6 +266,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -256,6 +284,8 @@
               "(path: PersistedStatePath) => void"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -270,6 +300,8 @@
                   "PersistedStatePath"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "lineNumber": 89,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -288,6 +320,8 @@
               "() => any"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -304,6 +338,8 @@
               "() => any"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -320,6 +356,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -336,6 +374,8 @@
               "(input: string) => this"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -350,6 +390,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "lineNumber": 118,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -378,6 +420,8 @@
           " extends React.Component<VisualizationErrorProps, {}, any>"
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_error.tsx",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -392,6 +436,8 @@
               "() => React.JSX.Element"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_error.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -408,6 +454,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_error.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -424,6 +472,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_error.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -450,6 +500,8 @@
           " extends React.Component<VisualizationNoResultsProps, {}, any>"
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_noresults.tsx",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -464,6 +516,8 @@
               "() => React.JSX.Element"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_noresults.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -480,6 +534,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_noresults.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -496,6 +552,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_noresults.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -521,6 +579,8 @@
           ") => string"
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/timezone.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -535,6 +595,8 @@
               "IUiSettingsClient"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/timezone.ts",
+            "lineNumber": 16,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -607,7 +669,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; variable?: string | undefined; }[]; type: \"datatable\"; meta?: ",
+          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; isComputedColumn?: boolean | undefined; variable?: string | undefined; }[]; type: \"datatable\"; meta?: ",
           "DatatableMeta",
           " | undefined; rows: ",
           {
@@ -620,6 +682,8 @@
           "[]; warning?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/prepare_log_table.ts",
+        "lineNumber": 87,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -640,6 +704,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/prepare_log_table.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -670,6 +736,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/prepare_log_table.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -685,6 +753,8 @@
               "boolean"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/prepare_log_table.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -706,6 +776,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_container.tsx",
+        "lineNumber": 52,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -720,6 +792,8 @@
               "VisualizationContainerProps"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_container.tsx",
+            "lineNumber": 52,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -738,6 +812,8 @@
         "label": "VisParams",
         "description": [],
         "path": "src/platform/packages/shared/kbn-visualizations-common/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -752,6 +828,8 @@
               "[key: string]:  any"
             ],
             "path": "src/platform/packages/shared/kbn-visualizations-common/types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -772,6 +850,8 @@
           "[DimensionColumn[] | undefined, string]"
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/prepare_log_table.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -787,6 +867,8 @@
           "\"_g\""
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -810,6 +892,8 @@
           "]"
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/prepare_log_table.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -825,6 +909,8 @@
           "\"savedObjects:listingLimit\""
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -840,6 +926,8 @@
           "\"savedObjects:perPage\""
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -855,6 +943,8 @@
           "\"_a\""
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -870,6 +960,8 @@
           "\"visualize\""
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -885,6 +977,8 @@
           "\"visualization\""
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -900,6 +994,8 @@
           "\"visualization\""
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -912,6 +1008,8 @@
         "label": "visualizeClassName",
         "description": [],
         "path": "src/platform/packages/shared/kbn-visualizations-common/vis.styles.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -929,6 +1027,8 @@
           "SerializedStyles"
         ],
         "path": "src/platform/packages/shared/kbn-visualizations-common/vis.styles.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -941,6 +1041,8 @@
         "label": "VisualizeConstants",
         "description": [],
         "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -952,6 +1054,8 @@
             "label": "VISUALIZE_BASE_PATH",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -963,6 +1067,8 @@
             "label": "LANDING_PAGE_PATH",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -974,6 +1080,8 @@
             "label": "LANDING_PAGE_PATH_WITH_TAB",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -985,6 +1093,8 @@
             "label": "WIZARD_STEP_1_PAGE_PATH",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -996,6 +1106,8 @@
             "label": "WIZARD_STEP_2_PAGE_PATH",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1007,6 +1119,8 @@
             "label": "CREATE_PATH",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1018,6 +1132,8 @@
             "label": "EDIT_PATH",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1029,6 +1145,8 @@
             "label": "EDIT_BY_VALUE_PATH",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1040,6 +1158,8 @@
             "label": "APP_ID",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

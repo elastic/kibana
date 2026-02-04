@@ -15,7 +15,6 @@ export default createStatefulTestConfig({
     reportName: 'X-Pack Agent Builder Functional Tests',
   },
   kbnServerArgs: [
-    '--uiSettings.overrides.agentBuilder:enabled=true',
     `--logging.loggers=${JSON.stringify([
       { name: 'plugins.agentBuilder', level: 'debug', appenders: ['console'] },
     ])}`,

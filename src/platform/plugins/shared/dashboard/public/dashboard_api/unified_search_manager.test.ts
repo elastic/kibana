@@ -13,7 +13,7 @@ import type { DashboardState } from '../../common';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 
 describe('initializeUnifiedSearchManager', () => {
-  describe('startComparing$', () => {
+  describe('startComparing', () => {
     test('Should return no changes when there are no changes', (done) => {
       const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
       const unifiedSearchManager = initializeUnifiedSearchManager(
@@ -25,7 +25,7 @@ describe('initializeUnifiedSearchManager', () => {
           useUnifiedSearchIntegration: false,
         }
       );
-      unifiedSearchManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+      unifiedSearchManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
         expect(changes).toMatchInlineSnapshot(`Object {}`);
         done();
       });
@@ -43,7 +43,7 @@ describe('initializeUnifiedSearchManager', () => {
             useUnifiedSearchIntegration: false,
           }
         );
-        unifiedSearchManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+        unifiedSearchManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
           expect(changes).toMatchInlineSnapshot(`Object {}`);
           done();
         });
@@ -65,7 +65,7 @@ describe('initializeUnifiedSearchManager', () => {
             useUnifiedSearchIntegration: false,
           }
         );
-        unifiedSearchManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+        unifiedSearchManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
           expect(changes).toMatchInlineSnapshot(`
             Object {
               "time_range": Object {
@@ -97,7 +97,7 @@ describe('initializeUnifiedSearchManager', () => {
         );
         let emitCount = 0;
         unifiedSearchManager.internalApi
-          .startComparing$(lastSavedState$)
+          .startComparing(lastSavedState$)
           .pipe(take(2))
           .subscribe((changes) => {
             emitCount++;

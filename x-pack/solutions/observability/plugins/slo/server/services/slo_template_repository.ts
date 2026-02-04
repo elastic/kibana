@@ -10,6 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import * as t from 'io-ts';
 import {
   budgetingMethodSchema,
+  dashboardsWithIdSchema,
   indicatorSchema,
   objectiveSchema,
   optionalSettingsSchema,
@@ -123,6 +124,10 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
 
       if (stored.groupBy && t.array(t.string).is(stored.groupBy)) {
         template.groupBy = stored.groupBy;
+      }
+
+      if (stored.artifacts && dashboardsWithIdSchema.is(stored.artifacts)) {
+        template.artifacts = stored.artifacts;
       }
 
       return template;

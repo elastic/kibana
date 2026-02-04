@@ -54,13 +54,16 @@ export const useListDetailsView = (exceptionListId: string) => {
   const { navigateToApp } = services.application;
 
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
-  const { read: canReadRules, edit: canEditRules } = useUserPrivileges().rulesPrivileges;
+  const {
+    exceptions: { edit: canEditExceptions },
+    rules: { read: canReadRules },
+  } = useUserPrivileges().rulesPrivileges;
 
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
   const canUserWriteCurrentList =
     exceptionListId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
       ? canWriteEndpointExceptions
-      : canEditRules;
+      : canEditExceptions;
 
   const [isLoading, setIsLoading] = useState<boolean>();
   const [showManageButtonLoader, setShowManageButtonLoader] = useState<boolean>(false);
@@ -242,12 +245,12 @@ export const useListDetailsView = (exceptionListId: string) => {
   // #region DeleteList
 
   const handleDeleteSuccess = useCallback(
-    (listId?: string) => () => {
+    (listName: string) => () => {
       notifications.toasts.addSuccess({
-        title: i18n.exceptionDeleteSuccessMessage(listId ?? referenceModalState.listId),
+        title: i18n.exceptionDeleteSuccessMessage(listName),
       });
     },
-    [notifications.toasts, referenceModalState.listId]
+    [notifications.toasts]
   );
 
   const handleDeleteError = useCallback(
@@ -264,17 +267,20 @@ export const useListDetailsView = (exceptionListId: string) => {
         id: list.id,
         namespaceType: list.namespace_type,
         onError: handleDeleteError,
-        onSuccess: handleDeleteSuccess,
+        onSuccess: () => {
+          handleDeleteSuccess(list.name)();
+          setReferenceModalState(exceptionReferenceModalInitialState);
+          setShowReferenceErrorModal(false);
+          navigateToApp(APP_UI_ID, {
+            deepLinkId: SecurityPageName.exceptions,
+            path: '',
+          });
+        },
       });
     } catch (error) {
       handleErrorStatus(error);
-    } finally {
       setReferenceModalState(exceptionReferenceModalInitialState);
       setShowReferenceErrorModal(false);
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.exceptions,
-        path: '',
-      });
     }
   }, [
     list,
@@ -416,7 +422,7 @@ export const useListDetailsView = (exceptionListId: string) => {
     listName: list?.name,
     listDescription: list?.description,
     listId: exceptionListId,
-    canUserEditList,
+    canUserEditList: canUserEditList && canUserWriteCurrentList,
     linkedRules,
     exportedList,
     handleOnDownload,

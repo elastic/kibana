@@ -8,7 +8,6 @@
  */
 
 import {
-  EuiBetaBadge,
   EuiButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -71,33 +70,7 @@ export function WorkflowsPage() {
           <EuiFlexItem>
             <EuiPageHeader
               pageTitle={
-                <EuiFlexGroup
-                  alignItems="center"
-                  justifyContent="flexStart"
-                  gutterSize="m"
-                  responsive={false}
-                  wrap={false}
-                >
-                  <EuiFlexItem grow={false}>
-                    <FormattedMessage
-                      id="workflows.pageTitle"
-                      defaultMessage="Workflows"
-                      ignoreTag
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBetaBadge
-                      label={
-                        <FormattedMessage
-                          id="workflows.technicalPreviewBadge"
-                          defaultMessage="Technical Preview"
-                        />
-                      }
-                      title="Technical Preview"
-                      size="s"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <FormattedMessage id="workflows.pageTitle" defaultMessage="Workflows" ignoreTag />
               }
             />
           </EuiFlexItem>

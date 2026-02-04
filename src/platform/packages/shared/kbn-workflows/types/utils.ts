@@ -16,6 +16,7 @@ import type {
 } from './v1';
 import { ExecutionStatus, KNOWN_HTTP_METHODS, TerminalExecutionStatuses } from './v1';
 import type {
+  BuiltInStepProperty,
   BuiltInStepType,
   ElasticsearchStep,
   ForEachStep,
@@ -29,7 +30,7 @@ import type {
   WaitStep,
   WorkflowYaml,
 } from '../spec/schema';
-import { BuiltInStepTypes, TriggerTypes } from '../spec/schema';
+import { BuiltInStepProperties, BuiltInStepTypes, TriggerTypes } from '../spec/schema';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
@@ -98,3 +99,6 @@ export const isDynamicConnector = (
 
 export const isHttpMethod = (method: string): method is HttpMethod =>
   KNOWN_HTTP_METHODS.includes(method as HttpMethod);
+
+export const isBuiltInStepProperty = (property: string): property is BuiltInStepProperty =>
+  BuiltInStepProperties.includes(property as BuiltInStepProperty);

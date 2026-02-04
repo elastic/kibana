@@ -12,6 +12,8 @@
         "label": "StreamsApplicationProps",
         "description": [],
         "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,6 +29,8 @@
               "<unknown>"
             ],
             "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -55,6 +59,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -70,6 +76,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -84,6 +92,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -100,6 +110,8 @@
       "label": "StreamsAppPublicSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+      "lineNumber": 77,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -114,6 +126,8 @@
       "label": "StreamsAppPublicStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+      "lineNumber": 79,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -136,6 +150,8 @@
       "label": "StreamsAppServerSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams_app/server/types.ts",
+      "lineNumber": 21,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -150,6 +166,8 @@
       "label": "StreamsAppServerStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams_app/server/types.ts",
+      "lineNumber": 23,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -169,6 +187,8 @@
         "label": "EntityTypeDefinition",
         "description": [],
         "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -180,6 +200,8 @@
             "label": "displayName",
             "description": [],
             "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -198,16 +220,12 @@
         "description": [],
         "signature": [
           "EntityBase & { type: \"stream\"; properties: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Streams",
-            "text": "Streams"
-          },
+          "IngestStream",
           ".all.Definition; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -221,16 +239,12 @@
         "description": [],
         "signature": [
           "EntityBase & { type: \"stream\"; properties: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Streams",
-            "text": "Streams"
-          },
+          "IngestStream",
           ".all.Definition; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -255,6 +269,8 @@
           "; } | { name: string; managementTab: string; pageState: never; })"
         ],
         "path": "x-pack/platform/plugins/shared/streams_app/common/locators/streams_locator.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

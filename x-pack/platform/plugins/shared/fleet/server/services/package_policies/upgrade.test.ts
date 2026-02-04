@@ -394,7 +394,17 @@ describe('Upgrade', () => {
             type: 'abcd',
             references: [],
             version: '0.9.0',
-            attributes: { ...createPackagePolicyMock(), id, name: id },
+            attributes: {
+              ...createPackagePolicyMock(),
+              id,
+              name: id,
+              ...{
+                package: {
+                  name: 'endpoint',
+                  version: '1.0.0',
+                },
+              },
+            },
           })),
         })
       );

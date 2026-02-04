@@ -208,14 +208,18 @@ export class ActionTypeRegistry {
     });
 
     this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
-    this.taskManager.registerTaskDefinitions({
-      [`actions:${actionType.id}`]: {
-        title: actionType.name,
-        maxAttempts,
-        cost: TaskCost.Tiny,
-        createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
-      },
-    });
+
+    // Skip task type registration for connectors without execute/params
+    if (actionType.executor && actionType.validate.params) {
+      this.taskManager.registerTaskDefinitions({
+        [`actions:${actionType.id}`]: {
+          title: actionType.name,
+          maxAttempts,
+          cost: TaskCost.Tiny,
+          createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
+        },
+      });
+    }
     // No need to notify usage on basic action types
     if (actionType.minimumLicenseRequired !== 'basic') {
       this.licensing.featureUsage.register(
@@ -268,7 +272,7 @@ export class ActionTypeRegistry {
         isSystemActionType: !!actionType.isSystemActionType,
         source: actionType.source || ACTION_TYPE_SOURCES.stack,
         subFeature: actionType.subFeature,
-        ...(exposeValidation === true
+        ...(exposeValidation === true && actionType.validate.params
           ? {
               validate: {
                 params: actionType.validate.params,

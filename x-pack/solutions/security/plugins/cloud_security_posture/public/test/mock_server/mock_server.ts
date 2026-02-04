@@ -163,8 +163,10 @@ export const getMockServerDependencies = () => {
         },
       },
       dataViewFieldEditor: dataViewFieldEditorMock.createStartContract(),
+      kql: {
+        ...getMockDependencies().kql,
+      },
       unifiedSearch: {
-        ...getMockDependencies().unifiedSearch,
         ui: {
           ...getMockDependencies().unifiedSearch.ui,
           SearchBar,

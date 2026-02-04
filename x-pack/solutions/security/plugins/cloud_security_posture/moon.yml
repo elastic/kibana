@@ -78,6 +78,7 @@ dependsOn:
   - '@kbn/shared-ux-card-no-data'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/react-query'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

@@ -93,9 +93,8 @@ export const EmbeddableRenderer = <
             } as unknown as Api;
           };
 
-          const initialState = parentApi.getSerializedStateForChild(uuid) ?? {
-            rawState: {} as SerializedState,
-          };
+          const initialState =
+            parentApi.getSerializedStateForChild(uuid) ?? ({} as SerializedState);
           const { api, Component } = await factory.buildEmbeddable({
             initialState,
             finalizeApi,

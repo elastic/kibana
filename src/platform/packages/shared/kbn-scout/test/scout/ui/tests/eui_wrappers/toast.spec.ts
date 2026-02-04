@@ -11,7 +11,8 @@ import { test, expect } from '../../../../../src/playwright';
 import { EuiToastWrapper } from '../../../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../../fixtures/eui_helpers';
 
-test.describe('EUI testing wrapper: EuiToast', { tag: ['@svlSecurity', '@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/243243
+test.describe.skip('EUI testing wrapper: EuiToast', { tag: ['@svlSecurity', '@ess'] }, () => {
   test(`toast`, async ({ page, log }) => {
     const selector = {
       locator: '.euiToast[type="info"]',

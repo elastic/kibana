@@ -15,6 +15,8 @@
         "label": "pluginsServiceMock",
         "description": [],
         "path": "src/core/packages/plugins/browser-mocks/src/plugins_service.mock.ts",
+        "lineNumber": 82,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,6 +31,8 @@
               "() => jest.Mocked<PluginsServiceContract>"
             ],
             "path": "src/core/packages/plugins/browser-mocks/src/plugins_service.mock.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -46,6 +50,8 @@
               "InternalPluginsServiceSetup"
             ],
             "path": "src/core/packages/plugins/browser-mocks/src/plugins_service.mock.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -63,6 +69,8 @@
               "InternalPluginsServiceSetup"
             ],
             "path": "src/core/packages/plugins/browser-mocks/src/plugins_service.mock.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -89,6 +97,8 @@
               "<object>"
             ],
             "path": "src/core/packages/plugins/browser-mocks/src/plugins_service.mock.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -104,6 +114,8 @@
                   "unknown"
                 ],
                 "path": "src/core/packages/plugins/browser-mocks/src/plugins_service.mock.ts",
+                "lineNumber": 38,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -126,6 +138,8 @@
                   " | undefined; }"
                 ],
                 "path": "src/core/packages/plugins/browser-mocks/src/plugins_service.mock.ts",
+                "lineNumber": 39,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }

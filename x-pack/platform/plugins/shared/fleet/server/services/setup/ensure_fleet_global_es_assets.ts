@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
-import pMap from 'p-map';
-
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ensureDefaultComponentTemplates } from '../epm/elasticsearch/template/install';
@@ -15,9 +12,14 @@ import {
   ensureFleetEventIngestedPipelineIsInstalled,
   ensureFleetFinalPipelineIsInstalled,
 } from '../epm/elasticsearch/ingest_pipeline/install';
-import { getInstallations, reinstallPackageForInstallation } from '../epm/packages';
 
-import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../../constants';
+import { appContextService } from '../app_context';
+import { scheduleSetupTask } from '../../tasks/setup/schedule';
+
+interface GlobalAssetResult {
+  isCreated: boolean;
+  name: string;
+}
 
 /**
  * Ensure ES assets shared by all Fleet index template are installed
@@ -45,26 +47,25 @@ export async function ensureFleetGlobalEsAssets(
   ]);
 
   if (options?.reinstallPackages) {
-    const assetResults = globalAssetsRes.flat();
-    if (assetResults.some((asset) => asset.isCreated)) {
-      // Update existing index template
-      const installedPackages = await getInstallations(soClient);
-      await pMap(
-        installedPackages.saved_objects,
-        async ({ attributes: installation }) => {
-          await reinstallPackageForInstallation({
-            soClient,
-            esClient,
-            installation,
-          }).catch((err) => {
-            apm.captureError(err);
-            logger.error(
-              `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets: ${err.message}`
-            );
-          });
-        },
-        { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
+    const assetResults = globalAssetsRes.flat() as GlobalAssetResult[];
+    const createdAssets = assetResults.filter((asset) => asset.isCreated);
+
+    if (createdAssets.length > 0) {
+      logger.info(
+        `Global Fleet assets changed (${createdAssets.length} created: ${createdAssets
+          .map((a) => a.name)
+          .join(', ')}). Scheduling package reinstallation task.`
       );
+
+      const taskManager = appContextService.getTaskManagerStart();
+      if (taskManager) {
+        await scheduleSetupTask(taskManager, { type: 'reinstallPackagesForGlobalAssetUpdate' });
+      } else {
+        logger.warn(
+          'Task manager not available, skipping deferred package reinstallation. ' +
+            'Packages may need to be manually reinstalled.'
+        );
+      }
     }
   }
 }

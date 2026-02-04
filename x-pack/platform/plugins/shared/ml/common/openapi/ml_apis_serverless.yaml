@@ -106,12 +106,7 @@ paths:
           content:
             application/json:
               examples:
-                successADResponse:
-                  value:
-                    'test-model':
-                      success: true
-                      type: 'anomaly-detector'
-                successDFAResponse:
+                successTMResponse:
                   value:
                     'test-model':
                       success: true

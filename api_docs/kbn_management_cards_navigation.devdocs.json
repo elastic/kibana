@@ -38,6 +38,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/cards_navigation/src/cards_navigation.tsx",
+        "lineNumber": 145,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,6 +60,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-management/cards_navigation/src/cards_navigation.tsx",
+            "lineNumber": 145,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -76,6 +80,8 @@
         "label": "CardsNavigationComponentProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-management/cards_navigation/src/types.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,6 +97,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-management/cards_navigation/src/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -102,6 +110,8 @@
             "label": "appBasePath",
             "description": [],
             "path": "src/platform/packages/shared/kbn-management/cards_navigation/src/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -116,6 +126,8 @@
               "((e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/cards_navigation/src/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -130,6 +142,8 @@
                   "React.MouseEvent<HTMLAnchorElement, MouseEvent>"
                 ],
                 "path": "src/platform/packages/shared/kbn-management/cards_navigation/src/types.ts",
+                "lineNumber": 65,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -148,6 +162,8 @@
               "(\"transform\" | \"tags\" | \"settings\" | \"dataViews\" | \"spaces\" | \"data_quality\" | \"data_usage\" | \"filesManagement\" | \"pipelines\" | \"maintenanceWindows\" | \"roles\" | \"reporting\" | \"api_keys\" | \"content_connectors\" | \"index_management\" | \"ingest_pipelines\" | \"jobsListLink\" | \"objects\" | \"triggersActions\" | \"triggersActionsConnectors\")[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/cards_navigation/src/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -170,6 +186,8 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/cards_navigation/src/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -188,6 +206,8 @@
           "\napp ids shared by all solutions"
         ],
         "path": "src/platform/packages/shared/kbn-management/cards_navigation/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -205,6 +225,8 @@
           "\"transform\" | \"tags\" | \"settings\" | \"dataViews\" | \"spaces\" | \"data_quality\" | \"data_usage\" | \"filesManagement\" | \"pipelines\" | \"maintenanceWindows\" | \"roles\" | \"reporting\" | \"api_keys\" | \"content_connectors\" | \"index_management\" | \"ingest_pipelines\" | \"jobsListLink\" | \"objects\" | \"triggersActions\" | \"triggersActionsConnectors\""
         ],
         "path": "src/platform/packages/shared/kbn-management/cards_navigation/src/types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -221,6 +243,8 @@
           " & ({ skipValidation?: false | undefined; } | { skipValidation: true; href: string; title: string; })"
         ],
         "path": "src/platform/packages/shared/kbn-management/cards_navigation/src/types.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -238,6 +262,8 @@
           "{ readonly DATA: \"data\"; readonly ACCESS: \"access\"; readonly ALERTS: \"alerts\"; readonly CONTENT: \"content\"; readonly OTHER: \"other\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-management/cards_navigation/src/types.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

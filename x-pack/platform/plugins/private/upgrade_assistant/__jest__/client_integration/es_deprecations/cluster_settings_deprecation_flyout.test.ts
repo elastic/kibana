@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import '@testing-library/jest-dom';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 
-import { setupEnvironment } from '../helpers';
-import type { ElasticsearchTestBed } from './es_deprecations.helpers';
+import { setupEnvironment } from '../helpers/setup_environment';
 import { setupElasticsearchPage } from './es_deprecations.helpers';
 import { esDeprecationsMockResponse } from './mocked_responses';
 import { MOCK_REINDEX_DEPRECATION } from './mocked_responses';
 
 describe('Cluster settings deprecation flyout', () => {
-  let testBed: ElasticsearchTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   const clusterSettingDeprecation = esDeprecationsMockResponse.migrationsDeprecations[4];
 
-  beforeEach(async () => {
+  const openFlyout = async () => {
+    fireEvent.click(screen.getAllByTestId('deprecation-clusterSetting')[0]);
+    return await screen.findByTestId('clusterSettingsDetails');
+  };
+
+  beforeEach(() => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
@@ -35,44 +39,35 @@ describe('Cluster settings deprecation flyout', () => {
         aliases: [],
       },
     });
-
-    await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup);
-    });
-
-    const { actions, component } = testBed;
-    component.update();
-    await actions.table.clickDeprecationRowAt({
-      deprecationType: 'clusterSetting',
-      index: 0,
-    });
   });
 
   test('renders a flyout with deprecation details', async () => {
-    const { find, exists } = testBed;
+    await setupElasticsearchPage(httpSetup);
+    const flyout = await openFlyout();
 
-    expect(exists('clusterSettingsDetails')).toBe(true);
-    expect(find('clusterSettingsDetails.flyoutTitle').text()).toContain(
+    expect(flyout).toBeInTheDocument();
+    expect(within(flyout).getByTestId('flyoutTitle')).toHaveTextContent(
       clusterSettingDeprecation.message
     );
-    expect(find('clusterSettingsDetails.documentationLink').props().href).toBe(
-      clusterSettingDeprecation.url
-    );
-    expect(exists('removeClusterSettingsPrompt')).toBe(true);
+    expect(
+      (within(flyout).getByTestId('documentationLink') as HTMLAnchorElement).getAttribute('href')
+    ).toBe(clusterSettingDeprecation.url);
+    expect(within(flyout).getByTestId('removeClusterSettingsPrompt')).toBeInTheDocument();
   });
 
   it('removes deprecated cluster settings', async () => {
-    const { find, actions, exists } = testBed;
-
     httpRequestsMockHelpers.setClusterSettingsResponse({
       acknowledged: true,
       persistent: {},
       transietn: {},
     });
 
-    expect(exists('clusterSettingsDetails.warningDeprecationBadge')).toBe(true);
+    await setupElasticsearchPage(httpSetup);
+    const flyout = await openFlyout();
 
-    await actions.clusterSettingsDeprecationFlyout.clickDeleteSettingsButton();
+    expect(within(flyout).getByTestId('warningDeprecationBadge')).toBeInTheDocument();
+
+    fireEvent.click(within(flyout).getByTestId('deleteClusterSettingsButton'));
 
     expect(httpSetup.post).toHaveBeenLastCalledWith(
       `/api/upgrade_assistant/cluster_settings`,
@@ -80,26 +75,28 @@ describe('Cluster settings deprecation flyout', () => {
     );
 
     // Verify the "Resolution" column of the table is updated
-    expect(find('clusterSettingsResolutionStatusCell').at(0).text()).toEqual(
-      'Deprecated settings removed'
-    );
-
-    // Reopen the flyout
-    await actions.table.clickDeprecationRowAt({
-      deprecationType: 'clusterSetting',
-      index: 0,
+    await waitFor(() => {
+      expect(screen.getAllByTestId('clusterSettingsResolutionStatusCell')[0]).toHaveTextContent(
+        'Deprecated settings removed'
+      );
     });
 
+    await waitFor(() => {
+      expect(screen.queryByTestId('clusterSettingsDetails')).toBeNull();
+    });
+
+    // Reopen the flyout
+    const reopenedFlyout = await openFlyout();
+
     // Verify prompt to remove setting no longer displays
-    expect(find('removeSettingsPrompt').length).toEqual(0);
+    expect(within(reopenedFlyout).queryByTestId('removeClusterSettingsPrompt')).toBeNull();
     // Verify the action button no longer displays
-    expect(find('clusterSettingsDetails.deleteSettingsButton').length).toEqual(0);
+    expect(within(reopenedFlyout).queryByTestId('deleteClusterSettingsButton')).toBeNull();
     // Verify the badge got marked as resolved
-    expect(exists('clusterSettingsDetails.resolvedDeprecationBadge')).toBe(true);
+    expect(within(reopenedFlyout).getByTestId('resolvedDeprecationBadge')).toBeInTheDocument();
   });
 
   it('handles failure', async () => {
-    const { find, actions } = testBed;
     const error = {
       statusCode: 500,
       error: 'Remove cluster settings error',
@@ -108,7 +105,10 @@ describe('Cluster settings deprecation flyout', () => {
 
     httpRequestsMockHelpers.setClusterSettingsResponse(undefined, error);
 
-    await actions.clusterSettingsDeprecationFlyout.clickDeleteSettingsButton();
+    await setupElasticsearchPage(httpSetup);
+    const flyout = await openFlyout();
+
+    fireEvent.click(within(flyout).getByTestId('deleteClusterSettingsButton'));
 
     expect(httpSetup.post).toHaveBeenLastCalledWith(
       `/api/upgrade_assistant/cluster_settings`,
@@ -116,22 +116,25 @@ describe('Cluster settings deprecation flyout', () => {
     );
 
     // Verify the "Resolution" column of the table is updated
-    expect(find('clusterSettingsResolutionStatusCell').at(0).text()).toEqual(
-      'Settings removal failed'
-    );
-
-    // Reopen the flyout
-    await actions.table.clickDeprecationRowAt({
-      deprecationType: 'clusterSetting',
-      index: 0,
+    await waitFor(() => {
+      expect(screen.getAllByTestId('clusterSettingsResolutionStatusCell')[0]).toHaveTextContent(
+        'Settings removal failed'
+      );
     });
 
+    await waitFor(() => {
+      expect(screen.queryByTestId('clusterSettingsDetails')).toBeNull();
+    });
+
+    // Reopen the flyout
+    const reopenedFlyout = await openFlyout();
+
     // Verify the flyout shows an error message
-    expect(find('clusterSettingsDetails.deleteClusterSettingsError').text()).toContain(
+    expect(within(reopenedFlyout).getByTestId('deleteClusterSettingsError')).toHaveTextContent(
       'Error deleting cluster settings'
     );
     // Verify the remove settings button text changes
-    expect(find('clusterSettingsDetails.deleteClusterSettingsButton').text()).toEqual(
+    expect(within(reopenedFlyout).getByTestId('deleteClusterSettingsButton')).toHaveTextContent(
       'Retry removing deprecated settings'
     );
   });

@@ -38,6 +38,8 @@
           ") => (rowA: Record<string, unknown> | null | undefined, rowB: Record<string, unknown> | null | undefined, direction: \"asc\" | \"desc\") => number"
         ],
         "path": "src/platform/packages/shared/kbn-sort-predicates/src/sorting.ts",
+        "lineNumber": 245,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -52,6 +54,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-sort-predicates/src/sorting.ts",
+            "lineNumber": 246,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -67,6 +71,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-sort-predicates/src/sorting.ts",
+            "lineNumber": 247,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -88,6 +94,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-sort-predicates/src/sorting.ts",
+            "lineNumber": 248,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -107,6 +115,8 @@
         "label": "NonStringSortableFieldType",
         "description": [],
         "path": "src/platform/packages/shared/kbn-sort-predicates/src/sorting.ts",
+        "lineNumber": 237,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

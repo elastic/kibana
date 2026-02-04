@@ -105,9 +105,11 @@ describe('query_utils', () => {
 
       logger = loggerMock.create();
       queryUtils = new QueryUtils(esClient, soClient, logger);
+      jest.useFakeTimers().setSystemTime(new Date('2024-01-02T00:00:00.000Z'));
     });
 
     afterEach(() => {
+      jest.useRealTimers();
       jest.clearAllMocks();
     });
 
@@ -150,7 +152,8 @@ describe('query_utils', () => {
         expect(soClient.find).toHaveBeenCalledWith({
           type: 'usage-counter',
           perPage: 10000,
-          filter: 'usage-counter.attributes.domainId:"agentBuilder"',
+          filter:
+            'usage-counter.attributes.domainId:"agentBuilder" and usage-counter.updated_at >= "2024-01-01T00:00:00.000Z"',
         });
 
         expect(result).toEqual([
