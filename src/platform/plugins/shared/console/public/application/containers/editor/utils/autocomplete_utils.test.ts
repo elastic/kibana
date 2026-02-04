@@ -182,7 +182,7 @@ describe('autocomplete_utils', () => {
           name: '.index',
           meta: 'index',
         },
-      ] as AutoCompleteContext['autoCompleteSet'];
+      ] as unknown as AutoCompleteContext['autoCompleteSet'];
       // mock the populateContext function that finds the correct autocomplete endpoint object and puts it into the context object
       mockPopulateContext.mockImplementation((...args) => {
         const context = args[0][1];
@@ -319,7 +319,7 @@ describe('autocomplete_utils', () => {
       // Mock autocomplete suggestions
       const mockAutocompleteSet = [
         { name: 'index.mode', template: 'standard' },
-      ] as AutoCompleteContext['autoCompleteSet'];
+      ] as unknown as AutoCompleteContext['autoCompleteSet'];
 
       mockPopulateContext.mockImplementation((...args) => {
         const context = args[0][1];
@@ -364,7 +364,7 @@ describe('autocomplete_utils', () => {
     it('calculates correct replacement range for quoted fields with dots', async () => {
       const mockAutocompleteSet = [
         { name: 'index.mode', template: 'standard' },
-      ] as AutoCompleteContext['autoCompleteSet'];
+      ] as unknown as AutoCompleteContext['autoCompleteSet'];
 
       mockPopulateContext.mockImplementation((...args) => {
         const context = args[0][1];
