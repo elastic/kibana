@@ -44,3 +44,24 @@ export const Default: Story = {
     onSubmit: action('onSubmit'),
   },
 };
+
+export const WithErrors: Story = {
+  args: {
+    initialcontextOverride: {
+      stepContext: {
+        inputs: {
+          name1: 'John Doe',
+          age: 'thirty',
+        },
+      },
+      schema: z.object({
+        inputs: z.object({
+          name: z.string(),
+          age: z.number(),
+        }),
+      }),
+    },
+    onClose: action('onClose'),
+    onSubmit: action('onSubmit'),
+  },
+};
