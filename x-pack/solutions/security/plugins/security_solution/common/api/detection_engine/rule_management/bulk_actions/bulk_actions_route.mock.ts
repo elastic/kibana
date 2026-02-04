@@ -30,3 +30,12 @@ export const getPerformBulkActionEditAlertSuppressionSchemaMock =
       { type: BulkActionEditTypeEnum.set_alert_suppression, value: { group_by: ['field1'] } },
     ],
   });
+
+export const getPerformBulkActionDuplicateSchemaMock = (): PerformRulesBulkActionRequestBody => ({
+  ids: ['04128c15-0d1b-4716-a4c5-46997ac7f3bd'],
+  action: 'duplicate',
+  duplicate: {
+    include_exceptions: false,
+    include_expired_exceptions: false,
+  },
+});

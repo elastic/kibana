@@ -22,13 +22,25 @@ import { performBulkActionRoute } from './route';
 import {
   getPerformBulkActionEditSchemaMock,
   getBulkDisableRuleActionSchemaMock,
+  getPerformBulkActionDuplicateSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
 import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
+import { validateRuleResponseActions as _validateRuleResponseActions } from '../../../../../../endpoint/services';
 
 jest.mock('../../../../../machine_learning/authz');
 
 let bulkGetRulesMock: jest.Mock;
+
+const validateRuleResponseActionsMock = _validateRuleResponseActions as jest.Mock;
+
+jest.mock('../../../../../../endpoint/services', () => {
+  const actualModule = jest.requireActual('../../../../../../endpoint/services');
+  return {
+    ...actualModule,
+    validateRuleResponseActions: jest.fn(actualModule.validateRuleResponseActions),
+  };
+});
 
 describe('Perform bulk action route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -763,6 +775,28 @@ describe('Perform bulk action route', () => {
       expect(response.body.message).toEqual(
         'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
       );
+    });
+
+    it('should validate endpoint response actions for duplicate bulk action', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: getPerformBulkActionDuplicateSchemaMock(),
+      });
+
+      // FIXME:PT Unclear how this test framework works, but I can't get this test to pass.
+      //        Even when I put in breakpoints in the route code, the API route handle
+      //        does not even seem tob e called.
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(validateRuleResponseActionsMock).toHaveBeenCalledWith({
+        endpointAuthz: expect.any(Object),
+        endpointService: expect.any(Object),
+        spaceId: 'default',
+        rulePayload: { action: 'duplicate' },
+        existingRule: {},
+      });
     });
   });
 
