@@ -20,21 +20,35 @@ import type { DrilldownsState, DrilldownState } from '../../server';
 export type DrilldownStateInternal = DrilldownState & { actionId: string };
 
 export type DrilldownDefinition<TDrilldownState extends DrilldownState = DrilldownState> = {
+  /**
+   * Implements the "navigation" action of the drilldown. This happens when
+   * user interacts with something in the UI that executes the drilldown trigger.
+   *
+   * @param config Drilldown state.
+   * @param context Object that represents context in which the drilldown is being executed in.
+   */
   execute: (drilldownState: TDrilldownState, context: EmbeddableApiContext) => Promise<void>;
+
+  /**
+   * Name of EUI icon to display when showing this drilldown to user.
+   */
+  euiIcon?: string;
+
   isCompatible?: ActionDefinition['isCompatible'];
 
-  /**
-   * Minimal license level
-   * Empty means no restrictions
-   */
-  minimalLicense?: LicenseType;
+  license?: {
+    /**
+     * Minimal license level
+     * Empty means no restrictions
+     */
+    minimalLicense: LicenseType;
 
-  /**
-   * Required when `minimalLicense` is used.
-   * Is a user-facing string. Has to be unique. Doesn't need i18n.
-   * The feature's name will be displayed to Cloud end-users when they're billed based on their feature usage.
-   */
-  licenseFeatureName?: string;
+    /**
+     * Is a user-facing string. Has to be unique. Doesn't need i18n.
+     * The feature's name will be displayed to Cloud end-users when they're billed based on their feature usage.
+     */
+    featureName: string;
+  };
 
   /**
    * List of triggers supported by drilldown type

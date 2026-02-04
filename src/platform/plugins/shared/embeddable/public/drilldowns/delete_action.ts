@@ -11,9 +11,9 @@ import { uiActions } from '../kibana_services';
 import type { DrilldownStateInternal } from './types';
 
 export function deleteAction(drilldownState: DrilldownStateInternal) {
-  const { actionId, triggers } = drilldownState;
+  const { actionId, trigger } = drilldownState;
   if (!uiActions.hasAction(actionId)) return;
 
-  triggers.forEach((trigger) => uiActions.detachAction(trigger, actionId));
+  uiActions.detachAction(trigger, actionId);
   uiActions.unregisterAction(actionId);
 }

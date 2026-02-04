@@ -21,10 +21,10 @@ export function registerDrilldown(type: string, getFn: () => Promise<DrilldownDe
   registry[type] = getFn;
 }
 
-export async function getDrilldownDefinition(type: string) {
+export async function getDrilldown(type: string) {
   return await registry[type]?.();
 }
 
-export function hasDrilldownDefinition(type: string) {
+export function hasDrilldown(type: string) {
   return Boolean(registry[type]);
 }

@@ -10,7 +10,7 @@
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import type { LicenseType } from '@kbn/licensing-types';
-import { getDrilldownDefinition, hasDrilldownDefinition } from './registry';
+import { getDrilldown, hasDrilldown } from './registry';
 import { licensing, uiActions } from '../kibana_services';
 import type { DrilldownStateInternal } from './types';
 
@@ -21,9 +21,9 @@ async function isCompatibleLicense(minimalLicense?: LicenseType) {
 }
 
 export function createAction(embeddableUuid: string, drilldownState: DrilldownStateInternal) {
-  const { actionId, triggers, type } = drilldownState;
+  const { actionId, label, trigger, type } = drilldownState;
 
-  if (!hasDrilldownDefinition(type)) {
+  if (!hasDrilldown(type)) {
     // eslint-disable-next-line no-console
     console.warn(
       `Unable to create action for drilldown. Drilldown type not registered for [type = ${type}].`
@@ -31,34 +31,32 @@ export function createAction(embeddableUuid: string, drilldownState: DrilldownSt
     return;
   }
 
-  uiActions.registerActionAsync(actionId, async () => ({
-    id: actionId,
-    execute: async (context: EmbeddableApiContext) => {
-      const { execute, licenseFeatureName, minimalLicense } =
-        (await getDrilldownDefinition(type)) ?? {};
+  uiActions.addTriggerActionAsync(actionId, trigger, async () => {
+    const { execute, euiIcon, isCompatible, license } = (await getDrilldown(type)) ?? {};
+    return {
+      id: actionId,
+      getDisplayName: () => label,
+      getIconType: () => euiIcon,
+      execute: async (context: EmbeddableApiContext) => {
+        if (license && licensing) {
+          licensing.featureUsage.notifyUsage(license.featureName).catch(() => {
+            // eslint-disable-next-line no-console
+            console.warn(`Drilldown [type = ${type}] fail notify feature usage.`);
+          });
+        }
 
-      if (minimalLicense && licenseFeatureName && licensing) {
-        licensing.featureUsage.notifyUsage(licenseFeatureName).catch(() => {
-          // eslint-disable-next-line no-console
-          console.warn(`Drilldown [type = ${type}] fail notify feature usage.`);
-        });
-      }
+        execute(drilldownState, context);
+      },
+      isCompatible: async (context: EmbeddableApiContext) => {
+        const { embeddable } = context;
+        if (!apiHasUniqueId(embeddable) || embeddable.uuid !== embeddableUuid) {
+          return false;
+        }
 
-      execute(drilldownState, context);
-    },
-    isCompatible: async (context: EmbeddableApiContext) => {
-      const { embeddable } = context;
-      if (!apiHasUniqueId(embeddable) || embeddable.uuid !== embeddableUuid) {
-        return false;
-      }
+        if (!(await isCompatibleLicense(license?.minimalLicense))) return false;
 
-      const { minimalLicense, isCompatible } = (await getDrilldownDefinition(type)) ?? {};
-
-      if (!(await isCompatibleLicense(minimalLicense))) return false;
-
-      return isCompatible ? await isCompatible(context) : true;
-    },
-  }));
-
-  triggers.forEach((trigger) => uiActions.attachAction(trigger, actionId));
+        return isCompatible ? isCompatible(context) : true;
+      },
+    };
+  });
 }
