@@ -11,12 +11,19 @@ import type { FC } from 'react';
 export const FieldType = {
   INPUT_TEXT: 'INPUT_TEXT',
   SELECT_BASIC: 'SELECT_BASIC',
+  TEXTAREA: 'TEXTAREA',
 } as const;
 
 export type FieldType = (typeof FieldType)[keyof typeof FieldType];
 
+export const fieldTypesArray = Object.keys(FieldType) as FieldType[];
+
 export const InputTextFieldSchema = z.object({
   control: z.literal(FieldType.INPUT_TEXT),
+});
+
+export const TextareaFieldSchema = z.object({
+  control: z.literal(FieldType.TEXTAREA),
 });
 
 export const SelectBasicFieldSchema = z.object({
@@ -44,11 +51,19 @@ const SelectBasic = (props: z.infer<typeof SelectBasicFieldSchema>) => {
 };
 SelectBasic.displayName = 'SelectBasic ';
 
+const Textarea = (props: z.infer<typeof TextareaFieldSchema>) => {
+  return null;
+};
+Textarea.displayName = 'Textarea';
+
+// NOTE: this guarantees the control will receive props aligned with the schema
 export type FieldMap = {
-  [K in FieldType]: FC<typeof FieldSchema & { control: K }>;
+  [K in FieldType]: FC<Extract<z.infer<typeof FieldSchema>, { control: K }>>;
 };
 
-export const fieldRegistry: FieldMap = {
+// Register ui controls here
+export const controlRegistry: FieldMap = {
   [FieldType.INPUT_TEXT]: InputText,
   [FieldType.SELECT_BASIC]: SelectBasic,
+  [FieldType.TEXTAREA]: Textarea,
 };
