@@ -27,9 +27,13 @@ describe('Assistant settings flyout', () => {
     onSaveConfirmed: jest.fn(),
   };
 
+  beforeEach(() => {
+    (EuiFlyout as unknown as jest.Mock).mockClear();
+  });
+
   it('passes aria-label from the title to EuiFlyout', () => {
     const title = 'Edit system prompt';
-    const mockedEuiFlyout = EuiFlyout as jest.MockedFunction<typeof EuiFlyout>;
+    const mockedEuiFlyout = EuiFlyout as unknown as jest.Mock;
     render(
       <Flyout {...requiredProps} title={title}>
         <div>{'Body'}</div>
@@ -46,16 +50,14 @@ describe('Assistant settings flyout', () => {
   });
 
   it('does not pass aria-label when the title is missing', () => {
-    const mockedEuiFlyout = EuiFlyout as jest.MockedFunction<typeof EuiFlyout>;
+    const mockedEuiFlyout = EuiFlyout as unknown as jest.Mock;
     render(
       <Flyout {...requiredProps}>
         <div>{'Body'}</div>
       </Flyout>
     );
 
-    expect(mockedEuiFlyout).toHaveBeenCalledWith(
-      expect.not.objectContaining({ 'aria-label': expect.any(String) }),
-      expect.anything()
-    );
+    const firstCallProps = mockedEuiFlyout.mock.calls[0]?.[0];
+    expect(firstCallProps?.['aria-label']).toBeUndefined();
   });
 });
