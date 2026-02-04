@@ -33,7 +33,7 @@ import {
 } from '../../test_utils';
 import type { ChatService } from './types';
 import { createChatService } from './chat_service';
-import { isConversationIdSetEvent, isRoundResendingEvent } from '@kbn/agent-builder-common/chat';
+import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat';
 
 const createChatModel = (): InferenceChatModel => {
   // we don't really need it
@@ -650,61 +650,6 @@ describe('ChatService', () => {
 
       const conversationIdSetEvents = events.filter(isConversationIdSetEvent);
       expect(conversationIdSetEvents).toHaveLength(0);
-    });
-
-    it('emits roundResendingEvent when operation is RESEND', async () => {
-      const conversation = {
-        ...createEmptyConversation(),
-        rounds: [
-          {
-            id: 'round-1',
-            status: 'completed',
-            input: { message: 'original message' },
-            response: { message: 'original response' },
-            steps: [],
-            started_at: new Date().toISOString(),
-            time_to_first_token: 100,
-            time_to_last_token: 500,
-            model_usage: {
-              connector_id: 'test-connector',
-              input_tokens: 10,
-              output_tokens: 20,
-              llm_calls: 1,
-            },
-          },
-        ],
-      };
-      getConversationMock.mockResolvedValue({ ...conversation, operation: 'RESEND' });
-
-      const mockRoundCompleteEvent = {
-        type: ChatEventType.roundComplete,
-        data: {
-          round: {
-            id: 'round-1',
-            trace_id: 'trace-1',
-            steps: [],
-            response: 'Regenerated response',
-          },
-        },
-      };
-      executeAgentMock$.mockReturnValue(of(mockRoundCompleteEvent));
-
-      const obs$ = chatService.converse({
-        agentId: 'my-agent',
-        conversationId: 'test-conversation',
-        resend: true,
-        request,
-        nextInput: {
-          message: 'ignored',
-        },
-      });
-
-      const events = await firstValueFrom(obs$.pipe(toArray()));
-
-      // Should emit roundResendingEvent
-      const roundResendingEvents = events.filter(isRoundResendingEvent);
-      expect(roundResendingEvents).toHaveLength(1);
-      expect(roundResendingEvents[0].data.conversation_id).toBe('test-conversation');
     });
 
     it('strips last round from conversation before passing to agent when resend=true', async () => {

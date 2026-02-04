@@ -10,7 +10,6 @@ import type {
   ConversationUpdatedEvent,
   Conversation,
   ConversationIdSetEvent,
-  RoundResendingEvent,
 } from '@kbn/agent-builder-common';
 import { ChatEventType } from '@kbn/agent-builder-common';
 
@@ -41,15 +40,6 @@ export const createConversationUpdatedEvent = (
 export const createConversationIdSetEvent = (conversationId: string): ConversationIdSetEvent => {
   return {
     type: ChatEventType.conversationIdSet,
-    data: {
-      conversation_id: conversationId,
-    },
-  };
-};
-
-export const createRoundResendingEvent = (conversationId: string): RoundResendingEvent => {
-  return {
-    type: ChatEventType.roundResending,
     data: {
       conversation_id: conversationId,
     },

@@ -23,7 +23,6 @@ export enum ChatEventType {
   thinkingComplete = 'thinking_complete',
   promptRequest = 'prompt_request',
   roundComplete = 'round_complete',
-  roundResending = 'round_resending',
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
   conversationIdSet = 'conversation_id_set',
@@ -232,23 +231,6 @@ export const isRoundCompleteEvent = (
   return event.type === ChatEventType.roundComplete;
 };
 
-// round resending
-
-export interface RoundResendingEventData {
-  conversation_id: string;
-}
-
-export type RoundResendingEvent = ChatEventBase<
-  ChatEventType.roundResending,
-  RoundResendingEventData
->;
-
-export const isRoundResendingEvent = (
-  event: AgentBuilderEvent<string, any>
-): event is RoundResendingEvent => {
-  return event.type === ChatEventType.roundResending;
-};
-
 // conversation created
 
 export interface ConversationCreatedEventData {
@@ -325,5 +307,4 @@ export type ChatEvent =
   | ChatAgentEvent
   | ConversationCreatedEvent
   | ConversationUpdatedEvent
-  | ConversationIdSetEvent
-  | RoundResendingEvent;
+  | ConversationIdSetEvent;
