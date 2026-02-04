@@ -31,7 +31,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // Refresh browser to ensure the newly created rule is visible in the UI
       await browser.refresh();
-      await pageObjects.common.navigateToApp('rules');
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
@@ -42,8 +42,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('Rules tab is selected by default', async () => {
       await retry.try(async () => {
         const url = await browser.getCurrentUrl();
-        expect(url).to.contain('/app/rules');
-        expect(url).to.not.contain('/app/rules/logs');
+        expect(url).to.contain('/app/management/insightsAndAlerting/triggersActions');
+        expect(url).to.not.contain('/app/management/insightsAndAlerting/triggersActions/logs');
       });
       await testSubjects.existOrFail('rulesList');
     });
@@ -53,24 +53,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(logsTabExists).to.be(true);
     });
 
-    it('clicking Logs tab navigates to /app/rules/logs', async () => {
+    it('clicking Logs tab navigates to /app/management/insightsAndAlerting/triggersActions/logs', async () => {
       await testSubjects.click('logsTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.try(async () => {
         const url = await browser.getCurrentUrl();
-        expect(url).to.contain('/app/rules/logs');
+        expect(url).to.contain('/app/management/insightsAndAlerting/triggersActions/logs');
       });
     });
 
-    it('clicking Rules tab navigates to /app/rules', async () => {
+    it('clicking Rules tab navigates to /app/management/insightsAndAlerting/triggersActions', async () => {
       await testSubjects.click('rulesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.try(async () => {
         const url = await browser.getCurrentUrl();
-        expect(url).to.contain('/app/rules');
-        expect(url).to.not.contain('/app/rules/logs');
+        expect(url).to.contain('/app/management/insightsAndAlerting/triggersActions');
+        expect(url).to.not.contain('/app/management/insightsAndAlerting/triggersActions/logs');
       });
       await testSubjects.existOrFail('rulesList');
     });
@@ -81,8 +81,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const url = await browser.getCurrentUrl();
-        expect(url).to.contain('/app/rules');
-        expect(url).to.not.contain('/app/rules/logs');
+        expect(url).to.contain('/app/management/insightsAndAlerting/triggersActions');
+        expect(url).to.not.contain('/app/management/insightsAndAlerting/triggersActions/logs');
       });
 
       await testSubjects.click('logsTab');
@@ -90,7 +90,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const url = await browser.getCurrentUrl();
-        expect(url).to.contain('/app/rules/logs');
+        expect(url).to.contain('/app/management/insightsAndAlerting/triggersActions/logs');
       });
 
       await testSubjects.click('rulesTab');
@@ -98,8 +98,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const url = await browser.getCurrentUrl();
-        expect(url).to.contain('/app/rules');
-        expect(url).to.not.contain('/app/rules/logs');
+        expect(url).to.contain('/app/management/insightsAndAlerting/triggersActions');
+        expect(url).to.not.contain('/app/management/insightsAndAlerting/triggersActions/logs');
       });
     });
   });
