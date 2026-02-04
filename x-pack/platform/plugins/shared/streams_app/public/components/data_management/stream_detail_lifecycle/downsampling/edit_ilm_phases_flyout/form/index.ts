@@ -12,6 +12,7 @@ export { createIlmPhasesFlyoutSerializer } from './serializer';
 export {
   type OnFieldErrorsChange,
   OnFieldErrorsChangeProvider,
+  useIlmPhasesFlyoutTabErrors,
   useOnFieldErrorsChange,
 } from './error_tracking';
 export {

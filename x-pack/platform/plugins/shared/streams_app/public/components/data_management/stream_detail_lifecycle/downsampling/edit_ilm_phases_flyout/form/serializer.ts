@@ -31,6 +31,12 @@ export const createIlmPhasesFlyoutSerializer = (initialPhases: IlmPolicyPhases =
   return (data: IlmPhasesFlyoutFormInternal): IlmPolicyPhases => {
     const next: IlmPolicyPhases = cloneDeep(initialPhases);
     const meta = data._meta;
+    // During initial mount, hook-form may call the serializer with partial data.
+    // In that case, keep the initial phases unchanged.
+    if (!meta) {
+      return next;
+    }
+
     const searchableSnapshotRepository = meta.searchableSnapshot?.repository ?? '';
 
     const buildNextDownsample = (
