@@ -40,12 +40,6 @@ export type { VisibilityState } from './visibility_state';
 export type { ChromeStyleState } from './chrome_style_state';
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 
-interface SideNavState {
-  isCollapsed$: Observable<boolean>;
-  getIsCollapsed: () => boolean;
-  setIsCollapsed: (isCollapsed: boolean) => void;
-}
-
 export interface ChromeState {
   /** Visibility management */
   visibility: VisibilityState;
@@ -57,7 +51,9 @@ export interface ChromeState {
   bodyClasses$: Observable<string[]>;
 
   /** Side navigation state */
-  sideNav: SideNavState;
+  sideNav: {
+    collapsed: State<boolean>;
+  };
 
   /** Feedback state */
   feedback: FeedbackState;
@@ -119,16 +115,11 @@ export function createChromeState({
 
   // Side Nav
   const sideNavCollapsed = createPersistedState(IS_SIDENAV_COLLAPSED_KEY, false);
-  const sideNav: SideNavState = {
-    isCollapsed$: sideNavCollapsed.$,
-    getIsCollapsed: sideNavCollapsed.get,
-    setIsCollapsed: sideNavCollapsed.set,
-  };
 
   // Feedback
   const feedback = createFeedbackState({
     ...feedbackDeps,
-    isSideNavCollapsed$: sideNav.isCollapsed$,
+    isSideNavCollapsed$: sideNavCollapsed.$,
   });
 
   // Breadcrumbs
@@ -156,7 +147,9 @@ export function createChromeState({
     visibility,
     style,
     bodyClasses$,
-    sideNav,
+    sideNav: {
+      collapsed: sideNavCollapsed,
+    },
     feedback,
     breadcrumbs: {
       classic: breadcrumbs,

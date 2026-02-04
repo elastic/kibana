@@ -10,19 +10,18 @@
 import useObservable from 'react-use/lib/useObservable';
 import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
 import React, { useCallback } from 'react';
-import type { Observable } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import { css, Global } from '@emotion/react';
 import { Navigation } from './navigation';
 import type { NavigationProps } from './types';
 
 export interface Props {
-  isCollapsed$: Observable<boolean>;
-  initialIsCollapsed: boolean;
+  isCollapsed$: BehaviorSubject<boolean>;
   navProps: NavigationProps;
 }
 
-export const GridLayoutProjectSideNav = ({ isCollapsed$, initialIsCollapsed, navProps }: Props) => {
-  const isCollapsed = useObservable(isCollapsed$, initialIsCollapsed);
+export const GridLayoutProjectSideNav = ({ isCollapsed$, navProps }: Props) => {
+  const isCollapsed = useObservable(isCollapsed$, isCollapsed$.getValue());
   const updateLayout = useLayoutUpdate();
   const setWidth = useCallback(
     (width: number) => {
