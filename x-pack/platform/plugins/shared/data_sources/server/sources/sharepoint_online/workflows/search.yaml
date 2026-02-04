@@ -18,10 +18,16 @@ inputs:
       - "drive"
       - "driveItem"
     description: "Entity types to search. Valid values: site, list, listItem, drive, driveItem"
-    required: true
   - name: region
-    type: string
+    type: choice
     default: "NAM"
+    options:
+      - "NAM"
+      - "EUR"
+      - "APC"
+      - "LAM"
+      - "MEA"
+    description: "Search region (NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa)"
     required: false
   - name: from
     type: number

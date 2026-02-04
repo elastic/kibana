@@ -16,7 +16,9 @@ import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yaml';
 import { parse } from 'yaml';
 import { loadWorkflows } from '@kbn/data-catalog-plugin/common/workflow_loader';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { createStackConnector } from '../utils/create_stack_connector';
+
 import type {
   DataSourcesServerSetupDependencies,
   DataSourcesServerStartDependencies,
@@ -131,7 +133,7 @@ export async function createDataSourceAndRelatedResources(
     workflowIds.push(workflow.id);
 
     if (workflowInfo.shouldGenerateABTool) {
-      const parsedWorkflow = parse(workflowInfo.content);
+      const parsedWorkflow: WorkflowYaml = parse(workflowInfo.content);
       const workflowDescription =
         typeof parsedWorkflow?.description === 'string'
           ? parsedWorkflow.description

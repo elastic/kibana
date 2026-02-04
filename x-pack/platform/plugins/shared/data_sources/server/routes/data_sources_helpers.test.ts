@@ -210,13 +210,12 @@ tags:
       }),
     });
     expect(mockWorkflowManagement.management.createWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({
-        yaml: expect.stringContaining('name: my-test-connector.sources.notion.search'),
-      }),
+      expect.any(Object),
       'default',
       mockRequest
     );
     const createdYaml = mockWorkflowManagement.management.createWorkflow.mock.calls[0][0].yaml;
+    expect(createdYaml).toContain('name: my-test-connector.sources.notion.search');
     expect(createdYaml).toContain('description: Search Notion content');
     expect(createdYaml).toContain('tags:');
     expect(createdYaml).toMatch(/-\s*agent-builder-tool/);

@@ -35,30 +35,32 @@ steps:
     with:
       driveId: "${{ inputs.drive_id }}"
       itemId: "${{ inputs.item_id }}"
-  - name: download-item-from-url
-    type: sharepoint-online.downloadItemFromURL
-    if: "${{ inputs.download_action == 'downloadItemFromURL' }}"
-    connector-id: <%= stackConnectorId %>
-    with:
-      downloadUrl: "${{ inputs.download_url }}"
-  - name: extract-content
-    type: elasticsearch.request
-    if: "${{ inputs.download_action == 'downloadItemFromURL' }}"
-    with:
-      method: POST
-      path: /_ingest/pipeline/_simulate
-      body:
-        pipeline:
-          processors:
-            - attachment:
-                field: data
-                indexed_chars: -1
-                remove_binary: true
-        docs:
-          - _id: "${{ inputs.download_url }}"
-            _source:
-              filename: "${{ inputs.download_url }}"
-              data: "${{ steps.download-item-from-url.output.base64 }}"
+  - name: download-item-from-url-flow
+    type: if
+    condition: "${{ inputs.download_action == 'downloadItemFromURL' }}"
+    steps:
+      - name: download-item-from-url
+        type: sharepoint-online.downloadItemFromURL
+        connector-id: <%= stackConnectorId %>
+        with:
+          downloadUrl: "${{ inputs.download_url }}"
+      - name: extract-content
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: /_ingest/pipeline/_simulate
+          body:
+            pipeline:
+              processors:
+                - attachment:
+                    field: data
+                    indexed_chars: -1
+                    remove_binary: true
+            docs:
+              - _id: "${{ inputs.download_url }}"
+                _source:
+                  filename: "${{ inputs.download_url }}"
+                  data: "${{ steps.download-item-from-url.output.base64 }}"
   - name: get-site-page-contents
     type: sharepoint-online.getSitePageContents
     if: "${{ inputs.download_action == 'getSitePageContents' }}"
