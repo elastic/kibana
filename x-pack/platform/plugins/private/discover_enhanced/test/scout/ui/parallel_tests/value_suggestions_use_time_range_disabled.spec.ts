@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData, assertionMessages } from '../fixtures';
 
 spaceTest.describe(
@@ -25,6 +26,8 @@ spaceTest.describe(
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
       await pageObjects.discover.goto();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitForHistogramRendered();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

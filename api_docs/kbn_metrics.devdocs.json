@@ -249,7 +249,7 @@
           ") => void"
         ],
         "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
-        "lineNumber": 39,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -273,7 +273,7 @@
               }
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
-            "lineNumber": 43,
+            "lineNumber": 45,
             "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
@@ -295,7 +295,7 @@
           "\nOptions to the initMetrics method"
         ],
         "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
-        "lineNumber": 21,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -313,7 +313,7 @@
               "Resource"
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
-            "lineNumber": 25,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -337,7 +337,7 @@
               }
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
-            "lineNumber": 29,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -355,7 +355,7 @@
               "{ readonly enabled: boolean; readonly opentelemetry: Readonly<{} & { metrics: Readonly<{} & { otlp: Readonly<{ url?: string | undefined; headers?: Record<string, string> | undefined; } & { exportIntervalMillis: number; logLevel: string; }>; prometheus: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
-            "lineNumber": 33,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

@@ -14,6 +14,7 @@ import type {
   ICommandCallbacks,
   ESQLColumnData,
   ESQLCommandSummary,
+  UnmappedFieldsStrategy,
 } from './types';
 
 /**
@@ -68,7 +69,8 @@ export interface ICommandMethods<TContext = any> {
     command: ESQLCommand,
     previousColumns: ESQLColumnData[],
     query: string,
-    newFields: IAdditionalFields
+    newFields: IAdditionalFields,
+    unmappedFieldsStrategy: UnmappedFieldsStrategy
   ) => Promise<ESQLColumnData[]> | ESQLColumnData[];
 
   /**
@@ -153,6 +155,7 @@ export interface IAdditionalFields {
   fromJoin: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
   fromEnrich: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
   fromFrom: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
+  fromPromql?: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
 }
 
 /**

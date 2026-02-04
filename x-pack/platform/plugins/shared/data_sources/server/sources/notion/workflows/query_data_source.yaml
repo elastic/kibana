@@ -1,0 +1,29 @@
+version: '1'
+name: 'sources.notion.query_data_source'
+description: 'Given the ID of a data source, query information about its rows. By default it will fetch 10 items, unless you specify page_size or cursor. You can filter the results by specifying the \`filter\`, which is a string representation of the JSON that would be passed, as per documentation in https://developers.notion.com/reference/filter-data-source-entries'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: data_source_id
+    type: string
+  - name: filter_by
+    type: string
+    required: false
+  - name: page_size
+    type: number
+    required: false
+    default: 10
+  - name: start_cursor
+    type: string
+    required: false
+steps:
+  - name: query-data-source
+    type: notion.queryDataSource
+    connector-id: <%= stackConnectorId %>
+    with:
+      dataSourceId: "${{inputs.data_source_id}}"
+      pageSize: ${{inputs.page_size}}
+      startCursor: "${{inputs.start_cursor}}"
+      filter: "${{inputs.filter_by}}"

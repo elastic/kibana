@@ -12,12 +12,15 @@ import type { CoreStart } from '@kbn/core/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { aiAssistantCapabilities } from '@kbn/observability-ai-assistant-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 export function RedirectToHomeIfUnauthorized({
   coreStart,
+  cloud,
   children,
 }: {
   coreStart: CoreStart;
+  cloud?: CloudStart;
   children: ReactNode;
 }) {
   const {
@@ -30,6 +33,8 @@ export function RedirectToHomeIfUnauthorized({
     [settings.client]
   );
   const chatExperience = useObservable(chatExperience$, AIChatExperience.Classic);
+  const isServerlessSearchSolution =
+    cloud?.isServerlessEnabled && cloud?.serverless?.projectType === 'search';
 
   const allowed =
     (capabilities?.observabilityAIAssistant?.[aiAssistantCapabilities.show] ?? false) &&
@@ -37,9 +42,13 @@ export function RedirectToHomeIfUnauthorized({
 
   useEffect(() => {
     if (!allowed) {
-      navigateToApp('home');
+      if (isServerlessSearchSolution) {
+        navigateToApp('searchHomepage');
+      } else {
+        navigateToApp('home');
+      }
     }
-  }, [allowed, navigateToApp]);
+  }, [allowed, navigateToApp, isServerlessSearchSolution]);
 
   if (!allowed) return null;
 

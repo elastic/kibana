@@ -14,6 +14,7 @@ import type { Logger } from '@kbn/logging';
 import type { DataSource } from '@kbn/data-catalog-plugin';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yaml';
+import { loadWorkflows } from '@kbn/data-catalog-plugin/common/workflow_loader';
 import { createStackConnector } from '../utils/create_stack_connector';
 import type {
   DataSourcesServerSetupDependencies,
@@ -98,13 +99,23 @@ export async function createDataSourceAndRelatedResources(
 
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
-  const workflowInfos = dataSource.generateWorkflows(finalStackConnectorId);
+
+  // Merge stackConnectorId into workflows' templateInputs
+  const templateInputs = {
+    ...dataSource.workflows.templateInputs,
+    stackConnectorId: finalStackConnectorId,
+  };
+  const workflowInfos = await loadWorkflows({
+    directory: dataSource.workflows.directory,
+    templateInputs,
+  });
+
   const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
   logger.info(`Creating workflows and tools for data source '${name}'`);
 
   for (const workflowInfo of workflowInfos) {
-    // Extract original workflow name from YAML and prefix it with the data source name
+    // Extract the original workflow name from YAML and prefix it with the data source name
     const nameMatch = workflowInfo.content.match(/^name:\s*['"]?([^'"\n]+)['"]?/m);
     const originalName = nameMatch?.[1]?.trim() ?? 'workflow';
     const prefixedName = `${slugify(name)}.${originalName}`;
@@ -119,8 +130,12 @@ export async function createDataSourceAndRelatedResources(
     workflowIds.push(workflow.id);
 
     if (workflowInfo.shouldGenerateABTool) {
+      // e.g., "sources.github.search_issues" -> "search_issues"
+      const workflowBaseName = originalName.split('.').pop() || originalName;
+
+      // Tool ID structure: type.data_source_name.workflow_base_name
       const tool = await toolRegistry.create({
-        id: `${type}.${slugify(workflow.name)}`,
+        id: `${type}.${slugify(name)}.${workflowBaseName}`,
         type: ToolType.workflow,
         description: `Workflow tool for ${type} data source`,
         tags: ['data-source', type],

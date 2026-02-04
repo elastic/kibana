@@ -97,13 +97,6 @@ export class QradarRulesXmlParser extends XmlParser {
     );
   }
 
-  private getStrValue(val: Array<string> | string): string {
-    if (Array.isArray(val)) {
-      return val[0].trim();
-    }
-    return val.trim();
-  }
-
   /**
    * Sanitizes text content by decoding HTML entities and removing HTML tags.
    * QRadar rule text elements can contain HTML like:

@@ -44,7 +44,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
   describe('alerts as data flapping', function () {
     this.tags('skipFIPS');
-    beforeEach(async () => {
+    afterEach(async () => {
       await es.deleteByQuery({
         index: alertsAsDataIndex,
         query: { match_all: {} },

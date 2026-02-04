@@ -205,8 +205,7 @@ describe('TaskManagerService Integration Tests', () => {
         mockAuthenticatedUser
       );
 
-      const expectedCompositeId = 'test-int-123-test-ds-456';
-      expect(dataStreamSavedObject.id).toBe(expectedCompositeId);
+      expect(dataStreamSavedObject.id).toBe('test-int-123-test-ds-456');
       expect(dataStreamSavedObject.attributes?.job_info?.job_id).toBe(scheduledTask.taskId);
       expect(dataStreamSavedObject.attributes?.job_info?.status).toBe(TASK_STATUSES.pending);
       expect(dataStreamSavedObject.attributes?.metadata?.version).toBe('0.0.0');
@@ -217,17 +216,26 @@ describe('TaskManagerService Integration Tests', () => {
 
       // Verify we can retrieve both saved objects
       const finalIntegration = await savedObjectService.getIntegration(integrationSavedObject.id);
-      const finalDataStream = await savedObjectService.getDataStream('test-ds-456', 'test-int-123');
+      const finalDataStream = await savedObjectService.getDataStream(
+        dataStreamParams.dataStreamId,
+        dataStreamParams.integrationId
+      );
 
       expect(finalIntegration.integration_id).toBe(integrationSavedObject.id);
       expect(finalDataStream.attributes.job_info.job_id).toBe(scheduledTask.taskId);
       expect(finalDataStream.attributes.job_info.status).toBe(TASK_STATUSES.pending);
 
       // Step 7: Clean up - delete in reverse order
-      await savedObjectService.deleteDataStream('test-int-123', 'test-ds-456');
+      await savedObjectService.deleteDataStream(
+        dataStreamParams.dataStreamId,
+        dataStreamParams.integrationId
+      );
       await savedObjectService.deleteIntegration(integrationSavedObject.id);
       await expect(
-        savedObjectService.getDataStream('test-ds-456', 'test-int-123')
+        savedObjectService.getDataStream(
+          dataStreamParams.dataStreamId,
+          dataStreamParams.integrationId
+        )
       ).rejects.toThrow();
     }, 60000);
 
@@ -350,11 +358,9 @@ describe('TaskManagerService Integration Tests', () => {
 
         // Verify all datastreams and integrations were created correctly
         for (const obj of createdObjects) {
-          const dataStreamId = obj.dataStream.attributes.data_stream_id;
-          const integrationId = obj.dataStream.attributes.integration_id;
           const retrievedDataStream = await savedObjectService.getDataStream(
-            dataStreamId,
-            integrationId
+            obj.dataStream.attributes.data_stream_id,
+            obj.dataStream.attributes.integration_id
           );
           expect(retrievedDataStream.attributes.job_info.job_id).toBe(obj.taskId);
           expect(retrievedDataStream.attributes.integration_id).toBe(obj.integration.id);
@@ -368,9 +374,12 @@ describe('TaskManagerService Integration Tests', () => {
       } finally {
         // Clean up all created objects (data streams first, then integrations)
         for (const obj of createdObjects) {
-          const dataStreamId = obj.dataStream.attributes.data_stream_id;
-          const integrationId = obj.dataStream.attributes.integration_id;
-          await savedObjectService.deleteDataStream(integrationId, dataStreamId).catch(() => {});
+          await savedObjectService
+            .deleteDataStream(
+              obj.dataStream.attributes.data_stream_id,
+              obj.dataStream.attributes.integration_id
+            )
+            .catch(() => {});
           await savedObjectService.deleteIntegration(obj.integration.id).catch(() => {});
         }
       }

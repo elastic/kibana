@@ -146,6 +146,19 @@ export function useGenAIConnectors({
     await fetchConnectors();
   }, [fetchConnectors]);
 
+  // If the selected connector is no longer available, select the first available connector
+  useEffect(() => {
+    const availableConnectors = connectors?.map((connector) => connector.id);
+
+    if (
+      selectedConnector &&
+      availableConnectors &&
+      !availableConnectors.includes(selectedConnector)
+    ) {
+      setLastUsedConnector(availableConnectors[0]); // First or undefined if empty
+    }
+  }, [connectors, setLastUsedConnector, selectedConnector]);
+
   return {
     connectors,
     selectedConnector: selectedConnector || connectors?.[0]?.id,

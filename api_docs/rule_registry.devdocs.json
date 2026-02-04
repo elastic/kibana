@@ -215,7 +215,9 @@
               "Result",
               "; _seq_no?: number | undefined; _shards: ",
               "ShardStatistics",
-              "; forced_refresh?: boolean | undefined; }>"
+              "; failure_store?: ",
+              "BulkFailureStoreStatus",
+              " | undefined; forced_refresh?: boolean | undefined; }>"
             ],
             "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts",
             "lineNumber": 805,

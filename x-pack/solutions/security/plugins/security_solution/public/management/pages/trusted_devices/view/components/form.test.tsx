@@ -39,6 +39,11 @@ jest.mock('../../../../../common/hooks/use_license', () => {
 });
 
 jest.mock('../../hooks/use_get_trusted_device_suggestions');
+jest.mock('../../../../../common/containers/source', () => ({
+  useFetchIndex: jest.fn(),
+}));
+
+import { useFetchIndex } from '../../../../../common/containers/source';
 
 describe('Trusted devices form', () => {
   const formPrefix = 'trustedDevices-form';
@@ -176,7 +181,16 @@ describe('Trusted devices form', () => {
     mockedContext = createAppRootMockRenderer();
     latestUpdatedItem = createItem();
 
-    // Mock the useGetTrustedDeviceSuggestions hook
+    (useFetchIndex as jest.Mock).mockReturnValue([
+      false, // isLoading
+      {
+        indexPatterns: {
+          fields: [{ name: 'some.field', type: 'string' }],
+          title: 'logs-endpoint.events.device-*',
+        },
+      },
+    ]);
+
     (useGetTrustedDeviceSuggestions as jest.Mock).mockReturnValue({
       data: [],
       isLoading: false,
@@ -531,6 +545,62 @@ describe('Trusted devices form', () => {
       renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
     ).toBeNull();
     expect(renderResult.queryByTestId('policy-id-0')).toBeNull();
+  });
+
+  describe('Suggestions API gating', () => {
+    it('should call suggestions hook with enabled=true when index has fields', async () => {
+      (useFetchIndex as jest.Mock).mockReturnValue([
+        false,
+        {
+          indexPatterns: {
+            fields: [{ name: 'device.id', type: 'string' }],
+            title: 'logs-endpoint.events.device-*',
+          },
+        },
+      ]);
+
+      await render();
+
+      expect(useGetTrustedDeviceSuggestions).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: true })
+      );
+    });
+
+    it('should call suggestions hook with enabled=false when index has no fields', async () => {
+      (useFetchIndex as jest.Mock).mockReturnValue([
+        false,
+        {
+          indexPatterns: {
+            fields: [],
+            title: '',
+          },
+        },
+      ]);
+
+      await render();
+
+      expect(useGetTrustedDeviceSuggestions).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
+    });
+
+    it('should call suggestions hook with enabled=false while index is loading', async () => {
+      (useFetchIndex as jest.Mock).mockReturnValue([
+        true, // isLoading = true
+        {
+          indexPatterns: {
+            fields: [],
+            title: '',
+          },
+        },
+      ]);
+
+      await render();
+
+      expect(useGetTrustedDeviceSuggestions).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
+    });
   });
 
   describe('Assignment section visibility', () => {

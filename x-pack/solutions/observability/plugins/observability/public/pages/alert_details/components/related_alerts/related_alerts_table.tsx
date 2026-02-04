@@ -68,7 +68,7 @@ export function RelatedAlertsTable({ alertData }: Props) {
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
+    <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="relatedAlertsTable">
       <EuiSpacer size="s" />
       <RelatedAlertsTableFilter />
       <AlertsTable<ObservabilityAlertsTableContext>

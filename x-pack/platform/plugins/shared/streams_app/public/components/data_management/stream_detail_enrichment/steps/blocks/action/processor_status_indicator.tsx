@@ -37,10 +37,10 @@ export const ProcessorStatusIndicator = ({
       }
     );
     variant = {
-      type: 'dot',
-      color: 'subdued',
+      type: 'minusInCircle',
+      color: euiTheme.colors.textDisabled,
       content: name,
-      size: 'l',
+      size: 'm',
     };
   } else if (
     stepStatus === 'skipped.followsProcessorBeingEdited' ||
@@ -80,10 +80,10 @@ export const ProcessorStatusIndicator = ({
     }
 
     variant = {
-      type: 'dot',
-      color: 'warning',
+      type: 'dashedCircle',
+      color: euiTheme.colors.textParagraph,
       content: name,
-      size: 'l',
+      size: 'm',
     };
   } else {
     if (stepStatus === 'running') {

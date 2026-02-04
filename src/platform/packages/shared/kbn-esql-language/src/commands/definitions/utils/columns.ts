@@ -11,16 +11,11 @@ import type { ICommandContext } from '../../registry/types';
 import type { ESQLColumn, ESQLIdentifier } from '../../../types';
 import { fuzzySearch } from './shared';
 
-/**
- * TODO - consider calling lookupColumn under the hood of this function. Seems like they should really do the same thing.
- */
 export function getColumnExists(
   node: ESQLColumn | ESQLIdentifier,
   { columns }: Pick<ICommandContext, 'columns'>,
   excludeFields = false
 ) {
-  const columnName = node.type === 'identifier' ? node.name : node.parts.join('.');
-
   const set = new Set(
     !excludeFields
       ? columns.keys()
@@ -29,14 +24,22 @@ export function getColumnExists(
           .map((col) => col.name)
   );
 
-  if (set.has(columnName)) {
+  return columnIsPresent(node, set);
+}
+
+export function columnIsPresent(node: ESQLColumn | ESQLIdentifier, columns: Set<string>) {
+  const columnName = getColumnName(node);
+  if (columns.has(columnName)) {
     return true;
   }
 
-  // TODO — I don't see this fuzzy searching in lookupColumn... should it be there?
-  if (Boolean(fuzzySearch(columnName, set.values()))) {
+  if (Boolean(fuzzySearch(columnName, columns.values()))) {
     return true;
   }
 
   return false;
+}
+
+export function getColumnName(node: ESQLColumn | ESQLIdentifier): string {
+  return node.type === 'identifier' ? node.name : node.parts.join('.');
 }

@@ -47,6 +47,10 @@ const queryClient = new QueryClient({
 
 jest.mock('../../../../common/lib/kibana');
 
+const { getIsExperimentalFeatureEnabled } = jest.requireMock(
+  '../../../../common/get_experimental_features'
+);
+
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
@@ -321,25 +325,30 @@ describe('rule_details', () => {
         .toMatchInlineSnapshot(`
         <EuiPanel
           borderRadius="none"
+          className="euiCallOut euiCallOut--danger"
           color="danger"
-          css="unknown styles"
           data-test-subj="ruleErrorBanner"
           grow={false}
           paddingSize="s"
           panelRef={null}
         >
-          <p
-            className="euiCallOutHeader__title"
+          <EuiTitle
+            css="unknown styles"
+            size="xxs"
           >
-            <EuiIcon
-              aria-hidden="true"
-              color="inherit"
-              css="unknown styles"
-              size="m"
-              type="error"
-            />
-            Cannot run rule
-          </p>
+            <p
+              className="euiCallOutHeader__title"
+            >
+              <EuiIcon
+                aria-hidden="true"
+                color="inherit"
+                css="unknown styles"
+                size="m"
+                type="error"
+              />
+              Cannot run rule
+            </p>
+          </EuiTitle>
           <EuiSpacer
             size="s"
           />
@@ -522,12 +531,23 @@ describe('rule_details', () => {
     });
 
     describe('links', () => {
-      it('links to the app that created the rule', () => {
+      it('renders view in app button in management context', () => {
+        (getIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
         const rule = mockRule();
         expect(
           shallowWithIntl(
             <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
           ).find('ViewInApp')
+        ).toBeTruthy();
+      });
+
+      it('renders view linked object button in rules app context', () => {
+        (getIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+        const rule = mockRule();
+        expect(
+          shallowWithIntl(
+            <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+          ).find('ViewLinkedObject')
         ).toBeTruthy();
       });
 

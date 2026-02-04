@@ -175,6 +175,7 @@ export const getSearchEmbeddableFactory = ({
           partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$ },
           discoverServices,
           isEditable: startServices.isEditable,
+          getTitle: () => titleManager.api.title$.getValue(),
         }),
         dataLoading$,
         blockingError$,
@@ -336,7 +337,6 @@ export const getSearchEmbeddableFactory = ({
                           api={{ ...api, fetchWarnings$, fetchContext$ }}
                           dataView={dataView!}
                           onAddFilter={
-                            isEsqlMode(savedSearch) ||
                             runtimeState.nonPersistedDisplayOptions?.enableFilters === false
                               ? undefined
                               : onAddFilter

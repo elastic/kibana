@@ -234,6 +234,26 @@ export const createNavigationTree = ({
                 {
                   link: 'ml:dataVisualizer',
                 },
+                {
+                  link: 'ml:dataDrift',
+                  sideNavStatus: 'hidden',
+                },
+                {
+                  link: 'ml:dataDriftPage',
+                  sideNavStatus: 'hidden',
+                },
+                {
+                  link: 'ml:fileUpload',
+                  sideNavStatus: 'hidden',
+                },
+                {
+                  link: 'ml:indexDataVisualizer',
+                  sideNavStatus: 'hidden',
+                },
+                {
+                  link: 'ml:indexDataVisualizerPage',
+                  sideNavStatus: 'hidden',
+                },
               ],
             },
             {
@@ -283,6 +303,10 @@ export const createNavigationTree = ({
                   ),
                 },
                 {
+                  link: 'ml:logRateAnalysisPage',
+                  sideNavStatus: 'hidden',
+                },
+                {
                   link: 'ml:logPatternAnalysis',
                   title: i18n.translate(
                     'xpack.serverlessObservability.nav.ml.aiops_labs.log_pattern_analysis',
@@ -292,6 +316,10 @@ export const createNavigationTree = ({
                   ),
                 },
                 {
+                  link: 'ml:logPatternAnalysisPage',
+                  sideNavStatus: 'hidden',
+                },
+                {
                   link: 'ml:changePointDetections',
                   title: i18n.translate(
                     'xpack.serverlessObservability.nav.ml.aiops_labs.change_point_detection',
@@ -299,6 +327,10 @@ export const createNavigationTree = ({
                       defaultMessage: 'Change point detection',
                     }
                   ),
+                },
+                {
+                  link: 'ml:changePointDetectionsPage',
+                  sideNavStatus: 'hidden',
                 },
               ],
             },

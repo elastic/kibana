@@ -250,6 +250,9 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       <EuiInMemoryTable
         loading={isLoading}
         tableLayout="auto"
+        tableCaption={i18n.translate('xpack.fleet.dataStreamList.dataStreamsTableCaption', {
+          defaultMessage: 'List of data streams',
+        })}
         noItemsMessage={
           isLoading ? (
             <FormattedMessage

@@ -55,6 +55,20 @@ function isAttachmentReferencedInRounds(
   return false;
 }
 
+const hasClientId = (attachment: { client_id?: string; versions: Array<{ data: unknown }> }) => {
+  if (attachment.client_id) {
+    return true;
+  }
+
+  return attachment.versions.some((version) => {
+    if (!version?.data || typeof version.data !== 'object') {
+      return false;
+    }
+
+    return Boolean((version.data as { client_id?: string }).client_id);
+  });
+};
+
 export function registerAttachmentRoutes({
   router,
   getInternalServices,
@@ -105,14 +119,17 @@ export function registerAttachmentRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { conversations: conversationsService } = getInternalServices();
+        const { conversations: conversationsService, attachments: attachmentsService } =
+          getInternalServices();
         const { conversation_id: conversationId } = request.params;
         const { include_deleted: includeDeleted } = request.query;
 
         const client = await conversationsService.getScopedClient({ request });
         const conversation = await client.get(conversationId);
 
-        const stateManager = createAttachmentStateManager(conversation.attachments ?? []);
+        const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
+          getTypeDefinition: attachmentsService.getTypeDefinition,
+        });
         const attachments = includeDeleted ? stateManager.getAll() : stateManager.getActive();
 
         return response.ok<ListAttachmentsResponse>({
@@ -184,23 +201,33 @@ export function registerAttachmentRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { conversations: conversationsService } = getInternalServices();
+        const { conversations: conversationsService, attachments: attachmentsService } =
+          getInternalServices();
         const { conversation_id: conversationId } = request.params;
         const { id, type, data, description, hidden } = request.body;
 
         const client = await conversationsService.getScopedClient({ request });
         const conversation = await client.get(conversationId);
 
-        const stateManager = createAttachmentStateManager(conversation.attachments ?? []);
+        const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
+          getTypeDefinition: attachmentsService.getTypeDefinition,
+        });
 
         // Check for duplicate ID if provided
-        if (id && stateManager.get(id)) {
+        if (id && stateManager.getAttachmentRecord(id)) {
           return response.conflict({
             body: { message: `Attachment with ID '${id}' already exists` },
           });
         }
 
-        const attachment = stateManager.add({ id, type, data, description, hidden });
+        let attachment;
+        try {
+          attachment = await stateManager.add({ id, type, data, description, hidden });
+        } catch (e) {
+          return response.badRequest({
+            body: { message: e.message },
+          });
+        }
 
         // Save the updated conversation
         await client.update({
@@ -262,15 +289,18 @@ export function registerAttachmentRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { conversations: conversationsService } = getInternalServices();
+        const { conversations: conversationsService, attachments: attachmentsService } =
+          getInternalServices();
         const { conversation_id: conversationId, attachment_id: attachmentId } = request.params;
         const { data, description } = request.body;
 
         const client = await conversationsService.getScopedClient({ request });
         const conversation = await client.get(conversationId);
 
-        const stateManager = createAttachmentStateManager(conversation.attachments ?? []);
-        const existing = stateManager.get(attachmentId);
+        const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
+          getTypeDefinition: attachmentsService.getTypeDefinition,
+        });
+        const existing = stateManager.getAttachmentRecord(attachmentId);
 
         if (!existing) {
           return response.notFound({
@@ -286,7 +316,14 @@ export function registerAttachmentRoutes({
           });
         }
 
-        const updated = stateManager.update(attachmentId, { data, description });
+        let updated;
+        try {
+          updated = await stateManager.update(attachmentId, { data, description });
+        } catch (e) {
+          return response.badRequest({
+            body: { message: e.message },
+          });
+        }
 
         if (!updated) {
           return response.customError({
@@ -359,15 +396,18 @@ export function registerAttachmentRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { conversations: conversationsService } = getInternalServices();
+        const { conversations: conversationsService, attachments: attachmentsService } =
+          getInternalServices();
         const { conversation_id: conversationId, attachment_id: attachmentId } = request.params;
         const { permanent } = request.query;
 
         const client = await conversationsService.getScopedClient({ request });
         const conversation = await client.get(conversationId);
 
-        const stateManager = createAttachmentStateManager(conversation.attachments ?? []);
-        const existing = stateManager.get(attachmentId);
+        const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
+          getTypeDefinition: attachmentsService.getTypeDefinition,
+        });
+        const existing = stateManager.getAttachmentRecord(attachmentId);
 
         if (!existing) {
           return response.notFound({
@@ -383,22 +423,19 @@ export function registerAttachmentRoutes({
         }
 
         if (permanent) {
+          if (hasClientId(existing)) {
+            return response.conflict({
+              body: {
+                message: `Cannot permanently delete attachment '${attachmentId}' because it was created from flyout configuration`,
+              },
+            });
+          }
+
           // Check if attachment is referenced in rounds
           if (isAttachmentReferencedInRounds(attachmentId, conversation.rounds)) {
             return response.conflict({
               body: {
                 message: `Cannot permanently delete attachment '${attachmentId}' because it is referenced in conversation rounds`,
-              },
-            });
-          }
-
-          // Check if attachment has client_id (from flyout config)
-          const latestVersion = stateManager.getLatest(attachmentId);
-          const versionData = latestVersion?.data as Record<string, unknown> | undefined;
-          if (versionData?.client_id) {
-            return response.conflict({
-              body: {
-                message: `Cannot permanently delete attachment '${attachmentId}' because it was created from flyout configuration`,
               },
             });
           }
@@ -480,14 +517,17 @@ export function registerAttachmentRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { conversations: conversationsService } = getInternalServices();
+        const { conversations: conversationsService, attachments: attachmentsService } =
+          getInternalServices();
         const { conversation_id: conversationId, attachment_id: attachmentId } = request.params;
 
         const client = await conversationsService.getScopedClient({ request });
         const conversation = await client.get(conversationId);
 
-        const stateManager = createAttachmentStateManager(conversation.attachments ?? []);
-        const existing = stateManager.get(attachmentId);
+        const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
+          getTypeDefinition: attachmentsService.getTypeDefinition,
+        });
+        const existing = stateManager.getAttachmentRecord(attachmentId);
 
         if (!existing) {
           return response.notFound({
@@ -509,7 +549,7 @@ export function registerAttachmentRoutes({
           });
         }
 
-        const restored = stateManager.get(attachmentId)!;
+        const restored = stateManager.getAttachmentRecord(attachmentId)!;
 
         // Save the updated conversation
         await client.update({
@@ -569,15 +609,18 @@ export function registerAttachmentRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { conversations: conversationsService } = getInternalServices();
+        const { conversations: conversationsService, attachments: attachmentsService } =
+          getInternalServices();
         const { conversation_id: conversationId, attachment_id: attachmentId } = request.params;
         const { description } = request.body;
 
         const client = await conversationsService.getScopedClient({ request });
         const conversation = await client.get(conversationId);
 
-        const stateManager = createAttachmentStateManager(conversation.attachments ?? []);
-        const existing = stateManager.get(attachmentId);
+        const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
+          getTypeDefinition: attachmentsService.getTypeDefinition,
+        });
+        const existing = stateManager.getAttachmentRecord(attachmentId);
 
         if (!existing) {
           return response.notFound({
@@ -593,7 +636,7 @@ export function registerAttachmentRoutes({
           });
         }
 
-        const renamed = stateManager.get(attachmentId)!;
+        const renamed = stateManager.getAttachmentRecord(attachmentId)!;
 
         // Save the updated conversation
         await client.update({

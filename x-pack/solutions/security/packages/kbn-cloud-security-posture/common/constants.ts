@@ -112,6 +112,12 @@ export const GENERIC_ENTITY_INDEX_ENRICH_POLICY =
 export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
 
 /**
+ * Entity store latest index pattern for LOOKUP JOIN queries.
+ * The <space> placeholder should be replaced with the actual space ID.
+ */
+export const ENTITIES_LATEST_INDEX = '.entities.v2.latest.security_generic_<space>';
+
+/**
  * ECS entity actor fields used for graph visualization.
  * NOTE: The order has meaning - it represents the fallback mechanism for detecting the actor field.
  */

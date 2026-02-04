@@ -22,6 +22,7 @@ import {
   EuiFlexItem,
   EuiFilterGroup,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GapAutoFillSchedulerLogsResponseBodyV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler';
@@ -35,10 +36,63 @@ import {
 } from '../../api/hooks/use_gap_auto_fill_scheduler';
 import { MultiselectFilter } from '../../../../common/components/multiselect_filter';
 
+type SchedulerLog = GapAutoFillSchedulerLogsResponseBodyV1['data'][number];
+
 interface GapAutoFillLogsFlyoutProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+export const getStatusTooltip = (logEntry: SchedulerLog): string => {
+  const { status, message, results } = logEntry;
+  if (!status) {
+    return '';
+  }
+
+  const successCount = results?.filter((r) => r.status === 'success').length ?? 0;
+  const messageLower = message?.toLowerCase() || '';
+
+  switch (status) {
+    case GAP_AUTO_FILL_STATUS.NO_GAPS:
+      return i18n.GAP_AUTO_FILL_STATUS_NO_GAPS_TOOLTIP;
+
+    case GAP_AUTO_FILL_STATUS.SUCCESS:
+      return i18n.GAP_AUTO_FILL_STATUS_SUCCESS_TOOLTIP;
+
+    case GAP_AUTO_FILL_STATUS.ERROR:
+      if (messageLower.includes('error during execution')) {
+        return i18n.GAP_AUTO_FILL_STATUS_ERROR_TASK_CRASH_TOOLTIP;
+      }
+
+      // Use results array to determine error type if available
+      if (results && results.length > 0) {
+        const errorCount = results.filter((r) => r.status === 'error').length;
+        if (errorCount === results.length) {
+          return i18n.GAP_AUTO_FILL_STATUS_ERROR_ALL_FAILED_TOOLTIP;
+        } else if (successCount > 0) {
+          return i18n.getGapAutoFillStatusErrorSomeSucceededTooltip(successCount);
+        }
+      }
+
+      return i18n.GAP_AUTO_FILL_STATUS_ERROR_TOOLTIP;
+
+    case GAP_AUTO_FILL_STATUS.SKIPPED:
+      if (messageLower.includes('capacity limit reached')) {
+        if (successCount > 0) {
+          return i18n.getGapAutoFillStatusSkippedSomeSucceededTooltip(successCount);
+        }
+
+        return i18n.GAP_AUTO_FILL_STATUS_SKIPPED_NO_CAPACITY_TOOLTIP;
+      }
+      if (messageLower.includes("can't schedule gap fills for any enabled rule")) {
+        return i18n.GAP_AUTO_FILL_STATUS_SKIPPED_RULES_DISABLED_TOOLTIP;
+      }
+      return i18n.GAP_AUTO_FILL_STATUS_SKIPPED_TOOLTIP;
+
+    default:
+      return '';
+  }
+};
 
 const statuses: GapAutoFillStatus[] = [
   GAP_AUTO_FILL_STATUS.SUCCESS,
@@ -65,7 +119,6 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
     enabled: isOpen,
   });
 
-  type SchedulerLog = GapAutoFillSchedulerLogsResponseBodyV1['data'][number];
   const [expandedRowMap, setExpandedRowMap] = useState<Record<string, JSX.Element>>({});
 
   const enabled = scheduler?.enabled;
@@ -103,8 +156,8 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
         align: 'center',
         width: '150px',
         name: i18n.GAP_AUTO_FILL_LOGS_STATUS_COLUMN,
-        render: (status: SchedulerLog['status']) => {
-          let badgeColor: 'success' | 'hollow' | 'danger';
+        render: (status: SchedulerLog['status'], item: SchedulerLog) => {
+          let badgeColor: 'success' | 'hollow' | 'danger' | 'warning';
 
           switch (status) {
             case GAP_AUTO_FILL_STATUS.SUCCESS:
@@ -114,12 +167,21 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
               badgeColor = 'danger';
               break;
             case GAP_AUTO_FILL_STATUS.SKIPPED:
+              badgeColor = 'warning';
+              break;
             case GAP_AUTO_FILL_STATUS.NO_GAPS:
             default:
               badgeColor = 'hollow';
           }
 
-          return <EuiBadge color={badgeColor}>{getStatusLabel(status)}</EuiBadge>;
+          const statusLabel = getStatusLabel(status);
+          const statusTooltip = getStatusTooltip(item);
+
+          return (
+            <EuiToolTip content={statusTooltip} position="top">
+              <EuiBadge color={badgeColor}>{statusLabel}</EuiBadge>
+            </EuiToolTip>
+          );
         },
       },
       {

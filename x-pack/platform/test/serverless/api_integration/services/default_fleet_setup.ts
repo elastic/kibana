@@ -8,7 +8,9 @@
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultFleetServerHostId = 'default-fleet-server';
+const defaultFleetServerHostIdInternal = 'default-fleet-server-internal';
 const defaultElasticsearchOutputId = 'es-default-output';
+const defaultElasticsearchOutputIdInternal = 'es-default-output-internal';
 
 export async function expectDefaultFleetServer({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -57,6 +59,12 @@ export const kbnServerArgs = [
     name: 'Default Fleet Server',
     is_default: true,
     host_urls: ['https://localhost:8220'],
+  })},${JSON.stringify({
+    id: defaultFleetServerHostIdInternal,
+    name: 'Default Fleet Server (Internal)',
+    is_default: false,
+    is_internal: true,
+    host_urls: ['https://localhost:8220'],
   })}]`,
   `--xpack.fleet.outputs=[${JSON.stringify({
     id: defaultElasticsearchOutputId,
@@ -65,5 +73,14 @@ export const kbnServerArgs = [
     is_default: true,
     is_default_monitoring: true,
     hosts: ['https://localhost:9200'],
-  })}]`,
+  })},${JSON.stringify({
+    id: defaultElasticsearchOutputIdInternal,
+    name: 'Default Output (Internal)',
+    type: 'elasticsearch',
+    is_default: false,
+    is_default_monitoring: false,
+    is_internal: true,
+    hosts: ['https://localhost:9200'],
+  })}
+  ]`,
 ];

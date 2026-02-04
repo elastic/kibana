@@ -360,5 +360,27 @@ describe('Presentation panel', () => {
       await renderPresentationPanel({ api });
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
     });
+
+    it('passes titleHighlight prop through to PresentationPanelHeader', async () => {
+      const api: DefaultPresentationPanelApi = {
+        uuid: 'test',
+        title$: new BehaviorSubject<string | undefined>('CPU Usage'),
+      };
+      const { container } = render(
+        <EuiThemeProvider>
+          <PresentationPanel
+            Component={getMockPresentationPanelCompatibleComponent(api)}
+            titleHighlight="cpu"
+          />
+        </EuiThemeProvider>
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitle')).toBeInTheDocument();
+      });
+      await waitFor(() => {
+        const mark = container.querySelector('mark');
+        expect(mark).toBeInTheDocument();
+      });
+    });
   });
 });

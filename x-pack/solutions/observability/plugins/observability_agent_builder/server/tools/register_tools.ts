@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 import type {
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import {
@@ -24,9 +23,9 @@ import {
 } from './get_anomaly_detection_jobs/tool';
 import { OBSERVABILITY_GET_ALERTS_TOOL_ID, createGetAlertsTool } from './get_alerts/tool';
 import {
-  OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
-  createGetLogCategoriesTool,
-} from './get_log_categories/tool';
+  OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
+  createGetLogGroupsTool,
+} from './get_log_groups/tool';
 import {
   OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
   createGetCorrelatedLogsTool,
@@ -56,7 +55,6 @@ import {
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID, createGetIndexInfoTool } from './get_index_info';
 
 const PLATFORM_TOOL_IDS = [
-  platformCoreTools.search,
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
@@ -67,7 +65,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
-  OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
+  OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
   OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
@@ -87,10 +85,7 @@ export async function registerTools({
   dataRegistry,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   logger: Logger;
@@ -99,7 +94,7 @@ export async function registerTools({
     createRunLogRateAnalysisTool({ core, logger }),
     createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
-    createGetLogCategoriesTool({ core, logger }),
+    createGetLogGroupsTool({ core, plugins, logger }),
     createGetServicesTool({ core, plugins, dataRegistry, logger }),
     createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),

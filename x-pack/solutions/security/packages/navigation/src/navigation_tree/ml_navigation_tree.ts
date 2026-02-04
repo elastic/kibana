@@ -25,7 +25,26 @@ export const createMachineLearningNavigationTree = (): NodeDefinition => ({
         },
         {
           link: 'ml:dataVisualizer',
-          title: i18nStrings.ml.dataVisualizer,
+        },
+        {
+          link: 'ml:dataDrift',
+          sideNavStatus: 'hidden',
+        },
+        {
+          link: 'ml:dataDriftPage',
+          sideNavStatus: 'hidden',
+        },
+        {
+          link: 'ml:fileUpload',
+          sideNavStatus: 'hidden',
+        },
+        {
+          link: 'ml:indexDataVisualizer',
+          sideNavStatus: 'hidden',
+        },
+        {
+          link: 'ml:indexDataVisualizerPage',
+          sideNavStatus: 'hidden',
         },
       ],
     },
@@ -66,12 +85,24 @@ export const createMachineLearningNavigationTree = (): NodeDefinition => ({
           title: i18nStrings.ml.aiopsLabs.logRateAnalysis,
         },
         {
+          link: 'ml:logRateAnalysisPage',
+          sideNavStatus: 'hidden',
+        },
+        {
           link: 'ml:logPatternAnalysis',
           title: i18nStrings.ml.aiopsLabs.logPatternAnalysis,
         },
         {
+          link: 'ml:logPatternAnalysisPage',
+          sideNavStatus: 'hidden',
+        },
+        {
           link: 'ml:changePointDetections',
           title: i18nStrings.ml.aiopsLabs.changePointDetection,
+        },
+        {
+          link: 'ml:changePointDetectionsPage',
+          sideNavStatus: 'hidden',
         },
       ],
     },

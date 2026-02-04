@@ -217,14 +217,6 @@ describe('utils', () => {
       expect(result.onClick).toBeDefined();
     });
 
-    it('should not set onClick when href is provided', () => {
-      const item = { ...baseItem, href: 'http://example.com' };
-      const result = mapAppMenuItemToPanelItem(item);
-
-      expect(result.onClick).toBeUndefined();
-      expect(result.href).toBe('http://example.com');
-    });
-
     it('should not set onClick when childPanelId is provided', () => {
       const result = mapAppMenuItemToPanelItem(baseItem, 1);
 
@@ -379,7 +371,7 @@ describe('utils', () => {
         { id: '2', label: 'Item 2', run: jest.fn(), order: 2 },
       ];
 
-      const { panels } = getPopoverPanels({ items });
+      const panels = getPopoverPanels({ items });
 
       expect(panels).toHaveLength(1);
       expect(panels[0].id).toBe(0);
@@ -396,7 +388,7 @@ describe('utils', () => {
         },
       ];
 
-      const { panels } = getPopoverPanels({ items });
+      const panels = getPopoverPanels({ items });
 
       expect(panels).toHaveLength(2);
       const mainPanel = panels.find((p) => p.id === 0);
@@ -412,7 +404,7 @@ describe('utils', () => {
         { id: '1', label: 'Item 1', run: jest.fn(), order: 1, separator: 'above' },
       ];
 
-      const { panels } = getPopoverPanels({ items });
+      const panels = getPopoverPanels({ items });
       const panelItems = panels[0].items as Array<{ isSeparator?: boolean; key?: string }>;
 
       expect(panelItems[0].isSeparator).toBe(true);
@@ -424,7 +416,7 @@ describe('utils', () => {
         { id: '1', label: 'Item 1', run: jest.fn(), order: 1, separator: 'below' },
       ];
 
-      const { panels } = getPopoverPanels({ items });
+      const panels = getPopoverPanels({ items });
       const panelItems = panels[0].items as Array<{ isSeparator?: boolean; key?: string }>;
 
       expect(panelItems[1].isSeparator).toBe(true);
@@ -434,7 +426,7 @@ describe('utils', () => {
     it('should append action items to main panel when provided', () => {
       const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
 
-      const { panels } = getPopoverPanels({
+      const panels = getPopoverPanels({
         items,
         primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
       });
@@ -450,7 +442,7 @@ describe('utils', () => {
     it('should use custom startPanelId', () => {
       const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
 
-      const { panels } = getPopoverPanels({ items, startPanelId: 10 });
+      const panels = getPopoverPanels({ items, startPanelId: 10 });
 
       expect(panels[0].id).toBe(10);
     });
@@ -472,12 +464,12 @@ describe('utils', () => {
         },
       ];
 
-      const { panels } = getPopoverPanels({ items });
+      const panels = getPopoverPanels({ items });
 
       expect(panels).toHaveLength(3);
     });
 
-    it('should create panelIdToTestId mapping for items with popoverTestId', () => {
+    it('should set data-test-subj on panels with popoverTestId', () => {
       const items: AppMenuPopoverItem[] = [
         {
           id: '1',
@@ -509,12 +501,16 @@ describe('utils', () => {
         },
       ];
 
-      const { panels, panelIdToTestId } = getPopoverPanels({ items });
+      const panels = getPopoverPanels({ items });
 
       expect(panels).toHaveLength(3);
-      expect(panelIdToTestId['1']).toBe('exportPopoverPanel');
-      expect(panelIdToTestId['2']).toBe('sharePopoverPanel');
-      expect(panelIdToTestId['0']).toBeUndefined(); // Main panel has no test ID
+      const exportPanel = panels.find((p) => p.title === 'Export');
+      const sharePanel = panels.find((p) => p.title === 'Share');
+      const mainPanel = panels.find((p) => p.id === 0);
+
+      expect(exportPanel?.['data-test-subj']).toBe('exportPopoverPanel');
+      expect(sharePanel?.['data-test-subj']).toBe('sharePopoverPanel');
+      expect(mainPanel?.['data-test-subj']).toBeUndefined(); // Main panel has no test ID by default
     });
   });
 

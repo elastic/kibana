@@ -348,7 +348,6 @@ export const systemsTaskRoute = createServerRoute({
             scheduleConfig: {
               taskType: SYSTEMS_IDENTIFICATION_TASK_TYPE,
               taskId,
-              streamName: name,
               params: await (async (): Promise<SystemIdentificationTaskParams> => {
                 const connectorId = await resolveConnectorId({
                   connectorId: body.connectorId,
@@ -359,6 +358,7 @@ export const systemsTaskRoute = createServerRoute({
                   connectorId,
                   start: body.from.getTime(),
                   end: body.to.getTime(),
+                  streamName: name,
                 };
               })(),
               request,

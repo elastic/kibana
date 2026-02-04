@@ -9,11 +9,10 @@ import supertest from 'supertest';
 import { format as formatUrl } from 'url';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import type { RoleCredentials } from '@kbn/test-suites-xpack-platform/serverless/shared/services';
-import type { SendOptions } from '@kbn/ftr-common-functional-services';
+import type { SearchService, SendOptions } from '@kbn/ftr-common-functional-services';
 import type { SendOptions as SecureSearchSendOptions } from './search_secure';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { SecuritySolutionUtilsInterface, Role, User } from './types';
-import { roles } from '../privileges/roles';
+import type { SecuritySolutionUtilsInterface, CustomRole } from './types';
 
 export function SecuritySolutionServerlessUtils({
   getService,
@@ -64,9 +63,11 @@ export function SecuritySolutionServerlessUtils({
     return agentWithCommonHeaders.set(credentials.apiKeyHeader);
   };
 
-  const createSuperTestWithCustomRole = async (roleDefinition: Role) => {
+  const createSuperTestWithCustomRole = async (roleDefinition: CustomRole) => {
     await svlUserManager.setCustomRole(roleDefinition.privileges);
     const roleAuthc = await svlUserManager.createM2mApiKeyWithCustomRoleScope();
+    rolesCredentials.set(roleDefinition.name, roleAuthc);
+
     const superTest = supertest
       .agent(kbnUrl)
       .set(svlCommonApi.getInternalRequestHeader())
@@ -87,23 +88,7 @@ export function SecuritySolutionServerlessUtils({
 
     createSuperTestWithCustomRole,
 
-    createSuperTestWithUser: async (user: User) => {
-      if (user.roles.length > 1) {
-        throw new Error(
-          `This test service only supports authentication for users with a single role. Error for ${
-            user.username
-          } with roles ${user.roles.join(',')}.`
-        );
-      }
-      const userRoleName = user.roles[0];
-      const roleDefinition = roles.find((role) => role.name === userRoleName);
-      if (!roleDefinition) {
-        throw new Error(`Could not find a role definition for ${userRoleName}`);
-      }
-      return await createSuperTestWithCustomRole(roleDefinition);
-    },
-
-    cleanUpCustomRole: async () => {
+    cleanUpCustomRoles: async () => {
       await svlUserManager.deleteCustomRole();
     },
 
@@ -130,7 +115,7 @@ export function SecuritySolutionServerlessUtils({
         return SecureSearch.send(serverlessSendOptions);
       };
 
-      return { ...SecureSearch, send };
+      return { ...SecureSearch, send } as SearchService;
     },
   };
 }

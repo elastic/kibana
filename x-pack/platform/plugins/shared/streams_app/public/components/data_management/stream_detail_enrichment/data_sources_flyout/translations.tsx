@@ -164,6 +164,24 @@ export const DATA_SOURCES_I18N = {
       />
     ),
   },
+  failureStore: {
+    defaultName: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.failureStore.defaultName',
+      { defaultMessage: 'Failure store' }
+    ),
+    placeholderName: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.failureStore.placeholderName',
+      { defaultMessage: 'Failure store' }
+    ),
+    subtitle: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.failureStore.subtitle',
+      { defaultMessage: 'Use documents from the failure store.' }
+    ),
+    label: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.failureStore.label',
+      { defaultMessage: 'Failed documents' }
+    ),
+  },
   nameField: {
     label: i18n.translate(
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.nameField.label',
