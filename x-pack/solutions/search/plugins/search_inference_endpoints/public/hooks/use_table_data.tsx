@@ -11,10 +11,15 @@ import { useCallback, useMemo } from 'react';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
-import type { FilterOptions, QueryParams } from '../components/all_inference_endpoints/types';
+import type {
+  FilterOptions,
+  QueryParams,
+  SortableInferenceEndpoint,
+  SortFieldInferenceEndpoint,
+} from '../components/all_inference_endpoints/types';
 import {
   INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
-  SortFieldInferenceEndpoint,
+  SortFieldInferenceEndpoint as SortFieldValues,
   SortOrder,
 } from '../components/all_inference_endpoints/types';
 import { getModelId } from '../utils/get_model_id';
@@ -24,7 +29,7 @@ interface UseTableDataReturn {
   sortedTableData: InferenceInferenceEndpointInfo[];
   paginatedSortedTableData: InferenceInferenceEndpointInfo[];
   pagination: Pagination;
-  sorting: EuiTableSortingType<InferenceInferenceEndpointInfo>;
+  sorting: EuiTableSortingType<SortableInferenceEndpoint>;
 }
 
 export const useTableData = (
@@ -60,13 +65,13 @@ export const useTableData = (
   const getSortValue = useCallback(
     (endpoint: InferenceInferenceEndpointInfo, field: SortFieldInferenceEndpoint): string => {
       switch (field) {
-        case SortFieldInferenceEndpoint.inference_id:
+        case SortFieldValues.inference_id:
           return endpoint.inference_id ?? '';
-        case SortFieldInferenceEndpoint.service:
+        case SortFieldValues.service:
           return endpoint.service ?? '';
-        case SortFieldInferenceEndpoint.task_type:
+        case SortFieldValues.task_type:
           return endpoint.task_type ?? '';
-        case SortFieldInferenceEndpoint.model:
+        case SortFieldValues.model:
           return getModelId(endpoint) ?? '';
         default:
           return '';
@@ -105,11 +110,11 @@ export const useTableData = (
     return sortedTableData.slice(startIndex, endIndex);
   }, [sortedTableData, pagination]);
 
-  const sorting: EuiTableSortingType<InferenceInferenceEndpointInfo> = useMemo(
+  const sorting: EuiTableSortingType<SortableInferenceEndpoint> = useMemo(
     () => ({
       sort: {
         direction: queryParams.sortOrder,
-        field: queryParams.sortField as keyof InferenceInferenceEndpointInfo,
+        field: queryParams.sortField,
       },
     }),
     [queryParams.sortField, queryParams.sortOrder]

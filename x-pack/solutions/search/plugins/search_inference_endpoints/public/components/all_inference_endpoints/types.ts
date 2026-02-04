@@ -6,16 +6,29 @@
  */
 
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  InferenceInferenceEndpointInfo,
+  InferenceTaskType,
+} from '@elastic/elasticsearch/lib/api/types';
 
 export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [25, 50, 100];
 
-export enum SortFieldInferenceEndpoint {
-  inference_id = 'inference_id',
-  service = 'service',
-  task_type = 'task_type',
-  model = 'model',
+// Extended type that includes 'model' as a sortable field
+// 'model' is a virtual field extracted from service_settings via getModelId()
+export interface SortableInferenceEndpoint extends InferenceInferenceEndpointInfo {
+  model?: string;
 }
+
+// Sort fields are derived from SortableInferenceEndpoint to ensure type safety
+export type SortFieldInferenceEndpoint = 'inference_id' | 'service' | 'task_type' | 'model';
+
+export const SortFieldInferenceEndpoint = {
+  inference_id: 'inference_id',
+  service: 'service',
+  task_type: 'task_type',
+  model: 'model',
+} as const;
+
 export enum SortOrder {
   asc = 'asc',
   desc = 'desc',
