@@ -19,10 +19,6 @@ import type {
   BulkCreateAlertActionItemBody,
   CreateAlertActionBody,
 } from '../../routes/schemas/alert_action_schema';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../services/logger_service/logger_service';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceScopedToken } from '../services/query_service/tokens';
@@ -35,7 +31,6 @@ export class AlertActionsClient {
     @inject(Request) private readonly request: KibanaRequest,
     @inject(QueryServiceScopedToken) private readonly queryService: QueryServiceContract,
     @inject(StorageServiceScopedToken) private readonly storageService: StorageServiceContract,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @optional() @inject(PluginStart('security')) private readonly security?: SecurityPluginStart
   ) {}
 
