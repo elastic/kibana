@@ -148,7 +148,7 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, home, data, urlForwarding }: DashboardSetupDependencies
+    { embeddable, share, home, data, urlForwarding }: DashboardSetupDependencies
   ) {
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',

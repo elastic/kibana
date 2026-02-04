@@ -9,7 +9,6 @@
 
 import type { LicenseType } from '@kbn/licensing-types';
 import type {
-  EmbeddableApiContext,
   PublishingSubject,
   StateComparators,
 } from '@kbn/presentation-publishing';
@@ -19,15 +18,18 @@ import type { DrilldownsState, DrilldownState } from '../../server';
 
 export type DrilldownStateInternal = DrilldownState & { actionId: string };
 
-export type DrilldownDefinition<TDrilldownState extends DrilldownState = DrilldownState> = {
+export type DrilldownDefinition<
+  TDrilldownState extends DrilldownState = DrilldownState,
+  TContext extends object = object,
+> = {
   /**
    * Implements the "navigation" action of the drilldown. This happens when
    * user interacts with something in the UI that executes the drilldown trigger.
    *
-   * @param config Drilldown state.
+   * @param drilldownState Drilldown state.
    * @param context Object that represents context in which the drilldown is being executed in.
    */
-  execute(drilldownState: TDrilldownState, context: EmbeddableApiContext): Promise<void>;
+  execute(drilldownState: TDrilldownState, context: TContext): Promise<void>;
 
   /**
    * Name of EUI icon to display when showing this drilldown to user.
@@ -39,7 +41,7 @@ export type DrilldownDefinition<TDrilldownState extends DrilldownState = Drilldo
    */
   getHref?(
     drilldownState: TDrilldownState,
-    context: EmbeddableApiContext
+    context: TContext
   ): Promise<string | undefined>;
 
   isCompatible?: ActionDefinition['isCompatible'];

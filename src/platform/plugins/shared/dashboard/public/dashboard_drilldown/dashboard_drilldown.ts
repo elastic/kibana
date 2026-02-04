@@ -7,18 +7,53 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { APPLY_FILTER_TRIGGER } from "@kbn/data-plugin/public";
-import { DrilldownDefinition } from "@kbn/embeddable-plugin/public";
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import type { DrilldownDefinition } from '@kbn/embeddable-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
+import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
+import { isFilterPinned } from '@kbn/es-query';
+import type { DashboardDrilldownState } from '../../server/dashboard_drilldown/types';
+import { coreServices } from '../services/kibana_services';
+import { getLocation } from './get_location';
+import { cleanEmptyKeys } from '../../common/locator/locator';
 
-export const dashboardDrilldown: DrilldownDefinition = {
-  execute: async (drilldownState: DashboardDrilldownConfig, context: EmbeddableApiContext) => {
-    /*if (config.open_in_new_tab) {
-      window.open(await this.getHref(config, context), '_blank');
+export const dashboardDrilldown: DrilldownDefinition<
+  DashboardDrilldownState,
+  ApplyGlobalFilterActionContext
+> = {
+  euiIcon: 'dashboardApp',
+  execute: async (
+    drilldownState: DashboardDrilldownState,
+    context: ApplyGlobalFilterActionContext
+  ) => {
+    if (drilldownState.open_in_new_tab) {
+      window.open(await getHref(drilldownState, context), '_blank');
     } else {
-      const { app, path, state } = await this.getLocation(config, context, false);
-      await this.params.start().core.application.navigateToApp(app, { path, state });
-    }*/
+      const { app, path, state } = await getLocation(drilldownState, context);
+      await coreServices.application.navigateToApp(app, { path, state });
+    }
   },
+  getHref,
   supportedTriggers: [APPLY_FILTER_TRIGGER, IMAGE_CLICK_TRIGGER],
 };
+
+async function getHref(
+  drilldownState: DashboardDrilldownState,
+  context: ApplyGlobalFilterActionContext
+) {
+  const { app, path, state } = await getLocation(drilldownState, context);
+  const url = await coreServices.application.getUrlForApp(app, {
+    path: setStateToKbnUrl(
+      '_a',
+      cleanEmptyKeys({
+        query: state.query,
+        filters: state.filters?.filter((f) => !isFilterPinned(f)),
+      }),
+      { useHash: false, storeInHashQuery: true },
+      path
+    ),
+    absolute: true,
+  });
+  return url;
+}

@@ -13,10 +13,10 @@ import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/common';
 import { DASHBOARD_DRILLDOWN_TYPE } from '../../common/page_bundle_constants';
 import { transformIn, transformOut } from './transforms';
 import { dashboardDrilldownSchema } from './schemas';
-import type { DashboardDrilldown, StoredDashboardDrilldown } from './types';
+import type { DashboardDrilldownState, StoredDashboardDrilldownState } from './types';
 
 export function registerDashboardDrilldown(embeddableSetup: EmbeddableSetup) {
-  embeddableSetup.registerDrilldown<StoredDashboardDrilldown, DashboardDrilldown>(
+  embeddableSetup.registerDrilldown<StoredDashboardDrilldownState, DashboardDrilldownState>(
     DASHBOARD_DRILLDOWN_TYPE,
     {
       schema: dashboardDrilldownSchema,

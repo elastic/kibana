@@ -12,12 +12,11 @@ import { v4 as uuidv4 } from 'uuid';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import type {
   DrilldownsManager,
-  DrilldownsState,
-  DrilldownState,
   DrilldownStateInternal,
 } from './types';
 import { createAction } from './create_action';
 import { deleteAction } from './delete_action';
+import { DrilldownsState, DrilldownState } from '../../server';
 
 export function initializeDrilldownsManager(
   embeddableUuid: string,
@@ -46,7 +45,7 @@ export function initializeDrilldownsManager(
 
   return {
     api: { ...api },
-    cleanup: () => deleteActions(),
+    cleanup: deleteActions,
     comparators: {
       drilldowns: 'deepEquality',
     } as StateComparators<DrilldownsState>,
