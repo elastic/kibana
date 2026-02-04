@@ -8,7 +8,8 @@
 import type {
   IFileStore,
   FsEntry,
-  FileEntry,
+  FileEntryInput,
+  FilestoreEntry,
   LsEntry,
   GrepMatch,
   DirEntryWithChildren,
@@ -27,17 +28,13 @@ export class FileSystemStore implements IFileStore {
    * Read a file entry from the store.
    * Returns undefined if the path doesn't exist or is a directory.
    */
-  async read(path: string, options: { version?: number } = {}): Promise<FileEntry | undefined> {
+  async read(
+    path: string,
+    options: { version?: number } = {}
+  ): Promise<FilestoreEntry | undefined> {
     const entry = await this.filesystem.get(path);
     if (entry?.type === 'file') {
-      const version = this.getVersion(entry, options.version);
-      if (!version) {
-        return undefined;
-      }
-      return {
-        ...entry,
-        versions: [version],
-      };
+      return this.toVersionedEntry(entry, options.version);
     }
     return undefined;
   }
@@ -71,9 +68,11 @@ export class FileSystemStore implements IFileStore {
   /**
    * List files matching the given glob pattern.
    */
-  async glob(pattern: string): Promise<FileEntry[]> {
+  async glob(pattern: string): Promise<FilestoreEntry[]> {
     const entries = await this.filesystem.glob(pattern, { onlyFiles: true });
-    return entries.map((entry) => this.toLatestFileEntry(entry as FileEntry));
+    return entries
+      .map((entry) => this.toVersionedEntry(entry as FileEntryInput))
+      .filter((entry): entry is FilestoreEntry => entry !== undefined);
   }
 
   /**
@@ -133,7 +132,7 @@ export class FileSystemStore implements IFileStore {
   /**
    * Build a nested tree structure from a flat list of entries.
    */
-  private buildTree(basePath: string, flatEntries: FsEntry[]): LsEntry[] {
+  private buildTree(basePath: string, flatEntries: LsEntry[]): LsEntry[] {
     // Map to store directory entries by path (so we can attach children)
     const dirMap = new Map<string, DirEntryWithChildren>();
 
@@ -191,29 +190,45 @@ export class FileSystemStore implements IFileStore {
    * Get the searchable text content of a file.
    * Uses plain_text if available, otherwise stringifies raw content.
    */
-  private getSearchableText(file: FileEntry): string {
-    const latest = this.getLatestVersion(file);
-    return latest.content.plain_text ?? JSON.stringify(latest.content.raw, null, 2);
+  private getSearchableText(file: FilestoreEntry): string {
+    return file.content.plain_text ?? JSON.stringify(file.content.raw, null, 2);
   }
 
-  private toLatestEntry(entry: FsEntry): FsEntry {
+  private toLatestEntry(entry: FsEntry): LsEntry {
     if (entry.type === 'file') {
-      return this.toLatestFileEntry(entry);
+      const versioned = this.toVersionedEntry(entry);
+      if (!versioned) {
+        throw new Error(`File entry at ${entry.path} has no versions`);
+      }
+      return versioned;
     }
     return entry;
   }
 
-  private toLatestFileEntry(entry: FileEntry): FileEntry {
-    const latest = this.getLatestVersion(entry);
+  private toVersionedEntry(entry: FileEntryInput, version?: number): FilestoreEntry | undefined {
+    const selectedVersion = this.getVersion(entry, version);
+    if (!selectedVersion) {
+      return undefined;
+    }
     return {
-      ...entry,
-      versions: [latest],
+      path: entry.path,
+      type: 'file',
+      version: selectedVersion.version,
+      metadata: {
+        ...entry.metadata,
+        ...selectedVersion.metadata,
+      },
+      content: selectedVersion.content,
     };
   }
 
-  private getLatestVersion(entry: FileEntry) {
+  private getLatestVersion<TVersion extends { version: number }>(entry: {
+    path?: string;
+    versions: TVersion[];
+  }): TVersion {
     if (entry.versions.length === 0) {
-      throw new Error(`File entry at ${entry.path} has no versions`);
+      const label = entry.path ?? 'unknown';
+      throw new Error(`File entry at ${label} has no versions`);
     }
     let latest = entry.versions[0];
     for (const version of entry.versions) {
@@ -224,7 +239,10 @@ export class FileSystemStore implements IFileStore {
     return latest;
   }
 
-  private getVersion(entry: FileEntry, version?: number) {
+  private getVersion<TVersion extends { version: number }>(
+    entry: { versions: TVersion[] },
+    version?: number
+  ): TVersion | undefined {
     if (version === undefined) {
       return this.getLatestVersion(entry);
     }

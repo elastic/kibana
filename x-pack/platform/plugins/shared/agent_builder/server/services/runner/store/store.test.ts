@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { FileEntryType, type FileEntry } from '@kbn/agent-builder-server/runner/filestore';
+import { FileEntryType, type FileEntryInput } from '@kbn/agent-builder-server/runner/filestore';
 import { FileSystemStore } from './store';
 import { VirtualFileSystem, MemoryVolume } from './filesystem';
 
 const createFileEntry = (
   path: string,
   content: { raw: object; plain_text?: string },
-  overrides: Partial<FileEntry> = {}
-): FileEntry => ({
+  overrides: Partial<FileEntryInput> = {}
+): FileEntryInput => ({
   path,
   type: 'file',
   metadata: {
@@ -54,7 +54,9 @@ describe('FileSystemStore', () => {
 
       const result = await store.read('/files/test.json');
 
-      expect(result).toEqual(entry);
+      expect(result?.path).toBe(entry.path);
+      expect(result?.content.raw).toEqual({ data: 'test' });
+      expect(result?.metadata.token_count).toBe(100);
     });
 
     it('returns latest version by default', async () => {
@@ -80,8 +82,8 @@ describe('FileSystemStore', () => {
 
       const result = await store.read('/files/test.json');
 
-      expect(result?.versions).toHaveLength(1);
-      expect(result?.versions[0].content.raw).toEqual({ data: 'v2' });
+      expect(result?.content.raw).toEqual({ data: 'v2' });
+      expect(result?.metadata.token_count).toBe(100);
     });
 
     it('returns requested version when specified', async () => {
@@ -107,8 +109,8 @@ describe('FileSystemStore', () => {
 
       const result = await store.read('/files/test.json', { version: 1 });
 
-      expect(result?.versions).toHaveLength(1);
-      expect(result?.versions[0].content.raw).toEqual({ data: 'v1' });
+      expect(result?.content.raw).toEqual({ data: 'v1' });
+      expect(result?.metadata.token_count).toBe(100);
     });
 
     it('returns undefined when path does not exist', async () => {
@@ -211,6 +213,7 @@ describe('FileSystemStore', () => {
       expect(result.map((e) => e.path)).toEqual(
         expect.arrayContaining(['/files/test1.json', '/files/test2.json'])
       );
+      expect(result[0].content).toBeDefined();
     });
 
     it('returns only files, not directories', async () => {

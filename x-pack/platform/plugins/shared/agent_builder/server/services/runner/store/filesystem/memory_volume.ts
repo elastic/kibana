@@ -6,7 +6,11 @@
  */
 
 import minimatch from 'minimatch';
-import type { FileEntry, FsEntry, DirEntry } from '@kbn/agent-builder-server/runner/filestore';
+import type {
+  FileEntryInput,
+  FsEntry,
+  DirEntry,
+} from '@kbn/agent-builder-server/runner/filestore';
 import type { Volume, VolumeGlobOptions } from './types';
 import { normalizePath, getPathSegments } from './path_utils';
 
@@ -17,7 +21,7 @@ interface DirNode {
   /** Child directories by name */
   children: Map<string, DirNode>;
   /** Files directly in this directory by filename */
-  files: Map<string, FileEntry>;
+  files: Map<string, FileEntryInput>;
 }
 
 /**
@@ -28,7 +32,7 @@ export class MemoryVolume implements Volume {
   readonly id: string;
 
   /** Map of normalized path to FileEntry for O(1) file lookup */
-  private readonly fileIndex: Map<string, FileEntry> = new Map();
+  private readonly fileIndex: Map<string, FileEntryInput> = new Map();
 
   /** Root of the directory tree */
   private readonly root: DirNode = this.createDirNode();
@@ -41,9 +45,9 @@ export class MemoryVolume implements Volume {
    * Add a file entry to this volume.
    * The entry's path will be normalized.
    */
-  add(entry: FileEntry): void {
+  add(entry: FileEntryInput): void {
     const normalizedPath = normalizePath(entry.path);
-    const normalizedEntry: FileEntry = { ...entry, path: normalizedPath };
+    const normalizedEntry: FileEntryInput = { ...entry, path: normalizedPath };
 
     // Remove existing entry at this path if any
     if (this.fileIndex.has(normalizedPath)) {
@@ -94,7 +98,7 @@ export class MemoryVolume implements Volume {
   // Volume interface implementation (async)
   // ============================================================================
 
-  async get(path: string): Promise<FileEntry | undefined> {
+  async get(path: string): Promise<FileEntryInput | undefined> {
     return this.fileIndex.get(normalizePath(path));
   }
 
@@ -122,7 +126,10 @@ export class MemoryVolume implements Volume {
     return entries;
   }
 
-  async glob(patterns: string | string[], options: VolumeGlobOptions = {}): Promise<FsEntry[]> {
+  async glob(
+    patterns: string | string[],
+    options: VolumeGlobOptions = {}
+  ): Promise<FsEntry[]> {
     const patternArray = Array.isArray(patterns) ? patterns : [patterns];
     const { onlyFiles = false, onlyDirectories = false } = options;
 
@@ -198,7 +205,7 @@ export class MemoryVolume implements Volume {
    * Add a file entry to the directory tree.
    * Creates intermediate directories as needed.
    */
-  private addToTree(entry: FileEntry): void {
+  private addToTree(entry: FileEntryInput): void {
     const segments = getPathSegments(entry.path);
     const fileName = segments.pop()!;
 

@@ -49,15 +49,12 @@ export const readTool = ({
         };
       }
 
-      const selectedVersion = entry.versions[0];
       let content: string | object;
       let truncated = false;
       if (raw) {
-        content = selectedVersion.content.raw;
+        content = entry.content.raw;
       } else {
-        content =
-          selectedVersion.content.plain_text ??
-          JSON.stringify(selectedVersion.content.raw, undefined, 2);
+        content = entry.content.plain_text ?? JSON.stringify(entry.content.raw, undefined, 2);
         const tokenCount = estimateTokens(content);
         if (tokenCount > SAFEGUARD_TOKEN_COUNT) {
           content = truncateTokens(content as string, SAFEGUARD_TOKEN_COUNT);

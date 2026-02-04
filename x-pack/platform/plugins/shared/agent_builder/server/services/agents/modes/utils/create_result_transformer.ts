@@ -193,8 +193,7 @@ const tryFilestoreSubstitution = async ({
     const entry = await filestore.read(path);
 
     // If entry exists and exceeds threshold, substitute with file reference
-    const version = entry?.versions[0];
-    if (version && version.metadata.token_count > threshold) {
+    if (entry && entry.metadata.token_count > threshold) {
       return markResultAsCleaned({
         tool_result_id: result.tool_result_id,
         type: ToolResultType.fileReference,

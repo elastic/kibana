@@ -8,11 +8,14 @@
 export {
   FileEntryType,
   type FileEntry,
+  type FileEntryInput,
   type FsEntry,
   type FileEntryContent,
   type FileEntryMetadata,
+  type FileEntryMetadataInput,
   type FileEntryVersion,
   type FileEntryVersionMetadata,
+  type FilestoreEntry,
   type DirEntry,
 } from './filesystem';
 export type { IFileStore, IToolFileStore, LsEntry, DirEntryWithChildren, GrepMatch } from './store';

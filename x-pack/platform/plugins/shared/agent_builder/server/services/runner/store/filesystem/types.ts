@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FsEntry, FileEntry } from '@kbn/agent-builder-server/runner/filestore';
+import type { FsEntry, FileEntryInput } from '@kbn/agent-builder-server/runner/filestore';
 
 // ============================================================================
 // Volume types
@@ -34,7 +34,7 @@ export interface Volume {
    * Get a file entry by exact path.
    * Returns undefined if the file doesn't exist in this volume.
    */
-  get(path: string): Promise<FileEntry | undefined>;
+  get(path: string): Promise<FileEntryInput | undefined>;
 
   /**
    * List contents of a directory.

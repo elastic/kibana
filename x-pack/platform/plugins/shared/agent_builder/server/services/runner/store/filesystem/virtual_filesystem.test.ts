@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { FileEntryType, type FileEntry } from '@kbn/agent-builder-server/runner/filestore';
+import { FileEntryType, type FileEntryInput } from '@kbn/agent-builder-server/runner/filestore';
 import { MemoryVolume } from './memory_volume';
 import { VirtualFileSystem } from './virtual_filesystem';
 
 const createFileEntry = (
   path: string,
-  content: FileEntry['versions'][number]['content']['raw'] = { name: `content for ${path}` },
-  overrides: Partial<FileEntry> = {}
-): FileEntry => ({
+  content: FileEntryInput['versions'][number]['content']['raw'] = { name: `content for ${path}` },
+  overrides: Partial<FileEntryInput> = {}
+): FileEntryInput => ({
   path,
   type: 'file',
   metadata: {
@@ -98,7 +98,7 @@ describe('VirtualFileSystem', () => {
       vfs.mount(volume1);
       vfs.mount(volume2);
 
-      const result = (await vfs.get('/shared/file.json')) as FileEntry;
+      const result = (await vfs.get('/shared/file.json')) as FileEntryInput;
       expect(result.versions[0].content.raw).toEqual({ source: 'v1' });
     });
 
@@ -114,7 +114,7 @@ describe('VirtualFileSystem', () => {
       vfs.mount(volume1, { priority: 10 });
       vfs.mount(volume2, { priority: 1 });
 
-      const result = (await vfs.get('/shared/file.json')) as FileEntry;
+      const result = (await vfs.get('/shared/file.json')) as FileEntryInput;
       expect(result.versions[0].content.raw).toEqual({ source: 'v2' }); // v2 has higher priority (lower number)
     });
   });
@@ -174,7 +174,7 @@ describe('VirtualFileSystem', () => {
       const results = await vfs.list('/agents');
 
       expect(results).toHaveLength(1);
-      expect((results[0] as FileEntry).versions[0].content.raw).toEqual({ source: 'v1' });
+      expect((results[0] as FileEntryInput).versions[0].content.raw).toEqual({ source: 'v1' });
     });
 
     it('supports recursive listing', async () => {
@@ -246,7 +246,7 @@ describe('VirtualFileSystem', () => {
       const results = await vfs.glob('/shared/*.json');
 
       expect(results).toHaveLength(1);
-      expect((results[0] as FileEntry).versions[0].content.raw).toEqual({ source: 'v1' }); // first-wins
+      expect((results[0] as FileEntryInput).versions[0].content.raw).toEqual({ source: 'v1' }); // first-wins
     });
   });
 

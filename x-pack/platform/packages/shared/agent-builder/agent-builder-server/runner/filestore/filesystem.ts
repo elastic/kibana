@@ -13,7 +13,7 @@ export enum FileEntryType {
   attachment = 'attachment',
 }
 
-export type FileEntryMetadata<TExtraMeta extends object = {}> = {
+export type FileEntryMetadataInput<TExtraMeta extends object = {}> = {
   /**
    * Type of the entry (tool_result, attachment...)
    */
@@ -27,6 +27,18 @@ export type FileEntryMetadata<TExtraMeta extends object = {}> = {
    */
   readonly: boolean;
 } /** extra per-type metadata */ & TExtraMeta;
+
+export type FileEntryMetadata<TExtraMeta extends object = {}> =
+  FileEntryMetadataInput<TExtraMeta> & {
+    /**
+     * True when the entry has more than one version.
+     */
+    versioned: boolean;
+    /**
+     * Latest version number (only when versioned is true).
+     */
+    last_version?: number;
+  };
 
 export interface FileEntryContent<TData extends object = object> {
   /**
@@ -52,9 +64,24 @@ export interface FileEntryVersion<TContent extends object = object> {
   metadata: FileEntryVersionMetadata;
 }
 
+export interface FilestoreEntry<TContent extends object = object, TMeta extends object = object> {
+  path: string;
+  type: 'file';
+  version: number;
+  metadata: FileEntryMetadataInput<TMeta> & FileEntryVersionMetadata;
+  content: FileEntryContent<TContent>;
+}
+
 /**
  * A file entry in the virtual filesystem.
  */
+export interface FileEntryInput<TContent extends object = object, TMeta extends object = object> {
+  path: string;
+  type: 'file';
+  metadata: FileEntryMetadataInput<TMeta>;
+  versions: FileEntryVersion<TContent>[];
+}
+
 export interface FileEntry<TContent extends object = object, TMeta extends object = object> {
   path: string;
   type: 'file';
@@ -73,4 +100,4 @@ export interface DirEntry {
 /**
  * Either a file or directory entry.
  */
-export type FsEntry = FileEntry | DirEntry;
+export type FsEntry = FileEntryInput | DirEntry;
