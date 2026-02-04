@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { of, throwError } from 'rxjs';
 import { ExecuteRuleQueryStep } from './execute_rule_query_step';
 import {
   createRuleExecutionInput,
@@ -15,22 +14,24 @@ import {
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createQueryService } from '../../services/query_service/query_service.mock';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 
 describe('ExecuteRuleQueryStep', () => {
   let step: ExecuteRuleQueryStep;
-  let mockSearchClient: ReturnType<typeof createQueryService>['mockSearchClient'];
+  let mockEsClient: DeeplyMockedApi<ElasticsearchClient>;
 
   beforeEach(() => {
     const { loggerService } = createLoggerService();
-    const { queryService, mockSearchClient: searchClient } = createQueryService();
-    mockSearchClient = searchClient;
-    step = new ExecuteRuleQueryStep(loggerService, queryService);
+    const mocks = createQueryService();
+    mockEsClient = mocks.mockEsClient;
+    step = new ExecuteRuleQueryStep(loggerService, mocks.queryService);
   });
 
   it('builds query payload and executes query', async () => {
     const esqlResponse = createEsqlResponse();
 
-    mockSearchClient.search.mockReturnValue(of({ isRunning: false, rawResponse: esqlResponse }));
+    mockEsClient.esql.query.mockResolvedValue(esqlResponse);
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
     const result = await step.execute(state);
@@ -44,9 +45,7 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('passes correct parameters to query service', async () => {
-    mockSearchClient.search.mockReturnValue(
-      of({ isRunning: false, rawResponse: createEsqlResponse() })
-    );
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
     const rule = createRuleResponse();
     const abortController = new AbortController();
@@ -57,19 +56,14 @@ describe('ExecuteRuleQueryStep', () => {
 
     await step.execute(state);
 
-    expect(mockSearchClient.search).toHaveBeenCalledWith(
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       {
-        params: {
-          query: rule.query,
-          dropNullColumns: false,
-          filter: expect.any(Object),
-          params: undefined,
-        },
+        query: rule.query,
+        drop_null_columns: false,
+        filter: expect.any(Object),
+        params: undefined,
       },
-      expect.objectContaining({
-        strategy: 'esql',
-        abortSignal: abortController.signal,
-      })
+      { signal: abortController.signal }
     );
   });
 
@@ -77,7 +71,7 @@ describe('ExecuteRuleQueryStep', () => {
     const abortController = new AbortController();
     abortController.abort();
 
-    mockSearchClient.search.mockReturnValue(throwError(() => new Error('Request aborted')));
+    mockEsClient.esql.query.mockRejectedValue(new Error('Request aborted'));
 
     const state = createRulePipelineState({
       input: createRuleExecutionInput({ abortSignal: abortController.signal }),
@@ -90,7 +84,7 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('propagates non-abort errors', async () => {
-    mockSearchClient.search.mockReturnValue(throwError(() => new Error('Query execution failed')));
+    mockEsClient.esql.query.mockRejectedValue(new Error('Query execution failed'));
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
 

@@ -6,18 +6,16 @@
  */
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { RuleResponse } from './rules_client';
 
 /**
  * Creates a mock Elasticsearch client.
  */
-export function createMockEsClient(): jest.Mocked<ElasticsearchClient> {
+export function createMockEsClient(): DeeplyMockedApi<ElasticsearchClient> {
   return elasticsearchServiceMock.createElasticsearchClient();
 }
 
@@ -33,16 +31,6 @@ export function createMockSavedObjectsClient(): jest.Mocked<SavedObjectsClientCo
  */
 export function createMockLogger(): jest.Mocked<Logger> {
   return loggerMock.create();
-}
-
-/**
- * Creates a mock scoped search client for QueryService.
- */
-export function createMockSearchClient(): jest.Mocked<IScopedSearchClient> {
-  // @ts-expect-error - dataPluginMock is not typed correctly
-  return dataPluginMock
-    .createStartContract()
-    .search.asScoped(httpServerMock.createKibanaRequest({}));
 }
 
 /**

@@ -18,8 +18,9 @@ import {
   type EdgeTypes,
   type FitViewOptions,
   type NodeMouseHandler,
+  type EdgeMouseHandler,
 } from '@xyflow/react';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
@@ -30,6 +31,10 @@ import { DependencyNode } from './dependency_node';
 import { GroupedResourcesNode } from './grouped_resources_node';
 import { ServiceMapEdge } from './service_map_edge';
 import { useEdgeHighlighting } from './use_edge_highlighting';
+import { useReducedMotion } from './use_reduced_motion';
+import { useKeyboardNavigation } from './use_keyboard_navigation';
+import { ReactFlowPopover } from './react_flow_popover';
+import type { Environment } from '../../../../../common/environment_rt';
 import type {
   ServiceMapNode,
   ServiceMapEdge as ServiceMapEdgeType,
@@ -45,31 +50,51 @@ const edgeTypes: EdgeTypes = {
   default: ServiceMapEdge,
 };
 
-const fitViewOptions: FitViewOptions = { padding: FIT_VIEW_PADDING, duration: FIT_VIEW_DURATION };
-
 interface ReactFlowGraphProps {
   height: number;
   nodes: ServiceMapNode[];
   edges: ServiceMapEdgeType[];
+  /** Currently focused service name (for service-specific map) */
+  serviceName?: string;
+  environment: Environment;
+  kuery: string;
+  start: string;
+  end: string;
 }
 
 function ReactFlowGraphInner({
   height,
   nodes: initialNodes,
   edges: initialEdges,
+  serviceName,
+  environment,
+  kuery,
+  start,
+  end,
 }: ReactFlowGraphProps) {
   const { euiTheme } = useEuiTheme();
   const { fitView } = useReactFlow();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<ServiceMapNode | null>(null);
+  const [selectedEdgeForPopover, setSelectedEdgeForPopover] = useState<ServiceMapEdgeType | null>(
+    null
+  );
 
   // Track the current selected node for use in layout effect without triggering re-layout
   const selectedNodeIdRef = useRef<string | null>(null);
   selectedNodeIdRef.current = selectedNodeId;
 
-  // Use the edge highlighting hook
   const { applyEdgeHighlighting } = useEdgeHighlighting();
 
-  // Apply layout to nodes
+  const { getAnimationDuration } = useReducedMotion();
+  const getFitViewOptions = useCallback(
+    (): FitViewOptions => ({
+      padding: FIT_VIEW_PADDING,
+      duration: getAnimationDuration(FIT_VIEW_DURATION),
+    }),
+    [getAnimationDuration]
+  );
+
   const layoutedNodes = useMemo(
     () => applyDagreLayout(initialNodes, initialEdges),
     [initialNodes, initialEdges]
@@ -78,31 +103,50 @@ function ReactFlowGraphInner({
   const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(layoutedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<ServiceMapEdgeType>(initialEdges);
 
-  // Update nodes and edges when props change
   useEffect(() => {
     setNodes(layoutedNodes);
-    // Apply edge highlighting preserving selection state
     setEdges(applyEdgeHighlighting(initialEdges, selectedNodeIdRef.current));
 
-    // Fit view after nodes are updated
     if (layoutedNodes.length > 0) {
-      setTimeout(() => fitView(fitViewOptions), 50);
+      setTimeout(() => fitView(getFitViewOptions()), 50);
     }
-  }, [layoutedNodes, initialEdges, setNodes, setEdges, fitView, applyEdgeHighlighting]);
+  }, [
+    layoutedNodes,
+    initialEdges,
+    setNodes,
+    setEdges,
+    fitView,
+    applyEdgeHighlighting,
+    getFitViewOptions,
+  ]);
 
-  // Handle node click - update node selection and edge highlighting
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
     (_, node) => {
       const newSelectedId = selectedNodeId === node.id ? null : node.id;
       setSelectedNodeId(newSelectedId);
       setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, newSelectedId));
+      setSelectedNodeForPopover(newSelectedId ? node : null);
+      setSelectedEdgeForPopover(null);
     },
     [selectedNodeId, setEdges, applyEdgeHighlighting]
   );
+  const handleEdgeClick: EdgeMouseHandler<ServiceMapEdgeType> = useCallback(
+    (_, edge) => {
+      setSelectedNodeId(null);
+      setSelectedNodeForPopover(null);
+      const newSelectedEdge = selectedEdgeForPopover?.id === edge.id ? null : edge;
+      setSelectedEdgeForPopover(newSelectedEdge);
+      setEdges((currentEdges) =>
+        applyEdgeHighlighting(currentEdges, { selectedEdgeId: newSelectedEdge?.id ?? null })
+      );
+    },
+    [selectedEdgeForPopover, setEdges, applyEdgeHighlighting]
+  );
 
-  // Handle pane click to deselect
   const handlePaneClick = useCallback(() => {
     setSelectedNodeId(null);
+    setSelectedNodeForPopover(null);
+    setSelectedEdgeForPopover(null);
     setNodes((currentNodes) =>
       currentNodes.map((n) => ({
         ...n,
@@ -111,6 +155,70 @@ function ReactFlowGraphInner({
     );
     setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
   }, [setNodes, setEdges, applyEdgeHighlighting]);
+
+  const handlePopoverClose = useCallback(() => {
+    setSelectedNodeId(null);
+    setSelectedNodeForPopover(null);
+    setSelectedEdgeForPopover(null);
+    setNodes((currentNodes) =>
+      currentNodes.map((n) => ({
+        ...n,
+        selected: false,
+      }))
+    );
+    setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
+  }, [setNodes, setEdges, applyEdgeHighlighting]);
+
+  // Close popover when user starts dragging (map panning or node dragging)
+  const handleDragStart = useCallback(() => {
+    if (selectedNodeForPopover || selectedEdgeForPopover) {
+      handlePopoverClose();
+    }
+  }, [selectedNodeForPopover, selectedEdgeForPopover, handlePopoverClose]);
+
+  // Handle node selection from keyboard navigation
+  const handleKeyboardNodeSelect = useCallback(
+    (node: ServiceMapNode | null) => {
+      if (node) {
+        setSelectedNodeId(node.id);
+        setSelectedNodeForPopover(node);
+        setSelectedEdgeForPopover(null);
+        setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, node.id));
+      } else {
+        handlePopoverClose();
+      }
+    },
+    [setEdges, applyEdgeHighlighting, handlePopoverClose]
+  );
+
+  // Handle edge selection from keyboard navigation
+  const handleKeyboardEdgeSelect = useCallback(
+    (edge: ServiceMapEdgeType | null) => {
+      if (edge) {
+        setSelectedNodeId(null);
+        setSelectedNodeForPopover(null);
+        setSelectedEdgeForPopover(edge);
+        setEdges((currentEdges) =>
+          applyEdgeHighlighting(currentEdges, { selectedEdgeId: edge.id })
+        );
+      } else {
+        handlePopoverClose();
+      }
+    },
+    [setEdges, applyEdgeHighlighting, handlePopoverClose]
+  );
+
+  // Use keyboard navigation hook for accessibility
+  const { screenReaderAnnouncement } = useKeyboardNavigation({
+    nodes,
+    edges,
+    selectedNodeId,
+    selectedNodeForPopover,
+    selectedEdgeForPopover,
+    onNodeSelect: handleKeyboardNodeSelect,
+    onEdgeSelect: handleKeyboardEdgeSelect,
+    onPopoverClose: handlePopoverClose,
+  });
 
   const containerStyle = useMemo(
     () => ({
@@ -151,6 +259,13 @@ function ReactFlowGraphInner({
           background-color: ${euiTheme.colors.backgroundBaseSubdued};
         }
 
+        &:focus-visible {
+          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+          outline-offset: -2px;
+          z-index: ${euiTheme.levels.content};
+          position: relative;
+        }
+
         &:last-child {
           border-bottom: none;
         }
@@ -165,12 +280,40 @@ function ReactFlowGraphInner({
 
   const onInit = useCallback(() => {
     if (layoutedNodes.length > 0) {
-      fitView(fitViewOptions);
+      fitView(getFitViewOptions());
     }
-  }, [fitView, layoutedNodes.length]);
+  }, [fitView, layoutedNodes.length, getFitViewOptions]);
+
+  const screenReaderInstructions = i18n.translate('xpack.apm.serviceMap.screenReaderInstructions', {
+    defaultMessage:
+      'This is an interactive service map showing application services and their dependencies. ' +
+      'Use Tab to navigate between service nodes. Use Arrow keys to move between adjacent nodes. ' +
+      'Press Enter or Space to select a node and view its details including connections. ' +
+      'Press Escape to close the details popover. ' +
+      'The zoom controls in the top left allow you to zoom in, zoom out, and fit the view.',
+  });
 
   return (
-    <div css={css(containerStyle)} data-test-subj="reactFlowServiceMap">
+    <div
+      css={css(containerStyle)}
+      data-test-subj="reactFlowServiceMap"
+      role="group"
+      tabIndex={0}
+      aria-label={i18n.translate('xpack.apm.serviceMap.regionLabel', {
+        defaultMessage:
+          'Service map with {nodeCount} services and dependencies. Use Tab to navigate nodes, Arrow keys to move between adjacent nodes.',
+        values: { nodeCount: nodes.length },
+      })}
+      aria-describedby="service-map-instructions"
+    >
+      <EuiScreenReaderOnly>
+        <div>
+          <div id="service-map-instructions">{screenReaderInstructions}</div>
+          <div role="status" aria-live="polite" aria-atomic="true">
+            {screenReaderAnnouncement}
+          </div>
+        </div>
+      </EuiScreenReaderOnly>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -179,25 +322,34 @@ function ReactFlowGraphInner({
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={handleNodeClick}
+        onEdgeClick={handleEdgeClick}
         onPaneClick={handlePaneClick}
+        onMoveStart={handleDragStart}
+        onNodeDragStart={handleDragStart}
         onInit={onInit}
         fitView
-        fitViewOptions={fitViewOptions}
+        fitViewOptions={getFitViewOptions()}
         minZoom={0.2}
         maxZoom={3}
         proOptions={{ hideAttribution: true }}
         nodesDraggable={true}
         nodesConnectable={false}
+        nodesFocusable={true}
         edgesFocusable={false}
-        aria-label={i18n.translate('xpack.apm.serviceMap.ariaLabel', {
-          defaultMessage:
-            'Service map showing {nodeCount} services and dependencies. Use tab or arrow keys to navigate between nodes, enter or space to view details.',
-          values: { nodeCount: nodes.length },
-        })}
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
         <Controls showInteractive={false} position="top-left" css={controlsStyles} />
       </ReactFlow>
+      <ReactFlowPopover
+        selectedNode={selectedNodeForPopover}
+        selectedEdge={selectedEdgeForPopover}
+        focusedServiceName={serviceName}
+        environment={environment}
+        kuery={kuery}
+        start={start}
+        end={end}
+        onClose={handlePopoverClose}
+      />
     </div>
   );
 }

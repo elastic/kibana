@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import moment from 'moment';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
-import { EsServiceInternalToken } from '../services/es_service/tokens';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
+import type { QueryServiceContract } from '../services/query_service/query_service';
+import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
@@ -28,7 +28,7 @@ export interface DispatcherServiceContract {
 @injectable()
 export class DispatcherService implements DispatcherServiceContract {
   constructor(
-    @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,
+    @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
   ) {}
@@ -48,20 +48,18 @@ export class DispatcherService implements DispatcherServiceContract {
 
     const { query } = getDispatchableAlertEventsQuery();
 
-    // TODO: Use QueryService as soon as it uses esClient instead of data plugin client
-    const result = await this.esClient.esql.query(
-      {
-        query,
-        filter: {
-          range: {
-            '@timestamp': {
-              gte: lookback,
-            },
+    const result = await this.queryService.executeQuery({
+      query,
+      filter: {
+        range: {
+          '@timestamp': {
+            gte: moment(previousStartedAt)
+              .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
+              .toISOString(),
           },
         },
       },
-      { signal: abortController?.signal }
-    );
+    });
 
     const dispatchableAlertEvents = queryResponseToRecords<AlertEpisode>({
       columns: result.columns,

@@ -8,9 +8,13 @@
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERT_ACTIONS_DATA_STREAM } from '../../../resources/alert_actions';
-import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/alert_events';
+import { ALERT_EVENTS_DATA_STREAM, type AlertEvent } from '../../../resources/alert_events';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import {
+  QueryService,
+  type QueryServiceContract,
+} from '../../services/query_service/query_service';
 import {
   StorageService,
   type StorageServiceContract,
@@ -25,55 +29,70 @@ import { setupTestServers } from './setup_test_servers';
  * Episode 2: active -> inactive
  * Episode 3: active
  */
-const ALERT_EVENTS_TEST_DATA = [
+const ALERT_EVENTS_TEST_DATA: AlertEvent[] = [
   {
     '@timestamp': '2026-01-22T07:50:00.000Z',
     type: 'alert',
-    rule: { id: 'rule-1' },
+    rule: { id: 'rule-1', version: 1 },
     group_hash: 'rule-1-series-1',
-    episode_id: 'rule-1-series-1-episode-3',
-    status: 'breach',
-    episode_status: 'active',
+    episode: {
+      id: 'rule-1-series-1-episode-3',
+      status: 'active',
+    },
+    data: {},
+    status: 'breached',
     source: 'internal',
   },
   {
     '@timestamp': '2026-01-22T07:25:00.000Z',
     type: 'alert',
-    rule: { id: 'rule-1' },
+    rule: { id: 'rule-1', version: 1 },
     group_hash: 'rule-1-series-1',
-    episode_id: 'rule-1-series-1-episode-2',
+    episode: {
+      id: 'rule-1-series-1-episode-2',
+      status: 'inactive',
+    },
+    data: {},
     status: 'recovered',
-    episode_status: 'inactive',
     source: 'internal',
   },
   {
     '@timestamp': '2026-01-22T07:20:00.000Z',
     type: 'alert',
-    rule: { id: 'rule-1' },
+    rule: { id: 'rule-1', version: 1 },
     group_hash: 'rule-1-series-1',
-    episode_id: 'rule-1-series-1-episode-2',
+    episode: {
+      id: 'rule-1-series-1-episode-2',
+      status: 'active',
+    },
+    data: {},
     status: 'breached',
-    episode_status: 'active',
     source: 'internal',
   },
   {
     '@timestamp': '2026-01-22T07:15:00.000Z',
     type: 'alert',
-    rule: { id: 'rule-1' },
+    rule: { id: 'rule-1', version: 1 },
     group_hash: 'rule-1-series-1',
-    episode_id: 'rule-1-series-1-episode-1',
+    episode: {
+      id: 'rule-1-series-1-episode-1',
+      status: 'inactive',
+    },
+    data: {},
     status: 'recovered',
-    episode_status: 'inactive',
     source: 'internal',
   },
   {
     '@timestamp': '2026-01-22T07:10:00.000Z',
     type: 'alert',
-    rule: { id: 'rule-1' },
+    rule: { id: 'rule-1', version: 1 },
     group_hash: 'rule-1-series-1',
-    episode_id: 'rule-1-series-1-episode-1',
+    episode: {
+      id: 'rule-1-series-1-episode-1',
+      status: 'active',
+    },
+    data: {},
     status: 'breached',
-    episode_status: 'active',
     source: 'internal',
   },
 ];
@@ -83,6 +102,7 @@ describe('DispatcherService integration tests', () => {
   let kibanaServer: TestKibanaUtils;
   let esClient: ElasticsearchClient;
   let dispatcherService: DispatcherServiceContract;
+  let queryService: QueryServiceContract;
   let storageService: StorageServiceContract;
   let mockLoggerService: LoggerServiceContract;
 
@@ -109,8 +129,9 @@ describe('DispatcherService integration tests', () => {
 
     mockLoggerService = createLoggerService().loggerService;
 
+    queryService = new QueryService(esClient, mockLoggerService);
     storageService = new StorageService(esClient, mockLoggerService);
-    dispatcherService = new DispatcherService(esClient, mockLoggerService, storageService);
+    dispatcherService = new DispatcherService(queryService, mockLoggerService, storageService);
   });
 
   describe('when there are no alert events', () => {
@@ -184,11 +205,14 @@ describe('DispatcherService integration tests', () => {
         {
           '@timestamp': '2026-01-22T07:55:00.000Z',
           type: 'alert',
-          rule: { id: 'rule-1' },
+          rule: { id: 'rule-1', version: 1 },
           group_hash: 'rule-1-series-1',
-          episode_id: 'rule-1-series-1-episode-3',
+          episode: {
+            id: 'rule-1-series-1-episode-3',
+            status: 'inactive',
+          },
+          data: {},
           status: 'recovered',
-          episode_status: 'inactive',
           source: 'internal',
         },
       ]);
@@ -245,10 +269,7 @@ async function cleanupDataStreams(esClient: ElasticsearchClient): Promise<void> 
   }
 }
 
-async function seedAlertEvents(
-  esClient: ElasticsearchClient,
-  events: Array<Record<string, any>>
-): Promise<void> {
+async function seedAlertEvents(esClient: ElasticsearchClient, events: AlertEvent[]): Promise<void> {
   const operations = events.flatMap((doc) => [
     { create: { _index: ALERT_EVENTS_DATA_STREAM } },
     doc,

@@ -19,6 +19,9 @@ export const createAlertEvent = (overrides?: Partial<AlertEvent>): AlertEvent =>
   status: 'breached',
   source: 'test-source',
   type: 'alert',
-  episode_id: 'test-episode-id',
+  episode: {
+    id: 'test-episode-id',
+    status: 'active',
+  },
   ...overrides,
 });

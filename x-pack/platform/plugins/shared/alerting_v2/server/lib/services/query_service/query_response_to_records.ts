@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import { set } from '@kbn/safer-lodash-set';
+import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export function queryResponseToRecords<T extends Record<string, any>>(
-  response: ESQLSearchResponse
+  response: EsqlQueryResponse
 ): T[] {
   const objects: T[] = [];
 
