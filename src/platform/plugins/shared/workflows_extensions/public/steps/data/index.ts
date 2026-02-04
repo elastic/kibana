@@ -8,6 +8,7 @@
  */
 
 export * from './data_dedupe_step';
+export * from './data_include_step';
 export * from './data_map_step';
 export * from './data_regex_extract_step';
 export * from './data_regex_replace_step';

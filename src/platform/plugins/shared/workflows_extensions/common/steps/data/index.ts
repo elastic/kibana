@@ -14,6 +14,13 @@ export {
   type DataDedupeStepOutputSchema,
 } from './data_dedupe_step';
 export {
+  DataIncludeStepTypeId,
+  dataIncludeStepCommonDefinition,
+  type DataIncludeStepConfigSchema,
+  type DataIncludeStepInputSchema,
+  type DataIncludeStepOutputSchema,
+} from './data_include_step';
+export {
   DataMapStepTypeId,
   dataMapStepCommonDefinition,
   type DataMapStepInputSchema,
