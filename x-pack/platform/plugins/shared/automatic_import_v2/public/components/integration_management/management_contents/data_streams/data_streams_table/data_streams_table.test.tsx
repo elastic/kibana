@@ -177,7 +177,7 @@ describe('DataStreamsTable', () => {
       const deleteButton = screen.getByTestId('deleteDataStreamButton');
       await userEvent.click(deleteButton);
 
-      // Click confirm button in the modal (use role to be more specific)
+      // Click confirm button in the modal
       const confirmButton = screen.getByRole('button', { name: /delete/i });
       await userEvent.click(confirmButton);
 

@@ -42,7 +42,6 @@ export const InputTypesBadges = ({ inputTypes }: InputTypesBadgesProps) => {
       </EuiBadge>
       {additionalBadgesNumber > 0 && (
         <EuiToolTip
-          data-test-subj="input-types-table-column-tooltip"
           css={tooltipStyles}
           content={allRemainingBadges}
           anchorProps={{ style: { display: 'flex' } }}

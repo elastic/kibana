@@ -419,7 +419,6 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
               aria-label="Upload log file"
               isLoading={isParsing}
               isInvalid={fileError != null}
-              data-test-subj="logFileUpload"
               disabled={logsSourceOption !== 'upload'}
             />
           </EuiFormRow>
