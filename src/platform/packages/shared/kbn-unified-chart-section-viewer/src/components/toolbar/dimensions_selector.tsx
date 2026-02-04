@@ -102,7 +102,11 @@ export const DimensionsSelector = ({
         checked: isSelected ? 'on' : undefined,
         // In single-selection mode, don't check intersections since we're replacing, not adding
         // Selected dimensions should always be enabled
-        disabled: singleSelection ? false : isSelected ? false : !isIntersecting || isDisabledByLimit,
+        disabled: singleSelection
+          ? false
+          : isSelected
+          ? false
+          : !isIntersecting || isDisabledByLimit,
         key: dimension.name,
       };
     });
