@@ -322,9 +322,9 @@ export const ThreatTechnique = z.object({
    * Technique reference
    */
   reference: z.string(),
-  /** 
+  /**
       * Array containing more specific information on the attack technique.
- 
+
       */
   subtechnique: z.array(ThreatSubtechnique).optional(),
 });
@@ -650,7 +650,7 @@ export const RuleActionId = z.string();
 
 export type RuleAction = z.infer<typeof RuleAction>;
 export const RuleAction = z.object({
-  /** 
+  /**
       * The action type used for sending notifications, can be:
 
   - `.slack`
@@ -670,7 +670,7 @@ export const RuleAction = z.object({
   - `.torq`
   - `.tines`
   - `.d3security`
- 
+
       */
   action_type_id: z.string(),
   group: RuleActionGroup.optional(),
