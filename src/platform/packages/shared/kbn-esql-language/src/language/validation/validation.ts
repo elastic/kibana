@@ -8,7 +8,7 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLCommand, ESQLMessage } from '../../types';
+import type { ESQLAstPromqlCommand, ESQLCommand, ESQLMessage } from '../../types';
 import { EsqlQuery } from '../../composer';
 import { esqlCommandRegistry } from '../../commands/registry';
 import { walk } from '../../ast';
@@ -22,6 +22,7 @@ import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types
 import { getSubqueriesToValidate } from './subqueries';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 import { areNewUnmappedFieldsAllowed } from '../../query_columns_service/helpers';
+import { looksLikePromqlParamAssignment } from '../../commands/registry/promql/utils';
 
 /**
  * ES|QL validation public API
@@ -197,7 +198,18 @@ function validateCommand(
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
-    return messages;
+    // Exception for PROMQL: the parser sets incomplete=true when query text looks like
+    // a param assignment (e.g. "index=ff") because the PromQL parser can't parse it.
+    if (command.name === 'promql') {
+      const promqlCmd = command as ESQLAstPromqlCommand;
+      const queryText = promqlCmd.query?.text?.trim() ?? '';
+
+      if (!looksLikePromqlParamAssignment(queryText)) {
+        return messages;
+      }
+    } else {
+      return messages;
+    }
   }
   // do not check the command exists, the grammar is already picking that up
   const commandDefinition = esqlCommandRegistry.getCommandByName(command.name);
