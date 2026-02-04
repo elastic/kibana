@@ -32,6 +32,7 @@ import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
 import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { StreamsTreeTable } from './tree_table';
+import { getFormattedError } from '../../util/errors';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -74,7 +75,7 @@ export function StreamListView() {
         const status = await getClassicStatus();
         setCanManageClassicElasticsearch(Boolean(status.can_manage));
       } catch (error) {
-        core.notifications.toasts.addError(error, {
+        core.notifications.toasts.addError(getFormattedError(error), {
           title: i18n.translate('xpack.streams.streamsListView.fetchClassicStatusErrorToastTitle', {
             defaultMessage: 'Error fetching classic streams status',
           }),
