@@ -30,6 +30,7 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   trim: { from: 'field', to: 'target_field', where: 'if' },
   join: { to: 'field', where: 'if' },
   concat: { to: 'field', where: 'if' },
+  user_agent: { from: 'field', to: 'target_field', where: 'if' },
   manual_ingest_pipeline: { where: 'if' },
 };
 

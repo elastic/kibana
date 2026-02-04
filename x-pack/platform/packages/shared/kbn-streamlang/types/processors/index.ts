@@ -512,6 +512,51 @@ export const concatProcessorSchema = processorBaseWithWhereSchema.extend({
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<ConcatProcessor>;
 
+/**
+ * User agent processor - Extract details from browser user agent strings
+ */
+
+const userAgentProperties = [
+  'name',
+  'os',
+  'device',
+  'original',
+  'version',
+  'os_name',
+  'os_version',
+  'os_full',
+  'os_major',
+  'os_minor',
+] as const;
+
+export type UserAgentProperty = (typeof userAgentProperties)[number];
+
+export interface UserAgentProcessor extends ProcessorBaseWithWhere {
+  action: 'user_agent';
+  from: string;
+  to?: string;
+  regex_file?: string;
+  properties?: UserAgentProperty[];
+  extract_device_type?: boolean;
+  ignore_missing?: boolean;
+}
+
+export const userAgentProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('user_agent'),
+  from: StreamlangSourceField.describe('Source field containing the user agent string'),
+  to: z.optional(StreamlangTargetField).describe('Target field for extracted user agent info'),
+  regex_file: z.optional(NonEmptyString).describe('Custom regex file name in ES config/ingest-user-agent'),
+  properties: z
+    .optional(z.array(z.enum(userAgentProperties)))
+    .describe('Specific properties to extract (defaults to all)'),
+  extract_device_type: z
+    .optional(z.boolean())
+    .describe('Extract device type (desktop, mobile, etc.)'),
+  ignore_missing: z
+    .optional(z.boolean())
+    .describe('Skip processing when source field is missing'),
+}) satisfies z.Schema<UserAgentProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -530,6 +575,7 @@ export type StreamlangProcessorDefinition =
   | TrimProcessor
   | JoinProcessor
   | ConcatProcessor
+  | UserAgentProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -550,6 +596,7 @@ export const streamlangProcessorSchema = z.union([
   joinProcessorSchema,
   convertProcessorSchema,
   concatProcessorSchema,
+  userAgentProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 

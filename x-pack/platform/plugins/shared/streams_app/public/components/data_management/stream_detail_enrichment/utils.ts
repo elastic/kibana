@@ -22,6 +22,7 @@ import type {
   StreamlangProcessorDefinitionWithUIAttributes,
   StreamlangStepWithUIAttributes,
   TrimProcessor,
+  UserAgentProcessor,
 } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
@@ -61,6 +62,7 @@ import type {
   SetFormState,
   TrimFormState,
   UppercaseFormState,
+  UserAgentFormState,
 } from './types';
 
 /**
@@ -80,6 +82,7 @@ export const SPECIALISED_TYPES = [
   'trim',
   'join',
   'concat',
+  'user_agent',
 ];
 
 interface FormStateDependencies {
@@ -281,6 +284,15 @@ const defaultConcatProcessorFormState = (): ConcatFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultUserAgentProcessorFormState = (sampleDocs: FlattenRecord[]): UserAgentFormState => ({
+  action: 'user_agent' as const,
+  from: getDefaultTextField(sampleDocs, ['user_agent.original', 'http.request.headers.user-agent']),
+  to: 'user_agent',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -306,6 +318,7 @@ const defaultProcessorFormStateByType: Record<
   set: defaultSetProcessorFormState,
   join: defaultJoinProcessorFormState,
   concat: defaultConcatProcessorFormState,
+  user_agent: defaultUserAgentProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -350,7 +363,8 @@ export const getFormStateFromActionStep = (
     step.action === 'lowercase' ||
     step.action === 'trim' ||
     step.action === 'join' ||
-    step.action === 'concat'
+    step.action === 'concat' ||
+    step.action === 'user_agent'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -632,6 +646,24 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as ConcatProcessor,
+      };
+    }
+
+    if (formState.action === 'user_agent') {
+      const { from, to, regex_file, properties, extract_device_type, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'user_agent',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          regex_file: isEmpty(regex_file) ? undefined : regex_file,
+          properties: isEmpty(properties) ? undefined : properties,
+          extract_device_type,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as UserAgentProcessor,
       };
     }
 
