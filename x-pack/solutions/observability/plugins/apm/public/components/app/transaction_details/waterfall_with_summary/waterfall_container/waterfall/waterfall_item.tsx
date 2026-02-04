@@ -207,7 +207,7 @@ function ServiceNameBadge({ item }: { item: IWaterfallSpanOrTransaction }) {
   }
 
   return (
-    <EuiBadge color="hollow" iconType="cluster">
+    <EuiBadge color="hollow" iconType="dot">
       {serviceName}
     </EuiBadge>
   );
