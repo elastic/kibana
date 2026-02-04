@@ -6,10 +6,9 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { euid } from '@kbn/entity-store/common';
+import { buildEntityFiltersFromEntityIdentifiers, euid } from '@kbn/entity-store/common';
 import type { FirstLastSeenRequestOptions } from '../../../../../common/api/search_strategy';
 import type { ESQuery } from '../../../../../common/typed_json';
-import { buildEntityFiltersFromEntityIdentifiers } from '../../../../../common/search_strategy/security_solution/risk_score/common';
 import { getEntitiesIndexNameV2 } from '../../../../lib/entity_analytics/entity_store/utils/entity_utils';
 
 import { createQueryFilterClauses } from '../../../../utils/build_query';

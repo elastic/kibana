@@ -11,6 +11,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiEmptyPrompt, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
+import { buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/common';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import type { Status } from '../../../../common/api/detection_engine';
 import { SecurityPageName } from '../../../../common/constants';
@@ -28,7 +29,6 @@ import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../inspect';
 import { LastUpdatedAt } from '../last_updated_at';
 import { SecuritySolutionLinkAnchor } from '../links';
 import { useLocalStorage } from '../local_storage';
-import { buildEntityFiltersFromEntityIdentifiers } from '../../../../common/search_strategy/security_solution/risk_score/common';
 import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
 import { MultiSelectPopover } from './components';
 import * as i18n from './translations';

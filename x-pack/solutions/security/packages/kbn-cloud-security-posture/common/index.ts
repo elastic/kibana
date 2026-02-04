@@ -36,7 +36,6 @@ export * from './constants';
 export {
   extractErrorMessage,
   buildMutedRulesFilter,
-  buildGenericEntityFlyoutPreviewQuery,
   buildMisconfigurationEntityFlyoutPreviewQuery,
   buildVulnerabilityEntityFlyoutPreviewQuery,
 } from './utils/helpers';

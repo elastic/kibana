@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/common';
 
 import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
 import type { ESBoolQuery } from '../../../../common/typed_json';
@@ -16,7 +17,6 @@ import { useQueryAlerts } from '../../../detections/containers/detection_engine/
 import { useGlobalTime } from '../../containers/use_global_time';
 import { useQueryInspector } from '../page/manage_query';
 import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
-import { buildEntityFiltersFromEntityIdentifiers } from '../../../../common/search_strategy/security_solution/risk_score/common';
 
 export interface AlertCountByRuleByStatusItem {
   ruleName: string;

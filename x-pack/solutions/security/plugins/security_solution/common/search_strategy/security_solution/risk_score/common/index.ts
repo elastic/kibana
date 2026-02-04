@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euid, buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/common';
+import { euid } from '@kbn/entity-store/common';
 import { EntityTypeToIdentifierField, EntityType } from '../../../../entity_analytics/types';
 import type { ESQuery } from '../../../../typed_json';
 import {
@@ -28,8 +28,6 @@ export const buildUserNamesFilter = (userNames: string[]) => {
 export const buildEntityNameFilter = (riskEntity: EntityType, entityNames: string[]): ESQuery => {
   return { terms: { [EntityTypeToIdentifierField[riskEntity]]: entityNames } };
 };
-
-export { buildEntityFiltersFromEntityIdentifiers };
 
 /**
  * Builds an Elasticsearch filter for host queries based on entityIdentifiers.

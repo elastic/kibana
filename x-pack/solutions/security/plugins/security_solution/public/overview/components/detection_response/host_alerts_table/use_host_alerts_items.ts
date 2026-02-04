@@ -332,8 +332,6 @@ function parseHostsData(
 ): HostAlertsItem[] {
   const buckets = rawAggregation?.[HOSTS_BY_SEVERITY_AGG].buckets ?? [];
 
-  console.log('buckets', buckets);
-
   return buckets.reduce<HostAlertsItem[]>((accumalatedAlertsByHost, currentHost) => {
     const hostName = firstNonNullValue(currentHost.key) ?? '-';
     const hostSource = currentHost.host_sample?.hits?.hits?.[0]?._source?.host;
