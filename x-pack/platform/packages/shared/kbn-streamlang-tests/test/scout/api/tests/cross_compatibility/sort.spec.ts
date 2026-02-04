@@ -184,6 +184,52 @@ apiTest.describe('Cross-compatibility - Sort Processor', { tag: ['@ess', '@svlOb
     expect(esqlDoc2).toHaveProperty('tags', ['zulu', 'xray', 'yankee']);
   });
 
+  apiTest(
+    'should handle ignore_missing consistently between transpilers',
+    async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'sort',
+            from: 'tags',
+            ignore_missing: true,
+          } as SortProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const docs = [
+        { tags: ['charlie', 'alpha', 'bravo'], status: 'has_tags' },
+        { status: 'no_tags' }, // Missing 'tags' field
+      ];
+
+      await testBed.ingest('ingest-sort-ignore-missing', docs, processors);
+      const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-sort-ignore-missing');
+
+      await testBed.ingest('esql-sort-ignore-missing', docs);
+      const esqlResult = await esql.queryOnIndex('esql-sort-ignore-missing', query);
+
+      expect(ingestResult).toHaveLength(2);
+      expect(esqlResult.documents).toHaveLength(2);
+
+      // Document with tags should be sorted
+      const ingestDoc1 = ingestResult.find((d: any) => d.status === 'has_tags');
+      const esqlDoc1 = esqlResult.documentsWithoutKeywords.find(
+        (d: any) => d.status === 'has_tags'
+      );
+      expect(ingestDoc1).toHaveProperty('tags', ['alpha', 'bravo', 'charlie']);
+      expect(esqlDoc1).toHaveProperty('tags', ['alpha', 'bravo', 'charlie']);
+
+      // Document without tags should pass through unchanged
+      const ingestDoc2 = ingestResult.find((d: any) => d.status === 'no_tags');
+      const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.status === 'no_tags');
+      expect(ingestDoc2).not.toHaveProperty('tags');
+      expect(esqlDoc2).toHaveProperty('tags', null);
+    }
+  );
+
   // *** Template validation tests ***
   [
     {

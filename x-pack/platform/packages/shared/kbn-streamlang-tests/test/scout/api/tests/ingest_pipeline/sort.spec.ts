@@ -156,6 +156,57 @@ apiTest.describe(
       }
     );
 
+    apiTest(
+      'should skip processing when field is missing and ignore_missing is true',
+      async ({ testBed }) => {
+        const indexName = 'streams-e2e-test-sort-ignore-missing';
+
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'sort',
+              from: 'nonexistent',
+              ignore_missing: true,
+            } as SortProcessor,
+          ],
+        };
+
+        const { processors } = transpile(streamlangDSL);
+
+        const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
+        await testBed.ingest(indexName, docs, processors);
+
+        const ingestedDocs = await testBed.getDocs(indexName);
+        expect(ingestedDocs).toHaveLength(1);
+        const source = ingestedDocs[0];
+        expect(source).toHaveProperty('message', 'some_value');
+        expect(source).not.toHaveProperty('nonexistent');
+      }
+    );
+
+    apiTest('should process when field exists and ignore_missing is true', async ({ testBed }) => {
+      const indexName = 'streams-e2e-test-sort-ignore-missing-exists';
+
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'sort',
+            from: 'tags',
+            ignore_missing: true,
+          } as SortProcessor,
+        ],
+      };
+
+      const { processors } = transpile(streamlangDSL);
+
+      const docs = [{ tags: ['charlie', 'alpha', 'bravo'] }];
+      await testBed.ingest(indexName, docs, processors);
+
+      const ingestedDocs = await testBed.getDocs(indexName);
+      expect(ingestedDocs).toHaveLength(1);
+      expect(ingestedDocs[0]).toHaveProperty('tags', ['alpha', 'bravo', 'charlie']);
+    });
+
     apiTest('should sort field conditionally with where condition', async ({ testBed }) => {
       const indexName = 'streams-e2e-test-sort-conditional';
 

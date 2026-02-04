@@ -226,6 +226,35 @@ apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: ['@ess', '@svlOb
     expect(doc2?.['event.kind']).toBe('production');
   });
 
+  apiTest('should handle ignore_missing: true', async ({ testBed, esql }) => {
+    const indexName = 'stream-e2e-test-sort-ignore-missing';
+
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'sort',
+          from: 'tags',
+          ignore_missing: true,
+        } as SortProcessor,
+      ],
+    };
+
+    const { query } = transpile(streamlangDSL);
+
+    const docWithField = { tags: ['charlie', 'alpha', 'bravo'], status: 'doc1' };
+    const docWithoutField = { status: 'doc2' }; // Should pass through
+    const docs = [docWithField, docWithoutField];
+    await testBed.ingest(indexName, docs);
+    const esqlResult = await esql.queryOnIndex(indexName, query);
+
+    // Both documents should be present
+    expect(esqlResult.documents).toHaveLength(2);
+    const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
+    const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
+    expect(doc1).toHaveProperty('tags', ['alpha', 'bravo', 'charlie']);
+    expect(doc2).toHaveProperty('tags', null);
+  });
+
   apiTest('should reject Mustache template syntax {{ and {{{ in field names', async () => {
     const streamlangDSL: StreamlangDSL = {
       steps: [
