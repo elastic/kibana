@@ -59,7 +59,7 @@ export const AZURE_CREDENTIAL_SCHEMA: CloudConnectorCredentialSchema = {
       aliases: [AZURE_CLIENT_ID_VAR_NAME], // 'azure.credentials.client_id'
       isSecret: true,
     },
-    azureCredentialsCloudConnectorId: {
+    azure_credentials_cloud_connector_id: {
       primary: AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID, // 'azure_credentials_cloud_connector_id'
       aliases: [AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME], // 'azure.credentials.azure_credentials_cloud_connector_id'
       isSecret: false,

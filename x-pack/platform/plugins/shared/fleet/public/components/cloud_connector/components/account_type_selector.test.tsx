@@ -9,7 +9,11 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../../common';
+import {
+  SINGLE_ACCOUNT,
+  ORGANIZATION_ACCOUNT,
+  ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS,
+} from '../../../../common';
 
 import { AccountTypeSelector, type AccountTypeSelectorProps } from './account_type_selector';
 
@@ -40,9 +44,13 @@ describe('AccountTypeSelector', () => {
       expect(screen.getByText('Organization')).toBeInTheDocument();
       expect(screen.getByText('Single Account')).toBeInTheDocument();
 
-      expect(screen.getByTestId('cloudConnectorAccountTypeSelector')).toBeInTheDocument();
-      expect(screen.getByTestId('cloudConnectorAccountTypeOrganization')).toBeInTheDocument();
-      expect(screen.getByTestId('cloudConnectorAccountTypeSingleAccount')).toBeInTheDocument();
+      expect(screen.getByTestId(ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SELECTOR)).toBeInTheDocument();
+      expect(
+        screen.getByTestId(ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.ORGANIZATION)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SINGLE_ACCOUNT)
+      ).toBeInTheDocument();
     });
   });
 
@@ -50,12 +58,15 @@ describe('AccountTypeSelector', () => {
     it('shows Organization as selected when selectedAccountType is organization-account', () => {
       renderSelector({ selectedAccountType: ORGANIZATION_ACCOUNT });
 
-      const organizationRadio = screen.getByTestId(
-        'cloudConnectorAccountTypeOrganization'
-      ) as HTMLInputElement;
-      const singleAccountRadio = screen.getByTestId(
-        'cloudConnectorAccountTypeSingleAccount'
-      ) as HTMLInputElement;
+      const organizationWrapper = screen.getByTestId(
+        ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.ORGANIZATION
+      );
+      const singleAccountWrapper = screen.getByTestId(
+        ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SINGLE_ACCOUNT
+      );
+
+      const organizationRadio = organizationWrapper.querySelector('input') as HTMLInputElement;
+      const singleAccountRadio = singleAccountWrapper.querySelector('input') as HTMLInputElement;
 
       expect(organizationRadio.checked).toBe(true);
       expect(singleAccountRadio.checked).toBe(false);
@@ -64,12 +75,15 @@ describe('AccountTypeSelector', () => {
     it('shows Single Account as selected when selectedAccountType is single-account', () => {
       renderSelector({ selectedAccountType: SINGLE_ACCOUNT });
 
-      const organizationRadio = screen.getByTestId(
-        'cloudConnectorAccountTypeOrganization'
-      ) as HTMLInputElement;
-      const singleAccountRadio = screen.getByTestId(
-        'cloudConnectorAccountTypeSingleAccount'
-      ) as HTMLInputElement;
+      const organizationWrapper = screen.getByTestId(
+        ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.ORGANIZATION
+      );
+      const singleAccountWrapper = screen.getByTestId(
+        ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SINGLE_ACCOUNT
+      );
+
+      const organizationRadio = organizationWrapper.querySelector('input') as HTMLInputElement;
+      const singleAccountRadio = singleAccountWrapper.querySelector('input') as HTMLInputElement;
 
       expect(organizationRadio.checked).toBe(false);
       expect(singleAccountRadio.checked).toBe(true);
@@ -80,7 +94,10 @@ describe('AccountTypeSelector', () => {
     it('calls onChange with organization-account when Organization is clicked', () => {
       renderSelector({ selectedAccountType: SINGLE_ACCOUNT });
 
-      const organizationRadio = screen.getByTestId('cloudConnectorAccountTypeOrganization');
+      const organizationWrapper = screen.getByTestId(
+        ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.ORGANIZATION
+      );
+      const organizationRadio = organizationWrapper.querySelector('input') as HTMLInputElement;
       fireEvent.click(organizationRadio);
 
       expect(mockOnChange).toHaveBeenCalledWith(ORGANIZATION_ACCOUNT);
@@ -89,7 +106,10 @@ describe('AccountTypeSelector', () => {
     it('calls onChange with single-account when Single Account is clicked', () => {
       renderSelector({ selectedAccountType: ORGANIZATION_ACCOUNT });
 
-      const singleAccountRadio = screen.getByTestId('cloudConnectorAccountTypeSingleAccount');
+      const singleAccountWrapper = screen.getByTestId(
+        ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SINGLE_ACCOUNT
+      );
+      const singleAccountRadio = singleAccountWrapper.querySelector('input') as HTMLInputElement;
       fireEvent.click(singleAccountRadio);
 
       expect(mockOnChange).toHaveBeenCalledWith(SINGLE_ACCOUNT);
@@ -100,12 +120,15 @@ describe('AccountTypeSelector', () => {
     it('disables radio buttons when disabled prop is true', () => {
       renderSelector({ disabled: true });
 
-      const organizationRadio = screen.getByTestId(
-        'cloudConnectorAccountTypeOrganization'
-      ) as HTMLInputElement;
-      const singleAccountRadio = screen.getByTestId(
-        'cloudConnectorAccountTypeSingleAccount'
-      ) as HTMLInputElement;
+      const organizationWrapper = screen.getByTestId(
+        ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.ORGANIZATION
+      );
+      const singleAccountWrapper = screen.getByTestId(
+        ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SINGLE_ACCOUNT
+      );
+
+      const organizationRadio = organizationWrapper.querySelector('input') as HTMLInputElement;
+      const singleAccountRadio = singleAccountWrapper.querySelector('input') as HTMLInputElement;
 
       expect(organizationRadio.disabled).toBe(true);
       expect(singleAccountRadio.disabled).toBe(true);
@@ -114,12 +137,15 @@ describe('AccountTypeSelector', () => {
     it('enables radio buttons when disabled prop is false', () => {
       renderSelector({ disabled: false });
 
-      const organizationRadio = screen.getByTestId(
-        'cloudConnectorAccountTypeOrganization'
-      ) as HTMLInputElement;
-      const singleAccountRadio = screen.getByTestId(
-        'cloudConnectorAccountTypeSingleAccount'
-      ) as HTMLInputElement;
+      const organizationWrapper = screen.getByTestId(
+        ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.ORGANIZATION
+      );
+      const singleAccountWrapper = screen.getByTestId(
+        ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SINGLE_ACCOUNT
+      );
+
+      const organizationRadio = organizationWrapper.querySelector('input') as HTMLInputElement;
+      const singleAccountRadio = singleAccountWrapper.querySelector('input') as HTMLInputElement;
 
       expect(organizationRadio.disabled).toBe(false);
       expect(singleAccountRadio.disabled).toBe(false);
@@ -128,12 +154,15 @@ describe('AccountTypeSelector', () => {
     it('enables radio buttons by default when disabled prop is not provided', () => {
       renderSelector();
 
-      const organizationRadio = screen.getByTestId(
-        'cloudConnectorAccountTypeOrganization'
-      ) as HTMLInputElement;
-      const singleAccountRadio = screen.getByTestId(
-        'cloudConnectorAccountTypeSingleAccount'
-      ) as HTMLInputElement;
+      const organizationWrapper = screen.getByTestId(
+        ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.ORGANIZATION
+      );
+      const singleAccountWrapper = screen.getByTestId(
+        ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SINGLE_ACCOUNT
+      );
+
+      const organizationRadio = organizationWrapper.querySelector('input') as HTMLInputElement;
+      const singleAccountRadio = singleAccountWrapper.querySelector('input') as HTMLInputElement;
 
       expect(organizationRadio.disabled).toBe(false);
       expect(singleAccountRadio.disabled).toBe(false);

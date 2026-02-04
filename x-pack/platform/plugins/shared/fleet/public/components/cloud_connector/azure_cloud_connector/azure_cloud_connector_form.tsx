@@ -17,6 +17,7 @@ import {
 import {
   extractRawCredentialVars,
   getCredentialKeyFromVarName,
+  writeCredentials,
 } from '../../../../common/services/cloud_connectors';
 import type { CloudConnectorFormProps, CloudSetupForCloudConnector } from '../types';
 
@@ -55,6 +56,7 @@ const getElasticStackId = (cloud?: CloudSetupForCloudConnector): string | undefi
 export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   newPolicy,
   packageInfo,
+  updatePolicy,
   cloud,
   hasInvalidRequiredVars = false,
   credentials,
@@ -130,12 +132,24 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           fields={fields}
           packageInfo={packageInfo}
           onChange={(key, value) => {
-            if (!credentials || !isAzureCredentials(credentials) || !setCredentials) return;
-
             // Use schema-based lookup to map var names to credential properties
             const credentialKey = getCredentialKeyFromVarName('azure', key);
-            if (credentialKey) {
+
+            // If we have credentials and setCredentials, update via credentials state
+            if (credentials && isAzureCredentials(credentials) && setCredentials && credentialKey) {
               setCredentials({ ...credentials, [credentialKey]: value });
+              return;
+            }
+
+            // Fallback: update policy directly when credentials or setCredentials is unavailable
+            if (credentialKey) {
+              const updatedPolicy = writeCredentials(
+                newPolicy,
+                { [credentialKey]: value },
+                'azure',
+                packageInfo
+              );
+              updatePolicy({ updatedPolicy });
             }
           }}
           hasInvalidRequiredVars={hasInvalidRequiredVars}

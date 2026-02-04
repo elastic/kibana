@@ -10,7 +10,7 @@ import { render, act } from '@testing-library/react';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { UseQueryResult } from '@kbn/react-query';
 
-import type { CloudConnector, CloudProvider } from '../../types';
+import type { CloudConnector, CloudProvider, NewPackagePolicy } from '../../types';
 
 import { useGetCloudConnectors } from './hooks/use_get_cloud_connectors';
 import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
@@ -42,7 +42,7 @@ jest.mock('./cloud_connector_tabs', () => ({
 
 jest.mock('./components/account_type_selector', () => ({
   AccountTypeSelector: jest.fn(() => (
-    <div data-testid="account-type-selector">{'MockedAccountTypeSelector'}</div>
+    <div data-test-subj="account-type-selector">{'MockedAccountTypeSelector'}</div>
   )),
 }));
 
@@ -660,16 +660,20 @@ describe('CloudConnectorSetup', () => {
       });
     });
 
-    it('should not call updatePolicy when supports_cloud_connector is already true', () => {
+    it('should not call updatePolicy when supports_cloud_connector is already true and account type matches', () => {
       setupMocks([]);
 
       const mockPolicyWithSupport = {
         ...mockPolicy,
         supports_cloud_connector: true, // Already true
+        cloud_connector_account_type:
+          ORGANIZATION_ACCOUNT as NewPackagePolicy['cloud_connector_account_type'], // Matches default effectiveAccountType
       };
 
       renderComponent({ newPolicy: mockPolicyWithSupport });
 
+      // When supports_cloud_connector is already true AND cloud_connector_account_type matches,
+      // updatePolicy should not be called
       expect(mockUpdatePolicy).not.toHaveBeenCalled();
     });
 

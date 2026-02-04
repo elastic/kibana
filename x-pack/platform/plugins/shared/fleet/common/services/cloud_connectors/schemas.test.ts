@@ -56,10 +56,12 @@ describe('Cloud Connector Schemas', () => {
       expect(clientId.isSecret).toBe(true);
     });
 
-    it('should have azureCredentialsCloudConnectorId field with correct keys', () => {
-      const { azureCredentialsCloudConnectorId } = AZURE_CREDENTIAL_SCHEMA.fields;
-      expect(azureCredentialsCloudConnectorId.primary).toBe('azure_credentials_cloud_connector_id');
-      expect(azureCredentialsCloudConnectorId.isSecret).toBe(false);
+    it('should have azure_credentials_cloud_connector_id field with correct keys', () => {
+      const { azure_credentials_cloud_connector_id } = AZURE_CREDENTIAL_SCHEMA.fields;
+      expect(azure_credentials_cloud_connector_id.primary).toBe(
+        'azure_credentials_cloud_connector_id'
+      );
+      expect(azure_credentials_cloud_connector_id.isSecret).toBe(false);
     });
   });
 
@@ -192,9 +194,9 @@ describe('Cloud Connector Schemas', () => {
         );
       });
 
-      it('should return azureCredentialsCloudConnectorId for its primary key', () => {
+      it('should return azure_credentials_cloud_connector_id for its primary key', () => {
         expect(getCredentialKeyFromVarName('azure', 'azure_credentials_cloud_connector_id')).toBe(
-          'azureCredentialsCloudConnectorId'
+          'azure_credentials_cloud_connector_id'
         );
       });
     });

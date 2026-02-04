@@ -9,6 +9,8 @@ import React from 'react';
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS } from '../../../../common';
+
 import type { AccountType } from '../../../types';
 import { ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT } from '../constants';
 
@@ -27,14 +29,14 @@ const ACCOUNT_TYPE_OPTIONS = [
     label: i18n.translate('xpack.fleet.cloudConnector.accountTypeSelector.organizationLabel', {
       defaultMessage: 'Organization',
     }),
-    'data-test-subj': 'cloudConnectorAccountTypeOrganization',
+    'data-test-subj': ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.ORGANIZATION,
   },
   {
     id: SINGLE_ACCOUNT,
     label: i18n.translate('xpack.fleet.cloudConnector.accountTypeSelector.singleAccountLabel', {
       defaultMessage: 'Single Account',
     }),
-    'data-test-subj': 'cloudConnectorAccountTypeSingleAccount',
+    'data-test-subj': ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SINGLE_ACCOUNT,
   },
 ];
 
@@ -54,7 +56,7 @@ export const AccountTypeSelector: React.FC<AccountTypeSelectorProps> = ({
       label={i18n.translate('xpack.fleet.cloudConnector.accountTypeSelector.label', {
         defaultMessage: 'Cloud Connector Account Type',
       })}
-      data-test-subj="cloudConnectorAccountTypeSelector"
+      data-test-subj={ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SELECTOR}
     >
       <EuiRadioGroup
         options={ACCOUNT_TYPE_OPTIONS}
