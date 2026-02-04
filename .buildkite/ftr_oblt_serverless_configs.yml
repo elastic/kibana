@@ -16,6 +16,7 @@ disabled:
   - x-pack/solutions/observability/test/serverless/api_integration/test_suites/fleet/config.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.logs_essentials.ts
+  - x-pack/solutions/observability/test/serverless/functional/configs/config.onboarding.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.examples.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.feature_flags.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.saved_objects_management.ts
