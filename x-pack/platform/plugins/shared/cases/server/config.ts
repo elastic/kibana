@@ -14,8 +14,16 @@ import {
 } from '../common/constants/incremental_id';
 
 export const ConfigSchema = schema.object({
-  markdownPlugins: schema.object({
-    lens: schema.boolean({ defaultValue: true }),
+  analytics: schema.object({
+    index: schema.object({
+      enabled: offeringBasedSchema({
+        serverless: schema.boolean({ defaultValue: false }),
+        traditional: schema.boolean({ defaultValue: false }),
+      }),
+    }),
+  }),
+  attachments: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
   }),
   files: schema.object({
     allowedMimeTypes: schema.arrayOf(schema.string({ minLength: 1 }), {
@@ -23,9 +31,6 @@ export const ConfigSchema = schema.object({
     }),
     // intentionally not setting a default here so that we can determine if the user set it
     maxSize: schema.maybe(schema.number({ min: 0 })),
-  }),
-  stack: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
   }),
   incrementalId: schema.object({
     /**
@@ -47,13 +52,16 @@ export const ConfigSchema = schema.object({
       min: 1,
     }),
   }),
-  analytics: schema.object({
-    index: schema.object({
-      enabled: offeringBasedSchema({
-        serverless: schema.boolean({ defaultValue: false }),
-        traditional: schema.boolean({ defaultValue: false }),
-      }),
-    }),
+  markdownPlugins: schema.object({
+    lens: schema.boolean({ defaultValue: true }),
+  }),
+  stack: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // WARN: enabling this feature and disabling it later is not supported (saved objects will throw errors)
+  templates: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
 });
