@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSiemReadinessApi } from '@kbn/siem-readiness';
+import { CATEGORY_ORDER, useSiemReadinessApi } from '@kbn/siem-readiness';
 import type { PipelineStats } from '@kbn/siem-readiness';
 import {
   CategoryAccordionTable,
@@ -65,11 +65,11 @@ export const ContinuityTab: React.FC = () => {
   const categorizedPipelines: Array<CategoryData<PipelineWithCategory>> = useMemo(() => {
     if (!pipelinesData?.length) return [];
 
-    const categoryOrder = ['Endpoint', 'Identity', 'Network', 'Cloud', 'Application/SaaS'];
+    const categoryMap = new Map<string, PipelineWithCategory[]>();
 
-    const categoryMap = pipelinesData.reduce((map, pipeline) => {
+    pipelinesData.forEach((pipeline) => {
       const failureRate =
-        pipeline.count > 0 ? ((pipeline.failed / pipeline.count) * 100).toFixed(2) : '0.00';
+        pipeline.count > 0 ? ((pipeline.failed / pipeline.count) * 100).toFixed(1) : '0.00';
 
       const pipelineWithStats: PipelineWithCategory = {
         ...pipeline,
@@ -77,27 +77,30 @@ export const ContinuityTab: React.FC = () => {
         status: pipeline.failed > 0 ? 'non_healthy' : 'healthy',
       };
 
-      const categories = new Set(
-        pipeline.indices
-          .map((indexName) => indexToCategoryMap.get(indexName))
-          .filter((category): category is string => Boolean(category))
-      );
+      // Find all categories this pipeline belongs to based on its indices
+      pipeline.indices.forEach((indexName) => {
+        const category = indexToCategoryMap.get(indexName);
+        if (!category) return;
 
-      categories.forEach((category) => {
-        const list = map.get(category) ?? [];
-        list.push(pipelineWithStats);
-        map.set(category, list);
+        const pipelinesInCategory = categoryMap.get(category) || [];
+        pipelinesInCategory.push(pipelineWithStats);
+        categoryMap.set(category, pipelinesInCategory);
       });
+    });
 
-      return map;
-    }, new Map<string, PipelineWithCategory[]>());
+    // Build result in category order, sorted by count descending
+    const result: Array<CategoryData<PipelineWithCategory>> = [];
+    CATEGORY_ORDER.forEach((category) => {
+      const items = categoryMap.get(category);
+      if (!items) return;
 
-    return categoryOrder
-      .filter((category) => categoryMap.has(category))
-      .map((category) => ({
+      result.push({
         category,
-        items: [...(categoryMap.get(category) ?? [])].sort((a, b) => b.count - a.count),
-      }));
+        items: items.sort((a, b) => b.count - a.count),
+      });
+    });
+
+    return result;
   }, [pipelinesData, indexToCategoryMap]);
 
   // Check if any pipeline has failures
