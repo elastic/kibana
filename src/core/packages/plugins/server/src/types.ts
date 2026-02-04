@@ -318,7 +318,7 @@ export type SharedGlobalConfig = RecursiveReadonly<{
  *
  * @public
  */
-export interface PluginInitializerContext<ConfigSchema = unknown> {
+export interface  PluginInitializerContext<ConfigSchema = unknown> {
   opaqueId: PluginOpaqueId;
   env: {
     mode: EnvironmentMode;

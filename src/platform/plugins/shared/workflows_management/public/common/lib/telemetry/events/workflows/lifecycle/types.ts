@@ -72,30 +72,20 @@ export interface ReportWorkflowCreatedActionParams
    */
   connectorTypes: string[];
   /**
+   * Unique step types used in the workflow (e.g., ['foreach', 'if', 'console']).
+   * This array format enables easy aggregation in dashboards.
+   */
+  stepTypes: string[];
+  /**
    * Count of steps by step type (e.g., { 'foreach': 2, 'slack.webhook': 5, 'if': 1 }).
    * Always extracted from workflow definition (defaults to empty object if not provided).
    */
   stepTypeCounts: Record<string, number>;
   /**
-   * Whether the workflow has scheduled triggers.
-   * Always extracted from workflow definition (defaults to false if not provided).
+   * Trigger types configured in the workflow (e.g., ['scheduled', 'alert', 'index']).
+   * This array format enables easy aggregation in dashboards.
    */
-  hasScheduledTriggers: boolean;
-  /**
-   * Whether the workflow has alert triggers.
-   * Always extracted from workflow definition (defaults to false if not provided).
-   */
-  hasAlertTriggers: boolean;
-  /**
-   * Whether the workflow has a timeout configured.
-   * Always extracted from workflow definition (defaults to false if not provided).
-   */
-  hasTimeout: boolean;
-  /**
-   * Whether the workflow has concurrency settings configured.
-   * Always extracted from workflow definition (defaults to false if not provided).
-   */
-  hasConcurrency: boolean;
+  triggerTypes: string[];
   /**
    * Maximum concurrent runs if concurrency is configured.
    * Only present when concurrency is configured.
@@ -107,10 +97,22 @@ export interface ReportWorkflowCreatedActionParams
    */
   concurrencyStrategy?: string;
   /**
-   * Whether the workflow has on-failure handling configured.
-   * Always extracted from workflow definition (defaults to false if not provided).
+   * Settings configured in the workflow (e.g., ['timeout', 'concurrency', 'on-failure']).
+   * This array format enables easy aggregation in dashboards.
    */
-  hasOnFailure: boolean;
+  settingsUsed: string[];
+  /**
+   * Whether the workflow has a description.
+   */
+  hasDescription: boolean;
+  /**
+   * Number of tags assigned to the workflow.
+   */
+  tagCount: number;
+  /**
+   * Number of constants defined in the workflow.
+   */
+  constCount: number;
 }
 
 /**
