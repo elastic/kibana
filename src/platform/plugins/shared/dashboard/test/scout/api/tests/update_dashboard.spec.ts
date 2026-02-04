@@ -38,9 +38,7 @@ apiTest.describe('dashboards - update', { tag: tags.ESS_ONLY }, () => {
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        data: {
-          title: 'Refresh Requests (Updated)',
-        },
+        title: 'Refresh Requests (Updated)',
       },
       responseType: 'json',
     });
@@ -57,9 +55,7 @@ apiTest.describe('dashboards - update', { tag: tags.ESS_ONLY }, () => {
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        data: {
-          title: 'Some other dashboard (updated)',
-        },
+        title: 'Some other dashboard (updated)',
       },
       responseType: 'json',
     });
@@ -77,9 +73,7 @@ apiTest.describe('dashboards - update', { tag: tags.ESS_ONLY }, () => {
         ...COMMON_HEADERS,
         ...editorCredentials.apiKeyHeader,
       },
-      body: {
-        data: {},
-      },
+      body: {},
       responseType: 'json',
     });
 
@@ -96,10 +90,8 @@ apiTest.describe('dashboards - update', { tag: tags.ESS_ONLY }, () => {
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        data: {
-          title: 'foo',
-          panels: {},
-        },
+        title: 'foo',
+        panels: {},
       },
       responseType: 'json',
     });

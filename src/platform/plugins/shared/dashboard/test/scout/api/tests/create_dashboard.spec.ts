@@ -40,9 +40,7 @@ apiTest.describe('dashboards - create', { tag: tags.ESS_ONLY }, () => {
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        data: {
-          title,
-        },
+        title,
       },
       responseType: 'json',
     });
@@ -58,16 +56,13 @@ apiTest.describe('dashboards - create', { tag: tags.ESS_ONLY }, () => {
     const title = `foo-${Date.now()}-${Math.random()}`;
     const id = `bar-${Date.now()}-${Math.random()}`;
 
-    const response = await apiClient.post(DASHBOARD_API_PATH, {
+    const response = await apiClient.post(`${DASHBOARD_API_PATH}/${id}`, {
       headers: {
         ...COMMON_HEADERS,
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        id,
-        data: {
-          title,
-        },
+        title,
       },
       responseType: 'json',
     });
@@ -81,15 +76,13 @@ apiTest.describe('dashboards - create', { tag: tags.ESS_ONLY }, () => {
     const title = `foo-${Date.now()}-${Math.random()}`;
     const spaceId = 'space-1';
 
-    const response = await apiClient.post(DASHBOARD_API_PATH, {
+    const response = await apiClient.post(`/s/${spaceId}/${DASHBOARD_API_PATH}`, {
       headers: {
         ...COMMON_HEADERS,
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        data: {
-          title,
-        },
+        title,
         spaces: [spaceId],
       },
       responseType: 'json',
@@ -102,16 +95,13 @@ apiTest.describe('dashboards - create', { tag: tags.ESS_ONLY }, () => {
   apiTest('return error if provided id already exists', async ({ apiClient }) => {
     const title = `foo-${Date.now()}-${Math.random()}`;
 
-    const response = await apiClient.post(DASHBOARD_API_PATH, {
+    const response = await apiClient.post(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
       headers: {
         ...COMMON_HEADERS,
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        id: TEST_DASHBOARD_ID,
-        data: {
-          title,
-        },
+        title,
       },
       responseType: 'json',
     });
@@ -126,9 +116,7 @@ apiTest.describe('dashboards - create', { tag: tags.ESS_ONLY }, () => {
         ...COMMON_HEADERS,
         ...editorCredentials.apiKeyHeader,
       },
-      body: {
-        data: {},
-      },
+      body: {},
       responseType: 'json',
     });
 
@@ -145,10 +133,8 @@ apiTest.describe('dashboards - create', { tag: tags.ESS_ONLY }, () => {
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        data: {
-          title: 'foo',
-          panels: {},
-        },
+        title: 'foo',
+        panels: {},
       },
       responseType: 'json',
     });

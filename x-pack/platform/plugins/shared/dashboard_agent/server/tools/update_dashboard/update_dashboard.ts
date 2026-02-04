@@ -89,9 +89,11 @@ This tool will:
         };
 
         // Update dashboard using the Dashboard plugin's client
-        const dashboardUpdateResponse = await dashboard.client.update(requestHandlerContext, id, {
-          data: updateData,
-        });
+        const dashboardUpdateResponse = await dashboard.client.update(
+          requestHandlerContext,
+          id,
+          updateData
+        );
 
         logger.info(`Dashboard updated successfully: ${dashboardUpdateResponse.id}`);
 
