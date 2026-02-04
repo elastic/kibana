@@ -40,15 +40,10 @@ const mapInstallationStatusToInstalledStatus = (status: InstallationStatus): Ins
 
 /**
  * Creates the app links for viewing the sample data in various Kibana apps.
+ * Note: Dashboard link is already added by the ViewButton component, so we only include
+ * additional links like Discover here.
  */
-const createAppLinks = (dashboardId: string, indexPatternId: string): AppLink[] => [
-  {
-    path: `/app/dashboards#/view/${dashboardId}`,
-    label: i18n.translate('xpack.sampleDataIngest.sampleDataSet.viewDashboardLink', {
-      defaultMessage: 'Dashboard',
-    }),
-    icon: 'dashboardApp',
-  },
+const createAppLinks = (indexPatternId: string): AppLink[] => [
   {
     path: `/app/discover#/?_a=(dataSource:(dataViewId:'${indexPatternId}',type:dataView))`,
     label: i18n.translate('xpack.sampleDataIngest.sampleDataSet.viewDiscoverLink', {
@@ -91,7 +86,7 @@ export const createSampleDataSet = (
     darkPreviewImagePath: `${assetBasePath}/search_results_illustration.svg`,
     overviewDashboard: dashboardId,
     defaultIndex: DEFAULT_INDEX_PATTERN_ID,
-    appLinks: createAppLinks(dashboardId, DEFAULT_INDEX_PATTERN_ID),
+    appLinks: createAppLinks(DEFAULT_INDEX_PATTERN_ID),
     status: mapInstallationStatusToInstalledStatus(statusResponse.status),
     statusMsg: statusResponse.error,
     // Custom install/remove handlers that use the sample_data_ingest API
