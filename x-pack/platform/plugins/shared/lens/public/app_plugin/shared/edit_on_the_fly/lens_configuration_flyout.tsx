@@ -26,7 +26,12 @@ import type { TypedLensSerializedState, SupportedDatasourceId } from '@kbn/lens-
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { getLensFeatureFlags } from '../../../get_feature_flags';
-import { useLensSelector, selectFramePublicAPI, useLensDispatch } from '../../../state_management';
+import {
+  useLensSelector,
+  selectFramePublicAPI,
+  useLensDispatch,
+  selectHideTextBasedEditor,
+} from '../../../state_management';
 import {
   EXPRESSION_BUILD_ERROR_ID,
   getAbsoluteDateRange,
