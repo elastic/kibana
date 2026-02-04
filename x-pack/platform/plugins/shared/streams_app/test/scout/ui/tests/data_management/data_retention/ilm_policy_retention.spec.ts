@@ -132,7 +132,7 @@ test.describe('Stream data retention - ILM policy', { tag: ['@ess'] }, () => {
     esClient,
     apiServices,
   }) => {
-    const policyName = 'streams-downsampling-policy';
+    const policyName = 'downsampling-policy';
 
     await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
     await esClient.ilm.putLifecycle({
@@ -208,7 +208,7 @@ test.describe('Stream data retention - ILM policy', { tag: ['@ess'] }, () => {
     esClient,
     apiServices,
   }) => {
-    const policyName = 'streams-downsampling-policy-save-as-new';
+    const policyName = 'downsampling-policy';
     const newPolicyName = `${policyName}-copy`;
 
     await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
