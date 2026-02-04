@@ -8,7 +8,7 @@
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 import { times } from 'lodash';
-import type { Page } from 'playwright';
+import type { Locator, Page } from 'playwright';
 
 export const journey = new Journey({
   kbnArchives: ['src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view'],
@@ -25,9 +25,10 @@ export const journey = new Journey({
 
   /**
    * Test performance of the editor when suggesting/validating large number of fields in functions, commands and options.
+   * Test is split for typing in two different speeds.
    */
   .step('Type a new query', async ({ page }) => {
-    await clearESQLEditorQuery(page);
+    await setMonacoEditorValue('', page);
 
     await typeESQLEditorQuery(
       `FROM indices-stats* METADATA _id, _index, _score
@@ -45,9 +46,8 @@ export const journey = new Journey({
 
     await typeESQLEditorQuery(
       `
-  | ENRICH policy
+  | ENRICH policy | CHANGE_POINT _all.primaries.bulk.avg_time_in_millis
   | LOOKUP JOIN lookup_index ON col0
-  | CHANGE_POINT _all.primaries.bulk.avg_time_in_millis
   | COMPLETION "query" WITH { "inference_id": "endpoint" }
   | FORK (KEEP _all.primaries.bulk.avg_time_in_millis) (STATS ABS(_all.primaries.bulk.avg_time_in_millis) BY col0)
   | FUSE linear
@@ -63,33 +63,40 @@ export const journey = new Journey({
    * Test performance of the editor after a long query. To stress columns collection routines.
    */
   .step('Paste a large query and edit it ', async ({ page }) => {
-    await clearESQLEditorQuery(page);
+    await setMonacoEditorValue('', page);
 
     const largeQuery = buildLargeQuery(100);
 
-    await pasteESQLEditorQuery(largeQuery, page);
+    await setMonacoEditorValue(largeQuery, page);
     await typeESQLEditorQuery(`| RENAME col0 AS renamed_field | KEEP renamed_field`, page, 200);
   });
 
 // === UTILS ===========================================================================
 
-const clearESQLEditorQuery = async (page: Page) => {
-  const editor = await getEditor(page);
-  await editor.clear();
-};
-
+/**
+ * Types the given string letter by letter.
+ */
 const typeESQLEditorQuery = async (value: string, page: Page, typingDelay: number) => {
   const editor = await getEditor(page);
+  await moveCursorToEnd(page, editor);
   await editor.pressSequentially(value, { delay: typingDelay, timeout: 0 });
 };
 
-const pasteESQLEditorQuery = async (value: string, page: Page) => {
-  const editor = await getEditor(page);
-  // Monaco can intercept pointer events over the hidden textarea; focusing avoids click flakiness.
-  await editor.focus();
-  await page.keyboard.insertText(value);
+/**
+ * Moves the cursor to the end of the given textarea.
+ */
+const moveCursorToEnd = async (page: Page, textarea: Locator) => {
+  await textarea.focus();
+  if (process.platform === 'darwin') {
+    await page.keyboard.press('Meta+ArrowDown');
+  } else {
+    await page.keyboard.press('Control+End');
+  }
 };
 
+/**
+ * Returns the Monaco editor textarea instance.
+ */
 const getEditor = async (page: Page) => {
   const editor = page.locator(subj('ESQLEditor'));
   const textarea = editor.locator('textarea').first();
@@ -97,9 +104,45 @@ const getEditor = async (page: Page) => {
   return textarea;
 };
 
-const buildLargeQuery = (numEvals: number) => {
-  const evalLines = times(numEvals, (colIndex) => {
-    return `| EVAL col${colIndex} = CLAMP(TO_INTEGER(_all.primaries.docs.count), _all.primaries.bulk.avg_size_in_bytes))`;
+/**
+ * This helper sets the value of a Monaco editor instance.
+ * This method is used as it's a LOT faster than using .fill().
+ */
+const setMonacoEditorValue = async (value: string, page: Page) => {
+  // Wait for Monaco to be ready
+  await page.waitForFunction(() => {
+    const monacoEditor = window.MonacoEnvironment?.monaco?.editor;
+    return Boolean(monacoEditor?.getModels && monacoEditor.getModels().length);
+  });
+
+  // Set the value directly via Monaco's API
+  await page.evaluate(
+    ({ codeEditorValue }) => {
+      const editor = window.MonacoEnvironment!.monaco.editor;
+      const models = editor.getModels();
+      models[0].setValue(codeEditorValue);
+    },
+    { codeEditorValue: value }
+  );
+
+  // Assert the value has been set correctly
+  await page.waitForFunction(
+    ({ expected }) => {
+      const editor = window.MonacoEnvironment?.monaco?.editor;
+      const models = editor?.getModels?.() ?? [];
+      const model = models[0];
+      return model ? model.getValue() === expected : false;
+    },
+    { expected: value }
+  );
+};
+
+/**
+ * Builds a large ESQL query with the given number of EVAL statements.
+ */
+const buildLargeQuery = (linesNumber: number) => {
+  const evalLines = times(linesNumber, (colIndex) => {
+    return `| EVAL col${colIndex} = CLAMP(TO_INTEGER(_all.primaries.docs.count), 55, 300)`;
   });
 
   const largeQuery = ['FROM indices-stats*', ...evalLines].join('\n');
