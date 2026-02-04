@@ -110,7 +110,7 @@ export const createSkillsServiceMock = (): SkillsServiceMock => {
 
 export const createToolManagerMock = (): ToolManagerMock => {
   return {
-    addTool: jest.fn(),
+    addTools: jest.fn(),
     list: jest.fn(),
     recordToolUse: jest.fn(),
     getToolIdMapping: jest.fn(),

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { validateSkillTypeDefinition, type SkillTypeDefinition } from './type_definition';
+import { validateSkillDefinition, type SkillDefinition } from './type_definition';
 
 describe('validateSkillTypeDefinition', () => {
-  const createMockSkill = (overrides: Partial<SkillTypeDefinition> = {}): SkillTypeDefinition => ({
+  const createMockSkill = (overrides: Partial<SkillDefinition> = {}): SkillDefinition => ({
     id: 'test-skill',
     name: 'test-skill',
     basePath: 'skills/platform' as any,
     description: 'A test skill',
-    body: 'Skill body content',
+    content: 'Skill body content',
     ...overrides,
   });
 
   it('validates a valid skill definition successfully', async () => {
     const skill = createMockSkill();
-    await expect(validateSkillTypeDefinition(skill)).resolves.toEqual(skill);
+    await expect(validateSkillDefinition(skill)).resolves.toEqual(skill);
   });
 
   it('throws error if tool count exceeds 7', async () => {
@@ -28,7 +28,7 @@ describe('validateSkillTypeDefinition', () => {
       getInlineTools: async () => ['tool5', 'tool6', 'tool7', 'tool8'] as any,
     });
 
-    await expect(validateSkillTypeDefinition(skill)).rejects.toThrow(
+    await expect(validateSkillDefinition(skill)).rejects.toThrow(
       expect.objectContaining({
         message: expect.stringContaining('Max tool limit exceeded'),
       })
@@ -41,7 +41,7 @@ describe('validateSkillTypeDefinition', () => {
       getInlineTools: async () => ['tool5', 'tool6', 'tool7'] as any,
     });
 
-    await expect(validateSkillTypeDefinition(skill)).resolves.toEqual(skill);
+    await expect(validateSkillDefinition(skill)).resolves.toEqual(skill);
   });
 
   it('handles only allowed tools', async () => {
@@ -49,7 +49,7 @@ describe('validateSkillTypeDefinition', () => {
       getAllowedTools: () => Array(8).fill('tool') as any,
     });
 
-    await expect(validateSkillTypeDefinition(skill)).rejects.toThrow(
+    await expect(validateSkillDefinition(skill)).rejects.toThrow(
       expect.objectContaining({
         message: expect.stringContaining('Max tool limit exceeded'),
       })
@@ -61,7 +61,7 @@ describe('validateSkillTypeDefinition', () => {
       getInlineTools: async () => Array(8).fill('tool') as any,
     });
 
-    await expect(validateSkillTypeDefinition(skill)).rejects.toThrow(
+    await expect(validateSkillDefinition(skill)).rejects.toThrow(
       expect.objectContaining({
         message: expect.stringContaining('Max tool limit exceeded'),
       })
@@ -70,7 +70,7 @@ describe('validateSkillTypeDefinition', () => {
 
   it('handles no tools', async () => {
     const skill = createMockSkill();
-    await expect(validateSkillTypeDefinition(skill)).resolves.toEqual(skill);
+    await expect(validateSkillDefinition(skill)).resolves.toEqual(skill);
   });
 
   it('throws Zod error for invalid schema fields', async () => {
@@ -78,7 +78,7 @@ describe('validateSkillTypeDefinition', () => {
       name: 'INVALID NAME' as any,
     });
 
-    await expect(validateSkillTypeDefinition(skill)).rejects.toThrow();
+    await expect(validateSkillDefinition(skill)).rejects.toThrow();
   });
 
   it('throws error if description is too long', async () => {
@@ -86,7 +86,7 @@ describe('validateSkillTypeDefinition', () => {
       description: 'a'.repeat(1025),
     });
 
-    await expect(validateSkillTypeDefinition(skill)).rejects.toThrow();
+    await expect(validateSkillDefinition(skill)).rejects.toThrow();
   });
 
   it('throws error if name contains invalid characters', async () => {
@@ -94,6 +94,6 @@ describe('validateSkillTypeDefinition', () => {
       name: 'name with spaces' as any,
     });
 
-    await expect(validateSkillTypeDefinition(skill)).rejects.toThrow();
+    await expect(validateSkillDefinition(skill)).rejects.toThrow();
   });
 });

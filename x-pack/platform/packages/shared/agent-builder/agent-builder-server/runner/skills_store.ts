@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { SkillTypeDefinition } from '../skills';
+import type { SkillDefinition } from '../skills';
 
 /**
- * Store to access tool results during execution
+ * Store to access skills during execution
  */
 export interface SkillsStore {
   has(skillId: string): boolean;
-  get(resultId: string): SkillTypeDefinition;
+  get(resultId: string): SkillDefinition;
 }
 
 /**
- * Writable version of ToolResultStore, used internally by the runner/agent
+ * Writable version of SkillsStore, used internally by the runner/agent
  */
 export interface WritableSkillsStore extends SkillsStore {
-  add(result: SkillTypeDefinition): void;
+  add(result: SkillDefinition): void;
   delete(skillId: string): boolean;
   asReadonly(): SkillsStore;
 }

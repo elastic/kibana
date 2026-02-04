@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export type { SkillTypeDefinition } from './type_definition';
-export { validateSkillTypeDefinition } from './type_definition';
+export type { SkillDefinition } from './type_definition';
+export { validateSkillDefinition } from './type_definition';
 export type {
   SkillBoundedTool,
   BuiltinSkillBoundedTool,

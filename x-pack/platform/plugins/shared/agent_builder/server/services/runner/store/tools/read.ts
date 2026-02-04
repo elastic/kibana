@@ -15,9 +15,8 @@ import {
   estimateTokens,
   truncateTokens,
 } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import { isSkillFileEntry } from '../volumes/skills/utils';
-import { pickTools } from '../../../agents/modes/utils/select_tools';
+import { loadSkillTools } from '../utils/load_skill';
 
 const schema = z.object({
   path: z.string().describe('Path of the file to read'),
@@ -55,33 +54,7 @@ export const readTool = ({
       }
 
       if (isSkillFileEntry(entry)) {
-        const skill = skillsService.getSkillDefinition(entry.metadata.skill_id);
-        if (skill) {
-          const inlineTools = (await skill.getInlineTools?.()) ?? [];
-          const inlineExecutableTools = inlineTools.map((tool) =>
-            skillsService.convertSkillTool(tool)
-          );
-
-          const allowedTools = skill.getAllowedTools?.() ?? [];
-          const registryExecutableTools = await pickTools({
-            toolProvider,
-            selection: [{ tool_ids: allowedTools }],
-            request,
-          });
-
-          await toolManager.addTool(
-            {
-              type: ToolManagerToolType.executable,
-              tools: [...inlineExecutableTools, ...registryExecutableTools],
-              logger,
-            },
-            {
-              dynamic: true,
-            }
-          );
-        } else {
-          logger.debug(`Skill '${entry.metadata.skill_id}' not found in registry.`);
-        }
+        await loadSkillTools({ skillsService, entry, toolProvider, request, toolManager, logger });
       }
 
       let content: string | object;
@@ -103,3 +76,4 @@ export const readTool = ({
     },
   };
 };
+

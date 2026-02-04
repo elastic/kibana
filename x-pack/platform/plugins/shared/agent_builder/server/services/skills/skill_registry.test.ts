@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { createSkillTypeRegistry, type SkillTypeRegistry } from './skill_type_registry';
-import type { SkillTypeDefinition } from '@kbn/agent-builder-server/skills';
-import { validateSkillTypeDefinition } from '@kbn/agent-builder-server/skills';
+import { createSkillRegistry, type SkillRegistry } from './skill_registry';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
 
 // Mock the validation function
 jest.mock('@kbn/agent-builder-server/skills', () => {
   const actual = jest.requireActual('@kbn/agent-builder-server/skills');
   return {
     ...actual,
-    validateSkillTypeDefinition: jest.fn(async (skill) => skill),
+    validateSkillDefinition: jest.fn(async (skill) => skill),
   };
 });
 
@@ -23,19 +23,19 @@ jest.mock('../runner/store/volumes/skills/utils', () => ({
   getSkillEntryPath: jest.fn(({ skill }) => `${skill.basePath}/${skill.name}/SKILL.md`),
 }));
 
-describe('SkillTypeRegistry', () => {
-  let registry: SkillTypeRegistry;
+describe('SkillRegistry', () => {
+  let registry: SkillRegistry;
 
   beforeEach(() => {
-    registry = createSkillTypeRegistry();
+    registry = createSkillRegistry();
   });
 
-  const createMockSkill = (overrides: Partial<SkillTypeDefinition> = {}): SkillTypeDefinition => ({
+  const createMockSkill = (overrides: Partial<SkillDefinition> = {}): SkillDefinition => ({
     id: 'test-skill-1',
     name: 'test-skill',
     basePath: 'skills/platform',
     description: 'A test skill',
-    body: 'Skill body content',
+    content: 'Skill body content',
     ...overrides,
   });
 
@@ -115,7 +115,7 @@ describe('SkillTypeRegistry', () => {
 
       await registry.register(skill);
 
-      expect(validateSkillTypeDefinition).toHaveBeenCalledWith(skill);
+      expect(validateSkillDefinition).toHaveBeenCalledWith(skill);
     });
   });
 
@@ -209,23 +209,23 @@ describe('SkillTypeRegistry', () => {
     });
   });
 
-  describe('createSkillTypeRegistry', () => {
+  describe('createSkillRegistry', () => {
     it('creates a new registry instance', () => {
-      const registry1 = createSkillTypeRegistry();
-      const registry2 = createSkillTypeRegistry();
+      const registry1 = createSkillRegistry();
+      const registry2 = createSkillRegistry();
 
       expect(registry1).not.toBe(registry2);
     });
 
     it('creates an empty registry', () => {
-      const newRegistry = createSkillTypeRegistry();
+      const newRegistry = createSkillRegistry();
       expect(newRegistry.list()).toEqual([]);
     });
   });
 
   describe('edge cases', () => {
     it('handles skills with empty body', async () => {
-      const skill = createMockSkill({ body: '' });
+      const skill = createMockSkill({ content: '' });
       await expect(registry.register(skill)).resolves.not.toThrow();
       expect(registry.get('test-skill-1')).toEqual(skill);
     });
@@ -237,10 +237,10 @@ describe('SkillTypeRegistry', () => {
 
     it('handles skills with special characters in body', async () => {
       const skill = createMockSkill({
-        body: 'Body with "quotes" and \'apostrophes\' and\nnewlines',
+        content: 'Body with "quotes" and \'apostrophes\' and\nnewlines',
       });
       await expect(registry.register(skill)).resolves.not.toThrow();
-      expect(registry.get('test-skill-1')?.body).toBe(
+      expect(registry.get('test-skill-1')?.content).toBe(
         'Body with "quotes" and \'apostrophes\' and\nnewlines'
       );
     });

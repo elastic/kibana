@@ -6,7 +6,7 @@
  */
 
 import { createSkillsStore, SkillsStoreImpl } from './skills_store';
-import type { SkillTypeDefinition } from '@kbn/agent-builder-server/skills';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 
 // Mock SKILLS_ENABLED
@@ -15,12 +15,12 @@ jest.mock('../../../../skills/constants', () => ({
 }));
 
 describe('SkillsStore', () => {
-  const createMockSkill = (overrides: Partial<SkillTypeDefinition> = {}): SkillTypeDefinition => ({
+  const createMockSkill = (overrides: Partial<SkillDefinition> = {}): SkillDefinition => ({
     id: 'test-skill-1',
     name: 'test-skill',
     basePath: 'skills/platform',
     description: 'A test skill',
-    body: 'Skill body content',
+    content: 'Skill body content',
     ...overrides,
   });
 
@@ -284,9 +284,9 @@ describe('SkillsStore', () => {
   describe('edge cases', () => {
     it('handles skills with empty body', () => {
       const store = new SkillsStoreImpl({ skills: [] });
-      const skill = createMockSkill({ body: '' });
+      const skill = createMockSkill({ content: '' });
       store.add(skill);
-      expect(store.get('test-skill-1').body).toBe('');
+      expect(store.get('test-skill-1').content).toBe('');
     });
 
     it('handles skills with referenced content', () => {
@@ -296,7 +296,7 @@ describe('SkillsStore', () => {
           {
             name: 'content',
             relativePath: '.',
-            body: 'Content body',
+            content: 'Content body',
           },
         ],
       });

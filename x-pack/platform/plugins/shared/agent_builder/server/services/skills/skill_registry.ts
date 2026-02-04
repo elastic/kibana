@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import type { SkillTypeDefinition } from '@kbn/agent-builder-server/skills';
-import { validateSkillTypeDefinition } from '@kbn/agent-builder-server/skills';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
 
-export interface SkillTypeRegistry {
-  register(skill: SkillTypeDefinition): Promise<void>;
+export interface SkillRegistry {
+  register(skill: SkillDefinition): Promise<void>;
   has(skillId: string): boolean;
-  get(skillId: string): SkillTypeDefinition | undefined;
-  list(): SkillTypeDefinition[];
+  get(skillId: string): SkillDefinition | undefined;
+  list(): SkillDefinition[];
 }
 
-export const createSkillTypeRegistry = (): SkillTypeRegistry => {
-  return new SkillTypeRegistryImpl();
+export const createSkillRegistry = (): SkillRegistry => {
+  return new SkillRegistryImpl();
 };
 
-class SkillTypeRegistryImpl implements SkillTypeRegistry {
-  private skills: Map<string, SkillTypeDefinition> = new Map();
+class SkillRegistryImpl implements SkillRegistry {
+  private skills: Map<string, SkillDefinition> = new Map();
   private skillFullPaths: Set<string> = new Set();
 
-  async register(skill: SkillTypeDefinition) {
-    await validateSkillTypeDefinition(skill);
+  async register(skill: SkillDefinition) {
+    await validateSkillDefinition(skill);
 
     if (this.skills.has(skill.id)) {
       throw new Error(`Skill type with id ${skill.id} already registered`);

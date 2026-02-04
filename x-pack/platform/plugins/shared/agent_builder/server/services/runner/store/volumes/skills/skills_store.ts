@@ -6,20 +6,20 @@
  */
 
 import type { SkillsStore, WritableSkillsStore } from '@kbn/agent-builder-server/runner';
-import type { SkillTypeDefinition } from '@kbn/agent-builder-server/skills';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { MemoryVolume } from '../../filesystem';
 import { createSkillEntries, getSkillEntryPath } from './utils';
 import { SKILLS_ENABLED } from '../../../../skills/constants';
 
-export const createSkillsStore = ({ skills }: { skills: SkillTypeDefinition[] }) => {
+export const createSkillsStore = ({ skills }: { skills: SkillDefinition[] }) => {
   return new SkillsStoreImpl({ skills });
 };
 
 export class SkillsStoreImpl implements WritableSkillsStore {
-  private readonly skills: Map<string, SkillTypeDefinition> = new Map();
+  private readonly skills: Map<string, SkillDefinition> = new Map();
   private readonly volume: MemoryVolume;
 
-  constructor({ skills = [] }: { skills?: SkillTypeDefinition[] }) {
+  constructor({ skills = [] }: { skills?: SkillDefinition[] }) {
     this.volume = new MemoryVolume('skills');
     if (SKILLS_ENABLED) {
       skills.forEach((skill) => this.add(skill));
@@ -30,7 +30,7 @@ export class SkillsStoreImpl implements WritableSkillsStore {
     return this.volume;
   }
 
-  add(skill: SkillTypeDefinition): void {
+  add(skill: SkillDefinition): void {
     this.skills.set(skill.id, skill);
     // Also add to the volume for filesystem access
     const entries = createSkillEntries(skill);
@@ -57,7 +57,7 @@ export class SkillsStoreImpl implements WritableSkillsStore {
     return this.skills.has(skillId);
   }
 
-  get(skillId: string): SkillTypeDefinition {
+  get(skillId: string): SkillDefinition {
     if (!this.skills.has(skillId)) {
       throw new Error(`Skill with id ${skillId} does not exist`);
     }

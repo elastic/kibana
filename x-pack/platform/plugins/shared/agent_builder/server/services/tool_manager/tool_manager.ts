@@ -8,6 +8,7 @@
 import type { StructuredTool } from '@langchain/core/tools';
 import { createToolIdMappings, toolToLangchain } from '@kbn/agent-builder-genai-utils/langchain';
 import { reverseMap } from '@kbn/agent-builder-genai-utils/langchain/tools';
+import { LRUCache } from 'lru-cache';
 import type {
   ToolManager as IToolManager,
   ToolManagerParams,
@@ -16,7 +17,6 @@ import type {
   AddToolInput,
 } from '@kbn/agent-builder-server/runner/tool_manager';
 import { browserToolsToLangchain } from '../tools/browser_tool_adapter';
-import { LRUMap } from './lru_map';
 
 export const createToolManager = (): ToolManager => {
   return new ToolManager({
@@ -33,15 +33,17 @@ export const createToolManager = (): ToolManager => {
  */
 export class ToolManager implements IToolManager {
   private staticTools: Map<ToolName, StructuredTool> = new Map<ToolName, StructuredTool>();
-  private dynamicTools: LRUMap<ToolName, StructuredTool>;
+  private dynamicTools: LRUCache<ToolName, StructuredTool>;
   private toolIdMappings: Map<string, string>;
 
   constructor(params: ToolManagerParams) {
-    this.dynamicTools = new LRUMap<ToolName, StructuredTool>(params.dynamicToolCapacity);
+    this.dynamicTools = new LRUCache<ToolName, StructuredTool>({
+      max: params.dynamicToolCapacity,
+    });
     this.toolIdMappings = new Map<string, string>();
   }
 
-  public async addTool(input: AddToolInput, options: AddToolOptions = {}): Promise<void> {
+  public async addTools(input: AddToolInput, options: AddToolOptions = {}): Promise<void> {
     const { dynamic = false } = options;
 
     let langchainTools: StructuredTool[];
@@ -85,7 +87,7 @@ export class ToolManager implements IToolManager {
   }
 
   public list(): StructuredTool[] {
-    return Array.from(this.staticTools.values()).concat(this.dynamicTools.values());
+    return [...this.staticTools.values(), ...this.dynamicTools.values()];
   }
 
   public recordToolUse(langchainToolName: ToolName): void {

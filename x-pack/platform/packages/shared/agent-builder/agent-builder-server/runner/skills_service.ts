@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SkillTypeDefinition, SkillBoundedTool } from '../skills';
+import type { SkillDefinition, SkillBoundedTool } from '../skills';
 import type { ExecutableTool } from './tool_provider';
 
 /**
@@ -15,11 +15,11 @@ export interface SkillsService {
   /**
    * Returns the list of skill type definitions
    */
-  list(): SkillTypeDefinition[];
+  list(): SkillDefinition[];
   /**
    * Returns the skill type definition for a given skill id
    */
-  getSkillDefinition(skillId: string): SkillTypeDefinition | undefined;
+  getSkillDefinition(skillId: string): SkillDefinition | undefined;
   /**
    * Convert a skill-scoped tool to a generic executable tool
    */

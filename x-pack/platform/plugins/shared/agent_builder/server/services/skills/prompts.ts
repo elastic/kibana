@@ -7,6 +7,7 @@
 
 import type { IFileStore } from '@kbn/agent-builder-server/runner';
 import { isSkillFileEntry } from '../runner/store/volumes/skills/utils';
+import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils';
 
 export const getSkillsInstructions = async ({
   filesystem,
@@ -21,26 +22,31 @@ export const getSkillsInstructions = async ({
   const skillPrompt =
     skillsFileEntries.length === 0
       ? [
-          '## SKILLS',
-          'Load a skill to get detailed instructions for a specific task. No skills are currently available.',
-        ].join('\n')
+        '## SKILLS',
+        'Load a skill to get detailed instructions for a specific task. No skills are currently available.',
+      ].join('\n')
       : [
-          '## SKILLS',
-          [
-            'Load a skill using filestore tools to get detailed instructions for a specific task.',
-            'Skills provide specialized knowledge and best practices for specific tasks.',
-            "Use them when a task matches a skill's description or the skill is useful for the task.",
-            'Only the skills listed here are available:',
-          ].join(' '),
-          '<available_skills>',
-          ...skillsFileEntries.flatMap((skillFileEntry) => [
-            `    <skill path="${skillFileEntry.path}">`,
-            `      <name>${skillFileEntry.metadata.skill_name}</name>`,
-            `      <description>${skillFileEntry.metadata.skill_description}</description>`,
-            `    </skill>`,
-          ]),
-          '</available_skills>',
-        ].join('\n');
+        '## SKILLS',
+        [
+          'Load a skill using filestore tools to get detailed instructions for a specific task.',
+          'Skills provide specialized knowledge and best practices for specific tasks.',
+          "Use them when a task matches a skill's description or the skill is useful for the task.",
+          'Only the skills listed here are available:',
+        ].join(' '),
+        generateXmlTree({
+          "tagName": "available_skills",
+          children: skillsFileEntries.map((skillFileEntry) => ({
+            "tagName": "skill",
+            attributes: {
+              "path": skillFileEntry.path
+            },
+            children: [
+              { "tagName": "name", "content": skillFileEntry.metadata.skill_name },
+              { "tagName": "description", "content": skillFileEntry.metadata.skill_description },
+            ]
+          }))
+        }),
+      ].join('\n');
 
   return skillPrompt;
 };

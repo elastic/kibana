@@ -12,18 +12,18 @@ import {
   createSkillEntries,
   isSkillFileEntry,
 } from './utils';
-import type { SkillTypeDefinition } from '@kbn/agent-builder-server/skills';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import type { SkillFileEntry, SkillReferencedContentFileEntry } from './types';
 
 describe('skills utils', () => {
-  const createMockSkill = (overrides: Partial<SkillTypeDefinition> = {}): SkillTypeDefinition => ({
+  const createMockSkill = (overrides: Partial<SkillDefinition> = {}): SkillDefinition => ({
     id: 'test-skill-1',
     name: 'test-skill',
     basePath: 'skills/platform',
     description: 'A test skill',
-    body: 'This is the skill body content.',
+    content: 'This is the skill body content.',
     ...overrides,
   });
 
@@ -95,7 +95,7 @@ describe('skills utils', () => {
       const skill = createMockSkill({
         name: 'test-skill',
         description: 'A test skill description',
-        body: 'This is the skill body.',
+        content: 'This is the skill body.',
       });
       const plainText = getSkillPlainText({ skill });
       expect(plainText).toBe(`---
@@ -108,7 +108,7 @@ This is the skill body.`);
 
     it('handles empty body', () => {
       const skill = createMockSkill({
-        body: '',
+        content: '',
       });
       const plainText = getSkillPlainText({ skill });
       expect(plainText).toContain('name: test-skill');
@@ -118,7 +118,7 @@ This is the skill body.`);
 
     it('handles multiline body', () => {
       const skill = createMockSkill({
-        body: 'Line 1\nLine 2\nLine 3',
+        content: 'Line 1\nLine 2\nLine 3',
       });
       const plainText = getSkillPlainText({ skill });
       expect(plainText).toContain('Line 1\nLine 2\nLine 3');
@@ -139,7 +139,7 @@ This is the skill body.`);
         id: 'skill-1',
         name: 'test-skill',
         description: 'Test description',
-        body: 'Skill body content',
+        content: 'Skill body content',
       });
       const entries = createSkillEntries(skill);
       expect(entries).toHaveLength(1);
@@ -166,12 +166,12 @@ This is the skill body.`);
           {
             name: 'content-1',
             relativePath: '.',
-            body: 'Content 1 body',
+            content: 'Content 1 body',
           },
           {
             name: 'content-2',
             relativePath: './queries',
-            body: 'Content 2 body',
+            content: 'Content 2 body',
           },
         ],
       });
@@ -194,7 +194,7 @@ This is the skill body.`);
 
     it('calculates token count for skill entry', () => {
       const skill = createMockSkill({
-        body: 'a'.repeat(100), // 100 characters = ~25 tokens
+        content: 'a'.repeat(100), // 100 characters = ~25 tokens
       });
       const entries = createSkillEntries(skill);
       expect(entries[0].metadata.token_count).toBeGreaterThan(0);
@@ -206,7 +206,7 @@ This is the skill body.`);
           {
             name: 'content',
             relativePath: '.',
-            body: 'b'.repeat(200), // 200 characters = ~50 tokens
+            content: 'b'.repeat(200), // 200 characters = ~50 tokens
           },
         ],
       });
@@ -236,7 +236,7 @@ This is the skill body.`);
           {
             name: 'content',
             relativePath: '.',
-            body: 'Content',
+            content: 'Content',
           },
         ],
       });
@@ -253,7 +253,7 @@ This is the skill body.`);
           {
             name: 'content',
             relativePath: '.',
-            body: 'Content',
+            content: 'Content',
           },
         ],
       });

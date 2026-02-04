@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSkillTypeRegistry, type SkillTypeRegistry } from './skill_type_registry';
+import { createSkillRegistry, type SkillRegistry } from './skill_registry';
 import type { SkillServiceSetup, SkillServiceStart } from './types';
 
 export interface SkillService {
@@ -18,10 +18,10 @@ export const createSkillService = (): SkillService => {
 };
 
 export class SkillServiceImpl implements SkillService {
-  readonly skillTypeRegistry: SkillTypeRegistry;
+  readonly skillTypeRegistry: SkillRegistry;
 
   constructor() {
-    this.skillTypeRegistry = createSkillTypeRegistry();
+    this.skillTypeRegistry = createSkillRegistry();
   }
 
   setup(): SkillServiceSetup {

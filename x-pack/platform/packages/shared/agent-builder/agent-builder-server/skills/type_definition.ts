@@ -47,7 +47,7 @@ type DirectoryPath = FilePathsFromStructure<SkillsDirectoryStructure>;
 /**
  * Server-side definition of a skill type.
  */
-export interface SkillTypeDefinition<
+export interface SkillDefinition<
   TName extends string = string,
   TBasePath extends DirectoryPath = DirectoryPath
 > {
@@ -81,37 +81,13 @@ export interface SkillTypeDefinition<
    */
   description: string;
   /**
-   * Body of the skill.
+   * Content of the skill.
    */
-  body: string;
+  content: string;
   /**
    * Referenced content
    */
-  referencedContent?: {
-    /**
-     * Name of the content. Also used as the file name `<reference-name>.md`.
-     * Must contain only lowercase letters, numbers, and hyphens. Max 64 characters.
-     * [basePath]/[name]/[relativePath]/[reference-name] must be unique.
-     */
-    name: string;
-    /**
-     * Relative path of the referenced content (relative to the skill base path). Must start with a dot `.`
-     *
-     * Valid relative paths are:
-     * - "." - stores reference content in the same directory as the skill
-     * - "./[directory]" - stores reference content in the "[directory]" directory
-     * - Avoid multiple levels of directories (such as "./[directory]/[subdirectory]") to keep the structure flat.
-     *
-     * Examples:
-     * - basePath: "skills/security/alerts/rules" & relativePath: "." - stores reference content in the "skills/security/alerts/rules/[name].md" file
-     * - basePath: "skills/security/alerts/rules" & relativePath: "./queries" - stores reference content in the "skills/security/alerts/rules/queries/[name].md" file
-     */
-    relativePath: string;
-    /**
-     * Body of the content.
-     */
-    body: string;
-  }[];
+  referencedContent?: ReferencedContent[];
   /**
    * should return the list of tools from the registry which should be exposed to the agent
    * when this skill is used in the conversation.
@@ -128,13 +104,60 @@ export interface SkillTypeDefinition<
   getInlineTools?: () => MaybePromise<SkillBoundedTool[]>;
 }
 
+export interface ReferencedContent {
+  /**
+     * Name of the content. Also used as the file name `<reference-name>.md`.
+     * Must contain only lowercase letters, numbers, and hyphens. Max 64 characters.
+     * [basePath]/[name]/[relativePath]/[reference-name] must be unique.
+     */
+  name: string;
+  /**
+     * Relative path of the referenced content (relative to the skill base path). Must start with a dot `.`
+     *
+     * Valid relative paths are:
+     * - "." - stores reference content in the same directory as the skill
+     * - "./[directory]" - stores reference content in the "[directory]" directory
+     * - Avoid multiple levels of directories (such as "./[directory]/[subdirectory]") to keep the structure flat.
+     *
+     * Examples:
+     * - basePath: "skills/security/alerts/rules" & relativePath: "." - stores reference content in the "skills/security/alerts/rules/[name].md" file
+     * - basePath: "skills/security/alerts/rules" & relativePath: "./queries" - stores reference content in the "skills/security/alerts/rules/queries/[name].md" file
+     */
+  relativePath: string;
+  /**
+     * Content of the reference.
+     */
+  content: string;
+}
+
+export const referencedContentSchema = z
+  .array(
+    z.object({
+      name: z
+        .string()
+        .min(1, 'Name must be non-empty')
+        .max(64, 'Name must be at most 64 characters')
+        .regex(
+          /^[a-z0-9-_]+$/,
+          'Reference name must contain only lowercase letters, numbers, underscores, and hyphens'
+        ),
+      relativePath: z
+        .string()
+        .min(1, 'Relative path must be non-empty')
+        .regex(
+          /^(?:\.|\.\/[a-z0-9-_]+)$/,
+          'Relative path must start with a dot and contain only lowercase letters, numbers, underscores, and hyphens'
+        ),
+      content: z.string().min(1, 'Content must be non-empty'),
+    })
+  )
 /**
  * Zod schema for validating SkillTypeDefinition name and description fields.
  * Validates:
  * - name: max 64 characters, lowercase letters, numbers, and hyphens only
  * - description: max 1024 characters, non-empty
  */
-export const skillTypeDefinitionSchema = z.object({
+export const skillDefinitionSchema = z.object({
   id: z.string().min(1, 'ID must be non-empty'),
   basePath: z.string().min(1, 'Base path must be non-empty'),
   name: z
@@ -148,29 +171,8 @@ export const skillTypeDefinitionSchema = z.object({
     .string()
     .min(1, 'Description must be non-empty')
     .max(1024, 'Description must be at most 1024 characters'),
-  body: z.string().min(1, 'Body must be non-empty'),
-  referencedContent: z
-    .array(
-      z.object({
-        name: z
-          .string()
-          .min(1, 'Name must be non-empty')
-          .max(64, 'Name must be at most 64 characters')
-          .regex(
-            /^[a-z0-9-_]+$/,
-            'Reference name must contain only lowercase letters, numbers, underscores, and hyphens'
-          ),
-        relativePath: z
-          .string()
-          .min(1, 'Relative path must be non-empty')
-          .regex(
-            /^(?:\.|\.\/[a-z0-9-_]+)$/,
-            'Relative path must start with a dot and contain only lowercase letters, numbers, underscores, and hyphens'
-          ),
-        body: z.string().min(1, 'Body must be non-empty'),
-      })
-    )
-    .optional(),
+  content: z.string().min(1, 'Content must be non-empty'),
+  referencedContent: referencedContentSchema.optional(),
 });
 
 /**
@@ -181,18 +183,18 @@ export const skillTypeDefinitionSchema = z.object({
  * @returns The validated definition
  * @throws {z.ZodError} If validation fails
  */
-export async function validateSkillTypeDefinition<
+export async function validateSkillDefinition<
   TName extends string,
   TPath extends DirectoryPath
->(definition: SkillTypeDefinition<TName, TPath>): Promise<SkillTypeDefinition<TName, TPath>> {
-  skillTypeDefinitionSchema.parse(definition);
+>(definition: SkillDefinition<TName, TPath>): Promise<SkillDefinition<TName, TPath>> {
+  skillDefinitionSchema.parse(definition);
   const allowedTools = definition.getAllowedTools?.();
   const inlineTools = await definition.getInlineTools?.();
   const totalToolCount = (allowedTools?.length ?? 0) + (inlineTools?.length ?? 0);
   if (totalToolCount > 7) {
     throw new Error(
       'Max tool limit exceeded: a skill may define up to 7 tools. ' +
-        'Split the skill into smaller ones or combine related operations into a single tool.'
+      'Split the skill into smaller ones or combine related operations into a single tool.'
     );
   }
   return definition;
@@ -204,7 +206,7 @@ export async function validateSkillTypeDefinition<
  * getting full type validation.
  */
 export function defineSkillType<TName extends string, TPath extends DirectoryPath>(
-  definition: SkillTypeDefinition<TName, TPath>
-): SkillTypeDefinition<TName, TPath> {
+  definition: SkillDefinition<TName, TPath>
+): SkillDefinition<TName, TPath> {
   return definition;
 }

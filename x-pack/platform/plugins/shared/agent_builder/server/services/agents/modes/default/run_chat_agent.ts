@@ -121,17 +121,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   await Promise.all([
-    toolManager.addTool({
+    toolManager.addTools({
       type: ToolManagerToolType.executable,
       tools: staticTools,
       logger,
       eventEmitter,
     }),
-    toolManager.addTool({
+    toolManager.addTools({
       type: ToolManagerToolType.browser,
       tools: browserApiTools ?? [],
     }),
-    toolManager.addTool(
+    toolManager.addTools(
       {
         type: ToolManagerToolType.executable,
         tools: dynamicTools,

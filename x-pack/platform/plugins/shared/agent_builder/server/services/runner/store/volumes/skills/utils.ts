@@ -8,10 +8,10 @@
 import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import type { SkillTypeDefinition } from '@kbn/agent-builder-server/skills';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { SkillFileEntry, SkillReferencedContentFileEntry } from './types';
 
-export const getSkillEntryPath = ({ skill }: { skill: SkillTypeDefinition }): string => {
+export const getSkillEntryPath = ({ skill }: { skill: SkillDefinition }): string => {
   return `${skill.basePath}/${skill.name}/SKILL.md`;
 };
 
@@ -19,23 +19,23 @@ export const getSkillReferencedContentEntryPath = ({
   skill,
   referencedContent,
 }: {
-  skill: SkillTypeDefinition;
-  referencedContent: NonNullable<SkillTypeDefinition['referencedContent']>[number];
+  skill: SkillDefinition;
+  referencedContent: NonNullable<SkillDefinition['referencedContent']>[number];
 }): string => {
   return `${skill.basePath}/${skill.name}/${referencedContent.relativePath}/${referencedContent.name}.md`;
 };
 
-export const getSkillPlainText = ({ skill }: { skill: SkillTypeDefinition }): string => {
+export const getSkillPlainText = ({ skill }: { skill: SkillDefinition }): string => {
   return `---
 name: ${skill.name}
 description: ${skill.description}
 ---
 
-${skill.body}`;
+${skill.content}`;
 };
 
 export const createSkillEntries = (
-  skill: SkillTypeDefinition
+  skill: SkillDefinition
 ): (SkillFileEntry | SkillReferencedContentFileEntry)[] => {
   const stringifiedContent = getSkillPlainText({ skill });
 
@@ -46,7 +46,9 @@ export const createSkillEntries = (
         skill,
       }),
       content: {
-        raw: {}, // TODO: idk what to put here
+        raw: {
+          body: stringifiedContent
+        },
         plain_text: stringifiedContent,
       },
       metadata: {
@@ -69,14 +71,16 @@ export const createSkillEntries = (
           referencedContent,
         }),
         content: {
-          raw: {}, // TODO: idk what to put here
-          plain_text: referencedContent.body,
+          raw: {
+            body: referencedContent.content
+          },
+          plain_text: referencedContent.content,
         },
         metadata: {
           // generic meta
           type: FileEntryType.skillReferenceContent,
           id: skill.id,
-          token_count: estimateTokens(referencedContent.body),
+          token_count: estimateTokens(referencedContent.content),
           readonly: true,
           // specific tool-result meta
           skill_id: skill.id,

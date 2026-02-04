@@ -10,13 +10,13 @@ import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { AgentEventEmitterFn, ExecutableTool } from '..';
 
-interface ToolManagerParams {
+export interface ToolManagerParams {
   dynamicToolCapacity: number;
 }
 
-type ToolName = string;
+export type ToolName = string;
 
-interface AddToolOptions {
+export interface AddToolOptions {
   dynamic?: boolean;
 }
 
@@ -25,32 +25,32 @@ export enum ToolManagerToolType {
   browser = 'browser',
 }
 
-interface ExecutableToolInput {
+export interface ExecutableToolInput {
   type: ToolManagerToolType.executable;
   tools: ExecutableTool | ExecutableTool[];
   logger: Logger;
   eventEmitter?: AgentEventEmitterFn;
 }
 
-interface BrowserToolInput {
+export interface BrowserToolInput {
   type: ToolManagerToolType.browser;
   tools: BrowserApiToolMetadata | BrowserApiToolMetadata[];
 }
 
-type AddToolInput = ExecutableToolInput | BrowserToolInput;
+export type AddToolInput = ExecutableToolInput | BrowserToolInput;
 
 /**
  * Interface for managing tools in the agent system.
  * Handles both static and dynamic tools with LRU eviction for dynamic tools.
  */
-interface ToolManager {
+export interface ToolManager {
   /**
    * Adds tools to the tool manager.
    * Supports both executable tools and browser API tools.
    * @param input - The tool input configuration (executable or browser)
    * @param options - Optional configuration for tool storage (static vs dynamic)
    */
-  addTool(input: AddToolInput, options?: AddToolOptions): Promise<void>;
+  addTools(input: AddToolInput, options?: AddToolOptions): Promise<void>;
 
   /**
    * Lists all tools in the tool manager.
@@ -79,13 +79,3 @@ interface ToolManager {
    */
   getDynamicToolIds(): string[];
 }
-
-export type {
-  ToolManager,
-  ToolManagerParams,
-  ToolName,
-  AddToolOptions,
-  ExecutableToolInput,
-  BrowserToolInput,
-  AddToolInput,
-};

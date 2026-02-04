@@ -10,18 +10,18 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import { z } from '@kbn/zod';
 
 /**
- * DISCLAIMER: This skill is a sample skill.
+ * DISCLAIMER: This skill is a sample skill. It is not registered.
  *
  * Threat analysis skill for security operations.
  * This skill helps analyze security threats, investigate alerts, and assess risk.
  */
-export const alertAnalysisSkill = defineSkillType({
+export const alertAnalysisSampleSkill = defineSkillType({
   id: 'alert-analysis',
   name: 'alert-analysis',
   basePath: 'skills/security/alerts',
   description:
     'Comprehensive guide to analyze a security alert, finding related alerts, events and cases and identifying potential threats.',
-  body: `# Alert Analysis Guide
+  content: `# Alert Analysis Guide
 
 ## Alert Analysis Process
 
@@ -70,7 +70,7 @@ export const alertAnalysisSkill = defineSkillType({
     {
       relativePath: './queries',
       name: 'related_by_entities',
-      body: `FROM .alerts-security.alerts-* METADATA _id, _index
+      content: `FROM .alerts-security.alerts-* METADATA _id, _index
 | WHERE (
     host.name == "ENTITY_VALUE_PLACEHOLDER" OR
     user.name == "ENTITY_VALUE_PLACEHOLDER" OR
