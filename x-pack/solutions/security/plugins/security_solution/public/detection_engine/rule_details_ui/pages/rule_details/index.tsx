@@ -739,61 +739,60 @@ export const RuleDetailsPage = connector(
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </HeaderPage>
+                  <TabNavigation navTabs={pageTabs} />
                   {ruleError}
                   <LegacyUrlConflictCallOut rule={rule} spacesApi={spacesApi} />
-                  <EuiSpacer />
-                  <RuleFieldsSectionWrapper>
-                    <EuiFlexGroup>
-                      <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
-                        {rule !== null && (
-                          <StepAboutRuleToggleDetails
-                            loading={isLoading}
-                            stepData={aboutRuleData}
-                            stepDataDetails={modifiedAboutRuleDetailsData}
-                            rule={rule}
-                          />
-                        )}
-                      </EuiFlexItem>
-
-                      <EuiFlexItem grow={1}>
-                        <EuiFlexGroup direction="column">
-                          <EuiFlexItem component="section" grow={1} data-test-subj="defineRule">
-                            <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
-                              {rule !== null && !isStartingJobs && (
-                                <RuleDefinitionSection
-                                  rule={rule}
-                                  isInteractive
-                                  dataTestSubj="definitionRule"
-                                />
-                              )}
-                            </StepPanel>
-                          </EuiFlexItem>
-                          <EuiSpacer />
-                          <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
-                            <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                              {rule != null && <RuleScheduleSection rule={rule} />}
-                            </StepPanel>
-                          </EuiFlexItem>
-                          {hasActions && (
-                            <EuiFlexItem data-test-subj="actions" component="section" grow={1}>
-                              <StepPanel loading={isLoading} title={ruleI18n.ACTIONS}>
-                                <StepRuleActionsReadOnly
-                                  addPadding={false}
-                                  defaultValues={ruleActionsData}
-                                />
-                              </StepPanel>
-                            </EuiFlexItem>
-                          )}
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </RuleFieldsSectionWrapper>
-                  <EuiSpacer />
-                  <TabNavigation navTabs={pageTabs} />
                   <EuiSpacer />
                 </Display>
                 <StyledMinHeightTabContainer>
                   <Routes>
+                    <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.overview})`}>
+                      <RuleFieldsSectionWrapper>
+                        <EuiFlexGroup>
+                          <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
+                            {rule !== null && (
+                              <StepAboutRuleToggleDetails
+                                loading={isLoading}
+                                stepData={aboutRuleData}
+                                stepDataDetails={modifiedAboutRuleDetailsData}
+                                rule={rule}
+                              />
+                            )}
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={1}>
+                            <EuiFlexGroup direction="column">
+                              <EuiFlexItem component="section" grow={1} data-test-subj="defineRule">
+                                <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
+                                  {rule !== null && !isStartingJobs && (
+                                    <RuleDefinitionSection
+                                      rule={rule}
+                                      isInteractive
+                                      dataTestSubj="definitionRule"
+                                    />
+                                  )}
+                                </StepPanel>
+                              </EuiFlexItem>
+                              <EuiSpacer />
+                              <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
+                                <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
+                                  {rule != null && <RuleScheduleSection rule={rule} />}
+                                </StepPanel>
+                              </EuiFlexItem>
+                              {hasActions && (
+                                <EuiFlexItem data-test-subj="actions" component="section" grow={1}>
+                                  <StepPanel loading={isLoading} title={ruleI18n.ACTIONS}>
+                                    <StepRuleActionsReadOnly
+                                      addPadding={false}
+                                      defaultValues={ruleActionsData}
+                                    />
+                                  </StepPanel>
+                                </EuiFlexItem>
+                              )}
+                            </EuiFlexGroup>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </RuleFieldsSectionWrapper>
+                    </Route>
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                       <>
                         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">

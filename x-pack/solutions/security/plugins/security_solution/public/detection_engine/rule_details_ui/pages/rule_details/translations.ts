@@ -28,6 +28,13 @@ export const UNKNOWN = i18n.translate(
   }
 );
 
+export const OVERVIEW_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.overviewTab',
+  {
+    defaultMessage: 'Overview',
+  }
+);
+
 export const ALERTS_TAB = i18n.translate('xpack.securitySolution.detectionEngine.alertTitle', {
   defaultMessage: 'Alerts',
 });
