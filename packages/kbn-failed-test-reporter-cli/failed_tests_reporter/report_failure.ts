@@ -26,6 +26,15 @@ function truncateFailureBody(failure: string, maxCharacters: number = 8192): str
       ].join('\n');
 }
 
+function getFailureBodyFromIssueBody(body: string): string | undefined {
+  const match = body.match(/```[\r\n]+([\s\S]*?)[\r\n]+```/);
+  if (!match) {
+    return undefined;
+  }
+
+  return match[1].trim();
+}
+
 function createFTRTitle(failure: TestFailure, prependTitle: string): string {
   if (prependTitle && prependTitle.trim() !== '') {
     return `Failing test: ${prependTitle} ${failure.classname} - ${failure.name}`;
@@ -186,11 +195,17 @@ function createScoutComment(
   failure: ScoutTestFailureExtended,
   buildUrl: string,
   branch: string,
-  pipeline: string
+  pipeline: string,
+  newErrorMessage?: string
 ): string {
-  return `New failure for "${failure.target}" target: [${
+  const base = `New failure for "${failure.target}" target: [${
     pipeline || 'CI Build'
   } - ${branch}](${buildUrl})`;
+  if (!newErrorMessage) {
+    return base;
+  }
+
+  return `${base}\n\nNew error message:\n\`\`\`\n${newErrorMessage}\n\`\`\``;
 }
 
 async function updateFTRFailureIssue(
@@ -228,7 +243,17 @@ async function updateScoutFailureIssue(
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 
-  const commentText = createScoutComment(failure, buildUrl, branch, pipeline);
+  const previousFailureBody = getFailureBodyFromIssueBody(issue.github.body);
+  const newErrorMessage = failure.errorMessage
+    ? (() => {
+        const currentFailureBody = truncateFailureBody(failure.errorMessage).trim();
+        return previousFailureBody && previousFailureBody !== currentFailureBody
+          ? currentFailureBody
+          : undefined;
+      })()
+    : undefined;
+
+  const commentText = createScoutComment(failure, buildUrl, branch, pipeline, newErrorMessage);
   await api.addIssueComment(issue.github.number, commentText);
 
   return { newBody, newCount };
