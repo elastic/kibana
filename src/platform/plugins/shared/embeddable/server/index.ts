@@ -14,6 +14,14 @@ export type { EmbeddableSetup, EmbeddableStart };
 export type { EmbeddableRegistryDefinition } from './types';
 
 export type {
+  DrilldownState,
+  DrilldownsState,
+  GetDrilldownsSchemaFnType,
+} from './drilldowns/types';
+
+export type { EmbeddableTransforms } from './embeddable_transforms/types';
+
+export type {
   EmbeddableStateWithType,
   EmbeddablePersistableStateService,
 } from './persistable_state';
