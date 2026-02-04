@@ -150,6 +150,7 @@ dependsOn:
   - '@kbn/controls-constants'
   - '@kbn/core-base-browser-mocks'
   - '@kbn/react-kibana-context-env'
+  - '@kbn/scout'
   - '@kbn/controls-schemas'
 tags:
   - plugin
@@ -163,6 +164,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:
