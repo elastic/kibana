@@ -13,7 +13,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type {
   IFileStore,
   LsEntry,
-  FilestoreEntry,
+  FilestoreEntryMetadata,
 } from '@kbn/agent-builder-server/runner/filestore';
 
 const schema = z.object({
@@ -53,7 +53,7 @@ export const lsTool = ({
 interface FileEntrySummary {
   path: string;
   type: 'file';
-  metadata: FilestoreEntry['metadata'];
+  metadata: FilestoreEntryMetadata;
 }
 
 /** Directory entry with optional children (for nested listing) */

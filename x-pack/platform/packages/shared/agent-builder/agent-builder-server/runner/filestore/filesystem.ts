@@ -82,9 +82,12 @@ export interface FilestoreEntry<TContent extends object = object, TMeta extends 
   path: string;
   type: 'file';
   version: number;
-  metadata: FileEntryMetadata<TMeta> & FileEntryVersionMetadata;
+  metadata: FilestoreEntryMetadata<TMeta>;
   content: FileEntryContent<TContent>;
 }
+
+export type FilestoreEntryMetadata<TMeta extends object = object> = FileEntryMetadata<TMeta> &
+  FileEntryVersionMetadata;
 
 export interface FilestoreVersionedEntry<
   TContent extends object = object,
