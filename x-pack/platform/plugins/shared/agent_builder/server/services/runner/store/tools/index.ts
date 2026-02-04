@@ -12,6 +12,7 @@ import { lsTool } from './ls';
 import { globTool } from './glob';
 import { grepTool } from './grep';
 import { diffTool } from './diff';
+import { historyTool } from './history';
 
 export const getStoreTools = ({
   filestore,
@@ -24,5 +25,6 @@ export const getStoreTools = ({
     globTool({ filestore }),
     grepTool({ filestore }),
     diffTool({ filestore }),
+    historyTool({ filestore }),
   ];
 };

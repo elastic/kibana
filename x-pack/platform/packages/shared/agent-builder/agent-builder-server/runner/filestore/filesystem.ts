@@ -56,6 +56,10 @@ export interface FileEntryVersionMetadata {
    * Estimated length, in tokens, of the content of the raw content.
    */
   token_count: number;
+  /**
+   * Optional textual summary of the change introduced by this version.
+   */
+  version_change?: string;
 }
 
 export interface FileEntryVersion<TContent extends object = object> {

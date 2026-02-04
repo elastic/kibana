@@ -244,6 +244,43 @@ describe('FileSystemStore', () => {
     });
   });
 
+  describe('getEntry', () => {
+    it('returns raw entry with versions', async () => {
+      volume.add(
+        createFileEntry(
+          '/files/test.json',
+          { raw: { id: 1 } },
+          {
+            versions: [
+              {
+                version: 1,
+                content: { raw: { id: 1 } },
+                metadata: { token_count: 100, version_change: 'initial' },
+              },
+              {
+                version: 2,
+                content: { raw: { id: 2 } },
+                metadata: { token_count: 100, version_change: 'updated id' },
+              },
+            ],
+          }
+        )
+      );
+
+      const result = await store.getEntry('/files/test.json');
+
+      expect(result?.versions).toHaveLength(2);
+      expect(result?.versions[0].metadata.version_change).toBe('initial');
+      expect(result?.versions[1].metadata.version_change).toBe('updated id');
+    });
+
+    it('returns undefined for missing files', async () => {
+      const result = await store.getEntry('/files/missing.json');
+
+      expect(result).toBeUndefined();
+    });
+  });
+
   describe('grep', () => {
     it('uses latest version content when searching', async () => {
       const entry = createFileEntry(

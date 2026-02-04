@@ -140,6 +140,7 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
 
 export const createFileSystemStoreMock = (): FileSystemStoreMock => {
   return {
+    getEntry: jest.fn(),
     read: jest.fn<ReturnType<IFileStore['read']>, Parameters<IFileStore['read']>>(),
     ls: jest.fn(),
     glob: jest.fn(),

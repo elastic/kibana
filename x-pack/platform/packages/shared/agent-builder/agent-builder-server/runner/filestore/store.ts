@@ -12,6 +12,12 @@ import type { DirEntry, FilestoreEntry } from './filesystem';
  */
 export interface IFileStore {
   /**
+   * Get a raw file entry (all versions) from the store.
+   *
+   * @param path path of the file to get.
+   */
+  getEntry(path: string): Promise<FileEntry | undefined>;
+  /**
    * Read a file entry from the store.
    *
    * @param path path of the file to read.

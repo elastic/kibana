@@ -7,8 +7,9 @@
 
 import type { ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common';
-import type { IFileStore, FilestoreEntry } from '@kbn/agent-builder-server/runner/filestore';
+import type { FilestoreEntry, IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
+import { createFileSystemStoreMock } from '../../../../test_utils/runner';
 import {
   createResultTransformer,
   FILE_REFERENCE_TOKEN_THRESHOLD,
@@ -26,12 +27,14 @@ describe('createResultTransformer', () => {
     results,
   });
 
-  const createMockFileStore = (entries: Map<string, FilestoreEntry>): IFileStore => ({
-    read: jest.fn(async (path: string, _options?: { version?: number }) => entries.get(path)),
-    ls: jest.fn(),
-    glob: jest.fn(),
-    grep: jest.fn(),
-  });
+  const createMockFileStore = (entries: Map<string, FilestoreEntry>): IFileStore => {
+    const filestore = createFileSystemStoreMock();
+    filestore.getEntry.mockImplementation(async (path: string) => entries.get(path));
+    filestore.read.mockImplementation(async (path: string, _options?: { version?: number }) =>
+      entries.get(path)
+    );
+    return filestore;
+  };
 
   const createFileEntry = (
     path: string,

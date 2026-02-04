@@ -38,6 +38,7 @@ const createMockDirEntry = (path: string, children?: LsEntry[]): DirEntryWithChi
 });
 
 const createMockStore = (lsResult: LsEntry[]): IFileStore => ({
+  getEntry: jest.fn(),
   read: jest.fn<ReturnType<IFileStore['read']>, Parameters<IFileStore['read']>>(),
   ls: jest.fn().mockResolvedValue(lsResult),
   glob: jest.fn(),

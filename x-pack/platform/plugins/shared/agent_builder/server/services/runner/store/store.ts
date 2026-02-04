@@ -8,7 +8,9 @@
 import type {
   IFileStore,
   FsEntry,
+  FileEntry,
   FileEntryInput,
+  FileEntryMetadata,
   FilestoreEntry,
   LsEntry,
   GrepMatch,
@@ -22,6 +24,21 @@ export class FileSystemStore implements IFileStore {
 
   constructor({ filesystem }: { filesystem: IVirtualFileSystem }) {
     this.filesystem = filesystem;
+  }
+
+  /**
+   * Get a raw file entry from the store.
+   * Returns undefined if the path doesn't exist or is a directory.
+   */
+  async getEntry(path: string): Promise<FileEntry | undefined> {
+    const entry = await this.filesystem.get(path);
+    if (entry?.type === 'file') {
+      return {
+        ...entry,
+        metadata: this.buildMetadata(entry),
+      };
+    }
+    return undefined;
   }
 
   /**
@@ -247,6 +264,18 @@ export class FileSystemStore implements IFileStore {
       return this.getLatestVersion(entry);
     }
     return entry.versions.find((entryVersion) => entryVersion.version === version);
+  }
+
+  private buildMetadata(entry: FileEntryInput): FileEntryMetadata {
+    const versions = entry.versions.map((version) => version.version);
+    const versioned = versions.length > 1;
+    const lastVersion = versions.length > 0 ? Math.max(...versions) : undefined;
+
+    return {
+      ...entry.metadata,
+      versioned,
+      ...(versioned ? { last_version: lastVersion } : {}),
+    };
   }
 
   /**
