@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   EuiSpacer,
   EuiLoadingSpinner,
@@ -24,14 +24,24 @@ import {
   CategoryAccordionTable,
   type CategoryData,
 } from '../../components/category_accordion_table';
+import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
+import { useBasePath } from '../../../../common/lib/kibana';
 import { ContinuityWarningPrompt } from './continuity_warning_prompt';
+import {
+  buildContinuityCaseDescription,
+  getContinuityCaseTitle,
+  getContinuityCaseTags,
+} from './continuity_add_case_details';
 
 // Extended PipelineStats with computed fields and Record<string, unknown> for CategoryAccordionTable
 interface PipelineWithCategory extends PipelineStats, Record<string, unknown> {
   failureRate: string;
+  status: 'healthy' | 'non_healthy';
 }
 
 export const ContinuityTab: React.FC = () => {
+  const basePath = useBasePath();
+  const { openNewCaseFlyout } = useSiemReadinessCases();
   const { getReadinessCategories, getReadinessPipelines } = useSiemReadinessApi();
   const { data: categoriesData, isLoading: categoriesLoading } = getReadinessCategories;
   const { data: pipelinesData, isLoading: pipelinesLoading } = getReadinessPipelines;
@@ -39,6 +49,7 @@ export const ContinuityTab: React.FC = () => {
   // Build index → category mapping from getReadinessCategories
   const indexToCategoryMap = useMemo(() => {
     const map = new Map<string, string>();
+
     if (!categoriesData?.mainCategoriesMap) return map;
 
     categoriesData.mainCategoriesMap.forEach(({ category, indices }) => {
@@ -63,6 +74,7 @@ export const ContinuityTab: React.FC = () => {
       const pipelineWithStats: PipelineWithCategory = {
         ...pipeline,
         failureRate,
+        status: pipeline.failed > 0 ? 'non_healthy' : 'healthy',
       };
 
       const categories = new Set(
@@ -94,6 +106,20 @@ export const ContinuityTab: React.FC = () => {
       category.items.some((pipeline) => pipeline.failed > 0)
     );
   }, [categorizedPipelines]);
+
+  // Case description
+  const caseDescription = useMemo(
+    () => buildContinuityCaseDescription(categorizedPipelines, basePath),
+    [categorizedPipelines, basePath]
+  );
+
+  const handleCreateCase = useCallback(() => {
+    openNewCaseFlyout({
+      title: getContinuityCaseTitle(),
+      description: caseDescription,
+      tags: getContinuityCaseTags(),
+    });
+  }, [openNewCaseFlyout, caseDescription]);
 
   // Table columns
   const columns: Array<EuiBasicTableColumn<PipelineWithCategory>> = useMemo(
@@ -322,26 +348,71 @@ export const ContinuityTab: React.FC = () => {
 
   return (
     <>
+      <EuiSpacer size="m" />
       {hasDocFailures && (
         <>
-          <EuiSpacer size="m" />
           <ContinuityWarningPrompt />
+          <EuiSpacer size="m" />
         </>
       )}
-      <EuiSpacer size="l" />
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.securitySolution.siemReadiness.continuity.description', {
-            defaultMessage:
-              'The following table summarizes the stability of your data by tracking ingest pipeline failure rates across log categories.',
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="l" />
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem>
+          <EuiText size="s" color="subdued">
+            {i18n.translate('xpack.securitySolution.siemReadiness.continuity.description', {
+              defaultMessage:
+                'The following table summarizes the stability of your data by tracking ingest pipeline failure rates across log categories.',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        {hasDocFailures && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconSide="right"
+              size="s"
+              iconType="plusInCircle"
+              onClick={handleCreateCase}
+              data-test-subj="createNewCaseButton"
+            >
+              {i18n.translate('xpack.securitySolution.siemReadiness.continuity.createCase', {
+                defaultMessage: 'Create new case',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <CategoryAccordionTable
         categories={categorizedPipelines}
         columns={columns}
         renderExtraAction={renderExtraAction}
+        filterField="status"
+        defaultFilterValue="all"
+        filterOptions={[
+          {
+            value: 'all',
+            label: i18n.translate('xpack.securitySolution.siemReadiness.continuity.filter.all', {
+              defaultMessage: 'All',
+            }),
+          },
+          {
+            value: 'healthy',
+            label: i18n.translate(
+              'xpack.securitySolution.siemReadiness.continuity.filter.healthy',
+              {
+                defaultMessage: 'Healthy',
+              }
+            ),
+          },
+          {
+            value: 'non_healthy',
+            label: i18n.translate(
+              'xpack.securitySolution.siemReadiness.continuity.filter.nonHealthy',
+              {
+                defaultMessage: 'Non-healthy',
+              }
+            ),
+          },
+        ]}
         searchField="name"
         searchPlaceholder={i18n.translate(
           'xpack.securitySolution.siemReadiness.continuity.searchPlaceholder',
