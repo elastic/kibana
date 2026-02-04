@@ -20,21 +20,25 @@ const featuresSchema = {
       items: {
         type: 'object',
         properties: {
+          id: {
+            type: 'string',
+            description: 'Unique identifier for the feature.',
+          },
           type: {
+            type: 'string',
+          },
+          subtype: {
             type: 'string',
           },
           description: {
             type: 'string',
             description: 'A summary of the feature.',
           },
-          name: {
-            type: 'string',
-          },
           title: {
             type: 'string',
             description: 'Very short human-readable title for UI (e.g. table, flyout header).',
           },
-          value: {
+          properties: {
             type: 'object',
             properties: {},
           },
@@ -65,11 +69,12 @@ const featuresSchema = {
           },
         },
         required: [
+          'id',
           'type',
+          'subtype',
           'description',
-          'name',
           'title',
-          'value',
+          'properties',
           'confidence',
           'evidence',
           'tags',

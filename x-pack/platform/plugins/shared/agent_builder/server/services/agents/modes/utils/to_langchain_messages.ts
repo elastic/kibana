@@ -21,17 +21,33 @@ import type {
   ProcessedConversationRound,
   ProcessedRoundInput,
 } from './prepare_conversation';
+import type { ToolCallResultTransformer } from './create_result_transformer';
+
+export interface ConversationToLangchainOptions {
+  conversation: ProcessedConversation;
+  /**
+   * Optional function to transform all results from a tool call.
+   * When provided, results will be passed through this function.
+   * Defaults to identity (no transformation).
+   */
+  resultTransformer?: ToolCallResultTransformer;
+  /**
+   * When true, tool call steps will be ignored.
+   */
+  ignoreSteps?: boolean;
+}
 
 /**
- * Converts a conversation to langchain format
+ * Converts a conversation to langchain format.
+ *
+ * When `resultTransformer` is provided, tool results from previous rounds
+ * will be passed through the transformer function.
  */
-export const conversationToLangchainMessages = ({
+export const convertPreviousRounds = async ({
   conversation,
+  resultTransformer,
   ignoreSteps = false,
-}: {
-  conversation: ProcessedConversation;
-  ignoreSteps?: boolean;
-}): BaseMessage[] => {
+}: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
 
   let rounds = conversation.previousRounds;
@@ -46,7 +62,7 @@ export const conversationToLangchainMessages = ({
   }
 
   for (const round of rounds) {
-    messages.push(...roundToLangchain(round, { ignoreSteps }));
+    messages.push(...(await roundToLangchain(round, { resultTransformer, ignoreSteps })));
   }
 
   messages.push(formatRoundInput({ input }));
@@ -54,10 +70,13 @@ export const conversationToLangchainMessages = ({
   return messages;
 };
 
-export const roundToLangchain = (
+export const roundToLangchain = async (
   round: ProcessedConversationRound,
-  { ignoreSteps = false }: { ignoreSteps?: boolean } = {}
-): BaseMessage[] => {
+  {
+    resultTransformer,
+    ignoreSteps = false,
+  }: { resultTransformer?: ToolCallResultTransformer; ignoreSteps?: boolean } = {}
+): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
 
   // user message
@@ -67,7 +86,7 @@ export const roundToLangchain = (
   if (!ignoreSteps) {
     for (const step of round.steps) {
       if (isToolCallStep(step)) {
-        messages.push(...createToolCallMessages(step));
+        messages.push(...(await createToolCallMessages(step, { resultTransformer })));
       }
     }
   }
@@ -113,7 +132,14 @@ const formatAssistantResponse = ({ response }: { response: AssistantResponse }):
   return createAIMessage(response.message);
 };
 
-export const createToolCallMessages = (toolCall: ToolCallWithResult): [AIMessage, ToolMessage] => {
+/**
+ * Creates tool call messages.
+ * When `resultTransformer` is provided, results will be passed through it.
+ */
+export const createToolCallMessages = async (
+  toolCall: ToolCallWithResult,
+  { resultTransformer }: { resultTransformer?: ToolCallResultTransformer } = {}
+): Promise<[AIMessage, ToolMessage]> => {
   const toolName = sanitizeToolId(toolCall.tool_id);
 
   const toolCallMessage = new AIMessage({
@@ -128,9 +154,12 @@ export const createToolCallMessages = (toolCall: ToolCallWithResult): [AIMessage
     ],
   });
 
+  // Process results - apply transformer if provided
+  const processedResults = resultTransformer ? await resultTransformer(toolCall) : toolCall.results;
+
   const toolResultMessage = new ToolMessage({
     tool_call_id: toolCall.tool_call_id,
-    content: JSON.stringify({ results: toolCall.results }),
+    content: JSON.stringify({ results: processedResults }),
   });
 
   return [toolCallMessage, toolResultMessage];
