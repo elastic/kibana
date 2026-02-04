@@ -47,7 +47,7 @@
           "siemV5": [
             "read"
           ],
-          "securitySolutionRulesV1": [
+          "securitySolutionRulesV2": [
             "read"
           ],
           "securitySolutionAssistant": [
@@ -129,7 +129,7 @@
           "siemV5": [
             "read"
           ],
-          "securitySolutionRulesV1": [
+          "securitySolutionRulesV2": [
             "read"
           ],
           "securitySolutionAssistant": [
@@ -244,7 +244,7 @@
             "actions_log_management_all",
             "file_operations_all"
           ],
-          "securitySolutionRulesV1": [
+          "securitySolutionRulesV2": [
             "all"
           ],
           "securitySolutionCasesV2": [
@@ -358,7 +358,7 @@
             "all",
             "endpoint_exceptions_all"
           ],
-          "securitySolutionRulesV1": [
+          "securitySolutionRulesV2": [
             "all"
           ],
           "securitySolutionAssistant": [
@@ -453,7 +453,7 @@
             "all",
             "endpoint_exceptions_all"
           ],
-          "securitySolutionRulesV1": [
+          "securitySolutionRulesV2": [
             "all"
           ],
           "securitySolutionAssistant": [
@@ -542,7 +542,7 @@
             "all",
             "endpoint_exceptions_all"
           ],
-          "securitySolutionRulesV1": [
+          "securitySolutionRulesV2": [
             "all"
           ],
           "securitySolutionAssistant": [
@@ -646,7 +646,7 @@
             "all",
             "endpoint_exceptions_all"
           ],
-          "securitySolutionRulesV1": [
+          "securitySolutionRulesV2": [
             "all"
           ],
           "securitySolutionAssistant": [
