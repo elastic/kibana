@@ -23,6 +23,7 @@ plugins:
     - transform
     - fleet
     - entity_store
+    - lens
   disabled:
 
 packages:
