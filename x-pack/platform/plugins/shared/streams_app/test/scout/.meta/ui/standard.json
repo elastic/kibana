@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-11T12:04:05.165Z",
-  "sha1": "616af2cab2cc56fc32e7382f8576877e723da32a",
+  "lastModified": "2026-01-30T09:08:18.132Z",
+  "sha1": "4306cf4cf95d07577fcc249070e5aad7dac68378",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -11,6 +11,142 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/global.setup.ts",
         "line": 10,
         "column": 16
+      }
+    },
+    {
+      "id": "886ec55acce7b69-e0176e372fb48de",
+      "title": "Attachments shows empty attachments prompt when navigating to attachments tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
+        "line": 138,
+        "column": 7
+      }
+    },
+    {
+      "id": "886ec55acce7b69-17f1921df3c07a9",
+      "title": "Attachments opens add attachment flyout and shows available attachments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
+        "line": 145,
+        "column": 7
+      }
+    },
+    {
+      "id": "886ec55acce7b69-78a107722ab10ab",
+      "title": "Attachments adds and removes all attachments from the stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
+        "line": 160,
+        "column": 7
+      }
+    },
+    {
+      "id": "886ec55acce7b69-7bcc2f437dac5d2",
+      "title": "Attachments opens attachment details flyout and verifies information for each type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
+        "line": 200,
+        "column": 7
+      }
+    },
+    {
+      "id": "a43be0edd7f2351-5d0e50bdec96eb3",
+      "title": "Advanced tab permissions - Classic streams should NOT show Advanced tab for viewer role on classic stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_classic.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "a43be0edd7f2351-25dcc7526fd7258",
+      "title": "Advanced tab permissions - Classic streams should NOT show Advanced tab for editor role on classic stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_classic.spec.ts",
+        "line": 37,
+        "column": 7
+      }
+    },
+    {
+      "id": "a43be0edd7f2351-3c70f6b07d7e4c9",
+      "title": "Advanced tab permissions - Classic streams should show Advanced tab for admin role on classic stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_classic.spec.ts",
+        "line": 49,
+        "column": 7
+      }
+    },
+    {
+      "id": "f924e4cd9376ed8-9bfc5e9d0302797",
+      "title": "Advanced tab permissions - Wired streams should NOT show Advanced tab for viewer role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_wired.spec.ts",
+        "line": 19,
+        "column": 7
+      }
+    },
+    {
+      "id": "f924e4cd9376ed8-ee48469d0bdec88",
+      "title": "Advanced tab permissions - Wired streams should NOT show Advanced tab for editor role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_wired.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "f924e4cd9376ed8-91bd8480d0fb237",
+      "title": "Advanced tab permissions - Wired streams should show Advanced tab for admin role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_wired.spec.ts",
+        "line": 35,
+        "column": 7
       }
     },
     {
@@ -51,7 +187,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/classic_streams_schema.spec.ts",
-        "line": 131,
+        "line": 127,
         "column": 9
       }
     },
@@ -149,7 +285,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 48,
+        "line": 52,
         "column": 9
       }
     },
@@ -163,7 +299,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 93,
+        "line": 95,
         "column": 9
       }
     },
@@ -177,7 +313,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 138,
+        "line": 139,
         "column": 9
       }
     },
@@ -205,7 +341,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 40,
+        "line": 41,
         "column": 7
       }
     },
@@ -219,7 +355,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 48,
+        "line": 49,
         "column": 7
       }
     },
@@ -233,7 +369,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 69,
+        "line": 71,
         "column": 7
       }
     },
@@ -247,7 +383,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 86,
+        "line": 90,
         "column": 7
       }
     },
@@ -261,7 +397,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 108,
+        "line": 113,
         "column": 7
       }
     },
@@ -275,7 +411,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 123,
+        "line": 129,
         "column": 7
       }
     },
@@ -289,7 +425,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 142,
+        "line": 149,
         "column": 7
       }
     },
@@ -303,7 +439,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 156,
+        "line": 165,
         "column": 7
       }
     },
@@ -317,7 +453,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 170,
+        "line": 180,
         "column": 7
       }
     },
@@ -359,7 +495,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/data_sources_management.spec.ts",
-        "line": 62,
+        "line": 84,
         "column": 9
       }
     },
@@ -373,7 +509,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/data_sources_management.spec.ts",
-        "line": 76,
+        "line": 98,
         "column": 9
       }
     },
@@ -387,7 +523,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/edit_steps.spec.ts",
-        "line": 39,
+        "line": 46,
         "column": 7
       }
     },
@@ -401,7 +537,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/edit_steps.spec.ts",
-        "line": 50,
+        "line": 59,
         "column": 7
       }
     },
@@ -415,7 +551,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/edit_steps.spec.ts",
-        "line": 61,
+        "line": 70,
         "column": 7
       }
     },
@@ -429,7 +565,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/edit_steps.spec.ts",
-        "line": 71,
+        "line": 80,
         "column": 7
       }
     },
@@ -443,7 +579,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/edit_steps.spec.ts",
-        "line": 85,
+        "line": 99,
         "column": 7
       }
     },
@@ -457,7 +593,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/edit_steps.spec.ts",
-        "line": 95,
+        "line": 109,
         "column": 7
       }
     },
@@ -471,7 +607,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/edit_steps.spec.ts",
-        "line": 105,
+        "line": 119,
         "column": 7
       }
     },
@@ -499,7 +635,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/error_handling.spec.ts",
-        "line": 69,
+        "line": 71,
         "column": 9
       }
     },
@@ -541,7 +677,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 120,
+        "line": 131,
         "column": 7
       }
     },
@@ -555,7 +691,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 128,
+        "line": 139,
         "column": 7
       }
     },
@@ -569,7 +705,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 143,
+        "line": 165,
         "column": 7
       }
     },
@@ -583,7 +719,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 151,
+        "line": 173,
         "column": 7
       }
     },
@@ -597,166 +733,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 165,
+        "line": 191,
         "column": 7
       }
     },
     {
-      "id": "cafd7c07a64c62c-f8d44b650682af6",
-      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to add processors (requires simulate privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 42,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-2315daf2c42d27d",
-      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to edit existing processors (requires simulate privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 50,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-6dfdbbced407ed7",
-      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to duplicate processors (requires manage privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 61,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-984b17bddf52f58",
-      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to delete processors (requires manage privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 72,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-92513d001d973b8",
-      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to add conditions (requires simulate privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 89,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-54177f2f2b1d75a",
-      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT show save changes button for viewer (requires manage privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 97,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-782eccbcbedcd18",
-      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT allow editor to add processors (requires simulate privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 142,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-6dc5ca4973457c5",
-      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT allow editor to edit existing processors (requires simulate privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 150,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-fe6cd89dee5117d",
-      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT allow editor to duplicate processors (requires manage privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 161,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-f898866e7c6a1f5",
-      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT allow editor to delete processors (requires manage privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 172,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-074bc7b5d0a9019",
-      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT show save changes button for editor (requires manage privilege)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 189,
-        "column": 9
-      }
-    },
-    {
-      "id": "cafd7c07a64c62c-10300c4c52ff3ef",
+      "id": "03304a5a0353a79-10300c4c52ff3ef",
       "title": "Streams data processing permissions - editor with conditions (no simulate, no manage) should NOT allow editor to edit existing conditions (requires simulate privilege)",
       "expectedStatus": "passed",
       "tags": [
@@ -764,13 +746,13 @@
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 237,
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_editor_conditions.spec.ts",
+        "line": 50,
         "column": 9
       }
     },
     {
-      "id": "cafd7c07a64c62c-c67b471c8eff15f",
+      "id": "03304a5a0353a79-c67b471c8eff15f",
       "title": "Streams data processing permissions - editor with conditions (no simulate, no manage) should NOT allow editor to delete conditions (requires manage privilege)",
       "expectedStatus": "passed",
       "tags": [
@@ -778,13 +760,13 @@
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 248,
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_editor_conditions.spec.ts",
+        "line": 61,
         "column": 9
       }
     },
     {
-      "id": "cafd7c07a64c62c-89774db8a07beae",
+      "id": "03304a5a0353a79-89774db8a07beae",
       "title": "Streams data processing permissions - editor with conditions (no simulate, no manage) should NOT allow editor to add nested steps to conditions (requires simulate privilege)",
       "expectedStatus": "passed",
       "tags": [
@@ -792,13 +774,83 @@
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 264,
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_editor_conditions.spec.ts",
+        "line": 77,
         "column": 9
       }
     },
     {
-      "id": "cafd7c07a64c62c-5a4e6cd12593697",
+      "id": "6ab7f56959b7775-782eccbcbedcd18",
+      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT allow editor to add processors (requires simulate privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_editor.spec.ts",
+        "line": 47,
+        "column": 9
+      }
+    },
+    {
+      "id": "6ab7f56959b7775-6dc5ca4973457c5",
+      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT allow editor to edit existing processors (requires simulate privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_editor.spec.ts",
+        "line": 57,
+        "column": 9
+      }
+    },
+    {
+      "id": "6ab7f56959b7775-fe6cd89dee5117d",
+      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT allow editor to duplicate processors (requires manage privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_editor.spec.ts",
+        "line": 68,
+        "column": 9
+      }
+    },
+    {
+      "id": "6ab7f56959b7775-f898866e7c6a1f5",
+      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT allow editor to delete processors (requires manage privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_editor.spec.ts",
+        "line": 79,
+        "column": 9
+      }
+    },
+    {
+      "id": "6ab7f56959b7775-074bc7b5d0a9019",
+      "title": "Streams data processing permissions - editor role (no simulate, no manage) should NOT show save changes button for editor (requires manage privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_editor.spec.ts",
+        "line": 96,
+        "column": 9
+      }
+    },
+    {
+      "id": "a873ce37831a168-5a4e6cd12593697",
       "title": "Streams data processing permissions - viewer with conditions (no simulate, no manage) should NOT allow viewer to edit existing conditions (requires simulate privilege)",
       "expectedStatus": "passed",
       "tags": [
@@ -806,13 +858,13 @@
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 315,
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_viewer_conditions.spec.ts",
+        "line": 50,
         "column": 9
       }
     },
     {
-      "id": "cafd7c07a64c62c-94be4ccd82b589f",
+      "id": "a873ce37831a168-94be4ccd82b589f",
       "title": "Streams data processing permissions - viewer with conditions (no simulate, no manage) should NOT allow viewer to delete conditions (requires manage privilege)",
       "expectedStatus": "passed",
       "tags": [
@@ -820,13 +872,13 @@
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 326,
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_viewer_conditions.spec.ts",
+        "line": 61,
         "column": 9
       }
     },
     {
-      "id": "cafd7c07a64c62c-9dd357f4eba4f70",
+      "id": "a873ce37831a168-9dd357f4eba4f70",
       "title": "Streams data processing permissions - viewer with conditions (no simulate, no manage) should NOT allow viewer to add nested steps to conditions (requires simulate privilege)",
       "expectedStatus": "passed",
       "tags": [
@@ -834,9 +886,132 @@
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions.spec.ts",
-        "line": 342,
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_viewer_conditions.spec.ts",
+        "line": 77,
         "column": 9
+      }
+    },
+    {
+      "id": "df5ccca8605937a-f8d44b650682af6",
+      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to add processors (requires simulate privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_viewer.spec.ts",
+        "line": 42,
+        "column": 9
+      }
+    },
+    {
+      "id": "df5ccca8605937a-2315daf2c42d27d",
+      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to edit existing processors (requires simulate privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_viewer.spec.ts",
+        "line": 52,
+        "column": 9
+      }
+    },
+    {
+      "id": "df5ccca8605937a-6dfdbbced407ed7",
+      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to duplicate processors (requires manage privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_viewer.spec.ts",
+        "line": 63,
+        "column": 9
+      }
+    },
+    {
+      "id": "df5ccca8605937a-984b17bddf52f58",
+      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to delete processors (requires manage privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_viewer.spec.ts",
+        "line": 74,
+        "column": 9
+      }
+    },
+    {
+      "id": "df5ccca8605937a-92513d001d973b8",
+      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT allow viewer to add conditions (requires simulate privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_viewer.spec.ts",
+        "line": 91,
+        "column": 9
+      }
+    },
+    {
+      "id": "df5ccca8605937a-54177f2f2b1d75a",
+      "title": "Streams data processing permissions - viewer role (no simulate, no manage) should NOT show save changes button for viewer (requires manage privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/permissions_viewer.spec.ts",
+        "line": 101,
+        "column": 9
+      }
+    },
+    {
+      "id": "a67cbd84c20f901-e9679353e0dd347",
+      "title": "Stream data processing - Pipeline suggestions should show suggest pipeline button when no steps exist and hide when connector unavailable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/pipeline_suggestions.spec.ts",
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "id": "a67cbd84c20f901-c1c440ff4267a08",
+      "title": "Stream data processing - Pipeline suggestions should generate suggestion and allow accept/reject",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/pipeline_suggestions.spec.ts",
+        "line": 88,
+        "column": 7
+      }
+    },
+    {
+      "id": "a67cbd84c20f901-b0c8efe63622aaa",
+      "title": "Stream data processing - Pipeline suggestions should regenerate suggestions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/pipeline_suggestions.spec.ts",
+        "line": 115,
+        "column": 7
       }
     },
     {
@@ -849,21 +1024,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 37,
-        "column": 7
-      }
-    },
-    {
-      "id": "8431b9ecd24de8b-1b67e195eca5b6c",
-      "title": "Stream data processing - simulation preview should display simulation preview when configuring a new processor",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 51,
+        "line": 35,
         "column": 7
       }
     },
@@ -877,7 +1038,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 72,
+        "line": 50,
         "column": 7
       }
     },
@@ -891,7 +1052,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 105,
+        "line": 83,
         "column": 7
       }
     },
@@ -905,7 +1066,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 140,
+        "line": 118,
         "column": 7
       }
     },
@@ -919,7 +1080,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 192,
+        "line": 170,
         "column": 7
       }
     },
@@ -933,7 +1094,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 235,
+        "line": 214,
         "column": 7
       }
     },
@@ -1059,63 +1220,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 46,
-        "column": 9
-      }
-    },
-    {
-      "id": "1590b4af49c6b0b-7bb84541041f0d9",
-      "title": "Stream data retention - custom retention periods should set retention with days unit",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 61,
-        "column": 9
-      }
-    },
-    {
-      "id": "1590b4af49c6b0b-3a1a9539d24c6dc",
-      "title": "Stream data retention - custom retention periods should set retention with hours unit",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 69,
-        "column": 9
-      }
-    },
-    {
-      "id": "1590b4af49c6b0b-2619b2671b2823d",
-      "title": "Stream data retention - custom retention periods should set retention with minutes unit",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 77,
-        "column": 9
-      }
-    },
-    {
-      "id": "1590b4af49c6b0b-2f8254aa46beb47",
-      "title": "Stream data retention - custom retention periods should set retention with seconds unit",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 85,
+        "line": 49,
         "column": 9
       }
     },
@@ -1129,7 +1234,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 93,
+        "line": 65,
         "column": 9
       }
     },
@@ -1143,7 +1248,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 107,
+        "line": 80,
         "column": 9
       }
     },
@@ -1590,76 +1695,6 @@
       }
     },
     {
-      "id": "ac3ffa0708d8fc2-00a2ba9f8f006e3",
-      "title": "Stream data retention - mode switching should switch between custom and indefinite modes",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_mode_switching.spec.ts",
-        "line": 53,
-        "column": 7
-      }
-    },
-    {
-      "id": "ac3ffa0708d8fc2-59e67e6f1ccb9a3",
-      "title": "Stream data retention - mode switching should switch between different custom time units",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_mode_switching.spec.ts",
-        "line": 73,
-        "column": 7
-      }
-    },
-    {
-      "id": "ac3ffa0708d8fc2-ca62a176717e665",
-      "title": "Stream data retention - mode switching should cancel mode change without saving",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_mode_switching.spec.ts",
-        "line": 98,
-        "column": 7
-      }
-    },
-    {
-      "id": "ac3ffa0708d8fc2-25fe1e374a04cba",
-      "title": "Stream data retention - mode switching should maintain mode selection when reopening modal",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_mode_switching.spec.ts",
-        "line": 110,
-        "column": 7
-      }
-    },
-    {
-      "id": "ac3ffa0708d8fc2-a7237a156dc9d03",
-      "title": "Stream data retention - mode switching should persist indefinite retention after page refresh",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_mode_switching.spec.ts",
-        "line": 122,
-        "column": 7
-      }
-    },
-    {
       "id": "7b9f1bc0367bdf5-60ee9f9e1af5c8c",
       "title": "Stream data retention - storage metrics integration should update retention without affecting storage display",
       "expectedStatus": "passed",
@@ -1918,7 +1953,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 24,
+        "line": 27,
         "column": 7
       }
     },
@@ -1932,7 +1967,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 59,
+        "line": 62,
         "column": 7
       }
     },
@@ -1946,7 +1981,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 72,
+        "line": 75,
         "column": 7
       }
     },
@@ -1960,7 +1995,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 90,
+        "line": 93,
         "column": 7
       }
     },
@@ -1974,7 +2009,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 118,
+        "line": 125,
         "column": 7
       }
     },
@@ -1988,7 +2023,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 140,
+        "line": 147,
         "column": 7
       }
     },
@@ -2002,7 +2037,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 154,
+        "line": 161,
         "column": 7
       }
     },
@@ -2016,7 +2051,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 167,
+        "line": 174,
         "column": 7
       }
     },
@@ -2030,7 +2065,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 192,
+        "line": 199,
         "column": 7
       }
     },
@@ -2044,7 +2079,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 217,
+        "line": 224,
         "column": 7
       }
     },
@@ -2273,8 +2308,8 @@
       }
     },
     {
-      "id": "643cc1fa64531d4-9def95b321f56b6",
-      "title": "Stream data routing - previewing data should show document filter controls when there is data by default",
+      "id": "643cc1fa64531d4-38d51486b946c3d",
+      "title": "Stream data routing - previewing data should hide document filter controls until condition is set",
       "expectedStatus": "passed",
       "tags": [
         "@ess",
@@ -2296,7 +2331,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 123,
+        "line": 135,
         "column": 7
       }
     },
@@ -2310,7 +2345,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 154,
+        "line": 167,
         "column": 7
       }
     },
@@ -2324,7 +2359,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 191,
+        "line": 204,
         "column": 7
       }
     },
@@ -2338,7 +2373,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 214,
+        "line": 227,
         "column": 7
       }
     },
@@ -2381,6 +2416,170 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/streams_header.spec.ts",
         "line": 60,
+        "column": 7
+      }
+    },
+    {
+      "id": "dc505a20fd2b429-a27e59b0bd3f0a0",
+      "title": "Discover integration - Classic Stream - Navigate to Stream processing from document flyout should navigate to Stream processing page from Discover document flyout in Data view mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/discover_integration_classic.spec.ts",
+        "line": 33,
+        "column": 9
+      }
+    },
+    {
+      "id": "dc505a20fd2b429-2878526f6235f60",
+      "title": "Discover integration - Classic Stream - Navigate to Stream processing from document flyout should navigate to Stream processing page from Discover document flyout in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/discover_integration_classic.spec.ts",
+        "line": 76,
+        "column": 9
+      }
+    },
+    {
+      "id": "0bc47f7935899e5-1fb86a9dc3c504c",
+      "title": "Discover integration - Wired Stream - Navigate to Stream processing from document flyout should navigate to Stream processing page from Discover document flyout in Data view mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/discover_integration_wired.spec.ts",
+        "line": 36,
+        "column": 9
+      }
+    },
+    {
+      "id": "0bc47f7935899e5-b55d04c6e12793c",
+      "title": "Discover integration - Wired Stream - Navigate to Stream processing from document flyout should navigate to Stream processing page from Discover document flyout in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/discover_integration_wired.spec.ts",
+        "line": 82,
+        "column": 9
+      }
+    },
+    {
+      "id": "a089b2dd43cb47d-15fd0e803c090f9",
+      "title": "Enable Wired Streams - Permissions should prevent editor users from enabling wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "a089b2dd43cb47d-79afd6053c91090",
+      "title": "Enable Wired Streams - Permissions should prevent viewer users from enabling wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
+    {
+      "id": "a089b2dd43cb47d-587db47b0f5e38e",
+      "title": "Enable Wired Streams - Permissions should prevent editor from disabling wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
+        "line": 73,
+        "column": 7
+      }
+    },
+    {
+      "id": "a089b2dd43cb47d-d65044e52c0ad5a",
+      "title": "Enable Wired Streams - Permissions should prevent viewer from disabling wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
+        "line": 101,
+        "column": 7
+      }
+    },
+    {
+      "id": "214bf545ba8b394-58d7a1a4b45c3f1",
+      "title": "Enable Wired Streams - Success flow should enable wired streams and show logs stream in the UI",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "214bf545ba8b394-0cd9ee750222906",
+      "title": "Enable Wired Streams - Success flow should show the root logs stream after enabling wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
+        "line": 85,
+        "column": 7
+      }
+    },
+    {
+      "id": "214bf545ba8b394-3616ba4d9924e34",
+      "title": "Enable Wired Streams - Success flow should disable wired streams and show empty state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
+        "line": 109,
+        "column": 7
+      }
+    },
+    {
+      "id": "5acdacb52d0e1fd-47f1c0fe4eada27",
+      "title": "Streams list view - classic stream creation creates a classic stream via the creation flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/streams_list_view/classic_stream_creation.spec.ts",
+        "line": 92,
         "column": 7
       }
     },
@@ -2452,6 +2651,34 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/streams_list_view/streams_table_values.spec.ts",
         "line": 139,
         "column": 7
+      }
+    },
+    {
+      "id": "f659f4fade00ba1-a05dc9950ead488",
+      "title": "TSDB-aware Discover links - Streams list view should use TS source command for TSDB stream Discover link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/tsdb_discover_links.spec.ts",
+        "line": 146,
+        "column": 9
+      }
+    },
+    {
+      "id": "f659f4fade00ba1-d1e761159aa5373",
+      "title": "TSDB-aware Discover links - Streams list view should use FROM source command for regular stream Discover link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/tsdb_discover_links.spec.ts",
+        "line": 160,
+        "column": 9
       }
     }
   ]
