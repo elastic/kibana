@@ -156,11 +156,13 @@ function parseConfig(log) {
   if (translateTimestampsRaw !== undefined) {
     if (translateTimestampsRaw === '' || translateTimestampsRaw === 'true') {
       translateTimestamps = true;
+    } else if (translateTimestampsRaw === 'live') {
+      translateTimestamps = 'live';
     } else {
       var hours = parseFloat(translateTimestampsRaw);
       if (Number.isNaN(hours) || hours <= 0) {
         console.error(
-          'Error: --translate-timestamps/SYNC_TRANSLATE_TIMESTAMPS value must be a positive number of hours.'
+          'Error: --translate-timestamps/SYNC_TRANSLATE_TIMESTAMPS value must be "live" or a positive number of hours.'
         );
         process.exit(1);
       }
@@ -354,14 +356,18 @@ function stripDataStreamFields(doc) {
   }
 }
 
-function transform(docs, config) {
-  var sourceRangeStart;
-  var sourceRange;
-  var targetRange;
+function transform(docs, config, useFromToRange) {
+  var sourceRangeStart, sourceRange, targetRange;
 
-  if (config.translateTimestamps && config.from && config.to) {
-    sourceRangeStart = new Date(config.from).getTime();
-    sourceRange = new Date(config.to).getTime() - sourceRangeStart;
+  if (config.translateTimestamps) {
+    if (useFromToRange) {
+      sourceRangeStart = new Date(config.from).getTime();
+      sourceRange = new Date(config.to).getTime() - sourceRangeStart;
+    } else {
+      // This case is for default live mode (no from/to)
+      sourceRange = 24 * 60 * 60 * 1000;
+      sourceRangeStart = new Date().getTime() - sourceRange;
+    }
 
     if (typeof config.translateTimestamps === 'number') {
       targetRange = config.translateTimestamps * 60 * 60 * 1000;
@@ -376,14 +382,20 @@ function transform(docs, config) {
     if (config.targetIndex) {
       doc._index = config.targetIndex;
     }
-    if (config.translateTimestamps && doc._source && doc._source['@timestamp'] && sourceRange > 0) {
-      var originalTimestampMs = new Date(doc._source['@timestamp']).getTime();
-      var now = new Date().getTime();
-      var targetEnd = now;
-      var targetStart = targetEnd - targetRange;
-      var normalized = (originalTimestampMs - sourceRangeStart) / sourceRange;
-      var newTimestampMs = targetStart + normalized * targetRange;
-      doc._source['@timestamp'] = new Date(newTimestampMs).toISOString();
+    if (config.translateTimestamps && doc._source && doc._source['@timestamp']) {
+      if (sourceRange > 0) {
+        var originalTimestampMs = new Date(doc._source['@timestamp']).getTime();
+        var now = new Date().getTime();
+        var targetEnd = now;
+        var targetStart = targetEnd - targetRange;
+        var clampedTimestampMs = Math.max(
+          sourceRangeStart,
+          Math.min(originalTimestampMs, sourceRangeStart + sourceRange)
+        );
+        var normalized = (clampedTimestampMs - sourceRangeStart) / sourceRange;
+        var newTimestampMs = targetStart + normalized * targetRange;
+        doc._source['@timestamp'] = new Date(newTimestampMs).toISOString();
+      }
     }
   }
 }
@@ -487,11 +499,20 @@ function uploadDocumentsToStream(destClient, docs, targetStreamOrIndex, batchSiz
   });
 }
 
-function runSyncCycle(sourceClient, destClient, config, cycleNumber, log, startTime, endTime) {
+function runSyncCycle(
+  sourceClient,
+  destClient,
+  config,
+  cycleNumber,
+  log,
+  startTime,
+  endTime,
+  useFromToRange
+) {
   return search(sourceClient, config, cycleNumber, log, startTime, endTime).then(function (docs) {
     if (docs.length === 0) return 0;
 
-    transform(docs, config);
+    transform(docs, config, useFromToRange);
 
     if (config.targetIndex) {
       return uploadDocumentsToStream(destClient, docs, config.targetIndex, config.batchSize, log);
@@ -550,10 +571,12 @@ Sync options:
   SYNC_BATCH_SIZE              or  --batch-size       (default: 100)
   SYNC_FROM                    or  --from             Start of the time range for syncing (ISO 8601 format)
   SYNC_TO                      or  --to               End of the time range for syncing (ISO 8601 format)
-  --translate-timestamps[=HOURS] Translate log timestamps to a new time range ending at the present.
-                                 With a value (in hours), normalizes to the last N hours.
-                                 Without a value, preserves the original duration.
-                                 Requires --from and --to.
+  --translate-timestamps[=VAL] Translate log timestamps to a new time range ending at the present.
+                               VAL can be:
+                               - A number of hours to normalize to (e.g., 24).
+                               - "live" to continuously sample from the --from/--to range and translate timestamps to now.
+                               - If no value, preserves the original duration.
+                               Requires --from and --to.
 
 Other:
   --config, -c                 Path to Kibana config (default: config/kibana.dev.yml)
@@ -597,7 +620,13 @@ function main() {
   process.on('SIGINT', onSignal);
   process.on('SIGTERM', onSignal);
 
+  // Determine sync strategy
+  var isLiveSampleMode = config.translateTimestamps === 'live' && config.from && config.to;
+  var isHistoricalBackfillMode = config.from && config.to && !isLiveSampleMode;
+
   var cycle = 0;
+  var historicalCycle = 0;
+
   function loop() {
     if (shutdownRequested) {
       log('Sync stopped.');
@@ -608,11 +637,19 @@ function main() {
 
     var startTime;
     var endTime;
-    if (config.from && config.to) {
+    var useFromToRange = false;
+
+    if (isLiveSampleMode) {
+      startTime = new Date(config.from);
+      endTime = new Date(config.to);
+      useFromToRange = true;
+    } else if (isHistoricalBackfillMode) {
+      historicalCycle += 1;
+      useFromToRange = true;
       var loopStartTime = new Date(config.from);
       var loopEndTime = new Date(config.to);
       var currentSyncTime = new Date(
-        loopStartTime.getTime() + cycle * config.intervalSeconds * 1000
+        loopStartTime.getTime() + (historicalCycle - 1) * config.intervalSeconds * 1000
       );
 
       if (currentSyncTime >= loopEndTime) {
@@ -620,15 +657,15 @@ function main() {
         process.exit(0);
         return;
       }
-
       startTime = currentSyncTime;
       endTime = new Date(currentSyncTime.getTime() + config.intervalSeconds * 1000);
       if (endTime > loopEndTime) {
         endTime = loopEndTime;
       }
     }
+    // Default live mode (no from/to) uses undefined startTime/endTime
 
-    runSyncCycle(sourceClient, destClient, config, cycle, log, startTime, endTime)
+    runSyncCycle(sourceClient, destClient, config, cycle, log, startTime, endTime, useFromToRange)
       .then(function (pushed) {
         var timeInfo = '';
         if (startTime && endTime) {
@@ -640,10 +677,10 @@ function main() {
           log('Sync stopped.');
           process.exit(0);
         } else {
-          if (config.from && config.to) {
-            loop();
+          if (isHistoricalBackfillMode) {
+            loop(); // Run next backfill cycle immediately
           } else {
-            setTimeout(loop, config.intervalSeconds * 1000);
+            setTimeout(loop, config.intervalSeconds * 1000); // Wait for interval
           }
         }
       })
@@ -653,7 +690,7 @@ function main() {
           log('Sync stopped.');
           process.exit(0);
         } else {
-          if (config.from && config.to) {
+          if (isHistoricalBackfillMode) {
             loop();
           } else {
             setTimeout(loop, config.intervalSeconds * 1000);
