@@ -7,7 +7,7 @@
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import type { ChangeEvent } from 'react';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiFormErrorText } from '@elastic/eui';
 import type { SecurityServiceStart } from '@kbn/core/public';
 import { parseOneAddress } from 'email-addresses';
 import { i18n } from '@kbn/i18n';
@@ -73,19 +73,27 @@ export const EmailInput = ({ email, security, handleChangeEmail, onValidationCha
   }, [security, email, handleChangeEmail]);
 
   return (
-    <EuiFormRow isInvalid={showError} fullWidth>
-      <EuiFieldText
-        data-test-subj="feedbackEmailInput"
-        onChange={handleChange}
-        onBlur={handleBlur}
-        type="email"
-        value={email}
-        fullWidth
-        isInvalid={showError}
-        placeholder={i18n.translate('feedback.emailInput.placeholder', {
-          defaultMessage: 'Your email',
-        })}
-      />
-    </EuiFormRow>
+    <>
+      <EuiFormRow>
+        <EuiFieldText
+          data-test-subj="feedbackEmailInput"
+          onChange={handleChange}
+          onBlur={handleBlur}
+          type="email"
+          value={email}
+          isInvalid={showError}
+          placeholder={i18n.translate('feedback.emailInput.placeholder', {
+            defaultMessage: 'Your email',
+          })}
+        />
+      </EuiFormRow>
+      {showError && (
+        <EuiFormErrorText>
+          {i18n.translate('feedback.emailInput.errorMessage', {
+            defaultMessage: 'Please enter a valid email address.',
+          })}
+        </EuiFormErrorText>
+      )}
+    </>
   );
 };
