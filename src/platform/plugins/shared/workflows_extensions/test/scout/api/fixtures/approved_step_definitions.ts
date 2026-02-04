@@ -70,7 +70,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'streams.listFeatures',
-    handlerHash: '4bdeb66bc0051ea23bc717521f422490a46027ebb4677bba60eab32364da5c6b',
+    handlerHash: 'd39a815a73bc414177c871dd1f4ba99218f4acb0bed0b7cd14ac3ef7f675edb3',
   },
   {
     id: 'streams.listStreams',
