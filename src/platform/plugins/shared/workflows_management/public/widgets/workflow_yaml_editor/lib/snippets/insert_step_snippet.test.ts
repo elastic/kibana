@@ -155,6 +155,7 @@ steps:
       full: true,
       withStepsSection: false,
     });
+    // Cursor is between the two nested steps (line 10); new step inserts after the first, so at line 12 with nested indent (6).
     expect(model.pushEditOperations).toHaveBeenCalledWith(
       null,
       [
