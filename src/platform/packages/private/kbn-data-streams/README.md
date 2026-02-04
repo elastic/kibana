@@ -26,7 +26,7 @@ The `DataStreamClient` provides a lightweight data-mapper pattern for CRUD opera
 
 ### Supported Operations
 
-#### `create(documents, options?)`
+#### `create(options?)`
 
 Create one or more documents in the data stream. Each document can optionally include an `_id` property. Supports optional `space` parameter applied globally to all documents.
 
