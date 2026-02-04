@@ -547,6 +547,14 @@ describe('useKeyboardNavigation', () => {
       document.body.removeChild(edgeElement);
     });
 
+    const pressKeyOnEdge = (key: string) => {
+      edgeElement.focus();
+      act(() => {
+        const event = new KeyboardEvent('keydown', { key, bubbles: true });
+        document.dispatchEvent(event);
+      });
+    };
+
     it('calls onEdgeSelect when Enter is pressed on a focused edge', () => {
       const onEdgeSelect = jest.fn();
       const edges = [createEdge('a', 'b')];
@@ -559,12 +567,7 @@ describe('useKeyboardNavigation', () => {
         })
       );
 
-      edgeElement.focus();
-
-      act(() => {
-        const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
-        document.dispatchEvent(event);
-      });
+      pressKeyOnEdge('Enter');
 
       expect(onEdgeSelect).toHaveBeenCalledWith(edges[0]);
     });
@@ -581,12 +584,7 @@ describe('useKeyboardNavigation', () => {
         })
       );
 
-      edgeElement.focus();
-
-      act(() => {
-        const event = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
-        document.dispatchEvent(event);
-      });
+      pressKeyOnEdge(' ');
 
       expect(onEdgeSelect).toHaveBeenCalledWith(edges[0]);
     });
@@ -604,12 +602,7 @@ describe('useKeyboardNavigation', () => {
         })
       );
 
-      edgeElement.focus();
-
-      act(() => {
-        const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
-        document.dispatchEvent(event);
-      });
+      pressKeyOnEdge('Enter');
 
       expect(onPopoverClose).toHaveBeenCalled();
     });
@@ -627,12 +620,7 @@ describe('useKeyboardNavigation', () => {
         })
       );
 
-      edgeElement.focus();
-
-      act(() => {
-        const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
-        document.dispatchEvent(event);
-      });
+      pressKeyOnEdge('Enter');
 
       expect(onEdgeSelect).not.toHaveBeenCalled();
     });
@@ -649,12 +637,7 @@ describe('useKeyboardNavigation', () => {
         })
       );
 
-      edgeElement.focus();
-
-      act(() => {
-        const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
-        document.dispatchEvent(event);
-      });
+      pressKeyOnEdge('Enter');
 
       expect(onEdgeSelect).not.toHaveBeenCalled();
     });

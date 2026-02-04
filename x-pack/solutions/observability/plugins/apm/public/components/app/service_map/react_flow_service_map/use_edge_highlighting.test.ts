@@ -14,6 +14,8 @@ import {
   HIGHLIGHTED_MARKER_SIZE,
   DEFAULT_STROKE_WIDTH,
   HIGHLIGHTED_STROKE_WIDTH,
+  MOCK_PRIMARY_COLOR,
+  MOCK_DEFAULT_COLOR,
 } from './constants';
 
 jest.mock('@elastic/eui', () => {
@@ -23,8 +25,8 @@ jest.mock('@elastic/eui', () => {
     useEuiTheme: () => ({
       euiTheme: {
         colors: {
-          primary: '#0077CC',
-          mediumShade: '#98A2B3',
+          primary: MOCK_PRIMARY_COLOR,
+          mediumShade: MOCK_DEFAULT_COLOR,
         },
         levels: {
           content: 1000,
@@ -44,12 +46,12 @@ function createEdge(
     source,
     target,
     type: 'default',
-    style: { stroke: '#98A2B3', strokeWidth: 1 },
+    style: { stroke: MOCK_DEFAULT_COLOR, strokeWidth: 1 },
     markerEnd: {
       type: MarkerType.ArrowClosed,
       width: 12,
       height: 12,
-      color: '#98A2B3',
+      color: MOCK_DEFAULT_COLOR,
     },
     data: {
       isBidirectional,
@@ -69,25 +71,25 @@ describe('useEdgeHighlighting', () => {
           type: MarkerType.ArrowClosed,
           width: DEFAULT_MARKER_SIZE,
           height: DEFAULT_MARKER_SIZE,
-          color: '#98A2B3',
+          color: MOCK_DEFAULT_COLOR,
         },
         highlightedEnd: {
           type: MarkerType.ArrowClosed,
           width: HIGHLIGHTED_MARKER_SIZE,
           height: HIGHLIGHTED_MARKER_SIZE,
-          color: '#0077CC',
+          color: MOCK_PRIMARY_COLOR,
         },
         defaultStart: {
           type: MarkerType.ArrowClosed,
           width: DEFAULT_MARKER_SIZE,
           height: DEFAULT_MARKER_SIZE,
-          color: '#98A2B3',
+          color: MOCK_DEFAULT_COLOR,
         },
         highlightedStart: {
           type: MarkerType.ArrowClosed,
           width: HIGHLIGHTED_MARKER_SIZE,
           height: HIGHLIGHTED_MARKER_SIZE,
-          color: '#0077CC',
+          color: MOCK_PRIMARY_COLOR,
         },
       });
     });
@@ -98,8 +100,8 @@ describe('useEdgeHighlighting', () => {
       const { result } = renderHook(() => useEdgeHighlighting());
 
       expect(result.current.colors).toEqual({
-        primary: '#0077CC',
-        default: '#98A2B3',
+        primary: MOCK_PRIMARY_COLOR,
+        default: MOCK_DEFAULT_COLOR,
       });
     });
   });
@@ -114,7 +116,7 @@ describe('useEdgeHighlighting', () => {
 
         expect(highlighted).toHaveLength(2);
         highlighted.forEach((edge) => {
-          expect(edge.style?.stroke).toBe('#98A2B3');
+          expect(edge.style?.stroke).toBe(MOCK_DEFAULT_COLOR);
           expect(edge.style?.strokeWidth).toBe(DEFAULT_STROKE_WIDTH);
           expect(edge.markerEnd).toEqual(result.current.markers.defaultEnd);
           expect(edge.zIndex).toBe(0);
@@ -130,7 +132,7 @@ describe('useEdgeHighlighting', () => {
           selectedEdgeId: null,
         });
 
-        expect(highlighted[0].style?.stroke).toBe('#98A2B3');
+        expect(highlighted[0].style?.stroke).toBe(MOCK_DEFAULT_COLOR);
         expect(highlighted[0].style?.strokeWidth).toBe(DEFAULT_STROKE_WIDTH);
       });
     });
@@ -143,13 +145,13 @@ describe('useEdgeHighlighting', () => {
         const highlighted = result.current.applyEdgeHighlighting(edges, 'a');
 
         const edgeAB = highlighted.find((e) => e.id === 'a~>b');
-        expect(edgeAB?.style?.stroke).toBe('#0077CC');
+        expect(edgeAB?.style?.stroke).toBe(MOCK_PRIMARY_COLOR);
         expect(edgeAB?.style?.strokeWidth).toBe(HIGHLIGHTED_STROKE_WIDTH);
         expect(edgeAB?.markerEnd).toEqual(result.current.markers.highlightedEnd);
         expect(edgeAB?.zIndex).toBe(1000);
 
         const edgeCD = highlighted.find((e) => e.id === 'c~>d');
-        expect(edgeCD?.style?.stroke).toBe('#98A2B3');
+        expect(edgeCD?.style?.stroke).toBe(MOCK_DEFAULT_COLOR);
         expect(edgeCD?.style?.strokeWidth).toBe(DEFAULT_STROKE_WIDTH);
       });
 
@@ -160,7 +162,7 @@ describe('useEdgeHighlighting', () => {
         const highlighted = result.current.applyEdgeHighlighting(edges, 'b');
 
         const edgeAB = highlighted.find((e) => e.id === 'a~>b');
-        expect(edgeAB?.style?.stroke).toBe('#0077CC');
+        expect(edgeAB?.style?.stroke).toBe(MOCK_PRIMARY_COLOR);
         expect(edgeAB?.style?.strokeWidth).toBe(HIGHLIGHTED_STROKE_WIDTH);
       });
 
@@ -170,7 +172,7 @@ describe('useEdgeHighlighting', () => {
 
         const highlighted = result.current.applyEdgeHighlighting(edges, 'a');
 
-        expect(highlighted[0].style?.stroke).toBe('#0077CC');
+        expect(highlighted[0].style?.stroke).toBe(MOCK_PRIMARY_COLOR);
       });
 
       it('supports options object with selectedNodeId', () => {
@@ -182,7 +184,7 @@ describe('useEdgeHighlighting', () => {
           selectedEdgeId: null,
         });
 
-        expect(highlighted[0].style?.stroke).toBe('#0077CC');
+        expect(highlighted[0].style?.stroke).toBe(MOCK_PRIMARY_COLOR);
       });
     });
 
@@ -197,12 +199,12 @@ describe('useEdgeHighlighting', () => {
         });
 
         const edgeAB = highlighted.find((e) => e.id === 'a~>b');
-        expect(edgeAB?.style?.stroke).toBe('#0077CC');
+        expect(edgeAB?.style?.stroke).toBe(MOCK_PRIMARY_COLOR);
         expect(edgeAB?.style?.strokeWidth).toBe(HIGHLIGHTED_STROKE_WIDTH);
         expect(edgeAB?.zIndex).toBe(1000);
 
         const edgeCD = highlighted.find((e) => e.id === 'c~>d');
-        expect(edgeCD?.style?.stroke).toBe('#98A2B3');
+        expect(edgeCD?.style?.stroke).toBe(MOCK_DEFAULT_COLOR);
       });
     });
 
@@ -286,12 +288,12 @@ describe('useEdgeHighlighting', () => {
         );
         expect(connectedEdges).toHaveLength(3);
         connectedEdges.forEach((edge) => {
-          expect(edge.style?.stroke).toBe('#0077CC');
+          expect(edge.style?.stroke).toBe(MOCK_PRIMARY_COLOR);
           expect(edge.zIndex).toBe(1000);
         });
 
         const unconnectedEdge = highlighted.find((e) => e.id === 'e~>f');
-        expect(unconnectedEdge?.style?.stroke).toBe('#98A2B3');
+        expect(unconnectedEdge?.style?.stroke).toBe(MOCK_DEFAULT_COLOR);
         expect(unconnectedEdge?.zIndex).toBe(0);
       });
     });
