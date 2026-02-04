@@ -409,6 +409,7 @@ export class ExceptionListClient {
    * Create an exception list container
    * @param options
    * @param options.description a description of the exception list
+   * @param options.osTypes item os types to apply
    * @param options.immutable True if it's a immutable list, otherwise false
    * @param options.listId the "list_id" of the exception list
    * @param options.meta Optional meta data to add to the exception list
@@ -421,6 +422,7 @@ export class ExceptionListClient {
    */
   public createExceptionList = async ({
     description,
+    osTypes,
     immutable,
     listId,
     meta,
@@ -438,6 +440,7 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType,
+      osTypes,
       savedObjectsClient,
       tags,
       type,
