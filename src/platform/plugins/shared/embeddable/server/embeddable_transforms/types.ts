@@ -9,6 +9,8 @@
 
 import type { Type } from '@kbn/config-schema';
 import type { Reference } from '@kbn/content-management-utils';
+import type { DrilldownTransforms } from '../../common';
+import type { GetDrilldownsSchemaFnType } from '../drilldowns/types';
 
 export type EmbeddableTransforms<
   StoredEmbeddableState extends object = object,
@@ -39,6 +41,15 @@ export type EmbeddableTransforms<
     state: StoredEmbeddableState;
     references?: Reference[];
   };
+};
+
+export type EmbeddableTransformsSetup<
+  StoredEmbeddableState extends object = object,
+  EmbeddableState extends object = object
+> = {
+  getTransforms?: (
+    drilldownTransforms: DrilldownTransforms
+  ) => EmbeddableTransforms<StoredEmbeddableState, EmbeddableState>;
   /**
    * Embeddable containers that include embeddable state in REST APIs, such as dashboard,
    * use schemas to
@@ -47,7 +58,7 @@ export type EmbeddableTransforms<
    *
    * When schema is provided, EmbeddableState is expected to be TypeOf<typeof schema>
    */
-  getSchema?: () => Type<object> | undefined;
+  getSchema?: (getDrilldownsSchema: GetDrilldownsSchemaFnType) => Type<object> | undefined;
   /**
    * Throws error when panel config is not supported.
    */
