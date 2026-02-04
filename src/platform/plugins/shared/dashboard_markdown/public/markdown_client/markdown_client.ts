@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LRUCache } from 'lru-cache';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 
@@ -25,14 +24,6 @@ import type {
 } from '../../server';
 import { coreServices } from '../services/kibana_services';
 
-const CACHE_SIZE = 20; // only store a max of 20 markdown embeddables
-const CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
-
-const cache = new LRUCache<string, MarkdownReadResponseBody>({
-  max: CACHE_SIZE,
-  ttl: CACHE_TTL,
-});
-
 export const markdownClient = {
   create: async (markdownState: MarkdownState) => {
     return coreServices.http.post<MarkdownCreateResponseBody>(MARKDOWN_API_PATH, {
@@ -41,16 +32,11 @@ export const markdownClient = {
     });
   },
   delete: async (id: string): Promise<DeleteResult> => {
-    cache.delete(id);
     return coreServices.http.delete(`${MARKDOWN_API_PATH}/${id}`, {
       version: MARKDOWN_API_VERSION,
     });
   },
   get: async (id: string): Promise<MarkdownReadResponseBody> => {
-    if (cache.has(id)) {
-      return cache.get(id)!;
-    }
-
     const result = await coreServices.http
       .get<MarkdownReadResponseBody>(`${MARKDOWN_API_PATH}/${id}`, {
         version: MARKDOWN_API_VERSION,
@@ -62,14 +48,6 @@ export const markdownClient = {
         const message = (e.body as { message?: string })?.message ?? e.message;
         throw new Error(message);
       });
-
-    if (result.meta.outcome !== 'aliasMatch') {
-      /**
-       * Only add the markdown to the cache if it does not require a redirect - otherwise, the meta
-       * alias info gets cached and prevents the markdown contents from being updated
-       */
-      cache.set(id, result);
-    }
     return result;
   },
   search: async (searchBody: MarkdownSearchRequestBody) => {
@@ -89,12 +67,6 @@ export const markdownClient = {
         body: JSON.stringify(markdownState),
       }
     );
-    cache.delete(id);
     return updateResponse;
-  },
-  invalidateCache: async (id: string) => {
-    if (cache.has(id)) {
-      cache.delete(id);
-    }
   },
 };
