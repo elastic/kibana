@@ -68,9 +68,11 @@ export async function getApmDownstreamDependencies({
     const dependencyName = location.dependencyName!;
 
     const rawThroughput = stats.throughput?.value;
+    const rawLatency = stats.latency?.value;
     const metrics = {
       errorRate: stats.errorRate?.value ?? undefined,
-      latencyMs: stats.latency?.value ?? undefined,
+      // Convert from microseconds to milliseconds
+      latencyMs: rawLatency != null ? rawLatency / 1000 : undefined,
       // Round to 3 decimal places for cleaner LLM output
       throughputPerMin: rawThroughput != null ? Math.round(rawThroughput * 1000) / 1000 : undefined,
     };

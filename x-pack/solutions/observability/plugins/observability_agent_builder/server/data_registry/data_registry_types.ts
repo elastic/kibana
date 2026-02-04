@@ -132,6 +132,35 @@ interface InfraHostsResponse {
   nodes: InfraEntityMetricsItem[];
 }
 
+interface ServiceTopologyNode {
+  'service.name': string;
+  'agent.name': string;
+  'service.environment'?: string;
+}
+
+interface ExternalNode {
+  'span.destination.service.resource': string;
+  'span.type': string;
+  'span.subtype': string;
+}
+
+interface ConnectionMetrics {
+  errorRate: number | null;
+  latencyMs: number | null;
+  throughputPerMin: number | null;
+}
+
+interface ServiceTopologyConnection {
+  source: ServiceTopologyNode | ExternalNode;
+  target: ServiceTopologyNode | ExternalNode;
+  metrics: ConnectionMetrics | null;
+}
+
+export interface ServiceTopologyResponse {
+  tracesCount: number;
+  connections: ServiceTopologyConnection[];
+}
+
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrorDetails: (params: {
     request: KibanaRequest;
@@ -195,4 +224,15 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     query: Record<string, unknown> | undefined;
     hostNames?: string[];
   }) => Promise<InfraHostsResponse>;
+
+  apmServiceTopology: (params: {
+    request: KibanaRequest;
+    serviceName: string;
+    environment?: string;
+    direction?: 'downstream' | 'upstream' | 'both';
+    kuery?: string;
+    start: string;
+    end: string;
+    includeMetrics?: boolean;
+  }) => Promise<ServiceTopologyResponse>;
 }

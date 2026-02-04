@@ -252,6 +252,7 @@ export class APMPlugin
     registerDataProviders({
       core,
       plugins,
+      config: currentConfig,
       logger: this.logger!.get('observabilityAgentBuilder'),
     });
 
