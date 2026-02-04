@@ -51,9 +51,7 @@ export const DataSourcesView: React.FC = () => {
   const handleConnectorClick = useCallback(
     (connector: Connector) => {
       setSelectedConnector(connector);
-      // Open the flyout with the connector's action type ID
-      // For connectors from registry, this will be the stackConnector.type (e.g., '.notion')
-      openFlyout(connector.type);
+      openFlyout(connector.type, connector.id);
     },
     [openFlyout]
   );
