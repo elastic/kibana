@@ -6,7 +6,6 @@
  */
 
 import { execSync } from 'child_process';
-import { PKG_JSON, UPSTREAM_BRANCH } from '@kbn/repo-info';
 
 export interface GitMetadata {
   branch: string | null;
@@ -14,8 +13,8 @@ export interface GitMetadata {
 }
 
 export function getGitMetadata(): GitMetadata {
-  const branch = UPSTREAM_BRANCH || tryGitCommand('git rev-parse --abbrev-ref HEAD');
-  const commitSha = PKG_JSON?.build?.sha || tryGitCommand('git rev-parse HEAD');
+  const branch = tryGitCommand('git rev-parse --abbrev-ref HEAD');
+  const commitSha = tryGitCommand('git rev-parse HEAD');
 
   return {
     branch: branch || null,
