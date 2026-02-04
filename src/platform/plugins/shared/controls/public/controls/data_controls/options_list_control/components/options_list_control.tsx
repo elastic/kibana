@@ -60,7 +60,7 @@ const optionListControlStyles = {
     css({
       fontWeight: `${euiTheme.font.weight.regular} !important` as 'normal',
       color: `${euiTheme.colors.textSubdued} !important`,
-      padding: `0 ${euiTheme.size.s}`,
+      padding: `0`,
       '&:hover::before': {
         background: `${euiTheme.colors.backgroundBasePlain} !important`,
       },
@@ -222,6 +222,7 @@ export const OptionsListControl = ({
       badgeColor="success"
       isLoading={loading}
       iconType={'arrowDown'}
+      // iconSize={'s'}
       data-test-subj={`optionsList-control-${componentApi.uuid}`}
       css={styles.filterButton}
       onClick={() => setPopoverOpen(!isPopoverOpen)}
@@ -250,7 +251,7 @@ export const OptionsListControl = ({
       data-shared-item
     >
       <EuiInputPopover
-        id={popoverId}
+        title="test"
         ownFocus
         input={button}
         repositionOnScroll

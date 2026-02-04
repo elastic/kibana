@@ -69,7 +69,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
   willHaveInitialFilter?: boolean;
   getInitialFilter?: (dataView: DataView) => Filter | undefined;
 }): Promise<DataControlStateManager> => {
-  const titlesManager = initializeTitleManager(state);
+  const titlesManager = initializeTitleManager({ ...state, hide_title: true });
 
   const dataControlStateManager = initializeStateManager<
     Omit<DataControlState, 'title' | 'description'>

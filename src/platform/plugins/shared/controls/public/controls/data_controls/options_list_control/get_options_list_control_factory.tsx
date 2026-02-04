@@ -29,7 +29,10 @@ import {
 import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import {
+  useStateFromPublishingSubject,
+  type PublishingSubject,
+} from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
 import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
@@ -60,6 +63,8 @@ import {
   makeSelection,
   selectAll,
 } from './utils/selection_utils';
+import { EuiFormRow, EuiText, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export const getOptionsListControlFactory = (): EmbeddableFactory<
   OptionsListControlState,
@@ -348,6 +353,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       return {
         api,
         Component: () => {
+          // const sectionId = useStateFromPublishingSubject(sectionId$);
+          // console.log({ sectionId });
           useEffect(() => {
             return () => {
               // on unmount, clean up all subscriptions
@@ -370,7 +377,30 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
                 displaySettings: state.displaySettings ?? {},
               }}
             >
-              <OptionsListControl />
+              {/* <EuiTitle size="xxs">
+                <figcaption>
+                  <h2>Test</h2>
+                </figcaption>
+              </EuiTitle> */}
+              <EuiFormRow
+                fullWidth
+                label="Text field"
+                css={({ euiTheme }) => css`
+                  padding: 4px 8px;
+                  width: 100%;
+                  row-gap: 2px;
+                  label {
+                    font-size: 1rem;
+                    font-weight: ${euiTheme.font.weight.regular};
+                    color: ${euiTheme.colors.textSubdued};
+                  }
+                  .euiFormRow__fieldWrapper {
+                    height: 100%;
+                  }
+                `}
+              >
+                <OptionsListControl />
+              </EuiFormRow>
             </OptionsListControlContext.Provider>
           );
         },
