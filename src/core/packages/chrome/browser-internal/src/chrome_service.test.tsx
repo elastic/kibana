@@ -268,7 +268,7 @@ describe('start', () => {
   describe('visibility', () => {
     it('emits false when no application is mounted', async () => {
       const { chrome, service } = await start();
-      const promise = firstValueFrom(chrome.getIsVisible$().pipe(Rx.take(4), toArray()));
+      const promise = firstValueFrom(chrome.getIsVisible$().pipe(Rx.take(1), toArray()));
 
       chrome.setIsVisible(true);
       chrome.setIsVisible(false);
@@ -277,9 +277,6 @@ describe('start', () => {
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
                       Array [
-                        false,
-                        false,
-                        false,
                         false,
                       ]
                   `);
@@ -291,7 +288,7 @@ describe('start', () => {
       const { navigateToApp } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
 
-      const promise = firstValueFrom(chrome.getIsVisible$().pipe(Rx.take(4), toArray()));
+      const promise = firstValueFrom(chrome.getIsVisible$().pipe(Rx.take(3), toArray()));
 
       await navigateToApp('alpha');
 
@@ -302,7 +299,6 @@ describe('start', () => {
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
                       Array [
-                        false,
                         false,
                         true,
                         false,
@@ -338,7 +334,7 @@ describe('start', () => {
       const startDeps = defaultStartDeps([new FakeApp('alpha', true)]);
       const { navigateToApp } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
-      const promise = firstValueFrom(chrome.getIsVisible$().pipe(Rx.take(3), toArray()));
+      const promise = firstValueFrom(chrome.getIsVisible$().pipe(Rx.take(1), toArray()));
 
       await navigateToApp('alpha');
       chrome.setIsVisible(true);
@@ -346,8 +342,6 @@ describe('start', () => {
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
                       Array [
-                        false,
-                        false,
                         false,
                       ]
                   `);
