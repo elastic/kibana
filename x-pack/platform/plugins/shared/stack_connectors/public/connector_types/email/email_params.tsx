@@ -99,7 +99,7 @@ export const EmailParamsFields = ({
     errors.cc !== undefined && Number(errors.cc.length) > 0 && cc !== undefined;
   const isBCCInvalid: boolean =
     errors.bcc !== undefined && Number(errors.bcc.length) > 0 && bcc !== undefined;
-  const isReplyToInValid: boolean =
+  const isReplyToInvalid: boolean =
     errors.replyTo !== undefined && Number(errors.replyTo.length) > 0 && replyTo !== undefined;
 
   const subjectLabel = i18n.translate(
@@ -282,7 +282,7 @@ export const EmailParamsFields = ({
         <EuiFormRow
           fullWidth
           error={errors.replyTo as string}
-          isInvalid={isReplyToInValid}
+          isInvalid={isReplyToInvalid}
           label={i18n.translate(
             'xpack.stackConnectors.components.email.recipientReplyToTextFieldLabel',
             {
@@ -293,7 +293,7 @@ export const EmailParamsFields = ({
           <EuiComboBox
             autoFocus
             noSuggestions
-            isInvalid={isReplyToInValid}
+            isInvalid={isReplyToInvalid}
             isDisabled={isDisabled}
             isLoading={isLoading}
             fullWidth
