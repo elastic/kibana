@@ -32,6 +32,7 @@ export const MetricsExperienceGrid = ({
   fetchParams,
   isChartLoading: isDiscoverLoading,
   isComponentVisible,
+  isTabSelected,
 }: UnifiedMetricsGridProps) => {
   const { searchTerm, isFullscreen, onSearchTermChange, onToggleFullscreen } =
     useMetricsExperienceState();
@@ -116,6 +117,7 @@ export const MetricsExperienceGrid = ({
         actions={actions}
         histogramCss={histogramCss}
         isDiscoverLoading={isDiscoverLoading}
+        isTabSelected={isTabSelected}
       />
     </ChartsGrid>
   );
