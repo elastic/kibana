@@ -244,7 +244,9 @@ describe('getSkillsInstructions', () => {
 
       const result = await getSkillsInstructions({ filesystem });
 
-      expect(result).toContain('Description with "quotes" and <tags> and &ampersands');
+      expect(result).toContain(
+        'Description with &quot;quotes&quot; and &lt;tags&gt; and &amp;ampersands'
+      );
     });
 
     it('handles very long skill descriptions', async () => {

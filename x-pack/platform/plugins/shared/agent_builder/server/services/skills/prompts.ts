@@ -41,8 +41,8 @@ export const getSkillsInstructions = async ({
                 path: skillFileEntry.path,
               },
               children: [
-                { tagName: 'name', content: skillFileEntry.metadata.skill_name },
-                { tagName: 'description', content: skillFileEntry.metadata.skill_description },
+                { tagName: 'name', children: [skillFileEntry.metadata.skill_name] },
+                { tagName: 'description', children: [skillFileEntry.metadata.skill_description] },
               ],
             })),
           }),
