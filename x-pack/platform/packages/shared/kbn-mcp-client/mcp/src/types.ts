@@ -68,6 +68,11 @@ export function isTextPart(part: ContentPart | null | undefined): part is TextPa
 export interface CallToolResponse {
   content: ContentPart[];
   /**
+   * When parseResponse was requested, the first content part's text is parsed as JSON
+   * and the `response` property is set here. Null if parsing fails or text is missing.
+   */
+  parsed?: unknown;
+  /**
    * Optional provider metadata for attribution and audit trails.
    * Included in tool execution results for tracking and logging.
    */

@@ -298,6 +298,19 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       const result = await this.mcpClient.callTool(callParams);
       this.logger.debug(`Successfully called tool: ${params.name}`);
 
+      if (params.parseResponse) {
+        const text = (result.content?.[0] as { text?: string } | undefined)?.text ?? null;
+        let parsed: unknown = null;
+        if (text != null) {
+          try {
+            parsed = JSON.parse(text);
+          } catch {
+            parsed = null;
+          }
+        }
+        return { ...result, parsed };
+      }
+
       return result;
     } catch (error) {
       // On error, ensure connection state is cleaned up

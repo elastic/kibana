@@ -23,6 +23,7 @@ export const McpListToolsParamsSchema = z.object({
 export const McpCallToolParamsSchema = z.object({
   name: z.string(),
   arguments: z.record(z.string(), z.any()).optional(),
+  parseResponse: z.boolean().optional(),
 });
 
 // Response/Output Schemas

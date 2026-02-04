@@ -90,4 +90,5 @@ export const ListToolsRequestSchema = z.object({
 export const CallToolRequestSchema = z.object({
   name: z.string(),
   arguments: z.record(z.string(), z.any()).optional(),
+  parseResponse: z.boolean().optional(),
 });

@@ -440,6 +440,75 @@ describe('McpConnector', () => {
       });
       expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1); // Disconnect in finally block
     });
+
+    it('should parse response and return entire parsed JSON when parseResponse is true', async () => {
+      const mockCallResult: CallToolResponse = {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ response: { answer: 42 }, other: 'ignored' }),
+          },
+        ],
+      };
+
+      mockMcpClient.isConnected.mockReturnValue(true);
+      mockMcpClient.callTool.mockResolvedValue(mockCallResult);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      const result = await connector.callTool(
+        { name: 'test-tool', parseResponse: true },
+        connectorUsageCollector
+      );
+
+      expect(result.parsed).toEqual({ response: { answer: 42 }, other: 'ignored' });
+      expect(result.content).toEqual(mockCallResult.content);
+    });
+
+    it('should return parsed null when parseResponse is true and text is invalid JSON', async () => {
+      const mockCallResult: CallToolResponse = {
+        content: [
+          {
+            type: 'text',
+            text: 'not valid json {{{',
+          },
+        ],
+      };
+
+      mockMcpClient.isConnected.mockReturnValue(true);
+      mockMcpClient.callTool.mockResolvedValue(mockCallResult);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      const result = await connector.callTool(
+        { name: 'test-tool', parseResponse: true },
+        connectorUsageCollector
+      );
+
+      expect(result.parsed).toBeNull();
+      expect(result.content).toEqual(mockCallResult.content);
+    });
+
+    it('should return full parsed JSON when parseResponse is true regardless of shape', async () => {
+      const mockCallResult: CallToolResponse = {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ foo: 'bar' }),
+          },
+        ],
+      };
+
+      mockMcpClient.isConnected.mockReturnValue(true);
+      mockMcpClient.callTool.mockResolvedValue(mockCallResult);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      const result = await connector.callTool(
+        { name: 'test-tool', parseResponse: true },
+        connectorUsageCollector
+      );
+
+      expect(result.parsed).toEqual({ foo: 'bar' });
+      expect(result.content).toEqual(mockCallResult.content);
+    });
   });
 
   describe('connection management', () => {
