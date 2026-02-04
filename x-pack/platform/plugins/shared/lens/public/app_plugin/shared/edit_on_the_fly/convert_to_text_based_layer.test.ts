@@ -137,7 +137,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
 
   const defaultConvertibleLayers: ConvertibleLayer[] = [
     createConvertibleLayer(
-      `FROM test-index | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS bucket_0_0 = COUNT(*) BY @timestamp = BUCKET(@timestamp, 30 minutes) | SORT @timestamp ASC`,
+      `FROM test-index | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS bucket_0_0 = COUNT(*) BY @timestamp = BUCKET(@timestamp, 30 minutes)`,
       {
         bucket_0_0: createColumnMapping('col2', 'Count of records', 'number'),
         '@timestamp': createColumnMapping('col1', '@timestamp', 'date', {
