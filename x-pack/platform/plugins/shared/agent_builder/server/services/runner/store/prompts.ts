@@ -17,6 +17,7 @@ const tools = {
   ls: sanitizeToolId(filestoreTools.ls),
   glob: sanitizeToolId(filestoreTools.glob),
   grep: sanitizeToolId(filestoreTools.grep),
+  diff: sanitizeToolId(filestoreTools.diff),
 };
 
 export const getFileSystemInstructions = async ({
@@ -38,6 +39,7 @@ export const getFileSystemInstructions = async ({
   - ${tools.ls}: list the content of a directory
   - ${tools.glob}: find files matching a glob pattern
   - ${tools.grep}: search for a text pattern in files
+  - ${tools.diff}: diff two versions of a file
 
   Please refer to each tool's description and schema for more information on how to use it.
 
