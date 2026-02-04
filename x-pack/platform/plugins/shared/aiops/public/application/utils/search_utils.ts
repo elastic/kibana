@@ -20,7 +20,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getDefaultDSLQuery, type SearchQueryLanguage } from '@kbn/ml-query-utils';
 
-function getSavedSearchSource(savedSearch: SavedSearch) {
+function getSavedSearchSource(savedSearch: Pick<SavedSearch, 'searchSource'>) {
   return savedSearch &&
     'searchSource' in savedSearch &&
     savedSearch?.searchSource instanceof SearchSource
@@ -42,7 +42,7 @@ export function getEsQueryFromSavedSearch({
 }: {
   dataView: DataView;
   uiSettings: IUiSettingsClient;
-  savedSearch: SavedSearch | null | undefined;
+  savedSearch: Pick<SavedSearch, 'searchSource'> | null | undefined;
   query?: Query;
   filters?: Filter[];
   filterManager?: FilterManager;

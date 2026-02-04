@@ -7,27 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, type FC, useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import React, { memo, type FC, useState, useEffect, useMemo } from 'react';
+import useLatest from 'react-use/lib/useLatest';
 import { PatternAnalysisTable, type PatternAnalysisTableProps } from './pattern_analysis_table';
+import { useCurrentTabSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { createSearchSource } from '../../state_management/utils/create_search_source';
+import { searchSourceComparator } from '../../state_management/redux/selectors/unsaved_changes';
 
 export const PatternAnalysisTab: FC<Omit<PatternAnalysisTableProps, 'query' | 'filters'>> = memo(
   (props) => {
     const services = useDiscoverServices();
-    const searchSourceUpdate = useObservable(props.stateContainer.getSearchSourceUpdates$());
+    const appState = useCurrentTabSelector((state) => state.appState);
+    const globalState = useCurrentTabSelector((state) => state.globalState);
+
+    const [searchSource, setSearchSource] = useState(() => {
+      return createSearchSource({
+        dataView: props.dataView,
+        appState,
+        globalState,
+        services,
+      });
+    });
+    const searchSourceRef = useLatest(searchSource);
+
+    useEffect(() => {
+      const newSearchSource = createSearchSource({
+        dataView: props.dataView,
+        appState,
+        globalState,
+        services,
+      });
+      if (
+        !searchSourceComparator(
+          searchSourceRef.current.getSerializedFields(),
+          newSearchSource.getSerializedFields()
+        )
+      ) {
+        setSearchSource(newSearchSource);
+      }
+    }, [appState, globalState, props.dataView, services, searchSourceRef]);
 
     const savedSearch = useMemo(() => {
       const newSavedSearch = services.savedSearch.getNew();
-      if (searchSourceUpdate?.value) {
-        newSavedSearch.searchSource = searchSourceUpdate.value;
-      }
+      newSavedSearch.searchSource = searchSource;
       return newSavedSearch;
-    }, [searchSourceUpdate, services.savedSearch]);
-
-    if (!searchSourceUpdate?.value) {
-      return null;
-    }
+    }, [services.savedSearch, searchSource]);
 
     return (
       <PatternAnalysisTable
