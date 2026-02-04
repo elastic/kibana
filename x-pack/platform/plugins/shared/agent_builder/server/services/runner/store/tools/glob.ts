@@ -38,7 +38,7 @@ export const globTool = ({
   };
 };
 
-type FileEntrySummary = Omit<FilestoreEntry, 'type' | 'content'>;
+type FileEntrySummary = Pick<FilestoreEntry, 'path' | 'metadata'>;
 
 function toSummary(entry: FilestoreEntry): FileEntrySummary {
   return {
