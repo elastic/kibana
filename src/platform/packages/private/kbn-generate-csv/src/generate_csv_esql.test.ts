@@ -317,7 +317,7 @@ describe('CsvESQLGenerator', () => {
       );
 
       expect(mockDataClientSearchFn).toBeCalledWith(
-        { params: { filter: undefined, locale: 'en', query: '' } },
+        { params: { filter: undefined, locale: 'en', query: '', time_zone: 'America/New_York' } },
         {
           strategy: 'esql',
           transport: {
@@ -396,7 +396,7 @@ describe('CsvESQLGenerator', () => {
       );
 
       expect(mockDataClientSearchFn).toBeCalledWith(
-        { params: { filter: undefined, locale: 'en', query: '' } },
+        { params: { filter: undefined, locale: 'en', query: '', time_zone: 'America/New_York' } },
         {
           strategy: 'esql',
           transport: {
@@ -494,6 +494,7 @@ describe('CsvESQLGenerator', () => {
             },
             locale: 'en',
             query: 'FROM kibana_sample_data_logs | LIMIT 10 | LIMIT 500',
+            time_zone: 'America/New_York',
           },
         },
         {
@@ -568,6 +569,7 @@ describe('CsvESQLGenerator', () => {
             ]),
             locale: 'en',
             query: `${query.esql} | LIMIT 500`,
+            time_zone: 'America/New_York',
           },
         },
         {
@@ -607,6 +609,7 @@ describe('CsvESQLGenerator', () => {
             filter: undefined,
             locale: 'en',
             query: 'FROM custom-metrics | LIMIT 500',
+            time_zone: 'America/New_York',
           },
         },
         {
