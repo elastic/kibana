@@ -23,6 +23,7 @@ import type {
   ChartSectionConfiguration,
   ChartSectionConfigurationExtensionParams,
 } from '../../../../types';
+import { DataSourceCategory } from '../../../../profiles';
 import { useAppStateSelector } from '../../../../../application/main/state_management/redux';
 
 type UnifiedGridProps = ChartSectionProps & {
@@ -58,9 +59,14 @@ const createChartSectionProps = (overrides: Partial<ChartSectionProps> = {}): Ch
 
 const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
   const getChartSection = createChartSection();
+
+  if (!getChartSection) {
+    throw new Error('getChartSectionConfiguration was not created.');
+  }
+
   const configFactory = getChartSection(
-    () => ({ replaceDefaultChart: false }) as ChartSectionConfiguration,
-    { context: {} as object }
+    () => ({ replaceDefaultChart: false } as ChartSectionConfiguration),
+    { context: { category: DataSourceCategory.Metrics } }
   );
 
   if (!configFactory) {
