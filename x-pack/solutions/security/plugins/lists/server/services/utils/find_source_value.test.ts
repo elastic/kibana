@@ -242,46 +242,6 @@ describe('find_source_value', () => {
       const value = findSourceValue(listItem);
       expect(value).toEqual(null);
     });
-
-    test('it will custom deserialize a single value with a custom deserializer', () => {
-      const listItem: SearchEsListItemSchema = {
-        ...getSearchEsListItemsAsAllUndefinedMock(),
-        deserializer: 'custom value: {{value}}',
-        text: 'www.example.com',
-      };
-      const value = findSourceValue(listItem);
-      expect(value).toEqual('custom value: www.example.com');
-    });
-
-    test('it will custom deserialize a text with a custom deserializer', () => {
-      const listItem: SearchEsListItemSchema = {
-        ...getSearchEsListItemsAsAllUndefinedMock(),
-        deserializer: 'custom value: {{value}}',
-        text: 'www.example.com',
-      };
-      const value = findSourceValue(listItem);
-      expect(value).toEqual('custom value: www.example.com');
-    });
-
-    test('it will custom deserialize a date_range with a custom deserializer', () => {
-      const listItem: SearchEsListItemSchema = {
-        ...getSearchEsListItemsAsAllUndefinedMock(),
-        date_range: { gte: '2020-07-01T23:10:19.505Z', lte: '2020-07-01T23:10:19.505Z' },
-        deserializer: 'custom value: {{gte}} {{lte}}',
-      };
-      const value = findSourceValue(listItem);
-      expect(value).toEqual('custom value: 2020-07-01T23:10:19.505Z 2020-07-01T23:10:19.505Z');
-    });
-
-    test('it will custom deserialize a ip_range with a custom deserializer using lte, gte', () => {
-      const listItem: SearchEsListItemSchema = {
-        ...getSearchEsListItemsAsAllUndefinedMock(),
-        deserializer: 'custom value: {{gte}} {{lte}}',
-        ip_range: { gte: '127.0.0.1', lte: '127.0.0.2' },
-      };
-      const value = findSourceValue(listItem);
-      expect(value).toEqual('custom value: 127.0.0.1 127.0.0.2');
-    });
   });
 
   describe('deserializeValue', () => {
@@ -289,7 +249,6 @@ describe('find_source_value', () => {
       const deserialized = deserializeValue({
         defaultDeserializer: DEFAULT_VALUE,
         defaultValueDeserializer: DEFAULT_VALUE,
-        deserializer: undefined,
         value: 'some value',
       });
       expect(deserialized).toEqual('some value');
@@ -299,7 +258,6 @@ describe('find_source_value', () => {
       const deserialized = deserializeValue({
         defaultDeserializer: DEFAULT_LTE_GTE,
         defaultValueDeserializer: DEFAULT_VALUE,
-        deserializer: undefined,
         value: 'some value',
       });
       expect(deserialized).toEqual('some value');
@@ -309,27 +267,6 @@ describe('find_source_value', () => {
       const deserialized = deserializeValue({
         defaultDeserializer: DEFAULT_LTE_GTE,
         defaultValueDeserializer: DEFAULT_VALUE,
-        deserializer: undefined,
-        value: { gte: '1', lte: '2' },
-      });
-      expect(deserialized).toEqual('1-2');
-    });
-
-    test('it deserializes a lte, gte value if given a custom deserializer', () => {
-      const deserialized = deserializeValue({
-        defaultDeserializer: DEFAULT_LTE_GTE,
-        defaultValueDeserializer: DEFAULT_VALUE,
-        deserializer: '{{{gte}}},{{{lte}}}',
-        value: { gte: '1', lte: '2' },
-      });
-      expect(deserialized).toEqual('1,2');
-    });
-
-    test('it deserializes using the default if given a lte, get value but the deserializer does not include gte and lte', () => {
-      const deserialized = deserializeValue({
-        defaultDeserializer: DEFAULT_LTE_GTE,
-        defaultValueDeserializer: DEFAULT_VALUE,
-        deserializer: '{{{value}}}',
         value: { gte: '1', lte: '2' },
       });
       expect(deserialized).toEqual('1-2');
@@ -339,27 +276,15 @@ describe('find_source_value', () => {
       const deserialized = deserializeValue({
         defaultDeserializer: DEFAULT_GEO_POINT,
         defaultValueDeserializer: DEFAULT_VALUE,
-        deserializer: undefined,
         value: { lat: '1', lon: '2' },
       });
       expect(deserialized).toEqual('1,2');
-    });
-
-    test('it deserializes a lat, lon value if given a custom deserializer', () => {
-      const deserialized = deserializeValue({
-        defaultDeserializer: DEFAULT_GEO_POINT,
-        defaultValueDeserializer: DEFAULT_VALUE,
-        deserializer: '{{{lat}}}-{{{lon}}}',
-        value: { lat: '1', lon: '2' },
-      });
-      expect(deserialized).toEqual('1-2');
     });
 
     test('it deserializes a lte, gte value with a comma if given a date range deserializer', () => {
       const deserialized = deserializeValue({
         defaultDeserializer: DEFAULT_DATE_RANGE,
         defaultValueDeserializer: DEFAULT_VALUE,
-        deserializer: undefined,
         value: { gte: '1', lte: '2' },
       });
       expect(deserialized).toEqual('1,2');

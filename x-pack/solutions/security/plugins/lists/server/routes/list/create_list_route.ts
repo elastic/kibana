@@ -38,8 +38,7 @@ export const createListRoute = (router: ListsPluginRouter): void => {
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { name, description, deserializer, id, serializer, type, meta, version } =
-            request.body;
+          const { name, description, id, type, meta, version } = request.body;
           const lists = await getListClient(context);
           const dataStreamExists = await lists.getListDataStreamExists();
           const indexExists = await lists.getListIndexExists();
@@ -68,12 +67,10 @@ export const createListRoute = (router: ListsPluginRouter): void => {
 
           const list = await lists.createList({
             description,
-            deserializer,
             id,
             immutable: false,
             meta,
             name,
-            serializer,
             type,
             version,
           });
