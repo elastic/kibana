@@ -141,8 +141,12 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
       }
 
       return [
-        ...getInputUnitsByPackage(agent.components, packagePolicy),
-        ...getOutputUnitsByPackage(agent.components, packagePolicy),
+        ...packagePolicy.inputs.flatMap((input) =>
+          getInputUnitsByPackage(agent.components ?? [], input.id ?? packagePolicy.id)
+        ),
+        ...packagePolicy.inputs.flatMap((input) =>
+          getOutputUnitsByPackage(agent.components ?? [], input.id ?? packagePolicy.id)
+        ),
       ].filter((u) => u.status === 'DEGRADED' || u.status === 'FAILED');
     }, [agent.components, packagePolicy]);
 
