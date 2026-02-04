@@ -331,6 +331,7 @@ export class VersionSpecificPolicyAssignmentTask {
     const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
       kuery: combinedKuery,
       perPage: AGENTS_BATCHSIZE,
+      showInactive: false,
     });
 
     for await (const agentsBatch of agentsFetcher) {
