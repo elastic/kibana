@@ -6,19 +6,39 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
-import { Controller } from 'react-hook-form';
+import React, { useEffect, useMemo } from 'react';
+import { Controller, useWatch } from 'react-hook-form';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Control, UseFormSetValue } from 'react-hook-form';
+import type { FormValues } from '../types';
 
 interface GroupBySelectProps {
-  control: any;
-  fields: Array<{ name: string; type: string }>;
+  control: Control<FormValues>;
+  columns: Array<{ name: string; type: string }>;
+  setValue: UseFormSetValue<FormValues>;
 }
 
-export const GroupBySelect: React.FC<GroupBySelectProps> = ({ control, fields }) => {
-  const options = fields.map((f) => ({ label: f.name, value: f.name }));
+export const GroupBySelect: React.FC<GroupBySelectProps> = ({ control, columns, setValue }) => {
+  const options = useMemo(
+    () => columns.map((col) => ({ label: col.name, value: col.name })),
+    [columns]
+  );
+  const columnNames = useMemo(() => new Set(columns.map((col) => col.name)), [columns]);
   const groupByRowId = 'ruleV2FormGroupByField';
+
+  // Watch for changes to groupingKey
+  const currentGroupingKey = useWatch({ control, name: 'groupingKey' });
+
+  // When columns change, filter out any invalid selections
+  useEffect(() => {
+    if (currentGroupingKey && currentGroupingKey.length > 0 && columnNames.size > 0) {
+      const validValues = currentGroupingKey.filter((val) => columnNames.has(val));
+      if (validValues.length !== currentGroupingKey.length) {
+        setValue('groupingKey', validValues);
+      }
+    }
+  }, [columnNames, currentGroupingKey, setValue]);
 
   return (
     <EuiFormRow
@@ -32,6 +52,7 @@ export const GroupBySelect: React.FC<GroupBySelectProps> = ({ control, fields })
         control={control}
         render={({ field }) => {
           const selectedOptions = (field.value ?? []).map((val) => ({ label: val }));
+
           return (
             <EuiComboBox
               id={groupByRowId}

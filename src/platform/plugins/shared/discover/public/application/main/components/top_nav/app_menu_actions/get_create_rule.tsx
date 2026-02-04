@@ -13,7 +13,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
 import { AppMenuActionId } from '@kbn/discover-utils';
-import { ESQLRuleFormFlyout } from '@kbn/esql-rule-form/flyout';
+import { ESQLRuleFormFlyout } from '@kbn/alerting-v2-rule-form';
 import { type Observable, type BehaviorSubject, filter, map, pairwise, startWith } from 'rxjs';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
@@ -38,7 +38,7 @@ export function CreateESQLRuleFlyout({
     (stateContainer.getCurrentTab().appState.query as AggregateQuery)?.esql || ''
   );
 
-  const { http, dataViews, notifications } = services;
+  const { http, data, dataViews, notifications } = services;
   const [queryError, setQueryError] = useState<Error | undefined>(undefined);
 
   useEffect(() => {
@@ -66,6 +66,7 @@ export function CreateESQLRuleFlyout({
       defaultTimeField={timeField}
       services={{
         http,
+        data,
         dataViews,
         notifications,
       }}

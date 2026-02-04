@@ -9,14 +9,15 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import type { FieldErrors, UseFormSetError } from 'react-hook-form';
-import type { FormValues } from './types';
+import type { FieldErrors, UseFormSetError, UseFormClearErrors } from 'react-hook-form';
+import type { FormValues } from '../form/types';
 
 interface ErrorCallOutProps {
   errors: FieldErrors<FormValues>;
   isSubmitted: boolean;
   isQueryInvalid?: boolean;
   setError: UseFormSetError<FormValues>;
+  clearErrors: UseFormClearErrors<FormValues>;
 }
 
 export const ErrorCallOut: React.FC<ErrorCallOutProps> = ({
@@ -24,6 +25,7 @@ export const ErrorCallOut: React.FC<ErrorCallOutProps> = ({
   isSubmitted,
   isQueryInvalid,
   setError,
+  clearErrors,
 }) => {
   useEffect(() => {
     if (isQueryInvalid) {
@@ -35,9 +37,9 @@ export const ErrorCallOut: React.FC<ErrorCallOutProps> = ({
         }),
       });
     } else {
-      setError('query', { type: 'manual', message: undefined });
+      clearErrors('query');
     }
-  }, [isQueryInvalid, setError]);
+  }, [isQueryInvalid, setError, clearErrors]);
 
   const errorMessages = Object.values(errors)
     .map((error) => error?.message)

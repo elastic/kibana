@@ -7,12 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-
-export const ESQLRuleFormFlyout = React.lazy(() =>
-  import('./esql_rule_form_flyout').then((module) => ({
-    default: module.ESQLRuleFormFlyout,
-  }))
-);
-
-export * from './types';
+module.exports = require('@kbn/storybook').defaultConfig;

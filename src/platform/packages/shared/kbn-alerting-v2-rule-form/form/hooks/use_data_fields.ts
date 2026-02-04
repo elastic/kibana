@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import { getFields } from '../utils';
+import { getFields } from '../../flyout/utils';
 
 interface UseDataFieldsProps {
   query: string;

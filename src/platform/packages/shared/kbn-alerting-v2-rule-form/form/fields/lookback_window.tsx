@@ -10,17 +10,20 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiFlexItem, EuiFormRow, EuiFlexGroup, EuiSelect, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getDurationUnitValue, getDurationNumberInItsUnit } from '../utils';
-import { getTimeOptions } from '../utils';
+import { getDurationUnitValue, getDurationNumberInItsUnit } from '../../flyout/utils';
+import { getTimeOptions } from '../../flyout/utils';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
 const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
 
-const SCHEDULE_TITLE_PREFIX = i18n.translate('xpack.esqlRuleForm.schedule.titlePrefix', {
-  defaultMessage: 'Every',
-});
+const LOOKBACK_WINDOW_TITLE_PREFIX = i18n.translate(
+  'xpack.esqlRuleForm.lookbackWindow.titlePrefix',
+  {
+    defaultMessage: 'Last',
+  }
+);
 
-const SCHEDULE_UNIT_LABEL = i18n.translate('xpack.esqlRuleForm.schedule.unitLabel', {
+const LOOKBACK_WINDOW_UNIT_LABEL = i18n.translate('xpack.esqlRuleForm.lookbackWindow.unitLabel', {
   defaultMessage: 'Unit',
 });
 
@@ -30,7 +33,7 @@ interface Props {
   errors?: string;
 }
 
-export const RuleSchedule: React.FC<Props> = React.forwardRef<HTMLInputElement, Props>(
+export const LookbackWindow: React.FC<Props> = React.forwardRef<HTMLInputElement, Props>(
   ({ value, onChange, errors }, ref) => {
     const intervalNumber = useMemo(() => {
       return getDurationNumberInItsUnit(value ?? 1);
@@ -67,7 +70,7 @@ export const RuleSchedule: React.FC<Props> = React.forwardRef<HTMLInputElement, 
     return (
       <EuiFormRow
         fullWidth
-        data-test-subj="ruleSchedule"
+        data-test-subj="lookbackWindow"
         display="rowCompressed"
         isInvalid={!!errors}
         error={errors}
@@ -76,16 +79,16 @@ export const RuleSchedule: React.FC<Props> = React.forwardRef<HTMLInputElement, 
           <EuiFlexItem grow={2}>
             <EuiFieldNumber
               fullWidth
-              prepend={[SCHEDULE_TITLE_PREFIX]}
+              prepend={[LOOKBACK_WINDOW_TITLE_PREFIX]}
               isInvalid={!!errors}
               value={intervalNumber}
               name="interval"
-              data-test-subj="ruleScheduleNumberInput"
+              data-test-subj="lookbackWindowNumberInput"
               onChange={onIntervalNumberChange}
               onKeyDown={onKeyDown}
-              id="ruleScheduleNumberInput"
-              itemID="ruleScheduleNumberInput"
-              aria-label={SCHEDULE_TITLE_PREFIX}
+              id="lookbackWindowNumberInput"
+              itemID="lookbackWindowNumberInput"
+              aria-label={LOOKBACK_WINDOW_TITLE_PREFIX}
               inputRef={ref}
             />
           </EuiFlexItem>
@@ -95,8 +98,8 @@ export const RuleSchedule: React.FC<Props> = React.forwardRef<HTMLInputElement, 
               value={intervalUnit}
               options={getTimeOptions(intervalNumber ?? 1)}
               onChange={onIntervalUnitChange}
-              data-test-subj="ruleScheduleUnitInput"
-              aria-label={SCHEDULE_UNIT_LABEL}
+              data-test-subj="lookbackWindowUnitInput"
+              aria-label={LOOKBACK_WINDOW_UNIT_LABEL}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

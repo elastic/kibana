@@ -1,6 +1,6 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/esql-rule-form",
+  "id": "@kbn/alerting-v2-rule-form",
   "owner": "@elastic/response-ops",
   "group": "platform",
   "visibility": "shared"

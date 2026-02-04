@@ -10,7 +10,7 @@
 import React, { useState, useEffect } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { firstFieldOption, getTimeFieldOptions } from '../utils';
+import { firstFieldOption, getTimeFieldOptions } from '../../flyout/utils';
 
 interface Props {
   value?: string;

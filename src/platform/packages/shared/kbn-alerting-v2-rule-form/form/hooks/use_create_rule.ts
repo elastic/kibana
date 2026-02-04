@@ -8,6 +8,7 @@
  */
 import { useMutation } from '@kbn/react-query';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
+import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../types';
 
 interface UseCreateRuleProps {
@@ -18,21 +19,27 @@ interface UseCreateRuleProps {
 
 export const useCreateRule = ({ http, notifications, onSuccess }: UseCreateRuleProps) => {
   const { mutate, isLoading } = useMutation(
-    (ruleData: FormValues) => {
-      const payload = {
-        ...ruleData,
-        enabled: true,
+    (formValues: FormValues) => {
+      const ruleData: CreateRuleData = {
+        name: formValues.name,
+        tags: formValues.tags,
+        schedule: formValues.schedule,
+        enabled: formValues.enabled,
+        query: formValues.query,
+        timeField: formValues.timeField,
+        lookbackWindow: formValues.lookbackWindow,
+        groupingKey: formValues.groupingKey,
       };
-      return http.post('/internal/alerting/v2/rule', {
-        body: JSON.stringify(payload),
+      return http.post<RuleResponse>('/internal/alerting/v2/rule', {
+        body: JSON.stringify(ruleData),
       });
     },
     {
-      onSuccess: (data: any) => {
+      onSuccess: (data: RuleResponse) => {
         notifications.toasts.addSuccess(`Rule '${data.name}' was created successfully`);
         onSuccess();
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
         notifications.toasts.addDanger(`Error creating rule: ${error.message}`);
       },
     }

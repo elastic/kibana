@@ -7,4 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './flyout';
+// Flyout component (lazy loaded)
+export { ESQLRuleFormFlyout } from './flyout';
+
+// Form components (lazy loaded)
+export { RuleFields } from './form';
+
+// Types
+export type { FormValues } from './form';
