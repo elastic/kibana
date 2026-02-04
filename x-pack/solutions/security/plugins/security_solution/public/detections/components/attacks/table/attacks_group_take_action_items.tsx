@@ -18,6 +18,7 @@ import { useAttackWorkflowStatusContextMenuItems } from '../../../hooks/attacks/
 import type { AttackWithWorkflowStatus } from '../../../hooks/attacks/bulk_actions/types';
 import { useAttackTagsContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_tags_context_menu_items';
 import { useAttackInvestigateInTimelineContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_investigate_in_timeline_context_menu_items';
+import { useAttackCaseContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items';
 
 interface AttacksGroupTakeActionItemsProps {
   attack: AttackDiscoveryAlert;
@@ -82,12 +83,20 @@ export function AttacksGroupTakeActionItems({
     closePopover,
   });
 
+  const { items: casesItems } = useAttackCaseContextMenuItems({ closePopover, attack });
+
   const defaultPanel: EuiContextMenuPanelDescriptor = useMemo(
     () => ({
       id: 0,
-      items: [...workflowItems, ...assignItems, ...tagsItems, ...investigateInTimelineItems],
+      items: [
+        ...workflowItems,
+        ...assignItems,
+        ...tagsItems,
+        ...investigateInTimelineItems,
+        ...casesItems,
+      ],
     }),
-    [workflowItems, assignItems, tagsItems, investigateInTimelineItems]
+    [workflowItems, assignItems, tagsItems, investigateInTimelineItems, casesItems]
   );
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
