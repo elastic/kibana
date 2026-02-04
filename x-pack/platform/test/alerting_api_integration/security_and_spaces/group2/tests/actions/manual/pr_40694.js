@@ -63,16 +63,30 @@ async function main() {
   console.log(`execute result: ${JSON.stringify(response, null, 4)}`);
 }
 
+function formatUrl(uri) {
+  const parsedUrl = new URL(`${KBN_URLBASE}/${uri}`);
+  const { username, password } = parsedUrl;
+  parsedUrl.username = '';
+  parsedUrl.password = '';
+  return {
+    url: parsedUrl.toString(),
+    authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+  };
+}
+
 async function httpGet(uri) {
-  const response = await fetch(`${KBN_URLBASE}/${uri}`);
+  const { url, authorization } = formatUrl(uri);
+  const response = await fetch(url, { headers: { authorization } });
   return response.json();
 }
 
 async function httpPost(uri, body) {
-  const response = await fetch(`${KBN_URLBASE}/${uri}`, {
+  const { url, authorization } = formatUrl(uri);
+  const response = await fetch(url, {
     method: 'post',
     body: JSON.stringify(body),
     headers: {
+      authorization,
       'Content-Type': 'application/json',
       'kbn-xsrf': 'what-evs',
     },
@@ -82,10 +96,12 @@ async function httpPost(uri, body) {
 }
 
 async function httpPut(uri, body) {
-  const response = await fetch(`${KBN_URLBASE}/${uri}`, {
+  const { url, authorization } = formatUrl(uri);
+  const response = await fetch(url, {
     method: 'put',
     body: JSON.stringify(body),
     headers: {
+      authorization,
       'Content-Type': 'application/json',
       'kbn-xsrf': 'what-evs',
     },
