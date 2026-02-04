@@ -537,7 +537,50 @@ function getParamZonePosition(commandText: string): PromqlPosition {
     return { type: 'after_param_keyword' };
   }
 
+  // Check if cursor is inside an open paren for query context (e.g., "PROMQL (" or "col0 = (")
+  if (isInsideQueryParen(commandText)) {
+    return { type: 'after_open_paren' };
+  }
+
   return { type: 'after_command' };
+}
+
+/**
+ * Detects if cursor is inside an open paren that starts a query context.
+ * Handles cases like "PROMQL (" or "PROMQL col0 = (" where the AST doesn't
+ * have a query node yet because the content is empty.
+ */
+function isInsideQueryParen(commandText: string): boolean {
+  const trimmed = commandText.trimEnd();
+
+  // Check for "(" or "= (" at the end, indicating start of query expression
+  if (trimmed.endsWith('(') || trimmed.endsWith('= (')) {
+    // Count open and close parens to ensure we're inside an unclosed paren
+    let depth = 0;
+    let inQuote: string | null = null;
+
+    for (const char of trimmed) {
+      if (inQuote) {
+        if (char === inQuote) {
+          inQuote = null;
+        }
+        continue;
+      }
+
+      if (char === '"' || char === "'") {
+        inQuote = char;
+      } else if (char === '(') {
+        depth++;
+      } else if (char === ')') {
+        depth--;
+      }
+    }
+
+    // If we have unclosed parens, we're inside query context
+    return depth > 0;
+  }
+
+  return false;
 }
 
 /** Extracts the trailing identifier from text (e.g., "start" from "end=value start"). */
@@ -686,7 +729,7 @@ export const PROMQL_REQUIRED_PARAMS = PROMQL_PARAMS.filter(({ required }) => req
 /* Matches "param=" or "param =" but not "endpoint=" for param "end". */
 const PARAM_ASSIGNMENT_PATTERNS = PROMQL_PARAM_NAMES.map((param) => ({
   param,
-  pattern: new RegExp(`\\b${param}\\s*=`, 'i'),
+  pattern: new RegExp(`${param}\\s*=`, 'i'),
 }));
 
 export function getPromqlParamDefinitions(): PromqlParamDefinition[] {

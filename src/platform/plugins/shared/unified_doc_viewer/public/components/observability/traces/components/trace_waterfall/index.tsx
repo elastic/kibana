@@ -10,11 +10,16 @@
 import { EuiDelayRender } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { TRACE_ID_FIELD } from '@kbn/discover-utils';
+import { where } from '@kbn/esql-composer';
+import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
 import { TraceWaterfallTourStep } from './full_screen_waterfall_tour_step';
+import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
+import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
 
 interface Props {
   traceId: string;
@@ -38,16 +43,43 @@ const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace
 
 export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
   const { data, discoverShared } = getUnifiedDocViewerServices();
-  const FocusedTraceWaterfall = discoverShared.features.registry.getById(
-    'observability-focused-trace-waterfall'
-  )?.render;
+  const { indexes } = useDataSourcesContext();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
 
-  if (!FocusedTraceWaterfall) {
-    return null;
-  }
+  const FocusedTraceWaterfall = discoverShared.features.registry.getById(
+    'observability-focused-trace-waterfall'
+  )?.render;
+
+  const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
+    indexPattern: indexes.apm.traces,
+    whereClause: where(`${TRACE_ID_FIELD} == ?traceId`, { traceId }),
+  });
+
+  const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({
+    href: discoverUrl,
+    esql: esqlQueryString,
+    tabLabel: sectionTitle,
+    dataTestSubj: 'unifiedDocViewerObservabilityTracesOpenInDiscoverButton',
+  });
   const actionId = 'traceWaterfallFullScreenAction';
+
+  const actions = useMemo(
+    () => [
+      {
+        icon: 'fullScreen',
+        onClick: () => setShowFullScreenWaterfall(true),
+        label: fullScreenButtonLabel,
+        ariaLabel: fullScreenButtonLabel,
+        id: actionId,
+        dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
+      },
+      ...(openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
+    ],
+    [openInDiscoverSectionAction]
+  );
+
+  if (!FocusedTraceWaterfall) return null;
 
   return (
     <>
@@ -67,16 +99,7 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
         id="trace-waterfall"
         title={sectionTitle}
         description={sectionTip}
-        actions={[
-          {
-            icon: 'fullScreen',
-            onClick: () => setShowFullScreenWaterfall(true),
-            label: fullScreenButtonLabel,
-            ariaLabel: fullScreenButtonLabel,
-            id: actionId,
-            dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
-          },
-        ]}
+        actions={actions}
       >
         {docId ? (
           <FocusedTraceWaterfall

@@ -82,14 +82,13 @@ export const useStreamDescriptionApi = ({
         })
         .catch((error) => {
           if (!silent) {
-            notifications.toasts.addError(error, {
+            notifications.toasts.addError(getFormattedError(error), {
               title: i18n.translate(
                 'xpack.streams.streamDetailView.streamDescription.saveErrorTitle',
                 {
                   defaultMessage: 'Failed to save description',
                 }
               ),
-              toastMessage: getFormattedError(error).message,
             });
           }
         })
