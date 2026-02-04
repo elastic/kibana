@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -19,9 +19,10 @@ import { MetricInsightsFlyout } from '../../flyout/metrics_insights_flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
-import { createESQLQuery } from '../../../common/utils';
+import { createESQLQuery, createMetricFieldsMap, getMetricKey } from '../../../common/utils';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
+import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
@@ -53,15 +54,22 @@ export const MetricsGrid = ({
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
+  const { flyoutState, onFlyoutStateChange } = useMetricsExperienceState();
+  const fieldsMap = useMemo(() => createMetricFieldsMap(fields), [fields]);
 
-  const [expandedMetric, setExpandedMetric] = useState<
-    | {
-        index: number;
-        metric: MetricField;
-        esqlQuery: string;
-      }
-    | undefined
-  >();
+  const flyoutData = useMemo(() => {
+    if (!flyoutState) return undefined;
+    if (!flyoutState.metricKey?.name || !flyoutState.metricKey?.dataViewIndex) return undefined;
+
+    const key = getMetricKey(flyoutState.metricKey.dataViewIndex, flyoutState.metricKey.name);
+    const metric = fieldsMap.get(key);
+    if (!metric) return undefined;
+    return {
+      gridPosition: flyoutState.gridPosition,
+      metric,
+      esqlQuery: flyoutState.esqlQuery,
+    };
+  }, [flyoutState, fieldsMap]);
 
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(fields.length / gridColumns);
@@ -74,22 +82,32 @@ export const MetricsGrid = ({
       gridRef,
     });
 
-  const handleViewDetails = useCallback((index: number, esqlQuery: string, metric: MetricField) => {
-    setExpandedMetric({ index, metric, esqlQuery });
-  }, []);
+  const handleViewDetails = useCallback(
+    (gridPosition: number, esqlQuery: string, metric: MetricField) => {
+      onFlyoutStateChange({
+        gridPosition,
+        metricKey: {
+          name: metric.name,
+          dataViewIndex: metric.index,
+        },
+        esqlQuery,
+      });
+    },
+    [onFlyoutStateChange]
+  );
 
   const handleCloseFlyout = useCallback(() => {
-    if (!expandedMetric) {
+    if (!flyoutData) {
       return;
     }
 
-    const { rowIndex, colIndex } = getRowColFromIndex(expandedMetric.index);
-    setExpandedMetric(undefined);
+    const { rowIndex, colIndex } = getRowColFromIndex(flyoutData.gridPosition);
+    onFlyoutStateChange(undefined);
     // Use requestAnimationFrame to ensure the flyout is fully closed before focusing
     requestAnimationFrame(() => {
       focusCell(rowIndex, colIndex);
     });
-  }, [expandedMetric, focusCell, getRowColFromIndex]);
+  }, [flyoutData, focusCell, getRowColFromIndex, onFlyoutStateChange]);
 
   if (fields.length === 0) {
     return <EmptyState />;
@@ -155,10 +173,10 @@ export const MetricsGrid = ({
           })}
         </EuiFlexGrid>
       </A11yGridWrapper>
-      {expandedMetric && (
+      {flyoutData && (
         <MetricInsightsFlyout
-          metric={expandedMetric.metric}
-          esqlQuery={expandedMetric.esqlQuery}
+          metric={flyoutData.metric}
+          esqlQuery={flyoutData.esqlQuery}
           onClose={handleCloseFlyout}
         />
       )}

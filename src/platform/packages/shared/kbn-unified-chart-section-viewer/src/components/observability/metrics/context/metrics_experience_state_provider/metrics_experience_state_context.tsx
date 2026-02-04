@@ -12,6 +12,8 @@ import { createContext } from 'react';
 import type { Dimension } from '../../../../../types';
 import {
   type MetricsExperienceRestorableState,
+  type FlyoutState,
+  type FlyoutTabId,
   useRestorableState,
 } from '../../../../../restorable_state';
 
@@ -20,6 +22,8 @@ export interface MetricsExperienceStateContextValue extends MetricsExperienceRes
   onDimensionsChange: (value: Dimension[]) => void;
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
+  onFlyoutStateChange: (value: FlyoutState | undefined) => void;
+  onFlyoutTabChange: (value: FlyoutTabId) => void;
 }
 
 export const MetricsExperienceStateContext =
@@ -30,6 +34,7 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
   const [selectedDimensions, setSelectedDimensions] = useRestorableState('selectedDimensions', []);
   const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
+  const [flyoutState, setFlyoutState] = useRestorableState('flyoutState', undefined);
 
   const onDimensionsChange = useCallback(
     (nextDimensions: Dimension[]) => {
@@ -53,6 +58,23 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
     setIsFullscreen((prev) => !prev);
   }, [setIsFullscreen]);
 
+  const onFlyoutStateChange = useCallback(
+    (value: FlyoutState | undefined) => {
+      setFlyoutState(value);
+    },
+    [setFlyoutState]
+  );
+
+  const onFlyoutTabChange = useCallback(
+    (value: FlyoutTabId) => {
+      setFlyoutState((prev) => {
+        if (!prev) return prev;
+        return { ...prev, selectedTabId: value };
+      });
+    },
+    [setFlyoutState]
+  );
+
   return (
     <MetricsExperienceStateContext.Provider
       value={{
@@ -60,10 +82,13 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
         isFullscreen,
         searchTerm,
         selectedDimensions,
+        flyoutState,
         onPageChange,
         onDimensionsChange,
         onSearchTermChange,
         onToggleFullscreen,
+        onFlyoutStateChange,
+        onFlyoutTabChange,
       }}
     >
       {children}

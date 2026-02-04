@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import '@testing-library/jest-dom';
 import { fireEvent, render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { MetricsGridProps } from './metrics_grid';
@@ -20,6 +21,7 @@ import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/publ
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { createESQLQuery } from '../../../common/utils';
+import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 
 jest.mock('../../chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="chart" />),
@@ -37,6 +39,17 @@ jest.mock('../../../common/utils', () => ({
   }),
 }));
 
+jest.mock('../../flyout/metrics_insights_flyout', () => ({
+  MetricInsightsFlyout: jest.fn(({ metric }) => (
+    <div data-test-subj="metricsInsightsFlyout" data-metric-name={metric.name} />
+  )),
+}));
+
+jest.mock('./context/metrics_experience_state_provider', () => ({
+  useMetricsExperienceState: jest.fn(),
+}));
+
+const mockUseMetricsExperienceState = useMetricsExperienceState as jest.Mock;
 describe('MetricsGrid', () => {
   let discoverFetch$: UnifiedHistogramFetch$;
 
@@ -81,15 +94,24 @@ describe('MetricsGrid', () => {
     fetchParams,
     services,
     actions,
+    isTabSelected: true,
   };
 
   const renderMetricsGrid = (props: Partial<MetricsGridProps> = {}) => {
     return render(<MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} {...props} />);
   };
 
+  const mockOnFlyoutStateChange = jest.fn();
+  const mockOnFlyoutTabChange = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
     discoverFetch$ = getFetch$Mock(fetchParams);
+    mockUseMetricsExperienceState.mockReturnValue({
+      flyoutState: undefined,
+      onFlyoutStateChange: mockOnFlyoutStateChange,
+      onFlyoutTabChange: mockOnFlyoutTabChange,
+    });
   });
 
   afterEach(() => {
@@ -342,6 +364,100 @@ describe('MetricsGrid', () => {
         expect(gridCells[1]).toHaveAttribute('tabindex', '0');
         expect(gridCells[0]).toHaveAttribute('tabindex', '-1');
       });
+    });
+  });
+
+  describe('Flyout state management', () => {
+    it('does not render flyout when flyoutState is undefined', () => {
+      renderMetricsGrid();
+
+      expect(screen.queryByTestId('metricsInsightsFlyout')).not.toBeInTheDocument();
+    });
+
+    it('renders flyout when flyoutState has a valid metric', () => {
+      mockUseMetricsExperienceState.mockReturnValue({
+        flyoutState: {
+          gridPosition: 0,
+          metricKey: { name: 'system.cpu.utilization', dataViewIndex: 'metrics-*' },
+          esqlQuery: 'FROM metrics-*',
+        },
+        onFlyoutStateChange: mockOnFlyoutStateChange,
+        onFlyoutTabChange: mockOnFlyoutTabChange,
+      });
+
+      renderMetricsGrid();
+
+      const flyout = screen.getByTestId('metricsInsightsFlyout');
+      expect(flyout).toBeInTheDocument();
+      expect(flyout).toHaveAttribute('data-metric-name', 'system.cpu.utilization');
+    });
+
+    it('does not render flyout when flyoutState metric is not found in fields', () => {
+      mockUseMetricsExperienceState.mockReturnValue({
+        flyoutState: {
+          gridPosition: 0,
+          metricKey: { name: 'non.existent.metric', dataViewIndex: 'metrics-*' },
+          esqlQuery: 'FROM metrics-*',
+        },
+        onFlyoutStateChange: mockOnFlyoutStateChange,
+        onFlyoutTabChange: mockOnFlyoutTabChange,
+      });
+
+      renderMetricsGrid();
+
+      expect(screen.queryByTestId('metricsInsightsFlyout')).not.toBeInTheDocument();
+    });
+
+    it('reconstructs flyoutData correctly using metricKey', () => {
+      const expectedMetric = fields[1]; // system.memory.utilization
+
+      mockUseMetricsExperienceState.mockReturnValue({
+        flyoutState: {
+          gridPosition: 1,
+          metricKey: { name: expectedMetric.name, dataViewIndex: expectedMetric.index },
+          esqlQuery: 'FROM metrics-*',
+        },
+        onFlyoutStateChange: mockOnFlyoutStateChange,
+        onFlyoutTabChange: mockOnFlyoutTabChange,
+      });
+
+      renderMetricsGrid();
+
+      const flyout = screen.getByTestId('metricsInsightsFlyout');
+      expect(flyout).toHaveAttribute('data-metric-name', expectedMetric.name);
+    });
+
+    it('handles metrics with same name but different dataViewIndex', () => {
+      const fieldsWithDuplicateName: MetricsGridProps['fields'] = [
+        {
+          name: 'cpu.usage',
+          dimensions: [],
+          index: 'metrics-system-*',
+          type: ES_FIELD_TYPES.LONG,
+        },
+        {
+          name: 'cpu.usage',
+          dimensions: [],
+          index: 'metrics-kubernetes-*',
+          type: ES_FIELD_TYPES.LONG,
+        },
+      ];
+
+      mockUseMetricsExperienceState.mockReturnValue({
+        flyoutState: {
+          gridPosition: 1,
+          metricKey: { name: 'cpu.usage', dataViewIndex: 'metrics-kubernetes-*' },
+          esqlQuery: 'FROM metrics-kubernetes-*',
+        },
+        onFlyoutStateChange: mockOnFlyoutStateChange,
+        onFlyoutTabChange: mockOnFlyoutTabChange,
+      });
+
+      renderMetricsGrid({ fields: fieldsWithDuplicateName });
+
+      const flyout = screen.getByTestId('metricsInsightsFlyout');
+      expect(flyout).toBeInTheDocument();
+      expect(flyout).toHaveAttribute('data-metric-name', 'cpu.usage');
     });
   });
 });
