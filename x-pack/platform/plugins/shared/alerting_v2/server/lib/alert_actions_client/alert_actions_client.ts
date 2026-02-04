@@ -43,10 +43,6 @@ export class AlertActionsClient {
     groupHash: string;
     action: CreateAlertActionBody;
   }): Promise<void> {
-    this.logger.debug({
-      message: () =>
-        `Creating alert action for group_hash [${params.groupHash}] with action type [${params.action.action_type}].`,
-    });
     const [username, alertEvent] = await Promise.all([
       this.getUserName(),
       this.findLastAlertEventRecordOrThrow({
@@ -111,7 +107,7 @@ export class AlertActionsClient {
     let whereClause = esql.exp`TRUE`;
     for (const action of actions) {
       whereClause = esql.exp`${whereClause} OR (group_hash == ${action.group_hash} AND ${
-        'episode_id' in action ? esql.exp`episode_id == ${action.episode_id}` : esql.exp`true`
+        'episode_id' in action ? esql.exp`episode.id == ${action.episode_id}` : esql.exp`true`
       })`;
     }
 
@@ -120,7 +116,7 @@ export class AlertActionsClient {
       | WHERE type == "alert" AND (${whereClause})
       | STATS
         last_event_timestamp = MAX(@timestamp),
-        last_episode_id = LAST(episode_id, @timestamp),
+        last_episode_id = LAST(episode.id, @timestamp),
         rule_id = VALUES(rule.id)
         BY group_hash
       | KEEP last_event_timestamp, rule_id, group_hash, last_episode_id
@@ -161,13 +157,6 @@ export class AlertActionsClient {
     episodeId?: string;
   }): Promise<AlertEventRecord> {
     const { groupHash, episodeId } = params;
-    this.logger.debug({
-      message: () =>
-        `Fetching last alert event record for group_hash [${groupHash}]${
-          episodeId ? ` and episode_id [${episodeId}]` : ''
-        }.`,
-    });
-
     const query = esql`
       FROM ${ALERT_EVENTS_DATA_STREAM}
       | WHERE type == "alert" AND group_hash == ${groupHash} AND ${
@@ -177,11 +166,6 @@ export class AlertActionsClient {
       | RENAME rule.id AS rule_id, episode.id AS episode_id
       | KEEP @timestamp, group_hash, episode_id, rule_id
       | LIMIT 1`.toRequest();
-
-    this.logger.debug({
-      message: () =>
-        `Executing ESQL query to find last alert event record: ${JSON.stringify(query.query)}`,
-    });
 
     const result = queryResponseToRecords<AlertEventRecord>(
       await this.queryService.executeQuery({ query: query.query })
