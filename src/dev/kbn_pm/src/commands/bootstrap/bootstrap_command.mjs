@@ -53,7 +53,6 @@ export const command = {
                           settings for local development. Disable this process either pass this flag or set
                           the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
     --allow-root         Required supplementary flag if you're running bootstrap as root.
-    --no-cache           Turns caches off on involved processes (Moon).
     --quiet              Prevent logging more than basic success/error messages
   `,
   reportTimings: {
@@ -69,7 +68,6 @@ export const command = {
     const forceInstall = args.getBooleanValue('force-install');
     const shouldInstall =
       forceInstall || !(await areNodeModulesPresent()) || !(await checkYarnIntegrity(log));
-    const noCache = args.getBooleanValue('no-cache') ?? forceInstall;
 
     const { packageManifestPaths, tsConfigRepoRels } = await time('discovery', discovery);
 
@@ -118,7 +116,7 @@ export const command = {
         await moonRun(':extract-version-dependencies', {
           pipe: !quiet,
           quiet,
-          noCache,
+          noCache: forceInstall,
         });
         log.success('relevant versions extracted for packages');
       }),
@@ -127,7 +125,7 @@ export const command = {
         await moonRun([':build-webpack'], {
           pipe: !quiet,
           quiet,
-          noCache,
+          noCache: forceInstall,
         });
         log.success('shared webpack bundles built');
       }),
