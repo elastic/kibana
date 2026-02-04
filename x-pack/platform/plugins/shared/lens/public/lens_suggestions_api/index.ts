@@ -7,6 +7,7 @@
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ChartType, mapVisToChartType } from '@kbn/visualization-utils';
+import { Parser } from '@kbn/esql-language';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import type {
   DatasourceMap,
@@ -69,6 +70,11 @@ const shouldShowLineChart = (
   const esqlQuery = context.query?.esql;
 
   if (!esqlQuery) return undefined;
+
+  const { root } = Parser.parse(esqlQuery);
+  const isPromql = root.commands.find(({ name }) => name === 'promql');
+
+  if (isPromql) return true;
 
   // Check if there's at least one date column (for x-axis)
   const hasDateColumn = columns.some((col) => col.meta?.type === 'date');
