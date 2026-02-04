@@ -165,42 +165,53 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
       return { isValid: false, errors };
     }
 
-    // Validate that esql is defined (required for upsert)
-    if (!this._definition.query.esql || this._definition.query.esql.trim() === '') {
-      errors.push(new Error('ES|QL query cannot be empty'));
-      return { isValid: false, errors };
-    }
+    // When only query_streams references are being updated (e.g. parent updated via cascading
+    // change when adding a child), the definition may not include the ES|QL query. Skip ES|QL
+    // validations in that case.
+    const existingStream = startingState.get(this._definition.name);
+    const isQueryStreamsOnlyUpdate =
+      existingStream != null &&
+      Streams.QueryStream.Definition.is(existingStream.definition) &&
+      (!this._definition.query.esql || this._definition.query.esql.trim() === '');
 
-    // Validate ES|QL syntax
-    try {
-      const { errors: esqlErrors } = await validateQuery(this._definition.query.esql);
-      if (esqlErrors && esqlErrors.length > 0) {
-        const errorMessages = esqlErrors.map((error) => {
-          if ('text' in error) {
-            return error.text;
-          }
-          if ('message' in error) {
-            return error.message;
-          }
-          return 'Unknown ES|QL syntax error';
-        });
-        errors.push(...errorMessages.map((msg) => new Error(`ES|QL syntax error: ${msg}`)));
+    if (!isQueryStreamsOnlyUpdate) {
+      // Validate that esql is defined (required for create or when updating the query)
+      if (!this._definition.query.esql || this._definition.query.esql.trim() === '') {
+        errors.push(new Error('ES|QL query cannot be empty'));
+        return { isValid: false, errors };
       }
-    } catch (error) {
-      errors.push(new Error(`Failed to validate ES|QL query: ${error.message}`));
-    }
 
-    // Validate the ES|QL query can be executed (basic test with LIMIT 0)
-    try {
-      await this.dependencies.scopedClusterClient.asCurrentUser.esql.query({
-        query: `${this._definition.query.esql}\n| LIMIT 0`,
-        format: 'json',
-      });
-    } catch (error) {
-      if (error.message) {
-        errors.push(new Error(`ES|QL query execution validation failed: ${error.message}`));
-      } else {
-        errors.push(new Error('ES|QL query execution validation failed'));
+      // Validate ES|QL syntax
+      try {
+        const { errors: esqlErrors } = await validateQuery(this._definition.query.esql);
+        if (esqlErrors && esqlErrors.length > 0) {
+          const errorMessages = esqlErrors.map((error) => {
+            if ('text' in error) {
+              return error.text;
+            }
+            if ('message' in error) {
+              return error.message;
+            }
+            return 'Unknown ES|QL syntax error';
+          });
+          errors.push(...errorMessages.map((msg) => new Error(`ES|QL syntax error: ${msg}`)));
+        }
+      } catch (error) {
+        errors.push(new Error(`Failed to validate ES|QL query: ${error.message}`));
+      }
+
+      // Validate the ES|QL query can be executed (basic test with LIMIT 0)
+      try {
+        await this.dependencies.scopedClusterClient.asCurrentUser.esql.query({
+          query: `${this._definition.query.esql}\n| LIMIT 0`,
+          format: 'json',
+        });
+      } catch (error) {
+        if (error.message) {
+          errors.push(new Error(`ES|QL query execution validation failed: ${error.message}`));
+        } else {
+          errors.push(new Error('ES|QL query execution validation failed'));
+        }
       }
     }
 
@@ -215,7 +226,6 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
     }
 
     // Check for conflicts with existing streams
-    const existingStream = startingState.get(this._definition.name);
     if (existingStream && !Streams.QueryStream.Definition.is(existingStream.definition)) {
       errors.push(
         new Error(
