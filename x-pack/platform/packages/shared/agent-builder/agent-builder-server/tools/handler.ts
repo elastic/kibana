@@ -9,6 +9,7 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type {
@@ -20,6 +21,7 @@ import type {
   ToolPromptManager,
   ToolStateManager,
 } from '../runner';
+import type { IToolFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
 
 /**
@@ -88,6 +90,10 @@ export interface ToolHandlerContext {
    */
   esClient: IScopedClusterClient;
   /**
+   * Saved objects client scoped to the current user.
+   */
+  savedObjectsClient: SavedObjectsClientContract;
+  /**
    * Inference model provider scoped to the current user.
    * Can be used to access the inference APIs or chatModel.
    */
@@ -125,4 +131,8 @@ export interface ToolHandlerContext {
    * Allows tools to create, read, update, and delete attachments that persist across conversation rounds.
    */
   attachments: AttachmentStateManager;
+  /**
+   * File store to access data from the agent's virtual filesystem
+   */
+  filestore: IToolFileStore;
 }
