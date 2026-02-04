@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiTableSortingType } from '@elastic/eui';
 import type { Pagination } from '@elastic/eui';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useCallback, useMemo } from 'react';
@@ -20,12 +19,19 @@ import {
 } from '../components/all_inference_endpoints/types';
 import { getModelId } from '../utils/get_model_id';
 
+interface TableSorting {
+  sort: {
+    field: SortFieldInferenceEndpoint;
+    direction: SortOrder;
+  };
+}
+
 interface UseTableDataReturn {
   tableData: InferenceInferenceEndpointInfo[];
   sortedTableData: InferenceInferenceEndpointInfo[];
   paginatedSortedTableData: InferenceInferenceEndpointInfo[];
   pagination: Pagination;
-  sorting: EuiTableSortingType<InferenceInferenceEndpointInfo>;
+  sorting: TableSorting;
 }
 
 export const useTableData = (
@@ -106,7 +112,7 @@ export const useTableData = (
     return sortedTableData.slice(startIndex, endIndex);
   }, [sortedTableData, pagination]);
 
-  const sorting = useMemo(
+  const sorting: TableSorting = useMemo(
     () => ({
       sort: {
         direction: queryParams.sortOrder,
