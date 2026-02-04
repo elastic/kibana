@@ -10,4 +10,4 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { readResponseBodySchema } from './schemas';
 
-export type MarkdownReadResponseBody = TypeOf<ReturnType<typeof readResponseBodySchema>>;
+export type MarkdownReadResponseBody = TypeOf<typeof readResponseBodySchema>;

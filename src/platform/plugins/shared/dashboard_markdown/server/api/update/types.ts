@@ -10,5 +10,5 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { updateRequestBodySchema, updateResponseBodySchema } from './schemas';
 
-export type MarkdownUpdateRequestBody = TypeOf<ReturnType<typeof updateRequestBodySchema>>;
-export type MarkdownUpdateResponseBody = TypeOf<ReturnType<typeof updateResponseBodySchema>>;
+export type MarkdownUpdateRequestBody = TypeOf<typeof updateRequestBodySchema>;
+export type MarkdownUpdateResponseBody = TypeOf<typeof updateResponseBodySchema>;
