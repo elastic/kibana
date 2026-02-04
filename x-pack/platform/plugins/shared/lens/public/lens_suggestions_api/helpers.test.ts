@@ -8,6 +8,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import {
   mergeSuggestionWithVisContext,
   injectESQLQueryIntoLensLayers,
+  shouldUseLineChart,
   switchVisualizationType,
 } from './helpers';
 import { mockAllSuggestions, createMockVisualization } from '../mocks';
@@ -929,6 +930,119 @@ describe('lens suggestions api helpers', () => {
         ]);
         expect(mockXYVisualization.switchVisualizationType).toHaveBeenCalled();
         expect(mockPieVisualization.switchVisualizationType).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('shouldUseLineChart', () => {
+      const baseTextBasedContext = {
+        dataViewSpec: {
+          id: 'index1',
+          title: 'index1',
+          name: 'DataView',
+        },
+        fieldName: '',
+        textBasedColumns: [
+          {
+            id: 'field1',
+            name: 'field1',
+            meta: {
+              type: 'number',
+            },
+          },
+        ] as DatatableColumn[],
+      };
+
+      it('returns undefined when context has no textBasedColumns', () => {
+        expect(
+          shouldUseLineChart({
+            dataViewSpec: {
+              id: 'index1',
+              title: 'index1',
+              name: 'DataView',
+            },
+            fieldName: '',
+          } as unknown as typeof baseTextBasedContext)
+        ).toBeUndefined();
+      });
+
+      it('returns undefined when context has no query', () => {
+        expect(
+          shouldUseLineChart(baseTextBasedContext as unknown as typeof context)
+        ).toBeUndefined();
+      });
+
+      it('returns false for non-TS / non-PROMQL ESQL', () => {
+        const nonTsContext = {
+          ...baseTextBasedContext,
+          query: {
+            esql: 'FROM index1 | keep field1',
+          },
+          textBasedColumns: [
+            ...baseTextBasedContext.textBasedColumns,
+            {
+              id: '@timestamp',
+              name: '@timestamp',
+              meta: {
+                type: 'date',
+              },
+            },
+          ] as DatatableColumn[],
+        };
+
+        expect(shouldUseLineChart(nonTsContext as unknown as typeof context)).toBe(false);
+      });
+
+      it('returns false for TS when there is no date column', () => {
+        const tsContext = {
+          ...baseTextBasedContext,
+          query: {
+            esql: 'TS foo',
+          },
+        };
+
+        expect(shouldUseLineChart(tsContext as unknown as typeof context)).toBe(false);
+      });
+
+      it('returns true for TS when there is a date column', () => {
+        const tsContext = {
+          ...baseTextBasedContext,
+          query: {
+            esql: 'TS foo',
+          },
+          textBasedColumns: [
+            ...baseTextBasedContext.textBasedColumns,
+            {
+              id: '@timestamp',
+              name: '@timestamp',
+              meta: {
+                type: 'date',
+              },
+            },
+          ] as DatatableColumn[],
+        };
+
+        expect(shouldUseLineChart(tsContext as unknown as typeof context)).toBe(true);
+      });
+
+      it('returns true for PROMQL when there is a date column', () => {
+        const promqlContext = {
+          ...baseTextBasedContext,
+          query: {
+            esql: 'PROMQL bytes_in',
+          },
+          textBasedColumns: [
+            ...baseTextBasedContext.textBasedColumns,
+            {
+              id: '@timestamp',
+              name: '@timestamp',
+              meta: {
+                type: 'date',
+              },
+            },
+          ] as DatatableColumn[],
+        };
+
+        expect(shouldUseLineChart(promqlContext as unknown as typeof context)).toBe(true);
       });
     });
   });
