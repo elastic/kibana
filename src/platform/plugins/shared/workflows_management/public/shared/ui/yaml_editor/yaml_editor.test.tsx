@@ -111,7 +111,12 @@ jest.mock('@kbn/code-editor', () => {
 // Mock lodash debounce to execute immediately in tests
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
-  debounce: (fn: Function) => fn,
+  debounce: (fn: Function) => {
+    const debouncedFn = fn as Function & { flush: () => void; cancel: () => void };
+    debouncedFn.flush = () => {};
+    debouncedFn.cancel = () => {};
+    return debouncedFn;
+  },
 }));
 
 // Mock the configureMonacoYamlSchema function
