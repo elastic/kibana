@@ -104,11 +104,18 @@ const workflowCreatedSchema: RootSchema<ReportWorkflowCreatedActionParams> = {
   },
   connectorTypes: {
     type: 'array',
-    items: {
-      type: 'keyword',
-    },
+    items: { type: 'keyword', _meta: { description: 'Connector type', optional: false } },
     _meta: {
       description: 'Unique connector types used in the workflow',
+      optional: false,
+    },
+  },
+  stepTypes: {
+    type: 'array',
+    items: { type: 'keyword', _meta: { description: 'Step type', optional: false } },
+    _meta: {
+      description:
+        'Unique step types used in the workflow (e.g., ["foreach", "if", "console"]). Enables easy aggregation in dashboards.',
       optional: false,
     },
   },
@@ -120,31 +127,12 @@ const workflowCreatedSchema: RootSchema<ReportWorkflowCreatedActionParams> = {
       optional: false,
     },
   },
-  hasScheduledTriggers: {
-    type: 'boolean',
+  triggerTypes: {
+    type: 'array',
+    items: { type: 'keyword', _meta: { description: 'Trigger type', optional: false } },
     _meta: {
-      description: 'Whether the workflow has scheduled triggers',
-      optional: false,
-    },
-  },
-  hasAlertTriggers: {
-    type: 'boolean',
-    _meta: {
-      description: 'Whether the workflow has alert triggers',
-      optional: false,
-    },
-  },
-  hasTimeout: {
-    type: 'boolean',
-    _meta: {
-      description: 'Whether the workflow has a timeout configured',
-      optional: false,
-    },
-  },
-  hasConcurrency: {
-    type: 'boolean',
-    _meta: {
-      description: 'Whether the workflow has concurrency settings configured',
+      description:
+        'Trigger types configured in the workflow (e.g., ["scheduled", "alert", "index"]). Enables easy aggregation in dashboards.',
       optional: false,
     },
   },
@@ -163,10 +151,33 @@ const workflowCreatedSchema: RootSchema<ReportWorkflowCreatedActionParams> = {
       optional: true,
     },
   },
-  hasOnFailure: {
+  settingsUsed: {
+    type: 'array',
+    items: { type: 'keyword', _meta: { description: 'Setting name', optional: false } },
+    _meta: {
+      description:
+        'Settings configured in the workflow (e.g., ["timeout", "concurrency", "on-failure"]). Enables easy aggregation in dashboards.',
+      optional: false,
+    },
+  },
+  hasDescription: {
     type: 'boolean',
     _meta: {
-      description: 'Whether the workflow has on-failure handling configured',
+      description: 'Whether the workflow has a description',
+      optional: false,
+    },
+  },
+  tagCount: {
+    type: 'integer',
+    _meta: {
+      description: 'Number of tags assigned to the workflow',
+      optional: false,
+    },
+  },
+  constCount: {
+    type: 'integer',
+    _meta: {
+      description: 'Number of constants defined in the workflow',
       optional: false,
     },
   },
@@ -198,7 +209,8 @@ const workflowUpdatedSchema: RootSchema<ReportWorkflowUpdatedActionParams> = {
     },
   },
   validationErrorTypes: {
-    type: 'keyword',
+    type: 'array',
+    items: { type: 'keyword', _meta: { description: 'Error type', optional: false } },
     _meta: {
       description:
         'Types of validation errors encountered (e.g., schema_error, step_name_duplicate)',
@@ -207,9 +219,7 @@ const workflowUpdatedSchema: RootSchema<ReportWorkflowUpdatedActionParams> = {
   },
   updatedFields: {
     type: 'array',
-    items: {
-      type: 'keyword',
-    },
+    items: { type: 'keyword', _meta: { description: 'Field name', optional: false } },
     _meta: {
       description:
         'List of field names that were updated (e.g., yaml, name, description, tags). Note: enabled changes are reported in a separate event.',
@@ -223,9 +233,7 @@ const workflowDeletedSchema: RootSchema<ReportWorkflowDeletedActionParams> = {
   ...eventNameSchema,
   workflowIds: {
     type: 'array',
-    items: {
-      type: 'keyword',
-    },
+    items: { type: 'keyword', _meta: { description: 'Workflow ID', optional: false } },
     _meta: {
       description: 'The workflow IDs being deleted',
       optional: false,

@@ -41,33 +41,31 @@ export interface WorkflowTelemetryMetadata {
    */
   connectorTypes: string[];
   /**
+   * Unique step types used in the workflow (e.g., ['foreach', 'if', 'console'])
+   * This array format enables easy aggregation in dashboards.
+   */
+  stepTypes: string[];
+  /**
    * Count of steps by step type (e.g., { 'foreach': 2, 'slack.webhook': 5, 'if': 1 })
    */
   stepTypeCounts: Record<string, number>;
   /**
-   * Whether the workflow has scheduled triggers
+   * Trigger types configured in the workflow (e.g., ['scheduled', 'alert', 'index'])
+   * This array format enables easy aggregation in dashboards.
    */
-  hasScheduledTriggers: boolean;
-  /**
-   * Whether the workflow has alert triggers
-   */
-  hasAlertTriggers: boolean;
+  triggerTypes: string[];
   /**
    * Number of inputs defined in the workflow
    */
   inputCount: number;
   /**
+   * Number of constants defined in the workflow
+   */
+  constCount: number;
+  /**
    * Number of triggers defined in the workflow
    */
   triggerCount: number;
-  /**
-   * Whether the workflow has a timeout configured
-   */
-  hasTimeout: boolean;
-  /**
-   * Whether the workflow has concurrency settings configured
-   */
-  hasConcurrency: boolean;
   /**
    * Maximum concurrent runs if concurrency is configured
    */
@@ -77,9 +75,18 @@ export interface WorkflowTelemetryMetadata {
    */
   concurrencyStrategy?: string;
   /**
-   * Whether the workflow has on-failure handling configured
+   * Settings configured in the workflow (e.g., ['timeout', 'concurrency', 'on-failure'])
+   * This array format enables easy aggregation in dashboards.
    */
-  hasOnFailure: boolean;
+  settingsUsed: string[];
+  /**
+   * Whether the workflow has a description
+   */
+  hasDescription: boolean;
+  /**
+   * Number of tags assigned to the workflow
+   */
+  tagCount: number;
 }
 
 /**
@@ -134,14 +141,15 @@ export function extractWorkflowMetadata(
     enabled: false,
     stepCount: 0,
     connectorTypes: [],
+    stepTypes: [],
     stepTypeCounts: {},
-    hasScheduledTriggers: false,
-    hasAlertTriggers: false,
+    triggerTypes: [],
     inputCount: 0,
+    constCount: 0,
     triggerCount: 0,
-    hasTimeout: false,
-    hasConcurrency: false,
-    hasOnFailure: false,
+    settingsUsed: [],
+    hasDescription: false,
+    tagCount: 0,
   };
 
   if (!workflow) {
@@ -149,7 +157,7 @@ export function extractWorkflowMetadata(
   }
 
   // Count steps (including nested)
-  const stepCount = countStepsRecursive(workflow.steps);
+  const stepCount = countStepsRecursive(workflow.steps || []);
 
   // Extract all step types and count occurrences
   const stepTypeCounts: Record<string, number> = {};
@@ -189,39 +197,55 @@ export function extractWorkflowMetadata(
     }
   }
 
-  countStepTypesRecursive(workflow.steps);
+  countStepTypesRecursive(workflow.steps || []);
 
-  // Check triggers
+  // Extract unique step types as an array for easy aggregation
+  const stepTypes = Object.keys(stepTypeCounts);
+
+  // Extract unique trigger types as an array for easy aggregation
   const triggers = workflow.triggers || [];
-  const hasScheduledTriggersValue = triggers.some((trigger) => trigger?.type === 'scheduled');
-  const hasAlertTriggers = triggers.some((trigger) => trigger?.type === 'alert');
+  const triggerTypes = [
+    ...new Set(
+      triggers.filter((trigger) => trigger?.type).map((trigger) => trigger.type as string)
+    ),
+  ];
 
   // Count inputs
   const inputCount = Array.isArray(workflow.inputs) ? workflow.inputs.length : 0;
 
+  // Count constants
+  const consts = (workflow as { consts?: Record<string, unknown> }).consts || {};
+  const constCount = Object.keys(consts).length;
+
   // Extract settings
   const enabled = Boolean(workflow.enabled);
-  const settings = workflow.settings;
-  const hasTimeout = Boolean(settings?.timeout);
-  const hasConcurrency = Boolean(settings?.concurrency);
+  const settings = workflow.settings || {};
   const concurrencyMax = settings?.concurrency?.max;
   const concurrencyStrategy = settings?.concurrency?.strategy;
-  const hasOnFailure = Boolean(settings?.['on-failure']);
+
+  // Build settingsUsed array from all settings keys for easy aggregation
+  const settingsUsed = Object.keys(settings);
+
+  // Extract description and tags info
+  const hasDescription = Boolean(workflow.description && workflow.description.trim().length > 0);
+  const tags = (workflow as { tags?: string[] }).tags || [];
+  const tagCount = tags.length;
 
   return {
     enabled,
     stepCount,
     connectorTypes: [...new Set(connectorTypes)], // Remove duplicates
+    stepTypes,
     stepTypeCounts,
-    hasScheduledTriggers: hasScheduledTriggersValue,
-    hasAlertTriggers,
+    triggerTypes,
     inputCount,
+    constCount,
     triggerCount: triggers.length,
-    hasTimeout,
-    hasConcurrency,
     ...(concurrencyMax !== undefined && { concurrencyMax }),
     ...(concurrencyStrategy && { concurrencyStrategy }),
-    hasOnFailure,
+    settingsUsed,
+    hasDescription,
+    tagCount,
   };
 }
 
@@ -319,12 +343,11 @@ export function extractStepInfoFromWorkflowYaml(
   }
 
   const workflowDefinition = parseResult.data;
-  const workflowId = workflowDefinition.id;
+  const workflowId = workflowDefinition.id as string | undefined;
 
   // Find the step by stepId
-  const stepInfo = workflowDefinition.steps
-    ? findStepRecursive(workflowDefinition.steps, stepId)
-    : null;
+  const steps = workflowDefinition.steps as WorkflowYaml['steps'] | undefined;
+  const stepInfo = steps ? findStepRecursive(steps, stepId) : null;
 
   if (!stepInfo) {
     return { stepType: 'unknown', workflowId };
