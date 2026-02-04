@@ -60,7 +60,7 @@ export function triggerVisualizeActions(
     contextualFields,
     originatingApp,
   };
-  uiActions.getTrigger(trigger).exec(triggerOptions);
+  uiActions.executeTriggerActions(trigger, triggerOptions);
 }
 
 export function triggerVisualizeActionsTextBasedLanguages(
@@ -78,7 +78,7 @@ export function triggerVisualizeActionsTextBasedLanguages(
     originatingApp,
     query,
   };
-  uiActions.getTrigger(VISUALIZE_FIELD_TRIGGER).exec(triggerOptions);
+  uiActions.executeTriggerActions(VISUALIZE_FIELD_TRIGGER, triggerOptions);
 }
 
 export interface VisualizeInformation {

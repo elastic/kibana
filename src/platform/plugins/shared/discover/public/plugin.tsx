@@ -39,11 +39,7 @@ import { registerFeature } from './plugin_imports/register_feature';
 import type { UrlTracker } from './build_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import { defaultCustomizationContext } from './customizations/defaults';
-import {
-  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER,
-  ACTION_VIEW_SAVED_SEARCH,
-  LEGACY_LOG_STREAM_EMBEDDABLE,
-} from './embeddable/constants';
+import { ACTION_VIEW_SAVED_SEARCH, LEGACY_LOG_STREAM_EMBEDDABLE } from './embeddable/constants';
 import {
   DiscoverContainerInternal,
   type DiscoverContainerProps,
@@ -56,7 +52,6 @@ import type {
   DiscoverStart,
   DiscoverStartPlugins,
 } from './types';
-import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
 import type { DiscoverEBTContextProps, DiscoverEBTManager } from './ebt_manager';
 import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_manager_registrations';
 import type { ProfileProviderSharedServices, ProfilesManager } from './context_awareness';
@@ -247,8 +242,6 @@ export class DiscoverPlugin
         return new ViewSavedSearchAction(core.application, this.locator!);
       }
     );
-    plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
-    plugins.uiActions.registerTrigger(DISCOVER_CELL_ACTIONS_TRIGGER);
 
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
 

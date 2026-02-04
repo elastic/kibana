@@ -242,7 +242,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
     };
     const uniqueSelectedEntities = [entity];
     setSelectedEntities(uniqueSelectedEntities);
-    uiActions.getTrigger(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER).exec({
+    uiActions.executeTriggerActions(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER, {
       embeddable: api,
       data: uniqueSelectedEntities,
     });

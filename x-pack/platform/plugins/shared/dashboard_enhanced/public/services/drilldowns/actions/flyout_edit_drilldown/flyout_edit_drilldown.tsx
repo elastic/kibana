@@ -20,7 +20,7 @@ import {
   type HasSupportedTriggers,
   apiHasUniqueId,
 } from '@kbn/presentation-publishing';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   apiHasDynamicActions,
   type HasDynamicActions,

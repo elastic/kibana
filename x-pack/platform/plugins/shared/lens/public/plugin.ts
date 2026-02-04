@@ -14,7 +14,6 @@ import type {
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type {
   ExpressionsServiceSetup,
@@ -84,6 +83,10 @@ import {
   LENS_CONTENT_TYPE,
   LENS_ITEM_LATEST_VERSION,
 } from '@kbn/lens-common/content_management/constants';
+import {
+  CONTEXT_MENU_TRIGGER,
+  IN_APP_EMBEDDABLE_EDIT_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -121,7 +124,6 @@ import {
 } from '../common/constants';
 import type { FormatFactory } from '../common/types';
 import { lensVisTypeAlias } from './vis_type_alias';
-import { inAppEmbeddableEditTrigger } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_trigger';
 
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
@@ -137,7 +139,6 @@ import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_c
 import {
   ACTION_CREATE_ESQL_CHART,
   ACTION_EDIT_LENS_EMBEDDABLE,
-  IN_APP_EMBEDDABLE_EDIT_TRIGGER,
 } from './trigger_actions/open_lens_config/constants';
 import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 import { setLensFeatureFlags } from './get_feature_flags';
@@ -653,9 +654,6 @@ export class LensPlugin {
     if (startDependencies.uiActions.hasAction(ACTION_VISUALIZE_FIELD)) {
       startDependencies.uiActions.unregisterAction(ACTION_VISUALIZE_FIELD);
     }
-
-    // this trigger enables external consumers to use the inline editing flyout
-    startDependencies.uiActions.registerTrigger(inAppEmbeddableEditTrigger);
 
     startDependencies.uiActions.addTriggerActionAsync(
       VISUALIZE_FIELD_TRIGGER,

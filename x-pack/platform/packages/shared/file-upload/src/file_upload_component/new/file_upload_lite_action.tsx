@@ -6,26 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Trigger, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import {
-  OPEN_FILE_UPLOAD_LITE_ACTION,
-  OPEN_FILE_UPLOAD_LITE_TRIGGER,
-} from '@kbn/file-upload-common';
+import { OPEN_FILE_UPLOAD_LITE_ACTION } from '@kbn/file-upload-common';
 
 import type { OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import { createFlyout } from './flyout/create_flyout';
 import type { FileUploadStartDependencies } from '../kibana_context';
-
-export const createOpenFileUploadLiteTrigger: Trigger = {
-  id: OPEN_FILE_UPLOAD_LITE_TRIGGER,
-  title: i18n.translate('xpack.fileUpload.lite.actions.triggerTitle', {
-    defaultMessage: 'Open file upload UI',
-  }),
-  description: i18n.translate('xpack.fileUpload.lite.actions.triggerDescription', {
-    defaultMessage: 'Open file upload UI',
-  }),
-};
 
 export function createOpenFileUploadLiteAction(
   coreStart: CoreStart,

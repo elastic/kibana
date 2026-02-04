@@ -50,7 +50,7 @@ export const HelloWorldExample = ({
       </EuiText>
       <EuiButton
         data-test-subj="emitHelloWorldTrigger"
-        onClick={() => uiActionsStartService.getTrigger(HELLO_WORLD_TRIGGER_ID).exec({})}
+        onClick={() => uiActionsStartService.executeTriggerActionsHELLO_WORLD_TRIGGER_ID, {})}
       >
         Click me to fire &quot;Hello world&quot; event ({actionsMessage})
       </EuiButton>

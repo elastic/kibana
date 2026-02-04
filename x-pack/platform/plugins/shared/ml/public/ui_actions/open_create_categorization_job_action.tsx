@@ -6,23 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Trigger, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import {
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION,
-  CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
   type CreateCategorizationADJobContext,
 } from '@kbn/ml-ui-actions';
 import type { MlCoreSetup } from '../plugin';
-
-export const createCategorizationADJobTrigger: Trigger = {
-  id: CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
-  title: i18n.translate('xpack.ml.actions.createADJobFromPatternAnalysis', {
-    defaultMessage: 'Create categorization anomaly detection job',
-  }),
-  description: i18n.translate('xpack.ml.actions.createADJobFromPatternAnalysis', {
-    defaultMessage: 'Create categorization anomaly detection job',
-  }),
-};
 
 export function createCategorizationADJobAction(
   getStartServices: MlCoreSetup['getStartServices']

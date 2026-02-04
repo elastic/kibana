@@ -11,7 +11,6 @@ import { ESQL_CONTROL, OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/c
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { PanelPlacementStrategy } from '@kbn/presentation-util-plugin/public';
 
-import { addControlMenuTrigger } from './actions/control_panel_actions';
 import { registerActions } from './actions/register_actions';
 import { registerOptionsListControl } from './controls/data_controls/options_list_control/register_options_list_control';
 import { registerRangeSliderControl } from './controls/data_controls/range_slider/register_range_slider_control';
@@ -33,8 +32,6 @@ export class ControlsPlugin
     _setupPlugins: ControlsPluginSetupDeps
   ) {
     const { embeddable } = _setupPlugins;
-
-    _setupPlugins.uiActions.registerTrigger(addControlMenuTrigger);
 
     registerOptionsListControl(embeddable);
     registerRangeSliderControl(embeddable);

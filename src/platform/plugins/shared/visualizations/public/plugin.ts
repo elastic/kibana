@@ -70,11 +70,6 @@ import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizatio
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
-import {
-  aggBasedVisualizationTrigger,
-  dashboardVisualizationPanelTrigger,
-  visualizeEditorTrigger,
-} from './triggers';
 import type { VisEditorsRegistry } from './vis_editors_registry';
 import { createVisEditorsRegistry } from './vis_editors_registry';
 import { showNewVisModal } from './wizard';
@@ -459,9 +454,6 @@ export class VisualizationsPlugin
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
     expressions.registerFunction(xyDimensionExpressionFunction);
-    uiActions.registerTrigger(aggBasedVisualizationTrigger);
-    uiActions.registerTrigger(visualizeEditorTrigger);
-    uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
     embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
       const {
         plugins: { embeddable: embeddableStart, embeddableEnhanced: embeddableEnhancedStart },

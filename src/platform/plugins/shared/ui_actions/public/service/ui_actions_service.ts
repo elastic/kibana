@@ -12,9 +12,8 @@ import { asyncMap } from '@kbn/std';
 import type { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
 import type { Action, ActionDefinition, FrequentCompatibilityChangeAction } from '../actions';
 import { ActionInternal } from '../actions';
-import { TriggerInternal } from '../triggers/trigger_internal';
-import type { TriggerContract } from '../triggers/trigger_contract';
 import { UiActionsExecutionService } from './ui_actions_execution_service';
+import { triggers } from '../triggers';
 
 export interface UiActionsServiceParams {
   readonly triggers?: TriggerRegistry;
@@ -42,14 +41,13 @@ export class UiActionsService {
     this.triggerToActions = triggerToActions;
   }
 
+  /** @deprecated */
   public readonly registerTrigger = (trigger: Trigger) => {
     if (this.triggers.has(trigger.id)) {
       throw new Error(`Trigger [trigger.id = ${trigger.id}] already registered.`);
     }
 
-    const triggerInternal = new TriggerInternal(this, trigger);
-
-    this.triggers.set(trigger.id, triggerInternal);
+    this.triggers.set(trigger.id, trigger);
     this.triggerToActions.set(trigger.id, []);
   };
 
@@ -57,14 +55,14 @@ export class UiActionsService {
     return Boolean(this.triggers.get(triggerId));
   };
 
-  public readonly getTrigger = (triggerId: string): TriggerContract => {
-    const trigger = this.triggers.get(triggerId);
+  public readonly getTrigger = (triggerId: string): Trigger => {
+    const trigger = triggers[triggerId] ?? this.triggers.get(triggerId);
 
     if (!trigger) {
       throw new Error(`Trigger [triggerId = ${triggerId}] does not exist.`);
     }
 
-    return trigger.contract;
+    return trigger;
   };
 
   /**
@@ -113,7 +111,7 @@ export class UiActionsService {
   };
 
   public readonly attachAction = (triggerId: string, actionId: string): void => {
-    const trigger = this.triggers.get(triggerId);
+    const trigger = this.getTrigger(triggerId);
 
     if (!trigger) {
       throw new Error(
@@ -121,10 +119,10 @@ export class UiActionsService {
       );
     }
 
-    const actionIds = this.triggerToActions.get(triggerId);
+    const actionIds = this.triggerToActions.get(triggerId) ?? [];
 
-    if (!actionIds!.find((id) => id === actionId)) {
-      this.triggerToActions.set(triggerId, [...actionIds!, actionId]);
+    if (!actionIds.find((id) => id === actionId)) {
+      this.triggerToActions.set(triggerId, [...actionIds, actionId]);
     }
   };
 
@@ -227,14 +225,27 @@ export class UiActionsService {
     }) as FrequentCompatibilityChangeAction[];
   };
 
-  /**
-   * @deprecated
-   *
-   * Use `plugins.uiActions.getTrigger(triggerId).exec(params)` instead.
-   */
-  public readonly executeTriggerActions = async (triggerId: string, context: object) => {
+  public readonly executeTriggerActions = async (
+    triggerId: string,
+    context: object,
+    alwaysShowPopup?: boolean
+  ) => {
     const trigger = this.getTrigger(triggerId);
-    await trigger.exec(context);
+
+    const actions = await this.getTriggerCompatibleActions(triggerId, context);
+
+    await Promise.all([
+      actions.map((action) =>
+        this.executionService.execute(
+          {
+            action,
+            context,
+            trigger,
+          },
+          alwaysShowPopup
+        )
+      ),
+    ]);
   };
 
   /**

@@ -6,12 +6,11 @@
  */
 
 import { type UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import {
-  categorizeFieldTrigger,
-  CATEGORIZE_FIELD_TRIGGER,
-} from '@kbn/ml-ui-actions/src/aiops/ui_actions';
 import type { CoreStart } from '@kbn/core/public';
+import {
+  CATEGORIZE_FIELD_TRIGGER,
+  CONTEXT_MENU_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { AiopsPluginStartDeps } from '../types';
 
 export function registerAiopsUiActions(
@@ -36,8 +35,6 @@ export function registerAiopsUiActions(
     const addChangePointChartAction = createAddChangePointChartAction(coreStart, pluginStart);
     return addChangePointChartAction;
   });
-
-  uiActions.registerTrigger(categorizeFieldTrigger);
 
   uiActions.addTriggerActionAsync(CATEGORIZE_FIELD_TRIGGER, 'ACTION_CATEGORIZE_FIELD', async () => {
     const { createCategorizeFieldAction } = await import('./actions');

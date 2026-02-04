@@ -58,14 +58,14 @@ export function createValueClickActionDefinition(
 
           const { appendFilterToESQLQueryFromValueClickAction } = await import('./filters');
           const queryString = appendFilterToESQLQueryFromValueClickAction(context.data);
-          await getStartServices().uiActions.getTrigger('UPDATE_ESQL_QUERY_TRIGGER').exec({
+          await getStartServices().uiActions.executeTriggerActions('UPDATE_ESQL_QUERY_TRIGGER', {
             queryString,
           });
         } else {
           const { createFiltersFromValueClickAction } = await import('./filters');
           const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
           if (filters.length > 0) {
-            await getStartServices().uiActions.getTrigger(APPLY_FILTER_TRIGGER).exec({
+            await getStartServices().uiActions.executeTriggerActionsAPPLY_FILTER_TRIGGER, {
               filters,
               embeddable: context.embeddable,
               timeFieldName: context.data.timeFieldName,

@@ -27,7 +27,7 @@ export const getButtonEmbeddableFactory = (uiActionsEnhanced: AdvancedUiActionsS
         api,
         Component: () => {
           const onClick = useCallback(() => {
-            uiActionsEnhanced.getTrigger(VALUE_CLICK_TRIGGER).exec({
+            uiActionsEnhanced.executeTriggerActions(VALUE_CLICK_TRIGGER, {
               embeddable: api,
               data: {
                 data: [],

@@ -8,7 +8,7 @@
  */
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ACTION_EDIT_IN_LENS } from './constants';
 import type { TypesStart } from '../vis_types/types_service';

@@ -985,7 +985,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           onClick={() => {
             closePopover();
             const additionalField = getAdditionalField(anomaly);
-            uiActions.getTrigger(CATEGORIZE_FIELD_TRIGGER).exec({
+            uiActions.executeTriggerActions(CATEGORIZE_FIELD_TRIGGER, {
               dataView: messageField.dataView,
               field: messageField.field,
               originatingApp: PLUGIN_ID,

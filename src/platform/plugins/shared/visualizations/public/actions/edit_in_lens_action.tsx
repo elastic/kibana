@@ -124,7 +124,7 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
         );
       }
       getEmbeddable().getStateTransfer().isTransferInProgress = true;
-      getUiActions().getTrigger(DASHBOARD_VISUALIZATION_PANEL_TRIGGER).exec(updatedWithMeta);
+      getUiActions().executeTriggerActions(DASHBOARD_VISUALIZATION_PANEL_TRIGGER, updatedWithMeta);
     }
   }
 

@@ -100,7 +100,7 @@ export function getActions(
           );
 
           if (testActions.length > 0 && testActions[0] !== undefined) {
-            services?.uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER).exec(triggerOptions);
+            services?.uiActions.executeTriggerActions(VISUALIZE_GEO_FIELD_TRIGGER, triggerOptions);
           }
         }
       },

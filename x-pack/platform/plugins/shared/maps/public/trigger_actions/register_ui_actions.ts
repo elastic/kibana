@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   ACTION_VISUALIZE_GEO_FIELD,
   ADD_PANEL_TRIGGER,

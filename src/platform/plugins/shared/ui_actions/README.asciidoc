@@ -42,7 +42,7 @@ provide some context data:
 
 [source,typescript jsx]
 ----
-plugins.uiActions.getTrigger('MY_APP_PIE_CHART_CLICK').exec({
+plugins.uiActions.executeTriggerActions('MY_APP_PIE_CHART_CLICK', {
   /* Custom context data. */
 });
 ----

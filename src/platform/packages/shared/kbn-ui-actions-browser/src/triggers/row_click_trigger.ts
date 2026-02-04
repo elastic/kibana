@@ -7,22 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { Trigger } from '.';
-
-export const ROW_CLICK_TRIGGER = 'ROW_CLICK_TRIGGER';
-
-export const rowClickTrigger: Trigger = {
-  id: ROW_CLICK_TRIGGER,
-  title: i18n.translate('uiActions.triggers.rowClickTitle', {
-    defaultMessage: 'Table row click',
-  }),
-  description: i18n.translate('uiActions.triggers.rowClickkDescription', {
-    defaultMessage: 'A click on a table row',
-  }),
-};
 
 export type RowClickContext = Partial<EmbeddableApiContext> & {
   data: {

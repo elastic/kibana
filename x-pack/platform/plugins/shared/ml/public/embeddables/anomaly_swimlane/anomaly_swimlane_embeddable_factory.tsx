@@ -335,7 +335,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
               setSelectedCells(update);
 
               if (update) {
-                uiActions.getTrigger(SWIM_LANE_SELECTION_TRIGGER).exec({
+                uiActions.executeTriggerActions(SWIM_LANE_SELECTION_TRIGGER, {
                   embeddable: api,
                   data: update,
                   updateCallback: setSelectedCells.bind(null, undefined),

@@ -9,7 +9,7 @@ import { from, map, type Observable, ReplaySubject } from 'rxjs';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -208,6 +208,7 @@ export class ReportingPublicPlugin
       visibleIn: [],
     });
 
+    console.log('CONTEXT MENU TRIGGER', CONTEXT_MENU_TRIGGER);
     uiActionsSetup.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, 'generateCsvReport', async () => {
       const { ReportingCsvPanelAction } = await import('@kbn/reporting-csv-share-panel');
       return new ReportingCsvPanelAction({

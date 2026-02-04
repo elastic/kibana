@@ -453,7 +453,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
                       },
                     };
                   }
-                  await getUiActions().getTrigger(triggerId).exec(context);
+                  await getUiActions().executeTriggerActions(triggerId, context);
                 }
               },
               onData: (_, inspectorAdapters) => {

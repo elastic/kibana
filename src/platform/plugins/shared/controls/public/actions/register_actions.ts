@@ -14,9 +14,9 @@ import {
   CONTROL_HOVER_TRIGGER_ID,
   CONTROL_MENU_TRIGGER,
 } from '@kbn/controls-constants';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { ACTION_EDIT_PANEL, ACTION_REMOVE_PANEL } from '@kbn/presentation-panel-plugin/public';
 import { ADD_PANEL_TRIGGER, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   ACTION_CLEAR_CONTROL,
   ACTION_EDIT_CONTROL_DISPLAY_SETTINGS,
@@ -24,11 +24,8 @@ import {
   OPTIONS_LIST_ACTION,
   RANGE_SLIDER_ACTION,
 } from './constants';
-import { controlHoverTrigger } from './controls_hover_trigger';
 
 export function registerActions(uiActions: UiActionsStart) {
-  uiActions.registerTrigger(controlHoverTrigger);
-
   uiActions.registerActionAsync(ACTION_CLEAR_CONTROL, async () => {
     const { ClearControlAction } = await import('../controls_module');
     return new ClearControlAction();

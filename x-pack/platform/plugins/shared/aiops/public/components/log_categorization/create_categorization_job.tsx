@@ -54,7 +54,7 @@ export const CreateCategorizationJobButton: FC<Props> = ({
       query,
       timeRange: { from: moment(earliest).toISOString(), to: moment(latest).toISOString() },
     };
-    uiActions.getTrigger(CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER).exec(triggerOptions);
+    uiActions.executeTriggerActions(CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER, triggerOptions);
   };
 
   if (uiActions === undefined || capabilities.ml.canCreateJob === false) {

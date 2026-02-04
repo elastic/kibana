@@ -13,12 +13,12 @@ UI Actions plugins provides API to manage **triggers** and **actions**.
 
 In general this plugin provides:
 
-* Creating custom functionality (actions).
-* Creating custom user interaction events (triggers).
-* Attaching and detaching actions to triggers.
-* Emitting trigger events.
-* Executing actions attached to a given trigger.
-* Exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
+- Creating custom functionality (actions).
+- Creating custom user interaction events (triggers).
+- Attaching and detaching actions to triggers.
+- Emitting trigger events.
+- Executing actions attached to a given trigger.
+- Exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
 
 ## Basic usage [_basic_usage]
 
@@ -35,7 +35,7 @@ plugins.uiActions.registerTrigger({
 Now, when user clicks on a pie slice you need to "trigger" your trigger and provide some context data:
 
 ```typescript
-plugins.uiActions.getTrigger('MY_APP_PIE_CHART_CLICK').exec({
+plugins.uiActions.executeTriggerActions('MY_APP_PIE_CHART_CLICK', {
   /* Custom context data. */
 });
 ```
@@ -55,9 +55,6 @@ plugins.uiActions.attachAction('MY_APP_PIE_CHART_CLICK', 'DO_SOMETHING');
 
 Now your `DO_SOMETHING` action will automatically execute when `MY_APP_PIE_CHART_CLICK` trigger is triggered; or, if more than one compatible action is attached to that trigger, user will be presented with a context menu popup to select one action to execute.
 
-
 ## Examples [_examples_9]
 
 [ui_action examples](https://github.com/elastic/kibana/blob/main/examples/ui_action_examples/README.md)
-
-

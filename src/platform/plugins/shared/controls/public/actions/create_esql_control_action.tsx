@@ -38,7 +38,7 @@ export const createESQLControlAction = (): ActionDefinition<
       : [];
 
     try {
-      await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+      await uiActionsService.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
         queryString: '',
         variableType: ESQLVariableType.VALUES,
         controlType: EsqlControlType.VALUES_FROM_QUERY,

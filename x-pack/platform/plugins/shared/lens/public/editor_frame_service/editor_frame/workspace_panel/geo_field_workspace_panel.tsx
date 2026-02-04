@@ -39,7 +39,7 @@ const dragDropOrder = [1, 0, 0, 0];
 
 export function GeoFieldWorkspacePanel(props: Props) {
   function onDrop() {
-    props.uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER).exec({
+    props.uiActions.executeTriggerActions(VISUALIZE_GEO_FIELD_TRIGGER, {
       dataViewSpec: props.indexPattern.spec,
       fieldName: props.fieldName,
       originatingApp: APP_ID,

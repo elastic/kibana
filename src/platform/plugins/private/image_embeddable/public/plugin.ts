@@ -18,7 +18,6 @@ import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plu
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { imageClickTrigger } from './actions';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { ADD_IMAGE_EMBEDDABLE_ACTION_ID, IMAGE_EMBEDDABLE_TYPE } from '../common/constants';
 
@@ -60,8 +59,6 @@ export class ImageEmbeddablePlugin
     core: CoreSetup<ImageEmbeddableStartDependencies>,
     plugins: ImageEmbeddableSetupDependencies
   ): SetupContract {
-    plugins.uiActions.registerTrigger(imageClickTrigger);
-
     plugins.embeddable.registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
       const [_, { getImageEmbeddableFactory }, [__, { embeddableEnhanced }]] = await Promise.all([
         untilPluginStartServicesReady(),

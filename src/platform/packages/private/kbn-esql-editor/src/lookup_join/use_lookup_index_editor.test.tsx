@@ -20,12 +20,12 @@ import {
 import { useLookupIndexPrivileges } from './use_lookup_index_privileges';
 import { coreMock } from '@kbn/core/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
 import { getLookupIndicesFromQuery } from '@kbn/esql-utils';
 import {
   appendIndexToJoinCommandByName,
   appendIndexToJoinCommandByPosition,
 } from './append_index_to_join_command';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
 
 // Mock dependencies
 jest.mock('@kbn/esql-utils', () => ({
@@ -208,7 +208,7 @@ describe('useLookupIndexCommand', () => {
 
     const mockTrigger = {
       exec: jest.fn(),
-    } as unknown as jest.Mocked<TriggerContract>;
+    } as unknown as jest.Mocked<Trigger>;
     mockServices.uiActions.getTrigger.mockReturnValue(mockTrigger);
   });
 

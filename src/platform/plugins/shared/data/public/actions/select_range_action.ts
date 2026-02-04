@@ -39,7 +39,7 @@ export function createSelectRangeActionDefinition(
         const { createFiltersFromRangeSelectAction } = await import('./filters');
         const filters = await createFiltersFromRangeSelectAction(context.data);
         if (filters.length > 0) {
-          await getStartServices().uiActions.getTrigger(APPLY_FILTER_TRIGGER).exec({
+          await getStartServices().uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
             filters,
             embeddable: context.embeddable,
             timeFieldName: context.data.timeFieldName,

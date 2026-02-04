@@ -10,10 +10,10 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-browser';
 import type { ActionInternal } from './actions/action_internal';
-import type { TriggerInternal } from './triggers/trigger_internal';
 
-export type TriggerRegistry = Map<string, TriggerInternal<object>>;
+export type TriggerRegistry = Map<string, Trigger>;
 export type ActionRegistry = Map<string, () => Promise<ActionInternal>>;
 export type TriggerToActionsRegistry = Map<string, string[]>;
 
