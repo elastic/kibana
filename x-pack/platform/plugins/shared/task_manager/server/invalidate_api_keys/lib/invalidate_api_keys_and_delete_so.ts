@@ -44,9 +44,7 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
             await savedObjectsClient.delete(savedObjectType, id);
             totalInvalidated++;
           } catch (err) {
-            logger.error(
-              `Failed to delete invalidated API key "${apiKeyId}". Error: ${err.message}`
-            );
+            logger.error(`Failed to delete invalidated API key. Error: ${err.message}`);
           }
         })
       );
@@ -56,12 +54,10 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
   // UIAM APIKey invalidation
   if (uiamApiKeysToInvalidate && uiamApiKeysToInvalidate.length > 0) {
     for (const { uiamApiKey, apiKeyId, id } of uiamApiKeysToInvalidate) {
-      let response;
-      try {
-        response = await invalidateUiamAPIKeys({ uiamApiKey, apiKeyId }, invalidateUiamApiKeyFn);
-      } catch (e) {
-        throw new Error(`Failed to invalidate UIAM API Key id: "${apiKeyId}". Error: ${e.message}`);
-      }
+      const response = await invalidateUiamAPIKeys(
+        { uiamApiKey, apiKeyId },
+        invalidateUiamApiKeyFn
+      );
 
       if (response.apiKeysEnabled === true && response.result.error_count > 0) {
         logger.error(`Failed to invalidate UIAM APIKey id: "${apiKeyId}"`);
@@ -70,9 +66,7 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
           await savedObjectsClient.delete(savedObjectType, id);
           totalInvalidated++;
         } catch (err) {
-          logger.error(
-            `Failed to delete invalidated UIAM API key "${apiKeyId}". Error: ${err.message}`
-          );
+          logger.error(`Failed to delete invalidated UIAM API key. Error: ${err.message}`);
         }
       }
     }

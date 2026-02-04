@@ -54,9 +54,9 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
       },
     });
 
-    const { uiamApiKey } = decryptedRule.attributes;
+    const { uiamApiKey, apiKey } = decryptedRule.attributes;
 
-    apiKeyToInvalidate = decryptedRule.attributes.apiKey;
+    apiKeyToInvalidate = apiKey;
     if (uiamApiKey) {
       uiamApiKeyToInvalidate = uiamApiKey;
     }

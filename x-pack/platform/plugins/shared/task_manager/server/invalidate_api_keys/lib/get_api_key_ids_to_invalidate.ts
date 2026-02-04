@@ -33,7 +33,7 @@ interface GetApiKeyIdsToInvalidateOpts {
 
 interface GetApiKeysToInvalidateResult {
   apiKeyIdsToInvalidate: ApiKeyIdAndSOId[];
-  uiamApiKeysToInvalidate: UiamApiKeyAndSOId[];
+  uiamApiKeysToInvalidate?: UiamApiKeyAndSOId[];
   apiKeyIdsToExclude: ApiKeyIdAndSOId[];
 }
 
@@ -128,5 +128,9 @@ export async function getApiKeyIdsToInvalidate({
     }
   });
 
-  return { apiKeyIdsToInvalidate, uiamApiKeysToInvalidate, apiKeyIdsToExclude };
+  return {
+    apiKeyIdsToInvalidate,
+    apiKeyIdsToExclude,
+    ...(uiamApiKeysToInvalidate.length > 0 ? { uiamApiKeysToInvalidate } : {}),
+  };
 }
