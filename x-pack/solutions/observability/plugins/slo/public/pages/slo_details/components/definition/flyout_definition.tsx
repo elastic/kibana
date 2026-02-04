@@ -11,7 +11,6 @@ import type { EuiDescriptionListProps, EuiIconTipProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiCodeBlock,
-  euiContainerCSS,
   euiContainerQuery,
   EuiDescriptionList,
   EuiFlexGroup,
@@ -38,8 +37,7 @@ import {
 import { SloFlyoutPanel } from '../../shared_flyout/flyout_panel';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { SloDetailsDefinitionProps } from '.';
-
-const DESCRIPTION_LIST_ROW_BREAKPOINT = '500px';
+import { DESCRIPTION_LIST_ROW_WIDTH_BREAKPOINT } from '../../shared_flyout/constants';
 
 function AccordionHeader({ title }: { title: string }) {
   return (
@@ -192,7 +190,7 @@ export function SloDetailsFlyoutDefinition({ slo }: SloDetailsDefinitionProps) {
         >
           <EuiSpacer />
           <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem css={euiContainerCSS('inline-size')}>
+            <EuiFlexItem>
               <SloFlyoutPanel
                 title={i18n.translate('xpack.slo.flyoutDefinition.sloFlyoutCard.definitionLabel', {
                   defaultMessage: 'Definition',
@@ -209,7 +207,7 @@ export function SloDetailsFlyoutDefinition({ slo }: SloDetailsDefinitionProps) {
                     that can be resized independently from the viewport size, so we need to use container queries instead
                     which requires some custom CSS.
                     */
-                    ${euiContainerQuery(`(width > ${DESCRIPTION_LIST_ROW_BREAKPOINT})`)} {
+                    ${euiContainerQuery(`(width > ${DESCRIPTION_LIST_ROW_WIDTH_BREAKPOINT}px)`)} {
                       /* Remove column gap to ensure bottom border is perceived as a continuous line */
                       column-gap: 0px;
                       /* Ensure dt and dd have the same height to align the borders */
@@ -223,8 +221,8 @@ export function SloDetailsFlyoutDefinition({ slo }: SloDetailsDefinitionProps) {
                       }
                     }
 
-                    ${euiContainerQuery(`(width <= ${DESCRIPTION_LIST_ROW_BREAKPOINT})`)} {
-                      /* Disable grid layout, essentially returning the component to type row */
+                    ${euiContainerQuery(`(width <= ${DESCRIPTION_LIST_ROW_WIDTH_BREAKPOINT}px)`)} {
+                      /* Disable grid layout, essentially disabling column mode */
                       display: block;
 
                       dt:not(:first-of-type) {
