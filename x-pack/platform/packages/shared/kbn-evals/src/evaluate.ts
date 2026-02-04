@@ -219,9 +219,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         runId: currentRunId,
         totalRepetitions: repetitions,
       });
+      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
 
       try {
-        await exportEvaluations(documents, evaluationsEsClient, log);
+        await exportEvaluations(documents, scoreRepository, log);
       } catch (error) {
         log.error(
           new Error(
@@ -232,7 +233,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         throw error;
       }
 
-      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
       await reportModelScore(scoreRepository, currentRunId, log);
     },
     {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import chalk from 'chalk';
 import { hostname } from 'os';
 import type { Model } from '@kbn/inference-common';
-import { EvaluationScoreRepository, type EvaluationScoreDocument } from './score_repository';
+import type { EvaluationScoreRepository } from './score_repository';
+import { type EvaluationScoreDocument } from './score_repository';
 import { getGitMetadata } from './git_metadata';
 import type { RanExperiment, EvaluationRun, TaskRun } from '../types';
 
@@ -91,7 +91,7 @@ export async function mapToEvaluationScoreDocuments({
 
 export async function exportEvaluations(
   documents: EvaluationScoreDocument[],
-  esClient: EsClient,
+  scoreRepository: EvaluationScoreRepository,
   log: SomeDevLog
 ): Promise<void> {
   if (documents.length === 0) {
@@ -101,8 +101,7 @@ export async function exportEvaluations(
 
   log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
 
-  const exporter = new EvaluationScoreRepository(esClient, log);
-  await exporter.exportScores(documents);
+  await scoreRepository.exportScores(documents);
 
   const { run_id: docRunId, task, environment } = documents[0];
 
