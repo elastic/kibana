@@ -8,3 +8,4 @@
  */
 
 export type OmitIndexProp<T> = Omit<T, 'index'>;
+export type OmitIndexProps<T> = Omit<T, 'index' | 'op_type'>;

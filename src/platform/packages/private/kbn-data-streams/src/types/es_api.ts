@@ -13,7 +13,7 @@ import type { TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch'
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import type { BaseSearchRuntimeMappings } from './runtime';
 
-import type { OmitIndexProp } from './helpers';
+import type { OmitIndexProp, OmitIndexProps } from './helpers';
 
 export interface ClientSearchRequest<SearchRuntimeMappings extends BaseSearchRuntimeMappings = {}>
   extends Omit<api.SearchRequest, 'index' | 'fields' | 'track_total_hits' | 'size'> {
@@ -45,7 +45,7 @@ export type ClientGet<TDocumentType> = (
   request: ClientGetRequest
 ) => Promise<ClientGetResponse<TDocumentType>>;
 
-export type ClientIndexRequest<TDocument> = OmitIndexProp<api.IndexRequest<TDocument>> & {
+export type ClientIndexRequest<TDocument> = OmitIndexProps<api.IndexRequest<TDocument>> & {
   /**
    * Optional space identifier. When provided, prefixes the document ID with the space
    * and adds kibana.space_ids property. When undefined, rejects space-prefixed IDs.
