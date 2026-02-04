@@ -81,8 +81,22 @@ export const createThresholdAlertType = (): SecurityAlertType<
         aggregatableTimestampField,
         primaryTimestamp,
         secondaryTimestamp,
+        inputIndex,
       } = sharedParams;
       const ruleParams = sharedParams.completeRule.ruleParams;
+
+      if (false) {
+        const result = await thresholdExecutor({
+          sharedParams,
+          services,
+          startedAt,
+          state,
+          licensing: sharedParams.licensing,
+          scheduleNotificationResponseActionsService:
+            sharedParams.scheduleNotificationResponseActionsService,
+        });
+        return result;
+      }
 
       const { signalHistory, searchErrors: previousSearchErrors } = state.initialized
         ? { signalHistory: state.signalHistory, searchErrors: [] }
@@ -130,7 +144,7 @@ export const createThresholdAlertType = (): SecurityAlertType<
       const aggrByCommand = byFields ? `${aggrCommand} BY ${byFields}` : aggrCommand;
 
       const esqlQuery = [
-        `FROM ${ruleParams.index}`,
+        `FROM ${inputIndex}`,
         timestampOverrideCommand,
         nullFiltersCommand,
         aggrByCommand,
@@ -147,7 +161,7 @@ export const createThresholdAlertType = (): SecurityAlertType<
         query: ruleParams.query,
         savedId: ruleParams.savedId,
         services,
-        index: ruleParams.index,
+        index: inputIndex,
         exceptionFilter: undefined,
         loadFields: true,
       });
@@ -252,17 +266,6 @@ export const createThresholdAlertType = (): SecurityAlertType<
           },
         },
       };
-
-      // const result = await thresholdExecutor({
-      //   sharedParams,
-      //   services,
-      //   startedAt,
-      //   state,
-      //   licensing: sharedParams.licensing,
-      //   scheduleNotificationResponseActionsService:
-      //     sharedParams.scheduleNotificationResponseActionsService,
-      // });
-      // return result;
     },
   };
 };

@@ -113,6 +113,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
         aggregatableTimestampField,
         primaryTimestamp,
         secondaryTimestamp,
+        inputIndex,
         // Note: exceptionFilter is handled by esqlExecutor via sharedParams
         unprocessedExceptions,
         scheduleNotificationResponseActionsService,
@@ -172,7 +173,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
       // - Phase 1 (find recent terms) -> handled by initial time range filter
       // - Phase 2 (check if new) -> INLINE STATS + WHERE first_seen >= from
       // - Phase 3 (fetch document) -> WHERE @timestamp == first_seen
-      const indexPattern = params.index ?? [];
+      const indexPattern = inputIndex ?? [];
       const esqlQuery = [
         // Source command - FROM index pattern with METADATA to get _id and _index
         // This allows proper alert deduplication based on source document ID
@@ -217,7 +218,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
         query: params.query,
         savedId: undefined,
         services,
-        index: indexPattern,
+        index: inputIndex,
         exceptionFilter: undefined, // esqlExecutor applies this from sharedParams
         loadFields: true,
       });
