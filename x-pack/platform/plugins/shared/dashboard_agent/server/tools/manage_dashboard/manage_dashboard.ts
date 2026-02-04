@@ -53,6 +53,25 @@ interface VisualizationFailure {
 }
 
 /**
+ * Panel dimension constants matching panel_utils.ts normalization logic.
+ */
+const DEFAULT_PANEL_HEIGHT = 12;
+const SMALL_PANEL_WIDTH = 12;
+const LARGE_PANEL_WIDTH = 24;
+const SMALL_CHART_TYPES = new Set(['metric', 'gauge']);
+
+/**
+ * Calculates panel dimensions based on chart type.
+ * Matches the logic in panel_utils.ts normalizePanels function.
+ */
+const getPanelDimensions = (chartType: string): { width: number; height: number } => {
+  return {
+    width: SMALL_CHART_TYPES.has(chartType) ? SMALL_PANEL_WIDTH : LARGE_PANEL_WIDTH,
+    height: DEFAULT_PANEL_HEIGHT,
+  };
+};
+
+/**
  * Input for generating a visualization from natural language.
  */
 interface VisualizationQueryInput {
@@ -101,6 +120,7 @@ const resolveExistingVisualizations = async ({
           panelId: panelEntry.panelId,
           visualization: vizConfig,
           title: vizConfig.title,
+          dimensions: getPanelDimensions(vizConfig.type),
         },
       });
     } catch (error) {
@@ -201,6 +221,7 @@ const generateVisualizationsFromQueries = async ({
           panelId: panelEntry.panelId,
           visualization: validatedConfig,
           title: panelEntry.title,
+          dimensions: getPanelDimensions(validatedConfig.type),
         },
       });
 

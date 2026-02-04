@@ -166,10 +166,7 @@ export function useDashboardAgentContext({
                 },
               },
               {
-                dimensions: {
-                  width: 12,
-                  height: 12,
-                },
+                dimensions: panel.dimensions,
               }
             );
           } catch (error) {

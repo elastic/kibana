@@ -128,6 +128,10 @@ export interface PanelAddedEventData {
     panelId: string;
     visualization: Record<string, unknown>;
     title?: string;
+    dimensions?: {
+      width: number;
+      height: number;
+    };
   };
 }
 
