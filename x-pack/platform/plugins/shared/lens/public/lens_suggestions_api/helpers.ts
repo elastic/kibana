@@ -223,8 +223,8 @@ export function switchVisualizationType({
  *   - A date column is available
  *
  * @param context the lens suggestions api context as being set by the consumers
- * @returns `true` if the context is a time series, `false` if not, or `undefined` if the context is not applicable
- * (e.g., non-ESQL queries or when `textBasedColumns` is unavailable)
+ * @returns `true` if the context is a time series, `false` if not (including non-TS/PromQL ES|QL queries),
+ * or `undefined` if the context is not applicable (e.g., missing query or `textBasedColumns`)
  */
 export const shouldUseLineChart = (
   context: VisualizeFieldContext | VisualizeEditorContext
