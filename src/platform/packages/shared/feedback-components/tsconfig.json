@@ -4,10 +4,11 @@
     "outDir": "target/types",
   },
   "include": [
-    "public/**/*",
-    "server/**/*",
+    "**/*.ts",
+    "**/*.tsx",
   ],
   "kbn_references": [
+    "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
     "@kbn/core",
     "@kbn/i18n",
@@ -15,7 +16,6 @@
     "@kbn/telemetry-plugin",
     "@kbn/config-schema",
     "@kbn/feedback-registry",
-    "@kbn/feedback-components",
     "@kbn/core-security-browser-mocks",
     "@kbn/core-http-router-server-mocks"
   ],

@@ -19,14 +19,14 @@ export const getAppDetails = (core: CoreStart) => {
    * Helper to get just the pathname from a navLink URL (strips hash and query string)
    * e.g., "/s/test/app/dashboards#/list" -> "/s/test/app/dashboards"
    */
-  const getNavLinkPath = (link: { url: string }) => {
-    return new URL(link.url, window.location.origin).pathname;
+  const getNavLinkPath = (url: string) => {
+    return new URL(url, window.location.origin).pathname;
   };
 
   /**
    * Try to match by url first (exact match)
    */
-  let match = navLinks.find((link) => getNavLinkPath(link) === currentPath);
+  let match = navLinks.find((link) => getNavLinkPath(link.url) === currentPath);
 
   /**
    * If no exact match, check if currentPath starts with any navLink.url then
@@ -37,8 +37,8 @@ export const getAppDetails = (core: CoreStart) => {
    */
   if (!match) {
     const matches = navLinks
-      .filter((link) => currentPath.startsWith(getNavLinkPath(link)))
-      .sort((a, b) => getNavLinkPath(b).length - getNavLinkPath(a).length);
+      .filter((link) => currentPath.startsWith(getNavLinkPath(link.url)))
+      .sort((a, b) => getNavLinkPath(b.url).length - getNavLinkPath(a.url).length);
     match = matches[0];
   }
 
