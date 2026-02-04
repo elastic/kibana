@@ -529,6 +529,51 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await esClient.indices.deleteDataStream({ name: CLASSIC_STREAM_NAME });
       });
 
+      // This test was added after ES issue #140506 was fixed (PR #141397).
+      // Previously, Kibana had a workaround that suppressed geo.location ignored field errors
+      // for OTEL streams. Now that the ES fix is in place, we should properly report any
+      // ignored_fields errors that might occur, without suppressing geo.location specifically.
+      it('should properly report ignored fields for geo.location in OTEL streams', async () => {
+        // logs.test is a wired stream (OTEL stream) created in the parent describe's before hook
+        // Test with geo.location field using OTEL semantic conventions (flattened format)
+        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'draft',
+                action: 'set' as const,
+                to: 'attributes.processed',
+                value: true,
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [
+            {
+              '@timestamp': TEST_TIMESTAMP,
+              'body.text': 'test with geo location',
+              // geo.location field following OTEL semantic conventions (flattened)
+              'resource.attributes.host.geo.location.lat': 40.7128,
+              'resource.attributes.host.geo.location.lon': -74.006,
+            },
+          ],
+        });
+
+        // The simulation should succeed
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
+
+        const { errors, status, value } = response.body.documents[0];
+        expect(status).to.be('parsed');
+        // With the ES fix in place (PR #141397), geo.location fields should work correctly
+        // without generating ignored_fields errors. Any errors that do occur should be
+        // properly reported (not suppressed as before).
+        expect(errors).to.eql([]);
+        // Verify the geo.location fields are preserved in the output
+        expect(value).to.have.property('resource.attributes.host.geo.location.lat', 40.7128);
+        expect(value).to.have.property('resource.attributes.host.geo.location.lon', -74.006);
+      });
+
       it('should correctly handle flattened geo point fields in simulation', async () => {
         const response = await simulateProcessingForStream(apiClient, CLASSIC_STREAM_NAME, {
           processing: {
