@@ -69,7 +69,9 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       ? await loadFromLibrary(savedObjectId)
       : initialState;
 
-    const titleManager = initializeTitleManager(initialMarkdownState);
+    console.log({ initialState, initialMarkdownState });
+
+    const titleManager = initializeTitleManager(initialState);
     const markdownStateManager = initializeStateManager<MarkdownState>(
       initialMarkdownState,
       defaultMarkdownState
@@ -159,9 +161,9 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       // Library transforms
       saveToLibrary: async (title: string) => {
         const { id } = await markdownClient.create({
-          ...titleManager.getLatestState(),
           ...markdownStateManager.getLatestState(),
           title,
+          description: defaultDescription$.getValue(),
         });
         return id;
       },
