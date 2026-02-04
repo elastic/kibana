@@ -166,6 +166,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   const {
     request,
     elasticsearch,
+    savedObjects,
     spaces,
     modelProvider,
     toolsService,
@@ -182,6 +183,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     spaceId,
     logger,
     esClient: elasticsearch.client.asScoped(request),
+    savedObjectsClient: savedObjects.getScopedClient(request),
     modelProvider,
     runner: manager.getRunner(),
     toolProvider: createToolProvider({

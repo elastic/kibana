@@ -52,7 +52,9 @@ export const panelGridSchema = schema.object({
 export function getPanelSchema() {
   return schema.object({
     config: schema.oneOf([
-      ...((embeddableService ? embeddableService.getEmbeddableSchemas() : []) as [ObjectType<{}>]),
+      ...((embeddableService ? embeddableService.getAllEmbeddableSchemas() : []) as [
+        ObjectType<{}>
+      ]),
       schema.object(
         {},
         {

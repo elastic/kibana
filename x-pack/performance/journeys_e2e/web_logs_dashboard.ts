@@ -6,7 +6,7 @@
  */
 
 import { Journey } from '@kbn/journeys';
-import { setupDashboardJourney } from './utils/dashboard_journey';
+import { setupDashboardJourney } from '../utils/dashboard_journey';
 
 export const journey = setupDashboardJourney({
   // call the journey constructor in this file so the name is set correctly

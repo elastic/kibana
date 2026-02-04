@@ -9,3 +9,5 @@
 
 export const IMAGE_EMBEDDABLE_TYPE = 'image';
 export const ADD_IMAGE_EMBEDDABLE_ACTION_ID = 'create_image_embeddable';
+export const IMAGE_CLICK_TRIGGER = 'IMAGE_CLICK_TRIGGER';
+export const IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS = [IMAGE_CLICK_TRIGGER];
