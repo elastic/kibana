@@ -12,7 +12,6 @@ import {
   EuiDatePicker,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormLabel,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -131,7 +130,6 @@ const ESQLEditorInternal = function ESQLEditor({
   onOpenQueryInNewTab,
   expandToFitQueryOnMount,
   dataErrorsControl,
-  formLabel,
   mergeExternalMessages,
   hideQuickSearch,
   queryStats,
@@ -1062,7 +1060,6 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   const htmlId = useGeneratedHtmlId({ prefix: 'esql-editor' });
-  const [labelInFocus, setLabelInFocus] = useState(false);
 
   const editorPanel = (
     <>
@@ -1120,26 +1117,6 @@ const ESQLEditorInternal = function ESQLEditor({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      {formLabel && (
-        <EuiFlexItem grow={false}>
-          <EuiFormLabel
-            isFocused={labelInFocus && !isDisabled}
-            isDisabled={isDisabled}
-            aria-invalid={Boolean(editorMessages.errors.length)}
-            isInvalid={Boolean(editorMessages.errors.length)}
-            onClick={() => {
-              // HTML `for` doesn't correctly transfer click behavior to the code editor hint, so apply it manually
-              const editorElement = document.getElementById(htmlId);
-              if (editorElement) {
-                editorElement.click();
-              }
-            }}
-            htmlFor={htmlId}
-          >
-            {formLabel}
-          </EuiFormLabel>
-        </EuiFlexItem>
-      )}
       <EuiFlexGroup
         gutterSize="none"
         css={{
@@ -1161,7 +1138,9 @@ const ESQLEditorInternal = function ESQLEditor({
             <div css={styles.editorContainer}>
               <CodeEditor
                 htmlId={htmlId}
-                aria-label={formLabel}
+                aria-label={i18n.translate('esqlEditor.ariaLabel', {
+                  defaultMessage: 'ES|QL editor',
+                })}
                 languageId={ESQL_LANG_ID}
                 classNameCss={getEditorOverwrites(theme)}
                 value={code}
@@ -1172,8 +1151,6 @@ const ESQLEditorInternal = function ESQLEditor({
                 signatureProvider={signatureProvider}
                 inlineCompletionsProvider={inlineCompletionsProvider}
                 onChange={onQueryUpdate}
-                onFocus={() => setLabelInFocus(true)}
-                onBlur={() => setLabelInFocus(false)}
                 editorDidMount={async (editor) => {
                   // Track editor init time once per mount
                   reportInitLatency();

@@ -76,7 +76,6 @@ export interface ESQLEditorProps {
   /** Allows controlling the switch to toggle data errors in the UI. If not provided the switch will be hidden and data errors visible */
   dataErrorsControl?: DataErrorsControl;
   /** Optional form field label to show above the query editor */
-  formLabel?: string;
   /** Whether to merge external messages into the editor's message list */
   mergeExternalMessages?: boolean;
   /** Stats about the last request made */

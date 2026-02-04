@@ -80,20 +80,22 @@ export function ESQLMenu({
           />
         </EuiToolTip>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={starredQueryLabel} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType={isStarred ? 'starFilled' : 'starEmpty'}
-            size="xs"
-            aria-label={starredQueryLabel}
-            className={!isStarred ? 'cm-favorite-button--empty' : ''}
-            onClick={onToggleStarredQuery}
-            isDisabled={!editorActions?.canToggleStarredQuery}
-            data-test-subj="ESQLEditor-toggle-starred-query-icon"
-            color="text"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
+      {!hideHistory && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip position="top" content={starredQueryLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType={isStarred ? 'starFilled' : 'starEmpty'}
+              size="xs"
+              aria-label={starredQueryLabel}
+              className={!isStarred ? 'cm-favorite-button--empty' : ''}
+              onClick={onToggleStarredQuery}
+              isDisabled={!editorActions?.canToggleStarredQuery}
+              data-test-subj="ESQLEditor-toggle-starred-query-icon"
+              color="text"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
       {!hideHistory && (
         <EuiFlexItem grow={false}>
           <EuiToolTip position="top" content={historyLabel} disableScreenReaderOutput>
