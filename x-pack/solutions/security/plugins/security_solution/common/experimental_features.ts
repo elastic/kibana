@@ -114,13 +114,18 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
-  filterProcessDescendantsForTrustedAppsEnabled: false,
+  filterProcessDescendantsForTrustedAppsEnabled: true,
 
   /**
    * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
    * can be disabled if necessary in a given environment.
    */
   entityStoreDisabled: false,
+
+  /**
+   * Enables AI rule creation feature
+   */
+  aiRuleCreationEnabled: false,
 
   /**
    * Disables the siem migrations feature

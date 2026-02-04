@@ -114,7 +114,7 @@ export const ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID = 'ent-search-audit-logs';
 export const ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID = 'ent-search-analytics-logs';
 
 export const CREATE_NEW_INDEX_URL = '/search_indices/new_index';
-export const PLAYGROUND_URL = '/playground';
+
 export const SEARCH_HOMEPAGE_URL = '/app/elasticsearch/home';
 
 export const MANAGE_API_KEYS_URL = '/app/management/security/api_keys';

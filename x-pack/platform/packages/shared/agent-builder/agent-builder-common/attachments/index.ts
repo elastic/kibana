@@ -12,15 +12,18 @@ export type {
   TextAttachment,
   ScreenContextAttachment,
   EsqlAttachment,
+  VisualizationRefAttachment,
 } from './attachments';
 export {
   AttachmentType,
   textAttachmentDataSchema,
   esqlAttachmentDataSchema,
   screenContextAttachmentDataSchema,
+  visualizationRefAttachmentDataSchema,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
   type EsqlAttachmentData,
+  type VisualizationRefAttachmentData,
 } from './attachment_types';
 
 export type {
