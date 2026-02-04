@@ -238,7 +238,7 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     await expect(logLevelRow).toBeVisible();
 
     // Click on the expand button for log.level
-    await logLevelRow.locator('button[aria-label="Expand"]').click();
+    await logLevelRow.locator('button[aria-label="11Expand"]').click();
 
     // Flyout should be visible
     await expect(page.getByTestId('datasetQualityDetailsDegradedFieldFlyout')).toBeVisible();
