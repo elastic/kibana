@@ -598,9 +598,9 @@ export class HttpServer {
       (request.app as KibanaRequestState).span = null;
 
       const { state: user, status } = this.authState.get<AuthenticatedUser>(request);
-      const isAuthenticated = status === AuthStatus.authenticated;
+      const isUserAuthenticated = status === AuthStatus.authenticated;
       userActivity?.setInjectedContext({
-        user: isAuthenticated
+        user: isUserAuthenticated
           ? {
               ip: request.info.remoteAddress,
               id: user.profile_uid,
