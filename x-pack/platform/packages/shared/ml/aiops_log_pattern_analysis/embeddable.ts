@@ -10,7 +10,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 
 export interface EmbeddablePatternAnalysisInput {
   dataView: DataView;
-  savedSearch?: SavedSearch | null;
+  savedSearch?: Pick<SavedSearch, 'searchSource'> | null;
   embeddingOrigin?: string;
   switchToDocumentView?: () => Promise<VIEW_MODE>;
   lastReloadRequestTime?: number;
