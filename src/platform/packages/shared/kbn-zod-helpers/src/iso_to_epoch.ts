@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import type * as z from '@kbn/zod/v4';
 
 export function isoToEpoch(input: string, ctx: z.RefinementCtx) {
   const epoch = new Date(input).getTime();
   if (isNaN(epoch)) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: 'custom',
       message: 'Invalid ISO date string',
     });
-    return z.NEVER;
+    // TODO: fix this
+    return { status: 'aborted' } as const;
   }
 
   return epoch;

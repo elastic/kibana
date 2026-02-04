@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as z from '@kbn/zod';
+import * as z from '@kbn/zod/v4';
 
 export function isNonEmptyString(input: string, ctx: z.RefinementCtx): void {
   if (input.trim() === '') {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: 'custom',
       message: 'No empty strings allowed',
     });
   }
@@ -21,7 +21,7 @@ export function isNonEmptyString(input: string, ctx: z.RefinementCtx): void {
 export const NonEmptyString = z
   .string()
   .min(1)
-  .superRefine(isNonEmptyString)
+  .check(z.superRefine(isNonEmptyString))
   .describe('A non-empty string.');
 
 /**
@@ -30,7 +30,7 @@ export const NonEmptyString = z
 export function isNonEmptyOrWhitespace(input: string, ctx: z.RefinementCtx): void {
   if (typeof input !== 'string' || input.length === 0) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: 'custom',
       message: 'Must be a non-empty string or whitespace',
     });
   }
@@ -39,5 +39,5 @@ export function isNonEmptyOrWhitespace(input: string, ctx: z.RefinementCtx): voi
 export const NonEmptyOrWhitespaceString = z
   .string()
   .min(1)
-  .superRefine(isNonEmptyOrWhitespace)
+  .check(z.superRefine(isNonEmptyOrWhitespace))
   .describe('A non-empty string or string with whitespace.');

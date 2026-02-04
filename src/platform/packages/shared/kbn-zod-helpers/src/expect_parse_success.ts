@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SafeParseReturnType, SafeParseSuccess } from '@kbn/zod';
+import type { ZodSafeParseResult } from '@kbn/zod/v4';
 import { stringifyZodError } from './stringify_zod_error';
 
 export function expectParseSuccess<Input, Output>(
-  result: SafeParseReturnType<Input, Output>
-): asserts result is SafeParseSuccess<Output> {
+  result: ZodSafeParseResult<Output>
+): asserts result is ZodSafeParseResult<Output> {
   if (!result.success) {
     // We are throwing here instead of using assertions because we want to show
     // the stringified error to assist with debugging.

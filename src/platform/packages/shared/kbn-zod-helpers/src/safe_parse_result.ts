@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as z from '@kbn/zod';
+import type * as z from '@kbn/zod/v4';
 
 /**
  * Safely parse a payload against a schema, returning the output or undefined.
@@ -21,7 +21,7 @@ import type * as z from '@kbn/zod';
 export function safeParseResult<T extends z.ZodTypeAny>(
   payload: unknown,
   schema: T
-): T['_output'] | undefined {
+): z.output<T> | undefined {
   const result = schema.safeParse(payload);
   if (result.success) {
     return result.data;

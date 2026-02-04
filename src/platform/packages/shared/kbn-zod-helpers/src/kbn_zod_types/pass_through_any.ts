@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as z from '@kbn/zod';
+import * as z from '@kbn/zod/v4';
 import type { KbnZodType } from './kbn_zod_type';
 import { KbnZodTypes } from './kbn_zod_type';
 
@@ -19,7 +19,7 @@ class KbnPassThroughAny extends z.ZodAny implements KbnZodType {
   readonly kbnTypeName = KbnZodTypes.PassThroughAny;
 
   static create() {
-    return new KbnPassThroughAny({ typeName: z.ZodFirstPartyTypeKind.ZodAny }).describe(
+    return new KbnPassThroughAny({ type: 'any' }).describe(
       'Pass through any value without validation.'
     );
   }

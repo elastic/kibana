@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as z from '@kbn/zod';
+import type * as z from '@kbn/zod/v4';
 import dateMath from '@kbn/datemath';
 
 function validateDateMath(time: string): boolean {
@@ -25,7 +25,7 @@ function validateDateMath(time: string): boolean {
 export function isValidDateMath(input: string, ctx: z.RefinementCtx) {
   if (!validateDateMath(input)) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: 'custom',
       message: 'Failed to parse date-math expression',
     });
   }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as z from '@kbn/zod';
+import type * as z from '@kbn/zod/v4';
 
 export function createIsNarrowSchema<TBaseSchema extends z.Schema, TNarrowSchema extends z.Schema>(
   _base: TBaseSchema,
