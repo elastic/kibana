@@ -8,7 +8,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
+import type { updateRequestBodySchema, updateResponseBodySchema } from './schemas';
 
-export type MarkdownUpdateRequestBody = TypeOf<ReturnType<typeof getUpdateRequestBodySchema>>;
-export type MarkdownUpdateResponseBody = TypeOf<ReturnType<typeof getUpdateResponseBodySchema>>;
+export type MarkdownUpdateRequestBody = TypeOf<ReturnType<typeof updateRequestBodySchema>>;
+export type MarkdownUpdateResponseBody = TypeOf<ReturnType<typeof updateResponseBodySchema>>;

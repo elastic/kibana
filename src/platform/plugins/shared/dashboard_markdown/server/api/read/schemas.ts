@@ -16,10 +16,8 @@ import {
   updatedMetaSchema,
 } from '../meta_schemas';
 
-export function getReadResponseBodySchema() {
-  return schema.object({
-    id: schema.string(),
-    data: markdownByValueEmbeddableSchema,
-    meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema, resolveMetaSchema]),
-  });
-}
+export const readResponseBodySchema = schema.object({
+  id: schema.string(),
+  data: markdownByValueEmbeddableSchema,
+  meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema, resolveMetaSchema]),
+});

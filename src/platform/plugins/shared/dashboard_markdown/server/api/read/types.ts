@@ -8,6 +8,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { getReadResponseBodySchema } from './schemas';
+import type { readResponseBodySchema } from './schemas';
 
-export type MarkdownReadResponseBody = TypeOf<ReturnType<typeof getReadResponseBodySchema>>;
+export type MarkdownReadResponseBody = TypeOf<ReturnType<typeof readResponseBodySchema>>;

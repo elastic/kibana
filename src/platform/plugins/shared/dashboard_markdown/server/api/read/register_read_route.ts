@@ -11,7 +11,7 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
-import { getReadResponseBodySchema } from './schemas';
+import { readResponseBodySchema } from './schemas';
 import { read } from './read';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
 
@@ -37,7 +37,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
         },
         response: {
           200: {
-            body: getReadResponseBodySchema,
+            body: () => readResponseBodySchema,
           },
         },
       }),

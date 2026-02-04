@@ -10,7 +10,7 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
-import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schemas';
+import { createRequestBodySchema, createResponseBodySchema } from './schemas';
 import { create } from './create';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
 
@@ -26,11 +26,11 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
       version: INTERNAL_API_VERSION,
       validate: () => ({
         request: {
-          body: getCreateRequestBodySchema(),
+          body: createRequestBodySchema,
         },
         response: {
           200: {
-            body: getCreateResponseBodySchema,
+            body: () => createResponseBodySchema,
           },
         },
       }),

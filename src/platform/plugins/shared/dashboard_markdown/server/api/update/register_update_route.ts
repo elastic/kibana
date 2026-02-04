@@ -11,7 +11,7 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { INTERNAL_API_VERSION, commonRouteConfig } from '../constants';
-import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
+import { updateRequestBodySchema, updateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
 
@@ -32,11 +32,11 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
               meta: { description: 'A unique identifier for the dashboard.' },
             }),
           }),
-          body: getUpdateRequestBodySchema(),
+          body: updateRequestBodySchema,
         },
         response: {
           200: {
-            body: getUpdateResponseBodySchema,
+            body: () => updateResponseBodySchema,
           },
         },
       }),

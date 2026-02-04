@@ -11,15 +11,11 @@ import { schema } from '@kbn/config-schema';
 import { markdownByValueEmbeddableSchema } from '../../schemas';
 import { baseMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
-export function getUpdateRequestBodySchema() {
-  return markdownByValueEmbeddableSchema;
-}
+export const updateRequestBodySchema = markdownByValueEmbeddableSchema;
 
-export function getUpdateResponseBodySchema() {
-  return schema.object({
-    id: schema.string(),
-    data: markdownByValueEmbeddableSchema,
-    meta: schema.allOf([baseMetaSchema, updatedMetaSchema]),
-    spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1 })),
-  });
-}
+export const updateResponseBodySchema = schema.object({
+  id: schema.string(),
+  data: markdownByValueEmbeddableSchema,
+  meta: schema.allOf([baseMetaSchema, updatedMetaSchema]),
+  spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1 })),
+});
