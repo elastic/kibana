@@ -14,6 +14,7 @@ import { bindOnStart } from './setup/bind_on_start';
 import { bindRoutes } from './setup/bind_routes';
 import { bindServices } from './setup/bind_services';
 import { bindRuleExecutionServices } from './setup/bind_rule_executor';
+import { bindTasks } from './setup/bind_tasks';
 
 export const config: PluginConfigDescriptor<PluginConfig> = {
   schema: configSchema,
@@ -25,6 +26,7 @@ export const module = new ContainerModule((options) => {
   bindRoutes(options);
   bindServices(options);
   bindRuleExecutionServices(options);
+  bindTasks(options);
 });
 
 export type { PluginConfig as AlertingV2Config } from './config';
