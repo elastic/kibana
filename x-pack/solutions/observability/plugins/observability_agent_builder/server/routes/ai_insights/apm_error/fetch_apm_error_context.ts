@@ -8,14 +8,11 @@
 import dedent from 'dedent';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { termFilter } from '../../../utils/dsl_filters';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../../types';
-import { getLogCategories } from '../../../tools/get_log_categories/handler';
-import { getLogsIndices } from '../../../utils/get_logs_indices';
 import { getApmIndices } from '../../../utils/get_apm_indices';
 import { parseDatemath } from '../../../utils/time';
 import { fetchDistributedTrace } from './fetch_distributed_trace';
@@ -128,40 +125,6 @@ export async function fetchApmErrorContext({
       start,
       end,
       handler: async () => (await traceContextPromise).services,
-    });
-
-    contextParts.push({
-      name: 'TraceLogCategories',
-      start,
-      end,
-      handler: async () => {
-        const logsIndices = await getLogsIndices({ core, logger });
-
-        const messageField = 'message';
-        const logCategories = await getLogCategories({
-          esClient,
-          logsIndices,
-          boolQuery: {
-            filter: [
-              ...termFilter('trace.id', traceId),
-              { exists: { field: messageField } },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: parsedStart,
-                    lte: parsedEnd,
-                  },
-                },
-              },
-            ],
-          },
-          logger,
-          categoryCount: 10,
-          fields: ['trace.id'],
-        });
-
-        return logCategories?.categories;
-      },
     });
   }
 

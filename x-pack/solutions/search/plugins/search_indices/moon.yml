@@ -55,6 +55,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/search-api-panels'
   - '@kbn/deeplinks-management'
+  - '@kbn/index-management-plugin'
 tags:
   - plugin
   - prod

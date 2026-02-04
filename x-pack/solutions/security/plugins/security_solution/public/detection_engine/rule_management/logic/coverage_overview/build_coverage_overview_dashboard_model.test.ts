@@ -20,7 +20,7 @@ const mockSubtechniques = getMockCoverageOverviewSubtechniques();
 
 describe('buildCoverageOverviewDashboardModel', () => {
   beforeEach(() => {
-    jest.mock('../../../../detections/mitre/mitre_tactics_techniques', () => {
+    jest.mock('../../../../../common/detection_engine/mitre/mitre_tactics_techniques', () => {
       return {
         tactics: mockTactics,
         techniques: mockTechniques,
