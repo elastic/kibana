@@ -57,8 +57,14 @@ export {
   getAncestorsAndSelf,
   getParentId,
   getSegments,
+  getRoot,
   MAX_NESTING_LEVEL,
   isRoot,
+  ROOT_STREAM_NAMES,
+  LOGS_ROOT_STREAM_NAME,
+  LOGS_OTEL_STREAM_NAME,
+  LOGS_ECS_STREAM_NAME,
+  type RootStreamName,
 } from './src/shared/hierarchy';
 
 export {

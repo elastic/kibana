@@ -10,10 +10,14 @@ import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common/types
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import {
   getAncestors,
+  getParentId,
   getSegments,
+  isDescendantOf,
   isDslLifecycle,
   isIlmLifecycle,
   isRootStreamDefinition,
+  ROOT_STREAM_NAMES,
+  type RootStreamName,
   Streams,
 } from '@kbn/streams-schema';
 import { parseDurationInSeconds } from '../../../data_management/stream_detail_lifecycle/helpers/helpers';
@@ -42,7 +46,14 @@ export interface StreamTree extends ListStreamDetail {
 }
 
 export function isParentName(parent: string, descendant: string) {
-  return parent !== descendant && descendant.startsWith(parent + '.');
+  // If descendant is a root stream, it cannot be a child of anything
+  if (ROOT_STREAM_NAMES.includes(descendant as RootStreamName)) {
+    return false;
+  }
+
+  // Use getParentId to find the actual parent, accounting for multi-segment roots
+  const actualParent = getParentId(descendant);
+  return actualParent === parent;
 }
 
 export function shouldComposeTree(sortField: SortableField) {
@@ -160,7 +171,7 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
     let existingNode: StreamTree | undefined;
     while (
       (existingNode = currentTree.find((node) =>
-        isParentName(node.stream.name, streamDetail.stream.name)
+        isDescendantOf(node.stream.name, streamDetail.stream.name)
       ))
     ) {
       currentTree = existingNode.children;

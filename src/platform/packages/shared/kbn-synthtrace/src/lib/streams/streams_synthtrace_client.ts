@@ -8,7 +8,12 @@
  */
 
 import type { ESDocumentWithOperation } from '@kbn/synthtrace-client';
-import type { Streams } from '@kbn/streams-schema';
+import {
+  LOGS_ECS_STREAM_NAME,
+  LOGS_OTEL_STREAM_NAME,
+  ROOT_STREAM_NAMES,
+  type Streams,
+} from '@kbn/streams-schema';
 import type { Readable } from 'stream';
 import { Transform, pipeline } from 'stream';
 import type { Required } from 'utility-types';
@@ -62,7 +67,15 @@ export class StreamsSynthtraceClientImpl
       ...options,
       pipeline: streamsPipeline(),
     });
-    this.dataStreams = ['logs', 'logs.*', 'logs-generic-default'];
+    this.dataStreams = [
+      'logs',
+      'logs.*',
+      'logs.otel',
+      'logs.otel.*',
+      'logs.ecs',
+      'logs.ecs.*',
+      'logs-generic-default',
+    ];
   }
 
   forkStream: StreamsSynthtraceClient['forkStream'] = (streamName, request, requestOptions) => {
@@ -140,24 +153,35 @@ export class StreamsSynthtraceClientImpl
   }
 }
 
-function streamsRoutingTransform() {
+function streamsRoutingTransform(isLogsEnabled: boolean = false) {
   return new Transform({
     objectMode: true,
     transform(document: ESDocumentWithOperation<StreamsDocument>, encoding, callback) {
-      if (!document._index) {
-        document._index = 'logs';
-      }
-      callback(null, document);
+      // Determine target streams based on isLogsEnabled
+      const targetStreams: string[] = isLogsEnabled
+        ? [...ROOT_STREAM_NAMES]
+        : [LOGS_OTEL_STREAM_NAME, LOGS_ECS_STREAM_NAME];
+
+      // Replicate document to each target stream
+      targetStreams.forEach((streamName) => {
+        const replicatedDoc = {
+          ...document,
+          _index: streamName,
+        };
+        this.push(replicatedDoc);
+      });
+
+      callback();
     },
   });
 }
 
-function streamsPipeline() {
+function streamsPipeline(isLogsEnabled: boolean = false) {
   return (base: Readable) => {
     return pipeline(
       base,
       getSerializeTransform<StreamsDocument>(),
-      streamsRoutingTransform(),
+      streamsRoutingTransform(isLogsEnabled),
       (err: unknown) => {
         if (err) {
           throw err;

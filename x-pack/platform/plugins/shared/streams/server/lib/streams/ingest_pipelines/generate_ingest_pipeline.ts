@@ -5,11 +5,25 @@
  * 2.0.
  */
 
-import { Streams, getParentId, isRoot } from '@kbn/streams-schema';
-import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  Streams,
+  getParentId,
+  isRoot,
+  getRoot,
+  LOGS_ROOT_STREAM_NAME,
+  LOGS_OTEL_STREAM_NAME,
+  LOGS_ECS_STREAM_NAME,
+} from '@kbn/streams-schema';
+import type {
+  IngestPutPipelineRequest,
+  IngestProcessorContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import { transpileIngestPipeline } from '@kbn/streamlang';
 import { ASSET_VERSION } from '../../../../common/constants';
-import { getLogsDefaultPipelineProcessors } from './logs_default_pipeline';
+import {
+  getLogsOtelPipelineProcessors,
+  getLogsEcsPipelineProcessors,
+} from './logs_default_pipeline';
 import { getProcessingPipelineName } from './name';
 
 export function generateIngestPipeline(
@@ -17,10 +31,26 @@ export function generateIngestPipeline(
   definition: Streams.all.Definition
 ): IngestPutPipelineRequest {
   const isWiredStream = Streams.WiredStream.Definition.is(definition);
+  const rootStream = getRoot(definition.name);
+
+  // Determine which processors to use based on root stream
+  let rootProcessors: IngestProcessorContainer[] = [];
+  if (isRoot(definition.name)) {
+    switch (rootStream) {
+      case LOGS_ECS_STREAM_NAME:
+        rootProcessors = getLogsEcsPipelineProcessors();
+        break;
+      case LOGS_OTEL_STREAM_NAME:
+      case LOGS_ROOT_STREAM_NAME:
+        rootProcessors = getLogsOtelPipelineProcessors();
+        break;
+    }
+  }
+
   return {
     id: getProcessingPipelineName(name),
     processors: [
-      ...(isRoot(definition.name) ? getLogsDefaultPipelineProcessors() : []),
+      ...rootProcessors,
       ...(!isRoot(definition.name) && isWiredStream
         ? [
             {

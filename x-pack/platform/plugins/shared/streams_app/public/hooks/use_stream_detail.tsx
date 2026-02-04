@@ -10,7 +10,7 @@ import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { Streams } from '@kbn/streams-schema';
 import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
-import { getAncestorsAndSelf, getSegments } from '@kbn/streams-schema';
+import { getAncestorsAndSelf, getParentId, isRoot } from '@kbn/streams-schema';
 import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 import { useStreamsAppBreadcrumbs } from './use_streams_app_breadcrumbs';
@@ -90,9 +90,20 @@ export function StreamDetailContextProvider({
     }
     // Build breadcrumbs for each segment in the hierarchy for wired streams
     const ids = getAncestorsAndSelf(key);
-    const segments = getSegments(key);
-    return ids.map((id, idx) => ({
-      title: segments[idx],
+
+    // Helper to get the display name for a stream ID in the breadcrumb
+    const getBreadcrumbTitle = (id: string): string => {
+      // If it's a root stream, show the full name
+      if (isRoot(id)) {
+        return id;
+      }
+      // For child streams, show only the part after the parent
+      const parent = getParentId(id);
+      return parent ? id.slice(parent.length + 1) : id; // +1 for the dot
+    };
+
+    return ids.map((id) => ({
+      title: getBreadcrumbTitle(id),
       path: `/{key}`,
       params: { path: { key: id } },
     }));

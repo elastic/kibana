@@ -18,11 +18,12 @@ import {
   EuiIconTip,
   EuiButtonIcon,
   EuiTourStep,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
 import { useStreamsTour } from '../streams_tour';
 import type { TableRow, SortableField } from './utils';
@@ -401,6 +402,28 @@ export function StreamsTreeTable({
                     <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
                   </EuiLink>
                 </EuiFlexItem>
+                {item.stream.name === LOGS_ROOT_STREAM_NAME && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge
+                      label={i18n.translate(
+                        'xpack.streams.streamsTreeTable.deprecatedLogsBadgeLabel',
+                        {
+                          defaultMessage: 'DEPRECATED',
+                        }
+                      )}
+                      color="warning"
+                      size="s"
+                      data-test-subj="deprecatedLogsBadge"
+                      alignment="middle"
+                      tooltipContent={i18n.translate(
+                        'xpack.streams.streamsTreeTable.deprecatedLogsBadgeTooltip',
+                        {
+                          defaultMessage: 'The logs stream is replaced by logs.otel and logs.ecs',
+                        }
+                      )}
+                    />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             );
           },

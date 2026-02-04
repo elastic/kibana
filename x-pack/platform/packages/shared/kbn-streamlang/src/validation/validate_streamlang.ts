@@ -103,6 +103,8 @@ export const KEEP_FIELDS = [
   'body.structured',
   'resource.schema_url',
   'resource.dropped_attributes_count',
+  'stream.name',
+  'scope.name',
 ] as const;
 
 /**
