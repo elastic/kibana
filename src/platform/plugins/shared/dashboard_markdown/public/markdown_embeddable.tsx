@@ -69,8 +69,6 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       ? await loadFromLibrary(savedObjectId)
       : initialState;
 
-    console.log({ initialState, initialMarkdownState });
-
     const titleManager = initializeTitleManager(initialState);
     const markdownStateManager = initializeStateManager<MarkdownState>(
       initialMarkdownState,
