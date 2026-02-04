@@ -14,12 +14,12 @@ import { RoundIcon } from './round_icon';
 import { lineClampStyles } from '../../../../../common.styles';
 
 const clampTextStyles = css`
-  word-break: break-word;
+  word-break: break-all;
   ${lineClampStyles(1)}
 `;
 
 const defaultThinkingLabel = i18n.translate('xpack.onechat.conversation.thinking.label', {
-  defaultMessage: 'Thinking...',
+  defaultMessage: 'Thinking…',
 });
 const thinkingCompletedLabel = i18n.translate(
   'xpack.onechat.conversation.thinking.completedReasoning',

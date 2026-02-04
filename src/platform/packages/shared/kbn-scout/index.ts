@@ -84,3 +84,6 @@ export type {
 
 // Re-exported Playwright types
 export type { Locator, CDPSession } from 'playwright/test';
+
+// Utility for overriding synthtrace clients
+export { getSynthtraceClient } from './src/common/services/synthtrace';
