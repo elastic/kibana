@@ -85,7 +85,6 @@ export const createAgentGraph = ({
     try {
       const response = await researcherModel.invoke(
         await promptFactory.getMainPrompt({
-          initialMessages: state.initialMessages,
           actions: state.mainActions,
         })
       );
@@ -195,7 +194,6 @@ export const createAgentGraph = ({
     try {
       const response = await answeringModel.invoke(
         await promptFactory.getAnswerPrompt({
-          initialMessages: state.initialMessages,
           actions: state.mainActions,
           answerActions: state.answerActions,
         })
