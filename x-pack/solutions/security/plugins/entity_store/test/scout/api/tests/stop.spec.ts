@@ -30,7 +30,7 @@ apiTest.describe('Entity Store stop/start API tests', { tag: ENTITY_STORE_TAGS }
   });
 
   apiTest(
-    'Should stop and start the extract entity task after install (user entity only)',
+    'Should stop and start the extract entity task after install',
     async ({ apiClient, kbnClient }) => {
       await kbnClient.uiSettings.update({
         [FF_ENABLE_ENTITY_STORE_V2]: true,
