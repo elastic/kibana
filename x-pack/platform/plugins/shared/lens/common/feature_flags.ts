@@ -47,6 +47,24 @@ export const lensFeatureFlags = {
     type: 'boolean',
     fallback: false as boolean,
   },
+  /**
+   * Enables ES|QL mode for form-based datasources, allowing Lens to generate
+   * ES|QL queries instead of traditional DSL aggregations.
+   */
+  enableEsql: {
+    id: 'lens.enable_esql',
+    type: 'boolean',
+    fallback: false as boolean,
+  },
+  /**
+   * Enables the "Convert to ES|QL" button in the Lens inline editing flyout,
+   * allowing users to convert form-based visualizations to ES|QL queries.
+   */
+  enableEsqlConversion: {
+    id: 'lens.enable_esql_conversion',
+    type: 'boolean',
+    fallback: false as boolean,
+  },
 } satisfies Record<string, LensFeatureFlag>;
 
 export type LensFeatureFlags = GetFlagTypes<typeof lensFeatureFlags>;
