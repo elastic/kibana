@@ -34,109 +34,115 @@ test.describe('Stream title and tags - Advanced Settings', { tag: ['@ess', '@svl
   test('shows empty title and tags in advanced settings by default', async ({ pageObjects }) => {
     await pageObjects.streams.gotoAdvancedTab(TEST_STREAM_NAME);
 
-    // Verify empty state for title and tags panels
-    await pageObjects.streams.expectStreamTitlePanelEmpty();
-    await pageObjects.streams.expectStreamTagsPanelEmpty();
+    // Verify empty state for title and tags (fields are always editable, so check for empty values)
+    await pageObjects.streams.expectStreamMetadataTitleEmpty();
+    await pageObjects.streams.expectStreamMetadataTagsEmpty();
   });
 
   test('can add and display title in advanced settings', async ({ pageObjects, page }) => {
     await pageObjects.streams.gotoAdvancedTab(TEST_STREAM_NAME);
 
-    // Click edit button for title panel
-    await pageObjects.streams.clickStreamTitlePanelEdit();
+    // Fill in the title (no edit button needed - always editable)
+    await pageObjects.streams.fillStreamMetadataTitle('Test Stream Title');
 
-    // Fill in the title
-    await pageObjects.streams.fillStreamTitlePanelInput('Test Stream Title');
+    // Bottom bar should appear with changes
+    await pageObjects.streams.expectStreamSettingsBottomBarVisible();
 
-    // Save the title
-    await pageObjects.streams.saveStreamTitlePanel();
+    // Save via bottom bar
+    await pageObjects.streams.saveStreamSettings();
 
     // Wait for save to complete (toast notification)
     await page.waitForTimeout(1000);
 
-    // Verify the title is displayed in the panel
-    await pageObjects.streams.expectStreamTitlePanelDisplay('Test Stream Title');
+    // Verify the title is displayed in the input
+    await pageObjects.streams.expectStreamMetadataTitle('Test Stream Title');
 
     // Refresh page to verify persistence
     await page.reload();
-    await pageObjects.streams.expectStreamTitlePanelDisplay('Test Stream Title');
+    await pageObjects.streams.expectStreamMetadataTitle('Test Stream Title');
   });
 
   test('can add and display tags in advanced settings', async ({ pageObjects, page }) => {
     await pageObjects.streams.gotoAdvancedTab(TEST_STREAM_NAME);
 
-    // Click edit button for tags panel
-    await pageObjects.streams.clickStreamTagsPanelEdit();
+    // Add tags (no edit button needed - always editable)
+    await pageObjects.streams.addStreamMetadataTag('test-tag');
+    await pageObjects.streams.addStreamMetadataTag('production');
 
-    // Add tags
-    await pageObjects.streams.addStreamTagInPanel('test-tag');
-    await pageObjects.streams.addStreamTagInPanel('production');
+    // Bottom bar should appear with changes
+    await pageObjects.streams.expectStreamSettingsBottomBarVisible();
 
-    // Save the tags
-    await pageObjects.streams.saveStreamTagsPanel();
+    // Save via bottom bar
+    await pageObjects.streams.saveStreamSettings();
 
     // Wait for save to complete
     await page.waitForTimeout(1000);
 
-    // Verify the tags are displayed in the panel
-    await pageObjects.streams.expectStreamTagsPanelBadge('test-tag');
-    await pageObjects.streams.expectStreamTagsPanelBadge('production');
+    // Verify the tags are displayed
+    await pageObjects.streams.expectStreamMetadataTag('test-tag');
+    await pageObjects.streams.expectStreamMetadataTag('production');
 
     // Refresh page to verify persistence
     await page.reload();
-    await pageObjects.streams.expectStreamTagsPanelBadge('test-tag');
-    await pageObjects.streams.expectStreamTagsPanelBadge('production');
+    await pageObjects.streams.expectStreamMetadataTag('test-tag');
+    await pageObjects.streams.expectStreamMetadataTag('production');
   });
 
   test('can cancel title edit without saving', async ({ pageObjects }) => {
     await pageObjects.streams.gotoAdvancedTab(TEST_STREAM_NAME);
 
-    // Click edit button for title panel
-    await pageObjects.streams.clickStreamTitlePanelEdit();
-
     // Fill in a new title
-    await pageObjects.streams.fillStreamTitlePanelInput('Cancelled Title');
+    await pageObjects.streams.fillStreamMetadataTitle('Cancelled Title');
 
-    // Cancel without saving
-    await pageObjects.streams.cancelStreamTitlePanel();
+    // Bottom bar should appear
+    await pageObjects.streams.expectStreamSettingsBottomBarVisible();
+
+    // Cancel via bottom bar
+    await pageObjects.streams.cancelStreamSettingsChanges();
 
     // Verify the original title is still displayed (Test Stream Title from previous test)
-    await pageObjects.streams.expectStreamTitlePanelDisplay('Test Stream Title');
+    await pageObjects.streams.expectStreamMetadataTitle('Test Stream Title');
+
+    // Bottom bar should be hidden after cancel
+    await pageObjects.streams.expectStreamSettingsBottomBarHidden();
   });
 
   test('can cancel tags edit without saving', async ({ pageObjects }) => {
     await pageObjects.streams.gotoAdvancedTab(TEST_STREAM_NAME);
 
-    // Click edit button for tags panel
-    await pageObjects.streams.clickStreamTagsPanelEdit();
-
     // Add a new tag
-    await pageObjects.streams.addStreamTagInPanel('cancelled-tag');
+    await pageObjects.streams.addStreamMetadataTag('cancelled-tag');
 
-    // Cancel without saving
-    await pageObjects.streams.cancelStreamTagsPanel();
+    // Bottom bar should appear
+    await pageObjects.streams.expectStreamSettingsBottomBarVisible();
+
+    // Cancel via bottom bar
+    await pageObjects.streams.cancelStreamSettingsChanges();
 
     // Verify original tags are still displayed
-    await pageObjects.streams.expectStreamTagsPanelBadge('test-tag');
-    await pageObjects.streams.expectStreamTagsPanelBadge('production');
+    await pageObjects.streams.expectStreamMetadataTag('test-tag');
+    await pageObjects.streams.expectStreamMetadataTag('production');
+
+    // Bottom bar should be hidden after cancel
+    await pageObjects.streams.expectStreamSettingsBottomBarHidden();
   });
 
   test('can clear title by saving empty value', async ({ pageObjects, page }) => {
     await pageObjects.streams.gotoAdvancedTab(TEST_STREAM_NAME);
 
-    // Click edit button for title panel
-    await pageObjects.streams.clickStreamTitlePanelEdit();
-
     // Clear the title
-    await pageObjects.streams.fillStreamTitlePanelInput('');
+    await pageObjects.streams.fillStreamMetadataTitle('');
 
-    // Save the empty title
-    await pageObjects.streams.saveStreamTitlePanel();
+    // Bottom bar should appear with changes
+    await pageObjects.streams.expectStreamSettingsBottomBarVisible();
+
+    // Save via bottom bar
+    await pageObjects.streams.saveStreamSettings();
 
     // Wait for save to complete
     await page.waitForTimeout(1000);
 
-    // Verify the title panel shows "No title set"
-    await pageObjects.streams.expectStreamTitlePanelEmpty();
+    // Verify the title is empty
+    await pageObjects.streams.expectStreamMetadataTitleEmpty();
   });
 });

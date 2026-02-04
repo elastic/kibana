@@ -8,9 +8,6 @@
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { EuiSpacer } from '@elastic/eui';
-import { StreamDescription } from '../../../stream_detail_systems/stream_description';
-import { StreamTitlePanel } from '../../../stream_detail_systems/stream_title';
-import { StreamTagsPanel } from '../../../stream_detail_systems/stream_tags';
 import { DeleteStreamPanel } from './delete_stream';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
@@ -31,23 +28,18 @@ export function ClassicAdvancedView({
 
   return (
     <>
-      <StreamTitlePanel definition={definition} refreshDefinition={refreshDefinition} />
-      <EuiSpacer />
-      <StreamTagsPanel definition={definition} refreshDefinition={refreshDefinition} />
-      <EuiSpacer />
-      {significantEvents?.enabled ? (
+      <UnmanagedElasticsearchAssets
+        definition={definition}
+        refreshDefinition={refreshDefinition}
+        showDescription={significantEvents?.enabled}
+        aiFeatures={aiFeatures}
+      />
+      {significantEvents?.enabled && (
         <>
-          <StreamDescription
-            definition={definition}
-            refreshDefinition={refreshDefinition}
-            aiFeatures={aiFeatures}
-          />
           <EuiSpacer />
           <StreamDiscoveryConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
-          <EuiSpacer />
         </>
-      ) : null}
-      <UnmanagedElasticsearchAssets definition={definition} refreshDefinition={refreshDefinition} />
+      )}
       <EuiSpacer />
       <DeleteStreamPanel definition={definition} />
       <EuiSpacer />

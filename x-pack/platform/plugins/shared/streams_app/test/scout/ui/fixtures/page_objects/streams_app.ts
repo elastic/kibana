@@ -1194,6 +1194,60 @@ export class StreamsApp {
     await this.page.getByTestId(`streamTag-${tag}`).locator('button').click();
   }
 
+  // Stream metadata form utility methods (unified form in advanced settings)
+  // Title is always editable - no edit button needed
+  async fillStreamMetadataTitle(title: string) {
+    const input = this.page.getByTestId('streamMetadataFormTitleInput');
+    await input.clear();
+    await input.fill(title);
+  }
+
+  async expectStreamMetadataTitle(title: string) {
+    await expect(this.page.getByTestId('streamMetadataFormTitleInput')).toHaveValue(title);
+  }
+
+  async expectStreamMetadataTitleEmpty() {
+    await expect(this.page.getByTestId('streamMetadataFormTitleInput')).toHaveValue('');
+  }
+
+  // Tags are always editable - no edit button needed
+  async addStreamMetadataTag(tag: string) {
+    const comboBox = this.page.getByTestId('streamMetadataFormTagsInput');
+    await comboBox.locator('input').fill(tag);
+    await this.page.keyboard.press('Enter');
+  }
+
+  async expectStreamMetadataTag(tag: string) {
+    // Tags appear as pills in the combo box
+    const comboBox = this.page.getByTestId('streamMetadataFormTagsInput');
+    await expect(comboBox.getByText(tag)).toBeVisible();
+  }
+
+  async expectStreamMetadataTagsEmpty() {
+    // Check that no tags are present (the combo box has no selected options)
+    const comboBox = this.page.getByTestId('streamMetadataFormTagsInput');
+    // The combo box should not have any pills
+    await expect(comboBox.locator('.euiComboBoxPill')).toHaveCount(0);
+  }
+
+  // Save changes via bottom bar (for all metadata + index settings)
+  async saveStreamSettings() {
+    await this.page.getByTestId('streamsAppSettingsSaveButton').click();
+  }
+
+  async cancelStreamSettingsChanges() {
+    await this.page.getByTestId('streamsAppSettingsCancelButton').click();
+  }
+
+  async expectStreamSettingsBottomBarVisible() {
+    await expect(this.page.getByTestId('streamsAppSettingsBottomBar')).toBeVisible();
+  }
+
+  async expectStreamSettingsBottomBarHidden() {
+    await expect(this.page.getByTestId('streamsAppSettingsBottomBar')).toBeHidden();
+  }
+
+  // Legacy methods (kept for backwards compatibility with any other tests)
   // Stream title utility methods (advanced settings panel)
   async clickStreamTitlePanelEdit() {
     await this.page.getByTestId('streamTitlePanelEditButton').click();

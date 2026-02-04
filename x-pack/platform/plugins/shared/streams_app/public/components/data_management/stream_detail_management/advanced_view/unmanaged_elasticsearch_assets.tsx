@@ -19,13 +19,18 @@ import { IngestPipelineDetails } from '../ingest_pipeline_details';
 import { DataStreamDetails } from '../data_stream_details';
 import { IndexConfiguration } from './index_configuration';
 import { Row, RowMetadata } from './row';
+import type { AIFeatures } from '../../../../hooks/use_ai_features';
 
 export function UnmanagedElasticsearchAssets({
   definition,
   refreshDefinition,
+  showDescription = false,
+  aiFeatures,
 }: {
   definition: Streams.ClassicStream.GetResponse;
   refreshDefinition: () => void;
+  showDescription?: boolean;
+  aiFeatures?: AIFeatures | null;
 }) {
   const {
     appParams: { history },
@@ -123,7 +128,12 @@ export function UnmanagedElasticsearchAssets({
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
-        <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
+        <IndexConfiguration
+          definition={definition}
+          refreshDefinition={refreshDefinition}
+          showDescription={showDescription}
+          aiFeatures={aiFeatures}
+        >
           <Row
             left={
               <RowMetadata
