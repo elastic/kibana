@@ -17,7 +17,7 @@ import { MARKDOWN_API_PATH } from '../../../common/constants';
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
     path: MARKDOWN_API_PATH,
-    summary: 'Create a markdown embeddable',
+    summary: 'Create a markdown panel',
     ...commonRouteConfig,
   });
 
@@ -43,7 +43,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
         if (e.isBoom && e.output.statusCode === 409) {
           return res.conflict({
             body: {
-              message: `A markdown embeddable with ID ${req.body.id} already exists.`,
+              message: `A markdown panel with ID ${req.body.id} already exists.`,
             },
           });
         }
@@ -52,7 +52,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
           return res.forbidden();
         }
 
-        return res.badRequest({ body: e });
+        return res.badRequest({ body: e.message });
       }
     }
   );

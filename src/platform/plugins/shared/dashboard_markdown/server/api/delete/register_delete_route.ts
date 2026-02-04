@@ -17,7 +17,7 @@ import { MARKDOWN_API_PATH } from '../../../common/constants';
 export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContext>) {
   const deleteRoute = router.delete({
     path: `${MARKDOWN_API_PATH}/{id}`,
-    summary: `Delete a markdown embeddable by ID.`,
+    summary: `Delete a markdown panel by ID.`,
     ...commonRouteConfig,
   });
 
@@ -29,7 +29,7 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
           params: schema.object({
             id: schema.string({
               meta: {
-                description: 'A unique identifier for the markdown embeddable.',
+                description: 'A unique identifier for the markdown panel.',
               },
             }),
           }),
@@ -43,7 +43,7 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
         if (e.isBoom && e.output.statusCode === 404) {
           return res.notFound({
             body: {
-              message: `A markdown embeddable with ID ${req.params.id} was not found.`,
+              message: `A markdown panel with ID ${req.params.id} was not found.`,
             },
           });
         }

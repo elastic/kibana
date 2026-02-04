@@ -18,7 +18,7 @@ import { MARKDOWN_API_PATH } from '../../../common/constants';
 export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>) {
   const readRoute = router.get({
     path: `${MARKDOWN_API_PATH}/{id}`,
-    summary: `Get a markdown embeddable by ID`,
+    summary: `Get a markdown panel by ID`,
     ...commonRouteConfig,
   });
 
@@ -30,7 +30,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
           params: schema.object({
             id: schema.string({
               meta: {
-                description: 'A unique identifier for the markdown embeddable.',
+                description: 'A unique identifier for the markdown panel.',
               },
             }),
           }),
@@ -52,7 +52,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
         if (e.isBoom && e.output.statusCode === 404) {
           return res.notFound({
             body: {
-              message: `A markdown embeddable with ID ${req.params.id} was not found.`,
+              message: `A markdown panel with ID ${req.params.id} was not found.`,
             },
           });
         }
@@ -61,7 +61,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
           return res.forbidden();
         }
 
-        return res.badRequest(e.message);
+        return res.badRequest({ body: e.message });
       }
     }
   );
