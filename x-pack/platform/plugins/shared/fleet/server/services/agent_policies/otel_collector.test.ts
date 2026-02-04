@@ -918,4 +918,162 @@ describe('generateOtelcolConfig', () => {
       });
     });
   });
+
+  describe('with config_yaml (advanced YAML configuration)', () => {
+    const otelInputForConfigYaml: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: 'test-config-yaml',
+      name: 'test-config-yaml',
+      revision: 0,
+      data_stream: {
+        namespace: 'default',
+      },
+      use_output: 'default',
+      package_policy_id: 'configyamlpolicy',
+      streams: [
+        {
+          id: 'stream-id-1',
+          data_stream: {
+            dataset: 'testdataset',
+            type: 'logs',
+          },
+          receivers: {
+            filelog: {
+              include: ['/var/log/*.log'],
+            },
+          },
+          service: {
+            pipelines: {
+              logs: {
+                receivers: ['filelog'],
+              },
+            },
+          },
+        },
+      ],
+    };
+
+    it('should apply config_yaml to the exporter', () => {
+      const outputWithConfigYaml: Output = {
+        type: 'elasticsearch',
+        is_default: true,
+        is_default_monitoring: true,
+        name: 'default',
+        id: 'fleet-default-output',
+        hosts: ['http://localhost:9200'],
+        config_yaml: `
+timeout: 30s
+retry:
+  enabled: true
+  max_retries: 5
+        `,
+      };
+
+      const inputs: FullAgentPolicyInput[] = [otelInputForConfigYaml];
+      const result = generateOtelcolConfig(inputs, outputWithConfigYaml);
+
+      expect(result.exporters?.['elasticsearch/default']).toEqual({
+        timeout: '30s',
+        retry: {
+          enabled: true,
+          max_retries: 5,
+        },
+        endpoints: ['http://localhost:9200'],
+      });
+    });
+
+    it('should let explicit properties override config_yaml values', () => {
+      const outputWithConfigYaml: Output = {
+        type: 'elasticsearch',
+        is_default: true,
+        is_default_monitoring: true,
+        name: 'default',
+        id: 'fleet-default-output',
+        hosts: ['http://localhost:9200'],
+        config_yaml: `
+endpoints:
+  - http://should-be-overridden:9200
+timeout: 30s
+        `,
+      };
+
+      const inputs: FullAgentPolicyInput[] = [otelInputForConfigYaml];
+      const result = generateOtelcolConfig(inputs, outputWithConfigYaml);
+
+      // endpoints from hosts should override the one in config_yaml
+      expect(result.exporters?.['elasticsearch/default']).toEqual({
+        timeout: '30s',
+        endpoints: ['http://localhost:9200'],
+      });
+    });
+
+    it('should work with empty config_yaml', () => {
+      const outputWithEmptyConfigYaml: Output = {
+        type: 'elasticsearch',
+        is_default: true,
+        is_default_monitoring: true,
+        name: 'default',
+        id: 'fleet-default-output',
+        hosts: ['http://localhost:9200'],
+        config_yaml: '',
+      };
+
+      const inputs: FullAgentPolicyInput[] = [otelInputForConfigYaml];
+      const result = generateOtelcolConfig(inputs, outputWithEmptyConfigYaml);
+
+      expect(result.exporters?.['elasticsearch/default']).toEqual({
+        endpoints: ['http://localhost:9200'],
+      });
+    });
+
+    it('should work with null config_yaml', () => {
+      const outputWithNullConfigYaml: Output = {
+        type: 'elasticsearch',
+        is_default: true,
+        is_default_monitoring: true,
+        name: 'default',
+        id: 'fleet-default-output',
+        hosts: ['http://localhost:9200'],
+        config_yaml: null,
+      };
+
+      const inputs: FullAgentPolicyInput[] = [otelInputForConfigYaml];
+      const result = generateOtelcolConfig(inputs, outputWithNullConfigYaml);
+
+      expect(result.exporters?.['elasticsearch/default']).toEqual({
+        endpoints: ['http://localhost:9200'],
+      });
+    });
+
+    it('should apply SSL settings from config_yaml to the exporter', () => {
+      const outputWithSslConfigYaml: Output = {
+        type: 'elasticsearch',
+        is_default: true,
+        is_default_monitoring: true,
+        name: 'default',
+        id: 'fleet-default-output',
+        hosts: ['https://localhost:9200'],
+        config_yaml: `
+tls:
+  insecure_skip_verify: true
+  ca_file: /path/to/ca.crt
+  cert_file: /path/to/client.crt
+  key_file: /path/to/client.key
+        `,
+      };
+
+      const inputs: FullAgentPolicyInput[] = [otelInputForConfigYaml];
+      const result = generateOtelcolConfig(inputs, outputWithSslConfigYaml);
+
+      expect(result.exporters?.['elasticsearch/default']).toEqual({
+        tls: {
+          insecure_skip_verify: true,
+          ca_file: '/path/to/ca.crt',
+          cert_file: '/path/to/client.crt',
+          key_file: '/path/to/client.key',
+        },
+        endpoints: ['https://localhost:9200'],
+      });
+    });
+  });
 });

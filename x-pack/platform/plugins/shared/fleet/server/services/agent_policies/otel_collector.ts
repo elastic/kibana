@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { load } from 'js-yaml';
+
 import type { Output, TemplateAgentPolicyInput } from '../../types';
 import type {
   FullAgentPolicyInput,
@@ -319,12 +321,18 @@ function attachOtelcolExporter(
 }
 
 function generateOtelcolExporter(dataOutput: Output): Record<OTelCollectorComponentID, any> {
+  // Parse config_yaml if present, similar to transformOutputToFullPolicyOutput
+  const advancedYamlConfig = dataOutput.config_yaml
+    ? (load(dataOutput.config_yaml) as Record<string, any>)
+    : {};
+
   switch (dataOutput.type) {
     case outputType.Elasticsearch:
       const outputID = getOutputIdForAgentPolicy(dataOutput);
       return {
         [`elasticsearch/${outputID}`]: {
-          endpoints: dataOutput.hosts,
+          ...advancedYamlConfig, // Apply advanced YAML config first
+          endpoints: dataOutput.hosts, // Explicit properties override config_yaml
         },
       };
     default:
