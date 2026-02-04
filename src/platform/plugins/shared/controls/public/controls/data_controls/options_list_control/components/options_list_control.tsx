@@ -299,9 +299,9 @@ const ConditionallyWrapWithLabel = ({
   ) : (
     <EuiFlexGroup
       direction="column"
-      gutterSize="xs"
       css={css`
-        padding: 4px 8px;
+        gap: 2px;
+        padding: 4px 8px 1px 8px;
       `}
     >
       <EuiFlexItem
@@ -320,7 +320,7 @@ const ConditionallyWrapWithLabel = ({
           {label}
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>{children} </EuiFlexItem>
+      <EuiFlexItem>{children}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
