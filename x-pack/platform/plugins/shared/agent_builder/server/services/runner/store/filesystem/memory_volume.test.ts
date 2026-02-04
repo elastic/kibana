@@ -5,33 +5,9 @@
  * 2.0.
  */
 
-import { FileEntryType, type FileEntry } from '@kbn/agent-builder-server/runner/filestore';
+import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
+import { createFileEntry } from '../../../../test_utils/filestore';
 import { MemoryVolume } from './memory_volume';
-
-const createFileEntry = (
-  path: string,
-  overrides: Partial<FileEntry> = {}
-): FileEntry => ({
-  path,
-  type: 'file',
-  metadata: {
-    type: FileEntryType.toolResult,
-    id: path,
-    readonly: true,
-  },
-  versions: [
-    {
-      version: 1,
-      content: {
-        raw: { name: `content for ${path}` },
-      },
-      metadata: {
-        token_count: 100,
-      },
-    },
-  ],
-  ...overrides,
-});
 
 describe('MemoryVolume', () => {
   describe('add', () => {
@@ -68,22 +44,26 @@ describe('MemoryVolume', () => {
     it('overwrites existing entry at the same path', async () => {
       const volume = new MemoryVolume('test');
       const entry1 = createFileEntry('/agents/agent1.json', {
-        versions: [
-          {
-            version: 1,
-            content: { raw: { version: 1 } },
-            metadata: { token_count: 100 },
-          },
-        ],
+        overrides: {
+          versions: [
+            {
+              version: 1,
+              content: { raw: { version: 1 } },
+              metadata: { token_count: 100 },
+            },
+          ],
+        },
       });
       const entry2 = createFileEntry('/agents/agent1.json', {
-        versions: [
-          {
-            version: 2,
-            content: { raw: { version: 2 } },
-            metadata: { token_count: 100 },
-          },
-        ],
+        overrides: {
+          versions: [
+            {
+              version: 2,
+              content: { raw: { version: 2 } },
+              metadata: { token_count: 100 },
+            },
+          ],
+        },
       });
 
       volume.add(entry1);

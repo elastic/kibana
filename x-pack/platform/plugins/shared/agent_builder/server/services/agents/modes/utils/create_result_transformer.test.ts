@@ -8,12 +8,12 @@
 import type { ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type {
-  FilestoreEntry,
   FilestoreVersionedEntry,
   IFileStore,
 } from '@kbn/agent-builder-server/runner/filestore';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import { createFileSystemStoreMock } from '../../../../test_utils/runner';
+import { createFilestoreVersionedEntry, toFilestoreEntry } from '../../../../test_utils/filestore';
 import {
   createResultTransformer,
   FILE_REFERENCE_TOKEN_THRESHOLD,
@@ -44,47 +44,14 @@ describe('createResultTransformer', () => {
     path: string,
     tokenCount: number,
     data: Record<string, unknown> = {}
-  ): FilestoreVersionedEntry => ({
-    path,
-    type: 'file',
-    metadata: {
-      type: 'tool_result' as any,
-      id: 'result-id',
-      readonly: true,
-      versioned: false,
-    },
-    versions: [
-      {
-        version: 1,
-        content: {
-          raw: data,
-          plain_text: JSON.stringify(data),
-        },
-        metadata: {
-          token_count: tokenCount,
-        },
+  ): FilestoreVersionedEntry =>
+    createFilestoreVersionedEntry(path, {
+      tokenCount,
+      content: {
+        raw: data,
+        plain_text: JSON.stringify(data),
       },
-    ],
-  });
-
-  const toFilestoreEntry = (entry?: FilestoreVersionedEntry): FilestoreEntry | undefined => {
-    if (!entry) {
-      return undefined;
-    }
-    const latest = entry.versions.reduce((current, next) =>
-      next.version > current.version ? next : current
-    );
-    return {
-      path: entry.path,
-      type: 'file',
-      version: latest.version,
-      metadata: {
-        ...entry.metadata,
-        ...latest.metadata,
-      },
-      content: latest.content,
-    };
-  };
+    });
 
   const createMockToolRegistry = (
     tools: Map<string, { summarizeToolReturn?: (step: ToolCallWithResult) => ToolResult[] | null }>

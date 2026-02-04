@@ -5,31 +5,10 @@
  * 2.0.
  */
 
-import { FileEntryType, type FileEntry } from '@kbn/agent-builder-server/runner/filestore';
+import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
+import { createFileEntry } from '../../../../test_utils/filestore';
 import { MemoryVolume } from './memory_volume';
 import { VirtualFileSystem } from './virtual_filesystem';
-
-const createFileEntry = (
-  path: string,
-  content: FileEntry['versions'][number]['content']['raw'] = { name: `content for ${path}` },
-  overrides: Partial<FileEntry> = {}
-): FileEntry => ({
-  path,
-  type: 'file',
-  metadata: {
-    type: FileEntryType.toolResult,
-    id: path,
-    readonly: true,
-  },
-  versions: [
-    {
-      version: 1,
-      content: { raw: content },
-      metadata: { token_count: 100 },
-    },
-  ],
-  ...overrides,
-});
 
 describe('VirtualFileSystem', () => {
   describe('mount', () => {
@@ -92,8 +71,8 @@ describe('VirtualFileSystem', () => {
       const volume1 = new MemoryVolume('v1');
       const volume2 = new MemoryVolume('v2');
 
-      volume1.add(createFileEntry('/shared/file.json', { source: 'v1' }));
-      volume2.add(createFileEntry('/shared/file.json', { source: 'v2' }));
+      volume1.add(createFileEntry('/shared/file.json', { content: { raw: { source: 'v1' } } }));
+      volume2.add(createFileEntry('/shared/file.json', { content: { raw: { source: 'v2' } } }));
 
       vfs.mount(volume1);
       vfs.mount(volume2);
@@ -107,8 +86,8 @@ describe('VirtualFileSystem', () => {
       const volume1 = new MemoryVolume('v1');
       const volume2 = new MemoryVolume('v2');
 
-      volume1.add(createFileEntry('/shared/file.json', { source: 'v1' }));
-      volume2.add(createFileEntry('/shared/file.json', { source: 'v2' }));
+      volume1.add(createFileEntry('/shared/file.json', { content: { raw: { source: 'v1' } } }));
+      volume2.add(createFileEntry('/shared/file.json', { content: { raw: { source: 'v2' } } }));
 
       // Mount v1 first but with lower priority (higher number)
       vfs.mount(volume1, { priority: 10 });
@@ -162,8 +141,8 @@ describe('VirtualFileSystem', () => {
       const volume1 = new MemoryVolume('v1');
       const volume2 = new MemoryVolume('v2');
 
-      const entry1 = createFileEntry('/agents/agent1.json', { source: 'v1' });
-      const entry2 = createFileEntry('/agents/agent1.json', { source: 'v2' });
+      const entry1 = createFileEntry('/agents/agent1.json', { content: { raw: { source: 'v1' } } });
+      const entry2 = createFileEntry('/agents/agent1.json', { content: { raw: { source: 'v2' } } });
 
       volume1.add(entry1);
       volume2.add(entry2);
@@ -237,8 +216,8 @@ describe('VirtualFileSystem', () => {
       const volume1 = new MemoryVolume('v1');
       const volume2 = new MemoryVolume('v2');
 
-      volume1.add(createFileEntry('/shared/file.json', { source: 'v1' }));
-      volume2.add(createFileEntry('/shared/file.json', { source: 'v2' }));
+      volume1.add(createFileEntry('/shared/file.json', { content: { raw: { source: 'v1' } } }));
+      volume2.add(createFileEntry('/shared/file.json', { content: { raw: { source: 'v2' } } }));
 
       vfs.mount(volume1);
       vfs.mount(volume2);

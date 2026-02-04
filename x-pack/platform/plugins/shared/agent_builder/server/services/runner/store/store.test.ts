@@ -5,31 +5,9 @@
  * 2.0.
  */
 
-import { FileEntryType, type FileEntry } from '@kbn/agent-builder-server/runner/filestore';
+import { createFileEntry } from '../../../test_utils/filestore';
 import { FileSystemStore } from './store';
 import { VirtualFileSystem, MemoryVolume } from './filesystem';
-
-const createFileEntry = (
-  path: string,
-  content: { raw: object; plain_text?: string },
-  overrides: Partial<FileEntry> = {}
-): FileEntry => ({
-  path,
-  type: 'file',
-  metadata: {
-    type: FileEntryType.toolResult,
-    id: path,
-    readonly: true,
-  },
-  versions: [
-    {
-      version: 1,
-      content,
-      metadata: { token_count: 100 },
-    },
-  ],
-  ...overrides,
-});
 
 describe('FileSystemStore', () => {
   let vfs: VirtualFileSystem;
@@ -49,7 +27,7 @@ describe('FileSystemStore', () => {
 
   describe('read', () => {
     it('returns a file entry when path exists', async () => {
-      const entry = createFileEntry('/files/test.json', { raw: { data: 'test' } });
+      const entry = createFileEntry('/files/test.json', { content: { raw: { data: 'test' } } });
       volume.add(entry);
 
       const result = await store.read('/files/test.json');
@@ -60,10 +38,8 @@ describe('FileSystemStore', () => {
     });
 
     it('returns latest version by default', async () => {
-      const entry = createFileEntry(
-        '/files/test.json',
-        { raw: { data: 'v1' } },
-        {
+      const entry = createFileEntry('/files/test.json', {
+        overrides: {
           versions: [
             {
               version: 2,
@@ -76,8 +52,8 @@ describe('FileSystemStore', () => {
               metadata: { token_count: 100 },
             },
           ],
-        }
-      );
+        },
+      });
       volume.add(entry);
 
       const result = await store.read('/files/test.json');
@@ -87,10 +63,8 @@ describe('FileSystemStore', () => {
     });
 
     it('returns requested version when specified', async () => {
-      const entry = createFileEntry(
-        '/files/test.json',
-        { raw: { data: 'v1' } },
-        {
+      const entry = createFileEntry('/files/test.json', {
+        overrides: {
           versions: [
             {
               version: 1,
@@ -103,8 +77,8 @@ describe('FileSystemStore', () => {
               metadata: { token_count: 100 },
             },
           ],
-        }
-      );
+        },
+      });
       volume.add(entry);
 
       const result = await store.read('/files/test.json', { version: 1 });
@@ -120,7 +94,7 @@ describe('FileSystemStore', () => {
     });
 
     it('returns undefined when path is a directory', async () => {
-      volume.add(createFileEntry('/files/test.json', { raw: { data: 'test' } }));
+      volume.add(createFileEntry('/files/test.json', { content: { raw: { data: 'test' } } }));
 
       const result = await store.read('/files');
 
@@ -131,8 +105,8 @@ describe('FileSystemStore', () => {
   describe('ls', () => {
     describe('with depth=1 (default)', () => {
       it('lists immediate children of a directory', async () => {
-        volume.add(createFileEntry('/root/file1.json', { raw: { id: 1 } }));
-        volume.add(createFileEntry('/root/file2.json', { raw: { id: 2 } }));
+        volume.add(createFileEntry('/root/file1.json', { content: { raw: { id: 1 } } }));
+        volume.add(createFileEntry('/root/file2.json', { content: { raw: { id: 2 } } }));
 
         const result = await store.ls('/root');
 
@@ -143,7 +117,7 @@ describe('FileSystemStore', () => {
       });
 
       it('includes subdirectories as DirEntry', async () => {
-        volume.add(createFileEntry('/root/subdir/file.json', { raw: {} }));
+        volume.add(createFileEntry('/root/subdir/file.json', { content: { raw: {} } }));
 
         const result = await store.ls('/root');
 
@@ -160,8 +134,8 @@ describe('FileSystemStore', () => {
 
     describe('with depth > 1 (nested tree)', () => {
       it('returns nested tree structure with depth=2', async () => {
-        volume.add(createFileEntry('/root/file1.json', { raw: { id: 1 } }));
-        volume.add(createFileEntry('/root/subdir/file2.json', { raw: { id: 2 } }));
+        volume.add(createFileEntry('/root/file1.json', { content: { raw: { id: 1 } } }));
+        volume.add(createFileEntry('/root/subdir/file2.json', { content: { raw: { id: 2 } } }));
 
         const result = await store.ls('/root', { depth: 2 });
 
@@ -181,7 +155,7 @@ describe('FileSystemStore', () => {
       });
 
       it('returns deeply nested tree with depth=3', async () => {
-        volume.add(createFileEntry('/root/a/b/file.json', { raw: {} }));
+        volume.add(createFileEntry('/root/a/b/file.json', { content: { raw: {} } }));
 
         const result = await store.ls('/root', { depth: 3 });
 
@@ -203,9 +177,9 @@ describe('FileSystemStore', () => {
 
   describe('glob', () => {
     it('returns files matching glob pattern', async () => {
-      volume.add(createFileEntry('/files/test1.json', { raw: { id: 1 } }));
-      volume.add(createFileEntry('/files/test2.json', { raw: { id: 2 } }));
-      volume.add(createFileEntry('/files/test.txt', { raw: { id: 3 } }));
+      volume.add(createFileEntry('/files/test1.json', { content: { raw: { id: 1 } } }));
+      volume.add(createFileEntry('/files/test2.json', { content: { raw: { id: 2 } } }));
+      volume.add(createFileEntry('/files/test.txt', { content: { raw: { id: 3 } } }));
 
       const result = await store.glob('/files/*.json');
 
@@ -217,7 +191,7 @@ describe('FileSystemStore', () => {
     });
 
     it('returns only files, not directories', async () => {
-      volume.add(createFileEntry('/files/subdir/file.json', { raw: {} }));
+      volume.add(createFileEntry('/files/subdir/file.json', { content: { raw: {} } }));
 
       const result = await store.glob('/files/*');
 
@@ -226,9 +200,9 @@ describe('FileSystemStore', () => {
     });
 
     it('supports ** for recursive matching', async () => {
-      volume.add(createFileEntry('/files/a.json', { raw: {} }));
-      volume.add(createFileEntry('/files/sub/b.json', { raw: {} }));
-      volume.add(createFileEntry('/files/sub/deep/c.json', { raw: {} }));
+      volume.add(createFileEntry('/files/a.json', { content: { raw: {} } }));
+      volume.add(createFileEntry('/files/sub/b.json', { content: { raw: {} } }));
+      volume.add(createFileEntry('/files/sub/deep/c.json', { content: { raw: {} } }));
 
       const result = await store.glob('/files/**/*.json');
 
@@ -236,7 +210,7 @@ describe('FileSystemStore', () => {
     });
 
     it('returns empty array when no matches', async () => {
-      volume.add(createFileEntry('/files/test.txt', { raw: {} }));
+      volume.add(createFileEntry('/files/test.txt', { content: { raw: {} } }));
 
       const result = await store.glob('/files/*.json');
 
@@ -247,10 +221,8 @@ describe('FileSystemStore', () => {
   describe('getEntry', () => {
     it('returns raw entry with versions', async () => {
       volume.add(
-        createFileEntry(
-          '/files/test.json',
-          { raw: { id: 1 } },
-          {
+        createFileEntry('/files/test.json', {
+          overrides: {
             versions: [
               {
                 version: 1,
@@ -263,8 +235,8 @@ describe('FileSystemStore', () => {
                 metadata: { token_count: 100, version_change: 'updated id' },
               },
             ],
-          }
-        )
+          },
+        })
       );
 
       const result = await store.getEntry('/files/test.json');
@@ -283,10 +255,8 @@ describe('FileSystemStore', () => {
 
   describe('grep', () => {
     it('uses latest version content when searching', async () => {
-      const entry = createFileEntry(
-        '/files/test.json',
-        { raw: {}, plain_text: 'old content' },
-        {
+      const entry = createFileEntry('/files/test.json', {
+        overrides: {
           versions: [
             {
               version: 1,
@@ -299,8 +269,8 @@ describe('FileSystemStore', () => {
               metadata: { token_count: 100 },
             },
           ],
-        }
-      );
+        },
+      });
       volume.add(entry);
 
       const result = await store.grep('new content', '/files/*.json');
@@ -313,8 +283,7 @@ describe('FileSystemStore', () => {
       it('finds matches using regex pattern', async () => {
         volume.add(
           createFileEntry('/files/test.json', {
-            raw: {},
-            plain_text: 'line 1\nfoo bar\nline 3',
+            content: { raw: {}, plain_text: 'line 1\nfoo bar\nline 3' },
           })
         );
 
@@ -328,8 +297,7 @@ describe('FileSystemStore', () => {
       it('finds multiple matches in the same file', async () => {
         volume.add(
           createFileEntry('/files/test.json', {
-            raw: {},
-            plain_text: 'error: first\ninfo: ok\nerror: second',
+            content: { raw: {}, plain_text: 'error: first\ninfo: ok\nerror: second' },
           })
         );
 
@@ -343,14 +311,12 @@ describe('FileSystemStore', () => {
       it('finds matches across multiple files', async () => {
         volume.add(
           createFileEntry('/files/a.json', {
-            raw: {},
-            plain_text: 'hello world',
+            content: { raw: {}, plain_text: 'hello world' },
           })
         );
         volume.add(
           createFileEntry('/files/b.json', {
-            raw: {},
-            plain_text: 'goodbye world',
+            content: { raw: {}, plain_text: 'goodbye world' },
           })
         );
 
@@ -367,8 +333,7 @@ describe('FileSystemStore', () => {
       it('treats pattern as literal text', async () => {
         volume.add(
           createFileEntry('/files/test.json', {
-            raw: {},
-            plain_text: 'foo.*bar\nfoo test bar',
+            content: { raw: {}, plain_text: 'foo.*bar\nfoo test bar' },
           })
         );
 
@@ -382,8 +347,7 @@ describe('FileSystemStore', () => {
       it('does not interpret regex metacharacters', async () => {
         volume.add(
           createFileEntry('/files/test.json', {
-            raw: {},
-            plain_text: 'function test() {\n  return true;\n}',
+            content: { raw: {}, plain_text: 'function test() {\n  return true;\n}' },
           })
         );
 
@@ -398,8 +362,7 @@ describe('FileSystemStore', () => {
       it('includes context lines before and after match', async () => {
         volume.add(
           createFileEntry('/files/test.json', {
-            raw: {},
-            plain_text: 'line 1\nline 2\nmatch here\nline 4\nline 5',
+            content: { raw: {}, plain_text: 'line 1\nline 2\nmatch here\nline 4\nline 5' },
           })
         );
 
@@ -412,8 +375,7 @@ describe('FileSystemStore', () => {
       it('handles context at beginning of file', async () => {
         volume.add(
           createFileEntry('/files/test.json', {
-            raw: {},
-            plain_text: 'match here\nline 2\nline 3',
+            content: { raw: {}, plain_text: 'match here\nline 2\nline 3' },
           })
         );
 
@@ -426,8 +388,7 @@ describe('FileSystemStore', () => {
       it('handles context at end of file', async () => {
         volume.add(
           createFileEntry('/files/test.json', {
-            raw: {},
-            plain_text: 'line 1\nline 2\nmatch here',
+            content: { raw: {}, plain_text: 'line 1\nline 2\nmatch here' },
           })
         );
 
@@ -442,8 +403,7 @@ describe('FileSystemStore', () => {
       it('uses plain_text when available', async () => {
         volume.add(
           createFileEntry('/files/test.json', {
-            raw: { nested: { value: 'hidden' } },
-            plain_text: 'searchable text',
+            content: { raw: { nested: { value: 'hidden' } }, plain_text: 'searchable text' },
           })
         );
 
@@ -455,7 +415,7 @@ describe('FileSystemStore', () => {
       it('falls back to JSON stringified raw content when plain_text is not available', async () => {
         volume.add(
           createFileEntry('/files/test.json', {
-            raw: { key: 'findme' },
+            content: { raw: { key: 'findme' } },
           })
         );
 
@@ -468,8 +428,7 @@ describe('FileSystemStore', () => {
     it('returns empty array when no matches', async () => {
       volume.add(
         createFileEntry('/files/test.json', {
-          raw: {},
-          plain_text: 'no match here',
+          content: { raw: {}, plain_text: 'no match here' },
         })
       );
 
@@ -481,8 +440,7 @@ describe('FileSystemStore', () => {
     it('returns empty array when no files match glob', async () => {
       volume.add(
         createFileEntry('/other/test.json', {
-          raw: {},
-          plain_text: 'findme',
+          content: { raw: {}, plain_text: 'findme' },
         })
       );
 
