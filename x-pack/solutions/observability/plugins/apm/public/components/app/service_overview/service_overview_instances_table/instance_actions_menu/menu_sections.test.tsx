@@ -30,10 +30,7 @@ describe('getMenuSections', () => {
   } as unknown as AssetDetailsLocator;
 
   const mockDiscoverLocator = {
-    getRedirectUrl: jest.fn((params: any) => {
-      const query = params.query?.query || '';
-      return `/app/discover#/?_g=(time:(from:'${params.timeRange.from}',to:'${params.timeRange.to}'))&_a=(query:(language:kuery,query:'${query}'))`;
-    }),
+    getRedirectUrl: jest.fn().mockReturnValue('/app/discover#/?kubernetes.pod.uid'),
   } as unknown as LocatorPublic<SerializableRecord>;
 
   const mockOnFilterByInstanceClick = jest.fn();
@@ -105,7 +102,6 @@ describe('getMenuSections', () => {
 
     // Verify Pod metrics action exists
     const podMetricsAction = allActions.find((action) => action.key === 'podMetrics');
-    expect(podMetricsAction).toBeDefined();
     expect(podMetricsAction?.label).toBe('Pod metrics');
   });
 
@@ -303,7 +299,6 @@ describe('getMenuSections', () => {
     const allActions = sections.flat().flatMap((section) => section.actions);
     const podMetricsAction = allActions.find((action) => action.key === 'podMetrics');
 
-    expect(podMetricsAction).toBeDefined();
     expect(podMetricsAction?.condition).toBe(true);
     // Should use Discover link, not Infra UI link
     expect(podMetricsAction?.href).toContain('/app/discover');

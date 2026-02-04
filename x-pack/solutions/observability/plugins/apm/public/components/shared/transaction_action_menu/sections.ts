@@ -144,8 +144,8 @@ export const getSections = ({
       label: i18n.translate('xpack.apm.transactionActionMenu.showPodMetricsLinkLabel', {
         defaultMessage: 'Pod metrics',
       }),
-      href: podMetricsLink.href,
-      condition: podMetricsLink.condition,
+      href: podMetricsLink,
+      condition: !!podMetricsLink,
     },
   ];
 

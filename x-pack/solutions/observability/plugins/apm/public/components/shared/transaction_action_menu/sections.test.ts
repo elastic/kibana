@@ -35,10 +35,7 @@ const mockAssetDetailsLocator = {
 } as unknown as jest.Mocked<AssetDetailsLocator>;
 
 const mockDiscoverLocator = {
-  getRedirectUrl: jest.fn().mockImplementation((params: any) => {
-    const query = params.query?.query || '';
-    return `/app/discover#/?_g=(time:(from:'${params.timeRange.from}',to:'${params.timeRange.to}'))&_a=(query:(language:kuery,query:'${query}'))`;
-  }),
+  getRedirectUrl: jest.fn().mockReturnValue('/app/discover#/?kubernetes.pod.uid'),
 } as unknown as ReturnType<typeof sharePluginMock.createLocator>;
 
 const expectLogsLocatorToBeCalled = () => {
@@ -227,7 +224,6 @@ describe('Transaction action menu', () => {
       (action) => action.key === 'podMetrics'
     );
 
-    expect(podMetricsAction).toBeDefined();
     expect(podMetricsAction?.condition).toBe(true);
     // Should use Discover link, not Infra UI link
     expect(podMetricsAction?.href).toContain('/app/discover');

@@ -19,11 +19,6 @@ interface PodMetricsLinkParams {
   infraLinksAvailable?: boolean;
 }
 
-interface PodMetricsLinkResult {
-  href: string | undefined;
-  condition: boolean;
-}
-
 /**
  * Determines the appropriate pod metrics link based on whether the pod is
  * OTel-observed and running on K8s. For OTel-observed K8s pods, returns a
@@ -36,44 +31,38 @@ export function getPodMetricsLink({
   assetDetailsLocator,
   discoverLocator,
   infraLinksAvailable = true,
-}: PodMetricsLinkParams): PodMetricsLinkResult {
+}: PodMetricsLinkParams): string | undefined {
   if (!podId) {
-    return { href: undefined, condition: false };
+    return undefined;
   }
 
   const isOTelObservedK8sPod = !!agentName && isOpenTelemetryAgentName(agentName);
 
   // For OTel-observed K8s pods, use Discover link instead of Infra UI
   if (isOTelObservedK8sPod && discoverLocator && infraMetricsQuery) {
-    return {
-      href: discoverLocator.getRedirectUrl({
-        dataViewSpec: {
-          title: 'metrics-*',
-        },
-        timeRange: {
-          from: infraMetricsQuery.from,
-          to: infraMetricsQuery.to,
-        },
-        query: {
-          language: 'kuery',
-          query: `kubernetes.pod.uid: "${podId}"`,
-        },
-      }),
-      condition: true,
-    };
+    return discoverLocator.getRedirectUrl({
+      dataViewSpec: {
+        title: 'metrics-*',
+      },
+      timeRange: {
+        from: infraMetricsQuery.from,
+        to: infraMetricsQuery.to,
+      },
+      query: {
+        language: 'kuery',
+        query: `kubernetes.pod.uid: "${podId}"`,
+      },
+    });
   }
 
   // For non-OTel pods, use Infra UI if available
   if (infraLinksAvailable && assetDetailsLocator && infraMetricsQuery) {
-    return {
-      href: assetDetailsLocator.getRedirectUrl({
-        entityId: podId,
-        entityType: 'pod',
-        assetDetails: { dateRange: infraMetricsQuery },
-      }),
-      condition: true,
-    };
+    return assetDetailsLocator.getRedirectUrl({
+      entityId: podId,
+      entityType: 'pod',
+      assetDetails: { dateRange: infraMetricsQuery },
+    });
   }
 
-  return { href: undefined, condition: false };
+  return undefined;
 }

@@ -102,8 +102,8 @@ export function getMenuSections({
       label: i18n.translate('xpack.apm.serviceOverview.instancesTable.actionMenus.podMetrics', {
         defaultMessage: 'Pod metrics',
       }),
-      href: podMetricsLink.href,
-      condition: podMetricsLink.condition,
+      href: podMetricsLink,
+      condition: !!podMetricsLink,
     },
   ];
 
