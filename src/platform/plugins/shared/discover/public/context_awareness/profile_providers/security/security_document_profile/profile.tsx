@@ -15,11 +15,14 @@ import type { ProfileProviderServices } from '../../profile_provider_services';
 import { SECURITY_PROFILE_ID } from '../constants';
 import * as i18n from '../translations';
 import type { SecurityProfileProviderFactory } from '../types';
-import { AlertEventOverviewLazy } from '../components';
+import { AlertEventOverviewLazy, NewAlertEventOverviewLazy } from '../components';
 
 export const createSecurityDocumentProfileProvider: SecurityProfileProviderFactory<
   DocumentProfileProvider
 > = (_services: ProfileProviderServices) => {
+  const isSecuritySolutionFlyoutEnabled =
+    _services.discoverFeatureFlags.getSecuritySolutionFlyoutEnabled();
+
   return {
     profileId: SECURITY_PROFILE_ID.document,
     experimental: true,
@@ -35,7 +38,12 @@ export const createSecurityDocumentProfileProvider: SecurityProfileProviderFacto
               id: 'doc_view_alerts_overview',
               title: i18n.overviewTabTitle(isAlert),
               order: 0,
-              render: (props) => <AlertEventOverviewLazy {...props} />,
+              render: (props) =>
+                isSecuritySolutionFlyoutEnabled ? (
+                  <NewAlertEventOverviewLazy {...props} />
+                ) : (
+                  <AlertEventOverviewLazy {...props} />
+                ),
             });
 
             return prevDocViewer.docViewsRegistry(registry);

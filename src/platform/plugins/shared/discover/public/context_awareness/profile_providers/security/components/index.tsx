@@ -17,3 +17,11 @@ export const AlertEventOverviewLazy = withSuspense(
     }))
   )
 );
+
+export const NewAlertEventOverviewLazy = withSuspense(
+  lazy(() =>
+    import('./new_alert_event_overview').then((module) => ({
+      default: module.NewAlertEventOverview,
+    }))
+  )
+);
