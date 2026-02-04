@@ -10,7 +10,7 @@ import type {
   FsEntry,
   FilestoreVersionedEntry,
   FileEntry,
-  FileEntryMetadata,
+  FilestoreVersionedEntryMetadata,
   FilestoreEntry,
   LsEntry,
   GrepMatch,
@@ -266,7 +266,7 @@ export class FileSystemStore implements IFileStore {
     return entry.versions.find((entryVersion) => entryVersion.version === version);
   }
 
-  private buildMetadata(entry: FileEntry): FileEntryMetadata {
+  private buildMetadata(entry: FileEntry): FilestoreVersionedEntryMetadata {
     const versions = entry.versions.map((version) => version.version);
     const versioned = versions.length > 1;
     const lastVersion = versions.length > 0 ? Math.max(...versions) : undefined;

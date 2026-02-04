@@ -13,7 +13,7 @@ export enum FileEntryType {
   attachment = 'attachment',
 }
 
-export type FileEntryMetadataInput<TExtraMeta extends object = {}> = {
+export type FileEntryMetadata<TExtraMeta extends object = {}> = {
   /**
    * Type of the entry (tool_result, attachment...)
    */
@@ -28,8 +28,8 @@ export type FileEntryMetadataInput<TExtraMeta extends object = {}> = {
   readonly: boolean;
 } /** extra per-type metadata */ & TExtraMeta;
 
-export type FileEntryMetadata<TExtraMeta extends object = {}> =
-  FileEntryMetadataInput<TExtraMeta> & {
+export type FilestoreVersionedEntryMetadata<TExtraMeta extends object = {}> =
+  FileEntryMetadata<TExtraMeta> & {
     /**
      * True when the entry has more than one version.
      */
@@ -74,7 +74,7 @@ export interface FileEntryVersion<TContent extends object = object> {
 export interface FileEntry<TContent extends object = object, TMeta extends object = object> {
   path: string;
   type: 'file';
-  metadata: FileEntryMetadataInput<TMeta>;
+  metadata: FileEntryMetadata<TMeta>;
   versions: FileEntryVersion<TContent>[];
 }
 
@@ -82,7 +82,7 @@ export interface FilestoreEntry<TContent extends object = object, TMeta extends 
   path: string;
   type: 'file';
   version: number;
-  metadata: FileEntryMetadataInput<TMeta> & FileEntryVersionMetadata;
+  metadata: FileEntryMetadata<TMeta> & FileEntryVersionMetadata;
   content: FileEntryContent<TContent>;
 }
 
@@ -92,7 +92,7 @@ export interface FilestoreVersionedEntry<
 > {
   path: string;
   type: 'file';
-  metadata: FileEntryMetadata<TMeta>;
+  metadata: FilestoreVersionedEntryMetadata<TMeta>;
   versions: FileEntryVersion<TContent>[];
 }
 
