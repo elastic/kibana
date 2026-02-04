@@ -11,6 +11,7 @@ import type { FtrProviderContext } from './ftr_provider_context';
 export function SearchInferenceManagementPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   return {
     InferenceTabularPage: {
@@ -73,15 +74,15 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
         await searchField.clearValue();
         await searchField.type('elser');
 
-        // Wait for table to update and check stats
-        await browser.sleep(500); // Allow time for filtering
+        // Wait for table to update and check stats using retry
+        await retry.try(async () => {
+          const filteredEndpointsText = await testSubjects.getVisibleText('endpointStatsEndpoints');
+          const filteredCount = parseInt(filteredEndpointsText.match(/\d+/)?.[0] || '0', 10);
 
-        const filteredEndpointsText = await testSubjects.getVisibleText('endpointStatsEndpoints');
-        const filteredCount = parseInt(filteredEndpointsText.match(/\d+/)?.[0] || '0', 10);
-
-        // Filtered count should be less than or equal to initial count
-        expect(filteredCount).to.be.lessThan(initialCount + 1);
-        expect(filteredCount).to.greaterThan(0);
+          // Filtered count should be less than or equal to initial count
+          expect(filteredCount).to.be.lessThan(initialCount + 1);
+          expect(filteredCount).to.greaterThan(0);
+        });
 
         // Clear the search field
         await searchField.clearValue();
