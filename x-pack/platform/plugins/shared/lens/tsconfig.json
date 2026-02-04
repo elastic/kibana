@@ -134,8 +134,6 @@
     "@kbn/esql-language",
     "@kbn/cps",
     "@kbn/kql",
-    "@kbn/react-env",
-    "@kbn/controls-constants",
     "@kbn/core-base-browser-mocks",
     "@kbn/react-kibana-context-env",
     "@kbn/controls-renderer"
