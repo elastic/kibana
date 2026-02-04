@@ -19,3 +19,8 @@ export {
   WrappingPrettyPrinter,
   type WrappingPrettyPrinterOptions,
 } from './wrapping_pretty_printer';
+
+export {
+  VerbatimPrettyPrinter,
+  type VerbatimPrettyPrinterOptions,
+} from './verbatim_pretty_printer';
