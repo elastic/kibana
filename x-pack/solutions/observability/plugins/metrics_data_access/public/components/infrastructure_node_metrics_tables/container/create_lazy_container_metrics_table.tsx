@@ -15,7 +15,7 @@ const LazyIntegratedContainerMetricsTable = lazy(
 );
 
 export function createLazyContainerMetricsTable(core: CoreStart, metricsClient: MetricsDataClient) {
-  return ({ timerange, filterClauseDsl, sourceId }: NodeMetricsTableProps) => {
+  return ({ timerange, kuery, sourceId }: NodeMetricsTableProps) => {
     return (
       <Suspense fallback={null}>
         <LazyIntegratedContainerMetricsTable
@@ -23,7 +23,7 @@ export function createLazyContainerMetricsTable(core: CoreStart, metricsClient: 
           metricsClient={metricsClient}
           sourceId={sourceId || 'default'}
           timerange={timerange}
-          filterClauseDsl={filterClauseDsl}
+          kuery={kuery}
         />
       </Suspense>
     );

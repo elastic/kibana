@@ -46,6 +46,8 @@ import {
   CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
   ENABLE_DISABLE_RULES_SUBFEATURE_ID,
   INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID,
+  ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
+  ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -202,6 +204,7 @@ export const getSecurityBaseKibanaFeature = ({
         LISTS_API_READ,
         RULES_API_READ,
         ALERTS_API_READ,
+        ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
         EXCEPTIONS_API_READ,
         USERS_API_READ,
         INITIALIZE_SECURITY_SOLUTION,
@@ -225,7 +228,7 @@ export const getSecurityBaseKibanaFeature = ({
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: [SECURITY_UI_SHOW],
+      ui: [SECURITY_UI_SHOW, ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE],
     },
   },
 });

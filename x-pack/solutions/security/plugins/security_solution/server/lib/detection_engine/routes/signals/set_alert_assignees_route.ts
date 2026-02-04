@@ -8,7 +8,7 @@
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   ALERTS_API_ALL,
-  ALERTS_API_SIGNAL_UPDATE_DEPRECATED_PRIVILEGE,
+  ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
 import { SetAlertAssigneesRequestBody } from '../../../../../common/api/detection_engine/alert_assignees';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -26,7 +26,7 @@ export const setAlertAssigneesRoute = (router: SecuritySolutionPluginRouter) => 
       security: {
         authz: {
           requiredPrivileges: [
-            { anyRequired: [ALERTS_API_ALL, ALERTS_API_SIGNAL_UPDATE_DEPRECATED_PRIVILEGE] },
+            { anyRequired: [ALERTS_API_ALL, ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE] },
           ],
         },
       },

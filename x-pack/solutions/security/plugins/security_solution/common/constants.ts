@@ -7,13 +7,17 @@
 
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import { SECURITY_FEATURE_ID_V5 } from '@kbn/security-solution-features/constants';
+import {
+  RULES_FEATURE_LATEST,
+  SECURITY_FEATURE_ID_V5,
+} from '@kbn/security-solution-features/constants';
 import * as i18n from './translations';
 
 export {
   SecurityPageName,
-  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
 } from '@kbn/security-solution-navigation';
+
 /**
  * as const
  *
@@ -30,7 +34,7 @@ export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
 export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const SECURITY_FEATURE_ID = SECURITY_FEATURE_ID_V5;
-export { RULES_FEATURE_ID_V4 as RULES_FEATURE_ID } from '@kbn/security-solution-features/constants';
+export const RULES_FEATURE_ID = RULES_FEATURE_LATEST;
 export { ALERTS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 export const APP_NAME = 'Security' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;

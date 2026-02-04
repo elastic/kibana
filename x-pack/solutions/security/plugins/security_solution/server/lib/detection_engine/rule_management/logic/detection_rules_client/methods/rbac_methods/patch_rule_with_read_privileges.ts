@@ -22,7 +22,7 @@ import { getReadAuthFieldValue, validateFieldWritePermissions } from '../../util
  *
  * Will throw errors if patch request contains fields not defined as a `ValidReadAuthEditFields` in the alerting plugin
  */
-export const patchRuleWithReadPrivileges = async ({
+export const patchReadAuthEditRuleFields = async ({
   rulesClient,
   rulePatch,
   existingRule,

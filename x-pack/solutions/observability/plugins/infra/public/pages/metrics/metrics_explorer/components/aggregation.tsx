@@ -24,35 +24,38 @@ interface Props {
   onChange: (aggregation: MetricsExplorerAggregation) => void;
 }
 
-type MetricsExplorerAggregationWithoutCustom = Exclude<MetricsExplorerAggregation, 'custom'>;
+type MetricsExplorerSelectableAggregation = Exclude<
+  MetricsExplorerAggregation,
+  'custom' | 'last_value'
+>;
 
 export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) => {
   const AGGREGATION_LABELS = {
-    ['avg']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.avg', {
+    ['avg']: i18n.translate('xpack.infra.metricsExplorer.aggregationLabels.avg', {
       defaultMessage: 'Average',
     }),
-    ['sum']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.sum', {
+    ['sum']: i18n.translate('xpack.infra.metricsExplorer.aggregationLabels.sum', {
       defaultMessage: 'Sum',
     }),
-    ['max']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.max', {
+    ['max']: i18n.translate('xpack.infra.metricsExplorer.aggregationLabels.max', {
       defaultMessage: 'Max',
     }),
-    ['min']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.min', {
+    ['min']: i18n.translate('xpack.infra.metricsExplorer.aggregationLabels.min', {
       defaultMessage: 'Min',
     }),
-    ['cardinality']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.cardinality', {
+    ['cardinality']: i18n.translate('xpack.infra.metricsExplorer.aggregationLabels.cardinality', {
       defaultMessage: 'Cardinality',
     }),
-    ['rate']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.rate', {
+    ['rate']: i18n.translate('xpack.infra.metricsExplorer.aggregationLabels.rate', {
       defaultMessage: 'Rate',
     }),
-    ['p95']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.p95', {
+    ['p95']: i18n.translate('xpack.infra.metricsExplorer.aggregationLabels.p95', {
       defaultMessage: '95th Percentile',
     }),
-    ['p99']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.p99', {
+    ['p99']: i18n.translate('xpack.infra.metricsExplorer.aggregationLabels.p99', {
       defaultMessage: '99th Percentile',
     }),
-    ['count']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.count', {
+    ['count']: i18n.translate('xpack.infra.metricsExplorer.aggregationLabels.count', {
       defaultMessage: 'Document count',
     }),
   };
@@ -72,7 +75,8 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
 
   const METRIC_EXPLORER_AGGREGATIONS_WITHOUT_CUSTOM = xor(METRIC_EXPLORER_AGGREGATIONS, [
     'custom',
-  ]) as MetricsExplorerAggregationWithoutCustom[];
+    'last_value',
+  ]) as MetricsExplorerSelectableAggregation[];
 
   return (
     <EuiSelect

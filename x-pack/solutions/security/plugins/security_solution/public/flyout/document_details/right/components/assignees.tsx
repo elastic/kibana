@@ -81,7 +81,7 @@ export const Assignees = memo(
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const upsellingMessage = useUpsellingMessage('alert_assignments');
 
-    const { hasAlertsAll } = useAlertsPrivileges();
+    const { hasAlertsUpdate } = useAlertsPrivileges();
     const setAlertAssignees = useSetAlertAssignees();
 
     const uids = useMemo(() => new Set(assignedUserIds), [assignedUserIds]);
@@ -119,7 +119,7 @@ export const Assignees = memo(
           button={
             <UpdateAssigneesButton
               togglePopover={togglePopover}
-              isDisabled={!hasAlertsAll || !isPlatinumPlus}
+              isDisabled={!hasAlertsUpdate || !isPlatinumPlus}
               toolTipMessage={
                 upsellingMessage ??
                 i18n.translate(
@@ -147,7 +147,7 @@ export const Assignees = memo(
     }, [
       assignedUserIds,
       handleApplyAssignees,
-      hasAlertsAll,
+      hasAlertsUpdate,
       isPlatinumPlus,
       isPopoverOpen,
       searchInputId,

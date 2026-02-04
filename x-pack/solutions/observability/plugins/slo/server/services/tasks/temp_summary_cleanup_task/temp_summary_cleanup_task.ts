@@ -53,7 +53,6 @@ export class TempSummaryCleanupTask {
             run: async () => {
               return this.runTask(taskInstance, core, abortController);
             },
-            cancel: async () => {},
           };
         },
       },

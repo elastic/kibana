@@ -18,6 +18,7 @@ import {
   THRESHOLD_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import {
   ALERTS_API_ALL,
   ALERTS_API_READ,
@@ -71,7 +72,7 @@ export const getAlertsBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
       catalogue: [APP_ID],
       savedObject: {
         all: [],
-        read: [],
+        read: [DATA_VIEW_SAVED_OBJECT_TYPE],
       },
       alerting: {
         alert: { all: alertingFeatures },
@@ -95,7 +96,7 @@ export const getAlertsBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
       catalogue: [APP_ID],
       savedObject: {
         all: [],
-        read: [],
+        read: [DATA_VIEW_SAVED_OBJECT_TYPE],
       },
       alerting: {
         alert: { read: alertingFeatures },

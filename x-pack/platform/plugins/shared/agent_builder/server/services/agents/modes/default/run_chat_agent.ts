@@ -38,6 +38,7 @@ import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 import { steps } from './constants';
+import { createPromptFactory } from './prompts';
 import type { StateType } from './state';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
@@ -68,6 +69,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     structuredOutput = false,
     outputSchema,
     startTime = new Date(),
+    configurationOverrides,
   },
   context
 ) => {
@@ -80,12 +82,18 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     stateManager,
     events,
     promptManager,
+    filestore,
   } = context;
 
   ensureValidInput({ input: nextInput, conversation });
 
   const pendingRound = getPendingRound(conversation);
   const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
+
+  // Only clear access tracking for a brand new round; keep it when resuming (HITL).
+  if (!pendingRound) {
+    context.attachmentStateManager.clearAccessTracking();
+  }
 
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -96,7 +104,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventEmitter: AgentEventEmitterFn = (event) => {
     manualEvents$.next(event);
   };
-
   const processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
@@ -108,7 +115,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     toolProvider,
     agentConfiguration,
     attachmentsService: attachments,
+    filestore,
     request,
+    spaceId: context.spaceId,
     runner: context.runner,
   });
 
@@ -139,6 +148,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const cycleLimit = 10;
   const graphRecursionLimit = getRecursionLimit(cycleLimit);
 
+  const promptFactory = createPromptFactory({
+    configuration: resolvedConfiguration,
+    capabilities: resolvedCapabilities,
+    filestore,
+    processedConversation,
+    outputSchema,
+    conversationTimestamp,
+  });
+
   const agentGraph = createAgentGraph({
     logger,
     events: { emit: eventEmitter },
@@ -149,6 +167,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     structuredOutput,
     outputSchema,
     processedConversation,
+    promptFactory,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -158,7 +177,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       conversation: processedConversation,
       agentBuilderToLangchainIdMap,
       cycleLimit,
-      conversationTimestamp,
     }),
     {
       version: 'v2',
@@ -190,6 +208,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
   };
 
+  // Use provided overrides, or fall back to pending round's overrides (for HITL resume)
+  const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;
+
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
@@ -199,6 +220,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       modelProvider,
       stateManager,
       attachmentStateManager: context.attachmentStateManager,
+      configurationOverrides: effectiveOverrides,
     }),
     evictInternalEvents(),
     shareReplay()
@@ -232,18 +254,16 @@ const createInitializerCommand = ({
   conversation,
   cycleLimit,
   agentBuilderToLangchainIdMap,
-  conversationTimestamp,
 }: {
   conversation: ProcessedConversation;
   cycleLimit: number;
   agentBuilderToLangchainIdMap: ToolIdMapping;
-  conversationTimestamp: string;
 }): Command => {
   const initialMessages = conversationToLangchainMessages({
     conversation,
   });
 
-  const initialState: Partial<StateType> = { initialMessages, cycleLimit, conversationTimestamp };
+  const initialState: Partial<StateType> = { initialMessages, cycleLimit };
   let startAt = steps.init;
 
   const lastRound = conversation.previousRounds.length

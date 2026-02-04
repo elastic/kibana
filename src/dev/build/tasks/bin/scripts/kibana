@@ -41,6 +41,13 @@ if [ "$KBN_ENABLE_JEMALLOC" = 'true' ]; then
     exit 1
   fi
 fi
+if [ "$KBN_ENABLE_MIMALLOC" = 'true' ]; then
+  export LD_PRELOAD='/usr/lib/libmimalloc-secure.so.2'
+  if [ ! -f "$LD_PRELOAD" ]; then
+    echo "unable to find mimalloc at $LD_PRELOAD"
+    exit 1
+  fi
+fi
 {{/serverless}}
 {{#forcePointerCompression}}
 NODE="${DIR}/node/pointer-compression/bin/node"

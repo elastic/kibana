@@ -75,6 +75,7 @@ export interface ISearchStart {
     appId: string;
     trackingProps: { openedFrom: string };
     onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
+    onClose?: () => void;
   }) => void;
   /**
    * Feature flag value to make it easier to use in different plugins

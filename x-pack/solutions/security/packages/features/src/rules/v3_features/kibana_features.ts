@@ -18,8 +18,7 @@ import {
   THRESHOLD_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
-
+import { EXCEPTION_LIST_NAMESPACE_AWARE } from '@kbn/securitysolution-list-constants';
 import {
   APP_ID,
   CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
@@ -111,8 +110,8 @@ export const getRulesV3BaseKibanaFeature = (
       app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
-        all: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
-        read: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
+        all: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE_AWARE),
+        read: params.savedObjects,
       },
       alerting: {
         rule: { all: alertingFeatures },

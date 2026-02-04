@@ -25,10 +25,16 @@ describe('useGroupTakeActionsItems', () => {
     tableId: 'mock-id',
     groupNumber: 0,
     selectedGroup: 'test',
+    groupBucket: {
+      key: ['bucket-test'],
+      key_as_string: 'bucket-test',
+      selectedGroup: 'test',
+      doc_count: 0,
+    },
   };
 
   beforeEach(() => {
-    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: true });
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
   });
 
   it('returns all take actions items if showAlertStatusActions is true and currentStatus is undefined', async () => {
@@ -176,7 +182,7 @@ describe('useGroupTakeActionsItems', () => {
 
   describe('when the user does not have alert edit privileges', () => {
     beforeEach(() => {
-      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: false });
+      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: false });
     });
 
     it('returns empty take actions items', async () => {

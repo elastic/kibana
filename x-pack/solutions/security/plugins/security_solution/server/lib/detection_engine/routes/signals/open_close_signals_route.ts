@@ -11,7 +11,7 @@ import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/s
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   ALERTS_API_ALL,
-  ALERTS_API_SIGNAL_UPDATE_DEPRECATED_PRIVILEGE,
+  ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
 import { AlertStatusEnum } from '../../../../../common/api/model';
@@ -44,7 +44,7 @@ export const setSignalsStatusRoute = (
       security: {
         authz: {
           requiredPrivileges: [
-            { anyRequired: [ALERTS_API_ALL, ALERTS_API_SIGNAL_UPDATE_DEPRECATED_PRIVILEGE] },
+            { anyRequired: [ALERTS_API_ALL, ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE] },
           ],
         },
       },

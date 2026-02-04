@@ -18,7 +18,7 @@ import {
   THRESHOLD_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
+import { EXCEPTION_LIST_NAMESPACE_AWARE } from '@kbn/securitysolution-list-constants';
 
 import {
   ALERTS_API_ALL,
@@ -44,6 +44,8 @@ import {
   INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID,
   CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
   ENABLE_DISABLE_RULES_SUBFEATURE_ID,
+  ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
+  ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../../security/types';
@@ -118,8 +120,8 @@ export const getRulesV2BaseKibanaFeature = (
       app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
-        all: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
-        read: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
+        all: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE_AWARE),
+        read: params.savedObjects,
       },
       alerting: {
         rule: { all: alertingFeatures },
@@ -128,7 +130,7 @@ export const getRulesV2BaseKibanaFeature = (
       management: {
         insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
       },
-      ui: [RULES_UI_READ, RULES_UI_EDIT],
+      ui: [RULES_UI_READ, RULES_UI_EDIT, EXCEPTIONS_UI_READ],
       api: [
         RULES_API_ALL,
         RULES_API_READ,
@@ -137,6 +139,7 @@ export const getRulesV2BaseKibanaFeature = (
         LISTS_API_ALL,
         LISTS_API_READ,
         LISTS_API_SUMMARY,
+        EXCEPTIONS_API_READ,
         USERS_API_READ,
         INITIALIZE_SECURITY_SOLUTION,
         'rac',
@@ -169,10 +172,11 @@ export const getRulesV2BaseKibanaFeature = (
       management: {
         insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
       },
-      ui: [RULES_UI_READ, EXCEPTIONS_UI_READ],
+      ui: [RULES_UI_READ, EXCEPTIONS_UI_READ, ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE],
       api: [
         RULES_API_READ,
         ALERTS_API_READ,
+        ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
         LISTS_API_READ,
         EXCEPTIONS_API_READ,
         USERS_API_READ,

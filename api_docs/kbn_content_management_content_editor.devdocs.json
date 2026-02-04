@@ -18,7 +18,7 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
-        "lineNumber": 125,
+        "lineNumber": 128,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -36,7 +36,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
-            "lineNumber": 127,
+            "lineNumber": 130,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -108,7 +108,7 @@
           ") => () => void"
         ],
         "path": "src/platform/packages/shared/content-management/content_editor/src/open_content_editor.tsx",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -191,7 +191,7 @@
           " | undefined; appendRows?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_editor/src/open_content_editor.tsx",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

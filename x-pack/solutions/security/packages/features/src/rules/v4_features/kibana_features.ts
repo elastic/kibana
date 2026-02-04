@@ -18,7 +18,11 @@ import {
   THRESHOLD_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
+<<<<<<<< HEAD:x-pack/solutions/security/packages/features/src/rules/v4_features/kibana_features.ts
 import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
+========
+import { EXCEPTION_LIST_NAMESPACE_AWARE } from '@kbn/securitysolution-list-constants';
+>>>>>>>> denar50/rbac-alerts-feature:x-pack/solutions/security/packages/features/src/rules/v3_features/kibana_features.ts
 
 import {
   APP_ID,
@@ -31,7 +35,11 @@ import {
   LISTS_API_SUMMARY,
   RULES_API_ALL,
   RULES_API_READ,
+<<<<<<<< HEAD:x-pack/solutions/security/packages/features/src/rules/v4_features/kibana_features.ts
   RULES_FEATURE_ID_V4,
+========
+  RULES_FEATURE_ID_V3,
+>>>>>>>> denar50/rbac-alerts-feature:x-pack/solutions/security/packages/features/src/rules/v3_features/kibana_features.ts
   RULES_UI_EDIT,
   RULES_UI_READ,
   SECURITY_SOLUTION_RULES_APP_ID,
@@ -58,12 +66,21 @@ const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
   consumers: [SERVER_APP_ID],
 }));
 
+<<<<<<<< HEAD:x-pack/solutions/security/packages/features/src/rules/v4_features/kibana_features.ts
 export const getRulesV4BaseKibanaFeature = (
   params: SecurityFeatureParams
 ): BaseKibanaFeatureConfig => ({
   id: RULES_FEATURE_ID_V4,
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionRulesV4Title',
+========
+export const getRulesV3BaseKibanaFeature = (
+  params: SecurityFeatureParams
+): BaseKibanaFeatureConfig => ({
+  id: RULES_FEATURE_ID_V3,
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionRulesV3Title',
+>>>>>>>> denar50/rbac-alerts-feature:x-pack/solutions/security/packages/features/src/rules/v3_features/kibana_features.ts
     {
       defaultMessage: 'Rules and Exceptions',
     }
@@ -81,8 +98,13 @@ export const getRulesV4BaseKibanaFeature = (
       app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
+<<<<<<<< HEAD:x-pack/solutions/security/packages/features/src/rules/v4_features/kibana_features.ts
         all: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
         read: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
+========
+        all: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE_AWARE),
+        read: params.savedObjects,
+>>>>>>>> denar50/rbac-alerts-feature:x-pack/solutions/security/packages/features/src/rules/v3_features/kibana_features.ts
       },
       alerting: {
         rule: { all: alertingFeatures },

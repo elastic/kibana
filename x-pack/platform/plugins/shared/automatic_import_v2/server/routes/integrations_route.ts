@@ -192,7 +192,7 @@ const createIntegrationRoute = (
           };
           return response.ok({ body });
         } catch (err) {
-          logger.error(`createIntegrationRoute: Caught error:`, err);
+          logger.error(`createIntegrationRoute: Caught error: ${err}`);
           const automaticImportResponse = buildAutomaticImportResponse(response);
           return automaticImportResponse.error({
             statusCode: 500,

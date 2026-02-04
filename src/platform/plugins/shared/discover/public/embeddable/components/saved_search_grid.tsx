@@ -64,6 +64,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
+      expandedDocSetter: NonNullable<UnifiedDataTableProps['setExpandedDoc']>,
       customColumnsMeta?: DataTableColumnsMeta
     ) => (
       <DiscoverGridFlyout
@@ -77,12 +78,13 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         onFilter={props.onFilter}
         onRemoveColumn={props.onRemoveColumn}
         onAddColumn={props.onAddColumn}
-        onClose={() => setExpandedDoc(undefined)}
-        setExpandedDoc={setExpandedDocWithInitialTab}
+        onClose={() => expandedDocSetter(undefined)}
+        setExpandedDoc={expandedDocSetter}
         initialTabId={initialTabId}
         query={props.query}
         filters={props.filters}
         docViewerRef={docViewerRef}
+        hideFilteringOnComputedColumns={true}
       />
     ),
     [
@@ -93,7 +95,6 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       props.onAddColumn,
       props.query,
       props.filters,
-      setExpandedDocWithInitialTab,
       initialTabId,
     ]
   );
@@ -148,6 +149,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         setExpandedDoc={setExpandedDocWithInitialTab}
         expandedDoc={expandedDoc}
         showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
+        hideFilteringOnComputedColumns={true}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
         renderCustomToolbar={renderCustomToolbarWithElements}

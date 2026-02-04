@@ -23,7 +23,7 @@ import {
 } from '../../../utils';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
+import { deleteAndReCreateUserRole } from '../../../../../config/services/common';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -72,12 +72,9 @@ export default ({ getService }: FtrProviderContext) => {
         const role = ROLES.rules_read_exceptions_all;
 
         beforeEach(async () => {
-          await createUserAndRole(getService, role);
+          await deleteAndReCreateUserRole(getService, role);
         });
 
-        afterEach(async () => {
-          await deleteUserAndRole(getService, role);
-        });
         it('should delete a single exception list item by its item_id', async () => {
           const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
           const restrictedApis = exceptionsApi.withUser(restrictedUser);
@@ -115,12 +112,9 @@ export default ({ getService }: FtrProviderContext) => {
         const role = ROLES.rules_read_exceptions_read;
 
         beforeEach(async () => {
-          await createUserAndRole(getService, role);
+          await deleteAndReCreateUserRole(getService, role);
         });
 
-        afterEach(async () => {
-          await deleteUserAndRole(getService, role);
-        });
         it('should NOT delete a single exception list item by its item_id', async () => {
           const restrictedUser = { username: 'rules_read_exceptions_read', password: 'changeme' };
           const restrictedApis = exceptionsApi.withUser(restrictedUser);

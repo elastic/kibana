@@ -56,7 +56,7 @@ jest.mock(
   '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
   () => ({
     useAlertsPrivileges: () => ({
-      hasAlertsAll: true,
+      hasAlertsUpdate: true,
     }),
   })
 );

@@ -15,7 +15,7 @@ import {
   getCreateExceptionListMinimalSchemaMockWithoutId,
 } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
+import { deleteAndReCreateUserRole } from '../../../../../config/services/common';
 
 import { deleteAllExceptions, removeExceptionListServerGeneratedProperties } from '../../../utils';
 
@@ -143,12 +143,9 @@ export default ({ getService }: FtrProviderContext) => {
         const role = ROLES.rules_read_exceptions_all;
 
         beforeEach(async () => {
-          await createUserAndRole(getService, role);
+          await deleteAndReCreateUserRole(getService, role);
         });
 
-        afterEach(async () => {
-          await deleteUserAndRole(getService, role);
-        });
         it('should be able to read a single exception list using list_id', async () => {
           const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
           const restrictedApis = exceptionsApi.withUser(restrictedUser);
@@ -176,12 +173,9 @@ export default ({ getService }: FtrProviderContext) => {
         const role = ROLES.rules_read_exceptions_read;
 
         beforeEach(async () => {
-          await createUserAndRole(getService, role);
+          await deleteAndReCreateUserRole(getService, role);
         });
 
-        afterEach(async () => {
-          await deleteUserAndRole(getService, role);
-        });
         it('should be able to read a single exception list using list_id', async () => {
           const restrictedUser = { username: 'rules_read_exceptions_read', password: 'changeme' };
           const restrictedApis = exceptionsApi.withUser(restrictedUser);

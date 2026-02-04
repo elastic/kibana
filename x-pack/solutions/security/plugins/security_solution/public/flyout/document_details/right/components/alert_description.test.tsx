@@ -174,7 +174,7 @@ describe('<AlertDescription />', () => {
       });
     });
 
-    it('should not render rule summary button when user cannot read rules', () => {
+    it('should render rule preview button as disabled if user does not have read privileges for rules', () => {
       mockUseUserPrivileges.mockReturnValue({
         ...initialUserPrivilegesState(),
         rulesPrivileges: {
@@ -183,13 +183,13 @@ describe('<AlertDescription />', () => {
         },
       });
 
-      const { queryByTestId, getByTestId } = renderDescription(
+      const { getByTestId } = renderDescription(
         panelContextValue([ruleUuid, ruleDescription, ruleName])
       );
 
       expect(getByTestId(ALERT_DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(ALERT_DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent('Rule description');
-      expect(queryByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).not.toBeInTheDocument();
+      expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toHaveAttribute('disabled');
     });
   });
 });

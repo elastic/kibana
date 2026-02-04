@@ -18,14 +18,17 @@ const createSetupContractMock = () => {
   });
 };
 
+const createStartContractMock = createSetupContractMock;
+
 const createMock = () => {
   const mocked = serviceContractMock();
   mocked.setup.mockReturnValue(createSetupContractMock());
+  mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
 export const settingsServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
-  createStartContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };

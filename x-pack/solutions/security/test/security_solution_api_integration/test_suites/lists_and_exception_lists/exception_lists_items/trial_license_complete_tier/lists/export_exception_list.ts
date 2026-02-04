@@ -12,7 +12,7 @@ import { EXCEPTION_LIST_URL, EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysoluti
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
+import { deleteAndReCreateUserRole } from '../../../../../config/services/common';
 import {
   removeExceptionListServerGeneratedProperties,
   removeExceptionListItemServerGeneratedProperties,
@@ -193,12 +193,9 @@ export default ({ getService }: FtrProviderContext): void => {
         const role = ROLES.rules_read_exceptions_all;
 
         beforeEach(async () => {
-          await createUserAndRole(getService, role);
+          await deleteAndReCreateUserRole(getService, role);
         });
 
-        afterEach(async () => {
-          await deleteUserAndRole(getService, role);
-        });
         it('should export a single list with a list id', async () => {
           const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
           const restrictedApis = exceptionsApi.withUser(restrictedUser);
@@ -231,12 +228,9 @@ export default ({ getService }: FtrProviderContext): void => {
         const role = ROLES.rules_read_exceptions_read;
 
         beforeEach(async () => {
-          await createUserAndRole(getService, role);
+          await deleteAndReCreateUserRole(getService, role);
         });
 
-        afterEach(async () => {
-          await deleteUserAndRole(getService, role);
-        });
         it('should export a single list with a list id', async () => {
           const restrictedUser = { username: 'rules_read_exceptions_read', password: 'changeme' };
           const restrictedApis = exceptionsApi.withUser(restrictedUser);

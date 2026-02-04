@@ -8,6 +8,7 @@
 import assert from 'assert';
 import { ReplaySubject, type Subject } from 'rxjs';
 import type {
+  Logger,
   LoggerFactory,
   SavedObject,
   SavedObjectsDeleteOptions,
@@ -45,6 +46,7 @@ export class AutomaticImportService {
   private savedObjectsServiceSetup: SavedObjectsServiceSetup;
   private taskManagerSetup: TaskManagerSetupContract;
   private taskManagerService: TaskManagerService;
+  private logger: Logger;
 
   constructor(
     loggerFactory: LoggerFactory,
@@ -54,6 +56,7 @@ export class AutomaticImportService {
   ) {
     this.pluginStop$ = new ReplaySubject(1);
     this.loggerFactory = loggerFactory;
+    this.logger = loggerFactory.get('automaticImportService');
     this.savedObjectsServiceSetup = savedObjectsServiceSetup;
     this.samplesIndexService = new AutomaticImportSamplesIndexService(loggerFactory);
 
@@ -78,13 +81,16 @@ export class AutomaticImportService {
 
   public async createUpdateIntegration(params: CreateUpdateIntegrationParams): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-
     const { authenticatedUser, integrationParams } = params;
 
     try {
       await this.savedObjectService.insertIntegration(integrationParams, authenticatedUser);
+      this.logger.debug(`Integration ${integrationParams.integrationId} created successfully`);
     } catch (error) {
       if (ErrorUtils.isIntegrationAlreadyExistsError(error)) {
+        this.logger.debug(
+          `Integration ${integrationParams.integrationId} already exists, updating it`
+        );
         // Build a full IntegrationAttributes object for the saved objects update API
         const existing = await this.savedObjectService.getIntegration(
           integrationParams.integrationId
@@ -107,6 +113,7 @@ export class AutomaticImportService {
         };
 
         await this.savedObjectService.updateIntegration(updateData, expectedVersion);
+        this.logger.debug(`Integration ${integrationParams.integrationId} updated successfully`);
       } else {
         throw error;
       }
