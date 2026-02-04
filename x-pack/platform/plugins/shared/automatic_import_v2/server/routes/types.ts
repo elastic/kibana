@@ -13,6 +13,12 @@ export interface CreateUpdateIntegrationParams {
   authenticatedUser: AuthenticatedUser;
 }
 
+export interface ApproveIntegrationParams {
+  integrationId: string;
+  authenticatedUser: AuthenticatedUser;
+  version: string;
+}
+
 export interface CreateDataStreamParams {
   dataStreamParams: DataStreamParams;
   authenticatedUser: AuthenticatedUser;
