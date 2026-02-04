@@ -62,7 +62,7 @@ Compares a baseline time window to a deviation window and performs statistical c
 
 Do NOT use for:
 - Understanding the sequence of events for a specific error (use get_correlated_logs)
-- Getting a general overview of log types (use get_log_categories)
+- Getting a general overview of log types (use get_log_groups)
 - Investigating individual log entries or transactions`,
     schema: logRateAnalysisSchema,
     tags: ['observability', 'logs'],
