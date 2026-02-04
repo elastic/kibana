@@ -26,7 +26,7 @@ test.describe('Homepage - Viewer', { tag: ['@svlSearch'] }, () => {
 
   test('Navigation cards should navigate to correct places', async ({ pageObjects, page }) => {
     const navigationCards = await pageObjects.homepage.getNavigationCards();
-    await expect(navigationCards).toHaveCount(5);
+    await expect(navigationCards).toHaveCount(4);
 
     const navCardTests = [
       {
@@ -44,10 +44,6 @@ test.describe('Homepage - Viewer', { tag: ['@svlSearch'] }, () => {
       {
         cardTestId: 'searchHomepageNavLinks-machineLearning',
         expectedUrl: 'ml/overview',
-      },
-      {
-        cardTestId: 'searchHomepageNavLinks-dataManagement',
-        expectedUrl: 'index_management',
       },
     ];
 
