@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
 import type {
   SavedSearchAttributes,
   SavedSearchByValueAttributes,
 } from '@kbn/saved-search-plugin/common';
+import type { DrilldownsState } from '@kbn/embeddable-plugin/server';
 import type { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 
 // These are options that are not persisted in the saved object, but can be used by solutions
@@ -29,7 +29,7 @@ export type EditableSavedSearchAttributes = Partial<
 
 type SearchEmbeddableBaseState = SerializedTitles &
   SerializedTimeRange &
-  Partial<DynamicActionsSerializedState> &
+  DrilldownsState &
   EditableSavedSearchAttributes & {
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
   };
