@@ -10,8 +10,10 @@ import { timerange } from '@kbn/synthtrace-client';
 import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import {
   generateGetTracesApmDataset,
-  generateGetTracesLogsData,
   DEFAULT_TRACE_CONFIGS,
+  generateCorrelatedLogsData,
+  createLogSequence,
+  type CorrelatedLogEvent,
 } from '@kbn/synthtrace';
 import type { OtherResult } from '@kbn/agent-builder-common';
 import { OBSERVABILITY_GET_TRACES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
@@ -25,12 +27,25 @@ interface GetTracesToolResult extends OtherResult {
   };
 }
 
-const START = 'now-10m';
+const START = 'now-1h';
 const END = 'now';
+
+async function indexCorrelatedLogs({
+  logsEsClient,
+  logs,
+}: {
+  logsEsClient: LogsSynthtraceEsClient;
+  logs: CorrelatedLogEvent[];
+}): Promise<void> {
+  const range = timerange('now-5m', 'now');
+  const { client, generator } = generateCorrelatedLogsData({ range, logsEsClient, logs });
+  await client.index(generator);
+}
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const synthtrace = getService('synthtrace');
+  const range = timerange(START, END);
 
   describe(`tool: ${OBSERVABILITY_GET_TRACES_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
@@ -42,12 +57,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
       apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
-      logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
+      logsSynthtraceEsClient = await synthtrace.createLogsSynthtraceEsClient();
 
       await apmSynthtraceEsClient.clean();
       await logsSynthtraceEsClient.clean();
-
-      const range = timerange(START, END);
 
       const apmData = generateGetTracesApmDataset({
         range,
@@ -56,13 +69,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       await apmData.client.index(apmData.generator);
-
-      const logsData = generateGetTracesLogsData({
-        range,
-        logsEsClient: logsSynthtraceEsClient,
-        config: DEFAULT_TRACE_CONFIGS[0],
-      });
-      await logsData.client.index(logsData.generator);
     });
 
     after(async () => {
@@ -74,45 +80,73 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    it('returns a single trace sequence with APM events and correlated logs', async () => {
-      const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
-        id: OBSERVABILITY_GET_TRACES_TOOL_ID,
-        params: {
-          start: START,
-          end: END,
-          traceId: DEFAULT_TRACE_CONFIGS[0].traceId,
-        },
+    describe('when traceId is provided', () => {
+      before(async () => {
+        const { traceId, serviceName, environment } = DEFAULT_TRACE_CONFIGS[0];
+
+        const correlatedLogs = createLogSequence({
+          service: serviceName,
+          correlation: {
+            'trace.id': traceId,
+            'request.id': `req-${traceId}`,
+          },
+          defaults: {
+            'service.environment': environment,
+          },
+          logs: [
+            { 'log.level': 'info', message: 'Checkout request received' },
+            { 'log.level': 'debug', message: 'Calling downstream cart service' },
+            { 'log.level': 'error', message: 'Database query failed: timeout' },
+            { 'log.level': 'warn', message: 'Retrying operation' },
+            { 'log.level': 'info', message: 'Checkout completed' },
+          ],
+        });
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
+          logs: correlatedLogs,
+        });
       });
-      const { sequences } = results[0].data;
-      // when traceId is provided, should return exactly one sequence
-      expect(sequences).to.have.length(1);
+      it('returns a single trace sequence with APM events and correlated logs', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
+          id: OBSERVABILITY_GET_TRACES_TOOL_ID,
+          params: {
+            start: START,
+            end: END,
+            traceId: DEFAULT_TRACE_CONFIGS[0].traceId,
+          },
+        });
+        const { sequences } = results[0].data;
+        // when traceId is provided, should return exactly one sequence
+        expect(sequences).to.have.length(1);
 
-      const sequence = sequences[0];
-      expect(sequence.correlation_identifier.identifier.field).to.be('trace.id');
-      expect(sequence.correlation_identifier.identifier.value).to.be(
-        DEFAULT_TRACE_CONFIGS[0].traceId
-      );
-      expect(sequence.traceItems.length).to.be.greaterThan(0);
-      expect(sequence.logs.length).to.be.greaterThan(0);
-      expect(sequence.errorItems.length).to.be.greaterThan(0);
-    });
-
-    it('returns an empty sequence if the trace does not exist', async () => {
-      const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
-        id: OBSERVABILITY_GET_TRACES_TOOL_ID,
-        params: {
-          start: START,
-          end: END,
-          traceId: 'trace-does-not-exist',
-        },
+        const sequence = sequences[0];
+        expect(sequence.correlation_identifier.identifier.field).to.be('trace.id');
+        expect(sequence.correlation_identifier.identifier.value).to.be(
+          DEFAULT_TRACE_CONFIGS[0].traceId
+        );
+        expect(sequence.traceItems.length).to.be.greaterThan(0);
+        expect(sequence.logs.length).to.be.greaterThan(0);
+        expect(sequence.errorItems.length).to.be.greaterThan(0);
       });
 
-      const { correlation_identifier, traceItems, logs, errorItems } = results[0].data.sequences[0];
-      expect(correlation_identifier.identifier.field).to.be('trace.id');
-      expect(correlation_identifier.identifier.value).to.be('trace-does-not-exist');
-      expect(traceItems).to.have.length(0);
-      expect(logs).to.have.length(0);
-      expect(errorItems).to.have.length(0);
+      it('returns an empty sequence if the trace does not exist', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
+          id: OBSERVABILITY_GET_TRACES_TOOL_ID,
+          params: {
+            start: START,
+            end: END,
+            traceId: 'trace-does-not-exist',
+          },
+        });
+
+        const { correlation_identifier, traceItems, logs, errorItems } =
+          results[0].data.sequences[0];
+        expect(correlation_identifier.identifier.field).to.be('trace.id');
+        expect(correlation_identifier.identifier.value).to.be('trace-does-not-exist');
+        expect(traceItems).to.have.length(0);
+        expect(logs).to.have.length(0);
+        expect(errorItems).to.have.length(0);
+      });
     });
   });
 }

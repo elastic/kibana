@@ -66,7 +66,10 @@ import { createCliScenario } from '../../../../lib/utils/create_scenario';
 import { withClient, type ScenarioReturnType } from '../../../../lib/utils/with_client';
 import type { ApmSynthtraceEsClient } from '../../../../lib/apm/client/apm_synthtrace_es_client';
 import type { LogsSynthtraceEsClient } from '../../../../lib/logs/logs_synthtrace_es_client';
-import { createLogSequence, generateLogsData } from './logs';
+import {
+  createLogSequence,
+  generateCorrelatedLogsData,
+} from '../get_correlated_logs/correlated_logs';
 
 interface SpanConfig {
   spanName: string;
@@ -226,7 +229,7 @@ export function generateGetTracesLogsData({
     ],
   });
 
-  return generateLogsData({ range, logsEsClient, logs: correlatedLogs });
+  return generateCorrelatedLogsData({ range, logsEsClient, logs: correlatedLogs });
 }
 
 export default createCliScenario<ApmFields | LogDocument>(
@@ -238,9 +241,9 @@ export default createCliScenario<ApmFields | LogDocument>(
     });
 
     // Index two log sets:
-    // 1) Default realistic sequences (uses generateDefaultSequences via generateLogsData)
+    // 1) Default realistic sequences (uses generateDefaultSequences via generateCorrelatedLogsData)
     // 2) A deterministic trace.id-correlated sequence matching DEFAULT_CONFIG.traceId
-    const defaultLogsData = generateLogsData({ range, logsEsClient });
+    const defaultLogsData = generateCorrelatedLogsData({ range, logsEsClient });
 
     const correlatedLogsData = [
       // Deterministic anchor log (has stable _id for logId lookups)
