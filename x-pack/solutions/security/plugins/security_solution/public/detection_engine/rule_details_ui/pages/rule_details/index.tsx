@@ -641,14 +641,6 @@ export const RuleDetailsPage = connector(
         )}
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal>
-            <SiemSearchBar
-              dataView={experimentalDataView}
-              pollForSignalIndex={pollForSignalIndex}
-              id={InputsModelId.global}
-              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-            />
-          </FiltersGlobal>
           <RuleDetailsContextProvider>
             <RuleCustomizationsContextProvider rule={rule}>
               <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -795,6 +787,13 @@ export const RuleDetailsPage = connector(
                     </Route>
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                       <>
+                        <SiemSearchBar
+                          dataView={experimentalDataView}
+                          pollForSignalIndex={pollForSignalIndex}
+                          id={InputsModelId.global}
+                          sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
+                        />
+                        <EuiSpacer />
                         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                           <EuiFlexItem grow={false}>
                             <AlertsTableFilterGroup
