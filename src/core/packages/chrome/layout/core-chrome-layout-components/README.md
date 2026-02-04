@@ -39,3 +39,4 @@ const styles = css`
 - **Components**: See [`layout.types.ts`](./layout.types.ts) for props and configuration
 - **Examples**: View [`__stories__/layout.stories.tsx`](./__stories__/layout.stories.tsx)
 - **Storybook**: Run `yarn storybook shared_ux` → "Layout"
+- **Architecture**: See [`layout_overview.mdx`](../layout_overview.mdx)

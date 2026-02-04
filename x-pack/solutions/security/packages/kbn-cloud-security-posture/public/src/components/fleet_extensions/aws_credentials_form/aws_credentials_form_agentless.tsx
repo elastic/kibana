@@ -4,8 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { EuiAccordion, EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import React, { Suspense } from 'react';
+import {
+  EuiAccordion,
+  EuiButton,
+  EuiCallOut,
+  EuiLink,
+  EuiSpacer,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -15,6 +22,7 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import type { SetupTechnology } from '@kbn/fleet-plugin/public';
+import { LazyCloudConnectorSetup } from '@kbn/fleet-plugin/public';
 import {
   AWS_CLOUD_FORMATION_ACCORDION_TEST_SUBJ,
   AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ,
@@ -49,8 +57,6 @@ import { ReadDocumentation } from '../common';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_credential_guide';
 import type { AwsInputFieldMapping, UpdatePolicy } from '../types';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
-
-import { CloudConnectorSetup } from '../cloud_connector/cloud_connector_setup';
 
 interface AwsAgentlessFormProps {
   cloud: CloudSetup;
@@ -337,17 +343,19 @@ export const AwsCredentialsFormAgentless = ({
       )}
 
       {awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS && (
-        <CloudConnectorSetup
-          templateName={templateName}
-          input={input}
-          newPolicy={newPolicy}
-          packageInfo={packageInfo}
-          updatePolicy={updatePolicy}
-          isEditPage={isEditPage}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-          cloud={cloud}
-          cloudProvider={AWS_PROVIDER}
-        />
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <LazyCloudConnectorSetup
+            templateName={templateName}
+            input={input}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            isEditPage={isEditPage}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+            cloud={cloud}
+            cloudProvider={AWS_PROVIDER}
+          />
+        </Suspense>
       )}
       <ReadDocumentation url={awsOverviewPath} />
     </>

@@ -58,4 +58,5 @@ export default createTestConfig({
     // Enables /internal/cloud_security_posture/graph API
     `--uiSettings.overrides.securitySolution:enableGraphVisualization=true`,
   ],
+  enableFleetDockerRegistry: false,
 });

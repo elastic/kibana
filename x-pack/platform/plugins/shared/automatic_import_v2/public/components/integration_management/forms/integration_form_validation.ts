@@ -6,28 +6,35 @@
  */
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { IntegrationFormData } from './types';
-import { MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from './constants';
+import type { IntegrationFormData, IntegrationFields, DataStreamFields } from './types';
 import * as i18n from './translations';
 
-const { emptyField, maxLengthField } = fieldValidators;
+export const REQUIRED_FIELDS = [
+  'title',
+  'description',
+  'connectorId',
+  'dataStreamTitle',
+  'dataStreamDescription',
+  'dataCollectionMethod',
+];
 
-// Helper to mark a field as required with the emptyField validator
-// since all validations against empty fields means field is required.
-// Move to separate helper file when we have edit datastream forms.
-export const requiredField = (message: string) => ({
-  validator: emptyField(message),
-  isRequired: true,
-});
+const { emptyField } = fieldValidators;
 
 const titleToPackageName = (integrationTitle: string): string => {
   return integrationTitle.toLowerCase().replace(/[^a-z0-9]/g, '_');
 };
 
-const createUniqueTitleValidator = (packageNames: Set<string> | undefined) => ({
+const createUniqueTitleValidator = (
+  packageNames: Set<string> | undefined,
+  excludePackageName?: string
+) => ({
   validator: ({ value }: { value: string }) => {
     const streamlinedTitle = titleToPackageName(value);
     if (!packageNames || !value) {
+      return undefined;
+    }
+    // For existing integrations, exclude their own package name from the check
+    if (excludePackageName && streamlinedTitle === excludePackageName) {
       return undefined;
     }
     if (packageNames.has(streamlinedTitle)) {
@@ -37,43 +44,113 @@ const createUniqueTitleValidator = (packageNames: Set<string> | undefined) => ({
   },
 });
 
-export const createIntegrationFormSchema = (
-  packageNames: Set<string> | undefined
-): FormSchema<IntegrationFormData> => ({
+const logSampleRequiredValidator = () => ({
+  validator: ({
+    value,
+    formData,
+  }: {
+    value: string | undefined;
+    formData: { logsSourceOption: string };
+  }) => {
+    const isLogSampleProvided = value != null && value.trim();
+    // Only require log sample value when upload option is selected
+    if (formData.logsSourceOption === 'upload' && !isLogSampleProvided) {
+      return { message: i18n.LOG_SAMPLE_REQUIRED };
+    }
+    return undefined;
+  },
+});
+
+const selectedIndexRequiredValidator = () => ({
+  validator: ({ value, formData }: { value: string; formData: { logsSourceOption: string } }) => {
+    const isSelectedIndexProvided = value != null && value.trim();
+    // Only require selected index when index option is selected
+    if (formData.logsSourceOption === 'index' && !isSelectedIndexProvided) {
+      return { message: i18n.SELECTED_INDEX_REQUIRED };
+    }
+    return undefined;
+  },
+});
+
+const createIntegrationFieldsSchema = (
+  packageNames: Set<string> | undefined,
+  currentPackageName?: string
+): FormSchema<IntegrationFields> => ({
   title: {
     label: 'Integration name',
     validations: [
-      requiredField(i18n.TITLE_REQUIRED),
-      {
-        validator: maxLengthField({
-          length: MAX_NAME_LENGTH,
-          message: i18n.TITLE_MAX_LENGTH,
-        }),
-      },
-      createUniqueTitleValidator(packageNames),
+      { validator: emptyField(i18n.TITLE_REQUIRED) },
+      createUniqueTitleValidator(packageNames, currentPackageName),
     ],
   },
   description: {
     label: 'Description',
-    validations: [
-      requiredField(i18n.DESCRIPTION_REQUIRED),
-      {
-        validator: maxLengthField({
-          length: MAX_DESCRIPTION_LENGTH,
-          message: i18n.DESCRIPTION_MAX_LENGTH,
-        }),
-      },
-    ],
+    validations: [{ validator: emptyField(i18n.DESCRIPTION_REQUIRED) }],
   },
-  // Logo svgs are validated in the processLogoFile function at upload time.
   logo: {
     label: 'Logo',
     validations: [],
   },
   connectorId: {
     label: 'AI Connector',
-    validations: [requiredField(i18n.CONNECTOR_REQUIRED)],
+    validations: [{ validator: emptyField(i18n.CONNECTOR_REQUIRED) }],
   },
 });
 
-export const IntegrationFormSchema = createIntegrationFormSchema(undefined);
+const dataStreamFieldsSchema: FormSchema<DataStreamFields> = {
+  dataStreamTitle: {
+    label: 'Data stream title',
+    validations: [{ validator: emptyField(i18n.DATA_STREAM_TITLE_REQUIRED) }],
+  },
+  dataStreamDescription: {
+    label: 'Data stream description',
+    validations: [{ validator: emptyField(i18n.DATA_STREAM_DESCRIPTION_REQUIRED) }],
+  },
+  dataCollectionMethod: {
+    label: 'Data collection method',
+    validations: [
+      {
+        validator: ({ value }: { value: string[] }) => {
+          if (!value || value.length === 0) {
+            return { message: i18n.DATA_COLLECTION_METHOD_REQUIRED };
+          }
+          return undefined;
+        },
+      },
+    ],
+  },
+  logsSourceOption: {
+    label: 'Logs source',
+    validations: [],
+  },
+  logSample: {
+    label: 'Log sample',
+    validations: [logSampleRequiredValidator()],
+  },
+  selectedIndex: {
+    label: 'Selected index',
+    validations: [selectedIndexRequiredValidator()],
+  },
+};
+
+/**
+ * Create the form schema for integration management
+ *
+ * @param packageNames - Set of existing package names for uniqueness validation
+ * @param currentIntegrationTitle - For existing integrations, their current title to exclude from uniqueness check
+ * @returns The form schema with appropriate validations
+ */
+export const createFormSchema = (
+  packageNames?: Set<string>,
+  currentIntegrationTitle?: string
+): FormSchema<IntegrationFormData> => {
+  const currentPackageName = currentIntegrationTitle
+    ? titleToPackageName(currentIntegrationTitle)
+    : undefined;
+
+  return {
+    integrationId: { validations: [] },
+    ...createIntegrationFieldsSchema(packageNames, currentPackageName),
+    ...dataStreamFieldsSchema,
+  };
+};

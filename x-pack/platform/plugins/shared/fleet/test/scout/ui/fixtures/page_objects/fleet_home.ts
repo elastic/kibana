@@ -18,8 +18,10 @@ export class FleetHomePage {
   }
 
   async waitForPageToLoad() {
-    await this.page.waitForLoadingIndicatorHidden();
-    await this.page.testSubj.waitForSelector(FLEET_AGENTS_TAB_SELECTOR, { state: 'visible' });
+    await this.page.testSubj.waitForSelector(FLEET_AGENTS_TAB_SELECTOR, {
+      state: 'visible',
+      timeout: 20_000,
+    });
     await this.page.testSubj.waitForSelector(FLEET_SETUP_LOADING_SELECTOR, { state: 'hidden' });
   }
 
@@ -55,8 +57,8 @@ export class FleetHomePage {
     await this.getAgentPoliciesTab().click();
   }
 
-  getAgentPolicyNameLink() {
-    return this.page.testSubj.locator('agentPolicyNameLink');
+  getAgentPolicyNameLink(title: string) {
+    return this.page.getByRole('link', { name: title });
   }
 
   getAddPackagePolicyButton() {
