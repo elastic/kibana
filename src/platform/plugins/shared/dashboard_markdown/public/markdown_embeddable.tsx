@@ -16,7 +16,7 @@ import {
   apiIsPresentationContainer,
   initializeUnsavedChanges,
 } from '@kbn/presentation-containers';
-import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
+import type { StateComparators } from '@kbn/presentation-publishing';
 import {
   getViewModeSubject,
   initializeStateManager,
@@ -42,11 +42,8 @@ import { loadFromLibrary } from './markdown_client/load_from_library';
 import { checkForDuplicateTitle } from './markdown_client/duplicate_title_check';
 import { markdownClient } from './markdown_client/markdown_client';
 
-const defaultMarkdownState: WithAllKeys<MarkdownState> = {
+const defaultMarkdownState: MarkdownByValueState = {
   content: '',
-  title: undefined,
-  description: undefined,
-  hide_title: undefined,
 };
 
 const flexCss = css({
@@ -65,19 +62,25 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
   type: MARKDOWN_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const savedObjectId = (initialState as MarkdownByReferenceState).savedObjectId;
-    const initialMarkdownState = savedObjectId
+    const isByReference = savedObjectId !== undefined;
+    const initialStoredState = isByReference
       ? await loadFromLibrary(savedObjectId)
-      : initialState;
+      : ({} as MarkdownState);
 
     const titleManager = initializeTitleManager(initialState);
-    const markdownStateManager = initializeStateManager<MarkdownState>(
-      initialMarkdownState,
+    const markdownStateManager = initializeStateManager<MarkdownByValueState>(
+      {
+        content: isByReference
+          ? initialStoredState.content
+          : (initialState as MarkdownState).content,
+      },
       defaultMarkdownState
     );
 
-    const isByReference = savedObjectId !== undefined;
-    const defaultTitle$ = new BehaviorSubject(initialMarkdownState.title);
-    const defaultDescription$ = new BehaviorSubject(initialMarkdownState.description);
+    const defaultTitle$ = new BehaviorSubject(initialStoredState?.title || initialState.title);
+    const defaultDescription$ = new BehaviorSubject(
+      initialStoredState?.description || initialState.description
+    );
     const isEditing$ = new BehaviorSubject<boolean>(false);
     const isNewPanel$ = new BehaviorSubject<boolean>(false);
     const isPreview$ = new BehaviorSubject<boolean>(false);

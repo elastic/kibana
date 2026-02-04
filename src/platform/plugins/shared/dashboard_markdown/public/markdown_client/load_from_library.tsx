@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MarkdownState } from '../../server';
 import { markdownClient } from './markdown_client';
 
-export async function loadFromLibrary(libraryId: string) {
+export async function loadFromLibrary(libraryId: string): Promise<MarkdownState> {
   const { data } = await markdownClient.get(libraryId);
-  return data;
+  return data as MarkdownState;
 }

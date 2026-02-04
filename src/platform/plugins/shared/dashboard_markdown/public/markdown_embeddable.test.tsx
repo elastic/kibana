@@ -238,14 +238,19 @@ describe('MarkdownEmbeddable', () => {
 
   it('unlinks from library', async () => {
     const { embeddable } = await renderEmbeddable({
-      initialState: { savedObjectId: '123' },
+      initialState: {
+        savedObjectId: '123',
+        title: 'Some title',
+        description: 'some description',
+        hide_title: true,
+      },
     });
 
     expect(embeddable.api.getSerializedStateByValue()).toEqual({
       content: 'Loaded **markdown** content.',
-      title: 'Markdown from library',
+      title: 'Some title',
       description: 'some description',
-      hide_title: undefined,
+      hide_title: true,
     });
   });
 });
