@@ -16,6 +16,7 @@ import { getTypedSearch } from '../../utils/get_typed_search';
 import { getTotalHits } from '../../utils/get_total_hits';
 import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
+import { warningAndAboveLogFilter } from '../../utils/ecs_otel_fields';
 
 export async function getToolHandler({
   core,
@@ -26,6 +27,7 @@ export async function getToolHandler({
   end,
   kqlFilter: kuery,
   fields,
+  messageField,
 }: {
   core: CoreSetup<
     ObservabilityAgentBuilderPluginStartDependencies,
@@ -38,6 +40,7 @@ export async function getToolHandler({
   end: string;
   kqlFilter?: string;
   fields: string[];
+  messageField: string;
 }) {
   const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
   const boolFilters = [
@@ -46,49 +49,41 @@ export async function getToolHandler({
       end: parseDatemath(end, { roundUp: true }),
     }),
     ...kqlFilter(kuery),
-    { exists: { field: 'message' } },
-  ];
-
-  const lowSeverityLogLevels = [
-    {
-      terms: {
-        'log.level': ['trace', 'debug', 'info'].flatMap((level) => [
-          level.toLowerCase(),
-          level.toUpperCase(),
-        ]),
-      },
-    },
+    { exists: { field: messageField } },
   ];
 
   const [highSeverityCategories, lowSeverityCategories] = await Promise.all([
-    getFilteredLogCategories({
+    getLogCategories({
       esClient,
       logsIndices,
-      boolQuery: { filter: boolFilters, must_not: lowSeverityLogLevels },
+      boolQuery: { filter: boolFilters, must: [warningAndAboveLogFilter()] },
       logger,
       categoryCount: 20,
       fields,
+      messageField,
     }),
-    getFilteredLogCategories({
+    getLogCategories({
       esClient,
       logsIndices,
-      boolQuery: { filter: boolFilters, must: lowSeverityLogLevels },
+      boolQuery: { filter: boolFilters, must_not: [warningAndAboveLogFilter()] },
       logger,
       categoryCount: 10,
       fields,
+      messageField,
     }),
   ]);
 
   return { highSeverityCategories, lowSeverityCategories };
 }
 
-export async function getFilteredLogCategories({
+export async function getLogCategories({
   esClient,
   logsIndices,
   boolQuery,
   logger,
   categoryCount,
   fields,
+  messageField,
 }: {
   esClient: IScopedClusterClient;
   logsIndices: string[];
@@ -96,6 +91,7 @@ export async function getFilteredLogCategories({
   logger: Logger;
   categoryCount: number;
   fields: string[];
+  messageField: string;
 }) {
   const search = getTypedSearch(esClient.asCurrentUser);
 
@@ -135,7 +131,7 @@ export async function getFilteredLogCategories({
         aggs: {
           categories: {
             categorize_text: {
-              field: 'message',
+              field: messageField,
               size: categoryCount,
               min_doc_count: 1,
             },
@@ -144,7 +140,7 @@ export async function getFilteredLogCategories({
                 top_hits: {
                   size: 1,
                   _source: false,
-                  fields: ['message', '@timestamp', ...fields],
+                  fields: [messageField, '@timestamp', ...fields],
                   sort: {
                     '@timestamp': { order: 'desc' },
                   },

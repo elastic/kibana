@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { EventTypeOpts } from '@kbn/core/server';
+import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/types';
 
 export enum SiemMigrationsEventTypes {
   // Common
@@ -47,6 +48,7 @@ export const SIEM_MIGRATIONS_MIGRATION_SUCCESS: EventTypeOpts<{
   failed: number;
   total: number;
   eventName: string;
+  vendor: SiemMigrationVendor;
 }> = {
   eventType: SiemMigrationsEventTypes.MigrationSuccess,
   schema: {
@@ -99,6 +101,12 @@ export const SIEM_MIGRATIONS_MIGRATION_SUCCESS: EventTypeOpts<{
         description: 'Total number of rules to migrate',
       },
     },
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Vendor of the migration',
+      },
+    },
   },
 };
 
@@ -112,6 +120,7 @@ export const SIEM_MIGRATIONS_MIGRATION_FAILURE: EventTypeOpts<{
   failed: number;
   total: number;
   eventName: string;
+  vendor: SiemMigrationVendor;
 }> = {
   eventType: SiemMigrationsEventTypes.MigrationFailure,
   schema: {
@@ -170,6 +179,12 @@ export const SIEM_MIGRATIONS_MIGRATION_FAILURE: EventTypeOpts<{
         description: 'Total number of rules to migrate',
       },
     },
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Vendor of the migration',
+      },
+    },
   },
 };
 
@@ -183,6 +198,7 @@ export const SIEM_MIGRATIONS_MIGRATION_ABORTED: EventTypeOpts<{
   failed: number;
   total: number;
   eventName: string;
+  vendor: SiemMigrationVendor;
 }> = {
   eventType: SiemMigrationsEventTypes.MigrationAborted,
   schema: {
@@ -241,6 +257,12 @@ export const SIEM_MIGRATIONS_MIGRATION_ABORTED: EventTypeOpts<{
         description: 'Total number of rules to migrate',
       },
     },
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Vendor of the migration',
+      },
+    },
   },
 };
 
@@ -251,6 +273,7 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS: EventTypeOpts<{
   translationResult: string;
   prebuiltMatch: boolean;
   eventName: string;
+  vendor: SiemMigrationVendor;
 }> = {
   eventType: SiemMigrationsEventTypes.RuleTranslationSuccess,
   schema: {
@@ -291,6 +314,12 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS: EventTypeOpts<{
         description: 'Whether a prebuilt rule was matched',
       },
     },
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Vendor of the migration',
+      },
+    },
   },
 };
 
@@ -299,6 +328,7 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
   error: string;
   migrationId: string;
   eventName: string;
+  vendor: SiemMigrationVendor;
 }> = {
   eventType: SiemMigrationsEventTypes.RuleTranslationFailure,
   schema: {
@@ -327,6 +357,12 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
         description: 'Unique identifier for the migration',
       },
     },
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Vendor of the migration',
+      },
+    },
   },
 };
 
@@ -338,6 +374,7 @@ export const SIEM_MIGRATIONS_PREBUILT_RULES_MATCH: EventTypeOpts<{
   postFilterRuleName: string;
   postFilterRuleCount: number;
   eventName: string;
+  vendor: SiemMigrationVendor;
 }> = {
   eventType: SiemMigrationsEventTypes.RuleTranslationPrebuiltRulesMatch,
   schema: {
@@ -387,6 +424,12 @@ export const SIEM_MIGRATIONS_PREBUILT_RULES_MATCH: EventTypeOpts<{
         description: 'Count of rules matched before LLM filtering',
       },
     },
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Vendor of the migration',
+      },
+    },
   },
 };
 
@@ -398,6 +441,7 @@ export const SIEM_MIGRATIONS_INTEGRATIONS_MATCH: EventTypeOpts<{
   postFilterIntegrationName: string;
   postFilterIntegrationCount: number;
   eventName: string;
+  vendor: SiemMigrationVendor;
 }> = {
   eventType: SiemMigrationsEventTypes.RuleTranslationIntegrationsMatch,
   schema: {
@@ -447,6 +491,12 @@ export const SIEM_MIGRATIONS_INTEGRATIONS_MATCH: EventTypeOpts<{
         description: 'Count of integrations matched before LLM filtering',
       },
     },
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Vendor of the migration',
+      },
+    },
   },
 };
 
@@ -456,6 +506,7 @@ export const SIEM_MIGRATIONS_DASHBOARD_TRANSLATION_SUCCESS: EventTypeOpts<{
   duration: number;
   translationResult: string;
   eventName: string;
+  vendor: SiemMigrationVendor;
 }> = {
   eventType: SiemMigrationsEventTypes.DashboardTranslationSuccess,
   schema: {
@@ -490,6 +541,12 @@ export const SIEM_MIGRATIONS_DASHBOARD_TRANSLATION_SUCCESS: EventTypeOpts<{
         description: 'Duration of the migration in milliseconds',
       },
     },
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Vendor of the migration',
+      },
+    },
   },
 };
 
@@ -498,6 +555,7 @@ export const SIEM_MIGRATIONS_DASHBOARD_TRANSLATION_FAILURE: EventTypeOpts<{
   error: string;
   migrationId: string;
   eventName: string;
+  vendor: SiemMigrationVendor;
 }> = {
   eventType: SiemMigrationsEventTypes.DashboardTranslationFailure,
   schema: {
@@ -524,6 +582,13 @@ export const SIEM_MIGRATIONS_DASHBOARD_TRANSLATION_FAILURE: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'Unique identifier for the migration',
+      },
+    },
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Vendor of the migration',
+        optional: false,
       },
     },
   },

@@ -79,7 +79,12 @@ while read -r config; do
     node node_modules/chromedriver/install.js --chromedriver-force-download
 
     # set annotation on the build
-    buildkite-agent annotate --style info --context chrome-beta "This build uses Google Chrome Beta @ ${CHROMEDRIVER_VERSION}"
+    buildkite-agent annotate --style info --context chrome-beta """
+  ⚠️This build uses Google Chrome Beta
+  Path: ${TEST_BROWSER_BINARY_PATH}
+  Version: $($TEST_BROWSER_BINARY_PATH --version)
+  Chromedriver version: ${CHROMEDRIVER_VERSION} / $(node node_modules/chromedriver/bin/chromedriver --version)
+  """
   fi
 
   # prevent non-zero exit code from breaking the loop

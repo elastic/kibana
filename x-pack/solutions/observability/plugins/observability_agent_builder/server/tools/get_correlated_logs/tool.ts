@@ -108,8 +108,8 @@ Do NOT use for:
     },
     handler: async (toolParams, { esClient }) => {
       const {
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
+        start,
+        end,
         kqlFilter,
         errorLogsOnly = true,
         index,

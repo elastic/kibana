@@ -6,7 +6,11 @@
  */
 import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
 
-import type { IlmPolicyFetcher, ValidationErrorType } from '../../../../utils';
+import type {
+  IlmPolicyFetcher,
+  SimulatedTemplateFetcher,
+  ValidationErrorType,
+} from '../../../../utils';
 
 export interface NameAndConfirmBaseProps {
   selectedIndexPattern: string;
@@ -20,7 +24,7 @@ export interface NameAndConfirmBaseProps {
 export interface NameAndConfirmStepProps extends NameAndConfirmBaseProps {
   template: IndexTemplate;
   getIlmPolicy?: IlmPolicyFetcher;
-  showDataRetention?: boolean;
+  getSimulatedTemplate?: SimulatedTemplateFetcher;
 }
 
 export interface NameStreamSectionProps extends NameAndConfirmBaseProps {

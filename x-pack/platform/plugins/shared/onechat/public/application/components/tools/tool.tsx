@@ -50,12 +50,11 @@ import {
   getUpdatePayloadFromData,
   getToolTypeDefaultValues,
 } from './form/registry/tools_form_registry';
-import { OPEN_TEST_FLYOUT_QUERY_PARAM, TOOL_TYPE_QUERY_PARAM } from './create_tool';
-import { ToolTestFlyout } from './execute/test_tools';
+import { TOOL_TYPE_QUERY_PARAM, TEST_TOOL_ID_QUERY_PARAM } from './create_tool';
 import { ToolEditContextMenu } from './form/components/tool_edit_context_menu';
 import { ToolForm, ToolFormMode } from './form/tool_form';
 import type { ToolFormData } from './form/types/tool_form_types';
-import { useFlyoutState } from '../../hooks/use_flyout_state';
+import { useToolsActions } from '../../context/tools_provider';
 
 const BUTTON_IDS = {
   SAVE: 'save',
@@ -98,10 +97,6 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     },
     [navigateToOnechatUrl]
   );
-  const [openTestFlyoutParam, setOpenTestFlyoutParam] = useQueryState<boolean>(
-    OPEN_TEST_FLYOUT_QUERY_PARAM,
-    { defaultValue: false }
-  );
   const [urlToolType, setUrlToolType] = useQueryState<ToolType>(TOOL_TYPE_QUERY_PARAM);
 
   const initialToolType = useMemo(() => {
@@ -115,12 +110,8 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const { control, reset, formState, handleSubmit, getValues } = form;
   const { errors, isDirty, isSubmitSuccessful } = formState;
   const [isCancelling, setIsCancelling] = useState(false);
-  const {
-    isOpen: showTestFlyout,
-    openFlyout: openTestFlyout,
-    closeFlyout: closeTestFlyout,
-  } = useFlyoutState(false);
   const [submittingButtonId, setSubmittingButtonId] = useState<string | undefined>();
+  const { testTool } = useToolsActions();
   const { services } = useKibana();
   const {
     application: { navigateToUrl },
@@ -131,14 +122,6 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
 
   const currentToolId = useWatch({ name: 'toolId', control });
   const toolType = useWatch({ name: 'type', control });
-
-  // Handle opening test tool flyout on navigation
-  useEffect(() => {
-    if (openTestFlyoutParam && currentToolId && !showTestFlyout) {
-      openTestFlyout();
-      setOpenTestFlyoutParam(false);
-    }
-  }, [openTestFlyoutParam, currentToolId, showTestFlyout, setOpenTestFlyoutParam, openTestFlyout]);
 
   const handleCancel = useCallback(() => {
     setIsCancelling(true);
@@ -176,8 +159,10 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   );
 
   const handleTestTool = useCallback(() => {
-    openTestFlyout();
-  }, [openTestFlyout]);
+    if (currentToolId) {
+      testTool(currentToolId);
+    }
+  }, [currentToolId, testTool]);
 
   const handleSaveAndTest = useCallback(
     async (data: ToolFormData) => {
@@ -186,8 +171,8 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
         buttonId: BUTTON_IDS.SAVE_AND_TEST,
       });
       if (mode === ToolFormMode.Create && response) {
-        deferNavigateToOnechatUrl(appPaths.tools.details({ toolId: response.id }), {
-          [OPEN_TEST_FLYOUT_QUERY_PARAM]: 'true',
+        deferNavigateToOnechatUrl(appPaths.tools.list, {
+          [TEST_TOOL_ID_QUERY_PARAM]: response.id,
         });
       } else {
         handleTestTool();
@@ -429,15 +414,6 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           </KibanaPageTemplate.BottomBar>
         </KibanaPageTemplate>
       </FormProvider>
-      {showTestFlyout && currentToolId && (
-        <ToolTestFlyout
-          toolId={currentToolId}
-          formMode={mode}
-          onClose={() => {
-            closeTestFlyout();
-          }}
-        />
-      )}
     </>
   );
 };

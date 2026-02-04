@@ -7,12 +7,10 @@
 
 import expect from '@kbn/expect';
 import { platformCoreTools } from '@kbn/onechat-common';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
   const searchTool = platformCoreTools.search;
 
   describe('Builtin Tools API', () => {
@@ -26,21 +24,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.eql(`Tool ${toolId} is read-only and can't be deleted`);
-      });
-
-      it('should return 404 when builtin tools API is disabled', async () => {
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
-        });
-
-        await supertest
-          .delete(`/api/agent_builder/tools/${searchTool}`)
-          .set('kbn-xsrf', 'kibana')
-          .expect(404);
-
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
-        });
       });
     });
 
@@ -93,29 +76,6 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(response.body).to.have.property('results');
-      });
-
-      it('should return 404 when tools API is disabled', async () => {
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
-        });
-
-        const executeRequest = {
-          tool_id: searchTool,
-          tool_params: {
-            query: 'test query',
-          },
-        };
-
-        await supertest
-          .post('/api/agent_builder/tools/_execute')
-          .set('kbn-xsrf', 'kibana')
-          .send(executeRequest)
-          .expect(404);
-
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
-        });
       });
     });
   });

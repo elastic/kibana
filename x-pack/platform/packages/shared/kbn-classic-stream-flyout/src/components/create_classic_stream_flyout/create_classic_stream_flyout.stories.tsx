@@ -8,10 +8,13 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
-import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
+import type {
+  TemplateListItem as IndexTemplate,
+  SimulateIndexTemplateResponse,
+} from '@kbn/index-management-shared-types';
 
 import { CreateClassicStreamFlyout } from './create_classic_stream_flyout';
-import type { StreamNameValidator, IlmPolicyFetcher } from '../../utils';
+import type { StreamNameValidator, IlmPolicyFetcher, SimulatedTemplateFetcher } from '../../utils';
 
 const MOCK_TEMPLATES: IndexTemplate[] = [
   {
@@ -434,6 +437,102 @@ const MOCK_ILM_POLICIES: Record<string, PolicyFromES> = {
   },
 };
 
+const createSimulatedTemplateResponse = (
+  indexMode: string = 'standard',
+  ilmPolicyName?: string
+): SimulateIndexTemplateResponse => ({
+  template: {
+    aliases: {},
+    mappings: {},
+    settings: {
+      index: {
+        mode: indexMode,
+        ...(ilmPolicyName ? { lifecycle: { name: ilmPolicyName } } : {}),
+      },
+    },
+  },
+});
+
+/**
+ * Mock simulated template responses keyed by template name.
+ * Maps template names to their simulated responses with resolved index mode and ILM policy.
+ */
+const MOCK_SIMULATED_TEMPLATES: Record<string, SimulateIndexTemplateResponse> = {
+  'behavioral_analytics-events-default': createSimulatedTemplateResponse(
+    'standard',
+    'profiling-60-days'
+  ),
+  'ilm-history-7': createSimulatedTemplateResponse('standard', 'logs'),
+  'logs-activemq.audit': createSimulatedTemplateResponse('standard'),
+  'logs-activemq.log': createSimulatedTemplateResponse('standard'),
+  'logs-akamai.siem': createSimulatedTemplateResponse('standard'),
+  'logs-apache.access': createSimulatedTemplateResponse('standard', '.alerts-ilm-policy'),
+  'logs-apache.error': createSimulatedTemplateResponse('standard', '.alerts-ilm-policy'),
+  'logs-apm.app@template': createSimulatedTemplateResponse('standard'),
+  'logs-apm.error@template': createSimulatedTemplateResponse('standard'),
+  'logs-auditd.log': createSimulatedTemplateResponse('standard', 'profiling-60-days'),
+  'logs-auditd.log-and-more-text-here-to-make-it-longer': createSimulatedTemplateResponse(
+    'standard',
+    'ilm-policy-with-a-long-name-and-more-text-here-to-make-it-longer'
+  ),
+  'logs-auditd_manager.auditd': createSimulatedTemplateResponse('standard', 'logs'),
+  'logs-cloud_security_posture.findings': createSimulatedTemplateResponse('standard'),
+  'logs-cloud_security_posture.scores': createSimulatedTemplateResponse('standard'),
+  'logs-cloud_security_posture.vulnerabilities': createSimulatedTemplateResponse('standard'),
+  'logs-docker.container_logs': createSimulatedTemplateResponse(
+    'standard',
+    '.monitoring-8-ilm-policy'
+  ),
+  'logs-elastic_agent': createSimulatedTemplateResponse('standard', 'profiling-60-days'),
+  'logs-elastic_agent.apm_server': createSimulatedTemplateResponse('standard', 'profiling-60-days'),
+  'logs-elastic_agent.auditbeat': createSimulatedTemplateResponse('standard', 'logs'),
+  'logs-elastic_agent.cloud_defend': createSimulatedTemplateResponse(
+    'standard',
+    '.alerts-ilm-policy'
+  ),
+  'logs-elastic_agent.cloudbeat': createSimulatedTemplateResponse('standard'),
+  'logs-infinite-retention': createSimulatedTemplateResponse('logsdb'),
+  'multi-pattern-template': createSimulatedTemplateResponse('lookup', 'logs'),
+  'very-long-pattern-template': createSimulatedTemplateResponse('lookup', 'logs'),
+};
+
+/**
+ * Creates a mock simulated template fetcher that wraps fetch logic with Storybook action logging.
+ */
+const createMockSimulatedTemplateFetcher = (): SimulatedTemplateFetcher => {
+  const onGetSimulatedTemplateAction = action('getSimulatedTemplate');
+
+  return async (templateName: string, signal?: AbortSignal) => {
+    onGetSimulatedTemplateAction(templateName);
+    action('getSimulatedTemplate:start')({ templateName, timestamp: Date.now() });
+
+    // Check if aborted before starting delay
+    if (signal?.aborted) {
+      action('getSimulatedTemplate:aborted')({ templateName, reason: 'aborted before delay' });
+      throw new Error('Simulated template fetch aborted');
+    }
+
+    // Simulate network delay with periodic abort checks
+    const delay = 300;
+    const startTime = Date.now();
+    while (Date.now() - startTime < delay) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      if (signal?.aborted) {
+        action('getSimulatedTemplate:aborted')({
+          templateName,
+          reason: 'aborted during delay',
+          elapsed: Date.now() - startTime,
+        });
+        throw new Error('Simulated template fetch aborted');
+      }
+    }
+
+    const simulatedTemplate = MOCK_SIMULATED_TEMPLATES[templateName];
+    action('getSimulatedTemplate:result')(simulatedTemplate ?? null);
+    return simulatedTemplate ?? null;
+  };
+};
+
 /**
  * Creates a mock ILM policy fetcher that wraps fetch logic with Storybook action logging.
  */
@@ -556,10 +655,7 @@ const createMockValidator = (
 };
 
 export const Default: Story = {
-  args: {
-    showDataRetention: true,
-  },
-  render: (args) => (
+  render: () => (
     <CreateClassicStreamFlyout
       onClose={action('onClose')}
       onCreate={async (name) => action('onCreate')(name)}
@@ -567,7 +663,7 @@ export const Default: Story = {
       onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={MOCK_TEMPLATES}
       getIlmPolicy={createMockIlmPolicyFetcher()}
-      showDataRetention={args.showDataRetention}
+      getSimulatedTemplate={createMockSimulatedTemplateFetcher()}
     />
   ),
 };
@@ -592,6 +688,7 @@ export const WithValidation: Story = {
         templates={MOCK_TEMPLATES}
         onValidate={validator}
         getIlmPolicy={createMockIlmPolicyFetcher()}
+        getSimulatedTemplate={createMockSimulatedTemplateFetcher()}
       />
     );
   },
@@ -621,6 +718,7 @@ export const WithSlowValidation: Story = {
         templates={MOCK_TEMPLATES}
         onValidate={validator}
         getIlmPolicy={createMockIlmPolicyFetcher()}
+        getSimulatedTemplate={createMockSimulatedTemplateFetcher()}
       />
     );
   },

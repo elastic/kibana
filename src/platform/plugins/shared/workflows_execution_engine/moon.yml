@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/data-streams'
   - '@kbn/es-mappings'
   - '@kbn/workflows-extensions'
+  - '@kbn/licensing-plugin'
 tags:
   - plugin
   - prod

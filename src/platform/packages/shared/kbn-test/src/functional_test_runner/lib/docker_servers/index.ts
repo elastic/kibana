@@ -9,3 +9,4 @@
 
 export * from './docker_servers_service';
 export * from './define_docker_servers_config';
+export * from './package_registry';

@@ -16,15 +16,15 @@ import type {
 } from '../../types';
 import { timeRangeSchemaOptional, indexDescription } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
-import type { getFilteredLogCategories } from './handler';
+import type { getLogCategories } from './handler';
 import { getToolHandler } from './handler';
 import { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from '../get_correlated_logs/tool';
 
 export interface GetLogCategoriesToolResult {
   type: ToolResultType.other;
   data: {
-    highSeverityCategories: Awaited<ReturnType<typeof getFilteredLogCategories>>;
-    lowSeverityCategories: Awaited<ReturnType<typeof getFilteredLogCategories>>;
+    highSeverityCategories: Awaited<ReturnType<typeof getLogCategories>>;
+    lowSeverityCategories: Awaited<ReturnType<typeof getLogCategories>>;
   };
 }
 
@@ -48,8 +48,15 @@ const getLogsSchema = z.object({
     .array(z.string())
     .optional()
     .describe(
-      'Additional fields to return for each log sample. "message" and "@timestamp" are always included. Example: ["service.name", "host.name"]'
+      'Additional fields to return for each log sample. "@timestamp" and the message field are always included. Example: ["service.name", "host.name"]'
     ),
+  messageField: z
+    .string()
+    .optional()
+    .describe(
+      'The field containing the log message. Use "message" for ECS logs or "body.text" for OpenTelemetry logs. Defaults to "message".'
+    )
+    .default('message'),
 });
 
 export function createGetLogCategoriesTool({
@@ -95,13 +102,7 @@ Do NOT use for:
       },
     },
     handler: async (toolParams, { esClient }) => {
-      const {
-        index,
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
-        kqlFilter,
-        fields = [],
-      } = toolParams;
+      const { index, start, end, kqlFilter, fields = [], messageField } = toolParams;
 
       try {
         const { highSeverityCategories, lowSeverityCategories } = await getToolHandler({
@@ -113,6 +114,7 @@ Do NOT use for:
           end,
           kqlFilter,
           fields,
+          messageField,
         });
 
         return {

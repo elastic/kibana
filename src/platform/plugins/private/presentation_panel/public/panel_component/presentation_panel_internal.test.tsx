@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiThemeProvider } from '@elastic/eui';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
@@ -329,6 +330,28 @@ describe('Presentation panel', () => {
       };
       await renderPresentationPanel({ api });
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
+    });
+
+    it('passes titleHighlight prop through to PresentationPanelHeader', async () => {
+      const api: DefaultPresentationPanelApi = {
+        uuid: 'test',
+        title$: new BehaviorSubject<string | undefined>('CPU Usage'),
+      };
+      const { container } = render(
+        <EuiThemeProvider>
+          <PresentationPanel
+            Component={getMockPresentationPanelCompatibleComponent(api)}
+            titleHighlight="cpu"
+          />
+        </EuiThemeProvider>
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitle')).toBeInTheDocument();
+      });
+      await waitFor(() => {
+        const mark = container.querySelector('mark');
+        expect(mark).toBeInTheDocument();
+      });
     });
   });
 });

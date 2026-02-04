@@ -119,7 +119,9 @@
     "@kbn/metrics-experience-plugin",
     "@kbn/unified-metrics-grid",
     "@kbn/shared-ux-link-redirect-app",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/lens-common",
+    "@kbn/shared-ux-error-boundary"
   ],
   "exclude": ["target/**/*"]
 }

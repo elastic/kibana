@@ -19,7 +19,12 @@ import type {
   OutputPreset,
   AgentlessPolicy,
 } from '../../common/types';
-import type { AgentStatus, AgentType, FleetServerAgentComponent } from '../../common/types/models';
+import type {
+  AgentStatus,
+  AgentType,
+  AgentUpgrade,
+  FleetServerAgentComponent,
+} from '../../common/types/models';
 
 import type {
   PackagePolicy,
@@ -99,6 +104,7 @@ export interface AgentSOAttributes {
   packages?: string[];
   namespaces?: string[];
   last_known_status?: AgentStatus;
+  upgrade?: AgentUpgrade;
 }
 
 export interface FleetProxySOAttributes {

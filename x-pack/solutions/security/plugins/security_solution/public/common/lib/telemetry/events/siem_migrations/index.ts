@@ -85,7 +85,7 @@ const vendorSchema: RootSchema<{ vendor?: SiemMigrationVendor }> = {
   vendor: {
     type: 'keyword',
     _meta: {
-      description: 'splunk | qradar',
+      description: 'Vendor of the migration',
       optional: true,
     },
   },

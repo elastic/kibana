@@ -27,11 +27,15 @@ export const generateTitle = ({
   chatModel: InferenceChatModel;
 }): Observable<string> => {
   return defer(async () => {
-    return generateConversationTitle({
-      previousRounds: conversation.rounds,
-      nextInput,
-      chatModel,
-    });
+    try {
+      return await generateConversationTitle({
+        previousRounds: conversation.rounds,
+        nextInput,
+        chatModel,
+      });
+    } catch (e) {
+      return conversation.title;
+    }
   }).pipe(shareReplay());
 };
 

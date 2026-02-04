@@ -40,7 +40,8 @@ export const queryKeys = {
       mcp: () => ['tools', 'health', 'mcp'] as const,
     },
     namespace: {
-      validate: (namespace: string) => ['tools', 'namespace', 'validate', namespace] as const,
+      validate: (namespace: string, connectorId?: string) =>
+        ['tools', 'namespace', 'validate', namespace, connectorId] as const,
     },
   },
 };

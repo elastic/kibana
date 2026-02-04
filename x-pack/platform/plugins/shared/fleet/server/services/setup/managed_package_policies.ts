@@ -128,22 +128,19 @@ export const upgradeManagedPackagePolicies = async (
   esClient: ElasticsearchClient,
   pkgName: string
 ): Promise<UpgradeManagedPackagePoliciesResult[]> => {
-  appContextService
-    .getLogger()
-    .debug('Running required package policies upgrades for managed policies');
+  const logger = appContextService.getLogger();
+  logger.debug('Running required package policies upgrades for managed policies');
+
   const results: UpgradeManagedPackagePoliciesResult[] = [];
 
   const installedPackage = await getInstallation({
     pkgName,
     savedObjectsClient: soClient,
-    logger: appContextService.getLogger(),
+    logger,
   });
 
   if (!installedPackage) {
-    appContextService
-      .getLogger()
-      .debug('Aborting upgrading managed package policies: package is not installed');
-
+    logger.debug('Aborting upgrading managed package policies: package is not installed');
     return [];
   }
 
@@ -153,13 +150,20 @@ export const upgradeManagedPackagePolicies = async (
     installedPackage.version
   );
 
+  let upgradedCount = 0;
   for await (const packagePolicies of packagePoliciesFinder) {
     for (const packagePolicy of packagePolicies) {
       if (isPolicyVersionLtInstalledVersion(packagePolicy, installedPackage)) {
         await upgradePackagePolicy(soClient, esClient, packagePolicy, installedPackage, results);
+        upgradedCount++;
       }
     }
   }
+
+  if (upgradedCount > 0) {
+    logger.info(`Completed upgrading ${upgradedCount} package policies for ${pkgName}`);
+  }
+
   return results;
 };
 

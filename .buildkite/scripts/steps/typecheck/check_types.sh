@@ -8,8 +8,4 @@ source .buildkite/scripts/common/util.sh
 
 echo --- Check Types
 
-if is_pr; then
-  node scripts/type_check --with-archive
-else
-  node scripts/type_check
-fi
+node scripts/type_check --with-archive

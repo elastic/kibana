@@ -47,13 +47,14 @@ function filterRequiredFields(ctx: {
         fieldObject as z.core.JSONSchema.JSONSchema,
         ctx.jsonSchema
       );
-      // filter out from 'required' array, if field has default or optional
-      return (
-        fieldSchema &&
-        typeof fieldSchema === 'object' &&
-        !('default' in fieldSchema) &&
-        !('optional' in fieldSchema)
-      );
+      // Conservative approach: if we can't resolve the ref, keep as required
+      // This happens when fieldObject is a $ref but ctx.jsonSchema doesn't have definitions
+      // (definitions are only at the root level, not in nested contexts)
+      if (!fieldSchema || typeof fieldSchema !== 'object') {
+        return true; // Keep as required (safer default)
+      }
+      // filter out from 'required' array only if field has default or optional
+      return !('default' in fieldSchema) && !('optional' in fieldSchema);
     });
     ctx.jsonSchema.required = newRequired.length > 0 ? newRequired : undefined;
   }

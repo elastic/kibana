@@ -12,30 +12,6 @@ The onechat plugin has 4 main packages:
 - `@kbn/onechat-browser`: browser-specific types and utilities.
 - `@kbn/onechat-genai-utils`: server-side utilities for our built-in tools and agents.
 
-## Enable all feature flags
-
-All features in the Onechat plugin are developed behind UI settings (feature flags). 
-By default, in-progress or experimental features are disabled. 
-To enable all features for development or testing, add the following to your `kibana.dev.yml`:
-
-```yml
-uiSettings.overrides:
-  agentBuilder:enabled: true
-```
-
-This will ensure all Onechat features are available in your Kibana instance.
-
-If running in Serverless or Cloud dev environments, it may be more practical to adjust these via API:
-
-```
-POST kbn://internal/kibana/settings
-{
-   "changes": {
-      "agentBuilder:enabled": true
-   }
-}
-```
-
 ## Enabling tracing
 
 Onechat agents are compatible with the Kibana inference tracing.
@@ -94,6 +70,8 @@ Tools can come from multiple sources:
 - esql: ES|QL tools, which are defined by a templated ES|QL query and its corresponding parameters.
 - index_search: An agentic search tool that can be scoped to an index pattern.
 - workflow: A tool that executes a workflow.
+
+- mcp: A tool provided by an external MCP (Model Context Protocol) server.
 
 ### Registering a tool
 

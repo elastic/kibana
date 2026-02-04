@@ -13,23 +13,17 @@ import { Chart } from '../chart';
 import { useChartLayers } from '../chart/hooks/use_chart_layers';
 import { getLatencyChart } from './trace_charts_definition';
 
-export const LatencyChart = () => {
-  const {
-    filters,
-    services,
-    fetchParams,
-    discoverFetch$,
-    dataSource,
-    indexes,
-    onBrushEnd,
-    onFilter,
-  } = useTraceMetricsContext();
+type LatencyChartContentProps = NonNullable<ReturnType<typeof getLatencyChart>>;
 
-  const { esqlQuery, seriesType, unit, color, title } = getLatencyChart({
-    dataSource,
-    indexes,
-    filters,
-  });
+const LatencyChartContent = ({
+  esqlQuery,
+  seriesType,
+  unit,
+  color,
+  title,
+}: LatencyChartContentProps) => {
+  const { services, fetchParams, discoverFetch$, indexes, onBrushEnd, onFilter } =
+    useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
     metric: {
@@ -59,4 +53,20 @@ export const LatencyChart = () => {
       syncTooltips
     />
   );
+};
+
+export const LatencyChart = () => {
+  const { filters, dataSource, indexes } = useTraceMetricsContext();
+
+  const latencyChart = getLatencyChart({
+    dataSource,
+    indexes,
+    filters,
+  });
+
+  if (!latencyChart) {
+    return null;
+  }
+
+  return <LatencyChartContent {...latencyChart} />;
 };

@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { PolicyFromES, Phases } from '@kbn/index-lifecycle-management-common-shared';
+import type { SimulateIndexTemplateResponse } from '@kbn/index-management-shared-types';
 
 /**
  * Phase description for UI display
@@ -31,6 +32,14 @@ export type IlmPolicyFetcher = (
   policyName: string,
   signal?: AbortSignal
 ) => Promise<PolicyFromES | null>;
+
+/**
+ * Async function to fetch simulated template data by template name.
+ */
+export type SimulatedTemplateFetcher = (
+  templateName: string,
+  signal?: AbortSignal
+) => Promise<SimulateIndexTemplateResponse | null>;
 
 /**
  * Phase indicator colors for ILM phases

@@ -60,11 +60,13 @@ describe('Streams Plugin', () => {
       expect(start).toHaveProperty('streamsRepositoryClient');
       expect(start).toHaveProperty('navigationStatus$');
       expect(start).toHaveProperty('getWiredStatus');
+      expect(start).toHaveProperty('getClassicStatus');
       expect(start).toHaveProperty('enableWiredMode');
       expect(start).toHaveProperty('disableWiredMode');
       expect(start).toHaveProperty('config$');
 
       expect(typeof start.getWiredStatus).toBe('function');
+      expect(typeof start.getClassicStatus).toBe('function');
       expect(typeof start.enableWiredMode).toBe('function');
       expect(typeof start.disableWiredMode).toBe('function');
     });
@@ -114,7 +116,7 @@ describe('Streams Plugin', () => {
       });
     });
 
-    it('should return UNKNOWN_STATUS on network error', async () => {
+    it('should return UNKNOWN_WIRED_STATUS on network error', async () => {
       mockRepositoryClient.fetch.mockRejectedValue(new Error('Network error'));
 
       const result = await getWiredStatus();
@@ -125,7 +127,7 @@ describe('Streams Plugin', () => {
       });
     });
 
-    it('should return UNKNOWN_STATUS on 404 error', async () => {
+    it('should return UNKNOWN_WIRED_STATUS on 404 error', async () => {
       mockRepositoryClient.fetch.mockRejectedValue({
         response: { status: 404 },
         message: 'Not found',
@@ -139,7 +141,7 @@ describe('Streams Plugin', () => {
       });
     });
 
-    it('should return UNKNOWN_STATUS on 500 error', async () => {
+    it('should return UNKNOWN_WIRED_STATUS on 500 error', async () => {
       mockRepositoryClient.fetch.mockRejectedValue({
         response: { status: 500 },
         message: 'Internal server error',
@@ -183,6 +185,58 @@ describe('Streams Plugin', () => {
       // Each call should have its own signal
       expect(firstCallSignal).toBeInstanceOf(AbortSignal);
       expect(secondCallSignal).toBeInstanceOf(AbortSignal);
+    });
+  });
+
+  describe('getClassicStatus', () => {
+    let getClassicStatus: () => Promise<any>;
+
+    beforeEach(() => {
+      const coreStart = coreMock.createStart();
+      const start = plugin.start(coreStart, {});
+      getClassicStatus = start.getClassicStatus;
+    });
+
+    it('should fetch classic status from API successfully', async () => {
+      const mockStatus = {
+        can_manage: true,
+      };
+
+      mockRepositoryClient.fetch.mockResolvedValue(mockStatus);
+
+      const result = await getClassicStatus();
+
+      expect(mockRepositoryClient.fetch).toHaveBeenCalledWith(
+        'GET /internal/streams/_classic_status',
+        expect.objectContaining({
+          signal: expect.any(AbortSignal),
+        })
+      );
+      expect(result).toEqual(mockStatus);
+    });
+
+    it('should return UNKNOWN_CLASSIC_STATUS on error', async () => {
+      mockRepositoryClient.fetch.mockRejectedValue(new Error('Network error'));
+
+      const result = await getClassicStatus();
+
+      expect(result).toEqual({
+        can_manage: false,
+      });
+    });
+
+    it('should log errors when fetch fails', async () => {
+      const mockError = new Error('Network failure');
+      const mockLogger = {
+        error: jest.fn(),
+      };
+      plugin.logger = mockLogger as any;
+
+      mockRepositoryClient.fetch.mockRejectedValue(mockError);
+
+      await getClassicStatus();
+
+      expect(mockLogger.error).toHaveBeenCalledWith(mockError);
     });
   });
 

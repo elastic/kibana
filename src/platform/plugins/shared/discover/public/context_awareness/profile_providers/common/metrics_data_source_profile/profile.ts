@@ -60,5 +60,8 @@ function isQuerySupported(query: AggregateQuery | Query | undefined): query is A
   }
 
   const parsed = Parser.parse(query.esql);
+  if (parsed.root.commands.length === 0 || parsed.errors.length > 0) {
+    return false;
+  }
   return parsed.root.commands.every((c) => SUPPORTED_ESQL_COMMANDS.has(c.name));
 }

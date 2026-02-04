@@ -129,9 +129,11 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
       if (!agent.components) {
         return [];
       }
-      return getInputUnitsByPackage(agent.components, packagePolicy).filter(
-        (u) => u.status === 'DEGRADED' || u.status === 'FAILED'
-      );
+      return packagePolicy.inputs
+        .flatMap((input) =>
+          getInputUnitsByPackage(agent.components ?? [], input.id ?? packagePolicy.id)
+        )
+        .filter((unit) => unit.status === 'FAILED' || unit.status === 'DEGRADED');
     }, [agent.components, packagePolicy]);
 
     const showNeedsAttentionBadge =

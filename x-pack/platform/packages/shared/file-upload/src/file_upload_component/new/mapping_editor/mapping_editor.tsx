@@ -57,7 +57,7 @@ export const MappingEditor: FC<Props> = ({ onImportClick }) => {
         <FormattedMessage
           id="xpack.fileUpload.mappingEditor.fieldCountDescription"
           defaultMessage={
-            '{fieldCount} fields found. Note that the field types cannot be changed after creating the index.'
+            '{fieldCount, plural, one {# field found} other {# fields found}}. This list includes fields detected in the files to import, plus any mappings defined in previous uploads for this index. Note that the field types cannot be changed after creating the index.'
           }
           values={{ fieldCount }}
         />

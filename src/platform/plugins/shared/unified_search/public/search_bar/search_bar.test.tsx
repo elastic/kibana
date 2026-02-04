@@ -442,7 +442,7 @@ describe('SearchBar', () => {
       });
 
       jest.advanceTimersByTime(500);
-      expect(onDraftChange).toHaveBeenCalledWith(draft);
+      expect(onDraftChange).not.toHaveBeenCalled(); // no change to draft
     });
 
     it('should check for query type mismatch', async () => {

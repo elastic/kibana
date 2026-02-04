@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import type { ToolType } from '@kbn/onechat-common';
 import { appPaths } from '../utils/app_paths';
@@ -13,10 +13,12 @@ import { useNavigation } from '../hooks/use_navigation';
 import { useDeleteTool, useDeleteTools } from '../hooks/tools/use_delete_tools';
 import { labels } from '../utils/i18n';
 import {
-  OPEN_TEST_FLYOUT_QUERY_PARAM,
   TOOL_SOURCE_QUERY_PARAM,
   TOOL_TYPE_QUERY_PARAM,
+  TEST_TOOL_ID_QUERY_PARAM,
 } from '../components/tools/create_tool';
+import { ToolTestFlyout } from '../components/tools/execute/test_tools';
+import { useQueryState } from '../hooks/use_query_state';
 
 export interface ToolsActionsContextType {
   createTool: (toolType: ToolType) => void;
@@ -68,14 +70,24 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
     [navigateToOnechatUrl]
   );
 
-  const testTool = useCallback(
-    (toolId: string) => {
-      navigateToOnechatUrl(appPaths.tools.details({ toolId }), {
-        [OPEN_TEST_FLYOUT_QUERY_PARAM]: 'true',
-      });
-    },
-    [navigateToOnechatUrl]
-  );
+  const [testToolId, setTestToolId] = useState<string | null>(null);
+  const [testToolIdParam, setTestToolIdParam] = useQueryState<string>(TEST_TOOL_ID_QUERY_PARAM);
+
+  // Handle opening test flyout from query param (one-time trigger, then clear param)
+  useEffect(() => {
+    if (testToolIdParam && !testToolId) {
+      setTestToolId(testToolIdParam);
+      setTestToolIdParam(null);
+    }
+  }, [testToolIdParam, testToolId, setTestToolIdParam]);
+
+  const testTool = useCallback((toolId: string) => {
+    setTestToolId(toolId);
+  }, []);
+
+  const closeTestFlyout = useCallback(() => {
+    setTestToolId(null);
+  }, []);
 
   const getEditToolUrl = useCallback(
     (toolId: string) => {
@@ -182,6 +194,7 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
           <EuiText>{labels.tools.bulkDeleteEsqlToolsConfirmationText}</EuiText>
         </EuiConfirmModal>
       )}
+      {testToolId && <ToolTestFlyout toolId={testToolId} onClose={closeTestFlyout} />}
     </ToolsActionsContext.Provider>
   );
 };

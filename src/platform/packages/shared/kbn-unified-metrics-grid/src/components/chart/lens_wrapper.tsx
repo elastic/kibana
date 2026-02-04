@@ -13,7 +13,6 @@ import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plu
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { ACTION_EXPLORE_IN_DISCOVER_TAB } from '../../common/constants';
-import { ChartTitle } from './chart_title';
 import type { UnifiedMetricsGridProps } from '../../types';
 
 export type LensWrapperProps = {
@@ -58,10 +57,6 @@ export function LensWrapper({
       width: 100%;
     }
 
-    & .embPanel__header {
-      visibility: hidden;
-    }
-
     & .lnsExpressionRenderer {
       width: 100%;
       margin: auto;
@@ -77,6 +72,13 @@ export function LensWrapper({
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+    }
+
+    // Style mark elements (from EuiHighlight) in panel headers to match Discover's highlight colors
+    & .embPanel__header mark,
+    & [data-test-subj='embeddablePanelTitle'] mark {
+      color: ${euiTheme.colors.textAccent};
+      background-color: ${euiTheme.colors.backgroundLightAccent};
     }
   `;
 
@@ -110,10 +112,10 @@ export function LensWrapper({
       <PresentationPanelQuickActionContext.Provider
         value={{ view: [ACTION_EXPLORE_IN_DISCOVER_TAB, 'openInspector'] }}
       >
-        <ChartTitle highlight={titleHighlight} title={lensProps.attributes.title} />
         <EmbeddableComponent
           {...lensProps}
           title={lensProps.attributes.title}
+          titleHighlight={titleHighlight}
           extraActions={extraActions}
           abortController={abortController}
           disabledActions={disabledActions}

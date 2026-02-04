@@ -183,9 +183,16 @@ describe('buildContextOverride', () => {
       const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithForeach);
       const result = buildContextOverride(workflowGraph, mockStaticData);
 
-      // The foreach workflow might not extract inputs as expected,
-      // let's just check that it handles it gracefully
-      expect(result.stepContext).toEqual({});
+      // The foreach step should extract inputs from the template expression
+      expect(result.stepContext).toEqual({
+        steps: {
+          data_step: {
+            output: {
+              items: 'replace with your data',
+            },
+          },
+        },
+      });
       expect(result.schema).toBeDefined();
     });
 
@@ -311,6 +318,176 @@ describe('buildContextOverride', () => {
         },
         inputs: {
           userInput: 'replace with your data',
+        },
+      });
+      expect(result.schema).toBeDefined();
+    });
+
+    it('should use input default values when inputsDefinition is provided', () => {
+      const workflowWithInputs = {
+        version: '1' as const,
+        name: 'test-workflow',
+        enabled: true,
+        triggers: [
+          {
+            type: 'manual' as const,
+            enabled: true,
+          },
+        ],
+        steps: [
+          {
+            name: 'log_input',
+            type: 'console.log',
+            with: {
+              message: '{{ inputs.message }}',
+              count: '{{ inputs.count }}',
+              flag: '{{ inputs.flag }}',
+            },
+          },
+        ],
+      };
+
+      const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithInputs);
+      const staticDataWithInputs = {
+        ...mockStaticData,
+        inputsDefinition: [
+          { name: 'message', type: 'string' as const, default: 'hello world' },
+          { name: 'count', type: 'number' as const, default: 42 },
+          { name: 'flag', type: 'boolean' as const, default: true },
+        ],
+      };
+      const result = buildContextOverride(workflowGraph, staticDataWithInputs);
+
+      expect(result.stepContext).toEqual({
+        inputs: {
+          message: 'hello world',
+          count: 42,
+          flag: true,
+        },
+      });
+      expect(result.schema).toBeDefined();
+    });
+
+    it('should fall back to placeholder for inputs without defaults', () => {
+      const workflowWithInputs = {
+        version: '1' as const,
+        name: 'test-workflow',
+        enabled: true,
+        triggers: [
+          {
+            type: 'manual' as const,
+            enabled: true,
+          },
+        ],
+        steps: [
+          {
+            name: 'log_input',
+            type: 'console.log',
+            with: {
+              messageWithDefault: '{{ inputs.messageWithDefault }}',
+              messageWithoutDefault: '{{ inputs.messageWithoutDefault }}',
+            },
+          },
+        ],
+      };
+
+      const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithInputs);
+      const staticDataWithInputs = {
+        ...mockStaticData,
+        inputsDefinition: [
+          { name: 'messageWithDefault', type: 'string' as const, default: 'default value' },
+          { name: 'messageWithoutDefault', type: 'string' as const },
+        ],
+      };
+      const result = buildContextOverride(workflowGraph, staticDataWithInputs);
+
+      expect(result.stepContext).toEqual({
+        inputs: {
+          messageWithDefault: 'default value',
+          messageWithoutDefault: 'replace with your data',
+        },
+      });
+      expect(result.schema).toBeDefined();
+    });
+
+    it('should handle array input defaults', () => {
+      const workflowWithArrayInput = {
+        version: '1' as const,
+        name: 'test-workflow',
+        enabled: true,
+        triggers: [
+          {
+            type: 'manual' as const,
+            enabled: true,
+          },
+        ],
+        steps: [
+          {
+            name: 'log_input',
+            type: 'console.log',
+            with: {
+              tags: '{{ inputs.tags }}',
+            },
+          },
+        ],
+      };
+
+      const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithArrayInput);
+      const staticDataWithInputs = {
+        ...mockStaticData,
+        inputsDefinition: [
+          { name: 'tags', type: 'array' as const, default: ['tag1', 'tag2', 'tag3'] },
+        ],
+      };
+      const result = buildContextOverride(workflowGraph, staticDataWithInputs);
+
+      expect(result.stepContext).toEqual({
+        inputs: {
+          tags: ['tag1', 'tag2', 'tag3'],
+        },
+      });
+      expect(result.schema).toBeDefined();
+    });
+
+    it('should handle choice input defaults', () => {
+      const workflowWithChoiceInput = {
+        version: '1' as const,
+        name: 'test-workflow',
+        enabled: true,
+        triggers: [
+          {
+            type: 'manual' as const,
+            enabled: true,
+          },
+        ],
+        steps: [
+          {
+            name: 'log_input',
+            type: 'console.log',
+            with: {
+              priority: '{{ inputs.priority }}',
+            },
+          },
+        ],
+      };
+
+      const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithChoiceInput);
+      const staticDataWithInputs = {
+        ...mockStaticData,
+        inputsDefinition: [
+          {
+            name: 'priority',
+            type: 'choice' as const,
+            options: ['low', 'medium', 'high'],
+            default: 'medium',
+          },
+        ],
+      };
+      const result = buildContextOverride(workflowGraph, staticDataWithInputs);
+
+      expect(result.stepContext).toEqual({
+        inputs: {
+          priority: 'medium',
         },
       });
       expect(result.schema).toBeDefined();

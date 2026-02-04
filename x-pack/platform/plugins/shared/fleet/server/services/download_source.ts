@@ -208,7 +208,7 @@ class DownloadSourceService {
     let secretsToDelete: SecretReference[] = [];
 
     const logger = appContextService.getLogger();
-    logger.debug(`Updating download source ${id} with ${newData}`);
+    logger.debug(`Updating download source ${id}`);
 
     const originalItem = await this.get(id);
     const updateData: Partial<DownloadSourceSOAttributes> = {

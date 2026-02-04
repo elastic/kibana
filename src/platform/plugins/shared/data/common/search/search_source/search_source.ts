@@ -700,6 +700,8 @@ export class SearchSource {
         } else {
           return addToBody('aggs', val);
         }
+      case 'timezone':
+        return addToRoot(key, val);
       default:
         return addToBody(key, val);
     }
@@ -809,6 +811,7 @@ export class SearchSource {
       'highlightAll',
       'fieldsFromSource',
       'body',
+      'timezone',
     ]);
     const body = { ...bodyParams, ...searchRequest.body };
     const dataView = this.getDataView(searchRequest.index);
@@ -959,7 +962,13 @@ export class SearchSource {
     };
 
     return omitByIsNil({
-      ...omit(searchRequest, ['query', 'filters', 'nonHighlightingFilters', 'fieldsFromSource']),
+      ...omit(searchRequest, [
+        'query',
+        'filters',
+        'nonHighlightingFilters',
+        'fieldsFromSource',
+        'timezone',
+      ]),
       body: omitByIsNil(bodyToReturn),
       indexType: this.getIndexType(searchRequest.index),
       highlightAll:
@@ -1011,9 +1020,11 @@ export class SearchSource {
     const filtersInMustClause = (sort ?? []).some((srt: EsQuerySortValue[]) =>
       Object.hasOwn(srt, '_score')
     );
+    const overwriteTimezone = this.getField('timezone');
     const esQueryConfigs = {
       ...getEsQueryConfig({ get: getConfig }),
       filtersInMustClause,
+      ...(overwriteTimezone ? { dateFormatTZ: overwriteTimezone } : {}),
     };
     return buildEsQuery(
       this.getDataView(index),

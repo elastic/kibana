@@ -36,6 +36,7 @@ const getToolsTableSearchConfig = ({
   box: {
     incremental: true,
     placeholder: labels.tools.searchToolsPlaceholder,
+    'data-test-subj': 'agentBuilderToolsSearchInput',
   },
   filters: [
     {

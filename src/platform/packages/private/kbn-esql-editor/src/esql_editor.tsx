@@ -1117,7 +1117,8 @@ const ESQLEditorInternal = function ESQLEditor({
                     editor.onDidFocusEditorText(() => {
                       // Skip triggering suggestions on initial focus to avoid interfering
                       // with editor initialization and automated tests
-                      if (!isFirstFocusRef.current) {
+                      // Also skip when date picker is open to prevent overlap
+                      if (!isFirstFocusRef.current && !datePickerOpenStatusRef.current) {
                         triggerSuggestions();
                       }
 
@@ -1261,7 +1262,9 @@ const ESQLEditorInternal = function ESQLEditor({
                     lineContent.length + 1
                   );
 
-                  const addition = `"${date.toISOString()}"${contentAfterCursor}`;
+                  const dateString = `"${date.toISOString()}"`;
+                  const addition = `${dateString}${contentAfterCursor}`;
+
                   editorRef.current?.executeEdits('time', [
                     {
                       range: {
@@ -1282,7 +1285,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   // move the cursor past the date we just inserted
                   editorRef.current?.setPosition({
                     lineNumber: currentCursorPosition?.lineNumber ?? 0,
-                    column: (currentCursorPosition?.column ?? 0) + addition.length - 1,
+                    column: (currentCursorPosition?.column ?? 0) + dateString.length,
                   });
                   // restore focus to the editor
                   editorRef.current?.focus();

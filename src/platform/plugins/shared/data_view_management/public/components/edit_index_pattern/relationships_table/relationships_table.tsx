@@ -39,6 +39,7 @@ import {
   titleFieldDescription,
   filterTitle,
   managedBadge,
+  relationshipsTableCaption,
 } from './i18n';
 
 const canGoInApp = (
@@ -183,6 +184,7 @@ export const RelationshipsTable = ({
       <EuiInMemoryTable<SavedObjectRelation>
         items={relationships}
         columns={columns}
+        tableCaption={relationshipsTableCaption}
         pagination={{
           pageSize,
         }}

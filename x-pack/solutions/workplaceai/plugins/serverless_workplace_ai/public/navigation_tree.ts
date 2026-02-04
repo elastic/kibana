@@ -31,7 +31,6 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
       },
       {
         link: 'workflows',
-        badgeType: 'techPreview' as const,
       },
       {
         link: 'dashboards',
