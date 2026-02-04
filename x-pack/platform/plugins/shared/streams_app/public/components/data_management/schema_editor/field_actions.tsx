@@ -117,9 +117,12 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
       onClick: () => openFlyout(),
     };
 
-    // Check if this field is mapped in a parent stream
-    // (i.e., there's also an inherited entry with the same name in the fields list)
-    const isMappedInParent = fields.some((f) => f.name === field.name && f.status === 'inherited');
+    // Check if this field has a real ES mapping (not type: 'unmapped') in a parent stream.
+    // If the parent has type: 'unmapped', the child should still be able to map it.
+    const inheritedField = fields.find((f) => f.name === field.name && f.status === 'inherited');
+    const hasRealMappingInParent = inheritedField && inheritedField.type !== 'unmapped';
+    // For "Unmap" action, we need to know if there's ANY inherited entry (even unmapped)
+    const isInheritedFromParent = !!inheritedField;
 
     switch (field.status) {
       case 'mapped':
@@ -137,9 +140,9 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
           actions.push(clearDescriptionAction);
         }
         // Don't show "Unmap field" for:
-        // - Fields mapped in parent (the parent's mapping still applies)
+        // - Fields inherited from parent (the parent's mapping or documentation still applies)
         // - Documentation-only fields (type === 'unmapped') since there's nothing to unmap
-        if (!isMappedInParent && field.type !== 'unmapped') {
+        if (!isInheritedFromParent && field.type !== 'unmapped') {
           actions.push({
             name: i18n.translate('xpack.streams.actions.unpromoteFieldLabel', {
               defaultMessage: 'Unmap field',
@@ -156,8 +159,9 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         break;
       case 'unmapped':
         actions = [viewFieldAction];
-        // Don't show "Map field" for fields mapped in parent (the parent's mapping applies)
-        if (!isMappedInParent) {
+        // Don't show "Map field" for fields with a real mapping in parent (the parent's mapping applies).
+        // If the parent has type: 'unmapped', the child should still be able to map it.
+        if (!hasRealMappingInParent) {
           actions.push({
             name: i18n.translate('xpack.streams.actions.mapFieldLabel', {
               defaultMessage: 'Map field',
@@ -170,7 +174,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
           actions.push(clearDescriptionAction);
         }
 
-        if (enableGeoPointSuggestions !== false && !isMappedInParent) {
+        if (enableGeoPointSuggestions !== false && !hasRealMappingInParent) {
           const geoSuggestion = getGeoPointSuggestion({
             fieldName: field.name,
             fields,

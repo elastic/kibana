@@ -281,8 +281,8 @@ describe('FieldActionsCell', () => {
       expect(actions).toContain('Clear description');
     });
 
-    it('should NOT show Map field action when field is mapped in parent', async () => {
-      // Unmapped field with same name as inherited field - parent's mapping applies
+    it('should NOT show Map field action when field has a real mapping in parent', async () => {
+      // Unmapped field with same name as inherited field with a real type - parent's mapping applies
       const unmappedField: UnmappedSchemaField = {
         name: 'attributes.field1',
         parent: 'logs.test',
@@ -307,6 +307,34 @@ describe('FieldActionsCell', () => {
       expect(actions).toContain('Edit description');
       expect(actions).not.toContain('Map field');
       expect(actions).not.toContain('Map as geo field');
+    });
+
+    it('should show Map field action when parent has type: unmapped', async () => {
+      // When parent has type: 'unmapped' (documentation-only), child should be able to map it
+      const unmappedField: UnmappedSchemaField = {
+        name: 'attributes.field1',
+        parent: 'logs.test',
+        status: 'unmapped',
+      };
+
+      const inheritedUnmappedField: MappedSchemaField = {
+        name: 'attributes.field1',
+        parent: 'logs',
+        status: 'inherited',
+        type: 'unmapped',
+        description: 'Parent documentation',
+      };
+
+      renderWithContext(unmappedField as SchemaEditorField, [
+        unmappedField as SchemaEditorField,
+        inheritedUnmappedField as SchemaEditorField,
+      ]);
+      await openActionsMenu();
+
+      const actions = getMenuItemNames();
+      expect(actions).toContain('View field');
+      expect(actions).toContain('Edit description');
+      expect(actions).toContain('Map field'); // Should show because parent only has documentation, not real mapping
     });
 
     it('should call onFieldUpdate without description when Clear description is clicked', async () => {

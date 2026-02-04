@@ -99,6 +99,41 @@ describe('validateAncestorFields', () => {
         })
       ).not.toThrow();
     });
+
+    it('should allow setting a real type when parent has type: unmapped', () => {
+      // When parent has type: 'unmapped' (documentation-only), child should be able to map it
+      const ancestor = createWiredStreamDefinition('logs', {
+        'attributes.field1': { type: 'unmapped', description: 'Parent documentation' },
+      });
+
+      const fields = {
+        'attributes.field1': { type: 'keyword' as const },
+      };
+
+      expect(() =>
+        validateAncestorFields({
+          ancestors: [ancestor],
+          fields,
+        })
+      ).not.toThrow();
+    });
+
+    it('should allow setting a real type with description when parent has type: unmapped', () => {
+      const ancestor = createWiredStreamDefinition('logs', {
+        'attributes.field1': { type: 'unmapped', description: 'Parent documentation' },
+      });
+
+      const fields = {
+        'attributes.field1': { type: 'keyword' as const, description: 'Child description' },
+      };
+
+      expect(() =>
+        validateAncestorFields({
+          ancestors: [ancestor],
+          fields,
+        })
+      ).not.toThrow();
+    });
   });
 
   describe('incompatible type validation', () => {

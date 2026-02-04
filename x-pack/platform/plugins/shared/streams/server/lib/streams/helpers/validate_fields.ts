@@ -42,7 +42,9 @@ export function validateAncestorFields({
           );
         }
         // Check for incompatible type changes (different non-unmapped types)
-        if (ancestorField.type !== fields[fieldName].type) {
+        // Allow: parent has 'unmapped' type → child can set any type (this is the expected use case
+        // where a field is documented in a parent but mapped in a child)
+        if (ancestorField.type !== fields[fieldName].type && ancestorField.type !== 'unmapped') {
           throw new MalformedFieldsError(
             `Field ${fieldName} is already defined with incompatible type in the parent stream ${ancestor.name}`
           );
