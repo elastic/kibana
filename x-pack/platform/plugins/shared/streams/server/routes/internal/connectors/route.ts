@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isSupportedConnectorType, type InferenceConnector } from '@kbn/inference-common';
+import { isSupportedConnector, type InferenceConnector } from '@kbn/inference-common';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 
@@ -49,9 +49,8 @@ export const getConnectorsRoute = createServerRoute({
     const connectors = await actionsClient.getAll();
 
     // Filter to only supported GenAI connector types
-    const supportedConnectors = connectors.filter((connector) =>
-      isSupportedConnectorType(connector.actionTypeId)
-    );
+    // Uses isSupportedConnector which also validates .inference connectors have taskType: 'chat_completion'
+    const supportedConnectors = connectors.filter((connector) => isSupportedConnector(connector));
 
     // Validate inference connectors have endpoints
     const validatedConnectors = await Promise.all(
