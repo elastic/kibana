@@ -13,7 +13,16 @@ import { API_BASE_PATH, loadWorkflows, type DataSource } from '../common';
 async function enhanceWithWorkflowContent(types: DataSource[]) {
   return Promise.all(
     types.map(async (type) => {
-      const workflowInfos = await loadWorkflows(type.workflows);
+      // creates placeholder stack connector ids when checking workflows using separate type workflow directory paths
+      const stackConnectorIds: Record<string, string> = {};
+      for (const stackConnector of type.stackConnectors) {
+        const directoryName = stackConnector.type.startsWith('.')
+          ? stackConnector.type.slice(1)
+          : stackConnector.type;
+        stackConnectorIds[stackConnector.type] = `placeholder-${directoryName}`;
+      }
+
+      const workflowInfos = await loadWorkflows(stackConnectorIds, type.workflows);
       const content: Record<string, string> = {};
       for (const info of workflowInfos) {
         let parsed;

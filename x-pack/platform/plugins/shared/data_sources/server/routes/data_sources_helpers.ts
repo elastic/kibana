@@ -181,7 +181,7 @@ export async function createDataSourceAndRelatedResources(
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
 
-  // Merge stackConnectorId and token into workflows' templateInputs
+  // Merge stackConnectorId into workflows' templateInputs
   const templateInputs = {
     ...dataSource.workflows.templateInputs,
   };
@@ -189,6 +189,8 @@ export async function createDataSourceAndRelatedResources(
     directory: dataSource.workflows.directory,
     templateInputs,
   });
+
+  logger.info(`Creating workflows and tools for data source '${name}'`);
 
   for (const workflowInfo of workflowInfos) {
     // Extract the original workflow name from YAML and prefix it with the data source name
