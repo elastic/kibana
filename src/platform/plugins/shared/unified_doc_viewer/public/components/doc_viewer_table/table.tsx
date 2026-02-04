@@ -63,10 +63,16 @@ export interface DocViewerTableRestorableState {
   rowsPerPage: number;
   // Current page number
   pageNumber: number;
+  // Current vertical scroll position
+  scrollTop: number;
 }
 
-const { withRestorableState, useRestorableState, useRestorableLocalStorage } =
-  createRestorableStateProvider<DocViewerTableRestorableState>();
+export const {
+  withRestorableState,
+  useRestorableState,
+  useRestorableRef,
+  useRestorableLocalStorage,
+} = createRestorableStateProvider<DocViewerTableRestorableState>();
 
 interface ItemsEntry {
   pinnedRows: FieldRow[];

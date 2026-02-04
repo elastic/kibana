@@ -10,6 +10,7 @@
 import type {
   EuiDataGridCellPopoverElementProps,
   EuiDataGridProps,
+  EuiDataGridRefProps,
   EuiDataGridStyle,
   RenderCellValue,
   UseEuiTheme,
@@ -20,7 +21,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { usePager } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import type { FieldRow } from './field_row';
 import { getPinColumnControl } from './get_pin_control';
@@ -32,6 +33,7 @@ import {
   getFilterInOutPairDisabledWarning,
 } from './table_cell_actions';
 import type { UseTableFiltersCallbacksReturn } from './table_filters';
+import { useRestorableRef } from './table';
 
 function getGridProps(
   gridStyle?: EuiDataGridStyle
@@ -266,9 +268,29 @@ export function TableGrid({
     return onTogglePinned && !hidePinColumn ? [getPinColumnControl({ rows, onTogglePinned })] : [];
   }, [onTogglePinned, hidePinColumn, rows]);
 
+  const dataGridRef = useRef<EuiDataGridRefProps>(null);
+  const scrollTopRef = useRestorableRef('scrollTop', 0);
+  const isScrollRestored = useRef(false);
+  const virtualizationOptions = useMemo<EuiDataGridProps['virtualizationOptions']>(
+    () => ({
+      onScroll: ({ scrollTop }) => {
+        if (isScrollRestored.current) {
+          scrollTopRef.current = scrollTop;
+        } else {
+          requestAnimationFrame(() => {
+            dataGridRef.current?.scrollTo?.({ scrollTop: scrollTopRef.current });
+            isScrollRestored.current = true;
+          });
+        }
+      },
+    }),
+    [scrollTopRef]
+  );
+
   return (
     <EuiDataGrid
       key={`fields-table-${id}`}
+      ref={dataGridRef}
       data-test-subj="UnifiedDocViewerTableGrid"
       {...getGridProps(gridStyle)}
       aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
@@ -283,6 +305,7 @@ export function TableGrid({
       renderCellPopover={customRenderCellPopover ? customRenderCellPopover : renderCellPopover}
       pagination={pagination}
       leadingControlColumns={leadingControlColumns}
+      virtualizationOptions={virtualizationOptions}
     />
   );
 }
