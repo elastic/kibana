@@ -32,6 +32,17 @@ export const SplitTargetFieldSelector = () => {
       const hasTargetField = Boolean(value?.trim());
       const isEqualToSourceField = value?.trim() === formValues.from?.trim();
 
+      // Check for Mustache template syntax
+      if (value?.includes('{{')) {
+        return i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.targetFieldMustacheError',
+          {
+            defaultMessage:
+              'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names',
+          }
+        );
+      }
+
       if (isWithinWhereBlock) {
         if (!hasTargetField) {
           return i18n.translate(

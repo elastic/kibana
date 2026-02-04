@@ -17,7 +17,20 @@ export const SortTargetFieldSelector = () => {
     formState: { errors },
   } = useFormContext<SortFormState>();
 
-  const { ref, ...inputProps } = register('to');
+  const { ref, ...inputProps } = register('to', {
+    validate: (value) => {
+      if (value?.includes('{{')) {
+        return i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.targetFieldMustacheError',
+          {
+            defaultMessage:
+              'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names',
+          }
+        );
+      }
+      return true;
+    },
+  });
 
   return (
     <EuiFormRow
