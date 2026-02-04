@@ -232,6 +232,7 @@ export async function ingestOpenApiSpec({
     indexName,
     client: esClient,
     logger,
+    inferenceId,
   });
 
   // Transform documents to index format and index them

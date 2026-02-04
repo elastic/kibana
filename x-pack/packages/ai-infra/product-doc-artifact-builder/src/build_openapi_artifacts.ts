@@ -8,6 +8,7 @@
 import Path from 'path';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { DocumentationProduct } from '@kbn/product-doc-common';
 import {
   downloadOpenAPISpecs,
@@ -53,46 +54,51 @@ export const buildOpenAPIArtifacts = async (config: OpenAPITaskConfig) => {
     buildFolder: config.buildFolder,
   });
 
-  // Index names
-  const elasticsearchIndex = 'kibana_ai_openapi_spec_elasticsearch';
-  const kibanaIndex = 'kibana_ai_openapi_spec_kibana';
+  // Configuration - use ELSER as default (required by OpenAPI mapping)
+  const inferenceId = config.inferenceId ?? defaultInferenceEndpoints.ELSER;
+  const semanticTextMapping = getSemanticTextMapping(inferenceId);
 
-  // Get semantic text mapping (using E5 small as specified in the mapping)
-  const semanticTextMapping = getSemanticTextMapping(config.inferenceId);
+  log.info(
+    `Using inference id [${inferenceId}] for semantic text mapping ${JSON.stringify(
+      semanticTextMapping,
+      null,
+      2
+    )}`
+  );
 
-  // Process and ingest Elasticsearch spec
-  log.info('Processing and ingesting Elasticsearch OpenAPI spec');
-  await ingestOpenApiSpec({
-    indexName: elasticsearchIndex,
-    esClient: embeddingClient,
-    openApiSpec: specs.elasticsearch,
-    logger: log,
-  });
+  const products = [
+    {
+      productName: DocumentationProduct.elasticsearch,
+      indexName: 'kibana_ai_openapi_spec_elasticsearch',
+      spec: specs.elasticsearch,
+    },
+    {
+      productName: DocumentationProduct.kibana,
+      indexName: 'kibana_ai_openapi_spec_kibana',
+      spec: specs.kibana,
+    },
+  ] as const;
 
-  // Create chunk files for Elasticsearch
-  await createOpenAPIChunkFiles({
-    index: elasticsearchIndex,
-    client: embeddingClient,
-    destFolder: Path.join(config.buildFolder, DocumentationProduct.elasticsearch),
-    log,
-  });
+  // Process each product: ingest, create chunk files
+  for (const { productName, indexName, spec } of products) {
+    log.info(`Processing and ingesting ${productName} OpenAPI spec`);
 
-  // Process and ingest Kibana spec
-  log.info('Processing and ingesting Kibana OpenAPI spec');
-  await ingestOpenApiSpec({
-    indexName: kibanaIndex,
-    esClient: embeddingClient,
-    openApiSpec: specs.kibana,
-    logger: log,
-  });
+    await ingestOpenApiSpec({
+      indexName,
+      esClient: embeddingClient,
+      openApiSpec: spec,
+      logger: log,
+      inferenceId,
+    });
 
-  // Create chunk files for Kibana
-  await createOpenAPIChunkFiles({
-    index: kibanaIndex,
-    client: embeddingClient,
-    destFolder: Path.join(config.buildFolder, DocumentationProduct.kibana),
-    log,
-  });
+    await createOpenAPIChunkFiles({
+      index: indexName,
+      client: embeddingClient,
+      destFolder: Path.join(config.buildFolder, productName),
+      log,
+      // inferenceId,
+    });
+  }
 
   // Create combined OpenAPI artifact
   await createCombinedOpenAPIArtifact({
@@ -101,6 +107,7 @@ export const buildOpenAPIArtifacts = async (config: OpenAPITaskConfig) => {
     stackVersion: config.stackVersion,
     log,
     semanticTextMapping,
+    inferenceId,
   });
 
   await cleanupFolders({ folders: [config.buildFolder] });

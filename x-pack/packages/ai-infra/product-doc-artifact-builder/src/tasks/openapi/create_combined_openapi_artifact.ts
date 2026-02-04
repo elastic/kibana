@@ -9,11 +9,65 @@ import Path from 'path';
 import AdmZip from 'adm-zip';
 import Fs from 'fs/promises';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { DocumentationProduct } from '@kbn/product-doc-common';
-import { LATEST_MANIFEST_FORMAT_VERSION } from '@kbn/product-doc-common';
+import { DocumentationProduct, LATEST_MANIFEST_FORMAT_VERSION } from '@kbn/product-doc-common';
+import type { ProductName } from '@kbn/product-doc-common';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { getArtifactMappings } from '../../artifact/mappings';
 import { getArtifactManifest } from '../../artifact/manifest';
 import type { SemanticTextMapping } from '../create_index';
+
+const isImpliedDefaultElserInferenceId = (inferenceId: string | null | undefined): boolean => {
+  return (
+    inferenceId === null ||
+    inferenceId === undefined ||
+    inferenceId === defaultInferenceEndpoints.ELSER ||
+    inferenceId === defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID ||
+    (typeof inferenceId === 'string' && inferenceId.toLowerCase().includes('elser'))
+  );
+};
+
+interface AddProductToZipParams {
+  zip: AdmZip;
+  productName: ProductName;
+  buildFolder: string;
+  stackVersion: string;
+  mappingFileContent: string;
+  log: ToolingLog;
+}
+
+const addProductToZip = async ({
+  zip,
+  productName,
+  buildFolder,
+  stackVersion,
+  mappingFileContent,
+  log,
+}: AddProductToZipParams) => {
+  const productBuildFolder = Path.join(buildFolder, productName);
+  const manifest = getArtifactManifest({
+    productName,
+    stackVersion,
+    formatVersion: LATEST_MANIFEST_FORMAT_VERSION,
+  });
+
+  // Add mappings.json
+  zip.addFile(`${productName}/mappings.json`, Buffer.from(mappingFileContent, 'utf-8'));
+
+  // Add manifest.json
+  zip.addFile(
+    `${productName}/manifest.json`,
+    Buffer.from(JSON.stringify(manifest, undefined, 2), 'utf-8')
+  );
+
+  // Add content folder
+  const contentFolder = Path.join(productBuildFolder, 'content');
+  try {
+    await Fs.access(contentFolder);
+    zip.addLocalFolder(contentFolder, `${productName}/content`);
+  } catch (error) {
+    log.warning(`Could not add ${productName} content folder: ${error}`);
+  }
+};
 
 export const createCombinedOpenAPIArtifact = async ({
   buildFolder,
@@ -21,78 +75,41 @@ export const createCombinedOpenAPIArtifact = async ({
   stackVersion,
   log,
   semanticTextMapping,
+  inferenceId,
 }: {
   buildFolder: string;
   targetFolder: string;
   stackVersion: string;
   log: ToolingLog;
   semanticTextMapping: SemanticTextMapping;
+  inferenceId: string;
 }) => {
   log.info(
     `Starting to create combined OpenAPI artifact from build folder [${buildFolder}] into target [${targetFolder}]`
   );
 
   const zip = new AdmZip();
-
   const mappings = getArtifactMappings(semanticTextMapping);
   const mappingFileContent = JSON.stringify(mappings, undefined, 2);
 
-  // Add elasticsearch folder contents
-  const esBuildFolder = Path.join(buildFolder, DocumentationProduct.elasticsearch);
-  const esManifest = getArtifactManifest({
-    productName: DocumentationProduct.elasticsearch,
-    stackVersion,
-    formatVersion: LATEST_MANIFEST_FORMAT_VERSION,
-  });
-
-  zip.addFile(
-    `${DocumentationProduct.elasticsearch}/mappings.json`,
-    Buffer.from(mappingFileContent, 'utf-8')
-  );
-  zip.addFile(
-    `${DocumentationProduct.elasticsearch}/manifest.json`,
-    Buffer.from(JSON.stringify(esManifest, undefined, 2), 'utf-8')
-  );
-
-  // Add elasticsearch content folder
-  const esContentFolder = Path.join(esBuildFolder, 'content');
-  try {
-    await Fs.access(esContentFolder);
-    zip.addLocalFolder(esContentFolder, `${DocumentationProduct.elasticsearch}/content`);
-  } catch (error) {
-    log.warn(`Could not add elasticsearch content folder: ${error}`);
+  // Add both products to the zip
+  for (const productName of [DocumentationProduct.elasticsearch, DocumentationProduct.kibana]) {
+    await addProductToZip({
+      zip,
+      productName,
+      buildFolder,
+      stackVersion,
+      mappingFileContent,
+      log,
+    });
   }
 
-  // Add kibana folder contents
-  const kibanaBuildFolder = Path.join(buildFolder, DocumentationProduct.kibana);
-  const kibanaManifest = getArtifactManifest({
-    productName: DocumentationProduct.kibana,
-    stackVersion,
-    formatVersion: LATEST_MANIFEST_FORMAT_VERSION,
-  });
+  // Generate artifact name with inference ID suffix if not default ELSER
+  const inferenceIdSuffix = isImpliedDefaultElserInferenceId(inferenceId) ? '' : `--${inferenceId}`;
+  const artifactName = `kb-product-doc-openapi-${stackVersion}${inferenceIdSuffix}.zip`;
 
-  zip.addFile(
-    `${DocumentationProduct.kibana}/mappings.json`,
-    Buffer.from(mappingFileContent, 'utf-8')
-  );
-  zip.addFile(
-    `${DocumentationProduct.kibana}/manifest.json`,
-    Buffer.from(JSON.stringify(kibanaManifest, undefined, 2), 'utf-8')
-  );
-
-  // Add kibana content folder
-  const kibanaContentFolder = Path.join(kibanaBuildFolder, 'content');
-  try {
-    await Fs.access(kibanaContentFolder);
-    zip.addLocalFolder(kibanaContentFolder, `${DocumentationProduct.kibana}/content`);
-  } catch (error) {
-    log.warn(`Could not add kibana content folder: ${error}`);
-  }
-
-  // Ensure target folder exists
+  // Ensure target folder exists and write zip
   await Fs.mkdir(targetFolder, { recursive: true });
-
-  const artifactName = `kb-product-doc-openapi-${stackVersion}.zip`;
   const artifactPath = Path.join(targetFolder, artifactName);
   zip.writeZip(artifactPath);
 
