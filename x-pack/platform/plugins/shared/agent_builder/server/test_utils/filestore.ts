@@ -106,6 +106,46 @@ export const createFilestoreVersionedEntry = <TContent extends object = object>(
   };
 };
 
+export interface CreateFilestoreEntryOptions<TContent extends object = object> {
+  /** The raw content of the file */
+  content?: FileEntryContent<TContent>;
+  /** Token count for the version metadata */
+  tokenCount?: number;
+  /** Version number */
+  version?: number;
+  /** Additional overrides for the FilestoreEntry */
+  overrides?: Partial<FilestoreEntry<TContent>>;
+}
+
+/**
+ * Creates a FilestoreEntry for use in ls/glob/grep tests.
+ * FilestoreEntry is the flattened single-version entry returned by read/ls/glob/grep.
+ */
+export const createFilestoreEntry = <TContent extends object = object>(
+  path: string,
+  options: CreateFilestoreEntryOptions<TContent> = {}
+): FilestoreEntry<TContent> => {
+  const { content, tokenCount = 100, version = 1, overrides = {} } = options;
+
+  const defaultContent: FileEntryContent<TContent> = content ?? {
+    raw: { name: `content for ${path}` } as TContent,
+  };
+
+  return {
+    path,
+    type: 'file',
+    version,
+    metadata: {
+      type: FileEntryType.toolResult,
+      id: path,
+      readonly: true,
+      token_count: tokenCount,
+    },
+    content: defaultContent,
+    ...overrides,
+  };
+};
+
 /**
  * Creates a DirEntryWithChildren for use in ls/tree tests.
  */
