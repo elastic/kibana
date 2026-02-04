@@ -11,11 +11,12 @@ import { useEuiTheme } from '@elastic/eui';
 import type { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
 import type { useFailureStoreConfig } from '../hooks/use_failure_store_config';
 import { formatBytes } from '../helpers/format_bytes';
+import { useIlmPhasesColorAndDescription } from '../hooks/use_ilm_phases_color_and_description';
+import { DataLifecycleSummary } from '../common/data_lifecycle/data_lifecycle_summary';
 import {
-  DataLifecycleSummary,
   buildLifecyclePhases,
   type LifecyclePhase,
-} from '../common/data_lifecycle/data_lifecycle_summary';
+} from '../common/data_lifecycle/lifecycle_types';
 
 interface FailureStoreSummaryProps {
   stats?: EnhancedFailureStoreStats;
@@ -24,6 +25,7 @@ interface FailureStoreSummaryProps {
 
 export const FailureStoreSummary = ({ stats, failureStoreConfig }: FailureStoreSummaryProps) => {
   const { euiTheme } = useEuiTheme();
+  const { ilmPhases } = useIlmPhasesColorAndDescription();
 
   const storageSize = stats?.size ? formatBytes(stats.size) : undefined;
 
@@ -38,6 +40,10 @@ export const FailureStoreSummary = ({ stats, failureStoreConfig }: FailureStoreS
     color: euiTheme.colors.severity.danger,
     size: storageSize,
     retentionPeriod,
+    sizeInBytes: stats?.size,
+    docsCount: stats?.count,
+    deletePhaseDescription: ilmPhases.delete.description,
+    deletePhaseColor: ilmPhases.delete.color,
   });
 
   return <DataLifecycleSummary phases={phases} />;

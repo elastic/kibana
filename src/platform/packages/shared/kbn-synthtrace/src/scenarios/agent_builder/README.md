@@ -22,8 +22,7 @@ To generate synthetic data using Synthtrace:
 node scripts/synthtrace src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/<tool_name>/<scenario> \
   --from "now-1h" \
   --to "now" \
-  --clean \
-  --workers=1
+  --clean
 ```
 
 ### 2. Running the Tool via API
@@ -54,8 +53,7 @@ To generate synthetic data using Synthtrace:
 node scripts/synthtrace src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/ai_insights/<scenario> \
   --from "now-1h" \
   --to "now" \
-  --clean \
-  --workers=1
+  --clean
 ```
 
 ### 2. Call the AI Insight

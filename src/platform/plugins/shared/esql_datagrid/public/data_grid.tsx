@@ -77,6 +77,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       <RowViewer
         dataView={props.dataView}
         notifications={props.core.notifications}
+        chrome={props.core.chrome}
         hit={hit}
         hits={displayedRows}
         columns={displayedColumns}
@@ -92,7 +93,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         setExpandedDoc={expandedDocSetter}
       />
     ),
-    [activeColumns, props.core.notifications, props.dataView, props.flyoutType]
+    [activeColumns, props.core.notifications, props.core.chrome, props.dataView, props.flyoutType]
   );
 
   const columnsMeta = useMemo(() => {

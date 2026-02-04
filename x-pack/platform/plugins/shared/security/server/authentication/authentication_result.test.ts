@@ -221,6 +221,7 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.redirectURL).toBe(redirectURL);
       expect(authenticationResult.user).toBeUndefined();
       expect(authenticationResult.state).toBeUndefined();
+      expect(authenticationResult.stateCookieOptions).toBeUndefined();
       expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
       expect(authenticationResult.userProfileGrant).toBeUndefined();
@@ -239,6 +240,7 @@ describe('AuthenticationResult', () => {
 
       expect(authenticationResult.redirectURL).toBe(redirectURL);
       expect(authenticationResult.state).toBe(state);
+      expect(authenticationResult.stateCookieOptions).toBeUndefined();
       expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
       expect(authenticationResult.userProfileGrant).toBeUndefined();
@@ -259,6 +261,7 @@ describe('AuthenticationResult', () => {
 
       expect(authenticationResult.redirectURL).toBe(redirectURL);
       expect(authenticationResult.state).toBe(state);
+      expect(authenticationResult.stateCookieOptions).toBeUndefined();
       expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
       expect(authenticationResult.userProfileGrant).toBeUndefined();
@@ -290,10 +293,35 @@ describe('AuthenticationResult', () => {
 
       expect(authenticationResult.redirectURL).toBe(redirectURL);
       expect(authenticationResult.state).toBe(state);
+      expect(authenticationResult.stateCookieOptions).toBeUndefined();
       expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.authResponseHeaders).toBe(authResponseHeaders);
       expect(authenticationResult.user).toBe(user);
       expect(authenticationResult.userProfileGrant).toBe(userProfileGrant);
+      expect(authenticationResult.error).toBeUndefined();
+    });
+
+    it('correctly produces `redirected` authentication result with stateCookieOptions.', () => {
+      const redirectURL = '/redirect/url';
+      const state = { some: 'state' };
+      const stateCookieOptions = { isSecure: true, sameSite: 'Lax' as 'Lax' };
+      const authenticationResult = AuthenticationResult.redirectTo(redirectURL, {
+        state,
+        stateCookieOptions,
+      });
+
+      expect(authenticationResult.redirected()).toBe(true);
+      expect(authenticationResult.succeeded()).toBe(false);
+      expect(authenticationResult.failed()).toBe(false);
+      expect(authenticationResult.notHandled()).toBe(false);
+
+      expect(authenticationResult.redirectURL).toBe(redirectURL);
+      expect(authenticationResult.state).toBe(state);
+      expect(authenticationResult.stateCookieOptions).toBe(stateCookieOptions);
+      expect(authenticationResult.authHeaders).toBeUndefined();
+      expect(authenticationResult.authResponseHeaders).toBeUndefined();
+      expect(authenticationResult.userProfileGrant).toBeUndefined();
+      expect(authenticationResult.user).toBeUndefined();
       expect(authenticationResult.error).toBeUndefined();
     });
   });

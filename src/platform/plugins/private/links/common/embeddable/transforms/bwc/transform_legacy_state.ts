@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StoredLinksState } from '../../../../server';
+import type { StoredLinksEmbeddableState } from '../../types';
 import type { StoredLinksByValueState910 } from './types';
 
-export function transformLegacyState(state: StoredLinksByValueState910): StoredLinksState {
+export function transformLegacyState(
+  state: StoredLinksByValueState910
+): StoredLinksEmbeddableState {
   // 9.1.0 by-value state stored state under attributes
   const { attributes, ...rest } = state;
   return {

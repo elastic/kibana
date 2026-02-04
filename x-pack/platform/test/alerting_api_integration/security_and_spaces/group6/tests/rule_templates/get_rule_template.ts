@@ -40,7 +40,15 @@ export default (ftrProvider: FtrProviderContext): void => {
         templateId: 'sample-alerting-rule',
       });
 
-      expect(ruleTemplate.body).to.eql(getRuleTemplateResponse('sample-alerting-rule'));
+      expect(ruleTemplate.body).to.eql({
+        ...getRuleTemplateResponse('sample-alerting-rule'),
+
+        description: 'This is a sample alerting rule template description',
+        artifacts: {
+          dashboards: [{ id: 'dash-1' }],
+          investigation_guide: { blob: 'text' },
+        },
+      });
     });
 
     it('unhappy path - 404s when rule template do not exists', async () => {

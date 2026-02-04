@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ToolCreateParams, ToolTypeUpdateParams } from '../../tool_provider';
+import type { ToolCreateParams } from '@kbn/agent-builder-server';
+import type { ToolTypeUpdateParams } from '../../tool_provider';
 import type { ToolProperties } from './storage';
 import type { ToolDocument, ToolPersistedDefinition } from './types';
 

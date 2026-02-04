@@ -10,3 +10,16 @@ To generate the docs run
 ```
 node scripts/build_api_docs
 ```
+
+To validate documentation without writing files, run
+
+```
+node scripts/check_package_docs --plugin <pluginId>
+```
+
+You can use `--plugin` to filter by plugin id and `--package` to filter by package id (manifest.id). These filters can be used independently or together. Validation flags:
+
+- `--check <any|comments|exports|all>` (optional, defaults to `all`).
+- You may pass multiple `--check` flags to combine specific checks.
+
+The `--stats` flag on `build_api_docs` is deprecated and routes to `check_package_docs`.

@@ -9,7 +9,7 @@
 
 export * from './tools/get_hosts/hosts';
 export * from './tools/get_services/services';
-export * from './tools/get_log_categories/log_categories';
+export * from './tools/get_log_groups/log_groups';
 export * from './tools/get_correlated_logs/correlated_logs';
 export * from './tools/get_downstream_dependencies/dependencies';
 export * from './tools/get_alerts/alerts';

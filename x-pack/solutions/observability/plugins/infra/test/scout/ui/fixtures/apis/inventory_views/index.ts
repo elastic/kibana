@@ -35,10 +35,31 @@ export interface InventoryViewApiService {
 
   /**
    * Deletes an inventory view by ID
-   * @param id - The id of the inventory view to delete
+   * @param id - The id of the inventory view(s) to delete
    * @returns Promise with no content
    */
-  deleteOne: (id: string) => Promise<void>;
+  deleteById: (id: string | string[]) => Promise<void>;
+
+  /**
+   * Deletes an inventory view by name
+   * @param name - The name of the inventory view(s) to delete
+   * @returns Promise with no content
+   */
+  deleteByName: (name: string | string[]) => Promise<void>;
+
+  /**
+   * Gets a full inventory view by ID
+   * @param id Id of the inventory view to retrieve
+   * @returns InventoryView object
+   */
+  getById: (id: string) => Promise<InventoryView>;
+
+  /**
+   * Makes an inventory view the default view
+   * @param id Id of the inventory view to set as default
+   * @returns Promise with no content
+   */
+  makeDefault: (id: string) => Promise<void>;
 }
 
 /**
@@ -86,16 +107,83 @@ export const getInventoryViewsApiService = ({
         }
       );
     },
-    deleteOne: async (id: string): Promise<void> => {
+    deleteById: async (id: string | string[]): Promise<void> => {
       return await measurePerformanceAsync(
         log,
-        'inventoryViews.deleteOne',
+        'inventoryViews.deleteById',
         async (): Promise<void> => {
-          await kbnClient.request({
-            method: 'DELETE',
+          const ids = Array.isArray(id) ? id : [id];
+
+          for (const viewId of ids) {
+            await kbnClient.request({
+              method: 'DELETE',
+              path: `/api/infra/inventory_views/${viewId}`,
+              retries: 3,
+              ignoreErrors: [404],
+            });
+          }
+        }
+      );
+    },
+    deleteByName: async (name: string | string[]): Promise<void> => {
+      return await measurePerformanceAsync(
+        log,
+        'inventoryViews.deleteByName',
+        async (): Promise<void> => {
+          const names = Array.isArray(name) ? name : [name];
+          const nameSet = new Set(names);
+
+          const findAllResponse = await kbnClient.request<FindInventoryViewResponse>({
+            method: 'GET',
+            path: '/api/infra/inventory_views',
+            retries: 3,
+          });
+          const existingViews = findAllResponse.data.data;
+
+          const ids = existingViews
+            .filter((view) => nameSet.has(view.attributes.name))
+            .map((view) => view.id);
+
+          if (ids.length === 0) {
+            return;
+          }
+
+          for (const viewId of ids) {
+            await kbnClient.request({
+              method: 'DELETE',
+              path: `/api/infra/inventory_views/${viewId}`,
+              retries: 3,
+              ignoreErrors: [404],
+            });
+          }
+        }
+      );
+    },
+    getById: async (id: string): Promise<InventoryView> => {
+      return await measurePerformanceAsync(
+        log,
+        'inventoryViews.getById',
+        async (): Promise<InventoryView> => {
+          const response = await kbnClient.request<InventoryViewResponse>({
+            method: 'GET',
             path: `/api/infra/inventory_views/${id}`,
             retries: 3,
-            ignoreErrors: [404],
+          });
+
+          return response.data.data;
+        }
+      );
+    },
+    makeDefault: async (id: string): Promise<void> => {
+      return await measurePerformanceAsync(
+        log,
+        'inventoryViews.makeDefault',
+        async (): Promise<void> => {
+          await kbnClient.request({
+            method: 'PATCH',
+            path: `/api/metrics/source/default`,
+            body: { inventoryDefaultView: id },
+            retries: 3,
           });
         }
       );

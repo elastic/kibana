@@ -8,15 +8,25 @@
 import type {
   EntityDefinition,
   EntityField,
-  EntityIdentityField,
+  EntityIdentity,
+  EntityType,
 } from '../definitions/entity_schema';
+import { esqlIsNotNullOrEmpty } from './esql_strings';
 
 export const HASHED_ID = 'entity.hashedId';
 const HASH_ALG = 'MD5';
 
 const MAIN_ENTITY_ID = 'entity.id';
-const DEFAULT_FIELDS_TO_KEEP = ['@timestamp', MAIN_ENTITY_ID, HASHED_ID];
+const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
+const TIMESTAMP_FIELD = '@timestamp';
+
 const METADATA_FIELDS = ['_index'];
+const DEFAULT_FIELDS_TO_KEEP = [
+  TIMESTAMP_FIELD,
+  MAIN_ENTITY_ID,
+  HASHED_ID,
+  ENGINE_METADATA_TYPE_FIELD,
+];
 
 const RECENT_DATA_PREFIX = 'recent';
 // Some fields have only src and we need to fallback to it.
@@ -30,7 +40,7 @@ interface LogsExtractionQueryParams {
   // contains all the fields and id descriptions
   entityDefinition: EntityDefinition;
   // limits amount of logs and entities processed
-  maxPageSearchSize: number;
+  docsLimit: number;
 
   fromDateISO: string;
 
@@ -39,28 +49,24 @@ interface LogsExtractionQueryParams {
 
 export const buildLogsExtractionEsqlQuery = ({
   indexPatterns,
-  entityDefinition: { fields, identityFields },
+  entityDefinition: { fields, identityField, type, entityTypeFallback },
   fromDateISO,
   toDateISO,
-  maxPageSearchSize,
+  docsLimit,
   latestIndex,
 }: LogsExtractionQueryParams): string => {
-  // supporting only one identity field until we have
-  // an strategy to express calculated identity fields
-  const idField = identityFields[0];
-  const idFieldName = idField.field;
+  const idFieldName = getIdFieldName(identityField);
 
   return `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}
-  | WHERE ${entityIdFilter(idFieldName)}
-      AND @timestamp > TO_DATETIME("${fromDateISO}")
-      AND @timestamp <= TO_DATETIME("${toDateISO}")
-  | SORT @timestamp ASC
-  | LIMIT ${maxPageSearchSize}
-  | RENAME
-    ${idFieldName} AS ${recentData(idFieldName)}
+  | WHERE (${entityIdFilter(identityField, type)})
+      AND ${TIMESTAMP_FIELD} > TO_DATETIME("${fromDateISO}")
+      AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
+  | SORT ${TIMESTAMP_FIELD} ASC
+  | LIMIT ${docsLimit}
+  ${entityFieldEvaluation(identityField, type)}
   | STATS
-    ${recentData('timestamp')} = MAX(@timestamp),
+    ${recentData('timestamp')} = MAX(${TIMESTAMP_FIELD}),
     ${recentFieldStats(fields)}
     BY ${recentData(idFieldName)}
   | LOOKUP JOIN ${latestIndex}
@@ -68,16 +74,22 @@ export const buildLogsExtractionEsqlQuery = ({
   | RENAME
     ${recentData(idFieldName)} AS ${idFieldName}
   | EVAL
-    ${mergedFieldStats(idField, fields)},
-    ${customFieldEvalLogic()},
+    ${mergedFieldStats(idFieldName, fields)},
+    ${customFieldEvalLogic(type, entityTypeFallback)},
     ${HASHED_ID} = HASH("${HASH_ALG}", ${MAIN_ENTITY_ID})
-  | KEEP ${fieldsToKeep(idField, fields)}
-  | SORT @timestamp ASC`;
+  | KEEP ${fieldsToKeep(idFieldName, fields)}
+  | SORT ${TIMESTAMP_FIELD} ASC`;
 };
 
-function entityIdFilter(idFieldName: string) {
-  return `${idFieldName} IS NOT NULL
-  AND ${idFieldName} != ""`;
+function entityIdFilter(identityField: EntityIdentity, type: EntityType) {
+  const idFieldName = getIdFieldName(identityField);
+  if (identityField.calculated) {
+    return [idFieldName, ...identityField.requiresOneOfFields]
+      .map((field) => `(${esqlIsNotNullOrEmpty(field)})`)
+      .join(' OR ');
+  }
+
+  return esqlIsNotNullOrEmpty(idFieldName);
 }
 
 function recentFieldStats(fields: EntityField[]) {
@@ -90,9 +102,9 @@ function recentFieldStats(fields: EntityField[]) {
         case 'collect_values':
           return `${recentDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength}))`;
         case 'prefer_newest_value':
-          return `${recentDest} = LAST(${castedSrc}, @timestamp)`;
+          return `${recentDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD})`;
         case 'prefer_oldest_value':
-          return `${recentDest} = FIRST(${castedSrc}, @timestamp)`;
+          return `${recentDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD})`;
         default:
           throw new Error('unknown field operation');
       }
@@ -100,11 +112,15 @@ function recentFieldStats(fields: EntityField[]) {
     .join(',\n ');
 }
 
-function mergedFieldStats({ field: idField }: EntityIdentityField, fields: EntityField[]) {
+function mergedFieldStats(idFieldName: string, fields: EntityField[]) {
   return fields
     .map((field) => {
       const { retention, destination: dest } = field;
       const recentDest = castDestType(recentData(dest), field);
+      if (dest === idFieldName) {
+        return null; // id field should not be merged
+      }
+
       switch (retention.operation) {
         case 'collect_values':
           return `${dest} = MV_DEDUPE(COALESCE(MV_APPEND(${recentDest}, ${dest}), ${recentDest}))`;
@@ -116,22 +132,30 @@ function mergedFieldStats({ field: idField }: EntityIdentityField, fields: Entit
           throw new Error('unknown field operation');
       }
     })
-    .concat([`${MAIN_ENTITY_ID} = ${idField}`])
+    .filter(Boolean)
+    .concat([`${MAIN_ENTITY_ID} = ${idFieldName}`])
     .join(',\n ');
 }
 
-function fieldsToKeep({ field: idField }: EntityIdentityField, fields: EntityField[]) {
+function fieldsToKeep(idFieldName: string, fields: EntityField[]) {
   return fields
     .map(({ destination }) => destination)
-    .concat([...DEFAULT_FIELDS_TO_KEEP, idField])
+    .concat([...DEFAULT_FIELDS_TO_KEEP, idFieldName])
     .join(',\n ');
 }
 
-function customFieldEvalLogic() {
-  return [
-    `@timestamp = ${recentData('timestamp')}`,
+function customFieldEvalLogic(type: EntityType, entityTypeFallback?: string) {
+  const evals = [
+    `${TIMESTAMP_FIELD} = ${recentData('timestamp')}`,
     `entity.name = COALESCE(entity.name, entity.id)`,
-  ].join(',\n ');
+    `${ENGINE_METADATA_TYPE_FIELD} = "${type}"`,
+  ];
+
+  if (entityTypeFallback) {
+    evals.push(`entity.type = COALESCE(entity.type, "${entityTypeFallback}")`);
+  }
+
+  return evals.join(',\n ');
 }
 
 function castSrcType(field: EntityField) {
@@ -169,4 +193,26 @@ function castDestType(fieldName: string, field: EntityField) {
     default:
       return fieldName;
   }
+}
+
+function getIdFieldName(identityField: EntityIdentity): string {
+  if (identityField.calculated) {
+    return identityField.defaultIdField;
+  }
+
+  return identityField.field;
+}
+
+function entityFieldEvaluation(identityField: EntityIdentity, type: EntityType) {
+  const idFieldName = getIdFieldName(identityField);
+  if (identityField.calculated) {
+    return `| EVAL ${recentData(idFieldName)} = CONCAT("${type}:", 
+      CASE(
+        ${esqlIsNotNullOrEmpty(idFieldName)}, ${idFieldName},
+        ${identityField.esqlEvaluation}
+      )
+    )`;
+  }
+
+  return `| EVAL ${recentData(idFieldName)} = CONCAT("${type}:", ${idFieldName})`;
 }

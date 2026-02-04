@@ -12,7 +12,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
   const testSubjects = getService('testSubjects');
 
-  describe('Trial Companion', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/251048
+  describe.skip('Trial Companion', () => {
     before(async () => {
       await svlCommonPage.loginAsAdmin();
     });

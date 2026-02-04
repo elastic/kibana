@@ -173,7 +173,7 @@ export function fromTermsLensStateToAPI(
           },
         }
       : {}),
-    ...(column.params.otherBucket != null
+    ...(column.params.otherBucket
       ? {
           other_bucket: {
             include_documents_without_field: Boolean(column.params.missingBucket),

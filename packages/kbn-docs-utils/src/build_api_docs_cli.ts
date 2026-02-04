@@ -26,9 +26,15 @@ import {
   type CliFlags,
   type CliContext,
 } from './cli';
+import { runCheckPackageDocs } from './check_package_docs_cli';
 
 const rootDir = Path.join(__dirname, '../../..');
-initApm(process.argv, rootDir, false, 'build_api_docs_cli');
+
+const startApm = () => {
+  if (!apm.isStarted()) {
+    initApm(process.argv, rootDir, false, 'build_api_docs_cli');
+  }
+};
 
 async function endTransactionWithFailure(transaction: Transaction | null) {
   if (transaction !== null) {
@@ -39,10 +45,10 @@ async function endTransactionWithFailure(transaction: Transaction | null) {
 }
 
 export function runBuildApiDocsCli() {
+  startApm();
   run(
     async ({ log, flags }) => {
       const transaction = apm.startTransaction('build-api-docs', 'kibana-cli');
-      const spanSetup = transaction.startSpan('build_api_docs.setup', 'setup');
 
       let options;
       try {
@@ -51,6 +57,16 @@ export function runBuildApiDocsCli() {
         await endTransactionWithFailure(transaction);
         throw error;
       }
+
+      if (options.stats && options.stats.length > 0) {
+        log.warning('--stats is deprecated. Please run check_package_docs_cli instead.');
+        transaction?.end();
+        await apm.flush();
+        await runCheckPackageDocs(log, flags as CliFlags);
+        return;
+      }
+
+      const spanSetup = transaction.startSpan('build_api_docs.setup', 'setup');
 
       const outputFolder = Path.resolve(REPO_ROOT, 'api_docs');
 
@@ -101,14 +117,14 @@ export function runBuildApiDocsCli() {
         defaultLevel: 'info',
       },
       flags: {
-        string: ['plugin', 'stats'],
+        string: ['plugin', 'package', 'stats'],
         boolean: ['references'],
         help: `
-          --plugin           Optionally, run for only a specific plugin
-          --stats            Optionally print API stats. Must be one or more of: any, comments or exports.
-                             In combination with a single plugin filter this option will skip writing any
-                             API docs as a tradeoff to just produce the stats output more quickly.
-          --references       Collect references for API items
+          --plugin           Optionally, run for only a specific plugin by its plugin ID (plugin.id in kibana.jsonc).
+          --package          Optionally, run for only a specific package by its package ID (id in kibana.jsonc, e.g., @kbn/core).
+          --stats            Deprecated. Use check_package_docs_cli instead. When provided, validation is routed
+                             to the new CLI and build outputs are skipped. Must be one or more of: any, comments or exports.
+          --references       Collect references for API items.
         `,
       },
     }

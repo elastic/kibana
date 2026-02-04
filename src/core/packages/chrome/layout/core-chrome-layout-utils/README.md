@@ -31,3 +31,7 @@ All scroll methods accept `behavior?: ScrollBehavior` option for 'auto' (instant
 
 ### Utility Methods
 - `isAtBottomOfPage(container?): boolean` - Check if scrolled to bottom (with 1px tolerance)
+
+## See also
+
+- [Layout overview](../layout_overview.mdx) - Architecture and data flow

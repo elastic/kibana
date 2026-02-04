@@ -21,7 +21,7 @@ import {
   getStartEndParams,
   hasStartEndParams,
 } from '@kbn/esql-utils';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, getTimeZoneFromSettings } from '@kbn/es-query';
 import type { Filter, Query } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
@@ -262,7 +262,12 @@ export class ESQLSource
       params.params = namedParams;
     }
 
-    params.filter = buildEsQuery(undefined, query, filters, getEsQueryConfig(getUiSettings()));
+    const esQueryConfigs = getEsQueryConfig(getUiSettings());
+
+    params.filter = buildEsQuery(undefined, query, filters, esQueryConfigs);
+    params.time_zone = esQueryConfigs.dateFormatTZ
+      ? getTimeZoneFromSettings(esQueryConfigs.dateFormatTZ)
+      : 'UTC';
 
     const requestResponder = inspectorAdapters.requests!.start(
       getLayerFeaturesRequestName(layerName),

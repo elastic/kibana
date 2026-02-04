@@ -13,7 +13,7 @@ import type { NodeMetricsTableProps } from '../shared';
 const LazyIntegratedHostMetricsTable = lazy(() => import('./integrated_host_metrics_table'));
 
 export function createLazyHostMetricsTable(core: CoreStart, metricsClient: MetricsDataClient) {
-  return ({ timerange, filterClauseDsl, sourceId }: NodeMetricsTableProps) => {
+  return ({ timerange, kuery, sourceId }: NodeMetricsTableProps) => {
     return (
       <Suspense fallback={null}>
         <LazyIntegratedHostMetricsTable
@@ -21,7 +21,7 @@ export function createLazyHostMetricsTable(core: CoreStart, metricsClient: Metri
           metricsClient={metricsClient}
           sourceId={sourceId || 'default'}
           timerange={timerange}
-          filterClauseDsl={filterClauseDsl}
+          kuery={kuery}
         />
       </Suspense>
     );

@@ -21,6 +21,7 @@ plugins:
     - workflows_extensions
     - transform
     - fleet
+    - entity_store
   disabled:
 
 packages:

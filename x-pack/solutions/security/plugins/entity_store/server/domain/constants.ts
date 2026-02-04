@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { EngineStatus } from './definitions/saved_objects';
+
 export const ENTITY_LATEST = 'latest' as const;
 export const ENTITY_UPDATES = 'updates' as const;
 
@@ -39,3 +41,11 @@ export const getEntitiesAliasPattern = <TDataset extends Dataset>({
   type,
   dataset,
 }: AliasPatternOptions<TDataset>) => `${ENTITY_BASE_PREFIX}-${type}-${dataset}` as const;
+
+export const ENGINE_STATUS: Record<Uppercase<EngineStatus>, EngineStatus> = {
+  INSTALLING: 'installing',
+  STARTED: 'started',
+  STOPPED: 'stopped',
+  UPDATING: 'updating',
+  ERROR: 'error',
+};

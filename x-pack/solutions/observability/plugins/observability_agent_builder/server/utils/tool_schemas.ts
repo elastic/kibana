@@ -12,8 +12,7 @@ const startDescription =
 const endDescription =
   'The end time of the query window using Elasticsearch date math. Example: "now".';
 
-export const indexDescription =
-  'Concrete index or index pattern to analyze. Example: "logs-payments.api-default".';
+export const indexDescription = 'Concrete index or index pattern to analyze. Example: "logs-*".';
 
 export const timeRangeSchemaRequired = {
   start: z.string().describe(startDescription),

@@ -16,6 +16,7 @@ export {
   ADD_DATA_PATH,
   SecurityPageName,
   DETECTION_ENGINE_RULES_URL_FIND,
+  RULES_FEATURE_ID,
   ESSENTIAL_ALERT_FIELDS,
 } from './constants';
 export { ELASTIC_SECURITY_RULE_ID } from './detection_engine/constants';

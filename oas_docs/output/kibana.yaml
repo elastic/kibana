@@ -57,7 +57,7 @@ tags:
       Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
       **Elastic Agent Builder requires an Enterprise subscription.**
     externalDocs:
-      description: Learn about working with Agent Builder programmatically
+      description: Agent Builder docs
       url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
     x-displayName: Agent Builder
   - name: alerting
@@ -1235,7 +1235,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
       operationId: get-agent-builder-agents
       parameters: []
       responses:
@@ -1291,7 +1291,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
       operationId: post-agent-builder-agents
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1421,7 +1421,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete an agent by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Delete an agent by ID. This action cannot be undone. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
       operationId: delete-agent-builder-agents-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1462,7 +1462,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
       operationId: get-agent-builder-agents-id
       parameters:
         - description: The unique identifier of the agent to retrieve.
@@ -1512,7 +1512,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
       operationId: put-agent-builder-agents-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2230,7 +2230,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
       operationId: post-agent-builder-converse
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2744,9 +2744,16 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         > warn
-        > This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        > This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.
+        To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/mcp-server).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
       operationId: post-agent-builder-mcp
-      parameters: []
+      parameters:
+        - description: Comma-separated list of namespaces to filter tools. Only tools matching the specified namespaces will be returned.
+          in: query
+          name: namespace
+          required: false
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -2799,7 +2806,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
       operationId: get-agent-builder-tools
       parameters: []
       responses:
@@ -2950,6 +2957,15 @@ paths:
       summary: List tools
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "https://${KIBANA_URL}/api/agent_builder/tools" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn:/api/agent_builder/tools
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -2962,7 +2978,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
       operationId: post-agent-builder-tools
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3105,6 +3121,55 @@ paths:
       summary: Create a tool
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+             -X POST "https://${KIBANA_URL}/api/agent_builder/tools" \
+             -H "Authorization: ApiKey ${API_KEY}" \
+             -H "kbn-xsrf: true" \
+             -H "Content-Type: application/json" \
+             -d '{
+               "id": "example-esql-tool",
+               "type": "esql",
+               "description": "Example ES|QL query tool for analyzing financial trades with time filtering",
+               "tags": ["analytics", "finance"],
+               "configuration": {
+                 "query": "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit",
+                 "params": {
+                   "startTime": {
+                     "type": "date",
+                     "description": "Start time for the analysis in ISO format"
+                   },
+                   "limit": {
+                     "type": "integer",
+                     "description": "Maximum number of results to return"
+                   }
+                 }
+               }
+             }'
+        - lang: Console
+          source: |
+            POST kbn:/api/agent_builder/tools
+            {
+              "id": "example-esql-tool",
+              "type": "esql",
+              "description": "An ES|QL query tool for analyzing financial trades with time filtering",
+              "tags": ["analytics", "finance", "updated"],
+              "configuration": {
+                "query": "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit",
+                "params": {
+                  "startTime": {
+                    "type": "date",
+                    "description": "Start time for the analysis in ISO format"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "Maximum number of results to return"
+                  }
+                }
+              }
+            }
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -3118,7 +3183,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Run a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
       operationId: post-agent-builder-tools-execute
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3309,9 +3374,32 @@ paths:
                         tool_result_id: uE8y
                         type: tabular_data
           description: Indicates a successful response
-      summary: Execute a Tool
+      summary: Run a tool
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+             -X POST "https://${KIBANA_URL}/api/agent_builder/tools/_execute" \
+             -H "Authorization: ApiKey ${API_KEY}" \
+             -H "kbn-xsrf: true" \
+             -H "Content-Type: application/json" \
+             -d '{
+               "tool_id": "platform.core.search",
+               "tool_params": {
+                 "query": "can you find john doe's email from the employee index?"}
+               }
+             }'
+        - lang: Console
+          source: |
+            POST kbn:/api/agent_builder/tools/_execute
+            {
+              "tool_id": "platform.core.search",
+              "tool_params": {
+                "query": "can you find john doe's email from the employee index?"
+              }
+            }
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -3325,7 +3413,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Delete a tool by ID. This action cannot be undone. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
       operationId: delete-agent-builder-tools-toolid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3354,6 +3442,16 @@ paths:
       summary: Delete a tool
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "https://${KIBANA_URL}/api/agent_builder/tools/{toolId}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn:/api/agent_builder/tools/{toolId}
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -3366,7 +3464,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
       operationId: get-agent-builder-tools-toolid
       parameters:
         - description: The unique identifier of the tool to retrieve.
@@ -3481,6 +3579,15 @@ paths:
       summary: Get a tool by id
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "https://${KIBANA_URL}/api/agent_builder/tools/{toolId}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn:/api/agent_builder/tools/{toolId}
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -3493,7 +3600,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
       operationId: put-agent-builder-tools-toolid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3635,6 +3742,51 @@ paths:
       summary: Update a tool
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+             -X PUT "https://${KIBANA_URL}/api/agent_builder/tools/{toolId}" \
+             -H "Authorization: ApiKey ${API_KEY}" \
+             -H "kbn-xsrf: true" \
+             -H "Content-Type: application/json" \
+             -d '{
+               "description": "Updated ES|QL query tool for analyzing financial trades with time filtering",
+               "tags": ["analytics", "finance", "updated"],
+               "configuration": {
+                 "query": "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit",
+                 "params": {
+                   "startTime": {
+                     "type": "date",
+                     "description": "Start time for the analysis in ISO format"
+                   },
+                   "limit": {
+                     "type": "integer",
+                     "description": "Maximum number of results to return"
+                   }
+                 }
+               }
+             }'
+        - lang: Console
+          source: |
+            PUT kbn:/api/agent_builder/tools/{toolId}
+            {
+              "description": "Updated ES|QL query tool for analyzing financial trades with time filtering",
+              "tags": ["analytics", "finance", "updated"],
+              "configuration": {
+                "query": "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit",
+                "params": {
+                  "startTime": {
+                    "type": "date",
+                    "description": "Start time for the analysis in ISO format"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "Maximum number of results to return"
+                  }
+                }
+              }
+            }
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -19173,6 +19325,74 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/endpoint/action/memory_dump:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/memory_dump</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Generates memory dumps on the targeted host.
+      operationId: EndpointGenerateMemoryDump
+      requestBody:
+        content:
+          application/json:
+            examples:
+              ProcessMemoryDump:
+                summary: Generate a memory dump from the host machine
+                value:
+                  agent_type: endpoint
+                  comment: Generating memory dump for investigation
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    entity_id: abc123
+                    type: process
+            schema:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_MemoryDumpRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                MemoryDumpSuccessResponse:
+                  summary: Memory dump action successfully created
+                  value:
+                    data:
+                      agents:
+                        - ed518850-681a-4d60-bb98-e22640cae2a8
+                      agentState:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          isCompleted: false
+                          wasSuccessful: false
+                      agentType: endpoint
+                      command: memory-dump
+                      createdBy: elastic
+                      hosts:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          name: gke-node-1235412
+                      id: 233db9ea-6733-4849-9226-5a7039c7161d
+                      isCompleted: false
+                      isExpired: false
+                      outputs: {}
+                      parameters:
+                        entity_id: abc123
+                        type: process
+                      startedAt: '2022-07-29T19:08:49.126Z'
+                      status: pending
+                      wasSuccessful: false
+              schema:
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionCreateSuccessResponse'
+          description: Action request was successfully created
+      summary: Generate a memory dump from the host machine
+      tags:
+        - Security Endpoint Management API
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/endpoint/action/running_procs:
     post:
       description: |-
@@ -19966,9 +20186,10 @@ paths:
                       message: Invalid monitored field
                       username: john.doe
                   stats:
-                    failed: 1
-                    successful: 1
-                    total: 2
+                    failedOperations: 1
+                    successfulOperations: 1
+                    totalOperations: 2
+                    uploaded: 1
                 type: object
                 properties:
                   errors:
@@ -24425,6 +24646,11 @@ paths:
                                                       - beta
                                                       - experimental
                                                     type: string
+                                                  var_group_selections:
+                                                    additionalProperties:
+                                                      type: string
+                                                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                    type: object
                                                   vars:
                                                     additionalProperties:
                                                       additionalProperties: false
@@ -24483,6 +24709,11 @@ paths:
                                                   enabled:
                                                     description: Enable or disable that stream. Defaults to `true` (enabled).
                                                     type: boolean
+                                                  var_group_selections:
+                                                    additionalProperties:
+                                                      type: string
+                                                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                    type: object
                                                   vars:
                                                     additionalProperties:
                                                       anyOf:
@@ -24650,6 +24881,11 @@ paths:
                                     type: string
                                   updated_by:
                                     type: string
+                                  var_group_selections:
+                                    additionalProperties:
+                                      type: string
+                                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                    type: object
                                   vars:
                                     anyOf:
                                       - additionalProperties:
@@ -25412,6 +25648,11 @@ paths:
                                                     - beta
                                                     - experimental
                                                   type: string
+                                                var_group_selections:
+                                                  additionalProperties:
+                                                    type: string
+                                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                  type: object
                                                 vars:
                                                   additionalProperties:
                                                     additionalProperties: false
@@ -25470,6 +25711,11 @@ paths:
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
+                                                var_group_selections:
+                                                  additionalProperties:
+                                                    type: string
+                                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                  type: object
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
@@ -25637,6 +25883,11 @@ paths:
                                   type: string
                                 updated_by:
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   anyOf:
                                     - additionalProperties:
@@ -26181,6 +26432,11 @@ paths:
                                                       - beta
                                                       - experimental
                                                     type: string
+                                                  var_group_selections:
+                                                    additionalProperties:
+                                                      type: string
+                                                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                    type: object
                                                   vars:
                                                     additionalProperties:
                                                       additionalProperties: false
@@ -26239,6 +26495,11 @@ paths:
                                                   enabled:
                                                     description: Enable or disable that stream. Defaults to `true` (enabled).
                                                     type: boolean
+                                                  var_group_selections:
+                                                    additionalProperties:
+                                                      type: string
+                                                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                    type: object
                                                   vars:
                                                     additionalProperties:
                                                       anyOf:
@@ -26406,6 +26667,11 @@ paths:
                                     type: string
                                   updated_by:
                                     type: string
+                                  var_group_selections:
+                                    additionalProperties:
+                                      type: string
+                                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                    type: object
                                   vars:
                                     anyOf:
                                       - additionalProperties:
@@ -26929,6 +27195,11 @@ paths:
                                                     - beta
                                                     - experimental
                                                   type: string
+                                                var_group_selections:
+                                                  additionalProperties:
+                                                    type: string
+                                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                  type: object
                                                 vars:
                                                   additionalProperties:
                                                     additionalProperties: false
@@ -26987,6 +27258,11 @@ paths:
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
+                                                var_group_selections:
+                                                  additionalProperties:
+                                                    type: string
+                                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                  type: object
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
@@ -27154,6 +27430,11 @@ paths:
                                   type: string
                                 updated_by:
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   anyOf:
                                     - additionalProperties:
@@ -27915,6 +28196,11 @@ paths:
                                                     - beta
                                                     - experimental
                                                   type: string
+                                                var_group_selections:
+                                                  additionalProperties:
+                                                    type: string
+                                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                  type: object
                                                 vars:
                                                   additionalProperties:
                                                     additionalProperties: false
@@ -27973,6 +28259,11 @@ paths:
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
+                                                var_group_selections:
+                                                  additionalProperties:
+                                                    type: string
+                                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                  type: object
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
@@ -28140,6 +28431,11 @@ paths:
                                   type: string
                                 updated_by:
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   anyOf:
                                     - additionalProperties:
@@ -28776,6 +29072,11 @@ paths:
                                                     - beta
                                                     - experimental
                                                   type: string
+                                                var_group_selections:
+                                                  additionalProperties:
+                                                    type: string
+                                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                  type: object
                                                 vars:
                                                   additionalProperties:
                                                     additionalProperties: false
@@ -28834,6 +29135,11 @@ paths:
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
+                                                var_group_selections:
+                                                  additionalProperties:
+                                                    type: string
+                                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                  type: object
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
@@ -29001,6 +29307,11 @@ paths:
                                   type: string
                                 updated_by:
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   anyOf:
                                     - additionalProperties:
@@ -30519,6 +30830,11 @@ paths:
                             enabled:
                               description: Enable or disable that stream. Defaults to `true` (enabled).
                               type: boolean
+                            var_group_selections:
+                              additionalProperties:
+                                type: string
+                              description: Variable group selections. Maps var_group name to the selected option name within that group.
+                              type: object
                             vars:
                               additionalProperties:
                                 anyOf:
@@ -30629,6 +30945,11 @@ paths:
                 policy_template:
                   description: The policy template to use for the agentless package policy. If not provided, the default policy template will be used.
                   type: string
+                var_group_selections:
+                  additionalProperties:
+                    type: string
+                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                  type: object
                 vars:
                   additionalProperties:
                     anyOf:
@@ -30944,6 +31265,11 @@ paths:
                                           - beta
                                           - experimental
                                         type: string
+                                      var_group_selections:
+                                        additionalProperties:
+                                          type: string
+                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                        type: object
                                       vars:
                                         additionalProperties:
                                           additionalProperties: false
@@ -31002,6 +31328,11 @@ paths:
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
+                                      var_group_selections:
+                                        additionalProperties:
+                                          type: string
+                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                        type: object
                                       vars:
                                         additionalProperties:
                                           anyOf:
@@ -31169,6 +31500,11 @@ paths:
                         type: string
                       updated_by:
                         type: string
+                      var_group_selections:
+                        additionalProperties:
+                          type: string
+                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                        type: object
                       vars:
                         anyOf:
                           - additionalProperties:
@@ -37276,6 +37612,56 @@ paths:
                                 - content
                               type: string
                             - type: string
+                        var_groups:
+                          items:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              description:
+                                type: string
+                              name:
+                                type: string
+                              options:
+                                items:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    description:
+                                      type: string
+                                    hide_in_deployment_modes:
+                                      items:
+                                        enum:
+                                          - default
+                                          - agentless
+                                        type: string
+                                      maxItems: 2
+                                      type: array
+                                    name:
+                                      type: string
+                                    title:
+                                      type: string
+                                    vars:
+                                      items:
+                                        type: string
+                                      maxItems: 100
+                                      type: array
+                                  required:
+                                    - name
+                                    - title
+                                    - vars
+                                maxItems: 20
+                                type: array
+                              selector_title:
+                                type: string
+                              title:
+                                type: string
+                            required:
+                              - name
+                              - title
+                              - selector_title
+                              - options
+                          maxItems: 20
+                          type: array
                         vars:
                           items:
                             additionalProperties: {}
@@ -38816,6 +39202,56 @@ paths:
                               - content
                             type: string
                           - type: string
+                      var_groups:
+                        items:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            description:
+                              type: string
+                            name:
+                              type: string
+                            options:
+                              items:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  description:
+                                    type: string
+                                  hide_in_deployment_modes:
+                                    items:
+                                      enum:
+                                        - default
+                                        - agentless
+                                      type: string
+                                    maxItems: 2
+                                    type: array
+                                  name:
+                                    type: string
+                                  title:
+                                    type: string
+                                  vars:
+                                    items:
+                                      type: string
+                                    maxItems: 100
+                                    type: array
+                                required:
+                                  - name
+                                  - title
+                                  - vars
+                              maxItems: 20
+                              type: array
+                            selector_title:
+                              type: string
+                            title:
+                              type: string
+                          required:
+                            - name
+                            - title
+                            - selector_title
+                            - options
+                        maxItems: 20
+                        type: array
                       vars:
                         items:
                           additionalProperties: {}
@@ -39523,6 +39959,56 @@ paths:
                               - content
                             type: string
                           - type: string
+                      var_groups:
+                        items:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            description:
+                              type: string
+                            name:
+                              type: string
+                            options:
+                              items:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  description:
+                                    type: string
+                                  hide_in_deployment_modes:
+                                    items:
+                                      enum:
+                                        - default
+                                        - agentless
+                                      type: string
+                                    maxItems: 2
+                                    type: array
+                                  name:
+                                    type: string
+                                  title:
+                                    type: string
+                                  vars:
+                                    items:
+                                      type: string
+                                    maxItems: 100
+                                    type: array
+                                required:
+                                  - name
+                                  - title
+                                  - vars
+                              maxItems: 20
+                              type: array
+                            selector_title:
+                              type: string
+                            title:
+                              type: string
+                          required:
+                            - name
+                            - title
+                            - selector_title
+                            - options
+                        maxItems: 20
+                        type: array
                       vars:
                         items:
                           additionalProperties: {}
@@ -46973,6 +47459,11 @@ paths:
                                             - beta
                                             - experimental
                                           type: string
+                                        var_group_selections:
+                                          additionalProperties:
+                                            type: string
+                                          description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                          type: object
                                         vars:
                                           additionalProperties:
                                             additionalProperties: false
@@ -47031,6 +47522,11 @@ paths:
                                         enabled:
                                           description: Enable or disable that stream. Defaults to `true` (enabled).
                                           type: boolean
+                                        var_group_selections:
+                                          additionalProperties:
+                                            type: string
+                                          description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                          type: object
                                         vars:
                                           additionalProperties:
                                             anyOf:
@@ -47198,6 +47694,11 @@ paths:
                           type: string
                         updated_by:
                           type: string
+                        var_group_selections:
+                          additionalProperties:
+                            type: string
+                          description: Variable group selections. Maps var_group name to the selected option name within that group.
+                          type: object
                         vars:
                           anyOf:
                             - additionalProperties:
@@ -47442,6 +47943,11 @@ paths:
                                     - beta
                                     - experimental
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   additionalProperties:
                                     additionalProperties: false
@@ -47573,6 +48079,11 @@ paths:
                       description: Indicates whether the package policy supports cloud connectors.
                       nullable: true
                       type: boolean
+                    var_group_selections:
+                      additionalProperties:
+                        type: string
+                      description: Variable group selections. Maps var_group name to the selected option name within that group.
+                      type: object
                     vars:
                       additionalProperties:
                         additionalProperties: false
@@ -47625,6 +48136,11 @@ paths:
                                 enabled:
                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                   type: boolean
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   additionalProperties:
                                     anyOf:
@@ -47752,6 +48268,11 @@ paths:
                       description: Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.
                       nullable: true
                       type: boolean
+                    var_group_selections:
+                      additionalProperties:
+                        type: string
+                      description: Variable group selections. Maps var_group name to the selected option name within that group.
+                      type: object
                     vars:
                       additionalProperties:
                         anyOf:
@@ -47928,6 +48449,11 @@ paths:
                                           - beta
                                           - experimental
                                         type: string
+                                      var_group_selections:
+                                        additionalProperties:
+                                          type: string
+                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                        type: object
                                       vars:
                                         additionalProperties:
                                           additionalProperties: false
@@ -47986,6 +48512,11 @@ paths:
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
+                                      var_group_selections:
+                                        additionalProperties:
+                                          type: string
+                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                        type: object
                                       vars:
                                         additionalProperties:
                                           anyOf:
@@ -48153,6 +48684,11 @@ paths:
                         type: string
                       updated_by:
                         type: string
+                      var_group_selections:
+                        additionalProperties:
+                          type: string
+                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                        type: object
                       vars:
                         anyOf:
                           - additionalProperties:
@@ -48448,6 +48984,11 @@ paths:
                                             - beta
                                             - experimental
                                           type: string
+                                        var_group_selections:
+                                          additionalProperties:
+                                            type: string
+                                          description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                          type: object
                                         vars:
                                           additionalProperties:
                                             additionalProperties: false
@@ -48506,6 +49047,11 @@ paths:
                                         enabled:
                                           description: Enable or disable that stream. Defaults to `true` (enabled).
                                           type: boolean
+                                        var_group_selections:
+                                          additionalProperties:
+                                            type: string
+                                          description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                          type: object
                                         vars:
                                           additionalProperties:
                                             anyOf:
@@ -48673,6 +49219,11 @@ paths:
                           type: string
                         updated_by:
                           type: string
+                        var_group_selections:
+                          additionalProperties:
+                            type: string
+                          description: Variable group selections. Maps var_group name to the selected option name within that group.
+                          type: object
                         vars:
                           anyOf:
                             - additionalProperties:
@@ -49017,6 +49568,11 @@ paths:
                                           - beta
                                           - experimental
                                         type: string
+                                      var_group_selections:
+                                        additionalProperties:
+                                          type: string
+                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                        type: object
                                       vars:
                                         additionalProperties:
                                           additionalProperties: false
@@ -49075,6 +49631,11 @@ paths:
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
+                                      var_group_selections:
+                                        additionalProperties:
+                                          type: string
+                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                        type: object
                                       vars:
                                         additionalProperties:
                                           anyOf:
@@ -49242,6 +49803,11 @@ paths:
                         type: string
                       updated_by:
                         type: string
+                      var_group_selections:
+                        additionalProperties:
+                          type: string
+                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                        type: object
                       vars:
                         anyOf:
                           - additionalProperties:
@@ -49490,6 +50056,11 @@ paths:
                                     - beta
                                     - experimental
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   additionalProperties:
                                     additionalProperties: false
@@ -49619,6 +50190,11 @@ paths:
                       description: Indicates whether the package policy supports cloud connectors.
                       nullable: true
                       type: boolean
+                    var_group_selections:
+                      additionalProperties:
+                        type: string
+                      description: Variable group selections. Maps var_group name to the selected option name within that group.
+                      type: object
                     vars:
                       additionalProperties:
                         additionalProperties: false
@@ -49670,6 +50246,11 @@ paths:
                                 enabled:
                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                   type: boolean
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   additionalProperties:
                                     anyOf:
@@ -49797,6 +50378,11 @@ paths:
                       description: Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.
                       nullable: true
                       type: boolean
+                    var_group_selections:
+                      additionalProperties:
+                        type: string
+                      description: Variable group selections. Maps var_group name to the selected option name within that group.
+                      type: object
                     vars:
                       additionalProperties:
                         anyOf:
@@ -49972,6 +50558,11 @@ paths:
                                           - beta
                                           - experimental
                                         type: string
+                                      var_group_selections:
+                                        additionalProperties:
+                                          type: string
+                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                        type: object
                                       vars:
                                         additionalProperties:
                                           additionalProperties: false
@@ -50030,6 +50621,11 @@ paths:
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
+                                      var_group_selections:
+                                        additionalProperties:
+                                          type: string
+                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                        type: object
                                       vars:
                                         additionalProperties:
                                           anyOf:
@@ -50197,6 +50793,11 @@ paths:
                         type: string
                       updated_by:
                         type: string
+                      var_group_selections:
+                        additionalProperties:
+                          type: string
+                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                        type: object
                       vars:
                         anyOf:
                           - additionalProperties:
@@ -50836,6 +51437,11 @@ paths:
                                                   - beta
                                                   - experimental
                                                 type: string
+                                              var_group_selections:
+                                                additionalProperties:
+                                                  type: string
+                                                description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                type: object
                                               vars:
                                                 additionalProperties:
                                                   additionalProperties: false
@@ -50894,6 +51500,11 @@ paths:
                                               enabled:
                                                 description: Enable or disable that stream. Defaults to `true` (enabled).
                                                 type: boolean
+                                              var_group_selections:
+                                                additionalProperties:
+                                                  type: string
+                                                description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                type: object
                                               vars:
                                                 additionalProperties:
                                                   anyOf:
@@ -51061,6 +51672,11 @@ paths:
                                 type: string
                               updated_by:
                                 type: string
+                              var_group_selections:
+                                additionalProperties:
+                                  type: string
+                                description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                type: object
                               vars:
                                 anyOf:
                                   - additionalProperties:
@@ -51263,6 +51879,11 @@ paths:
                                               - beta
                                               - experimental
                                             type: string
+                                          var_group_selections:
+                                            additionalProperties:
+                                              type: string
+                                            description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                            type: object
                                           vars:
                                             additionalProperties:
                                               additionalProperties: false
@@ -51412,6 +52033,11 @@ paths:
                                 type: string
                               updated_by:
                                 type: string
+                              var_group_selections:
+                                additionalProperties:
+                                  type: string
+                                description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                type: object
                               vars:
                                 additionalProperties:
                                   additionalProperties: false
@@ -60820,6 +61446,7 @@ paths:
                       items:
                         description: Cluster privileges that define the cluster level actions that users can perform.
                         type: string
+                      maxItems: 100
                       type: array
                     indices:
                       items:
@@ -60834,18 +61461,21 @@ paths:
                               items:
                                 description: The document fields that the role members have read access to.
                                 type: string
+                              maxItems: 1000
                               type: array
                             type: object
                           names:
                             items:
                               description: The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).
                               type: string
+                            maxItems: 100
                             minItems: 1
                             type: array
                           privileges:
                             items:
                               description: The index level privileges that the role members have for the data streams and indices.
                               type: string
+                            maxItems: 100
                             minItems: 1
                             type: array
                           query:
@@ -60854,6 +61484,7 @@ paths:
                         required:
                           - names
                           - privileges
+                      maxItems: 1000
                       type: array
                     remote_cluster:
                       items:
@@ -60864,17 +61495,20 @@ paths:
                             items:
                               description: A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.
                               type: string
+                            maxItems: 100
                             minItems: 1
                             type: array
                           privileges:
                             items:
                               description: The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.
                               type: string
+                            maxItems: 100
                             minItems: 1
                             type: array
                         required:
                           - privileges
                           - clusters
+                      maxItems: 100
                       type: array
                     remote_indices:
                       items:
@@ -60888,6 +61522,7 @@ paths:
                             items:
                               description: A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.
                               type: string
+                            maxItems: 100
                             minItems: 1
                             type: array
                           field_security:
@@ -60895,18 +61530,21 @@ paths:
                               items:
                                 description: The document fields that the role members have read access to.
                                 type: string
+                              maxItems: 1000
                               type: array
                             type: object
                           names:
                             items:
                               description: A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).
                               type: string
+                            maxItems: 100
                             minItems: 1
                             type: array
                           privileges:
                             items:
                               description: The index level privileges that role members have for the specified indices.
                               type: string
+                            maxItems: 100
                             minItems: 1
                             type: array
                           query:
@@ -60916,11 +61554,13 @@ paths:
                           - clusters
                           - names
                           - privileges
+                      maxItems: 1000
                       type: array
                     run_as:
                       items:
                         description: A user name that the role member can impersonate.
                         type: string
+                      maxItems: 100
                       type: array
                 kibana:
                   items:
@@ -60940,16 +61580,19 @@ paths:
                           - items:
                               description: A base privilege that grants applies to all spaces.
                               type: string
+                            maxItems: 50
                             type: array
                           - items:
                               description: A base privilege that applies to specific spaces.
                               type: string
+                            maxItems: 50
                             type: array
                       feature:
                         additionalProperties:
                           items:
                             description: The privileges that the role member has for the feature.
                             type: string
+                          maxItems: 100
                           type: array
                         type: object
                       spaces:
@@ -60964,6 +61607,7 @@ paths:
                           - items:
                               description: A space that the privilege applies to.
                               type: string
+                            maxItems: 1000
                             type: array
                         default:
                           - '*'
@@ -61028,6 +61672,7 @@ paths:
                             items:
                               description: Cluster privileges that define the cluster level actions that users can perform.
                               type: string
+                            maxItems: 100
                             type: array
                           indices:
                             items:
@@ -61042,18 +61687,21 @@ paths:
                                     items:
                                       description: The document fields that the role members have read access to.
                                       type: string
+                                    maxItems: 1000
                                     type: array
                                   type: object
                                 names:
                                   items:
                                     description: The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).
                                     type: string
+                                  maxItems: 100
                                   minItems: 1
                                   type: array
                                 privileges:
                                   items:
                                     description: The index level privileges that the role members have for the data streams and indices.
                                     type: string
+                                  maxItems: 100
                                   minItems: 1
                                   type: array
                                 query:
@@ -61062,6 +61710,7 @@ paths:
                               required:
                                 - names
                                 - privileges
+                            maxItems: 1000
                             type: array
                           remote_cluster:
                             items:
@@ -61072,17 +61721,20 @@ paths:
                                   items:
                                     description: A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.
                                     type: string
+                                  maxItems: 100
                                   minItems: 1
                                   type: array
                                 privileges:
                                   items:
                                     description: The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.
                                     type: string
+                                  maxItems: 100
                                   minItems: 1
                                   type: array
                               required:
                                 - privileges
                                 - clusters
+                            maxItems: 100
                             type: array
                           remote_indices:
                             items:
@@ -61096,6 +61748,7 @@ paths:
                                   items:
                                     description: A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.
                                     type: string
+                                  maxItems: 100
                                   minItems: 1
                                   type: array
                                 field_security:
@@ -61103,18 +61756,21 @@ paths:
                                     items:
                                       description: The document fields that the role members have read access to.
                                       type: string
+                                    maxItems: 1000
                                     type: array
                                   type: object
                                 names:
                                   items:
                                     description: A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).
                                     type: string
+                                  maxItems: 100
                                   minItems: 1
                                   type: array
                                 privileges:
                                   items:
                                     description: The index level privileges that role members have for the specified indices.
                                     type: string
+                                  maxItems: 100
                                   minItems: 1
                                   type: array
                                 query:
@@ -61124,11 +61780,13 @@ paths:
                                 - clusters
                                 - names
                                 - privileges
+                            maxItems: 1000
                             type: array
                           run_as:
                             items:
                               description: A user name that the role member can impersonate.
                               type: string
+                            maxItems: 100
                             type: array
                       kibana:
                         items:
@@ -61148,16 +61806,19 @@ paths:
                                 - items:
                                     description: A base privilege that grants applies to all spaces.
                                     type: string
+                                  maxItems: 50
                                   type: array
                                 - items:
                                     description: A base privilege that applies to specific spaces.
                                     type: string
+                                  maxItems: 50
                                   type: array
                             feature:
                               additionalProperties:
                                 items:
                                   description: The privileges that the role member has for the feature.
                                   type: string
+                                maxItems: 100
                                 type: array
                               type: object
                             spaces:
@@ -61172,6 +61833,7 @@ paths:
                                 - items:
                                     description: A space that the privilege applies to.
                                     type: string
+                                  maxItems: 1000
                                   type: array
                               default:
                                 - '*'
@@ -61459,6 +62121,7 @@ paths:
                     required:
                       - type
                       - id
+                  maxItems: 1000
                   type: array
                 overwrite:
                   default: false
@@ -61468,6 +62131,7 @@ paths:
                   items:
                     description: The identifiers of the spaces where you want to copy the specified objects.
                     type: string
+                  maxItems: 100
                   type: array
               required:
                 - spaces
@@ -61533,6 +62197,7 @@ paths:
                       - targetSpace
                       - targetType
                       - sourceId
+                  maxItems: 1000
                   type: array
               required:
                 - aliases
@@ -61577,6 +62242,7 @@ paths:
                     required:
                       - type
                       - id
+                  maxItems: 1000
                   type: array
               required:
                 - objects
@@ -61627,6 +62293,7 @@ paths:
                     required:
                       - type
                       - id
+                  maxItems: 1000
                   type: array
                 retries:
                   additionalProperties:
@@ -61656,6 +62323,7 @@ paths:
                       required:
                         - type
                         - id
+                    maxItems: 1000
                     type: array
                   type: object
               required:
@@ -61714,16 +62382,19 @@ paths:
                     required:
                       - type
                       - id
+                  maxItems: 1000
                   type: array
                 spacesToAdd:
                   items:
                     description: The identifiers of the spaces the saved objects should be added to or removed from.
                     type: string
+                  maxItems: 1000
                   type: array
                 spacesToRemove:
                   items:
                     description: The identifiers of the spaces the saved objects should be added to or removed from.
                     type: string
+                  maxItems: 1000
                   type: array
               required:
                 - objects
@@ -61826,6 +62497,7 @@ paths:
                   items:
                     description: The list of features that are turned off in the space.
                     type: string
+                  maxItems: 100
                   type: array
                 id:
                   description: The space ID that is part of the Kibana URL when inside the space. Space IDs are limited to lowercase alphanumeric, underscore, and hyphen characters (a-z, 0-9, _, and -). You are cannot change the ID with the update operation.
@@ -61951,6 +62623,7 @@ paths:
                   items:
                     description: The list of features that are turned off in the space.
                     type: string
+                  maxItems: 100
                   type: array
                 id:
                   description: The space ID that is part of the Kibana URL when inside the space. Space IDs are limited to lowercase alphanumeric, underscore, and hyphen characters (a-z, 0-9, _, and -). You are cannot change the ID with the update operation.
@@ -62659,6 +63332,23 @@ paths:
                                                           description: A non-empty string.
                                                           minLength: 1
                                                           type: string
+                                                        downsample:
+                                                          items:
+                                                            additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              after:
+                                                                description: A non-empty string.
+                                                                minLength: 1
+                                                                type: string
+                                                              fixed_interval:
+                                                                description: A non-empty string.
+                                                                minLength: 1
+                                                                type: string
+                                                            required:
+                                                              - after
+                                                              - fixed_interval
+                                                          type: array
                                                   required:
                                                     - dsl
                                                 - additionalProperties: false
@@ -65354,6 +66044,7 @@ paths:
                                                                   description: A non-empty string.
                                                                   minLength: 1
                                                                   type: string
+                                                                minItems: 1
                                                                 type: array
                                                               ignore_failure:
                                                                 description: Continue pipeline execution if this processor fails
@@ -67122,6 +67813,23 @@ paths:
                                                       description: A non-empty string.
                                                       minLength: 1
                                                       type: string
+                                                    downsample:
+                                                      items:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          after:
+                                                            description: A non-empty string.
+                                                            minLength: 1
+                                                            type: string
+                                                          fixed_interval:
+                                                            description: A non-empty string.
+                                                            minLength: 1
+                                                            type: string
+                                                        required:
+                                                          - after
+                                                          - fixed_interval
+                                                      type: array
                                               required:
                                                 - dsl
                                             - additionalProperties: false
@@ -69817,6 +70525,7 @@ paths:
                                                               description: A non-empty string.
                                                               minLength: 1
                                                               type: string
+                                                            minItems: 1
                                                             type: array
                                                           ignore_failure:
                                                             description: Continue pipeline execution if this processor fails
@@ -71336,6 +72045,23 @@ paths:
                                                           description: A non-empty string.
                                                           minLength: 1
                                                           type: string
+                                                        downsample:
+                                                          items:
+                                                            additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              after:
+                                                                description: A non-empty string.
+                                                                minLength: 1
+                                                                type: string
+                                                              fixed_interval:
+                                                                description: A non-empty string.
+                                                                minLength: 1
+                                                                type: string
+                                                            required:
+                                                              - after
+                                                              - fixed_interval
+                                                          type: array
                                                   required:
                                                     - dsl
                                                 - additionalProperties: false
@@ -74031,6 +74757,7 @@ paths:
                                                                   description: A non-empty string.
                                                                   minLength: 1
                                                                   type: string
+                                                                minItems: 1
                                                                 type: array
                                                               ignore_failure:
                                                                 description: Continue pipeline execution if this processor fails
@@ -75611,6 +76338,23 @@ paths:
                                                       description: A non-empty string.
                                                       minLength: 1
                                                       type: string
+                                                    downsample:
+                                                      items:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          after:
+                                                            description: A non-empty string.
+                                                            minLength: 1
+                                                            type: string
+                                                          fixed_interval:
+                                                            description: A non-empty string.
+                                                            minLength: 1
+                                                            type: string
+                                                        required:
+                                                          - after
+                                                          - fixed_interval
+                                                      type: array
                                               required:
                                                 - dsl
                                             - additionalProperties: false
@@ -78306,6 +79050,7 @@ paths:
                                                               description: A non-empty string.
                                                               minLength: 1
                                                               type: string
+                                                            minItems: 1
                                                             type: array
                                                           ignore_failure:
                                                             description: Continue pipeline execution if this processor fails
@@ -79823,6 +80568,23 @@ paths:
                                           description: A non-empty string.
                                           minLength: 1
                                           type: string
+                                        downsample:
+                                          items:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              after:
+                                                description: A non-empty string.
+                                                minLength: 1
+                                                type: string
+                                              fixed_interval:
+                                                description: A non-empty string.
+                                                minLength: 1
+                                                type: string
+                                            required:
+                                              - after
+                                              - fixed_interval
+                                          type: array
                                   required:
                                     - dsl
                                 - additionalProperties: false
@@ -82518,6 +83280,7 @@ paths:
                                                   description: A non-empty string.
                                                   minLength: 1
                                                   type: string
+                                                minItems: 1
                                                 type: array
                                               ignore_failure:
                                                 description: Continue pipeline execution if this processor fails
@@ -83980,6 +84743,23 @@ paths:
                                           description: A non-empty string.
                                           minLength: 1
                                           type: string
+                                        downsample:
+                                          items:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              after:
+                                                description: A non-empty string.
+                                                minLength: 1
+                                                type: string
+                                              fixed_interval:
+                                                description: A non-empty string.
+                                                minLength: 1
+                                                type: string
+                                            required:
+                                              - after
+                                              - fixed_interval
+                                          type: array
                                   required:
                                     - dsl
                                 - additionalProperties: false
@@ -86675,6 +87455,7 @@ paths:
                                                   description: A non-empty string.
                                                   minLength: 1
                                                   type: string
+                                                minItems: 1
                                                 type: array
                                               ignore_failure:
                                                 description: Continue pipeline execution if this processor fails
@@ -102921,6 +103702,11 @@ components:
         summary_markdown:
           description: A markdown summary of attack discovery, using the same syntax
           type: string
+        tags:
+          description: The optional array of tags assigned the attack
+          items:
+            type: string
+          type: array
         timestamp:
           $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyTimestamp'
           description: The time the attack discovery was generated
@@ -110139,6 +110925,7 @@ components:
           get-file: '#/components/schemas/Security_Endpoint_Management_API_GetFile'
           isolate: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
           kill-process: '#/components/schemas/Security_Endpoint_Management_API_KillProcess'
+          memory-dump: '#/components/schemas/Security_Endpoint_Management_API_MemoryDump'
           running-processes: '#/components/schemas/Security_Endpoint_Management_API_RunningProcesses'
           runscript: '#/components/schemas/Security_Endpoint_Management_API_Runscript'
           scan: '#/components/schemas/Security_Endpoint_Management_API_Scan'
@@ -110158,6 +110945,7 @@ components:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_SuspendProcess'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcesses'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_MemoryDump'
     Security_Endpoint_Management_API_ActionStateSuccessResponse:
       type: object
       properties:
@@ -110335,6 +111123,7 @@ components:
         - scan
         - runscript
         - cancel
+        - memory-dump
       minLength: 1
       type: string
     Security_Endpoint_Management_API_Commands:
@@ -111135,6 +111924,146 @@ components:
         - scriptName
       title: Microsoft Defender Endpoint Run Script Parameters
       type: object
+    Security_Endpoint_Management_API_MemoryDump:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    properties:
+                      code:
+                        type: string
+                      disk_free_space:
+                        description: The free space on the host machine in bytes after the memory dump is written to disk
+                        type: number
+                      file_size:
+                        description: The size of the memory dump compressed file in bytes
+                        type: string
+                      path:
+                        description: The path to the memory dump compressed file on the host machine
+                        type: string
+                    title: Memory dump output
+                    type: object
+              type: object
+            parameters:
+              oneOf:
+                - properties:
+                    type:
+                      description: Kernel-level memory dump
+                      enum:
+                        - kernel
+                      type: string
+                  required:
+                    - type
+                  title: Kernel memory dump
+                  type: object
+                - properties:
+                    pid:
+                      description: The process ID (PID)
+                      type: number
+                    type:
+                      description: Process-level memory dump using a process ID
+                      enum:
+                        - process
+                      type: string
+                  required:
+                    - type
+                    - pid
+                  title: Process memory dump with PID
+                  type: object
+                - properties:
+                    entity_id:
+                      description: The process entity ID
+                      type: string
+                    type:
+                      description: Process-level memory dump using an entity ID
+                      enum:
+                        - process
+                      type: string
+                  required:
+                    - type
+                    - entity_id
+                  title: Process memory dump with entity ID
+                  type: object
+          required:
+            - parameters
+    Security_Endpoint_Management_API_MemoryDumpRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
+            alert_ids:
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            case_ids:
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            comment:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - description: Dump the entire kernel memory.
+                  type: object
+                  properties:
+                    type:
+                      enum:
+                        - kernel
+                      type: string
+                  required:
+                    - type
+                - description: Dump the entire memory of a process using the PID.
+                  type: object
+                  properties:
+                    pid:
+                      type: number
+                    type:
+                      enum:
+                        - process
+                      type: string
+                  required:
+                    - type
+                    - pid
+                - description: Dump the entire memory of a process using the entity ID.
+                  type: object
+                  properties:
+                    entity_id:
+                      type: string
+                    type:
+                      enum:
+                        - process
+                      type: string
+                  required:
+                    - type
+                    - entity_id
+          required:
+            - parameters
     Security_Endpoint_Management_API_MetadataListResponse:
       example:
         data:
@@ -112945,16 +113874,19 @@ components:
     Security_Entity_Analytics_API_PrivmonUserCsvUploadStats:
       type: object
       properties:
-        failed:
+        failedOperations:
           type: integer
-        successful:
+        successfulOperations:
           type: integer
-        total:
+        totalOperations:
+          type: integer
+        uploaded:
           type: integer
       required:
-        - successful
-        - failed
-        - total
+        - successfulOperations
+        - uploaded
+        - failedOperations
+        - totalOperations
     Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse:
       type: object
       properties:

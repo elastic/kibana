@@ -1,0 +1,112 @@
+{
+  "packages": [
+    {
+      "path": "backport",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Creates config in home directory"
+    },
+    {
+      "path": "chromedriver",
+      "lifecycle": "install",
+      "required": true,
+      "reason": "Downloads chromedriver binary required for functional tests"
+    },
+    {
+      "path": "core-js",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Donation banner"
+    },
+    {
+      "path": "core-js-pure",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Donation banner"
+    },
+    {
+      "path": "cypress",
+      "lifecycle": "postinstall",
+      "required": true,
+      "reason": "Downloads Cypress required for functional tests"
+    },
+    {
+      "path": "es5-ext",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Displays informational message"
+    },
+    {
+      "path": "esbuild",
+      "lifecycle": "postinstall",
+      "required": true,
+      "reason": "Configures esbuild. Used by @elastic/synthetics"
+    },
+    {
+      "path": "geckodriver",
+      "lifecycle": "postinstall",
+      "required": true,
+      "reason": "Downloads geckodriver required for functional tests"
+    },
+    {
+      "path": "lmdb",
+      "lifecycle": "install",
+      "required": false,
+      "reason": "Builds native bindings for LMDB, used by @kbn/babel-register cache.  Prebuilds are sufficient."
+    },
+    {
+      "path": "ms-chromium-edge-driver",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Downloads Edge driver if EDGEDRIVER_DOWNLOAD_ON_INSTALL"
+    },
+    {
+      "path": "msgpackr-extract",
+      "lifecycle": "install",
+      "required": false,
+      "reason": "Builds native bindings for msgpack serialization used by lmdb.  Prebuilds are sufficient."
+    },
+    {
+      "path": "msw",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Copies worker script if msw.workerDirectory is configured.  Not used."
+    },
+    {
+      "path": "nice-napi",
+      "lifecycle": "install",
+      "required": false,
+      "reason": "Optionally used by piscina to set nice values"
+    },
+    {
+      "path": "playwright-chromium",
+      "lifecycle": "install",
+      "required": false,
+      "reason": "Browser installation handled by explicit 'yarn playwright install' in bootstrap"
+    },
+    {
+      "path": "protobufjs",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Prints version scheme warning - not needed"
+    },
+    {
+      "path": "puppeteer",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Downloads browser binaries for Puppeteer automation testing.  skipDownload is true in .puppeteerrc"
+    },
+    {
+      "path": "sharp",
+      "lifecycle": "install",
+      "required": false,
+      "reason": "Builds from source if required.  Prebuilds are sufficient."
+    },
+    {
+      "path": "@parcel/watcher",
+      "lifecycle": "install",
+      "required": false,
+      "reason": "Builds from source if npm_config_build_from_source=true.  Prebuilds are sufficient."
+    }
+  ]
+}

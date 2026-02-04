@@ -12,6 +12,7 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/dat
 
 import { TestProviders } from '../../../common/mock';
 import { AttacksPageContent, SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID } from './content';
+import { KPIS_SECTION } from './kpis/kpis_section';
 import { TABLE_SECTION_TEST_ID } from './table/table_section';
 import { FILTER_BY_ASSIGNEES_BUTTON } from '../../../common/components/filter_by_assignees_popover/test_ids';
 
@@ -65,6 +66,18 @@ describe('AttacksPageContent', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId(FILTER_BY_ASSIGNEES_BUTTON)).toBeInTheDocument();
+    });
+  });
+
+  it('should render KPIs section', async () => {
+    render(
+      <TestProviders>
+        <AttacksPageContent dataView={dataView} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId(KPIS_SECTION)).toBeInTheDocument();
     });
   });
 });

@@ -25,7 +25,8 @@ const getRuleDetailsTabName = (tabName: string): string => {
 };
 
 const isRuleCreatePage = (pathname: string) =>
-  pathname.includes(RULES_PATH) && pathname.includes('/create');
+  pathname.includes(RULES_PATH) &&
+  ['/create', '/ai_rule_creation'].some((path) => pathname.includes(path));
 
 const isRuleEditPage = (pathname: string) =>
   pathname.includes(RULES_PATH) && pathname.includes('/edit');

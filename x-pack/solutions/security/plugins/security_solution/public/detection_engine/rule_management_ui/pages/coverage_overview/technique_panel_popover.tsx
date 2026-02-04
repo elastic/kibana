@@ -37,7 +37,7 @@ export interface CoverageOverviewMitreTechniquePanelPopoverProps {
 const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
   technique,
 }: CoverageOverviewMitreTechniquePanelPopoverProps) => {
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);

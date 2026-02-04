@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { map } from 'rxjs';
+
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { addPanelMenuTrigger } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -38,9 +40,13 @@ export async function isTimeSliderControlCreationCompatible(
     return await createControlPanelAction.isCompatible({
       embeddable: {
         ...dashboardApi,
-        hasTimeSliderControl: Object.values(dashboardApi.layout$.getValue().pinnedPanels).some(
-          (control) => control.type === TIME_SLIDER_CONTROL
-        ),
+        ...(dashboardApi.layout$ && {
+          hasTimeSliderControl: () =>
+            Object.values(dashboardApi.layout$.getValue().pinnedPanels).some(
+              (control) => control.type === TIME_SLIDER_CONTROL
+            ),
+          layoutChanged$: dashboardApi.layout$.pipe(map(() => undefined)),
+        }),
       },
       trigger: addPanelMenuTrigger,
     } as ActionExecutionContext);

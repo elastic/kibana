@@ -220,7 +220,6 @@ export function ESQLControlsFlyout({
         search={search}
         valuesRetrieval={valuesField}
         timeRange={timeRange}
-        currentApp={currentApp}
         esqlVariables={esqlVariables}
       />
     ) : (

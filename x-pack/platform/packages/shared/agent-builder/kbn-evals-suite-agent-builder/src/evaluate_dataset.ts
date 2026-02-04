@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import {
   createQuantitativeCorrectnessEvaluators,
   type DefaultEvaluators,
-  type KibanaPhoenixClient,
+  type EvalsExecutorClient,
+  type Example,
   type EvaluationDataset,
   createQuantitativeGroundednessEvaluator,
   selectEvaluators,
@@ -18,9 +18,9 @@ import {
   createRagEvaluators,
   type GroundTruth,
   type RetrievedDoc,
+  type ExperimentTask,
+  type TaskOutput,
 } from '@kbn/evals';
-import type { ExperimentTask } from '@kbn/evals/src/types';
-import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -221,7 +221,7 @@ export function createEvaluateDataset({
   log,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: KibanaPhoenixClient;
+  phoenixClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;
@@ -266,7 +266,7 @@ export function createEvaluateExternalDataset({
   log,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: KibanaPhoenixClient;
+  phoenixClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;

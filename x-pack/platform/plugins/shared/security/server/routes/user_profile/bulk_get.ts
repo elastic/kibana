@@ -20,7 +20,7 @@ export function defineBulkGetUserProfilesRoute({
       path: '/internal/security/user_profile/_bulk_get',
       validate: {
         body: schema.object({
-          uids: schema.arrayOf(schema.string(), { minSize: 1 }),
+          uids: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 }),
           dataPath: schema.maybe(schema.string()),
         }),
       },

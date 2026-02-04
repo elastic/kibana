@@ -81,8 +81,13 @@ export class PromQLCstToAstConverter {
 
     const exprCtx = ctx.expression();
     const expression = exprCtx ? this.fromExpression(exprCtx) : undefined;
+    const node = PromQLBuilder.expression.query(expression, this.getParserFields(ctx));
 
-    return PromQLBuilder.expression.query(expression, this.getParserFields(ctx));
+    if (expression?.incomplete) {
+      node.incomplete = true;
+    }
+
+    return node;
   }
 
   // --------------------------------------------------------------- expression
@@ -131,7 +136,13 @@ export class PromQLCstToAstConverter {
       return this.fromParserRuleToUnknown(ctx);
     }
 
-    return PromQLBuilder.expression.unary(operator, arg, this.getParserFields(ctx));
+    const node = PromQLBuilder.expression.unary(operator, arg, this.getParserFields(ctx));
+
+    if (arg.incomplete) {
+      node.incomplete = true;
+    }
+
+    return node;
   }
 
   // -------------------------------------------------------------------- value
@@ -201,13 +212,26 @@ export class PromQLCstToAstConverter {
       }
     }
 
-    return PromQLBuilder.expression.func.call(
+    const node = PromQLBuilder.expression.func.call(
       name,
       args,
       grouping,
       groupingPosition,
       this.getParserFields(ctx)
     );
+
+    for (const arg of args) {
+      if (arg.incomplete) {
+        node.incomplete = true;
+        break;
+      }
+    }
+
+    if (grouping?.incomplete) {
+      node.incomplete = true;
+    }
+
+    return node;
   }
 
   private fromGrouping(ctx: cst.GroupingContext): ast.PromQLGrouping {
@@ -217,7 +241,16 @@ export class PromQLCstToAstConverter {
     const labelListCtx = ctx.labelList();
     const labels = this.fromLabelList(labelListCtx);
 
-    return PromQLBuilder.grouping(kind, labels, this.getParserFields(ctx));
+    const node = PromQLBuilder.grouping(kind, labels, this.getParserFields(ctx));
+
+    for (const label of labels) {
+      if (label.incomplete) {
+        node.incomplete = true;
+        break;
+      }
+    }
+
+    return node;
   }
 
   private fromLabelList(ctx: cst.LabelListContext): ast.PromQLLabelName[] {
@@ -254,7 +287,7 @@ export class PromQLCstToAstConverter {
     const evaluationCtx = ctx.evaluation();
     const evaluation = evaluationCtx ? this.fromEvaluation(evaluationCtx) : undefined;
 
-    return PromQLBuilder.expression.selector.node(
+    const node = PromQLBuilder.expression.selector.node(
       {
         metric,
         labelMap,
@@ -263,6 +296,24 @@ export class PromQLCstToAstConverter {
       },
       this.getParserFields(ctx)
     );
+
+    if (metric) {
+      node.incomplete ||= metric?.incomplete;
+    }
+
+    if (labelMap) {
+      node.incomplete ||= labelMap?.incomplete;
+    }
+
+    if (range) {
+      node.incomplete ||= range?.incomplete;
+    }
+
+    if (evaluation) {
+      node.incomplete ||= evaluation?.incomplete;
+    }
+
+    return node;
   }
 
   private fromSeriesMatcher(ctx: cst.SeriesMatcherContext): {
@@ -281,15 +332,23 @@ export class PromQLCstToAstConverter {
   private fromLabels(ctx: cst.LabelsContext): ast.PromQLLabelMap {
     const labels: ast.PromQLLabel[] = [];
     const labelCtxs = ctx.label_list();
+    let incomplete: boolean = false;
 
     for (const labelCtx of labelCtxs) {
       const label = this.fromLabel(labelCtx);
       if (label) {
         labels.push(label);
+        incomplete ||= label.incomplete;
+      } else {
+        incomplete = true;
       }
     }
 
-    return PromQLBuilder.labelMap(labels, this.getParserFields(ctx));
+    const node = PromQLBuilder.labelMap(labels, this.getParserFields(ctx));
+
+    node.incomplete = incomplete;
+
+    return node;
   }
 
   private fromLabel(ctx: cst.LabelContext): ast.PromQLLabel | undefined {
@@ -315,7 +374,17 @@ export class PromQLCstToAstConverter {
       value = this.fromStringToken(stringToken.symbol);
     }
 
-    return PromQLBuilder.label(labelName, operator, value, this.getParserFields(ctx));
+    const node = PromQLBuilder.label(labelName, operator, value, this.getParserFields(ctx));
+
+    if (labelName.incomplete) {
+      node.incomplete = true;
+    }
+
+    if (value?.incomplete) {
+      node.incomplete = true;
+    }
+
+    return node;
   }
 
   private fromLabelName(ctx: cst.LabelNameContext): ast.PromQLLabelName | undefined {
@@ -362,13 +431,27 @@ export class PromQLCstToAstConverter {
     const modifierCtx = ctx.modifier();
     const modifier = modifierCtx ? this.fromModifier(modifierCtx) : undefined;
 
-    return PromQLBuilder.expression.binary(
+    const node = PromQLBuilder.expression.binary(
       operator,
       left,
       right,
       { bool, modifier },
       this.getParserFields(ctx)
     );
+
+    if (left.incomplete) {
+      node.incomplete = true;
+    }
+
+    if (right.incomplete) {
+      node.incomplete = true;
+    }
+
+    if (modifier?.incomplete) {
+      node.incomplete = true;
+    }
+
+    return node;
   }
 
   private toBinaryOperator(text: string): ast.PromQLBinaryOperator {
@@ -400,9 +483,29 @@ export class PromQLCstToAstConverter {
         location: getPosition(joiningToken, joiningToken),
         incomplete: false,
       });
+
+      for (const label of groupLabels) {
+        if (label.incomplete) {
+          groupModifier.incomplete = true;
+          break;
+        }
+      }
     }
 
-    return PromQLBuilder.modifier(kind, labels, groupModifier, this.getParserFields(ctx));
+    const node = PromQLBuilder.modifier(kind, labels, groupModifier, this.getParserFields(ctx));
+
+    for (const label of labels) {
+      if (label.incomplete) {
+        node.incomplete = true;
+        break;
+      }
+    }
+
+    if (groupModifier?.incomplete) {
+      node.incomplete = true;
+    }
+
+    return node;
   }
 
   // ------------------------------------------------------------ parenthesized
@@ -415,7 +518,13 @@ export class PromQLCstToAstConverter {
       return this.fromParserRuleToUnknown(ctx);
     }
 
-    return PromQLBuilder.expression.parens(child, this.getParserFields(ctx));
+    const node = PromQLBuilder.expression.parens(child, this.getParserFields(ctx));
+
+    if (child.incomplete) {
+      node.incomplete = true;
+    }
+
+    return node;
   }
 
   // ----------------------------------------------------------------- subquery
@@ -463,13 +572,31 @@ export class PromQLCstToAstConverter {
     const evaluationCtx = ctx.evaluation();
     const evaluation = evaluationCtx ? this.fromEvaluation(evaluationCtx) : undefined;
 
-    return PromQLBuilder.expression.subquery(
+    const node = PromQLBuilder.expression.subquery(
       expr,
       range,
       resolution,
       evaluation,
       this.getParserFields(ctx)
     );
+
+    if (expr.incomplete) {
+      node.incomplete = true;
+    }
+
+    if (range.incomplete) {
+      node.incomplete = true;
+    }
+
+    if (resolution?.incomplete) {
+      node.incomplete = true;
+    }
+
+    if (evaluation?.incomplete) {
+      node.incomplete = true;
+    }
+
+    return node;
   }
 
   // --------------------------------------------------------------- evaluation
@@ -481,7 +608,17 @@ export class PromQLCstToAstConverter {
     const offset = offsetCtx ? this.fromOffset(offsetCtx) : undefined;
     const at = atCtx ? this.fromAt(atCtx) : undefined;
 
-    return PromQLBuilder.evaluation(offset, at, this.getParserFields(ctx));
+    const node = PromQLBuilder.evaluation(offset, at, this.getParserFields(ctx));
+
+    if (offset?.incomplete) {
+      node.incomplete = true;
+    }
+
+    if (at?.incomplete) {
+      node.incomplete = true;
+    }
+
+    return node;
   }
 
   private fromOffset(ctx: cst.OffsetContext): ReturnType<typeof PromQLBuilder.offset> {
@@ -493,7 +630,13 @@ export class PromQLCstToAstConverter {
       ? this.fromDuration(durationCtx)
       : PromQLBuilder.unknown({ incomplete: true });
 
-    return PromQLBuilder.offset(duration, negative, this.getParserFields(ctx));
+    const node = PromQLBuilder.offset(duration, negative, this.getParserFields(ctx));
+
+    if (duration.incomplete) {
+      node.incomplete = true;
+    }
+
+    return node;
   }
 
   private fromAt(ctx: cst.AtContext): ReturnType<typeof PromQLBuilder.at> {
@@ -516,7 +659,13 @@ export class PromQLCstToAstConverter {
       ? this.fromTimeValue(timeValueCtx)
       : PromQLBuilder.expression.literal.time('', { incomplete: true });
 
-    return PromQLBuilder.at(timeValue, negative, this.getParserFields(ctx));
+    const node = PromQLBuilder.at(timeValue, negative, this.getParserFields(ctx));
+
+    if (timeValue.incomplete) {
+      node.incomplete = true;
+    }
+
+    return node;
   }
 
   // ----------------------------------------------------------------- duration

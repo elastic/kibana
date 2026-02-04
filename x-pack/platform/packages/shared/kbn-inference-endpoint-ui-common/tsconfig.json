@@ -32,6 +32,7 @@
     "@kbn/search-api-panels",
     "@kbn/kibana-react-plugin",
     "@kbn/cloud-plugin",
-    "@kbn/deeplinks-management"
+    "@kbn/deeplinks-management",
+    "@kbn/connector-schemas"
   ]
 }

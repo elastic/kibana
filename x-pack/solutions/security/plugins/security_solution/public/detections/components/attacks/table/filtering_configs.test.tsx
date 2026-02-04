@@ -21,6 +21,7 @@ describe('filtering configs', () => {
         Array [
           Object {
             "meta": Object {
+              "disabled": false,
               "index": ".alerts-security.attack.discovery.alerts",
               "key": "kibana.alert.attack_discovery.api_config.name",
               "type": "term",

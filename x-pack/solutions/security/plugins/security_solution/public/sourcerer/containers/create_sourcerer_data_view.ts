@@ -234,7 +234,7 @@ const getAttackDataView = async ({
 export interface SecurityDataView {
   defaultDataView: KibanaDataView;
   alertDataView: KibanaDataView;
-  attackDataView?: KibanaDataView; // TODO remove optional when we remove the attacksAlertsAlignment feature flag
+  attackDataView?: KibanaDataView; // TODO remove optional when we remove the enableAlertsAndAttacksAlignment feature flag
   kibanaDataViews: Array<Omit<KibanaDataView, 'fields'>>;
 }
 

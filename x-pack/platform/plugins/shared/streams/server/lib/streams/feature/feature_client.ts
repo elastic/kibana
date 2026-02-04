@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { dateRangeQuery, termQuery } from '@kbn/es-query';
+
+import { dateRangeQuery, termQuery, termsQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import type { BaseFeature, Feature } from '@kbn/streams-schema';
-import objectHash from 'object-hash';
+import type { Feature } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
   STREAM_NAME,
+  FEATURE_ID,
   FEATURE_UUID,
   FEATURE_LAST_SEEN,
   FEATURE_STATUS,
@@ -19,8 +20,9 @@ import {
   FEATURE_CONFIDENCE,
   FEATURE_DESCRIPTION,
   FEATURE_TYPE,
-  FEATURE_NAME,
-  FEATURE_VALUE,
+  FEATURE_SUBTYPE,
+  FEATURE_TITLE,
+  FEATURE_PROPERTIES,
   FEATURE_TAGS,
   FEATURE_META,
   FEATURE_EXPIRES_AT,
@@ -52,8 +54,10 @@ export class FeatureClient {
   }
 
   async bulk(stream: string, operations: FeatureBulkOperation[]) {
+    const filteredOperations = await this.filterValidOperations(stream, operations);
+
     return await this.clients.storageClient.bulk({
-      operations: operations.map((operation) => {
+      operations: filteredOperations.map((operation) => {
         if ('index' in operation) {
           const document = toStorage(stream, operation.index.feature);
           return {
@@ -72,10 +76,11 @@ export class FeatureClient {
 
   async getFeatures(
     stream: string,
-    filters?: { type?: string[] }
+    filters?: { type?: string[]; id?: string[] }
   ): Promise<{ hits: Feature[]; total: number }> {
     const filterClauses: QueryDslQueryContainer[] = [
       ...termQuery(STREAM_NAME, stream),
+      ...(filters?.id?.length ? termsQuery(FEATURE_ID, filters.id) : []),
       {
         bool: {
           should: [
@@ -112,43 +117,72 @@ export class FeatureClient {
     };
   }
 
-  async getFeature(stream: string, id: string) {
-    const hit = await this.clients.storageClient.get({ id }).catch((err) => {
+  async getFeature(stream: string, uuid: string) {
+    const hit = await this.clients.storageClient.get({ id: uuid }).catch((err) => {
       if (isNotFoundError(err)) {
-        throw new StatusError(`Feature ${id} not found`, 404);
+        throw new StatusError(`Feature ${uuid} not found`, 404);
       }
       throw err;
     });
 
     const source = hit._source!;
     if (source[STREAM_NAME] !== stream) {
-      throw new StatusError(`Feature ${id} not found`, 404);
+      throw new StatusError(`Feature ${uuid} not found`, 404);
     }
     return fromStorage(source);
   }
 
-  async deleteFeature(stream: string, id: string) {
-    const feature = await this.getFeature(stream, id);
-    return await this.clients.storageClient.delete({ id: feature.id });
+  async deleteFeature(stream: string, uuid: string) {
+    const feature = await this.getFeature(stream, uuid);
+    return await this.clients.storageClient.delete({ id: feature.uuid });
   }
 
   async deleteFeatures(stream: string) {
     const features = await this.getFeatures(stream);
     return await this.clients.storageClient.bulk({
       operations: features.hits.map((feature) => ({
-        delete: { _id: feature.id },
+        delete: { _id: feature.uuid },
       })),
     });
+  }
+
+  private async filterValidOperations(
+    stream: string,
+    operations: FeatureBulkOperation[]
+  ): Promise<FeatureBulkOperation[]> {
+    const deleteIds = operations.flatMap((op) => ('delete' in op ? op.delete.id : []));
+
+    const validDeleteIds =
+      deleteIds.length > 0
+        ? new Set(
+            (
+              await this.clients.storageClient.search({
+                size: deleteIds.length,
+                track_total_hits: false,
+                query: {
+                  bool: {
+                    filter: [{ terms: { _id: deleteIds } }, ...termQuery(STREAM_NAME, stream)],
+                  },
+                },
+              })
+            ).hits.hits.flatMap((hit) => hit._id ?? [])
+          )
+        : new Set<string>();
+
+    return operations.filter(
+      (operation) => 'index' in operation || validDeleteIds.has(operation.delete.id)
+    );
   }
 }
 
 function toStorage(stream: string, feature: Feature): StoredFeature {
   return {
+    [FEATURE_UUID]: feature.uuid,
+    [FEATURE_ID]: feature.id,
     [FEATURE_TYPE]: feature.type,
-    [FEATURE_UUID]: getFeatureId(stream, feature),
-    [FEATURE_NAME]: feature.name,
+    [FEATURE_SUBTYPE]: feature.subtype,
     [FEATURE_DESCRIPTION]: feature.description,
-    [FEATURE_VALUE]: feature.value,
+    [FEATURE_PROPERTIES]: feature.properties,
     [FEATURE_CONFIDENCE]: feature.confidence,
     [FEATURE_EVIDENCE]: feature.evidence,
     [FEATURE_STATUS]: feature.status,
@@ -157,16 +191,18 @@ function toStorage(stream: string, feature: Feature): StoredFeature {
     [STREAM_NAME]: stream,
     [FEATURE_META]: feature.meta,
     [FEATURE_EXPIRES_AT]: feature.expires_at,
+    [FEATURE_TITLE]: feature.title,
   };
 }
 
 function fromStorage(feature: StoredFeature): Feature {
   return {
-    id: feature[FEATURE_UUID],
+    uuid: feature[FEATURE_UUID],
+    id: feature[FEATURE_ID],
     type: feature[FEATURE_TYPE],
-    name: feature[FEATURE_NAME],
+    subtype: feature[FEATURE_SUBTYPE],
     description: feature[FEATURE_DESCRIPTION],
-    value: feature[FEATURE_VALUE],
+    properties: feature[FEATURE_PROPERTIES],
     confidence: feature[FEATURE_CONFIDENCE],
     evidence: feature[FEATURE_EVIDENCE],
     status: feature[FEATURE_STATUS],
@@ -174,14 +210,6 @@ function fromStorage(feature: StoredFeature): Feature {
     tags: feature[FEATURE_TAGS],
     meta: feature[FEATURE_META],
     expires_at: feature[FEATURE_EXPIRES_AT],
+    title: feature[FEATURE_TITLE],
   };
-}
-
-export function getFeatureId(stream: string, feature: BaseFeature): string {
-  return objectHash({
-    [FEATURE_TYPE]: feature.type,
-    [STREAM_NAME]: stream,
-    [FEATURE_NAME]: feature.name,
-    [FEATURE_VALUE]: feature.value,
-  });
 }

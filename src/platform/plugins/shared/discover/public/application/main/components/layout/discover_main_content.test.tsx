@@ -8,108 +8,89 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import type {
-  DataDocuments$,
-  DataMain$,
-  DataTotalHits$,
-} from '../../state_management/discover_data_state_container';
+import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DiscoverMainContentProps } from './discover_main_content';
 import { DiscoverMainContent } from './discover_main_content';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { DiscoverDocuments } from './discover_documents';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { PatternAnalysisTab } from '../pattern_analysis';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { PanelsToggle } from '../../../../components/panels_toggle';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
-import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
+import { createDataSource } from '../../../../../common/data_sources';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
+import type { DiscoverAppState } from '../../state_management/redux';
+import { internalStateActions } from '../../state_management/redux';
+import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
+
+const dataView = dataViewWithTimefieldMock;
 
 const mountComponent = async ({
   hideChart = false,
   isEsqlMode = false,
   isChartAvailable,
   viewMode = VIEW_MODE.DOCUMENT_LEVEL,
-  storage,
 }: {
   hideChart?: boolean;
   isEsqlMode?: boolean;
   isChartAvailable?: boolean;
   viewMode?: VIEW_MODE;
-  storage?: Storage;
-  savedSearch?: SavedSearch;
 } = {}) => {
-  let services = createDiscoverServicesMock();
+  const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
+  const services = createDiscoverServicesMock();
 
-  (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
-    language: 'kuery',
-    query: '',
+  services.profilesManager = profilesManagerMock;
+
+  const toolkit = getDiscoverInternalStateMock({
+    services,
+    persistedDataViews: [dataView],
   });
-  (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
-    jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
-  );
 
-  if (storage) {
-    services = { ...services, storage };
-  }
+  await toolkit.initializeTabs();
 
-  const main$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    foundDocuments: true,
-  }) as DataMain$;
+  const query: DiscoverAppState['query'] = isEsqlMode
+    ? { esql: 'from *' }
+    : { query: '', language: 'kuery' };
 
-  const documents$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataViewMock)),
-  }) as DataDocuments$;
-
-  const totalHits$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: Number(esHitsMock.length),
-  }) as DataTotalHits$;
-
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  const savedSearchData$ = {
-    main$,
-    documents$,
-    totalHits$,
-  };
-  stateContainer.dataState.data$ = savedSearchData$;
-  const dataView = selectTabRuntimeState(
-    stateContainer.runtimeStateManager,
-    stateContainer.getCurrentTab().id
-  ).currentDataView$.getValue()!;
-  stateContainer.internalState.dispatch(
-    stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+  toolkit.internalState.dispatch(
+    internalStateActions.updateAppState({
+      tabId: toolkit.getCurrentTab().id,
       appState: {
-        dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+        dataSource: createDataSource({ dataView, query }),
         interval: 'auto',
         hideChart,
         columns: [],
+        query,
       },
     })
   );
 
-  if (isEsqlMode) {
-    stateContainer.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
-        appState: { query: { esql: 'from * ' } },
-      })
-    );
-  }
+  const { stateContainer } = await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
+  });
+
+  stateContainer.dataState.data$.documents$.next({
+    fetchStatus: FetchStatus.COMPLETE,
+    result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
+  });
+  stateContainer.dataState.data$.totalHits$.next({
+    fetchStatus: FetchStatus.COMPLETE,
+    result: Number(esHitsMock.length),
+  });
+  stateContainer.dataState.data$.main$.next({
+    fetchStatus: FetchStatus.COMPLETE,
+    foundDocuments: true,
+  });
 
   const props: DiscoverMainContentProps = {
     dataView,
@@ -121,7 +102,6 @@ const mountComponent = async ({
     isChartAvailable,
     panelsToggle: (
       <PanelsToggle
-        stateContainer={stateContainer}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: true,
@@ -135,9 +115,9 @@ const mountComponent = async ({
   };
 
   const component = mountWithIntl(
-    <DiscoverTestProvider services={services} stateContainer={stateContainer}>
+    <DiscoverToolkitTestProvider toolkit={toolkit}>
       <DiscoverMainContent {...props} />
-    </DiscoverTestProvider>
+    </DiscoverToolkitTestProvider>
   );
 
   await act(async () => {

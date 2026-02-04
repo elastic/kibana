@@ -59,6 +59,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [panel] = await dashboard.getDashboardPanels();
       await dashboardPanelActions.clickInlineEdit(panel);
       await dashboard.waitForRenderComplete();
+      // Verify ES|QL editor IS visible in Dashboard inline edit mode
+      await testSubjects.existOrFail('InlineEditingESQLEditor');
 
       await monacoEditor.setCodeEditorValue('from logstash-*');
       await testSubjects.click('ESQLEditor-run-query-button');

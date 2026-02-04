@@ -210,7 +210,12 @@ describe('SharedLists', () => {
       </TestProviders>
     );
     const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
-    expect(allMenuActions[0]).toBeEnabled();
+    fireEvent.click(allMenuActions[1]);
+
+    await waitFor(() => {
+      const allExportActions = wrapper.getAllByTestId('sharedListOverflowCardActionItemExport');
+      expect(allExportActions[0]).toBeEnabled();
+    });
   });
 
   it('renders delete option as disabled if list is "endpoint_list"', async () => {
@@ -231,7 +236,10 @@ describe('SharedLists', () => {
   it('renders overflow card button as enabled if user is read only', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
-      rulesPrivileges: { read: true, edit: false },
+      rulesPrivileges: {
+        rules: { read: true, edit: false },
+        exceptions: { read: true, edit: false },
+      },
     });
 
     const wrapper = render(
@@ -246,7 +254,10 @@ describe('SharedLists', () => {
   it('renders export option as enabled when user is restricted to only READ rules', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
-      rulesPrivileges: { read: true, edit: false },
+      rulesPrivileges: {
+        rules: { read: true, edit: false },
+        exceptions: { read: true, edit: false },
+      },
     });
 
     const wrapper = render(
@@ -258,8 +269,8 @@ describe('SharedLists', () => {
     fireEvent.click(allMenuActions[0]);
 
     await waitFor(() => {
-      const allDeleteActions = wrapper.getAllByTestId('sharedListOverflowCardActionItemExport');
-      expect(allDeleteActions[0]).toBeEnabled();
+      const allExportActions = wrapper.getAllByTestId('sharedListOverflowCardActionItemExport');
+      expect(allExportActions[0]).toBeEnabled();
     });
   });
 });

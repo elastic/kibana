@@ -447,12 +447,30 @@ describe('SplunkXmlDashboardParser', () => {
         isSupported: false,
       });
     });
+  });
 
-    it('should return false for dashboard version 2', () => {
-      const xml = createBasicXml(panelXml, 'dashboard', 2);
-      expect(SplunkXmlDashboardParser.isSupportedSplunkXml(xml)).toMatchObject({
-        isSupported: false,
-      });
+  describe('version', () => {
+    it('should return correct version', async () => {
+      const xml = createBasicXml(
+        createPanelXml('Panel 1', 'index=main | stats count by host') +
+          createPanelXml('Panel 2', 'index=app | stats sum(bytes)')
+      );
+      const parser = new SplunkXmlDashboardParser(xml);
+
+      const version = await parser.getVersion();
+
+      expect(version).toBe('1.1');
+    });
+
+    it('should return correct version for form rootNode', async () => {
+      const xml = createBasicXml(
+        createPanelXml('Panel 1', 'index=main | stats count by host') +
+          createPanelXml('Panel 2', 'index=app | stats sum(bytes)'),
+        'form'
+      );
+      const parser = new SplunkXmlDashboardParser(xml);
+      const version = await parser.getVersion();
+      expect(version).toBe('1.1');
     });
   });
 });

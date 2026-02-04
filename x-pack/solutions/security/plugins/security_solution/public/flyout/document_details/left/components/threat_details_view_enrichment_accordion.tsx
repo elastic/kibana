@@ -180,6 +180,12 @@ export const EnrichmentAccordion = memo(({ enrichment, index }: EnrichmentAccord
       `}
     >
       <EuiInMemoryTable
+        tableCaption={i18n.translate(
+          'xpack.securitySolution.flyout.threatIntelligence.enrichmentDetailsViewAccordionCaption',
+          {
+            defaultMessage: 'Threat enrichment details',
+          }
+        )}
         columns={columns}
         compressed
         data-test-subj={`${THREAT_INTELLIGENCE_ENRICHMENTS_ACCORDION_TABLE_TEST_ID}-${index}`}

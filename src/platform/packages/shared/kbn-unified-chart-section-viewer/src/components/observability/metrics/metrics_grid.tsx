@@ -149,7 +149,7 @@ export const MetricsGrid = ({
               focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
 
             return (
-              <EuiFlexItem key={index}>
+              <EuiFlexItem key={id}>
                 <ChartItem
                   id={id}
                   index={index}
@@ -240,7 +240,7 @@ const ChartItem = React.memo(
       );
 
       const esqlQuery = useMemo(() => {
-        const isSupported = metric.type !== 'unsigned_long' && metric.type !== 'histogram';
+        const isSupported = metric.type !== 'unsigned_long';
         return isSupported
           ? createESQLQuery({
               metric,

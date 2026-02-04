@@ -181,6 +181,9 @@ export function DashboardApp({
       // integrations
       useSessionStorageIntegration: true,
       useUnifiedSearchIntegration: true,
+      // Hide the control group from the dashboard renderer; the dashboard app handles displaying
+      // pinned controls in the top nav instead
+      useControlsIntegration: false,
       unifiedSearchSettings: {
         kbnUrlStateStorage,
       },

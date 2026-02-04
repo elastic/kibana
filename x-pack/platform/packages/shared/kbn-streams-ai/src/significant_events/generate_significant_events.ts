@@ -10,6 +10,7 @@ import type { Feature, Streams, System } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
+import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
@@ -18,6 +19,7 @@ import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
 import { sumTokens } from '../helpers/sum_tokens';
+import { getComputedFeatureInstructions } from '../features/computed';
 
 interface Query {
   kql: string;
@@ -63,17 +65,22 @@ export async function generateSignificantEvents({
 }> {
   logger.debug('Starting significant event generation');
 
-  logger.trace('Describing dataset for significant event generation');
-  const analysis = await withSpan('describe_dataset_for_significant_event_generation', () =>
-    describeDataset({
-      sampleDocsSize,
-      start,
-      end,
-      esClient,
-      index: stream.name,
-      filter: system?.filter ? conditionToQueryDsl(system.filter) : undefined,
-    })
-  );
+  let formattedAnalysis: FormattedDocumentAnalysis | undefined;
+
+  if (system?.filter) {
+    logger.trace('Describing dataset for significant event generation (with filter)');
+    const analysis = await withSpan('describe_dataset_for_significant_event_generation', () =>
+      describeDataset({
+        sampleDocsSize,
+        start,
+        end,
+        esClient,
+        index: stream.name,
+        filter: conditionToQueryDsl(system.filter),
+      })
+    );
+    formattedAnalysis = formatDocumentAnalysis(analysis, { dropEmpty: true });
+  }
 
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
 
@@ -82,11 +89,12 @@ export async function generateSignificantEvents({
     executeAsReasoningAgent({
       input: {
         name: system?.name || stream.name,
-        dataset_analysis: JSON.stringify(formatDocumentAnalysis(analysis, { dropEmpty: true })),
+        dataset_analysis: formattedAnalysis ? JSON.stringify(formattedAnalysis) : '',
         description: system?.description || stream.description,
         features: JSON.stringify(
           features.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
         ),
+        computed_feature_instructions: getComputedFeatureInstructions(),
       },
       maxSteps: 4,
       prompt,

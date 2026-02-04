@@ -10,7 +10,7 @@ import nodeCrypto from '@elastic/node-crypto';
 import { createHash, randomBytes } from 'crypto';
 import { promisify } from 'util';
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger, SessionStorageSetOptions } from '@kbn/core/server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -236,6 +236,7 @@ export class Session {
    * Creates new session document in the session index encrypting sensitive state.
    * @param request Request instance to create session value for.
    * @param sessionValue Session value parameters.
+   * @param stateCookieOptions Options to change the associated session cookie's properties
    */
   async create(
     request: KibanaRequest,
@@ -244,7 +245,8 @@ export class Session {
         SessionValue,
         'sid' | 'idleTimeoutExpiration' | 'lifespanExpiration' | 'createdAt' | 'metadata'
       >
-    >
+    >,
+    stateCookieOptions?: SessionStorageSetOptions
   ) {
     const [sid, aad] = await Promise.all([
       this.randomBytes(SID_BYTE_LENGTH).then((sidBuffer) => sidBuffer.toString('base64')),
@@ -268,7 +270,11 @@ export class Session {
       content: await this.crypto.encrypt(JSON.stringify({ username, userProfileId, state }), aad),
     });
 
-    await this.options.sessionCookie.set(request, { ...sessionExpirationInfo, sid, aad });
+    await this.options.sessionCookie.set(
+      request,
+      { ...sessionExpirationInfo, sid, aad },
+      stateCookieOptions
+    );
 
     sessionLogger.debug('Successfully created a new session.');
 

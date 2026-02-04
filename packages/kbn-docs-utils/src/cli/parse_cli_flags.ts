@@ -13,9 +13,84 @@ import type { CliFlags, CliOptions } from './types';
 /**
  * Validates that an array contains only strings.
  */
-function isStringArray(arr: unknown | string[]): arr is string[] {
-  return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
-}
+const isStringArray = (arr: unknown | string[]): arr is string[] =>
+  Array.isArray(arr) && arr.every((p) => typeof p === 'string');
+
+const normalizeStringList = (value: unknown | string[], flagName: string) => {
+  if (!value) {
+    return undefined;
+  }
+
+  const normalized = typeof value === 'string' ? [value] : value;
+
+  if (!isStringArray(normalized)) {
+    throw createFlagError(`expected --${flagName} must only contain strings`);
+  }
+
+  return normalized;
+};
+
+const dedupe = (values: string[] | undefined) =>
+  values && values.length > 0 ? Array.from(new Set(values)) : undefined;
+
+const VALID_CHECKS = ['any', 'comments', 'exports', 'all'] as const;
+
+const normalizeCheckFlagValues = (check: unknown | string[]) => {
+  if (!check) {
+    return undefined;
+  }
+
+  if (typeof check === 'string') {
+    return [check];
+  }
+
+  if (!isStringArray(check)) {
+    throw createFlagError(
+      'expected --check must only contain `any`, `comments`, `exports`, or `all`'
+    );
+  }
+
+  return check;
+};
+
+const expandChecks = (checks: string[] | undefined) => {
+  if (!checks) {
+    return undefined;
+  }
+
+  const expanded = checks.flatMap((c) => (c === 'all' ? ['any', 'comments', 'exports'] : [c]));
+
+  const invalid = expanded.find((c) => !VALID_CHECKS.includes(c as (typeof VALID_CHECKS)[number]));
+  if (invalid) {
+    throw createFlagError(
+      'expected --check must only contain `any`, `comments`, `exports`, or `all`'
+    );
+  }
+
+  return expanded;
+};
+
+const validateStats = (stats: string[] | undefined) => {
+  if (stats && stats.find((s) => s !== 'any' && s !== 'comments' && s !== 'exports')) {
+    throw createFlagError('expected --stats must only contain `any`, `comments` and/or `exports`');
+  }
+};
+
+const normalizeStats = (value: unknown | string[]) => {
+  if (!value) {
+    return undefined;
+  }
+
+  if (typeof value === 'string') {
+    return [value];
+  }
+
+  if (!isStringArray(value)) {
+    throw createFlagError('expected --stats must only contain `any`, `comments` and/or `exports`');
+  }
+
+  return value;
+};
 
 /**
  * Parses and validates CLI flags, normalizing them into a consistent format.
@@ -26,28 +101,19 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
  */
 export function parseCliFlags(flags: CliFlags): CliOptions {
   const collectReferences = flags.references === true;
-  const stats = flags.stats && typeof flags.stats === 'string' ? [flags.stats] : flags.stats;
-  const pluginFilter =
-    flags.plugin && typeof flags.plugin === 'string'
-      ? [flags.plugin]
-      : (flags.plugin as string[] | undefined);
+  const pluginFilter = dedupe(normalizeStringList(flags.plugin, 'plugin'));
+  const packageFilter = dedupe(normalizeStringList(flags.package, 'package'));
+  const rawStats = normalizeStats(flags.stats);
+  const rawChecks = normalizeCheckFlagValues(flags.check);
+  const expandedChecks = expandChecks(rawChecks);
+  const stats = dedupe([...(rawStats ?? []), ...(expandedChecks ?? [])]);
 
-  if (pluginFilter && !isStringArray(pluginFilter)) {
-    throw createFlagError('expected --plugin must only contain strings');
-  }
-
-  if (
-    (stats &&
-      isStringArray(stats) &&
-      stats.find((s) => s !== 'any' && s !== 'comments' && s !== 'exports')) ||
-    (stats && !isStringArray(stats))
-  ) {
-    throw createFlagError('expected --stats must only contain `any`, `comments` and/or `exports`');
-  }
+  validateStats(stats);
 
   return {
     collectReferences,
-    stats: stats && isStringArray(stats) ? stats : undefined,
+    stats,
     pluginFilter,
+    packageFilter,
   };
 }

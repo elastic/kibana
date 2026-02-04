@@ -209,6 +209,34 @@ export const PackageInfoSchema = schema
     vars: schema.maybe(
       schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 1000 })
     ),
+    var_groups: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          title: schema.string(),
+          selector_title: schema.string(),
+          description: schema.maybe(schema.string()),
+          options: schema.arrayOf(
+            schema
+              .object({
+                name: schema.string(),
+                title: schema.string(),
+                description: schema.maybe(schema.string()),
+                vars: schema.arrayOf(schema.string(), { maxSize: 100 }),
+                hide_in_deployment_modes: schema.maybe(
+                  schema.arrayOf(
+                    schema.oneOf([schema.literal('default'), schema.literal('agentless')]),
+                    { maxSize: 2 }
+                  )
+                ),
+              })
+              .extendsDeep({ unknowns: 'allow' }),
+            { maxSize: 20 }
+          ),
+        }),
+        { maxSize: 20 }
+      )
+    ),
     latestVersion: schema.maybe(schema.string()),
     discovery: schema.maybe(
       schema.object({

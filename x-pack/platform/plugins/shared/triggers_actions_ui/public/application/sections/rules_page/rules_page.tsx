@@ -11,7 +11,6 @@ import { EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import useObservable from 'react-use/lib/useObservable';
 import {
   getCreateRuleRoute,
   getEditRuleRoute,
@@ -25,6 +24,7 @@ import { RulesSettingsLink } from '../../components/rules_setting/rules_settings
 import { RulesListDocLink } from '../rules_list/components/rules_list_doc_link';
 import { RulesPageTemplate } from './rules_page_template';
 import { useKibana } from '../../../common/lib/kibana';
+import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import { getAlertingSectionBreadcrumb, getRulesBreadcrumbWithHref } from '../../lib/breadcrumb';
 import { CreateRuleButton } from '../rules_list/components/create_rule_button';
 import { getCurrentDocTitle } from '../../lib/doc_title';
@@ -41,12 +41,12 @@ const RulesPage = () => {
   const {
     chrome: { docTitle },
     setBreadcrumbs,
-    application: { navigateToApp, getUrlForApp, isAppRegistered, currentAppId$ },
+    application: { navigateToApp, getUrlForApp, isAppRegistered },
     http,
     notifications: { toasts },
     ruleTypeRegistry,
   } = useKibana().services;
-  const currentAppId = useObservable(currentAppId$, undefined);
+  const useUnifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
 
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
@@ -125,15 +125,24 @@ const RulesPage = () => {
       const { pathname, search, hash } = locationRef.current;
       const returnPath = `${pathname}${search}${hash}`;
 
-      navigateToApp(currentAppId || 'management', {
-        path: getCreateRuleRoute(ruleTypeId),
-        state: {
-          returnApp: currentAppId || 'management',
-          returnPath,
-        },
-      });
+      if (useUnifiedRulesPage) {
+        history.push({
+          pathname: getCreateRuleRoute(ruleTypeId),
+          search,
+          hash,
+          state: { returnPath },
+        });
+      } else {
+        navigateToApp('management', {
+          path: getCreateRuleRoute(ruleTypeId),
+          state: {
+            returnApp: 'management',
+            returnPath,
+          },
+        });
+      }
     },
-    [navigateToApp, currentAppId]
+    [navigateToApp, useUnifiedRulesPage, history]
   );
 
   const renderRulesList = useCallback(() => {
@@ -167,10 +176,7 @@ const RulesPage = () => {
   useEffect(() => {
     if (setBreadcrumbs) {
       if (currentSection === 'logs') {
-        const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(
-          isAppRegistered,
-          getUrlForApp
-        );
+        const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(getUrlForApp);
         setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('logs')]);
       } else {
         setBreadcrumbs([getAlertingSectionBreadcrumb('rules')]);
@@ -186,7 +192,7 @@ const RulesPage = () => {
           paddingSize: 'xl',
           bottomBorder: true,
           pageTitle: (
-            <span data-test-subj="rulesPageTitle">
+            <span data-test-subj="appTitle">
               <FormattedMessage
                 id="xpack.triggersActionsUI.rulesPage.pageTitle"
                 defaultMessage="Rules"

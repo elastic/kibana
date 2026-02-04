@@ -328,7 +328,9 @@ type ComponentProps = LensComponentProps & LensPublicCallbacks;
 type ComponentSerializedProps = TypedLensSerializedState;
 
 type LensRendererPrivateProps = ComponentSerializedProps & ComponentProps;
-export type LensRendererProps = LensRendererPrivateProps;
+export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title'> & {
+  hidePanelTitles?: boolean;
+};
 
 /**
  * The LensRuntimeState is the state stored for a dashboard panel
@@ -438,6 +440,9 @@ export interface StructuredDatasourceStates {
   formBased?: FormBasedPersistedState;
   textBased?: TextBasedPersistedState;
 }
+
+/** The supported datasource identifiers */
+export type SupportedDatasourceId = keyof StructuredDatasourceStates;
 
 /** Utility type to build typed version for each chart */
 type TypedLensAttributes<TVisType, TVisState> = Simplify<

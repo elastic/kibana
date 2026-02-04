@@ -25,6 +25,7 @@ import type {
   ClassicIngestStreamEffectiveLifecycle,
   IngestStreamSettings,
 } from '@kbn/streams-schema';
+import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { FAILURE_STORE_SELECTOR } from '../../../common/constants';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 
@@ -45,7 +46,20 @@ export function getDataStreamLifecycle(
 
   if (dataStream.next_generation_managed_by === 'Data stream lifecycle') {
     const retention = dataStream.lifecycle?.data_retention;
-    return { dsl: { data_retention: retention ? String(retention) : undefined } };
+    // TODO: Remove this cast when Elasticsearch is updated to a version with the correct downsampling type
+    // The expected type is already updated in the elasticsearch-specification repo:
+    // https://github.com/elastic/elasticsearch-specification/blob/main/output/typescript/types.ts#L12220-L12223
+    const downsampling = dataStream.lifecycle?.downsampling as DownsampleStep[] | undefined;
+
+    return {
+      dsl: {
+        data_retention: retention ? String(retention) : undefined,
+        downsample: downsampling?.map((step) => ({
+          after: step.after,
+          fixed_interval: step.fixed_interval,
+        })),
+      },
+    };
   }
 
   if (dataStream.next_generation_managed_by === 'Unmanaged') {

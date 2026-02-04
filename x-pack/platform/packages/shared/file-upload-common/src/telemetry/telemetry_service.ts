@@ -38,6 +38,7 @@ interface FileUploadEvent {
   upload_success: boolean;
   upload_cancelled: boolean;
   upload_time_ms: number;
+  file_extension: string;
   location?: string;
 }
 
@@ -58,6 +59,14 @@ interface UploadSessionEvent {
 
 export class FileUploadTelemetryService {
   constructor(private analytics: AnalyticsServiceStart, private location: string) {}
+
+  public static generateId(): string {
+    return crypto.randomUUID().substring(0, 13);
+  }
+
+  public static getFileExtension(fileName: string): string {
+    return fileName.split('.').pop() ?? 'unknown';
+  }
 
   private reportEvent(eventType: string, eventData: Record<string, unknown>) {
     try {

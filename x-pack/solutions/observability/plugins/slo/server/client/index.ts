@@ -8,17 +8,27 @@ import type {
   ElasticsearchClient,
   IScopedClusterClient,
   KibanaRequest,
+  Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { GetSLOGroupedStatsParams, GetSLOGroupedStatsResponse } from '@kbn/slo-schema';
+import type {
+  FindSLOParams,
+  FindSLOResponse,
+  GetSLOGroupedStatsParams,
+  GetSLOGroupedStatsResponse,
+} from '@kbn/slo-schema';
 import { once } from 'lodash';
+import { FindSLO } from '../services/find_slo';
 import { GetSLOGroupedStats } from '../services/get_slo_grouped_stats';
+import { DefaultSLODefinitionRepository } from '../services/slo_definition_repository';
 import { DefaultSLOSettingsRepository } from '../services/slo_settings_repository';
+import { DefaultSummarySearchClient } from '../services/summary_search_client/summary_search_client';
 import { getSummaryIndices } from '../services/utils/get_summary_indices';
 
 export interface SloClient {
   getSummaryIndices(): Promise<string[]>;
   getGroupedStats(params: GetSLOGroupedStatsParams): Promise<GetSLOGroupedStatsResponse>;
+  findSlos(params: FindSLOParams): Promise<FindSLOResponse>;
 }
 
 export function getSloClientWithRequest({
@@ -26,12 +36,14 @@ export function getSloClientWithRequest({
   scopedClusterClient,
   soClient,
   spaceId,
+  logger,
 }: {
   request: KibanaRequest;
   esClient: ElasticsearchClient;
   scopedClusterClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;
   spaceId: string;
+  logger: Logger;
 }): SloClient {
   const settingsRepository = new DefaultSLOSettingsRepository(soClient);
 
@@ -51,6 +63,19 @@ export function getSloClientWithRequest({
       const settings = await settingsRepository.get();
       const service = new GetSLOGroupedStats(scopedClusterClient, spaceId, settings);
       return await service.execute(params);
+    },
+
+    findSlos: async (params: FindSLOParams) => {
+      const settings = await settingsRepository.get();
+      const repository = new DefaultSLODefinitionRepository(soClient, logger);
+      const summarySearchClient = new DefaultSummarySearchClient(
+        scopedClusterClient,
+        logger,
+        spaceId,
+        settings
+      );
+      const findSLO = new FindSLO(repository, summarySearchClient);
+      return await findSLO.execute(params);
     },
   };
 }

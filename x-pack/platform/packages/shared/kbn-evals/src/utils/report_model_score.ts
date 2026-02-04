@@ -7,35 +7,31 @@
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
-import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import chalk from 'chalk';
 import { hostname } from 'os';
-import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
 import {
   EvaluationScoreRepository,
   type EvaluationScoreDocument,
   parseScoreDocuments,
 } from './score_repository';
 import { buildEvaluationResults, calculateEvaluatorStats } from './evaluation_stats';
-import type { EvaluationReport } from '../types';
+import type { EvaluationReport, RanExperiment } from '../types';
 
 export async function buildEvaluationReport({
-  phoenixClient,
   experiments,
   model,
   evaluatorModel,
   repetitions,
   runId,
 }: {
-  phoenixClient: KibanaPhoenixClient;
   experiments: RanExperiment[];
   model: Model;
   evaluatorModel: Model;
   repetitions: number;
   runId?: string;
 }): Promise<EvaluationReport> {
-  const { datasetScores } = await buildEvaluationResults(experiments, phoenixClient);
+  const { datasetScores } = await buildEvaluationResults(experiments);
 
   const datasetScoresWithStats = datasetScores.map((dataset) => ({
     ...dataset,

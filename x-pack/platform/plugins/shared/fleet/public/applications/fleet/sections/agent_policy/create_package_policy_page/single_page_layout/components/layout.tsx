@@ -24,8 +24,8 @@ import { useAgentless } from '../hooks/setup_technology';
 import { WithHeaderLayout } from '../../../../../layouts';
 import type {
   AgentPolicy,
+  NewPackagePolicy,
   PackageInfo,
-  PackagePolicy,
   RegistryPolicyTemplate,
 } from '../../../../../types';
 import { PackageIcon } from '../../../../../components';
@@ -46,7 +46,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
   packageInfo?: PackageInfo;
   integrationInfo?: RegistryPolicyTemplate;
-  defaultPolicyData?: Partial<PackagePolicy>;
+  defaultPolicyData?: Partial<NewPackagePolicy>;
   'data-test-subj'?: string;
   tabs?: Array<{
     title: string;

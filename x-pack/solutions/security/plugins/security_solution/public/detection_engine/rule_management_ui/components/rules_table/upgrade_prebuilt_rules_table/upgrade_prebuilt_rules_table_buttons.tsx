@@ -25,7 +25,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
     actions: { upgradeRules, upgradeAllRules },
   } = useUpgradePrebuiltRulesTableContext();
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayUpgradeSelectedRulesButton = numberOfSelectedRules > 0;

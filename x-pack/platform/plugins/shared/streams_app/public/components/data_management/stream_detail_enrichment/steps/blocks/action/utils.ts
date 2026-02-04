@@ -177,6 +177,17 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
       );
 
       return isPlural ? pluralConcatDescription : singularConcatDescription;
+    } else if (step.action === 'join') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.joinProcessorDescription',
+        {
+          defaultMessage: 'Combines {fromLength} field(s) with "{delimiter}"',
+          values: {
+            fromLength: step.from.length,
+            delimiter: step.delimiter,
+          },
+        }
+      );
     } else {
       const { action, parentId, customIdentifier, ignore_failure, ...rest } = step;
       // Remove 'where' if it exists (some processors have it, some don't)

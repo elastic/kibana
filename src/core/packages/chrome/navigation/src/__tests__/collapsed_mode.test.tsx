@@ -351,6 +351,37 @@ describe('Collapsed mode', () => {
         expect(tooltip).toHaveTextContent('Cases');
         expect(flaskIcon).toBeInTheDocument();
       });
+
+      /**
+       * GIVEN the side navigation is in collapsed mode
+       * AND a primary menu item is new
+       * WHEN I hover over that item
+       * THEN a tooltip shows up with the item label
+       * AND a badge reading "New"
+       */
+      it('should show tooltip with label and new badge on hover', async () => {
+        render(
+          <TestComponent
+            isCollapsed
+            items={observabilityMock.navItems}
+            logo={observabilityMock.logo}
+          />
+        );
+
+        const alertsLink = screen.getByTestId(primaryItemId('alerts'));
+
+        await user.hover(alertsLink);
+        flushPopoverTimers();
+
+        const tooltip = await screen.findByRole('tooltip');
+
+        expect(tooltip).toBeInTheDocument();
+        expect(tooltip).toHaveTextContent('Alerts');
+
+        const badge = tooltip.querySelector('.euiBadge');
+        expect(badge).toBeInTheDocument();
+        expect(badge).toHaveTextContent('New');
+      });
     });
 
     describe('More menu', () => {

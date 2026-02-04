@@ -6,7 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import {
   RULES_SETTINGS_TEST_SUBJECTS,
   RULE_TYPE_MODAL_TEST_SUBJECTS,

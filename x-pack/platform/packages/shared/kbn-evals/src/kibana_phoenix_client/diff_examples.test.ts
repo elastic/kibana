@@ -6,11 +6,10 @@
  */
 
 import { diffExamples } from './diff_examples';
-import type { ExampleWithId } from '../types';
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { Example, ExampleWithId } from '../types';
 
 function withId(example: Example, id: string): ExampleWithId {
-  return { ...(example as unknown as ExampleWithId), id };
+  return { ...(example as ExampleWithId), id };
 }
 
 describe('diffExamples', () => {
@@ -65,7 +64,7 @@ describe('diffExamples', () => {
     expect(result.toAdd).toEqual([secondExample]);
   });
 
-  it('considers examples equivalent after normalisation (undefined vs null / missing metadata)', () => {
+  it('considers examples equivalent after normalisation (undefined vs null / empty metadata)', () => {
     const stored = [
       withId(
         {

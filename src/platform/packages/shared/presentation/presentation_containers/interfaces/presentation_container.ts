@@ -69,7 +69,6 @@ export const apiIsPresentationContainer = (api: unknown | null): api is Presenta
     apiCanAddNewPanel(api) &&
       typeof (api as PresentationContainer)?.removePanel === 'function' &&
       typeof (api as PresentationContainer)?.replacePanel === 'function' &&
-      typeof (api as PresentationContainer)?.addNewPanel === 'function' &&
       apiPublishesChildren(api)
   );
 };

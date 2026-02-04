@@ -26,7 +26,7 @@ export function RuleSnoozeBadge({
 }: RuleSnoozeBadgeProps): JSX.Element {
   const RulesListNotifyBadge = useKibana().services.triggersActionsUi.getRulesListNotifyBadge;
   const { snoozeSettings, error } = useRuleSnoozeSettings(ruleId);
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const invalidateFetchRuleSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
 
   return (

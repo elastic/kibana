@@ -31,18 +31,7 @@ describe('PodMetricsTable', () => {
     to: 'now',
   };
 
-  const filterClauseDsl = {
-    bool: {
-      should: [
-        {
-          match: {
-            'pod.name': 'gke-edge-oblt-pool-1-9a60016d-lgg9',
-          },
-        },
-      ],
-      minimum_should_match: 1,
-    },
-  };
+  const kuery = `pod.name: "gke-edge-oblt-pool-1-9a60016d-lgg9"`;
 
   const mockData = {
     series: [
@@ -60,7 +49,7 @@ describe('PodMetricsTable', () => {
       const metricsClient = getMetricsClient();
       const LazyPodMetricsTable = createLazyPodMetricsTable(getStartServices()[0], metricsClient);
 
-      render(<LazyPodMetricsTable timerange={timerange} filterClauseDsl={filterClauseDsl} />);
+      render(<LazyPodMetricsTable timerange={timerange} kuery={kuery} />);
 
       expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
       expect(screen.queryByTestId('podMetricsTable')).not.toBeInTheDocument();
@@ -90,7 +79,7 @@ describe('PodMetricsTable', () => {
       const { findByText } = render(
         <IntegratedPodMetricsTable
           timerange={timerange}
-          filterClauseDsl={filterClauseDsl}
+          kuery={kuery}
           sourceId="default"
           metricsClient={metricsClient}
           {...coreProvidersPropsMock}

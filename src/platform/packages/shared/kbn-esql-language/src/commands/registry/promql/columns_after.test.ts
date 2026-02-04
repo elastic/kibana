@@ -22,9 +22,10 @@ describe('PROMQL columnsAfter', () => {
       [],
       '',
       {
-        fromFrom: () => Promise.resolve(sourceFields),
+        fromFrom: () => Promise.resolve([]),
         fromJoin: () => Promise.resolve([]),
         fromEnrich: () => Promise.resolve([]),
+        fromPromql: () => Promise.resolve(sourceFields),
       }
     );
 
@@ -42,9 +43,10 @@ describe('PROMQL columnsAfter', () => {
       [],
       '',
       {
-        fromFrom: () => Promise.resolve(sourceFields),
+        fromFrom: () => Promise.resolve([]),
         fromJoin: () => Promise.resolve([]),
         fromEnrich: () => Promise.resolve([]),
+        fromPromql: () => Promise.resolve(sourceFields),
       }
     );
 
@@ -56,8 +58,25 @@ describe('PROMQL columnsAfter', () => {
       fromFrom: () => Promise.resolve([]),
       fromJoin: () => Promise.resolve([]),
       fromEnrich: () => Promise.resolve([]),
+      fromPromql: () => Promise.resolve([]),
     });
 
     expect(result).toEqual([]);
+  });
+
+  it('returns step column of type date when step param is present', async () => {
+    const result = await columnsAfter(
+      synth.cmd`PROMQL index=metrics step=5m rate(http_requests_total[5m])`,
+      [],
+      '',
+      {
+        fromFrom: () => Promise.resolve([]),
+        fromJoin: () => Promise.resolve([]),
+        fromEnrich: () => Promise.resolve([]),
+        fromPromql: () => Promise.resolve([]),
+      }
+    );
+
+    expect(result).toEqual([{ name: 'step', type: 'date', userDefined: false }]);
   });
 });

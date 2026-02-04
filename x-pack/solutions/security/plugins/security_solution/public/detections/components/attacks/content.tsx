@@ -41,6 +41,7 @@ import { ConnectorFilter } from '../../../attack_discovery/pages/results/history
 
 import type { Status } from '../../../../common/api/detection_engine';
 import { FiltersSection } from './filters/filters_section';
+import { KPIsSection } from './kpis/kpis_section';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
@@ -163,6 +164,10 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           <EuiSpacer size="l" />
         </Display>
 
+        <EuiSpacer />
+        <KPIsSection />
+
+        <EuiSpacer />
         <TableSection
           dataView={dataView}
           statusFilter={statusFilter}

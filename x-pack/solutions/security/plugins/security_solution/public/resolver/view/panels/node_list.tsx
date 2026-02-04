@@ -132,6 +132,12 @@ export const NodeList = memo(({ id }: { id: string }) => {
         items={processTableView}
         columns={columns}
         sorting
+        tableCaption={i18n.translate(
+          'xpack.securitySolution.endpoint.resolver.panel.nodeList.tableCaption',
+          {
+            defaultMessage: 'Process events',
+          }
+        )}
       />
     </>
   );

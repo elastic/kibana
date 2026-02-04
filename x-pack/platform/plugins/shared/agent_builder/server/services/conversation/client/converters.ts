@@ -14,6 +14,7 @@ import type {
   ToolResult,
   UserIdAndName,
 } from '@kbn/agent-builder-common';
+import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
@@ -23,7 +24,12 @@ import type {
   PersistentConversationRoundStep,
 } from './types';
 import type { ConversationProperties } from './storage';
-import { migrateRoundAttachments, needsMigration } from './migrate_attachments';
+import {
+  createAttachmentRefs,
+  migrateRoundAttachments,
+  needsMigration,
+  applyAttachmentRefsToRounds,
+} from './migrate_attachments';
 
 export type Document = Pick<
   GetResponse<ConversationProperties>,
@@ -103,26 +109,40 @@ export const fromEs = (document: Document): Conversation => {
   const deserializedRounds = deserializeStepResults(rawRounds);
 
   const existingAttachments = document._source!.attachments;
+  const hasLegacyRoundAttachments = needsMigration(false, deserializedRounds);
+  const attachmentsForRefs =
+    existingAttachments && existingAttachments.length > 0
+      ? existingAttachments
+      : hasLegacyRoundAttachments
+      ? migrateRoundAttachments(deserializedRounds)
+      : [];
+
+  const refsByRound =
+    attachmentsForRefs.length > 0
+      ? createAttachmentRefs(deserializedRounds, attachmentsForRefs)
+      : new Map<number, AttachmentVersionRef[]>();
+
+  const roundsWithRefs = applyAttachmentRefsToRounds(deserializedRounds, refsByRound);
+
   if (existingAttachments && existingAttachments.length > 0) {
     return {
       ...base,
-      rounds: deserializedRounds,
+      rounds: roundsWithRefs,
       attachments: existingAttachments,
     };
   }
 
-  if (needsMigration(false, deserializedRounds)) {
-    const migratedAttachments = migrateRoundAttachments(deserializedRounds);
+  if (hasLegacyRoundAttachments) {
     return {
       ...base,
-      rounds: deserializedRounds,
-      ...(migratedAttachments.length > 0 && { attachments: migratedAttachments }),
+      rounds: roundsWithRefs,
+      ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
     };
   }
 
   return {
     ...base,
-    rounds: deserializedRounds,
+    rounds: roundsWithRefs,
     ...(document._source!.state && { state: document._source!.state }),
   };
 };

@@ -19,6 +19,10 @@ describe('validateDuration', () => {
     expect(validateDuration('1000s')).toBeUndefined();
   });
 
+  it('validates duration in milliseconds correctly', () => {
+    expect(validateDuration('2249704ms')).toBeUndefined();
+  });
+
   it('validates duration in days correctly', () => {
     expect(validateDuration('5d')).toBeUndefined();
   });

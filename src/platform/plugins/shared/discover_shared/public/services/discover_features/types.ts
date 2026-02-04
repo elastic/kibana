@@ -16,11 +16,13 @@ import type {
   ErrorsByTraceId,
   TraceRootSpan,
   UnifiedSpanDocument,
+  FocusedTraceWaterfallProps,
+  FullTraceWaterfallProps,
 } from '@kbn/apm-types';
-import type { ProcessorEvent } from '@kbn/apm-types-shared';
-import type { HistogramItem } from '@kbn/apm-types-shared';
+import type { HistogramItem, ProcessorEvent } from '@kbn/apm-types-shared';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type React from 'react';
+import type { IndicatorType } from '@kbn/slo-schema';
 import type { FeaturesRegistry } from '../../../common';
 
 /**
@@ -67,6 +69,7 @@ export interface ObservabilityCreateSLOFeature {
   createSLOFlyout: (props: {
     onClose: () => void;
     initialValues: Record<string, unknown>;
+    formSettings?: { isEditMode?: boolean; allowedIndicatorTypes?: IndicatorType[] };
   }) => React.ReactNode;
 }
 
@@ -123,6 +126,16 @@ export type SecuritySolutionFeature =
 /** ****************************************************************************************/
 
 /** **************** Observability Traces ****************/
+
+interface ObservabilityFocusedTraceWaterfallFeature {
+  id: 'observability-focused-trace-waterfall';
+  render: (props: FocusedTraceWaterfallProps) => JSX.Element;
+}
+
+interface ObservabilityFullTraceWaterfallFeature {
+  id: 'observability-full-trace-waterfall';
+  render: (props: FullTraceWaterfallProps) => JSX.Element;
+}
 
 export interface ObservabilityTracesSpanLinksFeature {
   id: 'observability-traces-fetch-span-links';
@@ -222,7 +235,9 @@ export type ObservabilityTracesFeature =
   | ObservabilityTracesFetchRootSpanByTraceIdFeature
   | ObservabilityTracesFetchSpanFeature
   | ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature
-  | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature;
+  | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature
+  | ObservabilityFocusedTraceWaterfallFeature
+  | ObservabilityFullTraceWaterfallFeature;
 
 /** ****************************************************************************************/
 

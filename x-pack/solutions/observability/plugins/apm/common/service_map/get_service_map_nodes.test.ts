@@ -13,6 +13,7 @@ import type {
   ServiceMapConnections,
   GroupResourceNodesResponse,
   ServiceConnectionNode,
+  ConnectionEdge,
 } from './types';
 import { getServiceMapNodes } from './get_service_map_nodes';
 import { getExternalConnectionNode, getServiceConnectionNode } from './utils';
@@ -60,6 +61,12 @@ const nodejsExternal = createExitSpan({
 
 const httpLoadBalancer = createExitSpan({
   spanDestinationServiceResource: 'opbeans:3000',
+  spanType: 'external',
+  spanSubtype: 'http',
+});
+
+const externalHttpLoadBalancer = createExitSpan({
+  spanDestinationServiceResource: 'opbeans:3001',
   spanType: 'external',
   spanSubtype: 'http',
 });
@@ -160,6 +167,9 @@ describe('getServiceMapNodes', () => {
     expect(getNodeAnomalyStats(elements, 'opbeans-java')).toEqual(
       multiServiceAnomalies.serviceAnomalies[1]
     );
+
+    // Verify resources are attached to the edge
+    expect((edges.shift()?.data as ConnectionEdge).resources).toEqual(['opbeans-node']);
   });
 
   it('adds connections for messaging systems', () => {
@@ -412,6 +422,10 @@ describe('getServiceMapNodes', () => {
           to: getServiceConnectionNode(nodejsService),
         },
         {
+          from: getExternalConnectionNode({ ...externalHttpLoadBalancer, ...javaService }),
+          to: getServiceConnectionNode(nodejsService),
+        },
+        {
           from: getExternalConnectionNode({ ...httpLoadBalancer, ...goService }),
           to: getServiceConnectionNode(javaService),
         },
@@ -424,6 +438,10 @@ describe('getServiceMapNodes', () => {
         {
           source: getServiceConnectionNode(javaService),
           destination: getExternalConnectionNode({ ...httpLoadBalancer, ...javaService }),
+        },
+        {
+          source: getServiceConnectionNode(javaService),
+          destination: getExternalConnectionNode({ ...externalHttpLoadBalancer, ...javaService }),
         },
         {
           source: getServiceConnectionNode(goService),
@@ -456,6 +474,14 @@ describe('getServiceMapNodes', () => {
     expect(getNodeAnomalyStats(elements, 'opbeans-go')?.anomalyScore).toBe(50);
     expect(getNodeAnomalyStats(elements, 'opbeans-node')?.anomalyScore).toBe(10);
     expect(getNodeAnomalyStats(elements, 'opbeans-python')?.anomalyScore).toBe(60);
+
+    // Verify that the edge has both resources (e.g. two load balancers serving the same service)
+    // Required to accurately calculate connection stats in Service Map
+    const javaToNodeEdge = edges.find((edge) => edge.data.id === 'opbeans-java~opbeans-node');
+    expect((javaToNodeEdge?.data as ConnectionEdge).resources).toEqual([
+      'opbeans:3000',
+      'opbeans:3001',
+    ]);
   });
 });
 

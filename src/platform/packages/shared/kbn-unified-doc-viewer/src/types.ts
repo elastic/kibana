@@ -9,6 +9,7 @@
 
 export type {
   DocView,
+  DocViewActions,
   DocViewFilterFn,
   DocViewRenderProps,
   DocViewerComponent,

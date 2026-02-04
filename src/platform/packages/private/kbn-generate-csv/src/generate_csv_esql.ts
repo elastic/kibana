@@ -74,7 +74,7 @@ export class CsvESQLGenerator {
     let reportingError: undefined | ReportingError;
     const warnings: string[] = [];
 
-    const { maxSizeBytes, maxRows, bom, escapeFormulaValues } = settings;
+    const { maxSizeBytes, maxRows, bom, escapeFormulaValues, timezone } = settings;
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
 
     // it will return undefined if there are no _tstart, _tend named params in the query
@@ -130,10 +130,7 @@ export class CsvESQLGenerator {
         // locale can be used for number/date formatting
         locale: i18n.getLocale(),
         ...(params.length ? { params } : {}),
-        // TODO: time_zone support was temporarily removed from ES|QL,
-        // we will need to add it back in once it is supported again.
-        // https://github.com/elastic/elasticsearch/pull/102767
-        // timezone
+        time_zone: timezone,
       },
     };
 

@@ -4709,4 +4709,53 @@ describe('update()', () => {
       expect(result.artifacts).toBeDefined();
     });
   });
+
+  describe('rule migration', () => {
+    test('migrates legacy lastRun.outcomeMsg string to string[]', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          actions: [],
+          lastRun: {
+            outcomeMsg: 'Some message',
+          },
+          revision: 1,
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        references: [],
+      });
+
+      const result = await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+            risk_score: 40,
+            severity: 'low',
+          },
+          actions: [],
+          alertDelay: {
+            active: 10,
+          },
+        },
+      });
+
+      expect(result).toMatchObject({
+        lastRun: {
+          outcomeMsg: ['Some message'],
+        },
+      });
+    });
+  });
 });

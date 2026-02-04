@@ -13,7 +13,7 @@ import {
 } from '@kbn/esql-utils';
 import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { getEsQueryConfig, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLRow } from '@kbn/es-types';
 import { getLensAttributesFromSuggestion, mapVisToChartType } from '@kbn/visualization-utils';
@@ -79,7 +79,7 @@ export const getGridAttrs = async (
       });
 
   const filter = getDSLFilter(data.query, uiSettings, dataView.timeFieldName);
-
+  const timezone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
   const results = await getESQLResults({
     esqlQuery: query.esql,
     search: data.search.search,
@@ -88,6 +88,7 @@ export const getGridAttrs = async (
     dropNullColumns: true,
     timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
     variables: esqlVariables,
+    timezone,
   });
 
   let queryColumns = results.response.columns;

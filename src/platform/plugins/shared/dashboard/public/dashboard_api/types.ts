@@ -100,6 +100,9 @@ export interface DashboardCreationOptions {
   /** Settings for unified search integration. */
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
+  /** Whether to render the control group above the dashboard viewport. */
+  useControlsIntegration?: boolean;
+
   /**
    * Validates a loaded saved object and determines whether it is valid.
    *

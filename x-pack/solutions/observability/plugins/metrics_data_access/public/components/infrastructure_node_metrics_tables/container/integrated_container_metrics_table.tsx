@@ -13,12 +13,12 @@ import { useContainerMetricsTable } from './use_container_metrics_table';
 
 function HookedContainerMetricsTable({
   timerange,
-  filterClauseDsl,
+  kuery,
   metricsClient,
 }: UseNodeMetricsTableOptions) {
   const containerMetricsTableProps = useContainerMetricsTable({
     timerange,
-    filterClauseDsl,
+    kuery,
     metricsClient,
   });
   return <ContainerMetricsTable {...containerMetricsTableProps} />;
@@ -26,7 +26,7 @@ function HookedContainerMetricsTable({
 
 function ContainerMetricsTableWithProviders({
   timerange,
-  filterClauseDsl,
+  kuery,
   sourceId,
   metricsClient,
   ...coreProvidersProps
@@ -35,7 +35,7 @@ function ContainerMetricsTableWithProviders({
     <CoreProviders {...coreProvidersProps}>
       <HookedContainerMetricsTable
         timerange={timerange}
-        filterClauseDsl={filterClauseDsl}
+        kuery={kuery}
         metricsClient={metricsClient}
       />
     </CoreProviders>

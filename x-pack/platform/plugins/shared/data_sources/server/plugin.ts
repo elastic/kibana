@@ -22,6 +22,7 @@ import type {
 } from './types';
 import { registerUISettings } from './register';
 import { setupSavedObjects } from './saved_objects';
+import { BulkDeleteTask } from './tasks/bulk_delete_task';
 
 export class DataSourcesServerPlugin
   implements
@@ -52,6 +53,16 @@ export class DataSourcesServerPlugin
 
     // Register saved objects type
     setupSavedObjects(savedObjects);
+
+    // Register bulk delete task if Task Manager is available
+    if (plugins.taskManager) {
+      new BulkDeleteTask({
+        core,
+        logFactory: this.logger,
+        taskManager: plugins.taskManager,
+        workflowManagement: plugins.workflowsManagement,
+      });
+    }
 
     // Register HTTP routes
     const router = core.http.createRouter();

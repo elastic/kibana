@@ -8,10 +8,15 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { ESQLVariableType, type ESQLControlVariable, QuerySource } from '@kbn/esql-types';
-import { ControlTriggerSource } from '@kbn/esql-types';
+import {
+  ESQLVariableType,
+  QuerySource,
+  type ESQLControlsContext,
+  ControlTriggerSource,
+  type ESQLControlVariable,
+} from '@kbn/esql-types';
 import type { CoreStart } from '@kbn/core/public';
-import type { ESQLEditorDeps, ControlsContext } from './types';
+import type { ESQLEditorDeps } from './types';
 import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 
 export interface MonacoCommandDependencies {
@@ -21,7 +26,7 @@ export interface MonacoCommandDependencies {
   editorRef: React.RefObject<monaco.editor.IStandaloneCodeEditor>;
   getCurrentQuery: () => string;
   esqlVariables: React.RefObject<ESQLControlVariable[] | undefined>;
-  controlsContext: React.RefObject<ControlsContext | undefined>;
+  controlsContext: React.RefObject<ESQLControlsContext | undefined>;
   openTimePickerPopover: () => void;
 }
 
@@ -32,8 +37,8 @@ const triggerControl = async (
   uiActions: ESQLEditorDeps['uiActions'],
   triggerSource: ControlTriggerSource,
   esqlVariables?: ESQLControlVariable[],
-  onSaveControl?: ControlsContext['onSaveControl'],
-  onCancelControl?: ControlsContext['onCancelControl']
+  onSaveControl?: ESQLControlsContext['onSaveControl'],
+  onCancelControl?: ESQLControlsContext['onCancelControl']
 ) => {
   await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
     queryString,

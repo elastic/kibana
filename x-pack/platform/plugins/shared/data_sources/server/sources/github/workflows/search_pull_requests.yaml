@@ -1,0 +1,44 @@
+version: '1'
+name: 'sources.github.search_pull_requests'
+description: 'Search for pull requests in a GitHub repository'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+  - name: order
+    type: string
+    default: "desc"
+    description: "Sort order. Valid values: asc, desc"
+  - name: owner
+    type: string
+    required: false
+  - name: repo
+    type: string
+    required: false
+  - name: page
+    type: number
+    default: 1
+  - name: per_page
+    type: number
+    default: 10
+  - name: sort
+    type: string
+    default: "created"
+    description: "Sort field. Valid values: comments, reactions, reactions-+1, reactions--1, reactions-smile, reactions-thinking_face, reactions-heart, reactions-tada, interactions, created, updated"
+steps:
+  - name: search-pull-requests
+    type: mcp.callTool
+    connector-id: <%= stackConnectorId %>
+    with:
+      name: "search_pull_requests"
+      arguments:
+        query: "${{inputs.query}}"
+        order: "${{inputs.order}}"
+        owner: "${{inputs.owner}}"
+        repo: "${{inputs.repo}}"
+        page: "${{inputs.page}}"
+        perPage: "${{inputs.per_page}}"
+        sort: "${{inputs.sort}}"

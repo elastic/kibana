@@ -80,14 +80,14 @@ export const alertDetectionsLinks: LinkItem = {
       defaultMessage: 'Detections',
     }),
   ],
-  links: [attacksSubLink, alertsSubLink],
+  links: [alertsSubLink, attacksSubLink],
   skipUrlState: true,
   categories: [
     {
       label: i18n.translate('xpack.securitySolution.appLinks.category.views', {
         defaultMessage: 'Views',
       }),
-      linkIds: [SecurityPageName.attacks, SecurityPageName.alerts],
+      linkIds: [SecurityPageName.alerts, SecurityPageName.attacks],
     },
   ],
 };

@@ -96,6 +96,8 @@ export class ServiceManager {
       logger: logger.get('runnerFactory'),
       security,
       elasticsearch,
+      uiSettings,
+      savedObjects,
       inference,
       spaces,
       actions,

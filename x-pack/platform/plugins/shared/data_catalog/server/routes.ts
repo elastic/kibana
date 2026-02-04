@@ -6,15 +6,58 @@
  */
 import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { API_BASE_PATH } from '../common/constants';
+import { parse } from 'yaml';
 import type { DataCatalog } from './data_catalog';
+import { API_BASE_PATH, loadWorkflows, type DataSource } from '../common';
+
+async function enhanceWithWorkflowContent(types: DataSource[]) {
+  return Promise.all(
+    types.map(async (type) => {
+      const workflowInfos = await loadWorkflows(type.workflows);
+      const content: Record<string, string> = {};
+      for (const info of workflowInfos) {
+        let parsed;
+        try {
+          parsed = parse(info.content);
+        } catch (error) {
+          throw new Error(
+            `Failed to parse workflow content for data source '${type.id}': ${
+              (error as Error).message
+            }`,
+            { cause: error }
+          );
+        }
+        if (!parsed) {
+          throw new Error(`Workflow for data source '${type.id}' has empty or invalid content`);
+        }
+        if (!parsed.name) {
+          throw new Error(
+            `Workflow for data source '${type.id}' is missing required 'name' attribute`
+          );
+        }
+        content[parsed.name] = info.content;
+      }
+      return {
+        ...type,
+        workflows: {
+          directory: type.workflows.directory,
+          content,
+        },
+      };
+    })
+  );
+}
 
 export function registerRoutes(router: IRouter, dataCatalog: DataCatalog) {
   // GET /api/data_sources_registry/types
   router.get(
     {
       path: `${API_BASE_PATH}/types`,
-      validate: {},
+      validate: {
+        query: schema.object({
+          includeWorkflows: schema.boolean({ defaultValue: false }),
+        }),
+      },
       security: {
         authz: {
           enabled: false,
@@ -24,6 +67,12 @@ export function registerRoutes(router: IRouter, dataCatalog: DataCatalog) {
     },
     async (context, request, response) => {
       const types = dataCatalog.list();
+
+      if (request.query.includeWorkflows) {
+        const typesWithWorkflows = await enhanceWithWorkflowContent(types);
+        return response.ok({ body: typesWithWorkflows });
+      }
+
       return response.ok({ body: types });
     }
   );
@@ -50,13 +99,7 @@ export function registerRoutes(router: IRouter, dataCatalog: DataCatalog) {
         if (!type) {
           return response.notFound({ body: `Type ${request.params.id} not found` });
         }
-        const workflowInfos = type.generateWorkflows('<fake-stack-connector-id>');
-        return response.ok({
-          body: {
-            ...type,
-            workflowInfos,
-          },
-        });
+        return response.ok({ body: type });
       } catch (err) {
         return response.notFound({ body: err.message });
       }

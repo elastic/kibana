@@ -48,6 +48,11 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   getIcon?: () => IconType;
   /**
+   * Optional custom click handler for attachment pills.
+   * When provided, pills will invoke this instead of the default behavior.
+   */
+  onClick?: (args: { attachment: TAttachment; version?: AttachmentVersion }) => void;
+  /**
    * Renders the attachment content in view mode.
    * If not provided, a default JSON renderer will be used by consumers.
    */

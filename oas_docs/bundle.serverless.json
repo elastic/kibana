@@ -1222,7 +1222,7 @@
     },
     "/api/agent_builder/agents": {
       "get": {
-        "description": "List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
+        "description": "List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "get-agent-builder-agents",
         "parameters": [],
         "responses": {
@@ -1293,7 +1293,7 @@
         "x-state": ""
       },
       "post": {
-        "description": "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
+        "description": "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "post-agent-builder-agents",
         "parameters": [
           {
@@ -1465,7 +1465,7 @@
     },
     "/api/agent_builder/agents/{id}": {
       "delete": {
-        "description": "Delete an agent by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
+        "description": "Delete an agent by ID. This action cannot be undone. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "delete-agent-builder-agents-id",
         "parameters": [
           {
@@ -1512,7 +1512,7 @@
         "x-state": ""
       },
       "get": {
-        "description": "Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
+        "description": "Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "get-agent-builder-agents-id",
         "parameters": [
           {
@@ -1571,7 +1571,7 @@
         "x-state": ""
       },
       "put": {
-        "description": "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
+        "description": "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "put-agent-builder-agents-id",
         "parameters": [
           {
@@ -2483,7 +2483,7 @@
     },
     "/api/agent_builder/converse": {
       "post": {
-        "description": "Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
+        "description": "Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "post-agent-builder-converse",
         "parameters": [
           {
@@ -2954,9 +2954,19 @@
     },
     "/api/agent_builder/mcp": {
       "post": {
-        "description": "> warn\n> This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
+        "description": "> warn\n> This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.\nTo learn more, refer to the [MCP documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/mcp-server).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "post-agent-builder-mcp",
-        "parameters": [],
+        "parameters": [
+          {
+            "description": "Comma-separated list of namespaces to filter tools. Only tools matching the specified namespaces will be returned.",
+            "in": "query",
+            "name": "namespace",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3021,7 +3031,7 @@
     },
     "/api/agent_builder/tools": {
       "get": {
-        "description": "List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
+        "description": "List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "get-agent-builder-tools",
         "parameters": [],
         "responses": {
@@ -3192,10 +3202,20 @@
         "tags": [
           "agent builder"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X GET \"https://${KIBANA_URL}/api/agent_builder/tools\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "GET kbn:/api/agent_builder/tools\n"
+          }
+        ],
         "x-state": ""
       },
       "post": {
-        "description": "Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
+        "description": "Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "post-agent-builder-tools",
         "parameters": [
           {
@@ -3393,12 +3413,22 @@
         "tags": [
           "agent builder"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n -X POST \"https://${KIBANA_URL}/api/agent_builder/tools\" \\\n -H \"Authorization: ApiKey ${API_KEY}\" \\\n -H \"kbn-xsrf: true\" \\\n -H \"Content-Type: application/json\" \\\n -d '{\n   \"id\": \"example-esql-tool\",\n   \"type\": \"esql\",\n   \"description\": \"Example ES|QL query tool for analyzing financial trades with time filtering\",\n   \"tags\": [\"analytics\", \"finance\"],\n   \"configuration\": {\n     \"query\": \"FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit\",\n     \"params\": {\n       \"startTime\": {\n         \"type\": \"date\",\n         \"description\": \"Start time for the analysis in ISO format\"\n       },\n       \"limit\": {\n         \"type\": \"integer\",\n         \"description\": \"Maximum number of results to return\"\n       }\n     }\n   }\n }'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "POST kbn:/api/agent_builder/tools\n{\n  \"id\": \"example-esql-tool\",\n  \"type\": \"esql\",\n  \"description\": \"An ES|QL query tool for analyzing financial trades with time filtering\",\n  \"tags\": [\"analytics\", \"finance\", \"updated\"],\n  \"configuration\": {\n    \"query\": \"FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit\",\n    \"params\": {\n      \"startTime\": {\n        \"type\": \"date\",\n        \"description\": \"Start time for the analysis in ISO format\"\n      },\n      \"limit\": {\n        \"type\": \"integer\",\n        \"description\": \"Maximum number of results to return\"\n      }\n    }\n  }\n}\n"
+          }
+        ],
         "x-state": ""
       }
     },
     "/api/agent_builder/tools/_execute": {
       "post": {
-        "description": "Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
+        "description": "Run a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "post-agent-builder-tools-execute",
         "parameters": [
           {
@@ -3694,16 +3724,26 @@
             "description": "Indicates a successful response"
           }
         },
-        "summary": "Execute a Tool",
+        "summary": "Run a tool",
         "tags": [
           "agent builder"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n -X POST \"https://${KIBANA_URL}/api/agent_builder/tools/_execute\" \\\n -H \"Authorization: ApiKey ${API_KEY}\" \\\n -H \"kbn-xsrf: true\" \\\n -H \"Content-Type: application/json\" \\\n -d '{\n   \"tool_id\": \"platform.core.search\",\n   \"tool_params\": {\n     \"query\": \"can you find john doe's email from the employee index?\"}\n   }\n }'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "POST kbn:/api/agent_builder/tools/_execute\n{\n  \"tool_id\": \"platform.core.search\",\n  \"tool_params\": {\n    \"query\": \"can you find john doe's email from the employee index?\"\n  }\n}\n"
+          }
         ],
         "x-state": ""
       }
     },
     "/api/agent_builder/tools/{toolId}": {
       "delete": {
-        "description": "Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
+        "description": "Delete a tool by ID. This action cannot be undone. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "delete-agent-builder-tools-toolid",
         "parameters": [
           {
@@ -3747,10 +3787,20 @@
         "tags": [
           "agent builder"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X DELETE \"https://${KIBANA_URL}/api/agent_builder/tools/{toolId}\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "DELETE kbn:/api/agent_builder/tools/{toolId}\n"
+          }
+        ],
         "x-state": ""
       },
       "get": {
-        "description": "Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
+        "description": "Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "get-agent-builder-tools-toolid",
         "parameters": [
           {
@@ -3884,10 +3934,20 @@
         "tags": [
           "agent builder"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X GET \"https://${KIBANA_URL}/api/agent_builder/tools/{toolId}\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "GET kbn:/api/agent_builder/tools/{toolId}\n"
+          }
+        ],
         "x-state": ""
       },
       "put": {
-        "description": "Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
+        "description": "Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "put-agent-builder-tools-toolid",
         "parameters": [
           {
@@ -4084,6 +4144,16 @@
         "summary": "Update a tool",
         "tags": [
           "agent builder"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n -X PUT \"https://${KIBANA_URL}/api/agent_builder/tools/{toolId}\" \\\n -H \"Authorization: ApiKey ${API_KEY}\" \\\n -H \"kbn-xsrf: true\" \\\n -H \"Content-Type: application/json\" \\\n -d '{\n   \"description\": \"Updated ES|QL query tool for analyzing financial trades with time filtering\",\n   \"tags\": [\"analytics\", \"finance\", \"updated\"],\n   \"configuration\": {\n     \"query\": \"FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit\",\n     \"params\": {\n       \"startTime\": {\n         \"type\": \"date\",\n         \"description\": \"Start time for the analysis in ISO format\"\n       },\n       \"limit\": {\n         \"type\": \"integer\",\n         \"description\": \"Maximum number of results to return\"\n       }\n     }\n   }\n }'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "PUT kbn:/api/agent_builder/tools/{toolId}\n{\n  \"description\": \"Updated ES|QL query tool for analyzing financial trades with time filtering\",\n  \"tags\": [\"analytics\", \"finance\", \"updated\"],\n  \"configuration\": {\n    \"query\": \"FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit\",\n    \"params\": {\n      \"startTime\": {\n        \"type\": \"date\",\n        \"description\": \"Start time for the analysis in ISO format\"\n      },\n      \"limit\": {\n        \"type\": \"integer\",\n        \"description\": \"Maximum number of results to return\"\n      }\n    }\n  }\n}\n"
+          }
         ],
         "x-state": ""
       }
@@ -11654,6 +11724,13 @@
                                                       ],
                                                       "type": "string"
                                                     },
+                                                    "var_group_selections": {
+                                                      "additionalProperties": {
+                                                        "type": "string"
+                                                      },
+                                                      "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                                      "type": "object"
+                                                    },
                                                     "vars": {
                                                       "additionalProperties": {
                                                         "additionalProperties": false,
@@ -11735,6 +11812,13 @@
                                                     "enabled": {
                                                       "description": "Enable or disable that stream. Defaults to `true` (enabled).",
                                                       "type": "boolean"
+                                                    },
+                                                    "var_group_selections": {
+                                                      "additionalProperties": {
+                                                        "type": "string"
+                                                      },
+                                                      "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                                      "type": "object"
                                                     },
                                                     "vars": {
                                                       "additionalProperties": {
@@ -11995,6 +12079,13 @@
                                     },
                                     "updated_by": {
                                       "type": "string"
+                                    },
+                                    "var_group_selections": {
+                                      "additionalProperties": {
+                                        "type": "string"
+                                      },
+                                      "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                      "type": "object"
                                     },
                                     "vars": {
                                       "anyOf": [
@@ -13078,6 +13169,13 @@
                                                     ],
                                                     "type": "string"
                                                   },
+                                                  "var_group_selections": {
+                                                    "additionalProperties": {
+                                                      "type": "string"
+                                                    },
+                                                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                                    "type": "object"
+                                                  },
                                                   "vars": {
                                                     "additionalProperties": {
                                                       "additionalProperties": false,
@@ -13159,6 +13257,13 @@
                                                   "enabled": {
                                                     "description": "Enable or disable that stream. Defaults to `true` (enabled).",
                                                     "type": "boolean"
+                                                  },
+                                                  "var_group_selections": {
+                                                    "additionalProperties": {
+                                                      "type": "string"
+                                                    },
+                                                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                                    "type": "object"
                                                   },
                                                   "vars": {
                                                     "additionalProperties": {
@@ -13419,6 +13524,13 @@
                                   },
                                   "updated_by": {
                                     "type": "string"
+                                  },
+                                  "var_group_selections": {
+                                    "additionalProperties": {
+                                      "type": "string"
+                                    },
+                                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                    "type": "object"
                                   },
                                   "vars": {
                                     "anyOf": [
@@ -14191,6 +14303,13 @@
                                                       ],
                                                       "type": "string"
                                                     },
+                                                    "var_group_selections": {
+                                                      "additionalProperties": {
+                                                        "type": "string"
+                                                      },
+                                                      "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                                      "type": "object"
+                                                    },
                                                     "vars": {
                                                       "additionalProperties": {
                                                         "additionalProperties": false,
@@ -14272,6 +14391,13 @@
                                                     "enabled": {
                                                       "description": "Enable or disable that stream. Defaults to `true` (enabled).",
                                                       "type": "boolean"
+                                                    },
+                                                    "var_group_selections": {
+                                                      "additionalProperties": {
+                                                        "type": "string"
+                                                      },
+                                                      "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                                      "type": "object"
                                                     },
                                                     "vars": {
                                                       "additionalProperties": {
@@ -14532,6 +14658,13 @@
                                     },
                                     "updated_by": {
                                       "type": "string"
+                                    },
+                                    "var_group_selections": {
+                                      "additionalProperties": {
+                                        "type": "string"
+                                      },
+                                      "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                      "type": "object"
                                     },
                                     "vars": {
                                       "anyOf": [
@@ -15557,6 +15690,13 @@
                                                     ],
                                                     "type": "string"
                                                   },
+                                                  "var_group_selections": {
+                                                    "additionalProperties": {
+                                                      "type": "string"
+                                                    },
+                                                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                                    "type": "object"
+                                                  },
                                                   "vars": {
                                                     "additionalProperties": {
                                                       "additionalProperties": false,
@@ -15638,6 +15778,13 @@
                                                   "enabled": {
                                                     "description": "Enable or disable that stream. Defaults to `true` (enabled).",
                                                     "type": "boolean"
+                                                  },
+                                                  "var_group_selections": {
+                                                    "additionalProperties": {
+                                                      "type": "string"
+                                                    },
+                                                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                                    "type": "object"
                                                   },
                                                   "vars": {
                                                     "additionalProperties": {
@@ -15898,6 +16045,13 @@
                                   },
                                   "updated_by": {
                                     "type": "string"
+                                  },
+                                  "var_group_selections": {
+                                    "additionalProperties": {
+                                      "type": "string"
+                                    },
+                                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                    "type": "object"
                                   },
                                   "vars": {
                                     "anyOf": [
@@ -16981,6 +17135,13 @@
                                                     ],
                                                     "type": "string"
                                                   },
+                                                  "var_group_selections": {
+                                                    "additionalProperties": {
+                                                      "type": "string"
+                                                    },
+                                                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                                    "type": "object"
+                                                  },
                                                   "vars": {
                                                     "additionalProperties": {
                                                       "additionalProperties": false,
@@ -17062,6 +17223,13 @@
                                                   "enabled": {
                                                     "description": "Enable or disable that stream. Defaults to `true` (enabled).",
                                                     "type": "boolean"
+                                                  },
+                                                  "var_group_selections": {
+                                                    "additionalProperties": {
+                                                      "type": "string"
+                                                    },
+                                                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                                    "type": "object"
                                                   },
                                                   "vars": {
                                                     "additionalProperties": {
@@ -17322,6 +17490,13 @@
                                   },
                                   "updated_by": {
                                     "type": "string"
+                                  },
+                                  "var_group_selections": {
+                                    "additionalProperties": {
+                                      "type": "string"
+                                    },
+                                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                    "type": "object"
                                   },
                                   "vars": {
                                     "anyOf": [
@@ -18214,6 +18389,13 @@
                                                     ],
                                                     "type": "string"
                                                   },
+                                                  "var_group_selections": {
+                                                    "additionalProperties": {
+                                                      "type": "string"
+                                                    },
+                                                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                                    "type": "object"
+                                                  },
                                                   "vars": {
                                                     "additionalProperties": {
                                                       "additionalProperties": false,
@@ -18295,6 +18477,13 @@
                                                   "enabled": {
                                                     "description": "Enable or disable that stream. Defaults to `true` (enabled).",
                                                     "type": "boolean"
+                                                  },
+                                                  "var_group_selections": {
+                                                    "additionalProperties": {
+                                                      "type": "string"
+                                                    },
+                                                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                                    "type": "object"
                                                   },
                                                   "vars": {
                                                     "additionalProperties": {
@@ -18555,6 +18744,13 @@
                                   },
                                   "updated_by": {
                                     "type": "string"
+                                  },
+                                  "var_group_selections": {
+                                    "additionalProperties": {
+                                      "type": "string"
+                                    },
+                                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                    "type": "object"
                                   },
                                   "vars": {
                                     "anyOf": [
@@ -20424,6 +20620,13 @@
                                 "description": "Enable or disable that stream. Defaults to `true` (enabled).",
                                 "type": "boolean"
                               },
+                              "var_group_selections": {
+                                "additionalProperties": {
+                                  "type": "string"
+                                },
+                                "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                "type": "object"
+                              },
                               "vars": {
                                 "additionalProperties": {
                                   "anyOf": [
@@ -20605,6 +20808,13 @@
                   "policy_template": {
                     "description": "The policy template to use for the agentless package policy. If not provided, the default policy template will be used.",
                     "type": "string"
+                  },
+                  "var_group_selections": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                    "type": "object"
                   },
                   "vars": {
                     "additionalProperties": {
@@ -21050,6 +21260,13 @@
                                           ],
                                           "type": "string"
                                         },
+                                        "var_group_selections": {
+                                          "additionalProperties": {
+                                            "type": "string"
+                                          },
+                                          "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                          "type": "object"
+                                        },
                                         "vars": {
                                           "additionalProperties": {
                                             "additionalProperties": false,
@@ -21131,6 +21348,13 @@
                                         "enabled": {
                                           "description": "Enable or disable that stream. Defaults to `true` (enabled).",
                                           "type": "boolean"
+                                        },
+                                        "var_group_selections": {
+                                          "additionalProperties": {
+                                            "type": "string"
+                                          },
+                                          "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                          "type": "object"
                                         },
                                         "vars": {
                                           "additionalProperties": {
@@ -21391,6 +21615,13 @@
                         },
                         "updated_by": {
                           "type": "string"
+                        },
+                        "var_group_selections": {
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                          "type": "object"
                         },
                         "vars": {
                           "anyOf": [
@@ -29651,6 +29882,76 @@
                               }
                             ]
                           },
+                          "var_groups": {
+                            "items": {
+                              "additionalProperties": true,
+                              "properties": {
+                                "description": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "options": {
+                                  "items": {
+                                    "additionalProperties": true,
+                                    "properties": {
+                                      "description": {
+                                        "type": "string"
+                                      },
+                                      "hide_in_deployment_modes": {
+                                        "items": {
+                                          "enum": [
+                                            "default",
+                                            "agentless"
+                                          ],
+                                          "type": "string"
+                                        },
+                                        "maxItems": 2,
+                                        "type": "array"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      },
+                                      "title": {
+                                        "type": "string"
+                                      },
+                                      "vars": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "maxItems": 100,
+                                        "type": "array"
+                                      }
+                                    },
+                                    "required": [
+                                      "name",
+                                      "title",
+                                      "vars"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "maxItems": 20,
+                                  "type": "array"
+                                },
+                                "selector_title": {
+                                  "type": "string"
+                                },
+                                "title": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "title",
+                                "selector_title",
+                                "options"
+                              ],
+                              "type": "object"
+                            },
+                            "maxItems": 20,
+                            "type": "array"
+                          },
                           "vars": {
                             "items": {
                               "additionalProperties": {},
@@ -32300,6 +32601,76 @@
                             }
                           ]
                         },
+                        "var_groups": {
+                          "items": {
+                            "additionalProperties": true,
+                            "properties": {
+                              "description": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "options": {
+                                "items": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "description": {
+                                      "type": "string"
+                                    },
+                                    "hide_in_deployment_modes": {
+                                      "items": {
+                                        "enum": [
+                                          "default",
+                                          "agentless"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "maxItems": 2,
+                                      "type": "array"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "title": {
+                                      "type": "string"
+                                    },
+                                    "vars": {
+                                      "items": {
+                                        "type": "string"
+                                      },
+                                      "maxItems": 100,
+                                      "type": "array"
+                                    }
+                                  },
+                                  "required": [
+                                    "name",
+                                    "title",
+                                    "vars"
+                                  ],
+                                  "type": "object"
+                                },
+                                "maxItems": 20,
+                                "type": "array"
+                              },
+                              "selector_title": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "title",
+                              "selector_title",
+                              "options"
+                            ],
+                            "type": "object"
+                          },
+                          "maxItems": 20,
+                          "type": "array"
+                        },
                         "vars": {
                           "items": {
                             "additionalProperties": {},
@@ -33293,6 +33664,76 @@
                               "type": "string"
                             }
                           ]
+                        },
+                        "var_groups": {
+                          "items": {
+                            "additionalProperties": true,
+                            "properties": {
+                              "description": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "options": {
+                                "items": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "description": {
+                                      "type": "string"
+                                    },
+                                    "hide_in_deployment_modes": {
+                                      "items": {
+                                        "enum": [
+                                          "default",
+                                          "agentless"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "maxItems": 2,
+                                      "type": "array"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "title": {
+                                      "type": "string"
+                                    },
+                                    "vars": {
+                                      "items": {
+                                        "type": "string"
+                                      },
+                                      "maxItems": 100,
+                                      "type": "array"
+                                    }
+                                  },
+                                  "required": [
+                                    "name",
+                                    "title",
+                                    "vars"
+                                  ],
+                                  "type": "object"
+                                },
+                                "maxItems": 20,
+                                "type": "array"
+                              },
+                              "selector_title": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "title",
+                              "selector_title",
+                              "options"
+                            ],
+                            "type": "object"
+                          },
+                          "maxItems": 20,
+                          "type": "array"
                         },
                         "vars": {
                           "items": {
@@ -43586,6 +44027,13 @@
                                             ],
                                             "type": "string"
                                           },
+                                          "var_group_selections": {
+                                            "additionalProperties": {
+                                              "type": "string"
+                                            },
+                                            "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                            "type": "object"
+                                          },
                                           "vars": {
                                             "additionalProperties": {
                                               "additionalProperties": false,
@@ -43667,6 +44115,13 @@
                                           "enabled": {
                                             "description": "Enable or disable that stream. Defaults to `true` (enabled).",
                                             "type": "boolean"
+                                          },
+                                          "var_group_selections": {
+                                            "additionalProperties": {
+                                              "type": "string"
+                                            },
+                                            "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                            "type": "object"
                                           },
                                           "vars": {
                                             "additionalProperties": {
@@ -43927,6 +44382,13 @@
                           },
                           "updated_by": {
                             "type": "string"
+                          },
+                          "var_group_selections": {
+                            "additionalProperties": {
+                              "type": "string"
+                            },
+                            "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                            "type": "object"
                           },
                           "vars": {
                             "anyOf": [
@@ -44271,6 +44733,13 @@
                                     ],
                                     "type": "string"
                                   },
+                                  "var_group_selections": {
+                                    "additionalProperties": {
+                                      "type": "string"
+                                    },
+                                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                    "type": "object"
+                                  },
                                   "vars": {
                                     "additionalProperties": {
                                       "additionalProperties": false,
@@ -44458,6 +44927,13 @@
                         "nullable": true,
                         "type": "boolean"
                       },
+                      "var_group_selections": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                        "type": "object"
+                      },
                       "vars": {
                         "additionalProperties": {
                           "additionalProperties": false,
@@ -44524,6 +45000,13 @@
                                   "enabled": {
                                     "description": "Enable or disable that stream. Defaults to `true` (enabled).",
                                     "type": "boolean"
+                                  },
+                                  "var_group_selections": {
+                                    "additionalProperties": {
+                                      "type": "string"
+                                    },
+                                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                    "type": "object"
                                   },
                                   "vars": {
                                     "additionalProperties": {
@@ -44727,6 +45210,13 @@
                         "description": "Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.",
                         "nullable": true,
                         "type": "boolean"
+                      },
+                      "var_group_selections": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                        "type": "object"
                       },
                       "vars": {
                         "additionalProperties": {
@@ -44981,6 +45471,13 @@
                                           ],
                                           "type": "string"
                                         },
+                                        "var_group_selections": {
+                                          "additionalProperties": {
+                                            "type": "string"
+                                          },
+                                          "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                          "type": "object"
+                                        },
                                         "vars": {
                                           "additionalProperties": {
                                             "additionalProperties": false,
@@ -45062,6 +45559,13 @@
                                         "enabled": {
                                           "description": "Enable or disable that stream. Defaults to `true` (enabled).",
                                           "type": "boolean"
+                                        },
+                                        "var_group_selections": {
+                                          "additionalProperties": {
+                                            "type": "string"
+                                          },
+                                          "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                          "type": "object"
                                         },
                                         "vars": {
                                           "additionalProperties": {
@@ -45322,6 +45826,13 @@
                         },
                         "updated_by": {
                           "type": "string"
+                        },
+                        "var_group_selections": {
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                          "type": "object"
                         },
                         "vars": {
                           "anyOf": [
@@ -45740,6 +46251,13 @@
                                             ],
                                             "type": "string"
                                           },
+                                          "var_group_selections": {
+                                            "additionalProperties": {
+                                              "type": "string"
+                                            },
+                                            "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                            "type": "object"
+                                          },
                                           "vars": {
                                             "additionalProperties": {
                                               "additionalProperties": false,
@@ -45821,6 +46339,13 @@
                                           "enabled": {
                                             "description": "Enable or disable that stream. Defaults to `true` (enabled).",
                                             "type": "boolean"
+                                          },
+                                          "var_group_selections": {
+                                            "additionalProperties": {
+                                              "type": "string"
+                                            },
+                                            "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                            "type": "object"
                                           },
                                           "vars": {
                                             "additionalProperties": {
@@ -46081,6 +46606,13 @@
                           },
                           "updated_by": {
                             "type": "string"
+                          },
+                          "var_group_selections": {
+                            "additionalProperties": {
+                              "type": "string"
+                            },
+                            "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                            "type": "object"
                           },
                           "vars": {
                             "anyOf": [
@@ -46968,6 +47500,13 @@
                                                   ],
                                                   "type": "string"
                                                 },
+                                                "var_group_selections": {
+                                                  "additionalProperties": {
+                                                    "type": "string"
+                                                  },
+                                                  "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                                  "type": "object"
+                                                },
                                                 "vars": {
                                                   "additionalProperties": {
                                                     "additionalProperties": false,
@@ -47049,6 +47588,13 @@
                                                 "enabled": {
                                                   "description": "Enable or disable that stream. Defaults to `true` (enabled).",
                                                   "type": "boolean"
+                                                },
+                                                "var_group_selections": {
+                                                  "additionalProperties": {
+                                                    "type": "string"
+                                                  },
+                                                  "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                                  "type": "object"
                                                 },
                                                 "vars": {
                                                   "additionalProperties": {
@@ -47309,6 +47855,13 @@
                                 },
                                 "updated_by": {
                                   "type": "string"
+                                },
+                                "var_group_selections": {
+                                  "additionalProperties": {
+                                    "type": "string"
+                                  },
+                                  "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                  "type": "object"
                                 },
                                 "vars": {
                                   "anyOf": [
@@ -47602,6 +48155,13 @@
                                               ],
                                               "type": "string"
                                             },
+                                            "var_group_selections": {
+                                              "additionalProperties": {
+                                                "type": "string"
+                                              },
+                                              "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                              "type": "object"
+                                            },
                                             "vars": {
                                               "additionalProperties": {
                                                 "additionalProperties": false,
@@ -47814,6 +48374,13 @@
                                 },
                                 "updated_by": {
                                   "type": "string"
+                                },
+                                "var_group_selections": {
+                                  "additionalProperties": {
+                                    "type": "string"
+                                  },
+                                  "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                  "type": "object"
                                 },
                                 "vars": {
                                   "additionalProperties": {
@@ -48218,6 +48785,13 @@
                                           ],
                                           "type": "string"
                                         },
+                                        "var_group_selections": {
+                                          "additionalProperties": {
+                                            "type": "string"
+                                          },
+                                          "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                          "type": "object"
+                                        },
                                         "vars": {
                                           "additionalProperties": {
                                             "additionalProperties": false,
@@ -48299,6 +48873,13 @@
                                         "enabled": {
                                           "description": "Enable or disable that stream. Defaults to `true` (enabled).",
                                           "type": "boolean"
+                                        },
+                                        "var_group_selections": {
+                                          "additionalProperties": {
+                                            "type": "string"
+                                          },
+                                          "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                          "type": "object"
                                         },
                                         "vars": {
                                           "additionalProperties": {
@@ -48559,6 +49140,13 @@
                         },
                         "updated_by": {
                           "type": "string"
+                        },
+                        "var_group_selections": {
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                          "type": "object"
                         },
                         "vars": {
                           "anyOf": [
@@ -48911,6 +49499,13 @@
                                     ],
                                     "type": "string"
                                   },
+                                  "var_group_selections": {
+                                    "additionalProperties": {
+                                      "type": "string"
+                                    },
+                                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                    "type": "object"
+                                  },
                                   "vars": {
                                     "additionalProperties": {
                                       "additionalProperties": false,
@@ -49096,6 +49691,13 @@
                         "nullable": true,
                         "type": "boolean"
                       },
+                      "var_group_selections": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                        "type": "object"
+                      },
                       "vars": {
                         "additionalProperties": {
                           "additionalProperties": false,
@@ -49161,6 +49763,13 @@
                                   "enabled": {
                                     "description": "Enable or disable that stream. Defaults to `true` (enabled).",
                                     "type": "boolean"
+                                  },
+                                  "var_group_selections": {
+                                    "additionalProperties": {
+                                      "type": "string"
+                                    },
+                                    "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                    "type": "object"
                                   },
                                   "vars": {
                                     "additionalProperties": {
@@ -49364,6 +49973,13 @@
                         "description": "Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.",
                         "nullable": true,
                         "type": "boolean"
+                      },
+                      "var_group_selections": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                        "type": "object"
                       },
                       "vars": {
                         "additionalProperties": {
@@ -49617,6 +50233,13 @@
                                           ],
                                           "type": "string"
                                         },
+                                        "var_group_selections": {
+                                          "additionalProperties": {
+                                            "type": "string"
+                                          },
+                                          "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                          "type": "object"
+                                        },
                                         "vars": {
                                           "additionalProperties": {
                                             "additionalProperties": false,
@@ -49698,6 +50321,13 @@
                                         "enabled": {
                                           "description": "Enable or disable that stream. Defaults to `true` (enabled).",
                                           "type": "boolean"
+                                        },
+                                        "var_group_selections": {
+                                          "additionalProperties": {
+                                            "type": "string"
+                                          },
+                                          "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                                          "type": "object"
                                         },
                                         "vars": {
                                           "additionalProperties": {
@@ -49958,6 +50588,13 @@
                         },
                         "updated_by": {
                           "type": "string"
+                        },
+                        "var_group_selections": {
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "description": "Variable group selections. Maps var_group name to the selected option name within that group.",
+                          "type": "object"
                         },
                         "vars": {
                           "anyOf": [
@@ -53965,6 +54602,7 @@
                           "description": "Cluster privileges that define the cluster level actions that users can perform.",
                           "type": "string"
                         },
+                        "maxItems": 100,
                         "type": "array"
                       },
                       "indices": {
@@ -53981,6 +54619,7 @@
                                   "description": "The document fields that the role members have read access to.",
                                   "type": "string"
                                 },
+                                "maxItems": 1000,
                                 "type": "array"
                               },
                               "type": "object"
@@ -53990,6 +54629,7 @@
                                 "description": "The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).",
                                 "type": "string"
                               },
+                              "maxItems": 100,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -53998,6 +54638,7 @@
                                 "description": "The index level privileges that the role members have for the data streams and indices.",
                                 "type": "string"
                               },
+                              "maxItems": 100,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -54012,6 +54653,7 @@
                           ],
                           "type": "object"
                         },
+                        "maxItems": 1000,
                         "type": "array"
                       },
                       "remote_cluster": {
@@ -54023,6 +54665,7 @@
                                 "description": "A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.",
                                 "type": "string"
                               },
+                              "maxItems": 100,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -54031,6 +54674,7 @@
                                 "description": "The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.",
                                 "type": "string"
                               },
+                              "maxItems": 100,
                               "minItems": 1,
                               "type": "array"
                             }
@@ -54041,6 +54685,7 @@
                           ],
                           "type": "object"
                         },
+                        "maxItems": 100,
                         "type": "array"
                       },
                       "remote_indices": {
@@ -54056,6 +54701,7 @@
                                 "description": "A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.",
                                 "type": "string"
                               },
+                              "maxItems": 100,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -54065,6 +54711,7 @@
                                   "description": "The document fields that the role members have read access to.",
                                   "type": "string"
                                 },
+                                "maxItems": 1000,
                                 "type": "array"
                               },
                               "type": "object"
@@ -54074,6 +54721,7 @@
                                 "description": "A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).",
                                 "type": "string"
                               },
+                              "maxItems": 100,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -54082,6 +54730,7 @@
                                 "description": "The index level privileges that role members have for the specified indices.",
                                 "type": "string"
                               },
+                              "maxItems": 100,
                               "minItems": 1,
                               "type": "array"
                             },
@@ -54097,6 +54746,7 @@
                           ],
                           "type": "object"
                         },
+                        "maxItems": 1000,
                         "type": "array"
                       },
                       "run_as": {
@@ -54104,6 +54754,7 @@
                           "description": "A user name that the role member can impersonate.",
                           "type": "string"
                         },
+                        "maxItems": 100,
                         "type": "array"
                       }
                     },
@@ -54139,6 +54790,7 @@
                                 "description": "A base privilege that grants applies to all spaces.",
                                 "type": "string"
                               },
+                              "maxItems": 50,
                               "type": "array"
                             },
                             {
@@ -54146,6 +54798,7 @@
                                 "description": "A base privilege that applies to specific spaces.",
                                 "type": "string"
                               },
+                              "maxItems": 50,
                               "type": "array"
                             }
                           ]
@@ -54156,6 +54809,7 @@
                               "description": "The privileges that the role member has for the feature.",
                               "type": "string"
                             },
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "type": "object"
@@ -54178,6 +54832,7 @@
                                 "description": "A space that the privilege applies to.",
                                 "type": "string"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             }
                           ],
@@ -54255,6 +54910,7 @@
                                 "description": "Cluster privileges that define the cluster level actions that users can perform.",
                                 "type": "string"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "indices": {
@@ -54271,6 +54927,7 @@
                                         "description": "The document fields that the role members have read access to.",
                                         "type": "string"
                                       },
+                                      "maxItems": 1000,
                                       "type": "array"
                                     },
                                     "type": "object"
@@ -54280,6 +54937,7 @@
                                       "description": "The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).",
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "minItems": 1,
                                     "type": "array"
                                   },
@@ -54288,6 +54946,7 @@
                                       "description": "The index level privileges that the role members have for the data streams and indices.",
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "minItems": 1,
                                     "type": "array"
                                   },
@@ -54302,6 +54961,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "remote_cluster": {
@@ -54313,6 +54973,7 @@
                                       "description": "A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.",
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "minItems": 1,
                                     "type": "array"
                                   },
@@ -54321,6 +54982,7 @@
                                       "description": "The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.",
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "minItems": 1,
                                     "type": "array"
                                   }
@@ -54331,6 +54993,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "remote_indices": {
@@ -54346,6 +55009,7 @@
                                       "description": "A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.",
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "minItems": 1,
                                     "type": "array"
                                   },
@@ -54355,6 +55019,7 @@
                                         "description": "The document fields that the role members have read access to.",
                                         "type": "string"
                                       },
+                                      "maxItems": 1000,
                                       "type": "array"
                                     },
                                     "type": "object"
@@ -54364,6 +55029,7 @@
                                       "description": "A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).",
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "minItems": 1,
                                     "type": "array"
                                   },
@@ -54372,6 +55038,7 @@
                                       "description": "The index level privileges that role members have for the specified indices.",
                                       "type": "string"
                                     },
+                                    "maxItems": 100,
                                     "minItems": 1,
                                     "type": "array"
                                   },
@@ -54387,6 +55054,7 @@
                                 ],
                                 "type": "object"
                               },
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "run_as": {
@@ -54394,6 +55062,7 @@
                                 "description": "A user name that the role member can impersonate.",
                                 "type": "string"
                               },
+                              "maxItems": 100,
                               "type": "array"
                             }
                           },
@@ -54429,6 +55098,7 @@
                                       "description": "A base privilege that grants applies to all spaces.",
                                       "type": "string"
                                     },
+                                    "maxItems": 50,
                                     "type": "array"
                                   },
                                   {
@@ -54436,6 +55106,7 @@
                                       "description": "A base privilege that applies to specific spaces.",
                                       "type": "string"
                                     },
+                                    "maxItems": 50,
                                     "type": "array"
                                   }
                                 ]
@@ -54446,6 +55117,7 @@
                                     "description": "The privileges that the role member has for the feature.",
                                     "type": "string"
                                   },
+                                  "maxItems": 100,
                                   "type": "array"
                                 },
                                 "type": "object"
@@ -54468,6 +55140,7 @@
                                       "description": "A space that the privilege applies to.",
                                       "type": "string"
                                     },
+                                    "maxItems": 1000,
                                     "type": "array"
                                   }
                                 ],
@@ -54621,6 +55294,7 @@
                       "description": "The list of features that are turned off in the space.",
                       "type": "string"
                     },
+                    "maxItems": 100,
                     "type": "array"
                   },
                   "id": {
@@ -54769,6 +55443,7 @@
                       "description": "The list of features that are turned off in the space.",
                       "type": "string"
                     },
+                    "maxItems": 100,
                     "type": "array"
                   },
                   "id": {
@@ -55818,6 +56493,29 @@
                                                             "description": "A non-empty string.",
                                                             "minLength": 1,
                                                             "type": "string"
+                                                          },
+                                                          "downsample": {
+                                                            "items": {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "after": {
+                                                                  "description": "A non-empty string.",
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "fixed_interval": {
+                                                                  "description": "A non-empty string.",
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "after",
+                                                                "fixed_interval"
+                                                              ],
+                                                              "type": "object"
+                                                            },
+                                                            "type": "array"
                                                           }
                                                         },
                                                         "type": "object"
@@ -60731,6 +61429,7 @@
                                                                     "minLength": 1,
                                                                     "type": "string"
                                                                   },
+                                                                  "minItems": 1,
                                                                   "type": "array"
                                                                 },
                                                                 "ignore_failure": {
@@ -63879,6 +64578,29 @@
                                                         "description": "A non-empty string.",
                                                         "minLength": 1,
                                                         "type": "string"
+                                                      },
+                                                      "downsample": {
+                                                        "items": {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "after": {
+                                                              "description": "A non-empty string.",
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "fixed_interval": {
+                                                              "description": "A non-empty string.",
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "after",
+                                                            "fixed_interval"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        "type": "array"
                                                       }
                                                     },
                                                     "type": "object"
@@ -68792,6 +69514,7 @@
                                                                 "minLength": 1,
                                                                 "type": "string"
                                                               },
+                                                              "minItems": 1,
                                                               "type": "array"
                                                             },
                                                             "ignore_failure": {
@@ -71474,6 +72197,29 @@
                                                             "description": "A non-empty string.",
                                                             "minLength": 1,
                                                             "type": "string"
+                                                          },
+                                                          "downsample": {
+                                                            "items": {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "after": {
+                                                                  "description": "A non-empty string.",
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "fixed_interval": {
+                                                                  "description": "A non-empty string.",
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "after",
+                                                                "fixed_interval"
+                                                              ],
+                                                              "type": "object"
+                                                            },
+                                                            "type": "array"
                                                           }
                                                         },
                                                         "type": "object"
@@ -76387,6 +77133,7 @@
                                                                     "minLength": 1,
                                                                     "type": "string"
                                                                   },
+                                                                  "minItems": 1,
                                                                   "type": "array"
                                                                 },
                                                                 "ignore_failure": {
@@ -79184,6 +79931,29 @@
                                                         "description": "A non-empty string.",
                                                         "minLength": 1,
                                                         "type": "string"
+                                                      },
+                                                      "downsample": {
+                                                        "items": {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "after": {
+                                                              "description": "A non-empty string.",
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "fixed_interval": {
+                                                              "description": "A non-empty string.",
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "after",
+                                                            "fixed_interval"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        "type": "array"
                                                       }
                                                     },
                                                     "type": "object"
@@ -84097,6 +84867,7 @@
                                                                 "minLength": 1,
                                                                 "type": "string"
                                                               },
+                                                              "minItems": 1,
                                                               "type": "array"
                                                             },
                                                             "ignore_failure": {
@@ -86732,6 +87503,29 @@
                                             "description": "A non-empty string.",
                                             "minLength": 1,
                                             "type": "string"
+                                          },
+                                          "downsample": {
+                                            "items": {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "after": {
+                                                  "description": "A non-empty string.",
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "fixed_interval": {
+                                                  "description": "A non-empty string.",
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "after",
+                                                "fixed_interval"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            "type": "array"
                                           }
                                         },
                                         "type": "object"
@@ -91645,6 +92439,7 @@
                                                     "minLength": 1,
                                                     "type": "string"
                                                   },
+                                                  "minItems": 1,
                                                   "type": "array"
                                                 },
                                                 "ignore_failure": {
@@ -94253,6 +95048,29 @@
                                             "description": "A non-empty string.",
                                             "minLength": 1,
                                             "type": "string"
+                                          },
+                                          "downsample": {
+                                            "items": {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "after": {
+                                                  "description": "A non-empty string.",
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "fixed_interval": {
+                                                  "description": "A non-empty string.",
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "after",
+                                                "fixed_interval"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            "type": "array"
                                           }
                                         },
                                         "type": "object"
@@ -99166,6 +99984,7 @@
                                                     "minLength": 1,
                                                     "type": "string"
                                                   },
+                                                  "minItems": 1,
                                                   "type": "array"
                                                 },
                                                 "ignore_failure": {

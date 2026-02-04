@@ -66,7 +66,10 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
     .addNode('translationResult', translationResultNode)
 
     // Edges
-    .addEdge(START, 'inlineQuery')
+    .addConditionalEdges(START, panelTypeRouter, {
+      isMarkdown: 'translationResult',
+      isNotMarkdown: 'inlineQuery',
+    })
     .addConditionalEdges('inlineQuery', translatableRouter, ['translateQuery', 'translationResult'])
     .addEdge('translateQuery', 'validation')
     .addEdge('fixQueryErrors', 'validation')
@@ -102,4 +105,11 @@ const validationRouter = (state: TranslateDashboardPanelState) => {
     return 'ecsMapping';
   }
   return 'selectIndexPattern';
+};
+
+const panelTypeRouter = (state: TranslateDashboardPanelState) => {
+  if (state.parsed_panel.viz_type === 'markdown') {
+    return 'isMarkdown';
+  }
+  return 'isNotMarkdown';
 };

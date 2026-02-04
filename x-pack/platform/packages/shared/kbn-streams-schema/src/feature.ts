@@ -8,48 +8,41 @@
 import { z } from '@kbn/zod';
 
 const featureStatus = ['active', 'stale', 'expired'] as const;
-export type FeatureStatus = (typeof featureStatus)[number];
-
 export const featureStatusSchema = z.enum(featureStatus);
+export type FeatureStatus = z.infer<typeof featureStatusSchema>;
 
-export interface BaseFeature {
-  type: string;
-  name: string;
-  description: string;
-  value: Record<string, any>;
-  confidence: number;
-  evidence: string[];
-  tags: string[];
-  meta: Record<string, any>;
-}
+export const DATASET_ANALYSIS_FEATURE_TYPE = 'dataset_analysis' as const;
 
-export interface Feature extends BaseFeature {
-  id: string;
-  status: FeatureStatus;
-  last_seen: string;
-  expires_at?: string;
-}
-
-export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
+export const baseFeatureSchema = z.object({
+  id: z.string(),
   type: z.string(),
-  name: z.string(),
+  subtype: z.string().optional(),
+  title: z.string().optional(),
   description: z.string(),
-  value: z.record(z.string(), z.any()),
+  properties: z.record(z.string(), z.unknown()),
   confidence: z.number().min(0).max(100),
-  evidence: z.array(z.string()),
-  tags: z.array(z.string()),
-  meta: z.record(z.string(), z.any()),
+  evidence: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  meta: z.record(z.string(), z.any()).optional(),
 });
 
-export const featureSchema: z.Schema<Feature> = baseFeatureSchema.and(
+export type BaseFeature = z.infer<typeof baseFeatureSchema>;
+
+export const featureSchema = baseFeatureSchema.and(
   z.object({
-    id: z.string(),
+    uuid: z.string(),
     status: featureStatusSchema,
     last_seen: z.string(),
     expires_at: z.string().optional(),
   })
 );
 
-export function isFeature(feature: any): feature is Feature {
+export type Feature = z.infer<typeof featureSchema>;
+
+export function isFeature(feature: unknown): feature is Feature {
   return featureSchema.safeParse(feature).success;
+}
+
+export function isComputedFeature(feature: BaseFeature) {
+  return feature.type === DATASET_ANALYSIS_FEATURE_TYPE;
 }

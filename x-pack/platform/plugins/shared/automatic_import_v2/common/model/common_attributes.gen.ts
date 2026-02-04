@@ -122,7 +122,14 @@ export const OriginalSource = z.object({
  * The status of the task
  */
 export type TaskStatus = z.infer<typeof TaskStatus>;
-export const TaskStatus = z.enum(['pending', 'processing', 'completed', 'failed', 'cancelled']);
+export const TaskStatus = z.enum([
+  'pending',
+  'processing',
+  'completed',
+  'approved',
+  'failed',
+  'cancelled',
+]);
 export type TaskStatusEnum = typeof TaskStatus.enum;
 export const TaskStatusEnum = TaskStatus.enum;
 

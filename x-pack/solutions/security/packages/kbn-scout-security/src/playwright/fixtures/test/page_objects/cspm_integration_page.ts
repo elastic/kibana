@@ -15,11 +15,13 @@ import {
   AZURE_ORGANIZATION_ACCOUNT_TEST_SUBJ,
   AZURE_SINGLE_ACCOUNT_TEST_SUBJ,
   AWS_INPUT_TEST_SUBJECTS,
+} from '@kbn/cloud-security-posture-common';
+import {
   AZURE_INPUT_FIELDS_TEST_SUBJECTS,
   AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
   AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
   CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
-} from '@kbn/cloud-security-posture-common';
+} from '@kbn/fleet-plugin/common';
 
 export class CspmIntegrationPage {
   constructor(private readonly page: ScoutPage) {}

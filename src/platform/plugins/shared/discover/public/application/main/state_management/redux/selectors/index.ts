@@ -7,5 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { selectAllTabs, selectRecentlyClosedTabs, selectTab, selectIsTabsBarHidden } from './tabs';
+export {
+  selectAllTabs,
+  selectRecentlyClosedTabs,
+  selectTab,
+  selectTabAppState,
+  selectIsTabsBarHidden,
+} from './tabs';
 export { type HasUnsavedChangesResult, selectHasUnsavedChanges } from './unsaved_changes';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { par, dpar } from '../nodes';
+import { par, dpar, list } from '../nodes';
 
 test('can construct a param', () => {
   const node1 = par('my_param');
@@ -34,4 +34,37 @@ test('can construct a double param using dpar() method', () => {
   expect(node.paramKind).toBe('??');
 
   expect(node + '').toBe('??my_param');
+});
+
+describe('list', () => {
+  test('can construct an integer list', () => {
+    const node = list([1, 2, 3]);
+
+    expect(node.type).toBe('list');
+    expect(node + '').toBe('[1, 2, 3]');
+  });
+
+  test('can construct a string list', () => {
+    const node = list(['a', 'b', 'c']);
+
+    expect(node.type).toBe('list');
+    expect(node + '').toBe('["a", "b", "c"]');
+  });
+
+  test('can construct a boolean list', () => {
+    const node = list([true, false, true]);
+
+    expect(node.type).toBe('list');
+    expect(node + '').toBe('[TRUE, FALSE, TRUE]');
+  });
+
+  test('throws on empty list', () => {
+    expect(() => list([])).toThrow('Cannot create an empty list literal');
+  });
+
+  test('throws on mixed types', () => {
+    expect(() => list([1, 'a', 2] as unknown as number[])).toThrow(
+      'All list elements must be of the same type. Expected "number", but found "string" at index 1'
+    );
+  });
 });

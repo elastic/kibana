@@ -11,6 +11,7 @@ import {
   SERVICE_OPBEANS_NODE,
   OPBEANS_JAVA_INSTANCE,
   PRODUCTION_ENVIRONMENT,
+  DEPENDENCY_POSTGRESQL,
 } from '../constants';
 
 export function opbeans({ from, to }: { from: number; to: number }) {
@@ -41,6 +42,16 @@ export function opbeans({ from, to }: { from: number; to: number }) {
             })
             .destination('opbeans-node')
             .duration(500)
+            .timestamp(timestamp),
+          // Add a database dependency
+          opbeansJava
+            .span({
+              spanName: 'SELECT * FROM products',
+              spanType: 'db',
+              spanSubtype: 'postgresql',
+            })
+            .destination(DEPENDENCY_POSTGRESQL)
+            .duration(50)
             .timestamp(timestamp)
         ),
       opbeansNode

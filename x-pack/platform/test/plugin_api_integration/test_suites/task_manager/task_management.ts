@@ -50,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
 
-  // Failing: See https://github.com/elastic/kibana/issues/247560
+  // Failing: See https://github.com/elastic/kibana/issues/246444
   describe.skip('scheduling and running tasks', () => {
     beforeEach(async () => {
       // clean up before each test
@@ -244,12 +244,13 @@ export default function ({ getService }: FtrProviderContext) {
               interval: number;
               tzid: string;
             };
-          }
+          },
+      regenerateApiKey: boolean = false
     ) {
       return supertest
         .post('/api/sample_tasks/bulk_update_schedules_with_api_key')
         .set('kbn-xsrf', 'xxx')
-        .send({ taskIds, schedule })
+        .send({ taskIds, schedule, regenerateApiKey })
         .expect(200)
         .then((response: { body: BulkUpdateTaskResult }) => response.body);
     }
@@ -370,6 +371,7 @@ export default function ({ getService }: FtrProviderContext) {
       const now = new Date();
       const todayDay = now.getUTCDate();
       const todayMonth = now.getUTCMonth();
+      const todayYear = now.getUTCFullYear();
       // set a start date for 2 days from now
       const startDate = moment(now).add(2, 'days').toDate();
       const dailyTask = await scheduleTask({
@@ -395,9 +397,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         const runAtDay = runAt.getUTCDate();
         const runAtMonth = runAt.getUTCMonth();
+        const runAtYear = runAt.getUTCFullYear();
         if (todayMonth === runAtMonth) {
           expect(runAtDay >= todayDay + 2).to.be(true);
-        } else if (todayMonth < runAtMonth) {
+        } else if (todayMonth < runAtMonth || todayYear < runAtYear) {
           log.info(`todayMonth: ${todayMonth}, runAtMonth: ${runAtMonth}`);
         } else {
           throw new Error(
@@ -1419,6 +1422,103 @@ export default function ({ getService }: FtrProviderContext) {
         ).eql(1);
         expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
       });
+    });
+
+    it('should bulk update schedules tasks with regenerated API keys if request and regenerate api key flag are provided', async () => {
+      let queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      const apiKeysLength = queryResult.body.apiKeys.length;
+
+      const scheduledTask = await scheduleTaskWithApiKey({
+        id: 'test-task-for-sample-task-plugin-to-test-task-api-key',
+        taskType: 'sampleTask',
+        params: {},
+        schedule: { interval: '1d' },
+      });
+
+      // wait for the task to run once
+      const result = await retry.try(async () => {
+        const res = await currentTask<{ count: number }>(
+          'test-task-for-sample-task-plugin-to-test-task-api-key'
+        );
+        expect(res.apiKey).not.empty();
+        expect(res.schedule).to.eql({ interval: '1d' });
+        expect(res.state.count).to.be(1);
+        return res;
+      });
+
+      // test that a new api key was created and matches the api key id for this task
+      queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      expect(
+        queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+          return apiKey.id === result.userScope?.apiKeyId;
+        }).length
+      ).eql(1);
+      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+
+      // update the schedule for this task with a request
+      const updates = await bulkUpdateSchedulesWithApiKey(
+        [scheduledTask.id],
+        { interval: '5s' },
+        true // regenerateApiKey
+      );
+      expect(updates.tasks.length).to.be(1);
+      expect(updates.errors.length).to.be(0);
+
+      // verify the task runs successfully with the new schedule
+      let updatedApiKey: string | undefined;
+      await retry.try(async () => {
+        const task = await currentTask<{ count: number }>(
+          'test-task-for-sample-task-plugin-to-test-task-api-key'
+        );
+
+        expect(task.state.count).to.be(2);
+        expect(task.schedule).to.eql({ interval: '5s' });
+        updatedApiKey = task.userScope?.apiKeyId;
+      });
+
+      // api_key_to_invalidate saved object should be created for the old api key
+      await retry.try(async () => {
+        const response = await es.search({
+          index: '.kibana_task_manager',
+          size: 100,
+          query: {
+            term: {
+              type: 'api_key_to_invalidate',
+            },
+          },
+        });
+
+        expect(
+          response.hits?.hits?.filter((hit: any) => {
+            return hit._source.api_key_to_invalidate?.apiKeyId === result.userScope?.apiKeyId;
+          }).length
+        ).eql(1);
+      });
+
+      // test that a new api key was created on update and matches the api key id for this task
+      const updatedQueryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      // test that the api key for the task is updated
+      expect(
+        updatedQueryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+          return apiKey.id === updatedApiKey;
+        }).length
+      ).eql(1);
+      expect(updatedQueryResult.body.apiKeys.length).eql(apiKeysLength + 2);
     });
 
     it('should bulk update schedules tasks with fake request if request is provided', async () => {

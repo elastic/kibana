@@ -54,7 +54,6 @@ export const EsqlEditorField = React.memo(() => {
             hasOutline
             hideRunQueryButton
             hideQueryHistory
-            hideTimeFilterInfo
             disableAutoFocus
             initialState={{
               editorHeight: 360,

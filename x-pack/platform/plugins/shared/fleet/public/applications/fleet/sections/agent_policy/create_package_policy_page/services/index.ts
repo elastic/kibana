@@ -7,6 +7,16 @@
 
 export { isAdvancedVar } from './is_advanced_var';
 export { hasInvalidButRequiredVar } from './has_invalid_but_required_var';
+export {
+  getVisibleOptions,
+  getVisibleVarsForOption,
+  getVarsControlledByVarGroups,
+  computeDefaultVarGroupSelections,
+  shouldShowVar,
+  isVarRequiredByVarGroup,
+  isVarInSelectedVarGroupOption,
+} from './var_group_helpers';
+export type { VarGroupSelection } from './var_group_helpers';
 export type {
   PackagePolicyValidationResults,
   PackagePolicyConfigValidationResults,

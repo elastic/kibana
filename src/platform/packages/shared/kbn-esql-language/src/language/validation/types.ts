@@ -17,6 +17,7 @@ export interface ReferenceMaps {
   policies: Map<string, ESQLPolicy>;
   query: string;
   joinIndices: IndexAutocompleteItem[];
+  timeSeriesSources?: IndexAutocompleteItem[];
 }
 
 export interface ValidationResult {

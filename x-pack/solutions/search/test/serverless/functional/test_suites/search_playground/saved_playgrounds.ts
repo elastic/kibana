@@ -54,6 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.common.navigateToUrl('searchPlayground');
 
         await pageObjects.searchPlayground.PlaygroundListPage.expectPlaygroundListPageComponentsToExist();
+        await pageObjects.searchPlayground.expectDeprecationNoticeToExist();
         await pageObjects.searchPlayground.PlaygroundListPage.clickNewPlaygroundButton();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundSetupPage();
         // Add a connector to the playground

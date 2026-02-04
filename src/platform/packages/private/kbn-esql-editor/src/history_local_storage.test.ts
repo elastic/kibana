@@ -58,8 +58,11 @@ describe('history local storage', function () {
 
     const historyItems = getCachedQueries();
     expect(historyItems.length).toBe(2);
-    expect(historyItems[1].timeRan).toBeDefined();
-    expect(historyItems[1].status).toBe('error');
+    const errorQuery = historyItems.find((item) =>
+      item.queryString.includes('stats meow = avg(woof)')
+    );
+    expect(errorQuery?.timeRan).toBeDefined();
+    expect(errorQuery?.status).toBe('error');
   });
 
   it('should update queries to cache correctly if they are the same with different format', function () {

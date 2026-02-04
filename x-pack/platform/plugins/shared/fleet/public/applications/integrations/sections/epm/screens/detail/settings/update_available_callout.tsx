@@ -129,6 +129,7 @@ export const UpdateAvailableCallout = ({
           <EuiSpacer size="m" />
           <EuiCheckbox
             id={checkboxId}
+            data-test-subj="breakingChangeCheckbox"
             label="I've reviewed the breaking changes and understand the impact."
             onChange={breakingChanges.toggleIsUnderstood}
             checked={breakingChanges.isUnderstood}

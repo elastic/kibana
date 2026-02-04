@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInputPopover,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
@@ -55,6 +56,24 @@ export type AIConnector = ActionConnector & {
   // related to OpenAI connectors, ex: Azure OpenAI, OpenAI
   apiProvider?: OpenAiProviderType;
 };
+
+interface GroupedConnectors {
+  customConnectors: ConnectorSelectableComponentProps['customConnectors'];
+  preConfiguredConnectors: ConnectorSelectableComponentProps['preConfiguredConnectors'];
+}
+
+const groupConnectors = (connectors: ActionConnector[] | undefined): GroupedConnectors =>
+  (connectors ?? []).reduce<GroupedConnectors>(
+    (acc, connector) => {
+      const target = connector.isPreconfigured ? acc.preConfiguredConnectors : acc.customConnectors;
+      target.push({ label: connector.name, value: connector.id });
+      return acc;
+    },
+    {
+      customConnectors: [],
+      preConfiguredConnectors: [],
+    }
+  );
 
 export const ConnectorSelector: React.FC<Props> = React.memo(
   ({
@@ -146,35 +165,17 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     );
     const buttonLabel = selectedOrDefaultConnector?.name ?? i18n.INLINE_CONNECTOR_PLACEHOLDER;
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
+    const isAddConnectorMissingPrivileges = !assistantAvailability.hasConnectorsAllPrivilege;
+    const isAddConnectorDisabled = isDisabled || isAddConnectorMissingPrivileges;
 
     // Group connectors into pre-configured and custom
     const { customConnectors, preConfiguredConnectors } = useMemo(
-      () =>
-        (aiConnectors ?? []).reduce<{
-          customConnectors: ConnectorSelectableComponentProps['customConnectors'];
-          preConfiguredConnectors: ConnectorSelectableComponentProps['preConfiguredConnectors'];
-        }>(
-          (acc, connector) => {
-            if (connector.isPreconfigured) {
-              acc.preConfiguredConnectors.push({
-                label: connector.name,
-                value: connector.id,
-              });
-            } else {
-              acc.customConnectors.push({
-                label: connector.name,
-                value: connector.id,
-              });
-            }
-            return acc;
-          },
-          {
-            customConnectors: [],
-            preConfiguredConnectors: [],
-          }
-        ),
+      () => groupConnectors(aiConnectors),
       [aiConnectors]
     );
+
+    const totalConnectors = customConnectors.length + preConfiguredConnectors.length;
+    const hasNoConnectors = !connectorExists && totalConnectors === 0;
 
     const renderOption: ConnectorSelectableProps['renderOption'] = useCallback(
       (option: EuiSelectableOption) => {
@@ -263,18 +264,28 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       euiTheme.colors.textPrimary,
     ]);
 
+    const addConnectorButton = (
+      <EuiButtonEmpty
+        data-test-subj="addNewConnectorButton"
+        iconType="plusInCircle"
+        isDisabled={isAddConnectorDisabled}
+        size="xs"
+        onClick={() => setIsConnectorModalVisible(true)}
+      >
+        {i18n.ADD_CONNECTOR}
+      </EuiButtonEmpty>
+    );
+
     return (
       <>
-        {!connectorExists && customConnectors.length + preConfiguredConnectors.length === 0 ? (
-          <EuiButtonEmpty
-            data-test-subj="addNewConnectorButton"
-            iconType="plusInCircle"
-            isDisabled={localIsDisabled}
-            size="xs"
-            onClick={() => setIsConnectorModalVisible(true)}
-          >
-            {i18n.ADD_CONNECTOR}
-          </EuiButtonEmpty>
+        {hasNoConnectors ? (
+          isAddConnectorMissingPrivileges ? (
+            <EuiToolTip content={i18n.ADD_CONNECTOR_MISSING_PRIVILEGES_DESCRIPTION}>
+              {addConnectorButton}
+            </EuiToolTip>
+          ) : (
+            addConnectorButton
+          )
         ) : (
           <EuiInputPopover
             input={input}

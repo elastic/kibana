@@ -7,14 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OptionsListSearchTechnique, OptionsListSortingType } from '@kbn/controls-schemas';
-
-export const DEFAULT_SEARCH_TECHNIQUE: OptionsListSearchTechnique = 'prefix';
-export const OPTIONS_LIST_DEFAULT_SORT: OptionsListSortingType = {
-  by: '_count',
-  direction: 'desc',
-};
-
 export const MIN_OPTIONS_LIST_REQUEST_SIZE = 10;
 export const MAX_OPTIONS_LIST_REQUEST_SIZE = 1000;
 export const MAX_OPTIONS_LIST_BULK_SELECT_SIZE = 100;

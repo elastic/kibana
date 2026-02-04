@@ -21,7 +21,6 @@ import {
 import { fetchEsql } from '../../../../data_fetching/fetch_esql';
 import { constructCascadeQuery } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import { apm } from '@elastic/apm-rum';
-import type { CascadedDocumentsRestorableState } from '../cascaded_documents_restorable_state';
 import type { ESQLStatsQueryMeta } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import type { ESQLDataGroupNode } from '../blocks';
 import type { RecordsFetchResponse } from '../../../../../types';
@@ -65,15 +64,12 @@ describe('data_fetching related hooks', () => {
       appliedFunctions: [{ identifier: 'count', aggregation: 'count' }],
     };
 
-    const defaultCascadeConfig: CascadedDocumentsRestorableState = {
-      availableCascadeGroups: ['category'],
-      selectedCascadeGroups: ['category'],
-    };
+    const defaultSelectedCascadeGroups = ['category'];
 
     it('should return empty array when rows are undefined', () => {
       const { result } = renderHook(() =>
         useGroupedCascadeData({
-          cascadeConfig: defaultCascadeConfig,
+          selectedCascadeGroups: defaultSelectedCascadeGroups,
           rows: undefined,
           queryMeta: defaultQueryMeta,
           esqlVariables: undefined,
@@ -86,7 +82,7 @@ describe('data_fetching related hooks', () => {
     it('should return empty array when rows are empty', () => {
       const { result } = renderHook(() =>
         useGroupedCascadeData({
-          cascadeConfig: defaultCascadeConfig,
+          selectedCascadeGroups: defaultSelectedCascadeGroups,
           rows: [],
           queryMeta: defaultQueryMeta,
           esqlVariables: undefined,
@@ -105,7 +101,7 @@ describe('data_fetching related hooks', () => {
 
       const { result } = renderHook(() =>
         useGroupedCascadeData({
-          cascadeConfig: defaultCascadeConfig,
+          selectedCascadeGroups: defaultSelectedCascadeGroups,
           rows: mockRows,
           queryMeta: defaultQueryMeta,
           esqlVariables: undefined,
@@ -113,10 +109,10 @@ describe('data_fetching related hooks', () => {
       );
 
       expect(result.current).toHaveLength(2);
-      expect(result.current[0].category).toBe('A');
-      expect(result.current[0].count).toBe(15); // 10 + 5 aggregated
-      expect(result.current[1].category).toBe('B');
-      expect(result.current[1].count).toBe(20);
+      expect(result.current[0].groupValue).toBe('A');
+      expect(result.current[0].aggregatedValues.count).toBe(15); // 10 + 5 aggregated
+      expect(result.current[1].groupValue).toBe('B');
+      expect(result.current[1].aggregatedValues.count).toBe(20);
     });
 
     it('should skip undefined and null values in grouping', () => {
@@ -129,7 +125,7 @@ describe('data_fetching related hooks', () => {
 
       const { result } = renderHook(() =>
         useGroupedCascadeData({
-          cascadeConfig: defaultCascadeConfig,
+          selectedCascadeGroups: defaultSelectedCascadeGroups,
           rows: mockRows,
           queryMeta: defaultQueryMeta,
           esqlVariables: undefined,
@@ -137,8 +133,8 @@ describe('data_fetching related hooks', () => {
       );
 
       expect(result.current).toHaveLength(2);
-      expect(result.current.find((r) => r.category === 'A')).toBeDefined();
-      expect(result.current.find((r) => r.category === 'B')).toBeDefined();
+      expect(result.current.find((r) => r.groupValue === 'A')).toBeDefined();
+      expect(result.current.find((r) => r.groupValue === 'B')).toBeDefined();
     });
 
     it('should aggregate multiple applied functions', () => {
@@ -157,7 +153,7 @@ describe('data_fetching related hooks', () => {
 
       const { result } = renderHook(() =>
         useGroupedCascadeData({
-          cascadeConfig: defaultCascadeConfig,
+          selectedCascadeGroups: defaultSelectedCascadeGroups,
           rows: mockRows,
           queryMeta: queryMetaWithMultipleFunctions,
           esqlVariables: undefined,
@@ -165,8 +161,36 @@ describe('data_fetching related hooks', () => {
       );
 
       expect(result.current).toHaveLength(1);
-      expect(result.current[0].count).toBe(15);
-      expect(result.current[0].sum).toBe(150);
+      expect(result.current[0].aggregatedValues.count).toBe(15);
+      expect(result.current[0].aggregatedValues.sum).toBe(150);
+    });
+
+    it('should aggregate multiple applied functions with array values', () => {
+      const mockRows = createMockRows([
+        { category: 'A', count: 10, ext: ['css', 'js'] },
+        { category: 'A', count: 5, ext: ['deb', 'rpm'] },
+      ]);
+
+      const queryMetaWithMultipleFunctions: ESQLStatsQueryMeta = {
+        groupByFields: [{ field: 'category', type: 'column' }],
+        appliedFunctions: [
+          { identifier: 'count', aggregation: 'count' },
+          { identifier: 'ext', aggregation: 'ext' },
+        ],
+      };
+
+      const { result } = renderHook(() =>
+        useGroupedCascadeData({
+          selectedCascadeGroups: defaultSelectedCascadeGroups,
+          rows: mockRows,
+          queryMeta: queryMetaWithMultipleFunctions,
+          esqlVariables: undefined,
+        })
+      );
+
+      expect(result.current).toHaveLength(1);
+      expect(result.current[0].aggregatedValues.count).toBe(15);
+      expect(result.current[0].aggregatedValues.ext).toEqual(['css', 'js', 'deb', 'rpm']);
     });
 
     it('should resolve esql variable for group key', () => {
@@ -180,14 +204,9 @@ describe('data_fetching related hooks', () => {
         { key: 'myVar', value: 'actualField', type: ESQLVariableType.FIELDS },
       ];
 
-      const cascadeConfigWithVariable: CascadedDocumentsRestorableState = {
-        availableCascadeGroups: ['??myVar'],
-        selectedCascadeGroups: ['??myVar'],
-      };
-
       const { result } = renderHook(() =>
         useGroupedCascadeData({
-          cascadeConfig: cascadeConfigWithVariable,
+          selectedCascadeGroups: ['??myVar'],
           rows: mockRows,
           queryMeta: defaultQueryMeta,
           esqlVariables,
@@ -195,8 +214,8 @@ describe('data_fetching related hooks', () => {
       );
 
       expect(result.current).toHaveLength(2);
-      expect(result.current[0]['??myVar']).toBe('X');
-      expect(result.current[1]['??myVar']).toBe('Y');
+      expect(result.current[0].groupValue).toBe('X');
+      expect(result.current[1].groupValue).toBe('Y');
     });
   });
 
@@ -385,7 +404,9 @@ describe('data_fetching related hooks', () => {
 
     const createMockRowData = (): ESQLDataGroupNode => ({
       id: '1',
-      category: 'A',
+      groupColumn: 'category',
+      groupValue: 'A',
+      aggregatedValues: {},
     });
 
     it('should return all four expansion handlers', () => {

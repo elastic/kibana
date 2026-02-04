@@ -46,7 +46,6 @@ dependsOn:
   - '@kbn/presentation-util'
   - '@kbn/kql'
   - '@kbn/control-group-renderer'
-  - '@kbn/controls-renderer'
   - '@kbn/utility-types'
 tags:
   - plugin
