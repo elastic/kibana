@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
+import { EuiHeaderSectionItemButton, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
@@ -18,6 +18,28 @@ interface Props {
 }
 
 export const FeedbackTriggerButton = ({ core, cloud, organizationId }: Props) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isOptedIn, setIsOptedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkTelemetryStatus = async () => {
+      try {
+        setIsLoading(true);
+        const telemetryConfig = await core.http.get<{ optIn: boolean | null }>(
+          '/internal/telemetry/config',
+          { version: '2' }
+        );
+        setIsOptedIn(telemetryConfig.optIn);
+      } catch (err) {
+        setIsOptedIn(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkTelemetryStatus();
+  }, [core.http]);
+
   const handleShowFeedbackContainer = () => {
     Promise.all([import('./feedback_container'), import('@kbn/react-kibana-mount')]).then(
       ([{ FeedbackContainer }, { toMountPoint }]) => {
@@ -39,15 +61,26 @@ export const FeedbackTriggerButton = ({ core, cloud, organizationId }: Props) =>
   };
 
   return (
-    <EuiHeaderSectionItemButton
-      data-test-subj="feedbackTriggerButton"
-      aria-haspopup="dialog"
-      aria-label={i18n.translate('feedback.triggerButton.ariaLabel', {
-        defaultMessage: 'Give feedback',
-      })}
-      onClick={handleShowFeedbackContainer}
+    <EuiToolTip
+      content={
+        !isOptedIn &&
+        i18n.translate('feedback.triggerButton.tooltip', {
+          defaultMessage: 'Enable usage collection to submit feedback',
+        })
+      }
     >
-      <EuiIcon type="comment" size="m" />
-    </EuiHeaderSectionItemButton>
+      <EuiHeaderSectionItemButton
+        data-test-subj="feedbackTriggerButton"
+        aria-haspopup="dialog"
+        aria-label={i18n.translate('feedback.triggerButton.ariaLabel', {
+          defaultMessage: 'Submit feedback',
+        })}
+        onClick={handleShowFeedbackContainer}
+        isLoading={isLoading}
+        disabled={!isOptedIn}
+      >
+        <EuiIcon type="comment" size="m" />
+      </EuiHeaderSectionItemButton>
+    </EuiToolTip>
   );
 };
