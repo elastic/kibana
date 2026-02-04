@@ -13,6 +13,47 @@
     "functions": [
       {
         "parentPluginId": "@kbn/streams-ai",
+        "id": "def-server.generateAllComputedFeatures",
+        "type": "Function",
+        "tags": [],
+        "label": "generateAllComputedFeatures",
+        "description": [
+          "\nGenerates all computed features by running all registered generators in parallel."
+        ],
+        "signature": [
+          "(options: ",
+          "ComputedFeatureGeneratorOptions",
+          ") => Promise<{ id: string; type: string; description: string; properties: Record<string, unknown>; confidence: number; meta?: Record<string, any> | undefined; tags?: string[] | undefined; title?: string | undefined; subtype?: string | undefined; evidence?: string[] | undefined; }[]>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/computed/index.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.generateAllComputedFeatures.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "ComputedFeatureGeneratorOptions"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/computed/index.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-ai",
         "id": "def-server.generateSignificantEvents",
         "type": "Function",
         "tags": [],
@@ -31,15 +72,7 @@
             "section": "def-common.System",
             "text": "System"
           },
-          " | undefined; features: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Feature",
-            "text": "Feature"
-          },
-          "[]; start: number; end: number; esClient: ",
+          " | undefined; features: ({ id: string; type: string; description: string; properties: Record<string, unknown>; confidence: number; meta?: Record<string, any> | undefined; tags?: string[] | undefined; title?: string | undefined; subtype?: string | undefined; evidence?: string[] | undefined; } & { status: \"active\" | \"stale\" | \"expired\"; uuid: string; last_seen: string; expires_at?: string | undefined; })[]; start: number; end: number; esClient: ",
           "ElasticsearchClient",
           "; inferenceClient: ",
           {
@@ -68,7 +101,7 @@
           "; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-        "lineNumber": 30,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -81,7 +114,7 @@
             "label": "{\n  stream,\n  system,\n  features,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n  sampleDocsSize,\n  systemPrompt,\n  logger,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-            "lineNumber": 48,
+            "lineNumber": 50,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -100,7 +133,7 @@
                   ".Definition"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 49,
+                "lineNumber": 51,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -123,7 +156,7 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 50,
+                "lineNumber": 52,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -136,17 +169,10 @@
                 "label": "features",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/streams-schema",
-                    "scope": "common",
-                    "docId": "kibKbnStreamsSchemaPluginApi",
-                    "section": "def-common.Feature",
-                    "text": "Feature"
-                  },
-                  "[]"
+                  "({ id: string; type: string; description: string; properties: Record<string, unknown>; confidence: number; meta?: Record<string, any> | undefined; tags?: string[] | undefined; title?: string | undefined; subtype?: string | undefined; evidence?: string[] | undefined; } & { status: \"active\" | \"stale\" | \"expired\"; uuid: string; last_seen: string; expires_at?: string | undefined; })[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 51,
+                "lineNumber": 53,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -159,7 +185,7 @@
                 "label": "start",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 52,
+                "lineNumber": 54,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -172,7 +198,7 @@
                 "label": "end",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 53,
+                "lineNumber": 55,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1176,7 +1202,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 54,
+                "lineNumber": 56,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1198,7 +1224,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 55,
+                "lineNumber": 57,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1214,7 +1240,7 @@
                   "AbortSignal"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 56,
+                "lineNumber": 58,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1236,7 +1262,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 57,
+                "lineNumber": 59,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1252,7 +1278,7 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 58,
+                "lineNumber": 60,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1265,7 +1291,7 @@
                 "label": "systemPrompt",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 59,
+                "lineNumber": 61,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2510,15 +2536,7 @@
             "section": "def-server.IdentifyFeaturesOptions",
             "text": "IdentifyFeaturesOptions"
           },
-          ") => Promise<{ features: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.BaseFeature",
-            "text": "BaseFeature"
-          },
-          "[]; tokensUsed: ",
+          ") => Promise<{ features: { id: string; type: string; description: string; properties: Record<string, unknown>; confidence: number; meta?: Record<string, any> | undefined; tags?: string[] | undefined; title?: string | undefined; subtype?: string | undefined; evidence?: string[] | undefined; }[]; tokensUsed: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",

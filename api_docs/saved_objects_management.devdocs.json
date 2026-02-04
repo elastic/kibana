@@ -350,9 +350,7 @@
               },
               ">) => React.ReactNode) | undefined; readOnly?: boolean | undefined; headers?: string | undefined; dataType?: ",
               "EuiTableDataType",
-              " | undefined; align?: ",
-              "HorizontalAlignment",
-              " | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"baseline\" | \"middle\" | \"top\" | \"bottom\" | undefined; render?: ((value: any, item: ",
+              " | undefined; render?: ((value: any, item: ",
               {
                 "pluginId": "savedObjectsManagement",
                 "scope": "public",
@@ -360,7 +358,9 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ") => React.ReactNode) | undefined; nameTooltip?: ",
+              ") => React.ReactNode) | undefined; align?: ",
+              "HorizontalAlignment",
+              " | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"baseline\" | \"middle\" | \"top\" | \"bottom\" | undefined; nameTooltip?: ",
               "EuiTableColumnNameTooltipProps",
               " | undefined; textOnly?: boolean | undefined; truncateText?: boolean | { lines: number; } | undefined; mobileOptions?: (Omit<",
               "EuiTableRowCellMobileOptionsShape",

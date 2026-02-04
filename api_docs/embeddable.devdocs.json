@@ -1188,25 +1188,25 @@
           ",",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.HasType",
+            "section": "def-common.HasType",
             "text": "HasType"
           },
           "<string>,",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPhaseEvents",
+            "section": "def-common.PublishesPhaseEvents",
             "text": "PublishesPhaseEvents"
           },
           ",",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.HasSerializableState",
+            "section": "def-common.HasSerializableState",
             "text": "HasSerializableState"
           },
           "<SerializedState>"
@@ -1538,9 +1538,9 @@
           "Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.EmbeddableApiContext",
+            "section": "def-common.EmbeddableApiContext",
             "text": "EmbeddableApiContext"
           },
           "> & { data: { value?: any; eventId?: string | undefined; columnMeta?: ",
@@ -1652,9 +1652,9 @@
           "Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.EmbeddableApiContext",
+            "section": "def-common.EmbeddableApiContext",
             "text": "EmbeddableApiContext"
           },
           "> & { data: { data: { table: Pick<",
@@ -1727,9 +1727,9 @@
           "Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.EmbeddableApiContext",
+            "section": "def-common.EmbeddableApiContext",
             "text": "EmbeddableApiContext"
           },
           "> & { data: { table: ",
@@ -1794,9 +1794,9 @@
           "Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.EmbeddableApiContext",
+            "section": "def-common.EmbeddableApiContext",
             "text": "EmbeddableApiContext"
           },
           "> & { data: { data: { table: Pick<",

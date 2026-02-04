@@ -920,7 +920,7 @@
         "label": "FeedbackButtons",
         "description": [],
         "signature": [
-          "({ onClickFeedback }: FeedbackButtonsProps) => React.JSX.Element"
+          "({ onClickFeedback }: FeedbackButtonsProps) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/buttons/feedback_buttons.tsx",
         "lineNumber": 24,
