@@ -46,7 +46,7 @@ export function applyDefaults(def: AnyDataStreamDefinition): AnyDataStreamDefini
           // System mapping for space support - injected into all data streams
           kibana: {
             properties: {
-              space_ids: { type: 'keyword' },
+              space_ids: { type: 'keyword', ignore_above: 1024 },
             },
           },
         },
