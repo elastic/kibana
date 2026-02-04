@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { streamsGetSignificantEventsStepDefinition } from './streams_get_significant_events_step';
 
-// Mock the fetch function
-const mockFetch = jest.fn();
-global.fetch = mockFetch;
+const mockMakeKibanaRequest = jest.fn();
 
 const createMockContext = (
   input: {
@@ -36,12 +33,8 @@ const createMockContext = (
       kibanaUrl: 'http://localhost:5601',
     }),
     getScopedEsClient: jest.fn(),
-    getFakeRequest: jest.fn().mockReturnValue({
-      headers: {
-        authorization: 'Bearer test-token',
-        cookie: 'test-cookie',
-      },
-    } as unknown as KibanaRequest),
+    getFakeRequest: jest.fn(),
+    makeKibanaRequest: mockMakeKibanaRequest,
   },
   logger: {
     debug: jest.fn(),
@@ -73,38 +66,32 @@ describe('streamsGetSignificantEventsStepDefinition', () => {
         aggregated_occurrences: [{ date: '2024-01-01T00:00:00Z', count: 5 }],
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValueOnce(mockResponse),
-      });
+      mockMakeKibanaRequest.mockResolvedValueOnce(mockResponse);
 
       const context = createMockContext();
       const result = await streamsGetSignificantEventsStepDefinition.handler(context);
 
       expect(result.output).toEqual(mockResponse);
       expect(result.error).toBeUndefined();
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/streams/logs/significant_events'),
-        expect.objectContaining({
-          method: 'GET',
-          headers: expect.objectContaining({
-            authorization: 'Bearer test-token',
-            'elastic-api-version': '2023-10-31',
-          }),
-        })
-      );
+      expect(mockMakeKibanaRequest).toHaveBeenCalledWith({
+        path: '/api/streams/logs/significant_events',
+        method: 'GET',
+        query: {
+          from: '2024-01-01T00:00:00Z',
+          to: '2024-01-02T00:00:00Z',
+          bucketSize: '1h',
+          query: undefined,
+        },
+      });
       expect(context.logger.debug).toHaveBeenCalledWith(
         'Fetching significant events for stream: logs'
       );
     });
 
-    it('should include query parameters in the URL', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValueOnce({
-          significant_events: [],
-          aggregated_occurrences: [],
-        }),
+    it('should include query parameters in the request', async () => {
+      mockMakeKibanaRequest.mockResolvedValueOnce({
+        significant_events: [],
+        aggregated_occurrences: [],
       });
 
       const context = createMockContext({
@@ -116,20 +103,22 @@ describe('streamsGetSignificantEventsStepDefinition', () => {
       });
       await streamsGetSignificantEventsStepDefinition.handler(context);
 
-      const calledUrl = mockFetch.mock.calls[0][0];
-      expect(calledUrl).toContain('from=2024-01-01T00%3A00%3A00Z');
-      expect(calledUrl).toContain('to=2024-01-02T00%3A00%3A00Z');
-      expect(calledUrl).toContain('bucketSize=1h');
-      expect(calledUrl).toContain('query=severity%3Aerror');
+      expect(mockMakeKibanaRequest).toHaveBeenCalledWith({
+        path: '/api/streams/logs/significant_events',
+        method: 'GET',
+        query: {
+          from: '2024-01-01T00:00:00Z',
+          to: '2024-01-02T00:00:00Z',
+          bucketSize: '1h',
+          query: 'severity:error',
+        },
+      });
     });
 
     it('should handle empty significant events', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValueOnce({
-          significant_events: [],
-          aggregated_occurrences: [],
-        }),
+      mockMakeKibanaRequest.mockResolvedValueOnce({
+        significant_events: [],
+        aggregated_occurrences: [],
       });
 
       const context = createMockContext();
@@ -143,12 +132,9 @@ describe('streamsGetSignificantEventsStepDefinition', () => {
     });
 
     it('should handle API error response', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 403,
-        statusText: 'Forbidden',
-        text: jest.fn().mockResolvedValueOnce('Access denied'),
-      });
+      mockMakeKibanaRequest.mockRejectedValueOnce(
+        new Error('Kibana API request failed with status 403 Forbidden: Access denied')
+      );
 
       const context = createMockContext();
       const result = await streamsGetSignificantEventsStepDefinition.handler(context);
@@ -159,7 +145,7 @@ describe('streamsGetSignificantEventsStepDefinition', () => {
     });
 
     it('should handle network error', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Timeout'));
+      mockMakeKibanaRequest.mockRejectedValueOnce(new Error('Timeout'));
 
       const context = createMockContext();
       const result = await streamsGetSignificantEventsStepDefinition.handler(context);
@@ -170,12 +156,9 @@ describe('streamsGetSignificantEventsStepDefinition', () => {
     });
 
     it('should URL encode stream names with special characters', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValueOnce({
-          significant_events: [],
-          aggregated_occurrences: [],
-        }),
+      mockMakeKibanaRequest.mockResolvedValueOnce({
+        significant_events: [],
+        aggregated_occurrences: [],
       });
 
       const context = createMockContext({
@@ -186,17 +169,22 @@ describe('streamsGetSignificantEventsStepDefinition', () => {
       });
       await streamsGetSignificantEventsStepDefinition.handler(context);
 
-      const calledUrl = mockFetch.mock.calls[0][0];
-      expect(calledUrl).toContain('/api/streams/logs%2Ftest/significant_events');
+      expect(mockMakeKibanaRequest).toHaveBeenCalledWith({
+        path: '/api/streams/logs%2Ftest/significant_events',
+        method: 'GET',
+        query: {
+          from: '2024-01-01T00:00:00Z',
+          to: '2024-01-02T00:00:00Z',
+          bucketSize: '1h',
+          query: undefined,
+        },
+      });
     });
 
     it('should not include query parameter if not provided', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValueOnce({
-          significant_events: [],
-          aggregated_occurrences: [],
-        }),
+      mockMakeKibanaRequest.mockResolvedValueOnce({
+        significant_events: [],
+        aggregated_occurrences: [],
       });
 
       const context = createMockContext({
@@ -207,8 +195,16 @@ describe('streamsGetSignificantEventsStepDefinition', () => {
       });
       await streamsGetSignificantEventsStepDefinition.handler(context);
 
-      const calledUrl = mockFetch.mock.calls[0][0];
-      expect(calledUrl).not.toContain('query=');
+      expect(mockMakeKibanaRequest).toHaveBeenCalledWith({
+        path: '/api/streams/logs/significant_events',
+        method: 'GET',
+        query: {
+          from: '2024-01-01T00:00:00Z',
+          to: '2024-01-02T00:00:00Z',
+          bucketSize: '1h',
+          query: undefined,
+        },
+      });
     });
   });
 

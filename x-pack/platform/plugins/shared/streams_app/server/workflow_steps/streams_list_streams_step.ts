@@ -6,7 +6,6 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { makeKibanaRequest } from './utils/make_kibana_request';
 import { streamsListStreamsStepCommonDefinition } from '../../common/workflow_steps';
 
 interface ListStreamsResponse {
@@ -17,17 +16,11 @@ export const streamsListStreamsStepDefinition = createServerStepDefinition({
   ...streamsListStreamsStepCommonDefinition,
   handler: async (context) => {
     try {
-      const workflowContext = context.contextManager.getContext();
-      const fakeRequest = context.contextManager.getFakeRequest();
-
       context.logger.debug('Fetching list of streams');
 
-      const response = await makeKibanaRequest<ListStreamsResponse>({
-        kibanaUrl: workflowContext.kibanaUrl,
+      const response = await context.contextManager.makeKibanaRequest<ListStreamsResponse>({
         path: '/api/streams',
         method: 'GET',
-        fakeRequest,
-        abortSignal: context.abortSignal,
       });
 
       context.logger.debug(`Successfully fetched ${response.streams.length} streams`);

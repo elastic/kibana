@@ -93,6 +93,12 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
         getFakeRequest: () => {
           return this.stepExecutionRuntime.contextManager.getFakeRequest();
         },
+        makeKibanaRequest: (options) => {
+          return this.stepExecutionRuntime.contextManager.makeKibanaRequest(
+            options,
+            this.stepExecutionRuntime.abortController.signal
+          );
+        },
       },
       logger: {
         debug: (message, meta) => this.workflowLogger.logDebug(message, meta),

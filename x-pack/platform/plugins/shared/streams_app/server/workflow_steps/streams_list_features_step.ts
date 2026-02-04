@@ -6,7 +6,6 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { makeKibanaRequest } from './utils/make_kibana_request';
 import { streamsListFeaturesStepCommonDefinition } from '../../common/workflow_steps';
 
 interface ListFeaturesResponse {
@@ -18,20 +17,15 @@ export const streamsListFeaturesStepDefinition = createServerStepDefinition({
   handler: async (context) => {
     try {
       const { name, type } = context.input;
-      const workflowContext = context.contextManager.getContext();
-      const fakeRequest = context.contextManager.getFakeRequest();
 
       context.logger.debug(`Fetching features for stream: ${name}`);
 
-      const response = await makeKibanaRequest<ListFeaturesResponse>({
-        kibanaUrl: workflowContext.kibanaUrl,
+      const response = await context.contextManager.makeKibanaRequest<ListFeaturesResponse>({
         path: `/internal/streams/${encodeURIComponent(name)}/features`,
         method: 'GET',
         query: {
           type,
         },
-        fakeRequest,
-        abortSignal: context.abortSignal,
       });
 
       context.logger.debug(

@@ -86,6 +86,13 @@ describe('WorkflowContextManager', () => {
       .fn()
       .mockReturnValue({} as EsWorkflowStepExecution);
 
+    const fakeRequest = {
+      headers: {
+        authorization: 'Bearer test-token',
+        cookie: 'test-cookie',
+      },
+    } as unknown as KibanaRequest;
+
     const underTest = new WorkflowContextManager({
       templateEngine: templatingEngineMock,
       node: fakeNode as AtomicGraphNode,
@@ -94,7 +101,7 @@ describe('WorkflowContextManager', () => {
       workflowExecutionState,
       esClient,
       dependencies,
-      fakeRequest: {} as KibanaRequest,
+      fakeRequest,
       coreStart: {} as CoreStart,
     });
 
@@ -884,6 +891,180 @@ describe('WorkflowContextManager', () => {
           expect.anything()
         );
       });
+    });
+  });
+
+  describe('makeKibanaRequest', () => {
+    const workflow: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      description: 'A test workflow',
+      enabled: true,
+      consts: {},
+      triggers: [],
+      steps: [],
+    };
+    let testContainer: ReturnType<typeof createTestContainer>;
+    let mockFetch: jest.Mock;
+    const originalFetch = global.fetch;
+
+    beforeEach(() => {
+      testContainer = createTestContainer(workflow);
+      mockFetch = jest.fn();
+      global.fetch = mockFetch;
+    });
+
+    afterEach(() => {
+      global.fetch = originalFetch;
+      mockFetch.mockClear();
+    });
+
+    it('should make a successful GET request', async () => {
+      const mockResponse = { data: 'test' };
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn().mockResolvedValueOnce(mockResponse),
+      });
+
+      const result = await testContainer.underTest.makeKibanaRequest({
+        path: '/api/test',
+        method: 'GET',
+      });
+
+      expect(result).toEqual(mockResponse);
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/test'),
+        expect.objectContaining({
+          method: 'GET',
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json',
+            'kbn-xsrf': 'true',
+            'elastic-api-version': '2023-10-31',
+          }),
+        })
+      );
+    });
+
+    it('should include query parameters in the URL', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn().mockResolvedValueOnce({}),
+      });
+
+      await testContainer.underTest.makeKibanaRequest({
+        path: '/api/test',
+        method: 'GET',
+        query: {
+          foo: 'bar',
+          baz: 'qux',
+        },
+      });
+
+      const calledUrl = mockFetch.mock.calls[0][0];
+      expect(calledUrl).toContain('foo=bar');
+      expect(calledUrl).toContain('baz=qux');
+    });
+
+    it('should skip undefined query parameters', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn().mockResolvedValueOnce({}),
+      });
+
+      await testContainer.underTest.makeKibanaRequest({
+        path: '/api/test',
+        method: 'GET',
+        query: {
+          included: 'yes',
+          excluded: undefined,
+        },
+      });
+
+      const calledUrl = mockFetch.mock.calls[0][0];
+      expect(calledUrl).toContain('included=yes');
+      expect(calledUrl).not.toContain('excluded');
+    });
+
+    it('should include body in POST request', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn().mockResolvedValueOnce({}),
+      });
+
+      await testContainer.underTest.makeKibanaRequest({
+        path: '/api/test',
+        method: 'POST',
+        body: { key: 'value' },
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ key: 'value' }),
+        })
+      );
+    });
+
+    it('should throw error on non-OK response', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        statusText: 'Not Found',
+        text: jest.fn().mockResolvedValueOnce('Resource not found'),
+      });
+
+      await expect(
+        testContainer.underTest.makeKibanaRequest({
+          path: '/api/test',
+          method: 'GET',
+        })
+      ).rejects.toThrow('Kibana API request failed: 404 Not Found - Resource not found');
+    });
+
+    it('should pass abort signal to fetch', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn().mockResolvedValueOnce({}),
+      });
+
+      const abortController = new AbortController();
+      await testContainer.underTest.makeKibanaRequest(
+        {
+          path: '/api/test',
+          method: 'GET',
+        },
+        abortController.signal
+      );
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          signal: abortController.signal,
+        })
+      );
+    });
+
+    it('should forward authentication headers from fake request', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn().mockResolvedValueOnce({}),
+      });
+
+      await testContainer.underTest.makeKibanaRequest({
+        path: '/api/test',
+        method: 'GET',
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            authorization: 'Bearer test-token',
+            cookie: 'test-cookie',
+          }),
+        })
+      );
     });
   });
 });

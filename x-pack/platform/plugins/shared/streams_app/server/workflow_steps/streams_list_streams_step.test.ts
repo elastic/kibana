@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { streamsListStreamsStepDefinition } from './streams_list_streams_step';
 
-// Mock the fetch function
-const mockFetch = jest.fn();
-global.fetch = mockFetch;
+const mockMakeKibanaRequest = jest.fn();
 
 const createMockContext = (): StepHandlerContext<any, any> => ({
   config: {},
@@ -23,12 +20,8 @@ const createMockContext = (): StepHandlerContext<any, any> => ({
       kibanaUrl: 'http://localhost:5601',
     }),
     getScopedEsClient: jest.fn(),
-    getFakeRequest: jest.fn().mockReturnValue({
-      headers: {
-        authorization: 'Bearer test-token',
-        cookie: 'test-cookie',
-      },
-    } as unknown as KibanaRequest),
+    getFakeRequest: jest.fn(),
+    makeKibanaRequest: mockMakeKibanaRequest,
   },
   logger: {
     debug: jest.fn(),
@@ -53,35 +46,23 @@ describe('streamsListStreamsStepDefinition', () => {
         { name: 'metrics', type: 'classic' },
       ];
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValueOnce({ streams: mockStreams }),
-      });
+      mockMakeKibanaRequest.mockResolvedValueOnce({ streams: mockStreams });
 
       const context = createMockContext();
       const result = await streamsListStreamsStepDefinition.handler(context);
 
       expect(result.output).toEqual({ streams: mockStreams });
       expect(result.error).toBeUndefined();
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:5601/api/streams',
-        expect.objectContaining({
-          method: 'GET',
-          headers: expect.objectContaining({
-            authorization: 'Bearer test-token',
-            'elastic-api-version': '2023-10-31',
-          }),
-        })
-      );
+      expect(mockMakeKibanaRequest).toHaveBeenCalledWith({
+        path: '/api/streams',
+        method: 'GET',
+      });
       expect(context.logger.debug).toHaveBeenCalledWith('Fetching list of streams');
       expect(context.logger.debug).toHaveBeenCalledWith('Successfully fetched 2 streams');
     });
 
     it('should handle empty streams list', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValueOnce({ streams: [] }),
-      });
+      mockMakeKibanaRequest.mockResolvedValueOnce({ streams: [] });
 
       const context = createMockContext();
       const result = await streamsListStreamsStepDefinition.handler(context);
@@ -91,12 +72,9 @@ describe('streamsListStreamsStepDefinition', () => {
     });
 
     it('should handle API error response', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        statusText: 'Internal Server Error',
-        text: jest.fn().mockResolvedValueOnce('Server error'),
-      });
+      mockMakeKibanaRequest.mockRejectedValueOnce(
+        new Error('Kibana API request failed with status 500 Internal Server Error: Server error')
+      );
 
       const context = createMockContext();
       const result = await streamsListStreamsStepDefinition.handler(context);
@@ -108,7 +86,7 @@ describe('streamsListStreamsStepDefinition', () => {
     });
 
     it('should handle network error', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+      mockMakeKibanaRequest.mockRejectedValueOnce(new Error('Network error'));
 
       const context = createMockContext();
       const result = await streamsListStreamsStepDefinition.handler(context);
@@ -118,25 +96,16 @@ describe('streamsListStreamsStepDefinition', () => {
       expect(context.logger.error).toHaveBeenCalled();
     });
 
-    it('should forward authentication headers', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValueOnce({ streams: [] }),
-      });
+    it('should call makeKibanaRequest with correct parameters', async () => {
+      mockMakeKibanaRequest.mockResolvedValueOnce({ streams: [] });
 
       const context = createMockContext();
       await streamsListStreamsStepDefinition.handler(context);
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            authorization: 'Bearer test-token',
-            cookie: 'test-cookie',
-            'kbn-xsrf': 'true',
-          }),
-        })
-      );
+      expect(mockMakeKibanaRequest).toHaveBeenCalledWith({
+        path: '/api/streams',
+        method: 'GET',
+      });
     });
   });
 

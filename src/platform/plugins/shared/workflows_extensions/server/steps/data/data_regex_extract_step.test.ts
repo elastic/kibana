@@ -31,6 +31,7 @@ describe('dataRegexExtractStepDefinition', () => {
       renderInputTemplate: jest.fn((val) => val),
       getScopedEsClient: jest.fn(),
       getFakeRequest: jest.fn(),
+      makeKibanaRequest: jest.fn(),
     },
     logger: {
       debug: jest.fn(),

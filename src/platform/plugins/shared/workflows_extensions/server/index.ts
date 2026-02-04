@@ -30,6 +30,8 @@ export type {
   StepHandler,
   StepHandlerContext,
   StepHandlerResult,
+  ContextManager,
+  MakeKibanaRequestOptions,
 } from './step_registry/types';
 
 export { createServerStepDefinition } from './step_registry/types';

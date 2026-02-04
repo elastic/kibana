@@ -6,7 +6,6 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { makeKibanaRequest } from './utils/make_kibana_request';
 import { streamsGetStreamStepCommonDefinition } from '../../common/workflow_steps';
 
 type GetStreamResponse = Record<string, unknown>;
@@ -16,17 +15,12 @@ export const streamsGetStreamStepDefinition = createServerStepDefinition({
   handler: async (context) => {
     try {
       const { name } = context.input;
-      const workflowContext = context.contextManager.getContext();
-      const fakeRequest = context.contextManager.getFakeRequest();
 
       context.logger.debug(`Fetching stream: ${name}`);
 
-      const response = await makeKibanaRequest<GetStreamResponse>({
-        kibanaUrl: workflowContext.kibanaUrl,
+      const response = await context.contextManager.makeKibanaRequest<GetStreamResponse>({
         path: `/api/streams/${encodeURIComponent(name)}`,
         method: 'GET',
-        fakeRequest,
-        abortSignal: context.abortSignal,
       });
 
       context.logger.debug(`Successfully fetched stream: ${name}`);

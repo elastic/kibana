@@ -6,7 +6,6 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { makeKibanaRequest } from './utils/make_kibana_request';
 import { streamsGetSignificantEventsStepCommonDefinition } from '../../common/workflow_steps';
 
 interface SignificantEventsResponse {
@@ -22,13 +21,10 @@ export const streamsGetSignificantEventsStepDefinition = createServerStepDefinit
   handler: async (context) => {
     try {
       const { name, from, to, bucketSize, query } = context.input;
-      const workflowContext = context.contextManager.getContext();
-      const fakeRequest = context.contextManager.getFakeRequest();
 
       context.logger.debug(`Fetching significant events for stream: ${name}`);
 
-      const response = await makeKibanaRequest<SignificantEventsResponse>({
-        kibanaUrl: workflowContext.kibanaUrl,
+      const response = await context.contextManager.makeKibanaRequest<SignificantEventsResponse>({
         path: `/api/streams/${encodeURIComponent(name)}/significant_events`,
         method: 'GET',
         query: {
@@ -37,8 +33,6 @@ export const streamsGetSignificantEventsStepDefinition = createServerStepDefinit
           bucketSize,
           query,
         },
-        fakeRequest,
-        abortSignal: context.abortSignal,
       });
 
       context.logger.debug(

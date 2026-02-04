@@ -152,6 +152,28 @@ export interface StepHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject> {
 }
 
 /**
+ * Options for making an internal HTTP request to a Kibana API endpoint.
+ */
+export interface MakeKibanaRequestOptions {
+  /**
+   * The API endpoint path (e.g., '/api/streams')
+   */
+  path: string;
+  /**
+   * HTTP method (defaults to 'GET')
+   */
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  /**
+   * Query parameters to append to the URL
+   */
+  query?: Record<string, string | undefined>;
+  /**
+   * Request body (ignored for GET requests)
+   */
+  body?: unknown;
+}
+
+/**
  * Context manager for accessing step execution runtime services
  */
 export interface ContextManager {
@@ -176,6 +198,23 @@ export interface ContextManager {
    * Returns the fake request
    */
   getFakeRequest(): KibanaRequest;
+
+  /**
+   * Makes an internal HTTP request to a Kibana API endpoint.
+   * Uses the workflow's authentication context for authorization.
+   *
+   * @param options - Request options including path, method, query, and body
+   * @returns Promise resolving to the parsed JSON response
+   *
+   * @example
+   * ```typescript
+   * const streams = await contextManager.makeKibanaRequest<StreamDefinition[]>({
+   *   path: '/api/streams',
+   *   method: 'GET',
+   * });
+   * ```
+   */
+  makeKibanaRequest<T>(options: MakeKibanaRequestOptions): Promise<T>;
 }
 
 /**

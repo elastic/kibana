@@ -13,12 +13,13 @@ import { KQLSyntaxError } from '@kbn/es-query';
 import type { SerializedError, StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { MakeKibanaRequestOptions } from '@kbn/workflows-extensions/server';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
-import { buildStepExecutionId, evaluateKql } from '../utils';
+import { buildStepExecutionId, evaluateKql, getKibanaUrl } from '../utils';
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -250,6 +251,72 @@ export class WorkflowContextManager {
    */
   public getDependencies(): ContextDependencies {
     return this.dependencies;
+  }
+
+  /**
+   * Makes an internal HTTP request to a Kibana API endpoint.
+   * Uses the workflow's authentication context for authorization.
+   *
+   * @param options - Request options including path, method, query, and body
+   * @param abortSignal - Optional abort signal for cancellation support
+   * @returns Promise resolving to the parsed JSON response
+   */
+  public async makeKibanaRequest<T>(
+    options: MakeKibanaRequestOptions,
+    abortSignal?: AbortSignal
+  ): Promise<T> {
+    const { path, method = 'GET', query, body } = options;
+    const kibanaUrl = getKibanaUrl(this.coreStart, this.dependencies?.cloudSetup);
+
+    // Build the URL with query parameters
+    const url = new URL(path, kibanaUrl);
+    if (query) {
+      for (const [key, value] of Object.entries(query)) {
+        if (value !== undefined) {
+          url.searchParams.set(key, value);
+        }
+      }
+    }
+
+    // Extract authentication headers from the fake request
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'kbn-xsrf': 'true',
+      'elastic-api-version': '2023-10-31',
+    };
+
+    // Forward authentication headers
+    const authHeader = this.fakeRequest.headers.authorization;
+    if (authHeader) {
+      headers.authorization = Array.isArray(authHeader) ? authHeader[0] : authHeader;
+    }
+
+    // Forward cookies if present
+    const cookieHeader = this.fakeRequest.headers.cookie;
+    if (cookieHeader) {
+      headers.cookie = Array.isArray(cookieHeader) ? cookieHeader[0] : cookieHeader;
+    }
+
+    const fetchOptions: RequestInit = {
+      method,
+      headers,
+      signal: abortSignal,
+    };
+
+    if (body && method !== 'GET') {
+      fetchOptions.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(url.toString(), fetchOptions);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `Kibana API request failed: ${response.status} ${response.statusText} - ${errorText}`
+      );
+    }
+
+    return response.json() as Promise<T>;
   }
 
   private buildWorkflowContext(): WorkflowContext {
