@@ -36,6 +36,7 @@ const FIELD_TYPE_TOKEN_MAP: Record<EsqlToolFieldType, string> = {
   [EsqlToolFieldType.FLOAT]: 'tokenNumber',
   [EsqlToolFieldType.BOOLEAN]: 'tokenBoolean',
   [EsqlToolFieldType.DATE]: 'tokenDate',
+  [EsqlToolFieldType.ARRAY]: 'tokenArray',
 };
 
 interface EsqlParamRowProps {
