@@ -71,7 +71,8 @@ export const GoogleDriveConnector: ConnectorSpec = {
           .describe(
             "Google Drive query. Use fullText contains 'term' for content search, " +
               "name contains 'term' for filename search, mimeType='application/pdf' for type filtering, " +
-              "modifiedTime > '2024-01-01' for date filtering. Combine with 'and'/'or'."
+              "modifiedTime > '2024-01-01' for date filtering. Combine with 'and'/'or'. " +
+              "Note: Google Drive includes trashed files by default. Add 'and trashed=false' to exclude them."
           ),
         pageSize: z
           .number()
@@ -136,6 +137,11 @@ export const GoogleDriveConnector: ConnectorSpec = {
             z.enum(['name', 'modifiedTime', 'createdTime']).optional()
           )
           .describe('Field to order results by'),
+        includeTrashed: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe('Include trashed files in results (default: false)'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -143,11 +149,15 @@ export const GoogleDriveConnector: ConnectorSpec = {
           pageSize: number;
           pageToken?: string;
           orderBy?: string;
+          includeTrashed: boolean;
         };
 
+        ctx.log.debug(`[google_drive.listFiles] input: ${JSON.stringify(input)}`);
+
         const folderId = typedInput.folderId || DEFAULT_FOLDER_ID;
+        const trashedFilter = typedInput.includeTrashed ? '' : ' and trashed=false';
         const params: Record<string, string | number> = {
-          q: `'${escapeQueryValue(folderId)}' in parents and trashed=false`,
+          q: `'${escapeQueryValue(folderId)}' in parents${trashedFilter}`,
           pageSize: Math.min(typedInput.pageSize || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
           fields: 'nextPageToken, files(id, name, mimeType, size, modifiedTime, webViewLink)',
         };
@@ -159,6 +169,8 @@ export const GoogleDriveConnector: ConnectorSpec = {
         if (typedInput.orderBy) {
           params.orderBy = typedInput.orderBy;
         }
+
+        ctx.log.debug(`[google_drive.listFiles] API params: ${JSON.stringify(params)}`);
 
         try {
           const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files`, {
@@ -187,6 +199,8 @@ export const GoogleDriveConnector: ConnectorSpec = {
           fileId: string;
           mimeType?: string;
         };
+
+        ctx.log.debug(`[google_drive.downloadFile] input: ${JSON.stringify(input)}`);
 
         try {
           // First, get file metadata to determine if it's a Google Workspace document
