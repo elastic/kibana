@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { ParsedTemplate } from '../../../../common/types/domain/template/v1';
 import { INTERNAL_TEMPLATES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -27,17 +26,12 @@ export const getTemplatesRoute = createCasesRoute({
     access: 'internal',
     summary: 'Get all case templates',
   },
-  params: {
-    query: schema.object({
-      includeDeleted: schema.boolean({ defaultValue: false }),
-    }),
-  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
       await caseContext.getCasesClient();
 
-      const { includeDeleted } = request.query;
+      const { includeDeleted } = request.query as { includeDeleted: boolean };
 
       const filteredTemplates = includeDeleted
         ? mockTemplates
