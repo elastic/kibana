@@ -86,3 +86,10 @@ export interface SiemReadinessPackageInfo {
   status: string;
   categories?: string[];
 }
+
+export interface PipelineStats {
+  name: string;
+  indices: string[];
+  count: number;
+  failed: number;
+}
