@@ -174,9 +174,7 @@ export async function bulkEditRules<Params extends RuleParams>(
 
   if (apiKeysToInvalidate.length > 0) {
     await bulkMarkApiKeysForInvalidation(
-      {
-        apiKeys: apiKeysToInvalidate,
-      },
+      { apiKeys: apiKeysToInvalidate },
       context.logger,
       context.unsecuredSavedObjectsClient
     );

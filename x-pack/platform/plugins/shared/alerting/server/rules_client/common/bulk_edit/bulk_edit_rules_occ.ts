@@ -122,7 +122,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
       }
 
       return {
-        apiKeysToInvalidate,
+        apiKeysToInvalidate: options.shouldInvalidateApiKeys ? apiKeysToInvalidate : [],
         resultSavedObjects: [],
         rules: [],
         errors: rules.map((rule) => ({
@@ -197,11 +197,11 @@ async function saveBulkUpdatedRules({
     if (apiKeysMap.size > 0) {
       const newApiKeysToInvalidate = [];
 
-      for (const { newUiamApiKey, newApiKey } of apiKeysMap.values()) {
+      for (const { newUiamApiKey, newApiKey, newApiKeyCreatedByUser } of apiKeysMap.values()) {
         if (newUiamApiKey) {
           newApiKeysToInvalidate.push(newUiamApiKey);
         }
-        if (newApiKey) {
+        if (newApiKey && !newApiKeyCreatedByUser) {
           newApiKeysToInvalidate.push(newApiKey);
         }
       }

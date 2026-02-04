@@ -265,7 +265,6 @@ describe('transformRuleDomainToRule', () => {
       revision: 0,
       updatedBy: 'user',
       apiKeyOwner: 'user',
-      uiamApiKeyId: 'uiam-api-key-id',
       flapping: {
         lookBackWindow: 20,
         statusChangeThreshold: 20,
