@@ -6,7 +6,7 @@
  */
 
 import type { ToolResultType } from '@kbn/agent-builder-common';
-import type { FileEntryInput } from '@kbn/agent-builder-server/runner/filestore';
+import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 
 export interface ToolCallEntryMeta {
   tool_result_type: ToolResultType;
@@ -14,7 +14,7 @@ export interface ToolCallEntryMeta {
   tool_call_id: string;
 }
 
-export type ToolCallFileEntry<TData extends object = object> = FileEntryInput<
+export type ToolCallFileEntry<TData extends object = object> = FileEntry<
   TData,
   ToolCallEntryMeta
 >;

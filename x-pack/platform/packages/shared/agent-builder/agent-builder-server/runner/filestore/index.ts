@@ -7,8 +7,8 @@
 
 export {
   FileEntryType,
+  type FilestoreVersionedEntry,
   type FileEntry,
-  type FileEntryInput,
   type FsEntry,
   type FileEntryContent,
   type FileEntryMetadata,

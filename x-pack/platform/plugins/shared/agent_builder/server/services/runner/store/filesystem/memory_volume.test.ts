@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FileEntryType, type FileEntryInput } from '@kbn/agent-builder-server/runner/filestore';
+import { FileEntryType, type FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import { MemoryVolume } from './memory_volume';
 
 const createFileEntry = (
   path: string,
-  overrides: Partial<FileEntryInput> = {}
-): FileEntryInput => ({
+  overrides: Partial<FileEntry> = {}
+): FileEntry => ({
   path,
   type: 'file',
   metadata: {
@@ -89,7 +89,7 @@ describe('MemoryVolume', () => {
       volume.add(entry1);
       volume.add(entry2);
 
-      const result = (await volume.get('/agents/agent1.json')) as FileEntryInput;
+      const result = (await volume.get('/agents/agent1.json')) as FileEntry;
       expect(result.versions[0].content.raw).toEqual({ version: 2 });
     });
   });

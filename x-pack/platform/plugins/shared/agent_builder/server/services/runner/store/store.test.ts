@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { FileEntryType, type FileEntryInput } from '@kbn/agent-builder-server/runner/filestore';
+import { FileEntryType, type FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import { FileSystemStore } from './store';
 import { VirtualFileSystem, MemoryVolume } from './filesystem';
 
 const createFileEntry = (
   path: string,
   content: { raw: object; plain_text?: string },
-  overrides: Partial<FileEntryInput> = {}
-): FileEntryInput => ({
+  overrides: Partial<FileEntry> = {}
+): FileEntry => ({
   path,
   type: 'file',
   metadata: {

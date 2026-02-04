@@ -7,7 +7,7 @@
 
 import minimatch from 'minimatch';
 import type {
-  FileEntryInput,
+  FileEntry,
   FsEntry,
   DirEntry,
 } from '@kbn/agent-builder-server/runner/filestore';
@@ -21,7 +21,7 @@ interface DirNode {
   /** Child directories by name */
   children: Map<string, DirNode>;
   /** Files directly in this directory by filename */
-  files: Map<string, FileEntryInput>;
+  files: Map<string, FileEntry>;
 }
 
 /**
@@ -32,7 +32,7 @@ export class MemoryVolume implements Volume {
   readonly id: string;
 
   /** Map of normalized path to FileEntry for O(1) file lookup */
-  private readonly fileIndex: Map<string, FileEntryInput> = new Map();
+  private readonly fileIndex: Map<string, FileEntry> = new Map();
 
   /** Root of the directory tree */
   private readonly root: DirNode = this.createDirNode();
@@ -45,9 +45,9 @@ export class MemoryVolume implements Volume {
    * Add a file entry to this volume.
    * The entry's path will be normalized.
    */
-  add(entry: FileEntryInput): void {
+  add(entry: FileEntry): void {
     const normalizedPath = normalizePath(entry.path);
-    const normalizedEntry: FileEntryInput = { ...entry, path: normalizedPath };
+    const normalizedEntry: FileEntry = { ...entry, path: normalizedPath };
 
     // Remove existing entry at this path if any
     if (this.fileIndex.has(normalizedPath)) {
@@ -98,7 +98,7 @@ export class MemoryVolume implements Volume {
   // Volume interface implementation (async)
   // ============================================================================
 
-  async get(path: string): Promise<FileEntryInput | undefined> {
+  async get(path: string): Promise<FileEntry | undefined> {
     return this.fileIndex.get(normalizePath(path));
   }
 
@@ -205,7 +205,7 @@ export class MemoryVolume implements Volume {
    * Add a file entry to the directory tree.
    * Creates intermediate directories as needed.
    */
-  private addToTree(entry: FileEntryInput): void {
+  private addToTree(entry: FileEntry): void {
     const segments = getPathSegments(entry.path);
     const fileName = segments.pop()!;
 

@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import type { DirEntry, FilestoreEntry } from './filesystem';
+import type { DirEntry, FilestoreVersionedEntry, FilestoreEntry } from './filesystem';
 
 /**
  * Main interface for the public API of the file store.
  */
 export interface IFileStore {
-  /**
-   * Get a raw file entry (all versions) from the store.
-   *
-   * @param path path of the file to get.
-   */
-  getEntry(path: string): Promise<FileEntry | undefined>;
   /**
    * Read a file entry from the store.
    *
@@ -50,6 +44,12 @@ export interface IFileStore {
     glob: string,
     options?: { context?: number; fixed?: boolean }
   ): Promise<GrepMatch[]>;
+  /**
+   * Get a raw file entry (all versions) from the store.
+   *
+   * @param path path of the file to get.
+   */
+  getEntry(path: string): Promise<FilestoreVersionedEntry | undefined>;
 }
 
 /**

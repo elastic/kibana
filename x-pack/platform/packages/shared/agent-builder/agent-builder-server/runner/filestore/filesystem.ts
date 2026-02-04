@@ -68,6 +68,16 @@ export interface FileEntryVersion<TContent extends object = object> {
   metadata: FileEntryVersionMetadata;
 }
 
+/**
+ * A file entry in the virtual filesystem.
+ */
+export interface FileEntry<TContent extends object = object, TMeta extends object = object> {
+  path: string;
+  type: 'file';
+  metadata: FileEntryMetadataInput<TMeta>;
+  versions: FileEntryVersion<TContent>[];
+}
+
 export interface FilestoreEntry<TContent extends object = object, TMeta extends object = object> {
   path: string;
   type: 'file';
@@ -76,17 +86,10 @@ export interface FilestoreEntry<TContent extends object = object, TMeta extends 
   content: FileEntryContent<TContent>;
 }
 
-/**
- * A file entry in the virtual filesystem.
- */
-export interface FileEntryInput<TContent extends object = object, TMeta extends object = object> {
-  path: string;
-  type: 'file';
-  metadata: FileEntryMetadataInput<TMeta>;
-  versions: FileEntryVersion<TContent>[];
-}
-
-export interface FileEntry<TContent extends object = object, TMeta extends object = object> {
+export interface FilestoreVersionedEntry<
+  TContent extends object = object,
+  TMeta extends object = object
+> {
   path: string;
   type: 'file';
   metadata: FileEntryMetadata<TMeta>;
@@ -104,4 +107,4 @@ export interface DirEntry {
 /**
  * Either a file or directory entry.
  */
-export type FsEntry = FileEntryInput | DirEntry;
+export type FsEntry = FileEntry | DirEntry;

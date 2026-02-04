@@ -9,12 +9,12 @@ import type {
   IFileStore,
   LsEntry,
   DirEntryWithChildren,
-  FileEntry,
+  FilestoreVersionedEntry,
 } from '@kbn/agent-builder-server/runner/filestore';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { buildFolderTree } from './folder_tree';
 
-const createMockFileEntry = (path: string): FileEntry => ({
+const createMockFileEntry = (path: string): FilestoreVersionedEntry => ({
   path,
   type: 'file',
   metadata: {

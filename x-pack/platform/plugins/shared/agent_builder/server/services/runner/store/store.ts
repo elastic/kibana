@@ -8,8 +8,8 @@
 import type {
   IFileStore,
   FsEntry,
+  FilestoreVersionedEntry,
   FileEntry,
-  FileEntryInput,
   FileEntryMetadata,
   FilestoreEntry,
   LsEntry,
@@ -30,7 +30,7 @@ export class FileSystemStore implements IFileStore {
    * Get a raw file entry from the store.
    * Returns undefined if the path doesn't exist or is a directory.
    */
-  async getEntry(path: string): Promise<FileEntry | undefined> {
+  async getEntry(path: string): Promise<FilestoreVersionedEntry | undefined> {
     const entry = await this.filesystem.get(path);
     if (entry?.type === 'file') {
       return {
@@ -88,7 +88,7 @@ export class FileSystemStore implements IFileStore {
   async glob(pattern: string): Promise<FilestoreEntry[]> {
     const entries = await this.filesystem.glob(pattern, { onlyFiles: true });
     return entries
-      .map((entry) => this.toVersionedEntry(entry as FileEntryInput))
+      .map((entry) => this.toVersionedEntry(entry as FileEntry))
       .filter((entry): entry is FilestoreEntry => entry !== undefined);
   }
 
@@ -222,7 +222,7 @@ export class FileSystemStore implements IFileStore {
     return entry;
   }
 
-  private toVersionedEntry(entry: FileEntryInput, version?: number): FilestoreEntry | undefined {
+  private toVersionedEntry(entry: FileEntry, version?: number): FilestoreEntry | undefined {
     const selectedVersion = this.getVersion(entry, version);
     if (!selectedVersion) {
       return undefined;
@@ -266,7 +266,7 @@ export class FileSystemStore implements IFileStore {
     return entry.versions.find((entryVersion) => entryVersion.version === version);
   }
 
-  private buildMetadata(entry: FileEntryInput): FileEntryMetadata {
+  private buildMetadata(entry: FileEntry): FileEntryMetadata {
     const versions = entry.versions.map((version) => version.version);
     const versioned = versions.length > 1;
     const lastVersion = versions.length > 0 ? Math.max(...versions) : undefined;
