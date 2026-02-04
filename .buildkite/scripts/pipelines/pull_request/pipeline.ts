@@ -75,6 +75,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     // A temporary pipeline for UIAM tests that should be removed when the main Scout pipeline supports custom configs.
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_uiam_tests.yml'));
+    // A temporary pipeline for Workflows Management tests that should be removed when the main Scout pipeline supports custom configs.
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_workflows_tests.yml'));
 
     if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
