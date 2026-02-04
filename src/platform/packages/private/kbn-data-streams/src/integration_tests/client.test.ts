@@ -156,13 +156,19 @@ describe('DataStreamClient', () => {
         expect(response).toHaveProperty('result', 'created');
         expect(response._id).toMatch(/^test-space::/);
 
-        // Get document and verify kibana.space_ids is stripped from _source
-        const getResponse = await client.get({ id: response._id!, space: 'test-space' });
-        expect(getResponse._source).toEqual({
+        // Search for document by ID and verify kibana.space_ids is stripped from _source
+        const searchResponse = await client.search({
+          space: 'test-space',
+          query: { ids: { values: [response._id!] } },
+          size: 1,
+        });
+        expect(searchResponse.hits.hits.length).toBe(1);
+        const hit = searchResponse.hits.hits[0];
+        expect(hit._source).toEqual({
           '@timestamp': expect.any(String),
           mappedField: 'test-value',
         });
-        expect(getResponse._source).not.toHaveProperty('kibana');
+        expect(hit._source).not.toHaveProperty('kibana');
 
         // Verify the property is actually stored in ES (bypassing client)
         const rawDocSearch = await esClient.search<
@@ -187,13 +193,19 @@ describe('DataStreamClient', () => {
 
         expect(response._id).toBe('test-space::my-doc');
 
-        // Get by prefixed ID
-        const getResponse = await client.get({ id: 'test-space::my-doc', space: 'test-space' });
-        expect(getResponse._source).toEqual({
+        // Search by prefixed ID
+        const searchResponse = await client.search({
+          space: 'test-space',
+          query: { ids: { values: ['test-space::my-doc'] } },
+          size: 1,
+        });
+        expect(searchResponse.hits.hits.length).toBe(1);
+        const hit = searchResponse.hits.hits[0];
+        expect(hit._source).toEqual({
           '@timestamp': expect.any(String),
           mappedField: 'test-value',
         });
-        expect(getResponse._source).not.toHaveProperty('kibana');
+        expect(hit._source).not.toHaveProperty('kibana');
       });
 
       it('should search within a space and return only documents from that space', async () => {
@@ -311,17 +323,20 @@ describe('DataStreamClient', () => {
         });
       });
 
-      it('should throw error when getting document with wrong space', async () => {
+      it('should not return document when searching with wrong space', async () => {
         const response = await client.index({
           space: 'space-a',
           document: { '@timestamp': new Date().toISOString(), mappedField: 'test' },
           refresh: true,
         });
 
-        // Try to get with wrong space
-        await expect(client.get({ id: response._id!, space: 'space-b' })).rejects.toThrow(
-          "Space mismatch: document belongs to 'space-a', not 'space-b'"
-        );
+        // Search with wrong space - should return no results
+        const searchResponse = await client.search({
+          space: 'space-b',
+          query: { ids: { values: [response._id!] } },
+          size: 1,
+        });
+        expect(searchResponse.hits.hits.length).toBe(0);
       });
 
       it('should reject create operation with existing ID (data streams do not support updates)', async () => {
@@ -359,13 +374,18 @@ describe('DataStreamClient', () => {
         // ID should NOT contain ::
         expect(response._id).not.toContain('::');
 
-        // Get document and verify kibana.space_ids is NOT present
-        const getResponse = await client.get({ id: response._id! });
-        expect(getResponse._source).toEqual({
+        // Search for document and verify kibana.space_ids is NOT present
+        const searchResponse = await client.search({
+          query: { ids: { values: [response._id!] } },
+          size: 1,
+        });
+        expect(searchResponse.hits.hits.length).toBe(1);
+        const hit = searchResponse.hits.hits[0];
+        expect(hit._source).toEqual({
           '@timestamp': expect.any(String),
           mappedField: 'test-value',
         });
-        expect(getResponse._source).not.toHaveProperty('kibana');
+        expect(hit._source).not.toHaveProperty('kibana');
 
         // Verify the property is NOT stored in ES
         const rawDocSearch = await esClient.search({
@@ -419,8 +439,21 @@ describe('DataStreamClient', () => {
         ).rejects.toThrow("IDs cannot contain '::'");
       });
 
-      it('should throw error when getting with space-prefixed ID without space parameter', async () => {
-        await expect(client.get({ id: 'space::doc' })).rejects.toThrow("IDs cannot contain '::'");
+      it('should not return space-bound documents when searching without space parameter', async () => {
+        // Create a space-bound document
+        const spaceResponse = await client.index({
+          space: 'test-space',
+          id: 'space-doc',
+          document: { '@timestamp': new Date().toISOString(), mappedField: 'test' },
+          refresh: true,
+        });
+
+        // Search without space parameter - should not return space-bound documents
+        const searchResponse = await client.search({
+          query: { ids: { values: [spaceResponse._id!] } },
+          size: 1,
+        });
+        expect(searchResponse.hits.hits.length).toBe(0);
       });
 
       it('should handle bulk operations without space, not prefixing IDs', async () => {
@@ -519,11 +552,13 @@ describe('DataStreamClient', () => {
         });
 
         // Verify it belongs to persistent-space
-        const getResponse = await client.get({
-          id: createResponse._id!,
+        const getSearchResponse = await client.search({
           space: 'persistent-space',
+          query: { ids: { values: [createResponse._id!] } },
+          size: 1,
         });
-        expect((getResponse._source as any)?.mappedField).toBe('original');
+        expect(getSearchResponse.hits.hits.length).toBe(1);
+        expect((getSearchResponse.hits.hits[0]._source as any)?.mappedField).toBe('original');
 
         // Verify it's searchable only in persistent-space
         const searchResponse = await client.search({

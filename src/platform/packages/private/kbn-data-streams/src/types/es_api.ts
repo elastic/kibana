@@ -33,18 +33,6 @@ export type ClientSearchResponse<
   TSearchRequest extends OmitIndexProp<api.SearchRequest>
 > = api.SearchResponse<TDocument, TSearchRequest>;
 
-export type ClientGetRequest = OmitIndexProp<api.GetRequest & api.SearchRequest> & {
-  /**
-   * Optional space identifier. When provided, validates that the document ID
-   * belongs to this space. When undefined, rejects space-prefixed IDs.
-   */
-  space?: string;
-};
-export type ClientGetResponse<TDocument> = api.GetResponse<TDocument>;
-export type ClientGet<TDocumentType> = (
-  request: ClientGetRequest
-) => Promise<ClientGetResponse<TDocumentType>>;
-
 export type ClientIndexRequest<TDocument> = OmitIndexProps<api.IndexRequest<TDocument>> & {
   /**
    * Optional space identifier. When provided, prefixes the document ID with the space
@@ -91,6 +79,5 @@ export interface InternalIDataStreamClient<
 
   bulk: ClientBulk<FullDocumentType>;
   index: ClientIndex<FullDocumentType>;
-  get: ClientGet<FullDocumentType>;
   existsIndex: ClientExistsIndex;
 }

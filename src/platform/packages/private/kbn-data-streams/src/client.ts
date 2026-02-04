@@ -18,7 +18,6 @@ import type {
   ClientSearchRequest,
   ClientIndexRequest,
   ClientBulkRequest,
-  ClientGetRequest,
   ClientBulkOperation,
 } from './types/es_api';
 
@@ -27,7 +26,6 @@ import { validateClientArgs } from './validate_client_args';
 import {
   generateSpacePrefixedId,
   throwOnIdWithSeparator,
-  validateSpaceInId,
   decorateDocumentWithSpace,
   buildSpaceFilter,
   buildSpaceAgnosticFilter,
@@ -167,85 +165,6 @@ export class DataStreamClient<
     }
 
     throw new Error(`Unknown operation: '${key}'`);
-  }
-
-  public async get(args: ClientGetRequest) {
-    const { space, ...rest } = args;
-    return space ? this.getWithSpace({ ...rest, space }) : this.getSpaceAgnostic(rest);
-  }
-
-  private async getWithSpace(
-    args: ClientGetRequest & { space: string }
-  ): Promise<api.GetResponse<FullDocumentType>> {
-    const { space, id, ...restArgs } = args;
-
-    // Space-aware mode: validate that ID belongs to the expected space
-    validateSpaceInId(id, space);
-
-    // Use search with ids query to work across all backing indices
-    const idsQuery: api.QueryDslQueryContainer = { ids: { values: [id] } };
-    const spaceQuery = this.buildSpaceAwareQuery(idsQuery, space);
-
-    // We cannot use this.client.get() because it requires specifying the backing index.
-    const searchResponse = await this.client.search<FullDocumentType>({
-      index: this.dataStreamDefinition.name,
-      query: spaceQuery,
-      size: 1,
-      ...restArgs,
-    });
-
-    const hit = searchResponse.hits.hits[0];
-    if (!hit) {
-      throw new Error(`document not found: ${id}`);
-    }
-
-    // Convert search hit to GetResponse format
-    return {
-      _id: hit._id!,
-      _index: hit._index,
-      _source: this.stripSpaceProperty(hit._source),
-      found: true,
-      _version: hit._version,
-      _seq_no: hit._seq_no,
-      _primary_term: hit._primary_term,
-    };
-  }
-
-  private async getSpaceAgnostic(
-    args: Omit<ClientGetRequest, 'space'>
-  ): Promise<api.GetResponse<FullDocumentType>> {
-    const { id, ...restArgs } = args;
-
-    // Space-agnostic mode: reject space-prefixed IDs
-    throwOnIdWithSeparator(id);
-
-    // Use search with ids query to work across all backing indices
-    const idsQuery: api.QueryDslQueryContainer = { ids: { values: [id] } };
-    const spaceQuery = this.buildSpaceAwareQuery(idsQuery, undefined);
-
-    // We cannot use this.client.get() because it requires specifying the backing index.
-    const searchResponse = await this.client.search<FullDocumentType>({
-      index: this.dataStreamDefinition.name,
-      query: spaceQuery,
-      size: 1,
-      ...restArgs,
-    });
-
-    const hit = searchResponse.hits.hits[0];
-    if (!hit) {
-      throw new Error(`document not found: ${id}`);
-    }
-
-    // Convert search hit to GetResponse format
-    return {
-      _id: hit._id!,
-      _index: hit._index,
-      _source: hit._source,
-      found: true,
-      _version: hit._version,
-      _seq_no: hit._seq_no,
-      _primary_term: hit._primary_term,
-    };
   }
 
   public async existsIndex() {

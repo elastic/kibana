@@ -12,8 +12,6 @@ export type { DataStreamDefinition, AnyDataStreamDefinition } from './definition
 export type {
   ClientSearchRequest,
   ClientSearchResponse,
-  ClientGetRequest,
-  ClientGetResponse,
   ClientIndexRequest,
   ClientIndexResponse,
   ClientBulkRequest,
