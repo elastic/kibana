@@ -26,6 +26,10 @@ export interface HybridBuildOptions {
   plugins?: string[];
   filter?: string[];
   log?: ToolingLog;
+  /** Enable profiling - writes stats.json and RsDoctor report */
+  profile?: boolean;
+  /** Skip RsDoctor, only generate stats.json (faster) */
+  profileStatsOnly?: boolean;
 }
 
 export interface HybridBuildResult {
@@ -61,6 +65,8 @@ export async function runHybridBuild(options: HybridBuildOptions): Promise<Hybri
     plugins: targetPlugins,
     filter,
     log,
+    profile = false,
+    profileStatsOnly = false,
   } = options;
 
   const startTime = Date.now();
@@ -80,6 +86,8 @@ export async function runHybridBuild(options: HybridBuildOptions): Promise<Hybri
       plugins: targetPlugins,
       filter,
       log,
+      profile,
+      profileStatsOnly,
     });
 
     log?.info('Starting RSPack compilation...');
@@ -92,7 +100,7 @@ export async function runHybridBuild(options: HybridBuildOptions): Promise<Hybri
       return runProductionBuild(compiler, log, startTime, repoRoot);
     }
   } catch (error: any) {
-    log?.error('Build failed:', error.message);
+    log?.error(`Build failed: ${error.message}`);
     if (error.stack) {
       log?.error(error.stack);
     }
@@ -115,7 +123,7 @@ async function runProductionBuild(
       const duration = (Date.now() - startTime) / 1000;
 
       if (err) {
-        log?.error('Compilation error:', err.message);
+        log?.error(`Compilation error: ${err.message}`);
         compiler.close(() => {
           resolve({
             success: false,
@@ -202,7 +210,7 @@ async function runWatchBuild(
         const duration = (Date.now() - startTime) / 1000;
 
         if (err) {
-          log?.error('Watch error:', err.message);
+          log?.error(`Watch error: ${err.message}`);
           if (isFirstBuild && !hasResolvedFirstBuild) {
             hasResolvedFirstBuild = true;
             resolve({

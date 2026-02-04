@@ -24,6 +24,89 @@ import {
 import type { ThemeTag } from '../types';
 
 /**
+ * Plugin to emit stats.json file for bundle analysis.
+ * Used when profiling is enabled.
+ * 
+ * Uses SYNCHRONOUS file writing to ensure stats are written before process exits.
+ */
+class EmitStatsPlugin {
+  constructor(
+    private readonly outputDir: string,
+    private readonly log?: ToolingLog
+  ) {}
+
+  apply(compiler: Compiler) {
+    // Use 'afterDone' hook which fires after all 'done' hooks complete
+    compiler.hooks.afterDone.tap('EmitStatsPlugin', (stats) => {
+      const statsPath = Path.resolve(this.outputDir, 'stats.json');
+
+      this.log?.info('Generating stats.json for bundle analysis...');
+
+      try {
+        // Ensure output directory exists
+        if (!Fs.existsSync(this.outputDir)) {
+          Fs.mkdirSync(this.outputDir, { recursive: true });
+        }
+
+        // Use minimal stats to avoid "Invalid string length" error
+        // Full stats for 211 bundles exceeds JS string limit (~512MB)
+        const minimalStats = {
+          all: false,
+          hash: true,
+          version: true,
+          timings: true,
+          assets: true,
+          chunks: true,
+          chunkGroups: true,
+          entrypoints: true,
+          // Skip detailed module info - too large
+          modules: false,
+          reasons: false,
+          chunkModules: false,
+        };
+
+        const jsonStats = stats.toJson(minimalStats);
+
+        // Build JSON string piece by piece to avoid string length limits
+        // Write synchronously to ensure completion before process exit
+        const fd = Fs.openSync(statsPath, 'w');
+
+        try {
+          Fs.writeSync(fd, '{\n');
+
+          const keys = Object.keys(jsonStats).filter(
+            (key) => (jsonStats as any)[key] !== undefined
+          );
+
+          keys.forEach((key, index) => {
+            const value = (jsonStats as any)[key];
+            const isLast = index === keys.length - 1;
+
+            try {
+              const jsonValue = JSON.stringify(value);
+              if (jsonValue !== undefined) {
+                Fs.writeSync(fd, `  "${key}": ${jsonValue}${isLast ? '' : ','}\n`);
+              }
+            } catch {
+              // Skip values that can't be stringified (circular refs, etc.)
+            }
+          });
+
+          Fs.writeSync(fd, '}\n');
+        } finally {
+          Fs.closeSync(fd);
+        }
+
+        const fileSize = Fs.statSync(statsPath).size;
+        this.log?.info(`Stats written to ${statsPath} (${(fileSize / 1024 / 1024).toFixed(2)} MB)`);
+      } catch (err: any) {
+        this.log?.error(`Failed to generate stats: ${err.message}`);
+      }
+    });
+  }
+}
+
+/**
  * Compute a hash of the config files that affect the build.
  * This ensures cache invalidation when config changes, since RSPack's
  * buildDependencies may not work correctly with TypeScript files.
@@ -177,6 +260,10 @@ export interface SingleCompileConfigOptions {
   filter?: string[];
   /** ToolingLog instance for consistent logging with Kibana's dev mode */
   log?: ToolingLog;
+  /** Enable profiling - writes stats.json and enables RsDoctor */
+  profile?: boolean;
+  /** Skip RsDoctor, only generate stats.json (faster) */
+  profileStatsOnly?: boolean;
 }
 
 /**
@@ -203,6 +290,8 @@ export async function createSingleCompileConfig(
     plugins: targetPlugins,
     log,
     filter,
+    profile = false,
+    profileStatsOnly = false,
   } = options;
 
   // Discover all plugins
@@ -247,6 +336,9 @@ export async function createSingleCompileConfig(
   // are initialized in the correct order. The `externals` only covers
   // npm packages from @kbn/ui-shared-deps.
 
+  // Output directory for all bundles (used in output.path and profiling plugins)
+  const bundlesDir = Path.resolve(outputRoot, 'target/public/bundles');
+
   return {
     name: 'kibana-plugins',
     mode: dist ? 'production' : 'development',
@@ -262,7 +354,7 @@ export async function createSingleCompileConfig(
 
     output: {
       // Output to a central location
-      path: Path.resolve(outputRoot, 'target/public/bundles'),
+      path: bundlesDir,
       // Single unified bundle (with [name] for runtimeChunk compatibility)
       filename: '[name].bundle.js',
       // Async chunks: short hash names in production, descriptive names in development
@@ -438,6 +530,9 @@ export async function createSingleCompileConfig(
         : false,
     },
 
+    // Enable profiling in the RSPack config itself
+    profile,
+
     plugins: [
       // Node.js browser polyfills (same as kbn-optimizer)
       new NodeLibsBrowserPlugin() as any,
@@ -455,6 +550,43 @@ export async function createSingleCompileConfig(
 
       // Watch plugin manifests and regenerate entry when plugins are added/removed
       ...(watch ? [new PluginWatchPlugin(pluginManifests, options, wrapperDir)] : []),
+
+      // Profiling plugins - enabled with --profile flag
+      ...(profile
+        ? [
+            // Emit stats.json for detailed bundle analysis
+            // Use external tools to analyze: https://statoscope.tech/ or webpack-bundle-analyzer
+            new EmitStatsPlugin(bundlesDir, log),
+          ]
+        : []),
+
+      // RsDoctor profiling - only works in the profile worker (avoids require-in-the-middle conflict)
+      // Skip if profileStatsOnly is enabled (faster builds when only stats.json is needed)
+      ...(profile && !profileStatsOnly
+        ? (() => {
+            try {
+              // eslint-disable-next-line @typescript-eslint/no-var-requires
+              const { RsdoctorRspackPlugin } = require('@rsdoctor/rspack-plugin');
+              log?.info('Enabling RsDoctor bundle analysis...');
+              return [
+                new RsdoctorRspackPlugin({
+                  // Don't auto-open browser - user can run CLI command manually
+                  disableClientServer: true,
+                  supports: {
+                    // Enable bundle analysis
+                    bundleAnalyze: true,
+                  },
+                }),
+              ];
+            } catch (e: any) {
+              // RsDoctor's envinfo dependency conflicts with require-in-the-middle (from harden)
+              // This should only happen if running outside the profile worker
+              log?.warning(`RsDoctor not available: ${e.message}`);
+              log?.info('Use stats.json with https://statoscope.tech for bundle analysis');
+              return [];
+            }
+          })()
+        : []),
     ],
 
     stats: {

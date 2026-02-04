@@ -20,6 +20,7 @@ export function getSharedResolveConfig(repoRoot: string): Configuration['resolve
   return {
     extensions: ['.js', '.ts', '.tsx', '.json'],
     mainFields: ['browser', 'module', 'main'],
+    mainFiles: ['index'],
     alias: {
       'react-dom$': 'react-dom/profiling',
       'scheduler/tracing': 'scheduler/tracing-profiling',

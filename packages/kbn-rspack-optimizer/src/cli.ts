@@ -8,6 +8,7 @@
  */
 
 import Path from 'path';
+import { fork } from 'child_process';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
 import getopts from 'getopts';
@@ -24,7 +25,18 @@ export interface CliOptions {
 export async function runRspackCli(options: CliOptions = {}): Promise<void> {
   const rawArgs = process.argv.slice(2);
   const args = getopts(rawArgs, {
-    boolean: ['watch', 'dist', 'examples', 'test-plugins', 'help', 'no-cache', 'verbose', 'quiet'],
+    boolean: [
+      'watch',
+      'dist',
+      'examples',
+      'test-plugins',
+      'help',
+      'no-cache',
+      'verbose',
+      'quiet',
+      'profile',
+      'profile-stats-only',
+    ],
     string: ['filter', 'themes', 'output-root', 'plugins'],
     alias: {
       h: 'help',
@@ -37,12 +49,24 @@ export async function runRspackCli(options: CliOptions = {}): Promise<void> {
       examples: false,
       'test-plugins': false,
       'no-cache': false,
+      profile: false,
+      'profile-stats-only': false,
     },
   });
 
   if (args.help) {
     printHelp();
     process.exit(0);
+  }
+
+  // When profiling, spawn a special worker that doesn't use require-in-the-middle
+  // This allows RsDoctor to work (envinfo conflicts with require-in-the-middle)
+  if (args.profile || args['profile-stats-only']) {
+    if (args.watch) {
+      // eslint-disable-next-line no-console
+      console.log('Note: --watch is ignored in profile mode (profile builds are always one-time)');
+    }
+    return runProfileWorker(rawArgs, args['profile-stats-only']);
   }
 
   const log = new ToolingLog({
@@ -74,12 +98,14 @@ export async function runRspackCli(options: CliOptions = {}): Promise<void> {
       filter,
       plugins,
       log,
+      profile: false,
     });
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
     if (result.success) {
       log.success(`RSPack build completed in ${duration}s`);
+
       if (!args.watch) {
         process.exit(0);
       }
@@ -88,9 +114,58 @@ export async function runRspackCli(options: CliOptions = {}): Promise<void> {
       process.exit(1);
     }
   } catch (error) {
-    log.error('RSPack optimizer failed:', error);
+    log.error(`RSPack optimizer failed: ${error}`);
     process.exit(1);
   }
+}
+
+/**
+ * Run the profile build in a separate worker process.
+ *
+ * The worker uses a minimal Node.js setup that avoids require-in-the-middle
+ * (from @kbn/setup-node-env/harden), which conflicts with envinfo used by RsDoctor.
+ */
+function runProfileWorker(args: string[], statsOnly: boolean = false): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const workerPath = Path.resolve(__dirname, '../scripts/profile_worker.js');
+
+    // eslint-disable-next-line no-console
+    console.log('');
+    // eslint-disable-next-line no-console
+    console.log(`Starting RSPack profiler${statsOnly ? ' (stats only)' : ''}...`);
+    // eslint-disable-next-line no-console
+    console.log('');
+
+    // Forward args to worker, excluding --profile flags (worker handles them via env)
+    const workerArgs = args.filter(
+      (arg) => arg !== '--profile' && arg !== '--profile-stats-only'
+    );
+
+    const child = fork(workerPath, workerArgs, {
+      stdio: 'inherit',
+      // Increase memory for profiling - stats generation needs significant heap
+      execArgv: ['--max-old-space-size=8192'],
+      env: {
+        ...process.env,
+        // Ensure APM doesn't interfere
+        ELASTIC_APM_ACTIVE: 'false',
+        // Pass stats-only mode to worker
+        RSPACK_PROFILE_STATS_ONLY: statsOnly ? 'true' : 'false',
+      },
+    });
+
+    child.on('exit', (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`Profile worker exited with code ${code}`));
+      }
+    });
+
+    child.on('error', (err) => {
+      reject(err);
+    });
+  });
 }
 
 function parseThemes(themesArg: string | undefined): ThemeTag[] {
@@ -119,7 +194,7 @@ RSPack Optimizer - Build Kibana platform plugin bundles
 Usage:
   node scripts/build_rspack_bundles.js [options]
 
-Options:
+Build Options:
   --watch, -w           Enable watch mode for development
   --dist                Build for distribution (minified, no source maps)
   --examples            Include example plugins
@@ -129,6 +204,13 @@ Options:
   --themes <tags>       Comma-separated theme tags to build (default: all)
   --output-root <dir>   Output root directory (default: repo root)
   --no-cache            Disable filesystem caching
+
+Profile Mode (one-time build with bundle analysis):
+  --profile             Full profiling with stats.json + RsDoctor report
+  --profile-stats-only  Fast profiling with stats.json only (skips RsDoctor)
+                        Note: --watch is ignored in profile mode
+
+Output Options:
   --verbose             Verbose output
   --quiet               Quiet output
   --help, -h            Show this help message
@@ -137,13 +219,19 @@ Environment Variables:
   KBN_USE_RSPACK=true   Use RSPack optimizer instead of webpack
 
 Examples:
-  # Full build
+  # Full production build
   node scripts/build_rspack_bundles.js --dist
 
-  # Development with watch
+  # Development with watch mode
   node scripts/build_rspack_bundles.js --watch
 
-  # Build without examples
-  node scripts/build_rspack_bundles.js --dist
+  # Profile with full analysis (stats.json + RsDoctor)
+  node scripts/build_rspack_bundles.js --profile
+
+  # Quick profile (stats.json only, faster)
+  node scripts/build_rspack_bundles.js --profile-stats-only
+
+  # Profile production build
+  node scripts/build_rspack_bundles.js --dist --profile
 `);
 }

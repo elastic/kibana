@@ -1776,6 +1776,7 @@
     "@playwright/test": "1.56.1",
     "@pmmmwh/react-refresh-webpack-plugin": "0.6.1",
     "@redocly/cli": "2.14.3",
+    "@rsdoctor/rspack-plugin": "^1.5.1",
     "@rspack/core": "1.7.4",
     "@statoscope/webpack-plugin": "5.28.2",
     "@storybook/addon-a11y": "8.6.15",
