@@ -69,7 +69,6 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
   const prevInterval: string[] = [];
 
   for await (const response of rulesFinder.find()) {
-    context.logger.info(`response.saved_objects ${JSON.stringify(response.saved_objects)}`);
     if (options.shouldValidateSchedule) {
       const intervals = response.saved_objects
         .filter((rule) => rule.attributes.enabled)

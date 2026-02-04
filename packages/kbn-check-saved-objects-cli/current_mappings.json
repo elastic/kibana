@@ -325,6 +325,9 @@
       },
       "createdAt": {
         "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "text"
       }
     }
   },

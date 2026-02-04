@@ -88,8 +88,6 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     rule.references || []
   );
 
-  context.logger.info(`ruleActions ${JSON.stringify(ruleActions)}`);
-
   const ruleArtifacts = injectReferencesIntoArtifacts(
     rule.id,
     rule.attributes.artifacts,
@@ -107,16 +105,12 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     context.isSystemAction
   );
 
-  context.logger.info(`ruleDomain ${JSON.stringify(ruleDomain)}`);
-
   const {
     rule: updatedRule,
     ruleActions: updatedRuleActions,
     hasUpdateApiKeyOperation,
     isAttributesUpdateSkipped,
   } = await updateAttributesFn({ domainRule: ruleDomain, ruleActions, ruleType });
-
-  context.logger.info(`updatedRule ${JSON.stringify(updatedRule)}`);
 
   const { modifiedParams: ruleParams, isParamsUpdateSkipped } = paramsModifier
     ? // TODO (http-versioning): Remove the cast when all rule types are fixed
@@ -177,8 +171,6 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     artifactsWithRefs,
   });
 
-  context.logger.info(`ruleAttributes ${JSON.stringify(ruleAttributes)}`);
-
   let apiKeyAttributes: ApiKeyAttributes | undefined;
   if (shouldInvalidateApiKeys) {
     const { apiKeyAttributes: preparedApiKeyAttributes } = await prepareApiKeys(
@@ -201,8 +193,6 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     rawAlertActions: ruleAttributes.actions,
     username,
   });
-
-  context.logger.info(`updatedAttributes ${JSON.stringify(updatedAttributes)}`);
 
   rules.push({ ...rule, references, attributes: updatedAttributes });
 }
