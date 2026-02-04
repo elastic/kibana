@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import startCase from 'lodash/startCase';
 import type { ActionsPluginsStart } from '../plugin';
 import type { ILicenseState } from '../lib';
 import { BASE_ACTION_API_PATH } from '../../common';
@@ -396,10 +395,7 @@ export const oauthCallbackRoute = (
             connectorId: oauthState.connectorId,
             tokenType: 'access_token',
           });
-          // Some providers return "bearer" instead of "Bearer", but expect "Bearer" in the header,
-          // so we normalize the token type, i.e., capitalize first letter (e.g., "bearer" -> "Bearer")
-          const normalizedTokenType = startCase(tokenResult.tokenType);
-          const formattedToken = `${normalizedTokenType} ${tokenResult.accessToken}`;
+          const formattedToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
           await connectorTokenClient.createWithRefreshToken({
             connectorId: oauthState.connectorId,
             accessToken: formattedToken,

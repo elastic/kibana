@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import startCase from 'lodash/startCase';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorToken, ConnectorTokenClientContract } from '../types';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
@@ -80,10 +79,7 @@ export const getOAuthClientCredentialsAccessToken = async ({
       },
       configurationUtilities
     );
-    // Some providers return "bearer" instead of "Bearer", but expect "Bearer" in the header,
-    // so we normalize the token type, i.e., capitalize first letter (e.g., "bearer" -> "Bearer")
-    const normalizedTokenType = startCase(tokenResult.tokenType);
-    accessToken = `${normalizedTokenType} ${tokenResult.accessToken}`;
+    accessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
 
     // try to update connector_token SO
     if (connectorId && connectorTokenClient) {
