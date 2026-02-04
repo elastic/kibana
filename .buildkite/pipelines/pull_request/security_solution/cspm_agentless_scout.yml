@@ -1,8 +1,8 @@
 steps:
-  - command: .buildkite/scripts/steps/functional/synthetics_plugin.sh
-    label: 'Synthetics @elastic/synthetics Tests'
+  - command: .buildkite/scripts/steps/test/cspm_agentless_scout.sh
+    label: 'CSPM Agentless Scout E2E Tests'
     agents:
-      machineType: n2-standard-4
+      machineType: n2-standard-8
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
@@ -14,11 +14,8 @@ steps:
       - check_types
       - check_oas_snapshot
     timeout_in_minutes: 60
-    artifact_paths:
-      - 'x-pack/solutions/observability/plugins/synthetics/e2e/.journeys/**/*'
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 3
-        - exit_status: '*'
           limit: 1
+
