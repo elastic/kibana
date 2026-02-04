@@ -27,6 +27,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { getLatencyChartScreenContext } from './get_latency_chart_screen_context';
 import { LatencyAggregationTypeSelect } from './latency_aggregation_type_select';
+import { OpenChartInDiscoverLink } from '../../links/discover_links/open_chart_in_discover_link';
 
 interface Props {
   height?: number;
@@ -139,10 +140,17 @@ export function LatencyChart({ height, kuery }: Props) {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <MLHeader
-              hasValidMlLicense={license?.getFeature('ml').isAvailable}
-              mlJobId={preferredAnomalyTimeseries?.jobId}
-            />
+            <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <MLHeader
+                  hasValidMlLicense={license?.getFeature('ml').isAvailable}
+                  mlJobId={preferredAnomalyTimeseries?.jobId}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <OpenChartInDiscoverLink dataTestSubj="apmLatencyChartOpenInDiscover" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
