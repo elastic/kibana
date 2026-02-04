@@ -8,6 +8,7 @@
  */
 
 import { run } from '../../lib/spawn.mjs';
+import { moonRun } from '../../lib/moon.mjs';
 import External from '../../lib/external_packages.js';
 
 import {
@@ -52,6 +53,7 @@ export const command = {
                           settings for local development. Disable this process either pass this flag or set
                           the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
     --allow-root         Required supplementary flag if you're running bootstrap as root.
+    --no-cache           Turns caches off on involved processes (Moon).
     --quiet              Prevent logging more than basic success/error messages
   `,
   reportTimings: {
@@ -64,10 +66,10 @@ export const command = {
     const quiet = args.getBooleanValue('quiet') ?? false;
     const vscodeConfig =
       !IS_CI && (args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE);
-    const allowRoot = args.getBooleanValue('allow-root') ?? false;
     const forceInstall = args.getBooleanValue('force-install');
     const shouldInstall =
       forceInstall || !(await areNodeModulesPresent()) || !(await checkYarnIntegrity(log));
+    const noCache = args.getBooleanValue('no-cache') ?? forceInstall;
 
     const { packageManifestPaths, tsConfigRepoRels } = await time('discovery', discovery);
 
@@ -110,24 +112,29 @@ export const command = {
       }
     });
 
-    await time('run install scripts', async () => {
-      await runInstallScripts(log, { quiet });
-    });
-
-    await time('pre-build webpack bundles for packages', async () => {
-      log.info('pre-build webpack bundles for packages');
-      await run(
-        'yarn',
-        ['kbn', 'build-shared']
-          .concat(quiet ? ['--quiet'] : [])
-          .concat(forceInstall ? ['--no-cache'] : [])
-          .concat(allowRoot ? ['--allow-root'] : []),
-        {
-          pipe: true,
-        }
-      );
-      log.success('shared webpack bundles built');
-    });
+    await Promise.all([
+      time('extract relevant versions for packages', async () => {
+        log.info('extract relevant versions for packages');
+        await moonRun(':extract-version-dependencies', {
+          pipe: !quiet,
+          quiet,
+          noCache,
+        });
+        log.success('relevant versions extracted for packages');
+      }),
+      time('pre-build webpack bundles for packages', async () => {
+        log.info('pre-build webpack bundles for packages');
+        await moonRun([':build-webpack'], {
+          pipe: !quiet,
+          quiet,
+          noCache,
+        });
+        log.success('shared webpack bundles built');
+      }),
+      time('run install scripts', async () => {
+        await runInstallScripts(log, { quiet });
+      }),
+    ]);
 
     await time('sort package json', async () => {
       await sortPackageJson(log);
