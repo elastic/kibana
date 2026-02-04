@@ -116,7 +116,6 @@ export class DashboardApp {
 
   async openNewDashboard() {
     await this.page.testSubj.click('newItemButton');
-    await this.waitForRenderComplete();
   }
 
   private getSettingsFlyout() {
@@ -161,22 +160,17 @@ export class DashboardApp {
 
   /**
    * Switches the dashboard to edit mode.
-   * Switches the dashboard to edit mode.
    */
   async switchToEditMode() {
-    const isViewMode = await this.getIsInViewMode();
-    if (isViewMode) {
-      await this.editModeButton.click();
-      // Wait for edit mode to be active (drag handles appear)
-      // Multiple drag handles are expected when multiple panels exist.
-      await expect
-        .poll(() => this.page.testSubj.locator('embeddablePanelDragHandle').count())
-        .toBeGreaterThan(0);
-    }
+    await this.editModeButton.click();
+    // Wait for edit mode to be active (drag handles appear)
+    // Multiple drag handles are expected when multiple panels exist.
+    await expect
+      .poll(() => this.page.testSubj.locator('embeddablePanelDragHandle').count())
+      .toBeGreaterThan(0);
   }
 
   /**
-   * Clicks the cancel button to exit edit mode without saving.
    * Clicks the cancel button to exit edit mode without saving.
    */
   async clickCancelOutOfEditMode() {
@@ -190,7 +184,6 @@ export class DashboardApp {
 
   /**
    * Opens the "Add panel" flyout for selecting panel types to add to the dashboard.
-   * Opens the "Add panel" flyout for selecting panel types to add.
    */
   async openAddPanelFlyout() {
     // Click top nav add menu button and wait for menu to appear
@@ -302,7 +295,6 @@ export class DashboardApp {
 
   /**
    * Core method to add an embeddable from the library.
-   * Adds an embeddable from the library.
    *
    * @param embeddableName - Name with dashes (e.g., 'Rendering-Test:-saved-search')
    * @param embeddableType - Optional type filter (e.g., 'search', 'Visualization')
@@ -669,14 +661,12 @@ export class DashboardApp {
 
   /**
    * Formats a panel title for use in test subject selectors.
-   * Formats a panel title for test subject selectors.
    */
   private formatTitleForTestSubj(title: string): string {
     return title.replace(/\s/g, '');
   }
 
   /**
-   * Gets the hover actions wrapper for a panel by title.
    * Gets the hover actions wrapper for a panel by title.
    *
    * @param title - Panel title. If empty, finds first panel by class.
@@ -694,7 +684,6 @@ export class DashboardApp {
   /**
    * Opens the context menu for a panel.
    * Scrolls the panel into view and clicks the menu toggle.
-   * Opens the context menu for a panel.
    */
   async openPanelContextMenu(title?: string) {
     const panelWrapper = this.getPanelHoverActionsLocator(title);
@@ -705,7 +694,6 @@ export class DashboardApp {
     const isOpen = await this.page.testSubj.locator('embeddablePanelContextMenuOpen').isVisible();
     if (!isOpen) {
       // Click the menu icon inside the panel wrapper.
-      // Click the menu icon INSIDE the panel wrapper, not globally
       const menuIcon = panelWrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]');
       await menuIcon.click();
       await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeVisible();
@@ -729,7 +717,6 @@ export class DashboardApp {
 
   /**
    * Checks if a panel action exists as a descendant of the panel wrapper.
-   * Checks if a panel action exists as a descendant of the panel wrapper.
    */
   private async panelActionExistsInWrapper(
     actionTestSubj: string,
@@ -741,7 +728,6 @@ export class DashboardApp {
   }
 
   /**
-   * Clicks a panel action from the hover actions or context menu.
    * Clicks a panel action from the hover actions or context menu.
    *
    * Key difference from before: checks if action is DESCENDANT of panel wrapper,
@@ -813,7 +799,6 @@ export class DashboardApp {
   /**
    * Checks if a panel has a specific action available.
    * Checks both hover actions and context menu.
-   * Checks if a panel has a specific action available.
    *
    * Uses count() > 0 to include hidden elements.
    * (finds elements even if not visible).
@@ -843,7 +828,6 @@ export class DashboardApp {
 
   /**
    * Asserts that a panel action exists (throws if not found).
-   * Asserts that a panel action exists (throws if not found).
    */
   async expectExistsPanelAction(actionTestSubj: string, title?: string) {
     const exists = await this.panelHasAction(actionTestSubj, title);
@@ -871,7 +855,6 @@ export class DashboardApp {
   /**
    * Verifies a panel is linked to the library.
    * A linked panel has the "Unlink from library" action available.
-   * Verifies a panel is linked to the library.
    *
    * Switches to edit mode before checking because library actions
    * may not be available in view mode.
@@ -894,7 +877,6 @@ export class DashboardApp {
   /**
    * Verifies a panel is NOT linked to the library.
    * A non-linked panel has the "Save to library" action available.
-   * Verifies a panel is NOT linked to the library.
    *
    * Switches to edit mode before checking because library actions
    * may not be available in view mode.
