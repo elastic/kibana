@@ -25,10 +25,9 @@ const API_KEY_MASK = '•'.repeat(60);
 
 interface ApiKeyFormProps {
   hasTitle?: boolean;
-  minWidth?: number;
 }
 
-export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true, minWidth }) => {
+export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const { apiKey, status, updateApiKey, toggleApiKeyVisibility } = useSearchApiKey();
 
