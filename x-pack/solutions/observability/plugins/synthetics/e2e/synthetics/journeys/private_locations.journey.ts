@@ -114,7 +114,7 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.goto(`${params.kibanaUrl}/app/integrations/detail/synthetics/policies`);
     await page.waitForSelector('h1:has-text("Elastic Synthetics")');
 
-    await page.click(`text="test-monitor-${NEW_LOCATION_LABEL}-default"`);
+    await page.click(`text="test-monitor-${NEW_LOCATION_LABEL}"`);
     await page.waitForSelector('h1:has-text("Edit Elastic Synthetics integration")');
     await page.waitForSelector('text="This package policy is managed by the Synthetics app."');
   });
