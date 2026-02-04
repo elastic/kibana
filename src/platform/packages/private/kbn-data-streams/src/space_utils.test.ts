@@ -13,8 +13,6 @@ import {
   containsSpaceSeparator,
   throwOnIdWithSeparator,
   generateSpacePrefixedId,
-  extractSpaceFromId,
-  validateSpaceInId,
   decorateDocumentWithSpace,
   buildSpaceFilter,
   buildSpaceAgnosticFilter,
@@ -71,46 +69,6 @@ describe('space_utils', () => {
 
     it('should handle empty space string', () => {
       expect(generateSpacePrefixedId('', 'doc123')).toBe('::doc123');
-    });
-  });
-
-  describe('extractSpaceFromId', () => {
-    it('should extract space and rawId from prefixed ID', () => {
-      expect(extractSpaceFromId('myspace::doc123')).toEqual({
-        space: 'myspace',
-        rawId: 'doc123',
-      });
-      expect(extractSpaceFromId('default::uuid-here')).toEqual({
-        space: 'default',
-        rawId: 'uuid-here',
-      });
-    });
-
-    it('should handle IDs with multiple separators', () => {
-      expect(extractSpaceFromId('space::part1::part2')).toEqual({
-        space: 'space::part1',
-        rawId: 'part2',
-      });
-    });
-
-    it('should throw if ID has no separator', () => {
-      expect(() => extractSpaceFromId('doc123')).toThrow(/missing space prefix/);
-    });
-  });
-
-  describe('validateSpaceInId', () => {
-    it('should not throw if ID belongs to expected space', () => {
-      expect(() => validateSpaceInId('myspace::doc123', 'myspace')).not.toThrow();
-    });
-
-    it('should throw if ID belongs to different space', () => {
-      expect(() => validateSpaceInId('other::doc123', 'myspace')).toThrow(
-        /Space mismatch: document belongs to 'other', not 'myspace'/
-      );
-    });
-
-    it('should throw if ID has no separator', () => {
-      expect(() => validateSpaceInId('doc123', 'myspace')).toThrow(/missing space prefix/);
     });
   });
 

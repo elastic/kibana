@@ -98,9 +98,6 @@ export class DataStreamClient<
       if (document) {
         processedDocument = decorateDocumentWithSpace(document, space);
       }
-    } else {
-      // Space-agnostic mode: no prefixing or decoration
-      // Validation already done above
     }
 
     return this.client.index<FullDocumentType>({

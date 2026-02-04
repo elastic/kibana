@@ -38,26 +38,6 @@ export function generateSpacePrefixedId(space: string, id?: string): string {
   return `${space}${SPACE_ID_SEPARATOR}${docId}`;
 }
 
-/** Extract space from a prefixed ID. Throws if ID has no prefix. */
-export function extractSpaceFromId(id: string): { space: string; rawId: string } {
-  const separatorIndex = id.lastIndexOf(SPACE_ID_SEPARATOR);
-  if (separatorIndex === -1) {
-    throw new Error(`Invalid document ID format: missing space prefix '${SPACE_ID_SEPARATOR}'`);
-  }
-  return {
-    space: id.substring(0, separatorIndex),
-    rawId: id.substring(separatorIndex + SPACE_ID_SEPARATOR.length),
-  };
-}
-
-/** Validate that the ID belongs to the expected space. */
-export function validateSpaceInId(id: string, expectedSpace: string): void {
-  const { space } = extractSpaceFromId(id);
-  if (space !== expectedSpace) {
-    throw new Error(`Space mismatch: document belongs to '${space}', not '${expectedSpace}'`);
-  }
-}
-
 /** Add kibana.space_ids property to document. Only called when space is defined. */
 export function decorateDocumentWithSpace<T>(
   doc: T,
