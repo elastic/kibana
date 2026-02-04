@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import yaml from 'js-yaml';
+import type { ConfigType } from '../../../config';
 import {
   INTERNAL_TEMPLATE_DETAILS_URL,
   INTERNAL_TEMPLATES_URL,
@@ -572,3 +573,23 @@ export const bulkExportTemplatesRoute = createCasesRoute({
     }
   },
 });
+
+/**
+ * Enable register template routes conditionally, based on feature flag
+ */
+export const getTemplateRoutes = (config: ConfigType) => {
+  if (!config.templates.enabled) {
+    return [];
+  }
+
+  return [
+    getTemplatesRoute,
+    getTemplateRoute,
+    postTemplateRoute,
+    putTemplateRoute,
+    patchTemplateRoute,
+    deleteTemplateRoute,
+    bulkDeleteTemplatesRoute,
+    bulkExportTemplatesRoute,
+  ];
+};
