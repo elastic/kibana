@@ -38,6 +38,8 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/observability/config.group10.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group11.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group12.ts
+  - x-pack/platform/test/serverless/functional/configs/observability/config.group13.ts
+  - x-pack/platform/test/serverless/functional/configs/observability/config.group14.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.logs_essentials.group1.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.screenshots.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.telemetry.ts

@@ -28,3 +28,6 @@ export * as connectorDomainV1 from './connector/v1';
 export * as attachmentDomainV1 from './attachment/v1';
 export * as observableDomainV1 from './observable/v1';
 export * as templateDomainV1 from './template/v1';
+
+// V2
+export * as attachmentDomainV2 from './attachment/v2';
