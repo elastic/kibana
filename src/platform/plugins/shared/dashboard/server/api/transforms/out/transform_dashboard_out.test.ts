@@ -86,7 +86,6 @@ describe('transformDashboardOut', () => {
         {
           config: {
             enhancements: {},
-            savedObjectId: '1',
             title: 'title1',
           },
           grid: { x: 0, y: 0, w: 10, h: 10 },
@@ -174,7 +173,6 @@ describe('transformDashboardOut', () => {
         {
           config: {
             enhancements: {},
-            savedObjectId: '1',
             title: 'title1',
           },
           grid: {
