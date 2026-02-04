@@ -11,8 +11,6 @@ export {
   getESQLAdHocDataview,
   getIndexPatternFromESQLQuery,
   hasTransformationalCommand,
-  isEsqlSourceCommandQuery,
-  EsqlSourceCommand,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   getIndexForESQLQuery,

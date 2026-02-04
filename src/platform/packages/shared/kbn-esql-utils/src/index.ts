@@ -14,7 +14,6 @@ export {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
-  isEsqlSourceCommandQuery,
   getTimeFieldFromESQLQuery,
   prettifyQuery,
   retrieveMetadataColumns,
@@ -38,7 +37,6 @@ export { appendToESQLQuery } from './utils/append_to_query/utils';
 export { appendStatsByToQuery } from './utils/append_to_query/append_stats_by';
 export { appendWhereClauseToESQLQuery } from './utils/append_to_query/append_where';
 export { appendLimitToQuery } from './utils/append_to_query/append_limit';
-export { EsqlSourceCommand } from './utils/esql_source_commands';
 
 export {
   getESQLQueryColumns,

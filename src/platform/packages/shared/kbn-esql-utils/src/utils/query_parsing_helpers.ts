@@ -31,28 +31,8 @@ import type {
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
-import type { EsqlSourceCommand } from './esql_source_commands';
 
 const DEFAULT_ESQL_LIMIT = 1000;
-
-/**
- * Checks whether the provided ES|QL query starts with a specific source command.
- *
- * ES|QL queries start with a source command (for example `FROM`, `ROW`, `SHOW`, `TS`, `PROMQL`)
- */
-export function isEsqlSourceCommandQuery(
-  esql: string | undefined,
-  command: EsqlSourceCommand
-): boolean {
-  if (!esql) return false;
-  try {
-    const { root, errors } = Parser.parse(esql);
-    if (errors.length) return false;
-    return root.commands[0]?.name === command;
-  } catch {
-    return false;
-  }
-}
 
 export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefined {
   if (!esql) return undefined;

@@ -8,8 +8,6 @@ import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ChartType, mapVisToChartType } from '@kbn/visualization-utils';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
-import { isEsqlSourceCommandQuery } from '@kbn/esql-utils/src/utils/query_parsing_helpers';
-import { EsqlSourceCommand } from '@kbn/esql-utils/src/utils/esql_source_commands';
 import type {
   DatasourceMap,
   VisualizationMap,
@@ -53,8 +51,7 @@ const createSuggestionWithAttributes = (
 
 // Determines whether a line chart is appropriate for the given context.
 //
-// - For PromQL queries, a line chart is always considered suitable.
-// - For other ESQL queries, a line chart is suitable when:
+// A line chart is suitable when:
 //   - A date/time column is available
 //   - There is only one time series
 //
@@ -72,12 +69,6 @@ const shouldShowLineChart = (
   const esqlQuery = context.query?.esql;
 
   if (!esqlQuery) return undefined;
-
-  const isPromQLQuery = isEsqlSourceCommandQuery(esqlQuery, EsqlSourceCommand.Promql);
-
-  if (isPromQLQuery) {
-    return true;
-  }
 
   // Check if there's at least one date column (for x-axis)
   const hasDateColumn = columns.some((col) => col.meta?.type === 'date');
