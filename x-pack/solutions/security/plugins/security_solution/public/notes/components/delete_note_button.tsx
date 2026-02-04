@@ -51,6 +51,7 @@ export interface DeleteNoteButtonIconProps {
 /**
  * Renders a button to delete a note.
  * This button works in combination with the DeleteConfirmModal.
+ * There should be a DeleteConfirmModal component as an ancestor of this component with visibility based on the redux state.
  */
 export const DeleteNoteButtonIcon = memo(({ note, index }: DeleteNoteButtonIconProps) => {
   const dispatch = useDispatch();

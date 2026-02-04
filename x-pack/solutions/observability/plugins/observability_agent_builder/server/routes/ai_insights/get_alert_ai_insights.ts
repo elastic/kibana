@@ -6,17 +6,20 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { InferenceClient } from '@kbn/inference-common';
+import type { InferenceClient, ChatCompletionEvent } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import dedent from 'dedent';
 import { compact, isEmpty } from 'lodash';
 import moment from 'moment';
+import type { Observable } from 'rxjs';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
+import { createAiInsightResult, type AiInsightResult } from './types';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
-import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
+import { getToolHandler as getLogGroups } from '../../tools/get_log_groups/handler';
+import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 
 /**
  * These types are derived from the generated alerts-as-data schemas:
@@ -49,11 +52,6 @@ interface GetAlertAiInsightParams {
   logger: Logger;
 }
 
-interface AlertAiInsightResult {
-  summary: string;
-  context: string;
-}
-
 export async function getAlertAiInsight({
   core,
   plugins,
@@ -63,7 +61,9 @@ export async function getAlertAiInsight({
   dataRegistry,
   request,
   logger,
-}: GetAlertAiInsightParams): Promise<AlertAiInsightResult> {
+}: GetAlertAiInsightParams): Promise<AiInsightResult> {
+  const urlPrefix = core.http.basePath.get(request);
+
   const relatedContext = await fetchAlertContext({
     core,
     plugins,
@@ -72,21 +72,21 @@ export async function getAlertAiInsight({
     request,
     logger,
   });
-  const summary = await generateAlertSummary({
+  const events$: Observable<ChatCompletionEvent> = generateAlertSummary({
     inferenceClient,
     connectorId,
     alertDoc,
+    urlPrefix,
     context: relatedContext,
   });
 
-  return { summary, context: relatedContext };
+  return createAiInsightResult(relatedContext, events$);
 }
 
 // Time window offsets in minutes before alert start
 const START_TIME_OFFSETS = {
   serviceSummary: 5,
   downstream: 24 * 60, // 24 hours
-  errors: 15,
   logs: 15,
   changePoints: 6 * 60, // 6 hours
 } as const;
@@ -121,27 +121,22 @@ async function fetchAlertContext({
   const fetchConfigs = [
     {
       key: 'apmServiceSummary' as const,
-      window: START_TIME_OFFSETS.serviceSummary,
+      startOffset: START_TIME_OFFSETS.serviceSummary,
       params: { serviceName, serviceEnvironment, transactionType },
     },
     {
       key: 'apmDownstreamDependencies' as const,
-      window: START_TIME_OFFSETS.downstream,
-      params: { serviceName, serviceEnvironment },
-    },
-    {
-      key: 'apmErrors' as const,
-      window: START_TIME_OFFSETS.errors,
+      startOffset: START_TIME_OFFSETS.downstream,
       params: { serviceName, serviceEnvironment },
     },
     {
       key: 'apmServiceChangePoints' as const,
-      window: START_TIME_OFFSETS.changePoints,
+      startOffset: START_TIME_OFFSETS.changePoints,
       params: { serviceName, serviceEnvironment, transactionType, transactionName },
     },
     {
       key: 'apmExitSpanChangePoints' as const,
-      window: START_TIME_OFFSETS.changePoints,
+      startOffset: START_TIME_OFFSETS.changePoints,
       params: { serviceName, serviceEnvironment },
     },
   ];
@@ -149,24 +144,28 @@ async function fetchAlertContext({
   const [coreStart] = await core.getStartServices();
   const esClient = coreStart.elasticsearch.client.asScoped(request);
 
-  async function fetchLogCategories() {
+  async function fetchLogGroups() {
     try {
       const start = getStart(START_TIME_OFFSETS.logs);
-      const result = await getLogCategories({
+      const end = alertStart;
+      const result = await getLogGroups({
         core,
+        plugins,
+        request,
         logger,
         esClient,
         start,
-        end: alertStart,
+        end,
         kqlFilter: `service.name: "${serviceName}"`,
-        fields: ['service.name'],
+        fields: [],
+        includeStackTrace: false,
+        includeFirstSeen: false,
+        size: 10,
       });
-      const hasCategories =
-        (result.highSeverityCategories?.categories?.length ?? 0) > 0 ||
-        (result.lowSeverityCategories?.categories?.length ?? 0) > 0;
-      return hasCategories ? { key: 'logCategories' as const, start, data: result } : null;
+
+      return result.length > 0 ? { key: 'logGroups' as const, start, end, data: result } : null;
     } catch (err) {
-      logger.debug(`AI insight: logCategories failed: ${err}`);
+      logger.debug(`AI insight: logGroups failed: ${err}`);
       return null;
     }
   }
@@ -174,26 +173,27 @@ async function fetchAlertContext({
   const allFetchers = [
     ...fetchConfigs.map(async (config) => {
       try {
-        const start = getStart(config.window);
+        const start = getStart(config.startOffset);
+        const end = alertStart;
         const data = await dataRegistry.getData(config.key, {
           request,
           ...config.params,
           start,
-          end: alertStart,
+          end,
         });
-        return isEmpty(data) ? null : { key: config.key, start, data };
+        return isEmpty(data) ? null : { key: config.key, start, end, data };
       } catch (err) {
         logger.debug(`AI insight: ${config.key} failed: ${err}`);
         return null;
       }
     }),
-    fetchLogCategories(),
+    fetchLogGroups(),
   ];
 
   const results = await Promise.all(allFetchers);
   const contextParts = compact(results).map(
-    ({ key, start, data }) =>
-      `<${key}>\nTime window: ${start} to ${alertStart}\n\`\`\`json\n${JSON.stringify(
+    ({ key, start, end, data }) =>
+      `<${key}>\nTime window: ${start} to ${end}\n\`\`\`json\n${JSON.stringify(
         data,
         null,
         2
@@ -203,17 +203,19 @@ async function fetchAlertContext({
   return contextParts.length > 0 ? contextParts.join('\n\n') : 'No related signals available.';
 }
 
-async function generateAlertSummary({
+function generateAlertSummary({
   inferenceClient,
+  urlPrefix,
   connectorId,
   alertDoc,
   context,
 }: {
   inferenceClient: InferenceClient;
+  urlPrefix: string;
   connectorId: string;
   alertDoc: AlertDocForInsight;
   context: string;
-}): Promise<string> {
+}): Observable<ChatCompletionEvent> {
   const systemPrompt = dedent(`
     You are an SRE assistant. Help an SRE quickly understand likely cause, impact, and next actions for this alert using the provided context.
 
@@ -239,6 +241,8 @@ async function generateAlertSummary({
     3) Log categories: error messages and exception patterns
     4) Errors: exception patterns with downstream context
     5) Service summary: instance counts, versions, anomalies, and metadata
+
+    ${getEntityLinkingInstructions({ urlPrefix })}
   `);
 
   const alertDetails = `\`\`\`json\n${JSON.stringify(alertDoc, null, 2)}\n\`\`\``;
@@ -254,11 +258,10 @@ async function generateAlertSummary({
     Summarize likely cause, impact, and immediate next checks for this alert using the format above. Tie related signals to the alert scope; ignore unrelated noise. If signals are weak or conflicting, mark Assessment "Inconclusive" and propose the safest next diagnostic step.
   `);
 
-  const completion = await inferenceClient.chatComplete({
+  return inferenceClient.chatComplete({
     connectorId,
     system: systemPrompt,
     messages: [{ role: MessageRole.User, content: userPrompt }],
+    stream: true,
   });
-
-  return completion.content;
 }

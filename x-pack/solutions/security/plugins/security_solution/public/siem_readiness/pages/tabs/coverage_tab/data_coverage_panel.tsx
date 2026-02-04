@@ -22,17 +22,19 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSiemReadinessApi } from '@kbn/siem-readiness';
+import type { SiemReadinessPackageInfo } from '@kbn/siem-readiness';
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
+import { IntegrationSelectablePopover } from '../../components/integrations_selectable_popover';
 
 const CATEGORY_ORDER = ['Endpoint', 'Identity', 'Network', 'Cloud', 'Application/SaaS'] as const;
 
-const CATEGORY_TO_INTEGRATION_FILTER: Record<string, string> = {
-  Cloud: 'cloudsecurity_cdr',
-  Endpoint: 'edr_xdr',
-  Identity: 'iam',
-  Network: 'network_security',
-  'Application/SaaS': 'siem',
+const CATEGORY_TO_INTEGRATION_FILTER: Record<string, string[]> = {
+  Cloud: ['cloudsecurity_cdr', 'cloud'],
+  Endpoint: ['edr_xdr'],
+  Identity: ['iam'],
+  Network: ['network_security', 'network'],
+  'Application/SaaS': ['siem'],
 };
 
 const ELASTIC_INTEGRATIONS_DOCS_URL =
@@ -68,16 +70,39 @@ const buildMissingCategoriesDescription = (
 // Component
 export const DataCoveragePanel: React.FC = () => {
   const basePath = useBasePath();
-  const { getReadinessCategories } = useSiemReadinessApi();
+  const { getReadinessCategories, getIntegrations } = useSiemReadinessApi();
   const { openNewCaseFlyout } = useSiemReadinessCases();
 
   const getCategoryIntegrationUrl = useCallback(
     (category: string): string => {
       const baseUrl = `${basePath}/app/integrations/browse/security`;
       const filter = CATEGORY_TO_INTEGRATION_FILTER[category];
-      return filter ? `${baseUrl}/${filter}` : baseUrl;
+      return filter ? `${baseUrl}/${filter[0]}` : baseUrl;
     },
     [basePath]
+  );
+
+  // Get integration options for a specific category
+  const getIntegrationOptionsForCategory = useCallback(
+    (category: string) => {
+      const filterValues = CATEGORY_TO_INTEGRATION_FILTER[category];
+      if (!filterValues || !getIntegrations.data?.items) {
+        return [];
+      }
+
+      const filteredPackages = getIntegrations.data.items.filter(
+        (pkg: SiemReadinessPackageInfo) => {
+          return pkg.categories?.some((cat: string) => filterValues.includes(cat));
+        }
+      );
+
+      return filteredPackages.map((pkg: SiemReadinessPackageInfo) => ({
+        label: pkg.title || pkg.name,
+        key: pkg.name,
+        checked: undefined,
+      }));
+    },
+    [getIntegrations.data?.items]
   );
 
   // Transform raw data into table rows
@@ -179,26 +204,9 @@ export const DataCoveragePanel: React.FC = () => {
       ),
       width: '220px',
       render: (row: CategoryCoverageData) => {
-        const integrationUrl = getCategoryIntegrationUrl(row.category);
-        const linkText = row.hasCoverage
-          ? i18n.translate(
-              'xpack.securitySolution.siemReadiness.coverage.dataCoverage.table.viewInstalled',
-              {
-                defaultMessage: 'View installed integrations',
-              }
-            )
-          : i18n.translate(
-              'xpack.securitySolution.siemReadiness.coverage.dataCoverage.table.viewMissing',
-              {
-                defaultMessage: 'View missing integrations',
-              }
-            );
+        const options = getIntegrationOptionsForCategory(row.category);
 
-        return (
-          <EuiLink href={integrationUrl} target="_blank" external>
-            {linkText}
-          </EuiLink>
-        );
+        return <IntegrationSelectablePopover options={options} />;
       },
     },
   ];

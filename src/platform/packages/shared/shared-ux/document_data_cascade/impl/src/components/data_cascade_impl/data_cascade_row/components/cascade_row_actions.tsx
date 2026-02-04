@@ -43,7 +43,7 @@ export const CascadeRowActions = function RowActions({
   const defaultActionProps = useMemo<Pick<EuiButtonIconProps, 'color' | 'size'>>(
     () => ({
       color: 'text',
-      size: 's',
+      size: 'xs',
     }),
     []
   );
@@ -52,7 +52,6 @@ export const CascadeRowActions = function RowActions({
     () => (
       <EuiButtonIcon
         {...defaultActionProps}
-        iconSize="s"
         aria-label={i18n.translate(
           'sharedUXPackages.dataCascade.expandRowButtonLabel.more_options',
           {
