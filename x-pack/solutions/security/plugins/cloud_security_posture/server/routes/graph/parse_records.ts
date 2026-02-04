@@ -112,10 +112,11 @@ export const parseRecords = (
 
   // Sort groups to be first (fixes minor layout issue)
   const nodes = sortNodes(ctx.nodesMap);
+  const edges = sortEdges(ctx.edgesMap, ctx.nodesMap);
 
   return {
     nodes,
-    edges: Object.values(ctx.edgesMap),
+    edges,
     messages: ctx.messages.length > 0 ? ctx.messages : undefined,
   };
 };
@@ -633,18 +634,67 @@ const createRelationshipNodes = (
 };
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
-  const groupNodes = [];
-  const otherNodes = [];
+  const groupNodes: NodeDataModel[] = [];
+  const connectorNodes: NodeDataModel[] = [];
+  const otherNodes: NodeDataModel[] = [];
 
   for (const node of Object.values(nodesMap)) {
     if (node.shape === 'group') {
       groupNodes.push(node);
+    } else if (node.shape === 'relationship' || node.shape === 'label') {
+      connectorNodes.push(node);
     } else {
       otherNodes.push(node);
     }
   }
 
-  return [...groupNodes, ...otherNodes];
+  // Sort connector nodes: relationship before label, then alphabetical by label
+  connectorNodes.sort((a, b) => {
+    // Primary sort: relationship before label
+    if (a.shape === 'relationship' && b.shape === 'label') return -1;
+    if (a.shape === 'label' && b.shape === 'relationship') return 1;
+    // Secondary sort: alphabetical by label
+    const labelA = ('label' in a && a.label) || '';
+    const labelB = ('label' in b && b.label) || '';
+    return labelA.localeCompare(labelB);
+  });
+
+  return [...groupNodes, ...connectorNodes, ...otherNodes];
+};
+
+/**
+ * Sort edges so relationship edges come before label edges.
+ * This affects Dagre layout which positions nodes based on edge order.
+ */
+const sortEdges = (
+  edgesMap: Record<string, EdgeDataModel>,
+  nodesMap: Record<string, NodeDataModel>
+): EdgeDataModel[] => {
+  const edges = Object.values(edgesMap);
+
+  // Helper to get the connector node shape for an edge
+  const getConnectorShape = (edge: EdgeDataModel): 'relationship' | 'label' | 'other' => {
+    // Check if target is a connector node
+    const targetNode = nodesMap[edge.target];
+    if (targetNode?.shape === 'relationship') return 'relationship';
+    if (targetNode?.shape === 'label') return 'label';
+
+    // Check if source is a connector node
+    const sourceNode = nodesMap[edge.source];
+    if (sourceNode?.shape === 'relationship') return 'relationship';
+    if (sourceNode?.shape === 'label') return 'label';
+
+    return 'other';
+  };
+
+  return edges.sort((a, b) => {
+    const shapeA = getConnectorShape(a);
+    const shapeB = getConnectorShape(b);
+
+    // Priority: relationship > label > other
+    const priority = { relationship: 0, label: 1, other: 2 };
+    return priority[shapeA] - priority[shapeB];
+  });
 };
 
 /**

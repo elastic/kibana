@@ -662,7 +662,9 @@ ${enrichmentSection}
     BY entity.id, relationship, targetEntityType = _target_type, targetEntitySubType = _target_sub_type
 // Compute relationshipNodeId for deduplication (similar to labelNodeId for events)
 // Multiple records with different target types share the same relationshipNodeId
-| EVAL relationshipNodeId = CONCAT(TO_STRING(entity.id), "-", relationship)`;
+| EVAL relationshipNodeId = CONCAT(TO_STRING(entity.id), "-", relationship)
+// Sort by relationship alphabetically to ensure deterministic ordering
+| SORT relationship ASC`;
 };
 
 /**
