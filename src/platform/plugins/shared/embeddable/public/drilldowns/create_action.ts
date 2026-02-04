@@ -31,7 +31,7 @@ export function createAction(embeddableUuid: string, drilldownState: DrilldownSt
     return;
   }
 
-  uiActions.addTriggerActionAsync(actionId, trigger, async () => {
+  uiActions.addTriggerActionAsync(trigger, actionId, async () => {
     const { execute, euiIcon, getHref, isCompatible, license } = (await getDrilldown(type)) ?? {};
 
     return {

@@ -15,6 +15,8 @@ import type {
   PublishesPhaseEvents,
 } from '@kbn/presentation-publishing';
 import type React from 'react';
+import { initializeDrilldownsManager } from '../drilldowns/drilldowns_manager';
+import { DrilldownsState } from '../../server';
 
 /**
  * The default embeddable API that all Embeddables must implement.
@@ -59,6 +61,11 @@ export interface BuildEmbeddableProps<
    * An optional parent API.
    */
   parentApi: unknown | undefined;
+
+  /**
+   * 
+   */
+  initializeDrilldownsManager(embeddableUuid: string, state: DrilldownsState): Promise<ReturnType<typeof initializeDrilldownsManager>>
 }
 
 /**

@@ -9,3 +9,4 @@
 
 export { getTransformDrilldownsOut } from '../common/drilldowns/transform_drilldowns_out';
 export { transformDashboardDrilldown } from './bwc/dashboard_drilldown';
+export { initializeDrilldownsManager } from './drilldowns/drilldowns_manager';
