@@ -15,9 +15,10 @@ import type {
   DashboardAgentPluginStart,
 } from './types';
 import { registerDashboardAgent } from './register_agent';
-import { createDashboardTool, updateDashboardTool } from './tools';
+import { manageDashboardTool } from './tools';
 import { getIsDashboardAgentEnabled } from './utils/get_is_dashboard_agent_enabled';
 import { DASHBOARD_AGENT_FEATURE_FLAG } from '../common/constants';
+import { createDashboardAttachmentType } from './attachment_types';
 
 export class DashboardAgentPlugin
   implements
@@ -64,7 +65,7 @@ export class DashboardAgentPlugin
     coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
     setupDeps: DashboardAgentSetupDependencies
   ) {
-    const [coreStart, startDeps] = await coreSetup.getStartServices();
+    const [, startDeps] = await coreSetup.getStartServices();
 
     const dashboardLocator =
       startDeps.share?.url?.locators?.get<DashboardLocatorParams>('DASHBOARD_APP_LOCATOR');
@@ -74,14 +75,12 @@ export class DashboardAgentPlugin
       return;
     }
 
+    // Register the dashboard attachment type
+    setupDeps.agentBuilder.attachments.registerType(createDashboardAttachmentType() as any);
+
+    // Register the consolidated manage_dashboard tool
     setupDeps.agentBuilder.tools.register(
-      createDashboardTool(startDeps.dashboard, coreStart.savedObjects, {
-        dashboardLocator,
-        spaces: startDeps.spaces,
-      })
-    );
-    setupDeps.agentBuilder.tools.register(
-      updateDashboardTool(startDeps.dashboard, coreStart.savedObjects, {
+      manageDashboardTool({
         dashboardLocator,
         spaces: startDeps.spaces,
       })

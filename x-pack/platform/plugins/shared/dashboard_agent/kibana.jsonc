@@ -7,18 +7,20 @@
   "plugin": {
     "id": "dashboardAgent",
     "server": true,
-    "browser": false,
+    "browser": true,
     "configPath": [
       "xpack",
       "dashboardAgent"
     ],
     "requiredPlugins": [
       "agentBuilder",
+      "agentBuilderPlatform",
       "dashboard"
     ],
     "optionalPlugins": [
       "share",
       "spaces"
-    ]
+    ],
+    "requiredBundles": []
   }
 }

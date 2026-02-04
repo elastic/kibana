@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
+import { getDashboardAttachmentService } from '../../services/dashboard_attachment_service';
 import { coreServices } from '../../services/kibana_services';
 import { dashboardClient } from '../../dashboard_client';
 import type { SaveDashboardProps, SaveDashboardReturn } from './types';
@@ -43,6 +44,14 @@ export const saveDashboard = async ({
        */
       if (newId !== lastSavedId) {
         getDashboardBackupService().clearState(lastSavedId);
+
+        // If this was a new (unsaved) dashboard being saved for the first time,
+        // migrate the attachment ID from session storage to local storage.
+        // This preserves the agent conversation context through the save operation.
+        if (!lastSavedId) {
+          getDashboardAttachmentService().migrateUnsavedToSaved(newId);
+        }
+
         return { redirectRequired: true, id: newId };
       }
     }

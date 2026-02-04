@@ -6,7 +6,7 @@
  */
 
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
-import type { DashboardPanel, DashboardSection } from '@kbn/dashboard-plugin/server';
+import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 import {
   LensConfigBuilder,
   type LensApiSchemaType,
@@ -16,13 +16,13 @@ import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/common/page_bundle_constants';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/common/constants';
 
-import type {
-  ToolAvailabilityContext,
-  ToolAvailabilityResult,
-  ToolResultStore,
-} from '@kbn/agent-builder-server';
-import { isToolResultId } from '@kbn/agent-builder-server';
-import { ToolResultType } from '@kbn/agent-builder-common';
+import type { ToolAvailabilityContext, ToolAvailabilityResult } from '@kbn/agent-builder-server';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import {
+  type AttachmentPanel,
+  isLensAttachmentPanel,
+  isGenericAttachmentPanel,
+} from '@kbn/dashboard-agent-common';
 import {
   DEFAULT_PANEL_HEIGHT,
   SMALL_PANEL_WIDTH,
@@ -73,89 +73,184 @@ export const getMarkdownPanelHeight = (content: string): number =>
   calculateMarkdownPanelHeight(content);
 
 /**
- * Filters out markdown panels from an array of dashboard panels.
- * Used when replacing the markdown summary during dashboard updates.
- * Note: Dashboard panels array can contain both panels and sections.
- */
-export const filterOutMarkdownPanels = (
-  panels: (DashboardPanel | DashboardSection)[] | undefined
-): (DashboardPanel | DashboardSection)[] =>
-  panels?.filter((item) => !('type' in item) || item.type !== MARKDOWN_EMBEDDABLE_TYPE) ?? [];
-
-/**
  * Normalizes panel configurations to the correct DashboardPanel format.
- * This is a temporary function to handle lens API schema conversion.
- * @param panels - Array of panel configurations
+ * Handles two panel types:
+ * - LensAttachmentPanel: Lens panels with visualization config in API format (LensApiSchemaType)
+ * - GenericAttachmentPanel: Non-Lens panels with raw config (type is the actual embeddable type)
+ *
+ * @param panels - Array of panel entries
  * @param yOffset - Optional Y offset for positioning (e.g., when a markdown panel is prepended)
  */
 export const normalizePanels = (
-  panels: unknown[] | undefined,
-  yOffset: number = 0,
-  resultStore?: ToolResultStore
+  panels: AttachmentPanel[] | undefined,
+  yOffset: number = 0
 ): DashboardPanel[] => {
-  const panelConfigs = panels ?? [];
+  const panelList = panels ?? [];
   const dashboardPanels: DashboardPanel[] = [];
   let currentX = 0;
   let currentY = yOffset;
 
-  for (const panel of panelConfigs) {
-    const config = resolveLensConfig(panel, resultStore);
-    const w = getPanelWidth(config.type);
+  for (const panel of panelList) {
+    let dashboardPanel: DashboardPanel | null = null;
 
-    // Check if panel fits in current row, if not move to next row
-    if (currentX + w > DASHBOARD_GRID_COLUMN_COUNT) {
-      currentX = 0;
-      currentY += DEFAULT_PANEL_HEIGHT;
+    if (isLensAttachmentPanel(panel)) {
+      // Lens panel: convert from API format to LensAttributes
+      const config = panel.visualization as LensApiSchemaType;
+      const w = getPanelWidth(config.type);
+
+      if (currentX + w > DASHBOARD_GRID_COLUMN_COUNT) {
+        currentX = 0;
+        currentY += DEFAULT_PANEL_HEIGHT;
+      }
+
+      dashboardPanel = buildLensPanelFromApi(config, {
+        x: currentX,
+        y: currentY,
+        w,
+        h: DEFAULT_PANEL_HEIGHT,
+      });
+      currentX += w;
+    } else if (isGenericAttachmentPanel(panel)) {
+      // Generic panel: build from raw configuration (type is the actual embeddable type)
+      dashboardPanel = buildPanelFromRawConfig(panel.type, panel.rawConfig, panel.title, {
+        currentX,
+        currentY,
+      });
+
+      if (dashboardPanel) {
+        currentX += dashboardPanel.grid.w;
+        if (currentX >= DASHBOARD_GRID_COLUMN_COUNT) {
+          currentX = 0;
+          currentY += DEFAULT_PANEL_HEIGHT;
+        }
+      }
     }
 
-    dashboardPanels.push(
-      buildLensPanelFromApi(config, { x: currentX, y: currentY, w, h: DEFAULT_PANEL_HEIGHT })
-    );
-
-    currentX += w;
+    if (dashboardPanel) {
+      dashboardPanels.push(dashboardPanel);
+    }
   }
 
   return dashboardPanels;
 };
 
-export const resolveLensConfig = (
-  panel: unknown,
-  resultStore?: ToolResultStore
-): LensApiSchemaType => {
-  if (typeof panel === 'string') {
-    if (!isToolResultId(panel)) {
-      throw new Error(
-        `Invalid panel reference "${panel}". Expected a tool_result_id from a previous visualization tool call.`
-      );
-    }
-    if (!resultStore || !resultStore.has(panel)) {
-      throw new Error(`Panel reference "${panel}" was not found in the tool result store.`);
+/**
+ * Builds a dashboard panel from raw configuration.
+ * Handles different embeddable types (lens, markdown, etc.)
+ */
+const buildPanelFromRawConfig = (
+  embeddableType: string,
+  rawConfig: Record<string, unknown>,
+  title: string | undefined,
+  position: { currentX: number; currentY: number }
+): DashboardPanel | null => {
+  const { currentX, currentY } = position;
+
+  if (embeddableType === 'lens') {
+    // For Lens panels, rawConfig is LensAttributes
+    const lensAttributes = rawConfig as LensAttributes;
+
+    // Determine panel width based on visualization type
+    const visType = lensAttributes.visualizationType;
+    const isSmallChart =
+      visType === 'lnsMetric' || visType === 'lnsLegacyMetric' || visType === 'lnsGauge';
+    const w = isSmallChart ? SMALL_PANEL_WIDTH : LARGE_PANEL_WIDTH;
+
+    // Check if panel fits in current row
+    let x = currentX;
+    let y = currentY;
+    if (x + w > DASHBOARD_GRID_COLUMN_COUNT) {
+      x = 0;
+      y += DEFAULT_PANEL_HEIGHT;
     }
 
-    const result = resultStore.get(panel);
-    if (result.type !== ToolResultType.visualization) {
-      throw new Error(
-        `Provided tool_result_id "${panel}" is not a visualization result (got "${result.type}").`
-      );
+    const lensConfig: LensSerializedAPIConfig = {
+      title: title ?? lensAttributes.title ?? 'Panel',
+      attributes: lensAttributes,
+    };
+
+    return {
+      type: 'lens',
+      grid: { x, y, w, h: DEFAULT_PANEL_HEIGHT },
+      config: lensConfig,
+    };
+  } else if (embeddableType === MARKDOWN_EMBEDDABLE_TYPE) {
+    // For markdown panels
+    const content = (rawConfig as { content?: string }).content ?? '';
+    const h = Math.max(
+      MARKDOWN_MIN_HEIGHT,
+      Math.min(MARKDOWN_MAX_HEIGHT, content.split('\n').length + 2)
+    );
+    const w = MARKDOWN_PANEL_WIDTH;
+
+    let x = currentX;
+    let y = currentY;
+    if (x + w > DASHBOARD_GRID_COLUMN_COUNT) {
+      x = 0;
+      y += DEFAULT_PANEL_HEIGHT;
     }
 
-    const visualization = result.data.visualization;
-    if (!visualization || typeof visualization !== 'object') {
-      throw new Error(
-        `Visualization result "${panel}" does not contain a valid visualization config.`
-      );
-    }
-
-    return visualization as LensApiSchemaType;
+    return {
+      type: MARKDOWN_EMBEDDABLE_TYPE,
+      grid: { x, y, w, h },
+      config: { content },
+    };
   }
 
-  if (typeof panel !== 'object' || panel === null || !('type' in panel)) {
+  // For other embeddable types, try to build a generic panel
+  // This is a fallback that may not work for all panel types
+  const w = LARGE_PANEL_WIDTH;
+  let x = currentX;
+  let y = currentY;
+  if (x + w > DASHBOARD_GRID_COLUMN_COUNT) {
+    x = 0;
+    y += DEFAULT_PANEL_HEIGHT;
+  }
+
+  return {
+    type: embeddableType,
+    grid: { x, y, w, h: DEFAULT_PANEL_HEIGHT },
+    config: rawConfig,
+  };
+};
+
+/**
+ * Resolves a Lens configuration from a visualization attachment.
+ * Always uses the latest version of the attachment.
+ * @param attachmentId - The visualization attachment ID
+ * @param attachments - The attachment state manager
+ */
+export const resolveLensConfigFromAttachment = (
+  attachmentId: string,
+  attachments: AttachmentStateManager
+): LensApiSchemaType => {
+  const latestVersion = attachments.getLatest(attachmentId);
+
+  if (!latestVersion) {
     throw new Error(
-      `Invalid panel configuration. Expected a Lens API config object with a "type" property.`
+      `Visualization attachment "${attachmentId}" was not found. Make sure you're using an attachment_id from a previous create_visualizations call.`
     );
   }
 
-  return panel as LensApiSchemaType;
+  const attachment = attachments.get(attachmentId);
+  // TODO: Use const -  VISUALIZATION_ATTACHMENT_TYPE
+  if (!attachment || attachment.type !== 'visualization') {
+    throw new Error(
+      `Attachment "${attachmentId}" is not a visualization attachment (got "${attachment?.type}").`
+    );
+  }
+
+  // TODO: Fix types
+  const data = latestVersion.data;
+  const visualization = (data as { visualization?: unknown }).visualization;
+
+  if (!visualization || typeof visualization !== 'object') {
+    throw new Error(
+      `Visualization attachment "${attachmentId}" does not contain a valid visualization config.`
+    );
+  }
+
+  return visualization as LensApiSchemaType;
 };
 
 const buildLensPanelFromApi = (
@@ -174,4 +269,16 @@ const buildLensPanelFromApi = (
     grid,
     config: lensConfig,
   };
+};
+
+/**
+ * Filters out visualization IDs from an array.
+ * Used by manage_dashboard to remove visualizations before rebuilding the dashboard.
+ */
+export const filterVisualizationIds = (
+  visualizationIds: string[],
+  idsToRemove: string[]
+): string[] => {
+  const removeSet = new Set(idsToRemove);
+  return visualizationIds.filter((id) => !removeSet.has(id));
 };

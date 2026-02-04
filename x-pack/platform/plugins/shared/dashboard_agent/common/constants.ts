@@ -28,6 +28,5 @@ const dashboardTool = (toolName: string) => {
  * These tools are registered by the dashboard_agent plugin.
  */
 export const dashboardTools = {
-  createDashboard: dashboardTool('create_dashboard'),
-  updateDashboard: dashboardTool('update_dashboard'),
+  manageDashboard: dashboardTool('manage_dashboard'),
 } as const;

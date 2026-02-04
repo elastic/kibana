@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { updateDashboardTool } from './update_dashboard';
+import type { DashboardResult } from '@kbn/agent-builder-common/tools/tool_result';
+
+/** Dashboard result data structure */
+export type DashboardResultData = DashboardResult['data'];
