@@ -17,7 +17,6 @@ import {
 } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
-import { appContextService } from '../app_context';
 import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
@@ -150,14 +149,6 @@ export async function reassignAgents(
       ).runActionAsyncTask();
     }
   }
-
-  appContextService
-    .getLogger()
-    .debug(
-      `Reassign agents ${givenAgents
-        .map((agent) => agent.id)
-        .join(',')} for agent policy ${newAgentPolicyId}`
-    );
 
   return await reassignBatch(
     esClient,

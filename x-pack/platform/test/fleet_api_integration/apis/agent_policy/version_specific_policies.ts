@@ -18,7 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
   const retry = getService('retry');
-  const logger = getService('log');
+  // const logger = getService('log');
   let currentMinor: string;
   let previousMinor: string;
 
@@ -150,11 +150,11 @@ export default function (providerContext: FtrProviderContext) {
           }
         });
 
-        const agents = await es.search({
-          index: '.fleet-agents',
-          q: `policy_id:${agentPolicyWithPPId}*`,
-        });
-        logger.info(JSON.stringify(agents.hits.hits, null, 2));
+        // const agents = await es.search({
+        //   index: '.fleet-agents',
+        //   q: `policy_id:${agentPolicyWithPPId}*`,
+        // });
+        // logger.info(JSON.stringify(agents.hits.hits, null, 2));
 
         await retry.tryForTime(20000, async () => {
           // verify agent with parent policy is reassigned
@@ -346,11 +346,11 @@ export default function (providerContext: FtrProviderContext) {
           }
         });
 
-        const agents = await es.search({
-          index: '.fleet-agents',
-          q: `policy_id:${agentPolicyWithPPId}*`,
-        });
-        logger.info(JSON.stringify(agents.hits.hits, null, 2));
+        // const agents = await es.search({
+        //   index: '.fleet-agents',
+        //   q: `policy_id:${agentPolicyWithPPId}*`,
+        // });
+        // logger.info(JSON.stringify(agents.hits.hits, null, 2));
 
         await retry.tryForTime(20000, async () => {
           // verify agent with parent policy is reassigned
