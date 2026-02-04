@@ -70,9 +70,9 @@ export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPage
           <PageTitle
             title={i18n.translate('xpack.ml.timeSeriesExplorer.pageTitle', {
               defaultMessage: 'Single Metric Viewer',
-              })}
-            />
-          </MlPageHeader>
+            })}
+          />
+        </MlPageHeader>
 
         {noSingleMetricJobsFound ? null : (
           <JobSelector
