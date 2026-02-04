@@ -104,3 +104,48 @@ responses:
                   - nlQuery
                 additionalProperties: false
                 "$schema": http://json-schema.org/draft-07/schema#
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+     -X PUT "https://${KIBANA_URL}/api/agent_builder/tools/{toolId}" \
+     -H "Authorization: ApiKey ${API_KEY}" \
+     -H "kbn-xsrf: true" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "description": "Updated ES|QL query tool for analyzing financial trades with time filtering",
+       "tags": ["analytics", "finance", "updated"],
+       "configuration": {
+         "query": "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit",
+         "params": {
+           "startTime": {
+             "type": "date",
+             "description": "Start time for the analysis in ISO format"
+           },
+           "limit": {
+             "type": "integer",
+             "description": "Maximum number of results to return"
+           }
+         }
+       }
+     }'
+- lang: Console
+  source: |
+    PUT kbn:/api/agent_builder/tools/{toolId}
+    {
+      "description": "Updated ES|QL query tool for analyzing financial trades with time filtering",
+      "tags": ["analytics", "finance", "updated"],
+      "configuration": {
+        "query": "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit",
+        "params": {
+          "startTime": {
+            "type": "date",
+            "description": "Start time for the analysis in ISO format"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return"
+          }
+        }
+      }
+    }

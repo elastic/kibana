@@ -50,7 +50,8 @@ export const createAttachmentAddTool = ({
     }
 
     // Check for duplicate ID if provided
-    if (id && attachmentManager.get(id)) {
+    const existing = id ? attachmentManager.getAttachmentRecord(id) : undefined;
+    if (existing) {
       return {
         results: [
           {
