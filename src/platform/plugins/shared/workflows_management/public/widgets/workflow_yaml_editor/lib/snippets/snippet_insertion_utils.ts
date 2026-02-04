@@ -213,15 +213,8 @@ export function getInsertRangeAndTextForTriggers(
           const lineAfterNext = nextLineNumber + 1;
           const lineAfterNextContent = getLineContent(model, lineAfterNext);
           if (lineAfterNextContent === null) {
-            const lastLineNumber = model.getLineCount();
-            const lastLineEndColumn = model.getLineMaxColumn(lastLineNumber);
-            const range = new monaco.Range(
-              lastLineNumber,
-              lastLineEndColumn,
-              lastLineNumber,
-              lastLineEndColumn
-            );
-            return { range, text: `\n${insertText}` };
+            const range = new monaco.Range(lineAfterNext, 1, lineAfterNext, 1);
+            return { range, text: insertText };
           }
           if (lineAfterNextContent.trim() === '') {
             const range = new monaco.Range(lineAfterNext, 1, lineAfterNext, 1);

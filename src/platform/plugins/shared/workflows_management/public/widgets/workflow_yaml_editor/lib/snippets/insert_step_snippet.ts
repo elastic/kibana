@@ -84,11 +84,14 @@ function findStepWithMaxEndOffsetAtOrBefore(
   let bestEndOffset = -1;
   for (const node of nodes) {
     const range = getMonacoRangeFromYamlNode(model, node);
-    if (!range) continue;
-    const endOffset = model.getOffsetAt(new monaco.Position(range.endLineNumber, range.endColumn));
-    if (endOffset <= cursorOffset && endOffset > bestEndOffset) {
-      bestEndOffset = endOffset;
-      best = node;
+    if (range) {
+      const endOffset = model.getOffsetAt(
+        new monaco.Position(range.endLineNumber, range.endColumn)
+      );
+      if (endOffset <= cursorOffset && endOffset > bestEndOffset) {
+        bestEndOffset = endOffset;
+        best = node;
+      }
     }
   }
   return best;
