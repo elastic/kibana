@@ -40,13 +40,8 @@ describe('Assistant settings flyout', () => {
       </Flyout>
     );
 
-    // Here we check that EuiFlyout was called with the correct aria-label and trust that EuiFlyout sets it correctly
-    // manual testing with a screen reader confirms this works as expected
-    // see https://eui.elastic.co/docs/components/containers/flyout/#props for aria-label usage
-    expect(mockedEuiFlyout).toHaveBeenCalledWith(
-      expect.objectContaining({ 'aria-label': title }),
-      expect.anything()
-    );
+    const firstCallProps = mockedEuiFlyout.mock.calls[0]?.[0];
+    expect(firstCallProps?.['aria-label']).toBe(title);
   });
 
   it('does not pass aria-label when the title is missing', () => {
