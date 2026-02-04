@@ -58,7 +58,7 @@ describe('skills utils', () => {
       const referencedContent = {
         name: 'example-content',
         relativePath: '.',
-        body: 'Content body',
+        content: 'Content body',
       };
       const path = getSkillReferencedContentEntryPath({ skill, referencedContent });
       expect(path).toBe('skills/platform/test-skill/./example-content.md');
@@ -69,7 +69,7 @@ describe('skills utils', () => {
       const referencedContent = {
         name: 'query-example',
         relativePath: './queries',
-        body: 'Query content',
+        content: 'Query content',
       };
       const path = getSkillReferencedContentEntryPath({ skill, referencedContent });
       expect(path).toBe('skills/platform/test-skill/./queries/query-example.md');
@@ -83,7 +83,7 @@ describe('skills utils', () => {
       const referencedContent = {
         name: 'alert-config',
         relativePath: './configs',
-        body: 'Config content',
+        content: 'Config content',
       };
       const path = getSkillReferencedContentEntryPath({ skill, referencedContent });
       expect(path).toBe('skills/observability/alert-skill/./configs/alert-config.md');
