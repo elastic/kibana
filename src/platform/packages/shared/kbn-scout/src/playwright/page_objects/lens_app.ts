@@ -150,10 +150,6 @@ export class LensApp {
   }
 
   private async openDimensionEditor(dimension: string) {
-    if (await this.closeDimensionEditorButton.isVisible()) {
-      return;
-    }
-
     await this.page.testSubj.locator(dimension).click();
     await expect(this.closeDimensionEditorButton).toBeVisible();
   }
@@ -181,9 +177,6 @@ export class LensApp {
   }
 
   private async openChartSwitchPopover() {
-    if (await this.chartSwitchList.isVisible()) {
-      return;
-    }
     await this.chartSwitchPopover.click();
     await expect(this.chartSwitchList).toBeVisible();
   }

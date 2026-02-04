@@ -123,7 +123,13 @@ export class DashboardApp {
   }
 
   async openSettingsFlyout() {
-    await this.settingsButton.click();
+    // typically serverless projects
+    if (await this.settingsButton.isVisible()) {
+      await this.settingsButton.click();
+    } else {
+      // typically stateful deployments
+      await this.page.getByRole('button', { name: 'Open dashboard settings' }).click();
+    }
     await expect(this.getSettingsFlyout()).toBeVisible();
   }
 
