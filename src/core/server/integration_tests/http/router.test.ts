@@ -13,7 +13,7 @@ import { Stream } from 'stream';
 import Boom from '@hapi/boom';
 import supertest from 'supertest';
 import { schema } from '@kbn/config-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
@@ -847,7 +847,7 @@ describe('Handler', () => {
 
       expect(result.body).toEqual({
         error: 'Bad Request',
-        message: expect.stringMatching(/Expected number, received string/),
+        message: expect.stringMatching(/expected number, received string/i),
         statusCode: 400,
       });
 
@@ -859,13 +859,12 @@ describe('Handler', () => {
               "error": Object {
                 "message": "[
           {
-            \\"code\\": \\"invalid_type\\",
             \\"expected\\": \\"number\\",
-            \\"received\\": \\"string\\",
+            \\"code\\": \\"invalid_type\\",
             \\"path\\": [
               \\"page\\"
             ],
-            \\"message\\": \\"Expected number, received string\\"
+            \\"message\\": \\"Invalid input: expected number, received string\\"
           }
         ]",
               },
