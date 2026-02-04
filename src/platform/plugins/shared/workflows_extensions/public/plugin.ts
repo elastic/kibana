@@ -42,7 +42,7 @@ export class WorkflowsExtensionsPublicPlugin
     return {
       registerStepDefinition: (metadata) => {
         // Casting here to prevent type errors with a narrow type definition and to avoid forcing consumers to cast manually
-        this.stepRegistry.register(metadata as PublicStepDefinition);
+        this.stepRegistry.register(metadata);
       },
     };
   }
