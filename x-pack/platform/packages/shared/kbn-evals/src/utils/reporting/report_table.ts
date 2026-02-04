@@ -10,6 +10,7 @@ import { table } from 'table';
 import chalk from 'chalk';
 import type { EvaluatorStats, DatasetScoreWithStats } from '../evaluation_stats';
 import { getUniqueEvaluatorNames, calculateOverallStats } from '../evaluation_stats';
+import { expandPatternsToEvaluators, matchesEvaluatorPattern } from '../../evaluators/patterns';
 
 export interface EvaluatorDisplayOptions {
   decimalPlaces?: number;
@@ -29,6 +30,23 @@ export interface EvaluationTableOptions {
   evaluatorDisplayGroups?: EvaluatorDisplayGroup[];
 }
 
+/** Gets display options for an evaluator, supporting @K pattern matching */
+function getEvaluatorDisplayOptions(
+  evaluatorName: string,
+  evaluatorFormats: Map<string, EvaluatorDisplayOptions>
+): EvaluatorDisplayOptions {
+  const exactMatch = evaluatorFormats.get(evaluatorName);
+  if (exactMatch) return exactMatch;
+
+  for (const [pattern, options] of evaluatorFormats.entries()) {
+    if (matchesEvaluatorPattern(evaluatorName, pattern)) {
+      return options;
+    }
+  }
+  return {};
+}
+
+/** Groups evaluator scores, expanding @K patterns to actual evaluator names */
 function groupEvaluatorScores(
   evaluatorNames: string[],
   evaluatorScoreGroups: EvaluatorDisplayGroup[]
@@ -39,12 +57,16 @@ function groupEvaluatorScores(
   const groupMapping = new Map<string, EvaluatorDisplayGroup>();
   const grouped = new Set<string>();
 
-  evaluatorScoreGroups.forEach((group) => {
-    if (group.evaluatorNames.every((name) => evaluatorNames.includes(name))) {
-      groupMapping.set(group.combinedColumnName, group);
-      group.evaluatorNames.forEach((name) => grouped.add(name));
+  for (const group of evaluatorScoreGroups) {
+    const expandedNames = expandPatternsToEvaluators(group.evaluatorNames, evaluatorNames);
+    if (expandedNames.length > 0) {
+      groupMapping.set(group.combinedColumnName, {
+        evaluatorNames: expandedNames,
+        combinedColumnName: group.combinedColumnName,
+      });
+      expandedNames.forEach((name) => grouped.add(name));
     }
-  });
+  }
 
   return {
     columnNames: [...evaluatorNames.filter((name) => !grouped.has(name)), ...groupMapping.keys()],
@@ -75,7 +97,7 @@ function formatStatsCell(
   const colorFn = isBold ? chalk.bold.green : chalk.cyan;
   const percentageColor = chalk.bold.yellow;
 
-  const evaluatorConfig = evaluatorFormats.get(evaluatorName) || {};
+  const evaluatorConfig = getEvaluatorDisplayOptions(evaluatorName, evaluatorFormats);
   const decimalPlaces = evaluatorConfig.decimalPlaces ?? 2;
   const unitSuffix = evaluatorConfig.unitSuffix || '';
   const statsToInclude = evaluatorConfig.statsToInclude;
