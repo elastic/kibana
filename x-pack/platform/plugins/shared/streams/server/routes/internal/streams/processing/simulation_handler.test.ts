@@ -45,9 +45,9 @@ describe('computeSimulationDocDiff', () => {
       expect(result.detected_fields.map((f) => f.name)).not.toContain('temp_field');
       // but SHOULD be tracked in intermediate_field_changes for debugging
       expect(result.intermediate_field_changes.map((f) => f.name)).toContain('temp_field');
-      expect(result.intermediate_field_changes.find((f) => f.name === 'temp_field')?.processor_id).toBe(
-        'processor1'
-      );
+      expect(
+        result.intermediate_field_changes.find((f) => f.name === 'temp_field')?.processor_id
+      ).toBe('processor1');
     });
 
     it('should return empty detected_fields when a field is set and immediately removed (regression test for PR comment)', () => {
@@ -80,7 +80,8 @@ describe('computeSimulationDocDiff', () => {
       // intermediate_field_changes should still track the temporary field for debugging
       expect(result.intermediate_field_changes.map((f) => f.name)).toContain('http.response.bytes');
       expect(
-        result.intermediate_field_changes.find((f) => f.name === 'http.response.bytes')?.processor_id
+        result.intermediate_field_changes.find((f) => f.name === 'http.response.bytes')
+          ?.processor_id
       ).toBe('set_processor');
     });
 
