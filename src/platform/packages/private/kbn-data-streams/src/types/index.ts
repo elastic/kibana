@@ -12,10 +12,8 @@ export type { DataStreamDefinition, AnyDataStreamDefinition } from './definition
 export type {
   ClientSearchRequest,
   ClientSearchResponse,
-  ClientIndexRequest,
-  ClientIndexResponse,
-  ClientBulkRequest,
-  ClientBulkResponse,
+  ClientCreateRequest,
+  ClientCreateResponse,
 } from './es_api';
 
 export type { IDataStreamClient, AnyIDataStreamClient } from './client';

@@ -26,35 +26,34 @@ The `DataStreamClient` provides a lightweight data-mapper pattern for CRUD opera
 
 ### Supported Operations
 
-#### `index(document, options?)`
-Index a single document into the data stream. Supports optional `space` parameter for space-aware operations.
+#### `create(documents, options?)`
+
+Create one or more documents in the data stream. Each document can optionally include an `_id` property. Supports optional `space` parameter applied globally to all documents.
 
 ```typescript
-const response = await client.index({
-  space: 'my-space', // optional
-  id: 'doc-123',     // optional, auto-generated if not provided
-  document: { '@timestamp': new Date().toISOString(), field: 'value' },
+// Single document
+const response = await client.create({
+  space: 'my-space', // optional, applied to all documents
+  documents: [
+    { _id: 'doc-123', '@timestamp': new Date().toISOString(), field: 'value' },
+  ],
   refresh: true,
 });
-```
 
-#### `bulk(operations, options?)`
-Perform bulk operations. Currently supports `create` operations only. Supports optional `space` parameter applied globally to all operations.
-
-```typescript
-const response = await client.bulk({
-  space: 'my-space', // optional, applied to all operations
-  operations: [
-    { create: { _id: 'doc-1' } },
-    { '@timestamp': new Date().toISOString(), field: 'value1' },
-    { create: { _id: 'doc-2' } },
-    { '@timestamp': new Date().toISOString(), field: 'value2' },
+// Multiple documents
+const response = await client.create({
+  space: 'my-space', // optional, applied to all documents
+  documents: [
+    { _id: 'doc-1', '@timestamp': new Date().toISOString(), field: 'value1' },
+    { '@timestamp': new Date().toISOString(), field: 'value2' }, // auto-generated ID
+    { _id: 'doc-3', '@timestamp': new Date().toISOString(), field: 'value3' },
   ],
   refresh: true,
 });
 ```
 
 #### `search(query, options?)`
+
 Search documents in the data stream. Supports optional `space` parameter for space-aware filtering.
 
 ```typescript
@@ -66,6 +65,7 @@ const response = await client.search({
 ```
 
 #### `existsIndex()`
+
 Check if the data stream exists.
 
 ```typescript
@@ -76,9 +76,9 @@ const exists = await client.existsIndex();
 
 The following operations are **not** exposed in the API because they require knowledge of the underlying backing index names, which we keep as a private implementation detail:
 
-- **`get(id)`**: Use `search()` with an `ids` query instead (see example below)
-- **Bulk `update` operations**: Data streams are append-only; updates require targeting specific backing indices
-- **Bulk `delete` operations**: Deletes require specifying the backing index name
+* **`get(id)`**: Use `search()` with an `ids` query instead (see example below)
+* **Bulk `update` operations**: Data streams are append-only; updates require targeting specific backing indices
+* **Bulk `delete` operations**: Deletes require specifying the backing index name
 
 #### Retrieving a Document by ID
 
@@ -102,6 +102,14 @@ if (response.hits.hits.length > 0) {
 
 This approach works across all backing indices in the data stream, unlike Elasticsearch's `get()` API which requires a specific backing index name.
 
+## Mapping Validation
+
+When registering a data stream, the following reserved keys are automatically validated and will cause an error if found in your mappings:
+
+* **`kibana`**: Reserved for system properties (e.g., `kibana.space_ids`)
+* **`_id`**: Reserved for document identifiers (cannot be defined in mappings)
+
+These validations occur during data stream registration via `registerDataStream()`.
 
 ## Mapping updates
 
@@ -122,26 +130,24 @@ Elasticsearch supports specifying runtime mappings at search time ([docs](https:
 
 Let's say I have written the following document:
 
-```
+```json
 POST my-data-stream/_doc
 {
   "@timestamp": "2099-05-06T16:21:15.000Z",
-  "message": """192.0.2.42 - - [06/May/2099:16:21:15 +0000] "GET /images/bg.jpg HTTP/1.0" 200 24736""",
+  "message": "192.0.2.42 - - [06/May/2099:16:21:15 +0000] GET /images/bg.jpg HTTP/1.0 200 24736",
 }
 ```
 
 But actually, I mapped `message` as a `keyword` field. With runtime mappings you can remap the field on the fly:
 
-```
+```json
 GET my-data-stream/_search
 {
   "runtime_mappings": {
     "messageV2": {
       "type": "text",
       "script": {
-        "source": """
-          emit(doc['message'].value);
-        """
+        "source": "emit(doc['message'].value);"
       }
     }
   },
@@ -154,22 +160,14 @@ GET my-data-stream/_search
 
 ...but what if you want to move and transform the value of a field in the database, almost like a migration. To a limited degree this is possible to do at read time too!
 
-```
+```json
 GET my-data-stream/_search
 {
   "runtime_mappings": {
     "messageV2": {
       "type": "text",
       "script": {
-        "source": """
-          if (params._source["messageV2"] != null) {
-            // return what we have in source if there is something
-            emit(params._source["messageV2"]);
-          } else  {
-            // return the original processed in some way
-            emit(doc['message'].value + " the original, but processed");
-          }
-        """
+        "source": "if (params._source[\"messageV2\"] != null) {\n  emit(params._source[\"messageV2\"]);\n} else {\n  emit(doc['message'].value + \" the original, but processed\");\n}"
       }
     }
   },

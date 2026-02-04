@@ -14,12 +14,7 @@ import type api from '@elastic/elasticsearch/lib/api/types';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import type { BaseSearchRuntimeMappings, IDataStreamClient, DataStreamDefinition } from './types';
 import type { ClientHelpers } from './types/client';
-import type {
-  ClientSearchRequest,
-  ClientIndexRequest,
-  ClientBulkRequest,
-  ClientBulkOperation,
-} from './types/es_api';
+import type { ClientSearchRequest, ClientCreateRequest } from './types/es_api';
 
 import { initialize } from './initialize';
 import { validateClientArgs } from './validate_client_args';
@@ -81,87 +76,48 @@ export class DataStreamClient<
     },
   };
 
-  public async index(args: ClientIndexRequest<FullDocumentType>) {
-    const { space, document, id, ...restArgs } = args;
+  public async create(args: ClientCreateRequest<FullDocumentType>) {
+    const { space, documents, ...restArgs } = args;
 
-    let processedId: string | undefined = id;
-    let processedDocument = document;
+    // Convert documents to ES bulk format: [metadata, document] pairs
+    const operations: Array<api.BulkOperationContainer | FullDocumentType> = [];
 
-    // Validate that user-provided IDs don't contain the separator (applies to both modes)
-    if (typeof id !== 'undefined') {
-      throwOnIdWithSeparator(id);
-    }
+    for (const doc of documents) {
+      // Extract _id from document if present
+      const { _id, ...documentWithoutId } = doc as { _id?: string; [key: string]: unknown };
 
-    if (typeof space !== 'undefined') {
-      // Space-aware mode: prefix ID and decorate document
-      processedId = generateSpacePrefixedId(space, id);
-      if (document) {
-        processedDocument = decorateDocumentWithSpace(document, space);
+      // Validate _id if provided
+      if (typeof _id !== 'undefined') {
+        throwOnIdWithSeparator(_id);
       }
-    }
 
-    return this.client.index<FullDocumentType>({
-      ...restArgs,
-      ...(processedId && { id: processedId }),
-      document: processedDocument,
-      index: this.dataStreamDefinition.name,
-      // Data streams only support op_type: 'create'
-      op_type: 'create',
-    });
-  }
+      // Process ID and document based on space
+      let processedId: string | undefined = _id;
+      let processedDocument: FullDocumentType;
 
-  public async bulk(args: ClientBulkRequest<FullDocumentType>) {
-    const { space, operations, ...restArgs } = args;
-
-    const processedOperations = operations.map((metadataOrDocument) => {
-      if (this.isBulkActionMetadata(metadataOrDocument)) {
-        return this.processActionMetadata(metadataOrDocument, space);
+      if (typeof space !== 'undefined') {
+        // Space-aware mode: prefix ID and decorate document
+        processedId = generateSpacePrefixedId(space, _id);
+        processedDocument = decorateDocumentWithSpace(documentWithoutId as FullDocumentType, space);
       } else {
-        if (space) {
-          return decorateDocumentWithSpace(metadataOrDocument, space);
-        } else {
-          return metadataOrDocument;
-        }
+        // Space-agnostic mode: no prefixing or decoration
+        processedDocument = documentWithoutId as FullDocumentType;
       }
-    });
+
+      // Add create metadata
+      operations.push({
+        create: processedId ? { _id: processedId } : {},
+      } as api.BulkOperationContainer);
+
+      // Add document
+      operations.push(processedDocument);
+    }
 
     return this.client.bulk<FullDocumentType>({
       index: this.dataStreamDefinition.name,
       ...restArgs,
-      operations: processedOperations,
+      operations,
     });
-  }
-
-  /** Check if an item is a bulk action metadata object (create). */
-  private isBulkActionMetadata(item: unknown): item is ClientBulkOperation {
-    if (!item || typeof item !== 'object') return false;
-    const op = item as ClientBulkOperation;
-    return !!op.create;
-  }
-
-  /** Process bulk action metadata: prefix IDs for create operations. */
-  private processActionMetadata(
-    action: ClientBulkOperation,
-    space: string | undefined
-  ): ClientBulkOperation {
-    const [key, metadata] = Object.entries(action).shift()!;
-    const { _id, ...rest } = metadata as { _id?: string; [key: string]: unknown };
-
-    if (key === 'create') {
-      // Validate that user-provided IDs don't contain the separator
-      if (typeof _id !== 'undefined') {
-        throwOnIdWithSeparator(_id);
-      }
-      if (space) {
-        // When space is provided, prefix the ID (or generate one if not provided)
-        return { create: { ...rest, _id: generateSpacePrefixedId(space, _id) } };
-      } else {
-        // When space is not provided, no prefixing
-        return action;
-      }
-    }
-
-    throw new Error(`Unknown operation: '${key}'`);
   }
 
   public async existsIndex() {

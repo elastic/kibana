@@ -37,23 +37,23 @@ The `DataStreamClient` implements a **data mapper pattern** that abstracts away 
 
 ## 3. Exposed Operations
 
-### `index(document, options?)`
-Index a single document. Supports optional `space` parameter for space-aware operations.
+### `create(documents, options?)`
 
-### `bulk(operations, options?)`
-Bulk operations. Currently supports `create` operations only. The `space` parameter is applied globally to all operations.
+Create one or more documents in the data stream. Accepts a `documents` array where each document can optionally include an `_id` property along with its other properties. The `space` parameter is applied globally to all documents. For single document creation, pass an array with one element.
 
 ### `search(query, options?)`
+
 Search documents. Supports optional `space` parameter for space-aware filtering. Use with `ids` query to retrieve documents by ID (replaces `get()`).
 
 ### `existsIndex()`
+
 Check if the data stream exists.
 
 ---
 
 ## 4. Space-Aware Operations
 
-All CRUD operations (`index`, `bulk`, `search`) accept an **optional** `space?: string` parameter:
+All CRUD operations (`create`, `search`) accept an **optional** `space?: string` parameter:
 
 - **When provided**: Documents are space-bound
   - IDs are prefixed: `{space}::{id}` (e.g., `myspace::abc123`)
@@ -79,7 +79,9 @@ All CRUD operations (`index`, `bulk`, `search`) accept an **optional** `space?: 
 
 During data stream registration (`registerDataStream`), mappings are automatically enriched:
 
-1. **Validation**: User-provided mappings are checked for reserved `kibana` key → throws error if found
+1. **Validation**: User-provided mappings are checked for reserved keys:
+   - `kibana` → throws error if found (reserved for system properties)
+   - `_id` → throws error if found (reserved for document identifiers)
 2. **Enrichment**: `kibana.space_ids` mapping is automatically injected
 
 **Implementation**: `src/platform/packages/private/kbn-data-streams/src/initialize/defaults.ts`
@@ -115,13 +117,23 @@ if (response.hits.hits.length > 0) {
 }
 ```
 
-### Indexing with Space
+### Creating with Space
 
 ```typescript
-await client.index({
+// Single document
+await client.create({
   space: 'my-space',
-  document: { field: 'value' },
+  documents: [{ field: 'value' }],
   // ID auto-generated and prefixed: 'my-space::{uuid}'
+});
+
+// Multiple documents
+await client.create({
+  space: 'my-space',
+  documents: [
+    { field: 'value1' }, // auto-generated ID, prefixed: 'my-space::{uuid}'
+    { _id: 'doc-2', field: 'value2' }, // explicit ID, prefixed: 'my-space::doc-2'
+  ],
 });
 ```
 

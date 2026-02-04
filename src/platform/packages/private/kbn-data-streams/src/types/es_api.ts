@@ -13,8 +13,6 @@ import type { TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch'
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import type { BaseSearchRuntimeMappings } from './runtime';
 
-import type { OmitIndexProp, OmitIndexProps } from './helpers';
-
 export interface ClientSearchRequest<SearchRuntimeMappings extends BaseSearchRuntimeMappings = {}>
   extends Omit<api.SearchRequest, 'index' | 'fields' | 'track_total_hits' | 'size'> {
   fields?: Array<Exclude<keyof SearchRuntimeMappings, number | symbol>>;
@@ -30,40 +28,28 @@ export interface ClientSearchRequest<SearchRuntimeMappings extends BaseSearchRun
 
 export type ClientSearchResponse<
   TDocument,
-  TSearchRequest extends OmitIndexProp<api.SearchRequest>
+  TSearchRequest extends Omit<api.SearchRequest, 'index'>
 > = api.SearchResponse<TDocument, TSearchRequest>;
 
-export type ClientIndexRequest<TDocument> = OmitIndexProps<api.IndexRequest<TDocument>> & {
-  /**
-   * Optional space identifier. When provided, prefixes the document ID with the space
-   * and adds kibana.space_ids property. When undefined, rejects space-prefixed IDs.
-   */
-  space?: string;
-};
-export type ClientIndexResponse = api.IndexResponse;
-export type ClientIndex<FullDocumentType> = (
-  request: ClientIndexRequest<FullDocumentType>
-) => Promise<ClientIndexResponse>;
-
-export interface ClientBulkOperation {
-  create?: Omit<api.BulkCreateOperation, '_index'>;
-}
-
-export type ClientBulkRequest<TDocument> = Omit<
-  OmitIndexProp<api.BulkRequest<TDocument>>,
-  'operations'
+export type ClientCreateRequest<TDocument> = Omit<
+  api.BulkRequest<TDocument>,
+  'operations' | 'index'
 > & {
-  operations: (ClientBulkOperation | TDocument)[];
   /**
-   * Optional space identifier. When provided, prefixes document IDs for create
-   * operations. When undefined, rejects space-prefixed IDs.
+   * Array of documents to create. Each document can optionally include an `_id` property.
+   * Documents are converted internally to ES bulk create operations.
+   */
+  documents: Array<{ _id?: string } & TDocument>;
+  /**
+   * Optional space identifier. When provided, prefixes document IDs and decorates
+   * documents with kibana.space_ids. When undefined, rejects space-prefixed IDs.
    */
   space?: string;
 };
-export type ClientBulkResponse = api.BulkResponse;
-export type ClientBulk<TDocumentType> = (
-  request: ClientBulkRequest<TDocumentType>
-) => Promise<ClientBulkResponse>;
+export type ClientCreateResponse = api.BulkResponse;
+export type ClientCreate<TDocumentType> = (
+  request: ClientCreateRequest<TDocumentType>
+) => Promise<ClientCreateResponse>;
 
 export type ClientExistsIndex = () => Promise<boolean>;
 
@@ -77,7 +63,6 @@ export interface InternalIDataStreamClient<
     transportOpts?: TransportRequestOptionsWithOutMeta
   ) => Promise<api.SearchResponse<FullDocumentType, Agg>>;
 
-  bulk: ClientBulk<FullDocumentType>;
-  index: ClientIndex<FullDocumentType>;
+  create: ClientCreate<FullDocumentType>;
   existsIndex: ClientExistsIndex;
 }

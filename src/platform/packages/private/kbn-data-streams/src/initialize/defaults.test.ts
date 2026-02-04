@@ -48,7 +48,22 @@ describe('applyDefaults', () => {
       expect(() => applyDefaults(dataStream)).toThrow(/contains reserved mapping key "kibana"/);
     });
 
-    it('should not throw if mappings do not contain "kibana" key', () => {
+    it('should throw if mappings contain reserved "_id" key', () => {
+      const dataStream = createTestDataStream({
+        template: {
+          mappings: {
+            properties: {
+              '@timestamp': mappings.date(),
+              _id: mappings.keyword(),
+            },
+          },
+        },
+      });
+
+      expect(() => applyDefaults(dataStream)).toThrow(/contains reserved mapping key "_id"/);
+    });
+
+    it('should not throw if mappings do not contain reserved keys', () => {
       const dataStream = createTestDataStream();
       expect(() => applyDefaults(dataStream)).not.toThrow();
     });
@@ -61,7 +76,7 @@ describe('applyDefaults', () => {
 
       expect(result.template?.mappings?.properties?.kibana).toEqual({
         properties: {
-          space_ids: { type: 'keyword' },
+          space_ids: { type: 'keyword', ignore_above: 1024 },
         },
       });
     });
@@ -98,7 +113,7 @@ describe('applyDefaults', () => {
       const result = applyDefaults(dataStream);
       expect(result.template?.mappings?.properties?.kibana).toEqual({
         properties: {
-          space_ids: { type: 'keyword' },
+          space_ids: { type: 'keyword', ignore_above: 1024 },
         },
       });
     });
@@ -115,7 +130,7 @@ describe('applyDefaults', () => {
       const result = applyDefaults(dataStream);
       expect(result.template?.mappings?.properties?.kibana).toEqual({
         properties: {
-          space_ids: { type: 'keyword' },
+          space_ids: { type: 'keyword', ignore_above: 1024 },
         },
       });
       // Should preserve user-provided priority

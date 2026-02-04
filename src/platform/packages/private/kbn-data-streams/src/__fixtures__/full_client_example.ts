@@ -59,32 +59,31 @@ export const exampleDataStreamClientOperations = async (
     throw new Error('Client not initialized properly');
   }
 
-  await client.index({
-    document: {
-      name: 'John Doe',
-      age: 30,
-      unmappedField: 'Unmapped but defined in the document interface',
-      '@timestamp': new Date().toISOString(),
-    },
+  await client.create({
+    documents: [
+      {
+        name: 'John Doe',
+        age: 30,
+        unmappedField: 'Unmapped but defined in the document interface',
+        '@timestamp': new Date().toISOString(),
+      },
+    ],
   });
 
-  await client.bulk({
-    operations: [
+  await client.create({
+    documents: [
       {
-        index: {},
+        name: 'Jane Doe',
+        age: 25,
+        unmappedField: 'Unmapped but defined in the document interface',
+        '@timestamp': new Date().toISOString(),
       },
       {
-        doc: {
-          name: 'John Doe',
-          age: 30,
-          unmappedField: 'Unmapped but defined in the document interface',
-          '@timestamp': new Date().toISOString(),
-        },
-      },
-      {
-        delete: {
-          _id: '123',
-        },
+        _id: 'custom-id-123',
+        name: 'Bob Smith',
+        age: 35,
+        unmappedField: 'Another unmapped field',
+        '@timestamp': new Date().toISOString(),
       },
     ],
   });

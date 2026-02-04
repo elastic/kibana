@@ -78,14 +78,16 @@ describe('DataStreamClient', () => {
     });
 
     test('basic index and search', async () => {
-      const response = await client.index({
-        document: {
-          '@timestamp': new Date().toISOString(),
-          mappedField: 'test-value',
-        },
+      const response = await client.create({
+        documents: [
+          {
+            '@timestamp': new Date().toISOString(),
+            mappedField: 'test-value',
+          },
+        ],
         refresh: true,
       });
-      expect(response).toHaveProperty('result', 'created');
+      expect(response.items[0].create).toHaveProperty('result', 'created');
 
       const searchResponse = await client.search({
         query: {
@@ -101,15 +103,17 @@ describe('DataStreamClient', () => {
     });
 
     test('basic index and search, id provided', async () => {
-      const response = await client.index({
-        id: 'user-provided-id',
-        document: {
-          '@timestamp': new Date().toISOString(),
-          mappedField: 'test-value',
-        },
+      const response = await client.create({
+        documents: [
+          {
+            _id: 'user-provided-id',
+            '@timestamp': new Date().toISOString(),
+            mappedField: 'test-value',
+          },
+        ],
         refresh: true,
       });
-      expect(response).toHaveProperty('result', 'created');
+      expect(response.items[0].create).toHaveProperty('result', 'created');
 
       const searchResponse = await client.search({
         query: {
@@ -147,19 +151,19 @@ describe('DataStreamClient', () => {
 
     describe('operations with space parameter', () => {
       it('should index with space and auto-generated ID, prefixing the ID and decorating the document', async () => {
-        const response = await client.index({
+        const response = await client.create({
           space: 'test-space',
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'test-value' },
+          documents: [{ '@timestamp': new Date().toISOString(), mappedField: 'test-value' }],
           refresh: true,
         });
 
-        expect(response).toHaveProperty('result', 'created');
-        expect(response._id).toMatch(/^test-space::/);
+        expect(response.items[0].create).toHaveProperty('result', 'created');
+        expect(response.items[0].create?._id).toMatch(/^test-space::/);
 
         // Search for document by ID and verify kibana.space_ids is stripped from _source
         const searchResponse = await client.search({
           space: 'test-space',
-          query: { ids: { values: [response._id!] } },
+          query: { ids: { values: [response.items[0].create?._id!] } },
           size: 1,
         });
         expect(searchResponse.hits.hits.length).toBe(1);
@@ -175,7 +179,7 @@ describe('DataStreamClient', () => {
           MappingsDefinition & { kibana: { space_ids: string[] } }
         >({
           index: testDataStream.name,
-          query: { ids: { values: [response._id!] } },
+          query: { ids: { values: [response.items[0].create?._id!] } },
           size: 1,
         });
         const rawDoc = rawDocSearch.hits.hits[0];
@@ -184,14 +188,19 @@ describe('DataStreamClient', () => {
       });
 
       it('should index with space and explicit ID, prefixing the ID correctly', async () => {
-        const response = await client.index({
+        const response = await client.create({
           space: 'test-space',
-          id: 'my-doc',
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'test-value' },
+          documents: [
+            {
+              _id: 'my-doc',
+              '@timestamp': new Date().toISOString(),
+              mappedField: 'test-value',
+            },
+          ],
           refresh: true,
         });
 
-        expect(response._id).toBe('test-space::my-doc');
+        expect(response.items[0].create?._id).toBe('test-space::my-doc');
 
         // Search by prefixed ID
         const searchResponse = await client.search({
@@ -210,21 +219,19 @@ describe('DataStreamClient', () => {
 
       it('should search within a space and return only documents from that space', async () => {
         // Index 2 documents in space-a
-        await client.index({
+        await client.create({
           space: 'space-a',
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'doc-a-1' },
-          refresh: true,
-        });
-        await client.index({
-          space: 'space-a',
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'doc-a-2' },
+          documents: [
+            { '@timestamp': new Date().toISOString(), mappedField: 'doc-a-1' },
+            { '@timestamp': new Date().toISOString(), mappedField: 'doc-a-2' },
+          ],
           refresh: true,
         });
 
         // Index 1 document in space-b
-        await client.index({
+        await client.create({
           space: 'space-b',
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'doc-b-1' },
+          documents: [{ '@timestamp': new Date().toISOString(), mappedField: 'doc-b-1' }],
           refresh: true,
         });
 
@@ -253,14 +260,14 @@ describe('DataStreamClient', () => {
       });
 
       it('should ensure space isolation in searches', async () => {
-        await client.index({
+        await client.create({
           space: 'space-a',
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'space-a-doc' },
+          documents: [{ '@timestamp': new Date().toISOString(), mappedField: 'space-a-doc' }],
           refresh: true,
         });
-        await client.index({
+        await client.create({
           space: 'space-b',
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'space-b-doc' },
+          documents: [{ '@timestamp': new Date().toISOString(), mappedField: 'space-b-doc' }],
           refresh: true,
         });
 
@@ -282,15 +289,20 @@ describe('DataStreamClient', () => {
       });
 
       it('should handle bulk operations with space, prefixing all IDs and decorating documents', async () => {
-        const bulkResponse = await client.bulk({
+        const bulkResponse = await client.create({
           space: 'test-space',
-          operations: [
-            { create: {} },
+          documents: [
             { '@timestamp': new Date().toISOString(), mappedField: 'bulk-doc-1' },
-            { create: { _id: 'bulk-doc-2' } },
-            { '@timestamp': new Date().toISOString(), mappedField: 'bulk-doc-2' },
-            { create: { _id: 'bulk-doc-3' } },
-            { '@timestamp': new Date().toISOString(), mappedField: 'bulk-doc-3' },
+            {
+              _id: 'bulk-doc-2',
+              '@timestamp': new Date().toISOString(),
+              mappedField: 'bulk-doc-2',
+            },
+            {
+              _id: 'bulk-doc-3',
+              '@timestamp': new Date().toISOString(),
+              mappedField: 'bulk-doc-3',
+            },
           ],
           refresh: true,
         });
@@ -324,35 +336,39 @@ describe('DataStreamClient', () => {
       });
 
       it('should not return document when searching with wrong space', async () => {
-        const response = await client.index({
+        const response = await client.create({
           space: 'space-a',
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'test' },
+          documents: [{ '@timestamp': new Date().toISOString(), mappedField: 'test' }],
           refresh: true,
         });
 
         // Search with wrong space - should return no results
         const searchResponse = await client.search({
           space: 'space-b',
-          query: { ids: { values: [response._id!] } },
+          query: { ids: { values: [response.items[0].create?._id!] } },
           size: 1,
         });
         expect(searchResponse.hits.hits.length).toBe(0);
       });
 
       it('should reject create operation with existing ID (data streams do not support updates)', async () => {
-        await client.index({
+        await client.create({
           space: 'space-a',
-          id: 'update-test',
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'original' },
+          documents: [
+            {
+              _id: 'update-test',
+              '@timestamp': new Date().toISOString(),
+              mappedField: 'original',
+            },
+          ],
           refresh: true,
         });
 
         // Data streams only support create operations, so attempting to create with an existing ID should fail
-        const bulkResponse = await client.bulk({
+        const bulkResponse = await client.create({
           space: 'space-a',
-          operations: [
-            { create: { _id: 'update-test' } },
-            { '@timestamp': new Date().toISOString(), mappedField: 'updated' },
+          documents: [
+            { _id: 'update-test', '@timestamp': new Date().toISOString(), mappedField: 'updated' },
           ],
           refresh: true,
         });
@@ -365,18 +381,18 @@ describe('DataStreamClient', () => {
 
     describe('operations without space parameter', () => {
       it('should index without space, not prefixing ID and not decorating document', async () => {
-        const response = await client.index({
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'test-value' },
+        const response = await client.create({
+          documents: [{ '@timestamp': new Date().toISOString(), mappedField: 'test-value' }],
           refresh: true,
         });
 
-        expect(response).toHaveProperty('result', 'created');
+        expect(response.items[0].create).toHaveProperty('result', 'created');
         // ID should NOT contain ::
-        expect(response._id).not.toContain('::');
+        expect(response.items[0].create?._id).not.toContain('::');
 
         // Search for document and verify kibana.space_ids is NOT present
         const searchResponse = await client.search({
-          query: { ids: { values: [response._id!] } },
+          query: { ids: { values: [response.items[0].create?._id!] } },
           size: 1,
         });
         expect(searchResponse.hits.hits.length).toBe(1);
@@ -390,7 +406,7 @@ describe('DataStreamClient', () => {
         // Verify the property is NOT stored in ES
         const rawDocSearch = await esClient.search({
           index: testDataStream.name,
-          query: { ids: { values: [response._id!] } },
+          query: { ids: { values: [response.items[0].create?._id!] } },
           size: 1,
         });
         const rawDoc = rawDocSearch.hits.hits[0];
@@ -400,24 +416,23 @@ describe('DataStreamClient', () => {
 
       it('should search without space and exclude space-bound documents', async () => {
         // Index 2 docs without space (space-agnostic)
-        const agnostic1 = await client.index({
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'agnostic-1' },
+        const agnosticResponse = await client.create({
+          documents: [
+            { '@timestamp': new Date().toISOString(), mappedField: 'agnostic-1' },
+            { '@timestamp': new Date().toISOString(), mappedField: 'agnostic-2' },
+          ],
           refresh: true,
         });
-        const agnostic2 = await client.index({
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'agnostic-2' },
-          refresh: true,
-        });
+        const agnostic1 = agnosticResponse.items[0].create;
+        const agnostic2 = agnosticResponse.items[1].create;
 
         // Index 2 docs with space
-        await client.index({
+        await client.create({
           space: 'test-space',
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'space-bound-1' },
-          refresh: true,
-        });
-        await client.index({
-          space: 'test-space',
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'space-bound-2' },
+          documents: [
+            { '@timestamp': new Date().toISOString(), mappedField: 'space-bound-1' },
+            { '@timestamp': new Date().toISOString(), mappedField: 'space-bound-2' },
+          ],
           refresh: true,
         });
 
@@ -427,42 +442,54 @@ describe('DataStreamClient', () => {
         });
         expect(searchResponse.hits.hits.length).toBe(2);
         const returnedIds = searchResponse.hits.hits.map((hit) => hit._id).sort();
-        expect(returnedIds).toEqual([agnostic1._id, agnostic2._id].sort());
+        expect(returnedIds).toEqual([agnostic1?._id, agnostic2?._id].sort());
       });
 
       it('should throw error when indexing with space-prefixed ID without space parameter', async () => {
         await expect(
-          client.index({
-            id: 'space::doc',
-            document: { '@timestamp': new Date().toISOString(), mappedField: 'test' },
+          client.create({
+            documents: [
+              {
+                _id: 'space::doc',
+                '@timestamp': new Date().toISOString(),
+                mappedField: 'test',
+              },
+            ],
           })
         ).rejects.toThrow("IDs cannot contain '::'");
       });
 
       it('should not return space-bound documents when searching without space parameter', async () => {
         // Create a space-bound document
-        const spaceResponse = await client.index({
+        const spaceResponse = await client.create({
           space: 'test-space',
-          id: 'space-doc',
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'test' },
+          documents: [
+            {
+              _id: 'space-doc',
+              '@timestamp': new Date().toISOString(),
+              mappedField: 'test',
+            },
+          ],
           refresh: true,
         });
 
         // Search without space parameter - should not return space-bound documents
         const searchResponse = await client.search({
-          query: { ids: { values: [spaceResponse._id!] } },
+          query: { ids: { values: [spaceResponse.items[0].create?._id!] } },
           size: 1,
         });
         expect(searchResponse.hits.hits.length).toBe(0);
       });
 
       it('should handle bulk operations without space, not prefixing IDs', async () => {
-        const bulkResponse = await client.bulk({
-          operations: [
-            { create: {} },
+        const bulkResponse = await client.create({
+          documents: [
             { '@timestamp': new Date().toISOString(), mappedField: 'bulk-agnostic-1' },
-            { create: { _id: 'bulk-agnostic-2' } },
-            { '@timestamp': new Date().toISOString(), mappedField: 'bulk-agnostic-2' },
+            {
+              _id: 'bulk-agnostic-2',
+              '@timestamp': new Date().toISOString(),
+              mappedField: 'bulk-agnostic-2',
+            },
           ],
           refresh: true,
         });
@@ -493,19 +520,25 @@ describe('DataStreamClient', () => {
 
         // Index documents in each space
         for (const space of spaces) {
-          const docs: string[] = [];
-          for (let i = 0; i < 3; i++) {
-            const response = await client.index({
-              space,
-              document: {
+          const response = await client.create({
+            space,
+            documents: [
+              {
                 '@timestamp': new Date().toISOString(),
-                mappedField: `${space}-doc-${i}`,
+                mappedField: `${space}-doc-0`,
               },
-              refresh: true,
-            });
-            docs.push(response._id!);
-          }
-          docsPerSpace[space] = docs;
+              {
+                '@timestamp': new Date().toISOString(),
+                mappedField: `${space}-doc-1`,
+              },
+              {
+                '@timestamp': new Date().toISOString(),
+                mappedField: `${space}-doc-2`,
+              },
+            ],
+            refresh: true,
+          });
+          docsPerSpace[space] = response.items.map((item) => item.create?._id!);
         }
 
         // Verify each space search returns only its own documents
@@ -523,10 +556,15 @@ describe('DataStreamClient', () => {
       it('should reject IDs containing :: separator in space-aware mode', async () => {
         // IDs containing :: separator should be rejected regardless of space parameter
         await expect(
-          client.index({
+          client.create({
             space: 'my-space',
-            id: 'doc::with::colons',
-            document: { '@timestamp': new Date().toISOString(), mappedField: 'test' },
+            documents: [
+              {
+                _id: 'doc::with::colons',
+                '@timestamp': new Date().toISOString(),
+                mappedField: 'test',
+              },
+            ],
             refresh: true,
           })
         ).rejects.toThrow("IDs cannot contain '::'");
@@ -535,26 +573,36 @@ describe('DataStreamClient', () => {
       it('should reject IDs containing :: separator in space-agnostic mode', async () => {
         // IDs containing :: separator should be rejected regardless of space parameter
         await expect(
-          client.index({
-            id: 'doc::with::colons',
-            document: { '@timestamp': new Date().toISOString(), mappedField: 'test' },
+          client.create({
+            documents: [
+              {
+                _id: 'doc::with::colons',
+                '@timestamp': new Date().toISOString(),
+                mappedField: 'test',
+              },
+            ],
             refresh: true,
           })
         ).rejects.toThrow("IDs cannot contain '::'");
       });
 
       it('should preserve space binding for documents (data streams do not support updates)', async () => {
-        const createResponse = await client.index({
+        const createResponse = await client.create({
           space: 'persistent-space',
-          id: 'persistent-doc',
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'original' },
+          documents: [
+            {
+              _id: 'persistent-doc',
+              '@timestamp': new Date().toISOString(),
+              mappedField: 'original',
+            },
+          ],
           refresh: true,
         });
 
         // Verify it belongs to persistent-space
         const getSearchResponse = await client.search({
           space: 'persistent-space',
-          query: { ids: { values: [createResponse._id!] } },
+          query: { ids: { values: [createResponse.items[0].create?._id!] } },
           size: 1,
         });
         expect(getSearchResponse.hits.hits.length).toBe(1);
@@ -577,15 +625,15 @@ describe('DataStreamClient', () => {
 
       it('should handle mixed space and space-agnostic documents correctly', async () => {
         // Create space-agnostic doc
-        const agnosticResponse = await client.index({
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'agnostic' },
+        const agnosticResponse = await client.create({
+          documents: [{ '@timestamp': new Date().toISOString(), mappedField: 'agnostic' }],
           refresh: true,
         });
 
         // Create space-bound doc
-        await client.index({
+        await client.create({
           space: 'mixed-space',
-          document: { '@timestamp': new Date().toISOString(), mappedField: 'space-bound' },
+          documents: [{ '@timestamp': new Date().toISOString(), mappedField: 'space-bound' }],
           refresh: true,
         });
 
@@ -594,7 +642,7 @@ describe('DataStreamClient', () => {
           query: { match_all: {} },
         });
         expect(agnosticSearch.hits.hits.length).toBe(1);
-        expect(agnosticSearch.hits.hits[0]._id).toBe(agnosticResponse._id);
+        expect(agnosticSearch.hits.hits[0]._id).toBe(agnosticResponse.items[0].create?._id);
 
         // Search with space should return only space-bound doc
         const spaceSearch = await client.search({

@@ -16,10 +16,21 @@ import type { AnyDataStreamDefinition, DataStreamDefinition } from '../types';
  */
 function validateMappings(def: AnyDataStreamDefinition): void {
   const properties = def.template?.mappings?.properties;
-  if (properties && 'kibana' in properties) {
+  if (!properties) {
+    return;
+  }
+
+  if ('kibana' in properties) {
     throw new Error(
       `Data stream "${def.name}" contains reserved mapping key "kibana". ` +
         `This namespace is reserved for system properties.`
+    );
+  }
+
+  if ('_id' in properties) {
+    throw new Error(
+      `Data stream "${def.name}" contains reserved mapping key "_id". ` +
+        `This field is reserved for document identifiers.`
     );
   }
 }
