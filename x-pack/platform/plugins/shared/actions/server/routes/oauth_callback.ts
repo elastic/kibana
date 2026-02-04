@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import startCase from 'lodash/startCase';
 import type { ActionsPluginsStart } from '../plugin';
 import type { ILicenseState } from '../lib';
@@ -21,11 +22,54 @@ import { ConnectorTokenClient } from '../lib/connector_token_client';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 
 const querySchema = schema.object({
-  code: schema.maybe(schema.string()),
-  state: schema.maybe(schema.string()),
-  error: schema.maybe(schema.string()),
-  error_description: schema.maybe(schema.string()),
-  session_state: schema.maybe(schema.string()), // Microsoft OAuth includes this
+  code: schema.maybe(
+    schema.string({
+      meta: {
+        description: i18n.translate('xpack.actions.oauthCallback.codeParamDescription', {
+          defaultMessage: 'The authorization code returned by the OAuth provider.',
+        }),
+      },
+    })
+  ),
+  state: schema.maybe(
+    schema.string({
+      meta: {
+        description: i18n.translate('xpack.actions.oauthCallback.stateParamDescription', {
+          defaultMessage: 'The state parameter for CSRF protection.',
+        }),
+      },
+    })
+  ),
+  error: schema.maybe(
+    schema.string({
+      meta: {
+        description: i18n.translate('xpack.actions.oauthCallback.errorParamDescription', {
+          defaultMessage: 'Error code if the authorization failed.',
+        }),
+      },
+    })
+  ),
+  error_description: schema.maybe(
+    schema.string({
+      meta: {
+        description: i18n.translate(
+          'xpack.actions.oauthCallback.errorDescriptionParamDescription',
+          {
+            defaultMessage: 'Human-readable error description.',
+          }
+        ),
+      },
+    })
+  ),
+  session_state: schema.maybe(
+    schema.string({
+      meta: {
+        description: i18n.translate('xpack.actions.oauthCallback.sessionStateParamDescription', {
+          defaultMessage: 'Session state from the OAuth provider (e.g., Microsoft).',
+        }),
+      },
+    })
+  ),
 });
 
 interface OAuthConnectorSecrets {
@@ -177,13 +221,40 @@ export const oauthCallbackRoute = (
     {
       path: `${BASE_ACTION_API_PATH}/connector/_oauth_callback`,
       security: DEFAULT_ACTION_ROUTE_SECURITY,
-      validate: {
-        query: querySchema,
-      },
       options: {
         access: 'public',
+        summary: i18n.translate('xpack.actions.oauthCallback.routeSummary', {
+          defaultMessage: 'Handle OAuth callback',
+        }),
+        description: i18n.translate('xpack.actions.oauthCallback.routeDescription', {
+          defaultMessage:
+            'Handles the OAuth 2.0 authorization code callback from external providers. Exchanges the authorization code for access and refresh tokens.',
+        }),
+        tags: ['oas-tag:connectors'],
         // authRequired: true is the default - user must have valid session
         // The OAuth redirect happens in their browser, so they will have their session cookie
+      },
+      validate: {
+        request: {
+          query: querySchema,
+        },
+        response: {
+          302: {
+            description: i18n.translate('xpack.actions.oauthCallback.response302Description', {
+              defaultMessage: 'Redirects to Kibana on successful authorization.',
+            }),
+          },
+          200: {
+            description: i18n.translate('xpack.actions.oauthCallback.response200Description', {
+              defaultMessage: 'Returns an HTML page with error details if authorization fails.',
+            }),
+          },
+          401: {
+            description: i18n.translate('xpack.actions.oauthCallback.response401Description', {
+              defaultMessage: 'User is not authenticated.',
+            }),
+          },
+        },
       },
     },
     router.handleLegacyErrors(
