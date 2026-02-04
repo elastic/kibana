@@ -10,7 +10,11 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { discover, common } = getPageObjects(['discover', 'common']);
+  const { discover, common, unifiedSearch } = getPageObjects([
+    'discover',
+    'common',
+    'unifiedSearch',
+  ]);
 
   const testSubjects = getService('testSubjects');
 
@@ -50,7 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Go to discover and select classic mode
         await common.navigateToApp('discover');
         await discover.selectTextBaseLang();
-        await discover.selectDataViewMode();
+        await unifiedSearch.switchToDataViewMode();
         const queryMode = await discover.getQueryMode();
         expect(queryMode).to.contain('classic');
 
