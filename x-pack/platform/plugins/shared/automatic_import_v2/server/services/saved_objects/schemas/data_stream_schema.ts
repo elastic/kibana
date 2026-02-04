@@ -54,6 +54,7 @@ export const dataStreamSchemaV1 = schema.object({
       ingest_pipeline: schema.maybe(schema.string()),
       field_mapping: schema.maybe(schema.recordOf(schema.string(), schema.string())),
       connector: schema.maybe(schema.string()),
+      results: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
     })
   ),
 });

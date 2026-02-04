@@ -216,16 +216,15 @@ export class TaskManagerService {
       // Extract and convert the pipeline to JSON string
       const pipelineString = JSON.stringify(result.current_pipeline || {});
 
-      // Extract docs from pipeline_generation_results and convert to string array
-      const pipelineGenerationResults = (result.pipeline_generation_results?.docs || []).map(
-        (doc) => JSON.stringify(doc)
-      );
+      const pipelineGenerationResultsObjects = (result.pipeline_generation_results?.docs ||
+        []) as Array<Record<string, unknown>>;
 
       // Update the data stream saved object with pipeline and task status
       await automaticImportSavedObjectService.updateDataStreamSavedObjectAttributes({
         integrationId,
         dataStreamId,
         ingestPipeline: pipelineString,
+        results: pipelineGenerationResultsObjects,
         status: TASK_STATUSES.completed,
       });
 
@@ -237,7 +236,7 @@ export class TaskManagerService {
           task_status: TASK_STATUSES.completed,
           result: {
             ingest_pipeline: pipelineString,
-            pipeline_generation_results: pipelineGenerationResults,
+            pipeline_generation_results: pipelineGenerationResultsObjects,
           },
         },
       };

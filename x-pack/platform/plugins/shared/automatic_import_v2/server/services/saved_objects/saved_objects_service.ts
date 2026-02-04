@@ -33,6 +33,7 @@ export interface UpdateDataStreamParams {
   integrationId: string;
   dataStreamId: string;
   ingestPipeline: string;
+  results?: Array<Record<string, unknown>>;
   status: keyof typeof TASK_STATUSES;
 }
 
@@ -547,7 +548,7 @@ export class AutomaticImportSavedObjectService {
   public async updateDataStreamSavedObjectAttributes(
     updateDataStreamParams: UpdateDataStreamParams
   ): Promise<void> {
-    const { integrationId, dataStreamId, ingestPipeline, status } = updateDataStreamParams;
+    const { integrationId, dataStreamId, ingestPipeline, results, status } = updateDataStreamParams;
 
     if (!integrationId) {
       throw new Error('Integration ID is required');
@@ -563,10 +564,15 @@ export class AutomaticImportSavedObjectService {
         throw new Error(`Data stream ${dataStreamId} not found`);
       }
 
+      this.logger.debug(
+        `Updating data stream ${dataStreamId} with results: ${JSON.stringify(results)}`
+      );
+
       const updatedDataStreamData: DataStreamAttributes = {
         ...dataStream.attributes,
         result: {
           ingest_pipeline: ingestPipeline,
+          ...results,
         },
         job_info: {
           ...dataStream.attributes.job_info,
