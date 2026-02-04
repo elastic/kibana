@@ -11,7 +11,8 @@ import React from 'react';
 import { EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DATA_TEST_SUBJ_DEMO_ENV_BUTTON } from './constants';
+import { DATA_TEST_SUBJ_DEMO_ENV_BUTTON, METRIC_CLICK_DEMO_ENV_BUTTON } from './constants';
+import { useServices } from './services';
 
 const title = i18n.translate('homePackages.demoEnvironmentPanel.welcomeTitle', {
   defaultMessage: 'Explore our live demo environment',
@@ -28,12 +29,12 @@ const linkLabel = i18n.translate('homePackages.demoEnvironmentPanel.linkLabel', 
 
 export interface Props {
   demoUrl: string;
-  onClick?: () => void;
 }
 
-export const DemoEnvironmentPanel = ({ demoUrl, onClick: onClickProp = () => {} }: Props) => {
+export const DemoEnvironmentPanel = ({ demoUrl }: Props) => {
+  const { logClick } = useServices();
   const onClick = () => {
-    onClickProp();
+    logClick(METRIC_CLICK_DEMO_ENV_BUTTON);
   };
 
   return (
