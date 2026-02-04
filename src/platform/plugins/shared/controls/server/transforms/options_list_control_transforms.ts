@@ -25,60 +25,62 @@ const OPTIONS_LIST_LEGACY_REF_NAMES = [
 
 export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(OPTIONS_LIST_CONTROL, {
-    transformIn: (state: OptionsListDSLControlState) => {
-      const { state: dataControlState, references } = transformDataControlIn(
-        state,
-        OPTIONS_LIST_REF_NAME
-      );
-      return {
-        state: dataControlState,
-        references,
-      };
-    },
-    transformOut: <
-      StoredStateType extends Partial<
-        LegacyStoredOptionsListExplicitInput & OptionsListDSLControlState
-      >
-    >(
-      state: StoredStateType,
-      panelReferences: Reference[] | undefined,
-      containerReferences: Reference[] | undefined,
-      id: string | undefined
-    ): OptionsListDSLControlState => {
-      const dataControlState = transformDataControlOut(
-        id,
-        state,
-        OPTIONS_LIST_LEGACY_REF_NAMES,
-        panelReferences,
-        containerReferences
-      );
+    getTransforms: () => ({
+      transformIn: (state: OptionsListDSLControlState) => {
+        const { state: dataControlState, references } = transformDataControlIn(
+          state,
+          OPTIONS_LIST_REF_NAME
+        );
+        return {
+          state: dataControlState,
+          references,
+        };
+      },
+      transformOut: <
+        StoredStateType extends Partial<
+          LegacyStoredOptionsListExplicitInput & OptionsListDSLControlState
+        >
+      >(
+        state: StoredStateType,
+        panelReferences: Reference[] | undefined,
+        containerReferences: Reference[] | undefined,
+        id: string | undefined
+      ): OptionsListDSLControlState => {
+        const dataControlState = transformDataControlOut(
+          id,
+          state,
+          OPTIONS_LIST_LEGACY_REF_NAMES,
+          panelReferences,
+          containerReferences
+        );
 
-      /**
-       * Pre 9.4 the control state was stored in camelCase; these transforms ensure they are converted to snake_case
-       */
-      const {
-        exclude,
-        sort,
-        exists_selected,
-        display_settings,
-        run_past_timeout,
-        search_technique,
-        selected_options,
-        single_select,
-      } = convertCamelCasedKeysToSnakeCase<LegacyStoredOptionsListExplicitInput>(
-        state as LegacyStoredOptionsListExplicitInput
-      );
-      return {
-        ...dataControlState,
-        exclude,
-        ...{ sort: sort as OptionsListDSLControlState['sort'] },
-        exists_selected,
-        display_settings,
-        run_past_timeout,
-        search_technique: search_technique as OptionsListDSLControlState['search_technique'],
-        selected_options,
-        single_select,
-      };
-    },
+        /**
+         * Pre 9.4 the control state was stored in camelCase; these transforms ensure they are converted to snake_case
+         */
+        const {
+          exclude,
+          sort,
+          exists_selected,
+          display_settings,
+          run_past_timeout,
+          search_technique,
+          selected_options,
+          single_select,
+        } = convertCamelCasedKeysToSnakeCase<LegacyStoredOptionsListExplicitInput>(
+          state as LegacyStoredOptionsListExplicitInput
+        );
+        return {
+          ...dataControlState,
+          exclude,
+          ...{ sort: sort as OptionsListDSLControlState['sort'] },
+          exists_selected,
+          display_settings,
+          run_past_timeout,
+          search_technique: search_technique as OptionsListDSLControlState['search_technique'],
+          selected_options,
+          single_select,
+        };
+      },
+    }),
   });
 };

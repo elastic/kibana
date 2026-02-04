@@ -24,38 +24,40 @@ const RANGE_SLIDER_LEGACY_REF_NAMES = [
 
 export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(RANGE_SLIDER_CONTROL, {
-    transformIn: (state: RangeSliderControlState) => {
-      const { state: dataControlState, references } = transformDataControlIn(
-        state,
-        RANGE_SLIDER_REF_NAME
-      );
-      return {
-        state: dataControlState,
-        references,
-      };
-    },
-    transformOut: <
-      StoredStateType extends Partial<
-        LegacyStoredRangeSliderExplicitInput & RangeSliderControlState
-      >
-    >(
-      state: StoredStateType,
-      panelReferences: Reference[] | undefined,
-      containerReferences: Reference[] | undefined,
-      id: string | undefined
-    ): RangeSliderControlState => {
-      const dataControlState = transformDataControlOut(
-        id,
-        state,
-        RANGE_SLIDER_LEGACY_REF_NAMES,
-        panelReferences,
-        containerReferences
-      );
-      return {
-        ...dataControlState,
-        value: state.value,
-        step: state.step,
-      };
-    },
+    getTransforms: () => ({
+      transformIn: (state: RangeSliderControlState) => {
+        const { state: dataControlState, references } = transformDataControlIn(
+          state,
+          RANGE_SLIDER_REF_NAME
+        );
+        return {
+          state: dataControlState,
+          references,
+        };
+      },
+      transformOut: <
+        StoredStateType extends Partial<
+          LegacyStoredRangeSliderExplicitInput & RangeSliderControlState
+        >
+      >(
+        state: StoredStateType,
+        panelReferences: Reference[] | undefined,
+        containerReferences: Reference[] | undefined,
+        id: string | undefined
+      ): RangeSliderControlState => {
+        const dataControlState = transformDataControlOut(
+          id,
+          state,
+          RANGE_SLIDER_LEGACY_REF_NAMES,
+          panelReferences,
+          containerReferences
+        );
+        return {
+          ...dataControlState,
+          value: state.value,
+          step: state.step,
+        };
+      },
+    }),
   });
 };
