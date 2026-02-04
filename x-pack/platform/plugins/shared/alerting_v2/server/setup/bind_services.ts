@@ -34,10 +34,6 @@ import {
   createTaskRunnerFactory,
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
-import {
-  createTaskRunnerInternalFactory,
-  TaskRunnerInternalFactoryToken,
-} from '../lib/services/task_run_scope_service/create_task_runner_internal';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
@@ -66,12 +62,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(TaskRunnerFactoryToken).toFactory((context) =>
     createTaskRunnerFactory({
-      getInjection: () => context.get(CoreStart('injection')),
-    })
-  );
-
-  bind(TaskRunnerInternalFactoryToken).toFactory((context) =>
-    createTaskRunnerInternalFactory({
       getInjection: () => context.get(CoreStart('injection')),
     })
   );
