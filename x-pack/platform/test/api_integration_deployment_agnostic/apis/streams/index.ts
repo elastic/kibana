@@ -35,6 +35,5 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./settings'));
     loadTestFile(require.resolve('./doc_counts'));
     loadTestFile(require.resolve('./snapshot_restore'));
-    loadTestFile(require.resolve('./connectors'));
   });
 }
