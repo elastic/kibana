@@ -75,6 +75,9 @@ export const createQueue = (config: Config, client: Client, logger: ToolingLog):
 };
 
 async function post(config: Config, docs: Doc[], logger: ToolingLog) {
+  if (config.destination.type !== 'http') {
+    throw new Error('post() should only be called with http destination');
+  }
   try {
     const startTs = Date.now();
     const resp = await axios.post(config.destination.url, docs, {
