@@ -15,8 +15,9 @@ export interface IFileStore {
    * Read a file entry from the store.
    *
    * @param path path of the file to read.
+   * @param options.version optional version to read (defaults to latest).
    */
-  read(path: string): Promise<FileEntry | undefined>;
+  read(path: string, options?: { version?: number }): Promise<FileEntry | undefined>;
   /**
    * List files and directories at the given path.
    *

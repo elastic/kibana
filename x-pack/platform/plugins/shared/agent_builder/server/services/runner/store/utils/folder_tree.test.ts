@@ -20,10 +20,15 @@ const createMockFileEntry = (path: string): FileEntry => ({
   metadata: {
     type: FileEntryType.toolResult,
     id: path,
-    token_count: 100,
     readonly: true,
   },
-  content: { raw: { data: 'test' } },
+  versions: [
+    {
+      version: 1,
+      content: { raw: { data: 'test' } },
+      metadata: { token_count: 100 },
+    },
+  ],
 });
 
 const createMockDirEntry = (path: string, children?: LsEntry[]): DirEntryWithChildren => ({
@@ -33,7 +38,7 @@ const createMockDirEntry = (path: string, children?: LsEntry[]): DirEntryWithChi
 });
 
 const createMockStore = (lsResult: LsEntry[]): IFileStore => ({
-  read: jest.fn(),
+  read: jest.fn<ReturnType<IFileStore['read']>, Parameters<IFileStore['read']>>(),
   ls: jest.fn().mockResolvedValue(lsResult),
   glob: jest.fn(),
   grep: jest.fn(),

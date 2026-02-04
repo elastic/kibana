@@ -11,7 +11,7 @@ import { VirtualFileSystem } from './virtual_filesystem';
 
 const createFileEntry = (
   path: string,
-  content: FileEntry['content']['raw'] = { name: `content for ${path}` },
+  content: FileEntry['versions'][number]['content']['raw'] = { name: `content for ${path}` },
   overrides: Partial<FileEntry> = {}
 ): FileEntry => ({
   path,
@@ -19,10 +19,15 @@ const createFileEntry = (
   metadata: {
     type: FileEntryType.toolResult,
     id: path,
-    token_count: 100,
     readonly: true,
   },
-  content: { raw: content },
+  versions: [
+    {
+      version: 1,
+      content: { raw: content },
+      metadata: { token_count: 100 },
+    },
+  ],
   ...overrides,
 });
 
@@ -94,7 +99,7 @@ describe('VirtualFileSystem', () => {
       vfs.mount(volume2);
 
       const result = (await vfs.get('/shared/file.json')) as FileEntry;
-      expect(result.content.raw).toEqual({ source: 'v1' });
+      expect(result.versions[0].content.raw).toEqual({ source: 'v1' });
     });
 
     it('respects priority for file resolution', async () => {
@@ -110,7 +115,7 @@ describe('VirtualFileSystem', () => {
       vfs.mount(volume2, { priority: 1 });
 
       const result = (await vfs.get('/shared/file.json')) as FileEntry;
-      expect(result.content.raw).toEqual({ source: 'v2' }); // v2 has higher priority (lower number)
+      expect(result.versions[0].content.raw).toEqual({ source: 'v2' }); // v2 has higher priority (lower number)
     });
   });
 
@@ -169,7 +174,7 @@ describe('VirtualFileSystem', () => {
       const results = await vfs.list('/agents');
 
       expect(results).toHaveLength(1);
-      expect((results[0] as FileEntry).content.raw).toEqual({ source: 'v1' });
+      expect((results[0] as FileEntry).versions[0].content.raw).toEqual({ source: 'v1' });
     });
 
     it('supports recursive listing', async () => {
@@ -241,7 +246,7 @@ describe('VirtualFileSystem', () => {
       const results = await vfs.glob('/shared/*.json');
 
       expect(results).toHaveLength(1);
-      expect((results[0] as FileEntry).content.raw).toEqual({ source: 'v1' }); // first-wins
+      expect((results[0] as FileEntry).versions[0].content.raw).toEqual({ source: 'v1' }); // first-wins
     });
   });
 

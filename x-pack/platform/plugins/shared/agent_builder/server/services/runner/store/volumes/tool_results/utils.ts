@@ -34,21 +34,28 @@ export const createToolCallEntry = (result: ToolResultWithMeta): ToolCallFileEnt
       toolCallId: result.tool_call_id,
       toolResultId: result.result.tool_result_id,
     }),
-    content: {
-      raw: result.result.data,
-      plain_text: stringifiedContent,
-    },
     metadata: {
       // generic meta
       type: FileEntryType.toolResult,
       id: result.result.tool_result_id,
-      token_count: estimateTokens(stringifiedContent),
       readonly: true,
       // specific tool-result meta
       tool_result_type: result.result.type,
       tool_call_id: result.tool_call_id,
       tool_id: result.tool_id,
     },
+    versions: [
+      {
+        version: 1,
+        content: {
+          raw: result.result.data,
+          plain_text: stringifiedContent,
+        },
+        metadata: {
+          token_count: estimateTokens(stringifiedContent),
+        },
+      },
+    ],
   };
 };
 

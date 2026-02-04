@@ -38,7 +38,7 @@ export const globTool = ({
   };
 };
 
-type FileEntrySummary = Omit<FileEntry, 'type' | 'content'>;
+type FileEntrySummary = Omit<FileEntry, 'type' | 'versions'>;
 
 function toSummary(entry: FileEntry): FileEntrySummary {
   return {

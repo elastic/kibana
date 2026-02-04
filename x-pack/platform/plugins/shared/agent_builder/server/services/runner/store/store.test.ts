@@ -19,10 +19,15 @@ const createFileEntry = (
   metadata: {
     type: FileEntryType.toolResult,
     id: path,
-    token_count: 100,
     readonly: true,
   },
-  content,
+  versions: [
+    {
+      version: 1,
+      content,
+      metadata: { token_count: 100 },
+    },
+  ],
   ...overrides,
 });
 
@@ -50,6 +55,60 @@ describe('FileSystemStore', () => {
       const result = await store.read('/files/test.json');
 
       expect(result).toEqual(entry);
+    });
+
+    it('returns latest version by default', async () => {
+      const entry = createFileEntry(
+        '/files/test.json',
+        { raw: { data: 'v1' } },
+        {
+          versions: [
+            {
+              version: 2,
+              content: { raw: { data: 'v2' } },
+              metadata: { token_count: 100 },
+            },
+            {
+              version: 1,
+              content: { raw: { data: 'v1' } },
+              metadata: { token_count: 100 },
+            },
+          ],
+        }
+      );
+      volume.add(entry);
+
+      const result = await store.read('/files/test.json');
+
+      expect(result?.versions).toHaveLength(1);
+      expect(result?.versions[0].content.raw).toEqual({ data: 'v2' });
+    });
+
+    it('returns requested version when specified', async () => {
+      const entry = createFileEntry(
+        '/files/test.json',
+        { raw: { data: 'v1' } },
+        {
+          versions: [
+            {
+              version: 1,
+              content: { raw: { data: 'v1' } },
+              metadata: { token_count: 100 },
+            },
+            {
+              version: 2,
+              content: { raw: { data: 'v2' } },
+              metadata: { token_count: 100 },
+            },
+          ],
+        }
+      );
+      volume.add(entry);
+
+      const result = await store.read('/files/test.json', { version: 1 });
+
+      expect(result?.versions).toHaveLength(1);
+      expect(result?.versions[0].content.raw).toEqual({ data: 'v1' });
     });
 
     it('returns undefined when path does not exist', async () => {
@@ -183,6 +242,33 @@ describe('FileSystemStore', () => {
   });
 
   describe('grep', () => {
+    it('uses latest version content when searching', async () => {
+      const entry = createFileEntry(
+        '/files/test.json',
+        { raw: {}, plain_text: 'old content' },
+        {
+          versions: [
+            {
+              version: 1,
+              content: { raw: {}, plain_text: 'old content' },
+              metadata: { token_count: 100 },
+            },
+            {
+              version: 2,
+              content: { raw: {}, plain_text: 'new content' },
+              metadata: { token_count: 100 },
+            },
+          ],
+        }
+      );
+      volume.add(entry);
+
+      const result = await store.grep('new content', '/files/*.json');
+
+      expect(result).toHaveLength(1);
+      expect(result[0].line).toBe(1);
+    });
+
     describe('regex mode (default)', () => {
       it('finds matches using regex pattern', async () => {
         volume.add(

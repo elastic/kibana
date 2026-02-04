@@ -18,6 +18,7 @@ import {
 
 const schema = z.object({
   path: z.string().describe('Path of the file to read'),
+  version: z.number().optional().describe('Optional version to read (defaults to latest)'),
   raw: z
     .boolean()
     .optional()
@@ -40,20 +41,23 @@ export const readTool = ({
     type: ToolType.builtin,
     schema,
     tags: ['filestore'],
-    handler: async ({ path, raw }, context) => {
-      const entry = await filestore.read(path);
+    handler: async ({ path, version, raw }, context) => {
+      const entry = await filestore.read(path, { version });
       if (!entry) {
         return {
           results: [createErrorResult(`Entry '${path}' not found`)],
         };
       }
 
+      const selectedVersion = entry.versions[0];
       let content: string | object;
       let truncated = false;
       if (raw) {
-        content = entry.content.raw;
+        content = selectedVersion.content.raw;
       } else {
-        content = entry.content.plain_text ?? JSON.stringify(entry.content.raw, undefined, 2);
+        content =
+          selectedVersion.content.plain_text ??
+          JSON.stringify(selectedVersion.content.raw, undefined, 2);
         const tokenCount = estimateTokens(content);
         if (tokenCount > SAFEGUARD_TOKEN_COUNT) {
           content = truncateTokens(content as string, SAFEGUARD_TOKEN_COUNT);

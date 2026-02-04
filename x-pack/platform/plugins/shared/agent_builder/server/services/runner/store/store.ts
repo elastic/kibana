@@ -27,10 +27,17 @@ export class FileSystemStore implements IFileStore {
    * Read a file entry from the store.
    * Returns undefined if the path doesn't exist or is a directory.
    */
-  async read(path: string): Promise<FileEntry | undefined> {
+  async read(path: string, options: { version?: number } = {}): Promise<FileEntry | undefined> {
     const entry = await this.filesystem.get(path);
     if (entry?.type === 'file') {
-      return entry;
+      const version = this.getVersion(entry, options.version);
+      if (!version) {
+        return undefined;
+      }
+      return {
+        ...entry,
+        versions: [version],
+      };
     }
     return undefined;
   }
@@ -45,7 +52,8 @@ export class FileSystemStore implements IFileStore {
 
     if (depth <= 1) {
       // Simple case: just list immediate children
-      return this.filesystem.list(normalizedPath);
+      const entries = await this.filesystem.list(normalizedPath);
+      return entries.map((entry) => this.toLatestEntry(entry));
     }
 
     // Get flat list with recursion
@@ -54,7 +62,10 @@ export class FileSystemStore implements IFileStore {
       maxDepth: depth - 1,
     });
 
-    return this.buildTree(normalizedPath, flatEntries);
+    return this.buildTree(
+      normalizedPath,
+      flatEntries.map((entry) => this.toLatestEntry(entry))
+    );
   }
 
   /**
@@ -62,7 +73,7 @@ export class FileSystemStore implements IFileStore {
    */
   async glob(pattern: string): Promise<FileEntry[]> {
     const entries = await this.filesystem.glob(pattern, { onlyFiles: true });
-    return entries as FileEntry[];
+    return entries.map((entry) => this.toLatestFileEntry(entry as FileEntry));
   }
 
   /**
@@ -181,7 +192,43 @@ export class FileSystemStore implements IFileStore {
    * Uses plain_text if available, otherwise stringifies raw content.
    */
   private getSearchableText(file: FileEntry): string {
-    return file.content.plain_text ?? JSON.stringify(file.content.raw, null, 2);
+    const latest = this.getLatestVersion(file);
+    return latest.content.plain_text ?? JSON.stringify(latest.content.raw, null, 2);
+  }
+
+  private toLatestEntry(entry: FsEntry): FsEntry {
+    if (entry.type === 'file') {
+      return this.toLatestFileEntry(entry);
+    }
+    return entry;
+  }
+
+  private toLatestFileEntry(entry: FileEntry): FileEntry {
+    const latest = this.getLatestVersion(entry);
+    return {
+      ...entry,
+      versions: [latest],
+    };
+  }
+
+  private getLatestVersion(entry: FileEntry) {
+    if (entry.versions.length === 0) {
+      throw new Error(`File entry at ${entry.path} has no versions`);
+    }
+    let latest = entry.versions[0];
+    for (const version of entry.versions) {
+      if (!latest || version.version > latest.version) {
+        latest = version;
+      }
+    }
+    return latest;
+  }
+
+  private getVersion(entry: FileEntry, version?: number) {
+    if (version === undefined) {
+      return this.getLatestVersion(entry);
+    }
+    return entry.versions.find((entryVersion) => entryVersion.version === version);
   }
 
   /**

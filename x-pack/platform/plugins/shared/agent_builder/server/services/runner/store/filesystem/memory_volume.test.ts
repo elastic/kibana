@@ -14,12 +14,19 @@ const createFileEntry = (path: string, overrides: Partial<FileEntry> = {}): File
   metadata: {
     type: FileEntryType.toolResult,
     id: path,
-    token_count: 100,
     readonly: true,
   },
-  content: {
-    raw: { name: `content for ${path}` },
-  },
+  versions: [
+    {
+      version: 1,
+      content: {
+        raw: { name: `content for ${path}` },
+      },
+      metadata: {
+        token_count: 100,
+      },
+    },
+  ],
   ...overrides,
 });
 
@@ -57,14 +64,30 @@ describe('MemoryVolume', () => {
 
     it('overwrites existing entry at the same path', async () => {
       const volume = new MemoryVolume('test');
-      const entry1 = createFileEntry('/agents/agent1.json', { content: { raw: { version: 1 } } });
-      const entry2 = createFileEntry('/agents/agent1.json', { content: { raw: { version: 2 } } });
+      const entry1 = createFileEntry('/agents/agent1.json', {
+        versions: [
+          {
+            version: 1,
+            content: { raw: { version: 1 } },
+            metadata: { token_count: 100 },
+          },
+        ],
+      });
+      const entry2 = createFileEntry('/agents/agent1.json', {
+        versions: [
+          {
+            version: 2,
+            content: { raw: { version: 2 } },
+            metadata: { token_count: 100 },
+          },
+        ],
+      });
 
       volume.add(entry1);
       volume.add(entry2);
 
       const result = (await volume.get('/agents/agent1.json')) as FileEntry;
-      expect(result.content.raw).toEqual({ version: 2 });
+      expect(result.versions[0].content.raw).toEqual({ version: 2 });
     });
   });
 

@@ -23,10 +23,6 @@ export type FileEntryMetadata<TExtraMeta extends object = {}> = {
    */
   id: string;
   /**
-   * Estimated length, in tokens, of the content of the raw content.
-   */
-  token_count: number;
-  /**
    * Defines if the entry can be modified or not.
    */
   readonly: boolean;
@@ -43,6 +39,19 @@ export interface FileEntryContent<TData extends object = object> {
   plain_text?: string;
 }
 
+export interface FileEntryVersionMetadata {
+  /**
+   * Estimated length, in tokens, of the content of the raw content.
+   */
+  token_count: number;
+}
+
+export interface FileEntryVersion<TContent extends object = object> {
+  version: number;
+  content: FileEntryContent<TContent>;
+  metadata: FileEntryVersionMetadata;
+}
+
 /**
  * A file entry in the virtual filesystem.
  */
@@ -50,7 +59,7 @@ export interface FileEntry<TContent extends object = object, TMeta extends objec
   path: string;
   type: 'file';
   metadata: FileEntryMetadata<TMeta>;
-  content: FileEntryContent<TContent>;
+  versions: FileEntryVersion<TContent>[];
 }
 
 /**

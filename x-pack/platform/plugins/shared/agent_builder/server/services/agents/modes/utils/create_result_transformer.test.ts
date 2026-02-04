@@ -27,7 +27,7 @@ describe('createResultTransformer', () => {
   });
 
   const createMockFileStore = (entries: Map<string, FileEntry>): IFileStore => ({
-    read: jest.fn(async (path: string) => entries.get(path)),
+    read: jest.fn(async (path: string, _options?: { version?: number }) => entries.get(path)),
     ls: jest.fn(),
     glob: jest.fn(),
     grep: jest.fn(),
@@ -43,13 +43,20 @@ describe('createResultTransformer', () => {
     metadata: {
       type: 'tool_result' as any,
       id: 'result-id',
-      token_count: tokenCount,
       readonly: true,
     },
-    content: {
-      raw: data,
-      plain_text: JSON.stringify(data),
-    },
+    versions: [
+      {
+        version: 1,
+        content: {
+          raw: data,
+          plain_text: JSON.stringify(data),
+        },
+        metadata: {
+          token_count: tokenCount,
+        },
+      },
+    ],
   });
 
   const createMockToolRegistry = (
