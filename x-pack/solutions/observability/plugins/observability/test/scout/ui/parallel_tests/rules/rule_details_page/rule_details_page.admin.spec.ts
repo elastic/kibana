@@ -84,7 +84,7 @@ test.describe.skip('Rule Details Page - Admin', { tag: ['@ess', '@svlOblt'] }, (
     // Verify navigation to alerts tab with correct URL parameters
     const url = page.url();
     expect(url).toContain('tabId=alerts');
-    expect(url).toContain('selectedOptions:!(active)');
+    expect(url).toContain('selected_options:!(active)');
     expect(url).toContain('rangeFrom:now-30d');
     expect(url).toContain('rangeTo:now');
   });
@@ -103,7 +103,7 @@ test.describe.skip('Rule Details Page - Admin', { tag: ['@ess', '@svlOblt'] }, (
     const url = page.url();
     expect(url).toContain('tabId=alerts');
     // All statuses = empty selectedOptions array
-    expect(url).toContain('selectedOptions:!()');
+    expect(url).toContain('selected_options:!()');
     expect(url).toContain('rangeFrom:now-30d');
     expect(url).toContain('rangeTo:now');
   });

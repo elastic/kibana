@@ -67,7 +67,7 @@ test.describe('Rule Details Page - Viewer', { tag: ['@ess', '@svlOblt'] }, () =>
     // Verify navigation to alerts tab
     const url = page.url();
     expect(url).toContain('tabId=alerts');
-    expect(url).toContain('selectedOptions:!(active)');
+    expect(url).toContain('selected_options:!(active)');
   });
 
   test('should navigate to alerts tab when clicking total alerts', async ({
