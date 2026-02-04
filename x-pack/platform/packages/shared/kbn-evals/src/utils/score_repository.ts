@@ -17,7 +17,6 @@ export interface EvaluationScoreDocument {
   example: {
     id: string;
     index: number;
-    input_hash: string;
     dataset: {
       id: string;
       name: string;
@@ -128,7 +127,6 @@ export class EvaluationScoreRepository {
               properties: {
                 id: { type: 'keyword' },
                 index: { type: 'integer' },
-                input_hash: { type: 'keyword' },
                 dataset: {
                   type: 'object',
                   properties: {

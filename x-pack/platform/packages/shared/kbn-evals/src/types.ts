@@ -68,7 +68,7 @@ export interface EvaluatorParams<TExample extends Example, TTaskOutput extends T
 export interface EvaluationResult {
   score?: number | null;
   label?: string | null;
-  explanation?: string;
+  explanation?: string | null;
   reasoning?: string;
   details?: unknown;
   metadata?: Record<string, unknown> | undefined;

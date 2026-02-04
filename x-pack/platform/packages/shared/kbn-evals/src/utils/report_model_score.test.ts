@@ -22,7 +22,7 @@ describe('mapToEvaluationScoreDocuments', () => {
     provider: ModelProvider.Anthropic,
   };
 
-  it('builds documents with dataset name and input hash from runs', async () => {
+  it('builds documents with dataset name from runs', async () => {
     const experiments = [
       {
         id: 'exp-1',
@@ -58,7 +58,6 @@ describe('mapToEvaluationScoreDocuments', () => {
 
     expect(docs[0].example.dataset.name).toBe('Dataset 1');
     expect(docs[0].example.id).toBe('0');
-    expect(docs[0].example.input_hash).not.toBe('');
   });
 
   it('uses experiment run id to resolve example id when available', async () => {
@@ -98,7 +97,6 @@ describe('mapToEvaluationScoreDocuments', () => {
     });
 
     expect(docs[0].example.id).toBe('example-2');
-    expect(docs[0].example.input_hash).not.toBe('');
     expect(docs[0].task.trace_id).toBe('trace-1');
   });
 });

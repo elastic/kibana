@@ -31,7 +31,6 @@ const createMockScoreDocument = (
   example: {
     id: 'example-1',
     index: 0,
-    input_hash: 'abc123def456',
     dataset: {
       id: 'dataset-1',
       name: 'Test Dataset',
@@ -100,7 +99,6 @@ describe('EvaluationScoreRepository', () => {
         example: {
           id: 'example-2',
           index: 1,
-          input_hash: 'def456ghi789',
           dataset: {
             id: 'dataset-1',
             name: 'Test Dataset',

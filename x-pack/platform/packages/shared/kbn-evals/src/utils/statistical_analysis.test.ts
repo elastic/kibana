@@ -42,7 +42,6 @@ const createMockScore = ({
   example: {
     id: exampleId,
     index: 0,
-    input_hash: 'abc123def456',
     dataset: {
       id: datasetId,
       name: datasetName,

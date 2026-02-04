@@ -8,16 +8,11 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import chalk from 'chalk';
-import { createHash } from 'crypto';
 import { hostname } from 'os';
 import type { Model } from '@kbn/inference-common';
 import { EvaluationScoreRepository, type EvaluationScoreDocument } from './score_repository';
 import { getGitMetadata } from './git_metadata';
 import type { RanExperiment, EvaluationRun, TaskRun } from '../types';
-
-function computeInputHash(input: unknown): string {
-  return createHash('sha256').update(JSON.stringify(input)).digest('hex').substring(0, 16);
-}
 
 function getTaskRun(evalRun: EvaluationRun, runs: RanExperiment['runs']): TaskRun {
   return runs[evalRun.experimentRunId];
@@ -60,7 +55,6 @@ export async function mapToEvaluationScoreDocuments({
         example: {
           id: exampleId,
           index: taskRun.exampleIndex,
-          input_hash: computeInputHash(taskRun.input),
           dataset: {
             id: datasetId,
             name: datasetName,
