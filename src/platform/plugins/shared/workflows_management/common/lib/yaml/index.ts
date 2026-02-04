@@ -8,9 +8,15 @@
  */
 
 export { getPathAtOffset, getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
+export {
+  getInnermostBlockContainingOffset,
+  getStepsAndElseKeyOffsets,
+  type BlockKeyInfo,
+  type StepsElseKeyOffsets,
+} from './get_steps_else_key_offsets';
 export { getStepNodeAtPosition } from './get_step_node_at_position';
 export { getStepNode } from './get_step_node';
-export { getStepNodesWithType } from './get_step_nodes_with_type';
+export { getStepNodesWithType, isStepLikeMap } from './get_step_nodes_with_type';
 export { getTriggerNodes, getTriggersPair } from './get_trigger_nodes';
 export { getTriggerNodesWithType } from './get_trigger_nodes_with_type';
 export { parseWorkflowYamlToJSON } from './parse_workflow_yaml_to_json';

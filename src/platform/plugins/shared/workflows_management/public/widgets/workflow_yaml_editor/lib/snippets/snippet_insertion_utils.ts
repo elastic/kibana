@@ -12,9 +12,6 @@ import { monaco } from '@kbn/monaco';
 import { getIndentLevelFromLineNumber } from '../get_indent_level';
 import { getMonacoRangeFromYamlRange } from '../utils';
 
-/**
- * Removes trailing newlines from a string without using regex
- */
 function removeTrailingNewlines(text: string): string {
   let end = text.length;
   while (end > 0 && text[end - 1] === '\n') {
@@ -23,9 +20,6 @@ function removeTrailingNewlines(text: string): string {
   return text.slice(0, end);
 }
 
-/**
- * Gets line content and checks if it's empty
- */
 function getLineContent(model: monaco.editor.ITextModel, lineNumber: number): string | null {
   if (lineNumber > model.getLineCount()) {
     return null;
@@ -33,16 +27,30 @@ function getLineContent(model: monaco.editor.ITextModel, lineNumber: number): st
   return model.getLineContent(lineNumber);
 }
 
-/**
- * Checks if a line is a comment
- */
 function isCommentLine(lineContent: string | null): boolean {
   return lineContent !== null && lineContent.trim().startsWith('#');
 }
 
-/**
- * Handles insertion after a comment line
- */
+function isElseKeyLine(lineContent: string | null): boolean {
+  if (!lineContent) return false;
+  const t = lineContent.trim();
+  return t === 'else:' || /^else:\s*/.test(t);
+}
+
+function replaceLineWithStepAndKeepLine(
+  model: monaco.editor.ITextModel,
+  lineNum: number,
+  insertText: string,
+  lineContent: string | null
+): { range: monaco.Range; text: string } {
+  const normalizedText = removeTrailingNewlines(insertText);
+  const range =
+    lineNum < model.getLineCount()
+      ? new monaco.Range(lineNum, 1, lineNum + 1, 1)
+      : new monaco.Range(lineNum, 1, lineNum, model.getLineMaxColumn(lineNum));
+  return { range, text: `${normalizedText}\n${lineContent ?? ''}\n` };
+}
+
 function handleInsertAfterComment(
   model: monaco.editor.ITextModel,
   insertAtLineNumber: number,
@@ -80,9 +88,6 @@ function handleInsertAfterComment(
   return { range, text: addTrailingNewline ? `${normalizedText}\n` : normalizedText };
 }
 
-/**
- * Handles insertion after a non-comment item (step/trigger)
- */
 function handleInsertAfterItem(
   model: monaco.editor.ITextModel,
   insertAtLineNumber: number,
@@ -101,9 +106,6 @@ function handleInsertAfterItem(
   return { range, text: insertText };
 }
 
-/**
- * Creates a replacement range for an empty item line
- */
 export function createReplacementRange(
   model: monaco.editor.ITextModel,
   lineNumber: number
@@ -116,10 +118,6 @@ export function createReplacementRange(
   return new monaco.Range(lineNumber, 1, lineNumber, lineEndColumn);
 }
 
-/**
- * Checks if a YAML node represents an empty item
- * An empty item is one that doesn't have a 'type' field, which is required for triggers/steps
- */
 export function isEmptyItem(item: unknown): boolean {
   if (!item) {
     return true;
@@ -144,9 +142,6 @@ export function isEmptyItem(item: unknown): boolean {
   return false;
 }
 
-/**
- * Finds the last comment line in a section (triggers or steps)
- */
 export function findLastCommentLine(
   model: monaco.editor.ITextModel,
   sectionKeyRange: monaco.Range | null
@@ -189,9 +184,6 @@ export function findLastCommentLine(
   return null;
 }
 
-/**
- * Determines the insertion range and modifies the insert text based on the insertion context
- */
 export function getInsertRangeAndTextForTriggers(
   model: monaco.editor.ITextModel,
   replaceRange: monaco.Range | null,
@@ -268,8 +260,13 @@ export function getInsertRangeAndTextForSteps(
   insertAtLineNumber: number,
   insertText: string,
   commentCount?: number,
-  isReplacingFlowArray?: boolean
+  isReplacingFlowArray?: boolean,
+  insertInElseBlock?: boolean,
+  elseKeyLines?: Set<number>
 ): { range: monaco.Range; text: string } {
+  const isLineElseKey = (lineNum: number) =>
+    elseKeyLines?.has(lineNum) ?? isElseKeyLine(getLineContent(model, lineNum));
+
   if (replaceRange) {
     const text =
       isReplacingFlowArray && !insertText.startsWith('steps:\n') ? `\n${insertText}` : insertText;
@@ -282,12 +279,39 @@ export function getInsertRangeAndTextForSteps(
       return { range, text: insertText };
     }
 
+    if (isLineElseKey(insertAtLineNumber)) {
+      return replaceLineWithStepAndKeepLine(
+        model,
+        insertAtLineNumber,
+        insertText,
+        getLineContent(model, insertAtLineNumber)
+      );
+    }
+
+    const nextLineNumber = insertAtLineNumber + 1;
+    if (isLineElseKey(nextLineNumber)) {
+      return replaceLineWithStepAndKeepLine(
+        model,
+        nextLineNumber,
+        insertText,
+        nextLineNumber <= model.getLineCount() ? getLineContent(model, nextLineNumber) : null
+      );
+    }
+
     const currentLineContent = getLineContent(model, insertAtLineNumber);
     if (isCommentLine(currentLineContent)) {
       return handleInsertAfterComment(model, insertAtLineNumber, insertText, true);
-    } else {
-      return handleInsertAfterItem(model, insertAtLineNumber, insertText, true);
     }
+    if (!currentLineContent || !currentLineContent.trim()) {
+      if (insertAtLineNumber < model.getLineCount()) {
+        const range = new monaco.Range(insertAtLineNumber, 1, insertAtLineNumber + 1, 1);
+        return { range, text: insertText };
+      }
+      const lineEndColumn = model.getLineMaxColumn(insertAtLineNumber);
+      const range = new monaco.Range(insertAtLineNumber, 1, insertAtLineNumber, lineEndColumn);
+      return { range, text: insertText };
+    }
+    return handleInsertAfterItem(model, insertAtLineNumber, insertText, true);
   }
 
   if (insertAtLineNumber > model.getLineCount()) {
@@ -299,7 +323,22 @@ export function getInsertRangeAndTextForSteps(
 
   if (targetLine && targetLine.trim()) {
     const normalizedText = removeTrailingNewlines(insertText);
-    const isComment = targetLine.trim().startsWith('#');
+    const trimmed = targetLine.trim();
+    const isComment = trimmed.startsWith('#');
+    if (isLineElseKey(insertAtLineNumber)) {
+      return replaceLineWithStepAndKeepLine(model, insertAtLineNumber, insertText, targetLine);
+    }
+    if (!insertInElseBlock) {
+      const prevLineNumber = insertAtLineNumber - 1;
+      if (prevLineNumber >= 1 && isLineElseKey(prevLineNumber)) {
+        return replaceLineWithStepAndKeepLine(
+          model,
+          prevLineNumber,
+          insertText,
+          getLineContent(model, prevLineNumber)
+        );
+      }
+    }
     if (isComment) {
       const lineEndColumn = model.getLineMaxColumn(insertAtLineNumber);
       const range = new monaco.Range(insertAtLineNumber, 1, insertAtLineNumber, lineEndColumn);
@@ -309,14 +348,15 @@ export function getInsertRangeAndTextForSteps(
     return { range, text: `${normalizedText}\n` };
   }
 
+  if (insertAtLineNumber < model.getLineCount()) {
+    const range = new monaco.Range(insertAtLineNumber, 1, insertAtLineNumber + 1, 1);
+    return { range, text: insertText };
+  }
   const lineEndColumn = model.getLineMaxColumn(insertAtLineNumber);
   const range = new monaco.Range(insertAtLineNumber, 1, insertAtLineNumber, lineEndColumn);
   return { range, text: insertText };
 }
 
-/**
- * Finds the first empty item in a sequence (triggers or steps)
- */
 export function findFirstEmptyItem(
   model: monaco.editor.ITextModel,
   sectionPair: Pair | null
@@ -347,10 +387,6 @@ export function findFirstEmptyItem(
   return null;
 }
 
-/**
- * Gets the section key range and calculates the expected indent level for array items
- * Works for both triggers and steps sections
- */
 export function getSectionKeyInfo(
   model: monaco.editor.ITextModel,
   sectionPair: Pair | null

@@ -470,6 +470,69 @@ steps:
     );
   });
 
+  it('should insert step on the newline after a step with root indent', () => {
+    const inputYaml = `steps:
+  - name: first_step
+    type: http
+    with:
+      url: https://example.com
+
+`;
+    const model = createFakeMonacoModel(inputYaml);
+    const yamlDocument = parseDocument(inputYaml);
+    // Cursor is on the empty line (line 6) after the last step
+    insertStepSnippet(
+      model as unknown as monaco.editor.ITextModel,
+      yamlDocument,
+      'http',
+      new monaco.Position(6, 1)
+    );
+
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+      full: true,
+      withStepsSection: false,
+    });
+
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+      full: true,
+      withStepsSection: false,
+    });
+    const callArgs = (model.pushEditOperations as jest.Mock).mock.calls[0];
+    expect(callArgs[1][0].range.startLineNumber).toBe(6);
+    expect(callArgs[1][0].range.startColumn).toBe(1);
+    expect(callArgs[1][0].text).toBe(prependIndentToLines(snippetText, 2));
+  });
+
+  it('should insert step on next line with root indent when cursor is on steps: line', () => {
+    const inputYaml = `steps:
+  - name: first_step
+    type: http`;
+    const model = createFakeMonacoModel(inputYaml);
+    const yamlDocument = parseDocument(inputYaml);
+    // Cursor is on the "steps:" line (line 1)
+    insertStepSnippet(
+      model as unknown as monaco.editor.ITextModel,
+      yamlDocument,
+      'http',
+      new monaco.Position(1, 3)
+    );
+
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+      full: true,
+      withStepsSection: false,
+    });
+
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+      full: true,
+      withStepsSection: false,
+    });
+    const callArgs = (model.pushEditOperations as jest.Mock).mock.calls[0];
+    // Should insert on line 2 (next line after "steps:")
+    expect(callArgs[1][0].range.startLineNumber).toBe(2);
+    expect(callArgs[1][0].range.startColumn).toBe(1);
+    expect(callArgs[1][0].text).toContain(prependIndentToLines(snippetText, 2).trim());
+  });
+
   it('should insert step on following line when cursor is on comment line', () => {
     const inputYaml = `steps:
   ## Hello world
@@ -646,5 +709,116 @@ steps:
       ],
       expect.any(Function)
     );
+  });
+
+  describe('nested steps indent', () => {
+    it('should use nested foreach steps indent when inserting inside foreach steps block', () => {
+      const inputYaml = `steps:
+  - name: loop
+    type: foreach
+    foreach: "{{ x }}"
+    steps:
+      - name: inner
+        type: console`;
+      const model = createFakeMonacoModel(inputYaml);
+      const yamlDocument = parseDocument(inputYaml);
+      // Cursor on empty line after inner step (line 8)
+      insertStepSnippet(
+        model as unknown as monaco.editor.ITextModel,
+        yamlDocument,
+        'http',
+        new monaco.Position(8, 1)
+      );
+
+      const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+        full: true,
+        withStepsSection: false,
+      });
+      // Foreach steps: key at 4 spaces, so step indent 6
+      expect(model.pushEditOperations).toHaveBeenCalledWith(
+        null,
+        [
+          {
+            range: expect.any(monaco.Range),
+            text: prependIndentToLines(snippetText, 6),
+          },
+        ],
+        expect.any(Function)
+      );
+    });
+
+    it('should use nested if steps indent when inserting inside if step block', () => {
+      const inputYaml = `steps:
+  - name: check
+    type: if
+    condition: "x"
+    steps:
+      - name: then_step
+        type: console`;
+      const model = createFakeMonacoModel(inputYaml);
+      const yamlDocument = parseDocument(inputYaml);
+      // Cursor on empty line after then_step (line 8)
+      insertStepSnippet(
+        model as unknown as monaco.editor.ITextModel,
+        yamlDocument,
+        'http',
+        new monaco.Position(8, 1)
+      );
+
+      const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+        full: true,
+        withStepsSection: false,
+      });
+      // If steps: key at 4 spaces, so step indent 6
+      expect(model.pushEditOperations).toHaveBeenCalledWith(
+        null,
+        [
+          {
+            range: expect.any(monaco.Range),
+            text: prependIndentToLines(snippetText, 6),
+          },
+        ],
+        expect.any(Function)
+      );
+    });
+
+    it('should use nested if steps indent when inserting inside foreach then if step block', () => {
+      const inputYaml = `steps:
+  - name: loop
+    type: foreach
+    foreach: "{{ x }}"
+    steps:
+      - name: check
+        type: if
+        condition: "x"
+        steps:
+          - name: then_step
+            type: console`;
+      const model = createFakeMonacoModel(inputYaml);
+      const yamlDocument = parseDocument(inputYaml);
+      // Cursor on empty line after then_step (line 12), inside foreach -> if -> steps
+      insertStepSnippet(
+        model as unknown as monaco.editor.ITextModel,
+        yamlDocument,
+        'http',
+        new monaco.Position(12, 1)
+      );
+
+      const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+        full: true,
+        withStepsSection: false,
+      });
+      // If steps: key at 8 spaces (inside foreach), so step indent 10
+      expect(model.pushEditOperations).toHaveBeenCalledWith(
+        null,
+        [
+          {
+            range: expect.any(monaco.Range),
+            text: prependIndentToLines(snippetText, 10),
+          },
+        ],
+        expect.any(Function)
+      );
+    });
   });
 });
