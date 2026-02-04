@@ -34,6 +34,7 @@ import {
 import type { ChatService } from './types';
 import { createChatService } from './chat_service';
 import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat';
+import type { AttachmentServiceStart } from '../attachments';
 
 const createChatModel = (): InferenceChatModel => {
   // we don't really need it
@@ -50,6 +51,7 @@ describe('ChatService', () => {
   let conversationService: ReturnType<typeof createConversationServiceMock>;
   let uiSettings: ReturnType<typeof uiSettingsServiceMock.createStartContract>;
   let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
+  let attachmentsService: AttachmentServiceStart;
 
   let chatService: ChatService;
 
@@ -61,12 +63,17 @@ describe('ChatService', () => {
     conversationService = createConversationServiceMock();
     uiSettings = uiSettingsServiceMock.createStartContract();
     savedObjects = savedObjectsServiceMock.createStartContract();
+    attachmentsService = {
+      validate: jest.fn().mockImplementation(async (attachment) => ({ valid: true, attachment })),
+      getTypeDefinition: jest.fn(),
+    };
 
     chatService = createChatService({
       inference,
       logger,
       agentService,
       conversationService,
+      attachmentsService,
       uiSettings,
       savedObjects,
     });
@@ -304,6 +311,24 @@ describe('ChatService', () => {
     });
 
     await expect(firstValueFrom(obs$)).rejects.toThrow('No connector available for chat execution');
+  });
+
+  it('validates attachments and throws bad request on invalid attachment', async () => {
+    (attachmentsService.validate as jest.Mock).mockResolvedValue({
+      valid: false,
+      error: 'boom',
+    });
+
+    const obs$ = chatService.converse({
+      agentId: 'my-agent',
+      request,
+      nextInput: {
+        message: 'hello',
+        attachments: [{ type: 'some_type', data: { foo: 'bar' } }],
+      },
+    });
+
+    await expect(firstValueFrom(obs$)).rejects.toThrow('Attachment validation failed: boom');
   });
 
   describe('conversationIdSetEvent', () => {

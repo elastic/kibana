@@ -21,12 +21,10 @@ import {
   isConversationCreatedEvent,
   createBadRequestError,
 } from '@kbn/agent-builder-common';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { ChatService } from '../services/chat';
-import type { AttachmentServiceStart } from '../services/attachments';
 import { validateToolSelection } from '../services/agents/persisted/client/utils';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -169,25 +167,6 @@ export function registerChatRoutes({
     ),
   });
 
-  const validateAttachments = async ({
-    attachments,
-    attachmentsService,
-  }: {
-    attachments: AttachmentInput[];
-    attachmentsService: AttachmentServiceStart;
-  }) => {
-    const results: AttachmentInput[] = [];
-    for (const attachment of attachments) {
-      const validation = await attachmentsService.validate(attachment);
-      if (validation.valid) {
-        results.push(validation.attachment);
-      } else {
-        throw createBadRequestError(`Attachment validation failed: ${validation.error}`);
-      }
-    }
-    return results;
-  };
-
   const validateConfigurationOverrides = async ({
     payload,
     request,
@@ -211,13 +190,11 @@ export function registerChatRoutes({
 
   const callConverse = ({
     payload,
-    attachments,
     request,
     chatService,
     abortSignal,
   }: {
-    payload: Omit<ChatRequestBodyPayload, 'attachments'>;
-    attachments: AttachmentInput[];
+    payload: ChatRequestBodyPayload;
     request: KibanaRequest;
     chatService: ChatService;
     abortSignal: AbortSignal;
@@ -228,6 +205,7 @@ export function registerChatRoutes({
       conversation_id: conversationId,
       input,
       prompts,
+      attachments,
       capabilities,
       browser_api_tools: browserApiTools,
       configuration_overrides: configurationOverrides,
@@ -281,7 +259,7 @@ export function registerChatRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { chat: chatService, attachments: attachmentsService } = getInternalServices();
+        const { chat: chatService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
 
         const abortController = new AbortController();
@@ -289,18 +267,10 @@ export function registerChatRoutes({
           abortController.abort();
         });
 
-        const attachments = payload.attachments
-          ? await validateAttachments({
-              attachments: payload.attachments,
-              attachmentsService,
-            })
-          : [];
-
         await validateConfigurationOverrides({ payload, request });
 
         const chatEvents$ = callConverse({
           payload,
-          attachments,
           chatService,
           request,
           abortSignal: abortController.signal,
@@ -361,7 +331,7 @@ export function registerChatRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const [, { cloud }] = await coreSetup.getStartServices();
-        const { chat: chatService, attachments: attachmentsService } = getInternalServices();
+        const { chat: chatService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
 
         const abortController = new AbortController();
@@ -369,18 +339,10 @@ export function registerChatRoutes({
           abortController.abort();
         });
 
-        const attachments = payload.attachments
-          ? await validateAttachments({
-              attachments: payload.attachments,
-              attachmentsService,
-            })
-          : [];
-
         await validateConfigurationOverrides({ payload, request });
 
         const chatEvents$ = callConverse({
           payload,
-          attachments,
           request,
           chatService,
           abortSignal: abortController.signal,
