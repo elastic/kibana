@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may use this file only in compliance with the Elastic License 2.0.
- */
-
 import { z } from '@kbn/zod';
 import type { EngineDescriptor } from './definitions/saved_objects';
 
@@ -33,18 +27,24 @@ export const EngineComponentResource = z.enum([
 ]);
 export type EngineComponentResource = z.infer<typeof EngineComponentResource>;
 
-export type EngineComponentStatus = z.infer<typeof EngineComponentStatus>;
-export const EngineComponentStatus = z.object({
+export type BaseComponentStatus = z.infer<typeof BaseComponentStatus>;
+export const BaseComponentStatus = z.object({
   id: z.string(),
   installed: z.boolean(),
   resource: EngineComponentResource,
-  enabled: z.boolean().optional(),
-  status: z.string().optional(),
-  remainingLogsToExtract: z.number().optional(),
-  lastExecutionTimestamp: z.string().optional(),
-  runs: z.number().optional(),
-  lastError: z.string().optional(),
 });
+
+export type TaskComponentStatus = z.infer<typeof TaskComponentStatus>;
+export const TaskComponentStatus = BaseComponentStatus.merge(
+  z.object({
+    status: z.string(),
+    remainingLogsToExtract: z.number().nullable(),
+    runs: z.number(),
+    lastError: z.string(),
+  })
+);
+
+export type EngineComponentStatus = BaseComponentStatus | TaskComponentStatus;
 
 export interface GetStatusResult {
   status: EntityStoreStatus;

@@ -18,19 +18,20 @@ import { LogExtractionState } from '../../domain/definitions/saved_objects';
  * Legacy engine descriptor from V1. will be removed in a future version.
  */
 export type LegacyEngineDescriptorV1 = z.infer<typeof LegacyEngineDescriptorV1>;
-export const LegacyEngineDescriptorV1 = z.object({
-  delay: LogExtractionState.shape.delay,
-  timeout: LogExtractionState.shape.timeout,
-  frequency: LogExtractionState.shape.frequency,
+export const LegacyEngineDescriptorV1 = LogExtractionState.pick({
+  delay: true,
+  timeout: true,
+  frequency: true,
+  lookbackPeriod: true,
+  fieldHistoryLength: true,
+  filter: true,
+}).merge(z.object({
   docsPerSecond: z.literal(-1),
-  lookbackPeriod: LogExtractionState.shape.lookbackPeriod,
-  fieldHistoryLength: LogExtractionState.shape.fieldHistoryLength,
   indexPattern: z.literal(''),
-  filter: LogExtractionState.shape.filter,
   enrichPolicyExecutionInterval: z.null(),
   timestampField: z.literal('@timestamp'),
   maxPageSearchSize: z.literal(10000),
-});
+}));
 
 type StatusEngine = Omit<GetStatusResult['engines'][number], 'versionState'> &
   LegacyEngineDescriptorV1;

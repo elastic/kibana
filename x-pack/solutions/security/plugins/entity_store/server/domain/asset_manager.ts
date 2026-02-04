@@ -24,7 +24,7 @@ import type {
   EntityStoreStatus,
   EngineComponentStatus,
   EngineComponentResource,
-  GetStatusResult,
+  GetStatusResult
 } from './types';
 import { getExtractEntityTaskId } from '../tasks/extract_entity_task';
 import { getLatestEntitiesIndexName } from './assets/latest_index';
@@ -286,10 +286,10 @@ export class AssetManager {
         id: taskId,
         installed: true,
         resource: 'task',
-        status: task.state?.status,
-        remainingLogsToExtract: countResult.success ? countResult.count : 0,
-        runs: task.state?.runs ?? 0,
-        lastError: task.state?.lastError ?? null,
+        status: task.state.status ?? null,
+        remainingLogsToExtract: countResult.success ? countResult.count : null,
+        runs: task.state.runs ?? 0,
+        lastError: task.state.lastError ?? null,
       };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
@@ -317,17 +317,16 @@ export class AssetManager {
   }
 
   private calculateEntityStoreStatus(engines: EngineDescriptor[]): EntityStoreStatus {
-    let status = ENTITY_STORE_STATUS.RUNNING;
     if (engines.length === 0) {
-      status = ENTITY_STORE_STATUS.NOT_INSTALLED;
+      return ENTITY_STORE_STATUS.NOT_INSTALLED;
     } else if (engines.some((engine) => engine.status === ENGINE_STATUS.ERROR)) {
-      status = ENTITY_STORE_STATUS.ERROR;
+      return ENTITY_STORE_STATUS.ERROR;
     } else if (engines.every((engine) => engine.status === ENGINE_STATUS.STOPPED)) {
-      status = ENTITY_STORE_STATUS.STOPPED;
+      return ENTITY_STORE_STATUS.STOPPED;
     } else if (engines.some((engine) => engine.status === ENGINE_STATUS.INSTALLING)) {
-      status = ENTITY_STORE_STATUS.INSTALLING;
+      return ENTITY_STORE_STATUS.INSTALLING;
     }
 
-    return status;
+    return ENTITY_STORE_STATUS.RUNNING;
   }
 }
