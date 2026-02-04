@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('machine learning - data frame analytics', function () {
+  describe('machine learning - data frame analytics - group 2', function () {
     this.tags(['ml']);
 
     before(async () => {
@@ -35,11 +35,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./outlier_detection_creation'));
-    loadTestFile(require.resolve('./regression_creation'));
-    loadTestFile(require.resolve('./classification_creation'));
-    loadTestFile(require.resolve('./cloning'));
-    loadTestFile(require.resolve('./results_view_content'));
     loadTestFile(require.resolve('./regression_creation_saved_search'));
     loadTestFile(require.resolve('./classification_creation_saved_search'));
     loadTestFile(require.resolve('./outlier_detection_creation_saved_search'));

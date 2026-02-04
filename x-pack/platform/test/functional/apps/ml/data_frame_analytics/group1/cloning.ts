@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

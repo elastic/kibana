@@ -6,46 +6,58 @@
  */
 
 import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
-import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { AnalyticsTableRowDetails } from '../../../../services/ml/data_frame_analytics_table';
 import {
   type DiscoverUrlConfig,
   type DashboardUrlConfig,
   type OtherUrlConfig,
-} from '../../../services/ml/data_frame_analytics_edit';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
-import type { FieldStatsType } from '../common/types';
-
-const testDiscoverCustomUrl: DiscoverUrlConfig = {
-  label: 'Show data',
-  indexName: 'ft_bank_marketing',
-  queryEntityFieldNames: ['day'],
-  timeRange: TIME_RANGE_TYPE.AUTO,
-};
-
-const testDashboardCustomUrl: DashboardUrlConfig = {
-  label: 'Show dashboard',
-  dashboardName: 'ML Test',
-  queryEntityFieldNames: ['day'],
-  timeRange: TIME_RANGE_TYPE.AUTO,
-};
-
-const testOtherCustomUrl: OtherUrlConfig = {
-  label: 'elastic.co',
-  url: 'https://www.elastic.co/',
-};
+} from '../../../../services/ml/data_frame_analytics_edit';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FieldStatsType } from '../../common/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe('classification creation', function () {
+  const fieldStatsEntries = [
+    {
+      fieldName: 'g1',
+      type: 'number' as FieldStatsType,
+      isDependentVariableInput: true,
+      isIncludeFieldInput: true,
+    },
+    {
+      fieldName: 'g2',
+      type: 'number' as FieldStatsType,
+      isIncludeFieldInput: true,
+    },
+  ];
+
+  const testDiscoverCustomUrl: DiscoverUrlConfig = {
+    label: 'Show data',
+    indexName: 'ft_egs_regression',
+    queryEntityFieldNames: ['stabf'],
+    timeRange: TIME_RANGE_TYPE.AUTO,
+  };
+
+  const testDashboardCustomUrl: DashboardUrlConfig = {
+    label: 'Show dashboard',
+    dashboardName: 'ML Test',
+    queryEntityFieldNames: ['stabf'],
+    timeRange: TIME_RANGE_TYPE.AUTO,
+  };
+
+  const testOtherCustomUrl: OtherUrlConfig = {
+    label: 'elastic.co',
+    url: 'https://www.elastic.co/',
+  };
+
+  describe('regression creation', function () {
     let testDashboardId: string | null = null;
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        'x-pack/platform/test/fixtures/es_archives/ml/bm_classification'
-      );
-      await ml.testResources.createDataViewIfNeeded('ft_bank_marketing');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/egs_regression');
+      await ml.testResources.createDataViewIfNeeded('ft_egs_regression');
       await ml.testResources.setKibanaTimeZoneToUTC();
       testDashboardId = await ml.testResources.createMLTestDashboardIfNeeded();
 
@@ -54,68 +66,50 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteDataViewByTitle('ft_bank_marketing');
+      await ml.testResources.deleteDataViewByTitle('ft_egs_regression');
     });
 
-    const jobId = `bm_1_${Date.now()}`;
+    const jobId = `egs_1_${Date.now()}`;
     const testDataList = [
       {
-        suiteTitle: 'bank marketing',
-        jobType: 'classification',
+        suiteTitle: 'electrical grid stability',
+        jobType: 'regression',
         jobId,
-        jobDescription:
-          "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
-        source: 'ft_bank_marketing',
+        jobDescription: 'Regression job based on ft_egs_regression dataset with runtime fields',
+        source: 'ft_egs_regression',
         get destinationIndex(): string {
-          return `user-${this.jobId}`;
+          return `user-${jobId}`;
         },
+        fieldStatsEntries,
         runtimeFields: {
-          uppercase_y: {
+          uppercase_stab: {
             type: 'keyword',
-            script: 'emit(params._source.y.toUpperCase())',
+            script: 'emit(params._source.stabf.toUpperCase())',
           },
         },
-        dependentVariable: 'y',
+        dependentVariable: 'stab',
         trainingPercent: 20,
-        modelMemory: '60mb',
+        modelMemory: '20mb',
         createDataView: true,
-        fieldStatsEntries: [
-          {
-            fieldName: 'age',
-            type: 'number' as FieldStatsType,
-            isDependentVariableInput: true,
-          },
-          {
-            fieldName: 'balance.keyword',
-            type: 'keyword' as FieldStatsType,
-            isDependentVariableInput: true,
-          },
-        ],
         advancedEditorContent: [
           '{',
-          `  "description": "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",`,
+          '  "description": "Regression job based on ft_egs_regression dataset with runtime fields",',
           '  "source": {',
         ],
         expected: {
-          rocCurveColorState: [
-            // tick/grid/axis
-            { color: '#DDDDDD', percentage: 50 },
-            // line
-            { color: '#98A2B3', percentage: 10 },
-          ],
           scatterplotMatrixColorStats: [
-            // marker colors
-            { color: '#7FC6B3', percentage: 1 },
-            { color: '#88ADD0', percentage: 0.03 },
+            // some marker colors of the continuous color scale
+            { color: '#61AFA3', percentage: 2 },
+            { color: '#D1E5E0', percentage: 2 },
             // tick/grid/axis
-            { color: '#DDDDDD', percentage: 8 },
-            { color: '#D3DAE6', percentage: 8 },
-            { color: '#F5F7FA', percentage: 15 },
+            { color: '#6A717D', percentage: 5 },
+            { color: '#F5F7FA', percentage: 5 },
+            { color: '#D3DAE6', percentage: 3 },
           ],
-          runtimeFieldsEditorContent: ['{', '  "uppercase_y": {', '    "type": "keyword",'],
+          runtimeFieldsEditorContent: ['{', '  "uppercase_stab": {', '    "type": "keyword",'],
           row: {
             memoryStatus: 'ok',
-            type: 'classification',
+            type: 'regression',
             status: 'stopped',
             progress: '100',
           },
@@ -129,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
                   'stopped',
                   'Create time',
                   'Model memory limit',
-                  '25mb',
+                  '16mb',
                   'Version',
                 ],
               },
@@ -143,9 +137,9 @@ export default function ({ getService }: FtrProviderContext) {
                 expectedEntries: [
                   'Data counts',
                   'Training docs',
-                  '1862',
+                  '400',
                   'Test docs',
-                  '7452',
+                  '1600',
                   'Skipped docs',
                   '0',
                 ],
@@ -176,22 +170,21 @@ export default function ({ getService }: FtrProviderContext) {
                 section: 'analysisStats',
                 expectedEntries: {
                   '': '',
-                  timestamp: 'February 24th 2023, 22:47:21',
-                  timing_stats: '{"elapsed_time":106,"iteration_time":75}',
-                  class_assignment_objective: 'maximize_minimum_recall',
-                  alpha: '7.472711200701066',
-                  downsample_factor: '0.3052602404313446',
-                  eta: '0.5195489124616268',
-                  eta_growth_rate_per_tree: '1.2597744562308133',
-                  feature_bag_fraction: '0.2828427124746191',
-                  gamma: '2.02003625000462',
-                  lambda: '0.5454579969846399',
-                  max_attempts_to_add_tree: '3',
+                  timestamp: 'February 28th 2023, 22:20:30',
+                  timing_stats: '{"elapsed_time":0,"iteration_time":0}',
+                  alpha: '0.0001097308602104853',
+                  downsample_factor: '1',
+                  eta: '0.020888927310242174',
+                  eta_growth_rate_per_tree: '1.010444463655121',
+                  feature_bag_fraction: '0.6317118309501533',
+                  gamma: '0.0000023617026632010964',
+                  lambda: '2.668084016785013',
+                  max_attempts_to_add_tree: '0',
                   max_optimization_rounds_per_hyperparameter: '2',
-                  max_trees: '5',
-                  num_folds: '5',
-                  num_splits_per_feature: '75',
-                  soft_tree_depth_limit: '8.425554156072732',
+                  max_trees: '272',
+                  num_folds: '0',
+                  num_splits_per_feature: '0',
+                  soft_tree_depth_limit: '2',
                   soft_tree_depth_tolerance: '0.15',
                 },
               },
@@ -200,6 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       },
     ];
+
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
@@ -250,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
             'opens field stats flyout from dependent variable input'
           );
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
-          for (const { fieldName, type: fieldType } of testData.fieldStatsEntries.filter(
+          for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
             (e) => e.isDependentVariableInput
           )) {
             await ml.dataFrameAnalyticsCreation.assertFieldStatsFlyoutContentFromDependentVariableInputTrigger(
@@ -272,6 +266,16 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
+          await ml.testExecution.logTestStep('opens field stats flyout from include fields input');
+          for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
+            (e) => e.isIncludeFieldInput
+          )) {
+            await ml.dataFrameAnalyticsCreation.assertFieldStatFlyoutContentFromIncludeFieldTrigger(
+              fieldName,
+              fieldType
+            );
+          }
+
           await ml.testExecution.logTestStep(
             'sets the sample size to 10000 for the scatterplot matrix'
           );
@@ -283,10 +287,9 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.setScatterplotMatrixRandomizeQueryCheckState(true);
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          // TODO Revisit after Borealis update is fully done
-          // await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
-          //   testData.expected.scatterplotMatrixColorStats
-          // );
+          await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
+            testData.expected.scatterplotMatrixColorStats
+          );
 
           await ml.testExecution.logTestStep('continues to the additional options step');
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
@@ -326,12 +329,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('checks validation callouts exist');
           await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
-          // Expect the follow callouts:
-          // - ✓ Dependent variable
-          // - ✓ Training percent
-          // - ✓ Top classes
-          // - ⚠ Analysis fields
-          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(4);
+          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(3);
 
           // switch to json editor and back
           await ml.testExecution.logTestStep('switches to advanced editor then back to form');
@@ -378,7 +376,6 @@ export default function ({ getService }: FtrProviderContext) {
             status: testData.expected.row.status,
             progress: testData.expected.row.progress,
           });
-
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowDetails(
             testData.jobId,
             testData.expected.rowDetails
@@ -406,7 +403,7 @@ export default function ({ getService }: FtrProviderContext) {
             testDashboardCustomUrl,
             {
               index: 1,
-              url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'day:\"$day$\"'))`,
+              url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'stabf:\"$stabf$\"'))`,
             }
           );
         });
@@ -460,24 +457,11 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the results view for created job');
           await ml.dataFrameAnalyticsTable.openResultsView(testData.jobId);
-          await ml.dataFrameAnalyticsResults.assertClassificationEvaluatePanelElementsExists();
-          await ml.dataFrameAnalyticsResults.assertClassificationTablePanelExists();
+          await ml.dataFrameAnalyticsResults.assertRegressionEvaluatePanelElementsExists();
+          await ml.dataFrameAnalyticsResults.assertRegressionTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-
-          await ml.testExecution.logTestStep('displays the ROC curve chart');
-          // TODO Revisit after Borealis update is fully done
-          // await ml.commonUI.assertColorsInCanvasElement(
-          //   'mlDFAnalyticsClassificationExplorationRocCurveChart',
-          //   testData.expected.rocCurveColorState,
-          //   ['#000000'],
-          //   undefined,
-          //   undefined,
-          //   // increased tolerance for ROC curve chart up from 10 to 20
-          //   // since the returned colors vary quite a bit on each run.
-          //   20
-          // );
 
           await ml.testExecution.logTestStep(
             'sets the sample size to 10000 for the scatterplot matrix'
@@ -490,10 +474,9 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.setScatterplotMatrixRandomizeQueryCheckState(true);
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          // TODO Revisit after Borealis update is fully done
-          // await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
-          //   testData.expected.scatterplotMatrixColorStats
-          // );
+          await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
+            testData.expected.scatterplotMatrixColorStats
+          );
 
           await ml.commonUI.resetAntiAliasing();
         });
@@ -504,6 +487,20 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsTable.openMapView(testData.jobId);
           await ml.dataFrameAnalyticsMap.assertMapElementsExists();
           await ml.dataFrameAnalyticsMap.assertJobMapTitle(testData.jobId);
+        });
+
+        it('opens job details fly-out in the map view', async () => {
+          await ml.testExecution.logTestStep('should open the job details fly-out');
+          await ml.navigation.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
+          await ml.dataFrameAnalyticsTable.openMapView(testData.jobId);
+          await ml.dataFrameAnalyticsMap.assertMapElementsExists();
+          await ml.dataFrameAnalyticsMap.openMlAnalyticsIdSelectionBadge(testData.jobId);
+          await ml.dataFrameAnalyticsMap.assertAnalyticsJobDetailsFlyoutButtonExists(
+            testData.jobId
+          );
+          await ml.dataFrameAnalyticsMap.openAnalyticsJobDetailsFlyout(testData.jobId);
+          await ml.jobDetailsFlyout.assertAnalyticsDetailsFlyoutExists();
+          await ml.jobDetailsFlyout.assertAnalyticsDetailsFlyoutIdExists(testData.jobId);
         });
       });
     }

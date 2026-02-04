@@ -6,110 +6,127 @@
  */
 
 import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
-import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { AnalyticsTableRowDetails } from '../../../../services/ml/data_frame_analytics_table';
 import {
   type DiscoverUrlConfig,
   type DashboardUrlConfig,
   type OtherUrlConfig,
-} from '../../../services/ml/data_frame_analytics_edit';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
-import type { FieldStatsType } from '../common/types';
+} from '../../../../services/ml/data_frame_analytics_edit';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FieldStatsType } from '../../common/types';
+
+const testDiscoverCustomUrl: DiscoverUrlConfig = {
+  label: 'Show data',
+  indexName: 'ft_ihp_outlier',
+  queryEntityFieldNames: ['SaleType'],
+  timeRange: TIME_RANGE_TYPE.AUTO,
+};
+
+const testDashboardCustomUrl: DashboardUrlConfig = {
+  label: 'Show dashboard',
+  dashboardName: 'ML Test',
+  queryEntityFieldNames: ['SaleType'],
+  timeRange: TIME_RANGE_TYPE.AUTO,
+};
+
+const testOtherCustomUrl: OtherUrlConfig = {
+  label: 'elastic.co',
+  url: 'https://www.elastic.co/',
+};
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  const fieldStatsEntries = [
-    {
-      fieldName: 'g1',
-      type: 'number' as FieldStatsType,
-      isDependentVariableInput: true,
-      isIncludeFieldInput: true,
-    },
-    {
-      fieldName: 'g2',
-      type: 'number' as FieldStatsType,
-      isIncludeFieldInput: true,
-    },
-  ];
-
-  const testDiscoverCustomUrl: DiscoverUrlConfig = {
-    label: 'Show data',
-    indexName: 'ft_egs_regression',
-    queryEntityFieldNames: ['stabf'],
-    timeRange: TIME_RANGE_TYPE.AUTO,
-  };
-
-  const testDashboardCustomUrl: DashboardUrlConfig = {
-    label: 'Show dashboard',
-    dashboardName: 'ML Test',
-    queryEntityFieldNames: ['stabf'],
-    timeRange: TIME_RANGE_TYPE.AUTO,
-  };
-
-  const testOtherCustomUrl: OtherUrlConfig = {
-    label: 'elastic.co',
-    url: 'https://www.elastic.co/',
-  };
-
-  describe('regression creation', function () {
+  describe('outlier detection creation', function () {
     let testDashboardId: string | null = null;
+
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/egs_regression');
-      await ml.testResources.createDataViewIfNeeded('ft_egs_regression');
-      await ml.testResources.setKibanaTimeZoneToUTC();
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
+      await ml.testResources.createDataViewIfNeeded('ft_ihp_outlier');
       testDashboardId = await ml.testResources.createMLTestDashboardIfNeeded();
+      await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteDataViewByTitle('ft_egs_regression');
+      await ml.testResources.deleteDataViewByTitle('ft_ihp_outlier');
     });
 
-    const jobId = `egs_1_${Date.now()}`;
+    const jobId = `ihp_1_${Date.now()}`;
+
+    const fieldStatsEntries = [
+      {
+        fieldName: '1stFlrSF',
+        type: 'keyword' as FieldStatsType,
+        isIncludeFieldInput: true,
+      },
+    ];
+
     const testDataList = [
       {
-        suiteTitle: 'electrical grid stability',
-        jobType: 'regression',
+        suiteTitle: 'iowa house prices',
+        jobType: 'outlier_detection',
         jobId,
-        jobDescription: 'Regression job based on ft_egs_regression dataset with runtime fields',
-        source: 'ft_egs_regression',
+        jobDescription: 'Outlier detection job based on ft_ihp_outlier dataset with runtime fields',
+        source: 'ft_ihp_outlier',
         get destinationIndex(): string {
           return `user-${jobId}`;
         },
-        fieldStatsEntries,
         runtimeFields: {
-          uppercase_stab: {
+          lowercase_central_air: {
             type: 'keyword',
-            script: 'emit(params._source.stabf.toUpperCase())',
+            script: 'emit(params._source.CentralAir.toLowerCase())',
           },
         },
-        dependentVariable: 'stab',
-        trainingPercent: 20,
-        modelMemory: '20mb',
+        modelMemory: '5mb',
         createDataView: true,
         advancedEditorContent: [
           '{',
-          '  "description": "Regression job based on ft_egs_regression dataset with runtime fields",',
+          '  "description": "Outlier detection job based on ft_ihp_outlier dataset with runtime fields",',
           '  "source": {',
         ],
         expected: {
-          scatterplotMatrixColorStats: [
-            // some marker colors of the continuous color scale
-            { color: '#61AFA3', percentage: 2 },
-            { color: '#D1E5E0', percentage: 2 },
-            // tick/grid/axis
-            { color: '#6A717D', percentage: 5 },
-            { color: '#F5F7FA', percentage: 5 },
-            { color: '#D3DAE6', percentage: 3 },
+          histogramCharts: [
+            { chartAvailable: true, id: '1stFlrSF', legend: '334 - 4692' },
+            { chartAvailable: true, id: 'BsmtFinSF1', legend: '0 - 5644' },
+            { chartAvailable: true, id: 'BsmtQual', legend: '0 - 5' },
+            { chartAvailable: true, id: 'CentralAir', legend: '2 categories' },
+            { chartAvailable: true, id: 'Condition2', legend: '2 categories' },
+            { chartAvailable: true, id: 'Electrical', legend: '2 categories' },
+            { chartAvailable: true, id: 'ExterQual', legend: '1 - 4' },
+            { chartAvailable: true, id: 'Exterior1st', legend: '2 categories' },
+            { chartAvailable: true, id: 'Exterior2nd', legend: '3 categories' },
+            { chartAvailable: true, id: 'Fireplaces', legend: '0 - 3' },
           ],
-          runtimeFieldsEditorContent: ['{', '  "uppercase_stab": {', '    "type": "keyword",'],
+          scatterplotMatrixColorsWizard: [
+            // markers
+            { color: '#5078AA', percentage: 15 },
+            // grey boilerplate
+            { color: '#69707D', percentage: 12 },
+          ],
+          scatterplotMatrixColorStatsResults: [
+            // outlier markers
+            { color: '#BE6E96', percentage: 1 },
+            // regular markers
+            { color: '#6496BE', percentage: 15 },
+            // tick/grid/axis
+            { color: '#69707D', percentage: 12 },
+            { color: '#D2DCE6', percentage: 10 },
+            // anti-aliasing
+            { color: '#F5F7FA', percentage: 35 },
+          ],
+          runtimeFieldsEditorContent: [
+            '{',
+            '  "lowercase_central_air": {',
+            '    "type": "keyword",',
+          ],
           row: {
             memoryStatus: 'ok',
-            type: 'regression',
+            type: 'outlier_detection',
             status: 'stopped',
             progress: '100',
           },
@@ -123,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
                   'stopped',
                   'Create time',
                   'Model memory limit',
-                  '16mb',
+                  '2mb',
                   'Version',
                 ],
               },
@@ -137,9 +154,9 @@ export default function ({ getService }: FtrProviderContext) {
                 expectedEntries: [
                   'Data counts',
                   'Training docs',
-                  '400',
+                  '1460',
                   'Test docs',
-                  '1600',
+                  '0',
                   'Skipped docs',
                   '0',
                 ],
@@ -147,22 +164,14 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'progress',
                 expectedEntries: [
-                  'Phase 8/8',
+                  'Phase 4/4',
                   'reindexing',
                   '100%',
                   'loading_data',
                   '100%',
-                  'feature_selection',
-                  '100%',
-                  'coarse_parameter_search',
-                  '100%',
-                  'fine_tuning_parameters',
-                  '100%',
-                  'final_training',
+                  'computing_outliers',
                   '100%',
                   'writing_results',
-                  '100%',
-                  'inference',
                   '100%',
                 ],
               },
@@ -170,22 +179,14 @@ export default function ({ getService }: FtrProviderContext) {
                 section: 'analysisStats',
                 expectedEntries: {
                   '': '',
-                  timestamp: 'February 28th 2023, 22:20:30',
-                  timing_stats: '{"elapsed_time":0,"iteration_time":0}',
-                  alpha: '0.0001097308602104853',
-                  downsample_factor: '1',
-                  eta: '0.020888927310242174',
-                  eta_growth_rate_per_tree: '1.010444463655121',
-                  feature_bag_fraction: '0.6317118309501533',
-                  gamma: '0.0000023617026632010964',
-                  lambda: '2.668084016785013',
-                  max_attempts_to_add_tree: '0',
-                  max_optimization_rounds_per_hyperparameter: '2',
-                  max_trees: '272',
-                  num_folds: '0',
-                  num_splits_per_feature: '0',
-                  soft_tree_depth_limit: '2',
-                  soft_tree_depth_tolerance: '0.15',
+                  timestamp: 'March 1st 2023, 19:00:41',
+                  timing_stats: '{"elapsed_time":49}',
+                  n_neighbors: '0',
+                  method: 'ensemble',
+                  compute_feature_influence: true,
+                  feature_influence_threshold: '0.1',
+                  outlier_fraction: '0.05',
+                  standardization_enabled: true,
                 },
               },
             ],
@@ -204,8 +205,6 @@ export default function ({ getService }: FtrProviderContext) {
         it('loads the data frame analytics wizard', async () => {
           await ml.testExecution.logTestStep('loads the data frame analytics page');
           await ml.navigation.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
-
-          await ml.testExecution.logTestStep('loads the source selection modal');
 
           // Disable anti-aliasing to stabilize canvas image rendering assertions
           await ml.commonUI.disableAntiAliasing();
@@ -240,28 +239,20 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.runtimeFieldsEditorContent
           );
 
-          await ml.testExecution.logTestStep(
-            'opens field stats flyout from dependent variable input'
-          );
-          await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
-          for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
-            (e) => e.isDependentVariableInput
-          )) {
-            await ml.dataFrameAnalyticsCreation.assertFieldStatsFlyoutContentFromDependentVariableInputTrigger(
-              fieldName,
-              fieldType
-            );
-          }
+          await ml.testExecution.logTestStep('does not display the dependent variable input');
+          await ml.dataFrameAnalyticsCreation.assertDependentVariableInputMissing();
 
-          await ml.testExecution.logTestStep('inputs the dependent variable');
-          await ml.dataFrameAnalyticsCreation.selectDependentVariable(testData.dependentVariable);
-
-          await ml.testExecution.logTestStep('inputs the training percent');
-          await ml.dataFrameAnalyticsCreation.assertTrainingPercentInputExists();
-          await ml.dataFrameAnalyticsCreation.setTrainingPercent(testData.trainingPercent);
+          await ml.testExecution.logTestStep('does not display the training percent input');
+          await ml.dataFrameAnalyticsCreation.assertTrainingPercentInputMissing();
 
           await ml.testExecution.logTestStep('displays the source data preview');
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
+          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramChartEnabled(true);
+
+          await ml.testExecution.logTestStep('displays the source data preview histogram charts');
+          await ml.dataFrameAnalyticsCreation.enableAndAssertSourceDataPreviewHistogramCharts(
+            testData.expected.histogramCharts
+          );
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
@@ -287,9 +278,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.setScatterplotMatrixRandomizeQueryCheckState(true);
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
-            testData.expected.scatterplotMatrixColorStats
-          );
+          // TODO Revisit after Borealis update is fully done
+          // await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
+          //   testData.expected.scatterplotMatrixColorsWizard
+          // );
 
           await ml.testExecution.logTestStep('continues to the additional options step');
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
@@ -329,7 +321,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('checks validation callouts exist');
           await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
-          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(3);
+          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(1);
 
           // switch to json editor and back
           await ml.testExecution.logTestStep('switches to advanced editor then back to form');
@@ -376,6 +368,7 @@ export default function ({ getService }: FtrProviderContext) {
             status: testData.expected.row.status,
             progress: testData.expected.row.progress,
           });
+
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowDetails(
             testData.jobId,
             testData.expected.rowDetails
@@ -403,7 +396,7 @@ export default function ({ getService }: FtrProviderContext) {
             testDashboardCustomUrl,
             {
               index: 1,
-              url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'stabf:\"$stabf$\"'))`,
+              url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'SaleType:\"$SaleType$\"'))`,
             }
           );
         });
@@ -412,7 +405,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('opens edit flyout for other url');
           await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
 
-          await ml.testExecution.logTestStep('adds other type custom url for the analytics job');
+          await ml.testExecution.logTestStep('add other type custom url for the analytics job');
           await ml.dataFrameAnalyticsEdit.addOtherTypeCustomUrl(testData.jobId, testOtherCustomUrl);
         });
 
@@ -457,11 +450,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the results view for created job');
           await ml.dataFrameAnalyticsTable.openResultsView(testData.jobId);
-          await ml.dataFrameAnalyticsResults.assertRegressionEvaluatePanelElementsExists();
-          await ml.dataFrameAnalyticsResults.assertRegressionTablePanelExists();
+          await ml.dataFrameAnalyticsResults.assertOutlierTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
-          await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+          await ml.dataFrameAnalyticsResults.assertFeatureInfluenceCellNotEmpty();
 
           await ml.testExecution.logTestStep(
             'sets the sample size to 10000 for the scatterplot matrix'
@@ -474,9 +466,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.setScatterplotMatrixRandomizeQueryCheckState(true);
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
-            testData.expected.scatterplotMatrixColorStats
-          );
+          // TODO Revisit after Borealis update is fully done
+          // await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
+          //   testData.expected.scatterplotMatrixColorStatsResults
+          // );
 
           await ml.commonUI.resetAntiAliasing();
         });
@@ -487,20 +480,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsTable.openMapView(testData.jobId);
           await ml.dataFrameAnalyticsMap.assertMapElementsExists();
           await ml.dataFrameAnalyticsMap.assertJobMapTitle(testData.jobId);
-        });
-
-        it('opens job details fly-out in the map view', async () => {
-          await ml.testExecution.logTestStep('should open the job details fly-out');
-          await ml.navigation.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
-          await ml.dataFrameAnalyticsTable.openMapView(testData.jobId);
-          await ml.dataFrameAnalyticsMap.assertMapElementsExists();
-          await ml.dataFrameAnalyticsMap.openMlAnalyticsIdSelectionBadge(testData.jobId);
-          await ml.dataFrameAnalyticsMap.assertAnalyticsJobDetailsFlyoutButtonExists(
-            testData.jobId
-          );
-          await ml.dataFrameAnalyticsMap.openAnalyticsJobDetailsFlyout(testData.jobId);
-          await ml.jobDetailsFlyout.assertAnalyticsDetailsFlyoutExists();
-          await ml.jobDetailsFlyout.assertAnalyticsDetailsFlyoutIdExists(testData.jobId);
         });
       });
     }

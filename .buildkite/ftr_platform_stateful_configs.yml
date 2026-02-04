@@ -251,7 +251,8 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_integrations/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_result_views/config.ts
-  - x-pack/platform/test/functional/apps/ml/data_frame_analytics/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_frame_analytics/group1/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_frame_analytics/group2/config.ts
   - x-pack/platform/test/functional/apps/ml/data_visualizer/config.ts
   - x-pack/platform/test/functional/apps/ml/permissions/config.ts
   - x-pack/platform/test/functional/apps/ml/short_tests/config.ts
