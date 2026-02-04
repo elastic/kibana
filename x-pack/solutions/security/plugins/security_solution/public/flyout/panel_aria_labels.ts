@@ -139,6 +139,11 @@ export const ATTACK_DETAILS_RIGHT_PANEL_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Attack discovery details' }
 );
 
+export const ATTACK_DETAILS_LEFT_PANEL_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.panelAriaLabel.attackDetailsLeft',
+  { defaultMessage: 'Attack details expanded view' }
+);
+
 export const VULNERABILITY_FINDINGS_PANEL_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.panelAriaLabel.vulnerabilityFindings',
   { defaultMessage: 'Vulnerability details' }
