@@ -307,6 +307,28 @@ export class UserProfileService {
     }
   }
 
+  private recordGetCurrentSuccess(params: {
+    profileActivationRequired?: boolean;
+    apiKeyRetrievalRequired?: boolean;
+  }) {
+    securityTelemetry.recordGetCurrentProfileInvocation({
+      profileActivationRequired: params.profileActivationRequired,
+      apiKeyRetrievalRequired: params.apiKeyRetrievalRequired,
+      outcome: 'success',
+    });
+  }
+
+  private recordGetCurrentFailure(params: {
+    profileActivationRequired?: boolean;
+    apiKeyRetrievalRequired?: boolean;
+  }) {
+    securityTelemetry.recordGetCurrentProfileInvocation({
+      profileActivationRequired: params.profileActivationRequired,
+      apiKeyRetrievalRequired: params.apiKeyRetrievalRequired,
+      outcome: 'failure',
+    });
+  }
+
   /**
    * See {@link UserProfileServiceStart} for documentation.
    */
@@ -322,40 +344,49 @@ export class UserProfileService {
 
     let profileId: string | undefined;
     let sessionId: string | undefined;
+    let profileActivationRequired: boolean | undefined;
+    let apiKeyRetrievalRequired: boolean | undefined;
 
     if (request.headers.cookie) {
       this.logger.debug(`Request to get current user profile is authenticated via session.`);
-      securityTelemetry.recordGetCurrentProfileInvocation();
       ({ profileId, sessionId } = await this.getCurrentUserProfileIdViaSession(session, request));
     } else {
       const authType = this.getAuthHeaderType(request.headers.authorization);
 
       if (authType === 'basic') {
+        profileActivationRequired = true;
+
         this.logger.debug(
           `Request to get current user profile is authenticated via Basic credentials.`
         );
-        securityTelemetry.recordGetCurrentProfileInvocation({
-          profileActivationRequired: true,
-        });
 
-        const activatedProfile = await this.activateProfileViaBasicAuth(clusterClient, request);
+        let activatedProfile: UserProfileWithSecurity | undefined;
+        try {
+          activatedProfile = await this.activateProfileViaBasicAuth(clusterClient, request);
+        } catch (error) {
+          this.recordGetCurrentFailure({ profileActivationRequired, apiKeyRetrievalRequired });
+          this.logger.debug(
+            `Failed to activate profile via basic credentials: ${getDetailedErrorMessage(error)}`
+          );
+          throw error;
+        }
 
         // It is not possible to select/filter profile data when activating, so unless the dataPath is empty,
         // we will need to re-fetch the profile like in the other cases (session, API key).
-        if (!dataPath) {
+        if (activatedProfile && !dataPath) {
+          this.recordGetCurrentSuccess({ profileActivationRequired, apiKeyRetrievalRequired });
           return activatedProfile;
         }
         profileId = activatedProfile?.uid;
       } else if (authType === 'apikey') {
+        apiKeyRetrievalRequired = true;
         this.logger.debug(`Request to get current user profile is authenticated via API key.`);
-        securityTelemetry.recordGetCurrentProfileInvocation({
-          apiKeyRetrievalRequired: true,
-        });
         profileId = await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
       }
     }
 
     if (!profileId) {
+      this.recordGetCurrentFailure({ profileActivationRequired, apiKeyRetrievalRequired });
       return null;
     }
 
@@ -366,6 +397,7 @@ export class UserProfileService {
         data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
       });
     } catch (error) {
+      this.recordGetCurrentFailure({ profileActivationRequired, apiKeyRetrievalRequired });
       this.logger.error(
         `Failed to retrieve user profile for the current user${
           sessionId ? ` [sid=${getPrintableSessionId(sessionId)}]` : ''
@@ -375,6 +407,7 @@ export class UserProfileService {
     }
 
     if (body.profiles.length === 0) {
+      this.recordGetCurrentFailure({ profileActivationRequired, apiKeyRetrievalRequired });
       this.logger.error(
         `The user profile for the current user${
           sessionId ? ` [sid=${getPrintableSessionId(sessionId)}]` : ''
@@ -383,6 +416,7 @@ export class UserProfileService {
       throw new Error(`User profile is not found.`);
     }
 
+    this.recordGetCurrentSuccess({ profileActivationRequired, apiKeyRetrievalRequired });
     this.logger.debug(`Returning current user profile.`);
     return parseUserProfileWithSecurity<D>(body.profiles[0]);
   }

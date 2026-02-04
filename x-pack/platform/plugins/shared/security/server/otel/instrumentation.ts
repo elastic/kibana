@@ -26,7 +26,7 @@ interface UserAuthenticationAttributes extends BasicAttributes {
   providerType: string;
 }
 
-interface GetCurrentProfileAttributes {
+interface GetCurrentProfileAttributes extends BasicAttributes {
   profileActivationRequired?: boolean;
   apiKeyRetrievalRequired?: boolean;
 }
@@ -136,7 +136,7 @@ class SecurityTelemetry {
       ...(application ? { application } : {}),
       ...(deletedPrivileges ? { 'deleted.privileges': deletedPrivileges } : {}),
       ...(providerType ? { 'auth.provider.type': providerType } : {}),
-      ...(outcome ? { 'auth.outcome': outcome } : {}),
+      ...(outcome ? { outcome } : {}),
       ...(profileActivationRequired
         ? { 'profile.get_current.profile_activation_required': profileActivationRequired }
         : {}),
@@ -183,10 +183,8 @@ class SecurityTelemetry {
     this.privilegeRegistrationDuration.record(duration, transformedAttributes);
   };
 
-  recordGetCurrentProfileInvocation = (attributes?: GetCurrentProfileAttributes) => {
-    const transformedAttributes = this.transformAttributes<GetCurrentProfileAttributes>(
-      attributes ?? {}
-    );
+  recordGetCurrentProfileInvocation = (attributes: GetCurrentProfileAttributes) => {
+    const transformedAttributes = this.transformAttributes<GetCurrentProfileAttributes>(attributes);
     this.getCurrentProfileCounter.add(1, transformedAttributes);
   };
 }
