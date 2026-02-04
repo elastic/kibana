@@ -33,7 +33,6 @@ export const sectionSchema = schema.object({
 export const dashboardAttributesSchema = dashboardAttributesSchemaV2.extends(
   {
     sections: schema.maybe(schema.arrayOf(sectionSchema)),
-    // pinned_panels is added but we do not define it to prevent adding a new version
   },
   { unknowns: 'ignore' }
 );
