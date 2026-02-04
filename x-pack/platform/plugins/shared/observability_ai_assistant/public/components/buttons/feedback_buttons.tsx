@@ -23,6 +23,7 @@ const THANK_YOU_MESSAGE = i18n.translate(
 
 export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
   const { notifications } = useKibana().services;
+  const isFeedbackEnabled = notifications.feedback.isEnabled();
 
   const [hasBeenClicked, setHasBeenClicked] = useState(false);
 
@@ -37,6 +38,8 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
     setHasBeenClicked(true);
     notifications.toasts.addSuccess(THANK_YOU_MESSAGE);
   };
+
+  if (!isFeedbackEnabled) return null;
 
   return (
     <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="s" wrap>

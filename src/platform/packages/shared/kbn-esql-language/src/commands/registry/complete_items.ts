@@ -12,6 +12,7 @@ import { esqlCommandRegistry } from '.';
 import { buildDocumentation } from '../definitions/utils/documentation';
 import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
 import { withAutoSuggest } from '../definitions/utils/autocomplete/helpers';
+import { techPreviewLabel } from '../definitions/utils/shared';
 import { SuggestionCategory } from '../../shared/sorting/types';
 import {
   ESQL_STRING_TYPES,
@@ -19,10 +20,6 @@ import {
   ESQL_NAMED_PARAMS_TYPE,
 } from '../definitions/types';
 import { getPromqlParamDefinitions } from './promql/utils';
-
-const techPreviewLabel = i18n.translate('kbn-esql-language.esql.autocomplete.techPreviewLabel', {
-  defaultMessage: `Technical Preview`,
-});
 
 function buildCharCompleteItem(
   label: string,
@@ -180,10 +177,11 @@ export function getPromqlParamKeySuggestions(): ISuggestionItem[] {
     withAutoSuggest({
       label: name,
       text: `${name} = `,
-      kind: 'Keyword',
+      kind: 'Value',
       detail: i18n.translate(`kbn-esql-language.esql.autocomplete.promql.${name}ParamDoc`, {
         defaultMessage: description,
       }),
+      category: SuggestionCategory.VALUE,
     })
   );
 }
@@ -195,6 +193,16 @@ export const commaCompleteItem = buildCharCompleteItem(
   }),
   { sortText: 'B', quoted: false, category: SuggestionCategory.COMMA }
 );
+
+export const promqlByCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: 'by',
+  text: 'by ($0) ',
+  asSnippet: true,
+  kind: 'Reference',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.byDoc', {
+    defaultMessage: 'Group by labels',
+  }),
+});
 
 export const byCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'BY',

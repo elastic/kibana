@@ -130,6 +130,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                       docId: item.id,
                       errorCount,
                       errorDocId: errorCount > 1 ? undefined : item.errors[0].errorDocId,
+                      docIndex: errorCount > 1 ? undefined : item.errors[0].errorDocIndex,
                     });
                   }
                 }}

@@ -297,6 +297,10 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
     },
   };
 
+  const snapshotTableCaption = i18n.translate('xpack.snapshotRestore.snapshotList.table.caption', {
+    defaultMessage: 'List of snapshots',
+  });
+
   return (
     <>
       <SnapshotSearchBar
@@ -336,6 +340,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
             'data-test-subj': 'cell',
           })}
           data-test-subj="snapshotTable"
+          tableCaption={snapshotTableCaption}
         />
       )}
     </>

@@ -30,6 +30,8 @@ export interface RangeAgg {
 
 export type NamedAggregation = Record<string, estypes.AggregationsAggregationContainer>;
 
+export type GroupingSort = Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
+
 export interface GroupingQueryArgs {
   additionalFilters: BoolAgg[];
   groupByField: string;
@@ -39,7 +41,7 @@ export interface GroupingQueryArgs {
   pageNumber?: number;
   uniqueValue: string;
   size?: number;
-  sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
+  sort?: GroupingSort;
   statsAggregations?: NamedAggregation[];
   timeRange?: {
     from: string;
