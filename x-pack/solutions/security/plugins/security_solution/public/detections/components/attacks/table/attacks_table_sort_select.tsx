@@ -121,7 +121,7 @@ export const AttacksTableSortSelect = React.memo(
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downRight"
-        panelProps={{ css: { width: euiTheme.base * 18 } }}
+        panelStyle={{ minWidth: euiTheme.base * 18 }}
       >
         <EuiSelectable<SortOption>
           singleSelection="always"
