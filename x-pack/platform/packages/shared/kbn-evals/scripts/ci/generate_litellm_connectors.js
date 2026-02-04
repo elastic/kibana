@@ -331,6 +331,9 @@ async function main() {
       config: {
         apiProvider: 'Other',
         apiUrl: chatUrl,
+        // For OpenAI-compatible ("Other") providers, inference defaults to simulated function calling
+        // unless this is explicitly enabled. Our LiteLLM models support native tool calling.
+        enableNativeFunctionCalling: true,
         defaultModel: requestModel,
       },
       secrets: {

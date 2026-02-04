@@ -11,7 +11,7 @@ import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
-import { ChatCompletionEventType } from '@kbn/inference-common';
+import { createInferenceInternalError, ChatCompletionEventType } from '@kbn/inference-common';
 import { TOOL_USE_END, TOOL_USE_START } from './constants';
 
 function matchOnSignalStart(buffer: string) {
@@ -50,25 +50,18 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
           const functionCallBody = match?.[1];
 
           if (!functionCallBody) {
-            // Don't fail the whole request on malformed tool-call blocks; just ignore them.
-            logger.debug('Invalid function call syntax; ignoring tool-use block');
-            return;
+            throw createInferenceInternalError(`Invalid function call syntax`);
           }
 
-          let parsedFunctionCall: { name?: string; input?: unknown };
-          try {
-            parsedFunctionCall = JSON.parse(functionCallBody) as { name?: string; input?: unknown };
-          } catch (e) {
-            logger.debug('Failed to parse tool-use JSON; ignoring tool-use block');
-            return;
-          }
+          const parsedFunctionCall = JSON.parse(functionCallBody) as {
+            name?: string;
+            input?: unknown;
+          };
 
           logger.debug(() => 'Parsed function call:\n ' + JSON.stringify(parsedFunctionCall));
 
           if (!parsedFunctionCall.name) {
-            // Some upstream models occasionally emit incomplete tool-use JSON; don't 500.
-            logger.debug('Missing name for tool use; ignoring tool-use block');
-            return;
+            throw createInferenceInternalError(`Missing name for tool use`);
           }
           let input = parsedFunctionCall.input;
           if (typeof input === 'string') {
