@@ -497,7 +497,7 @@ async function installPackageFromRegistry({
       pkgVersion = latestPkg.version;
     }
 
-    installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+    const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
     installType = getInstallType({ pkgVersion, installedPkg });
 
     telemetryEvent.installType = installType;
