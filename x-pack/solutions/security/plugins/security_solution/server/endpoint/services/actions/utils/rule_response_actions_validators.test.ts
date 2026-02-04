@@ -150,6 +150,17 @@ describe('Rules Endpoint response actions validators', () => {
       }
     );
 
+    it('should error if user has no authz and is updating existing rule', async () => {
+      rulePayload.response_actions = [];
+      existingRule.params.responseActions = [createExistingRuleResponseActionMock()];
+      options.existingRule = existingRule;
+      endpointAuthz.canIsolateHost = false;
+
+      await expect(validateRuleResponseActions(options)).rejects.toThrow(
+        'User is not authorized to create/update isolate response action'
+      );
+    });
+
     describe('and response action is kill/suspend process', () => {
       it('should error if `field` is defined but `overwrite` is `true`', async () => {
         rulePayload.response_actions = [
