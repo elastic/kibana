@@ -111,7 +111,8 @@ const getEditor = async (page: Page) => {
 const setMonacoEditorValue = async (value: string, page: Page) => {
   // Wait for Monaco to be ready
   await page.waitForFunction(() => {
-    const monacoEditor = window.MonacoEnvironment?.monaco?.editor;
+    // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
+    const monacoEditor = window.MonacoEnvironment!.monaco.editor;
     return Boolean(monacoEditor?.getModels && monacoEditor.getModels().length);
   });
 
@@ -128,9 +129,8 @@ const setMonacoEditorValue = async (value: string, page: Page) => {
   // Assert the value has been set correctly
   await page.waitForFunction(
     ({ expected }) => {
-      const editor = window.MonacoEnvironment?.monaco?.editor;
-      const models = editor?.getModels?.() ?? [];
-      const model = models[0];
+      const editor = window.MonacoEnvironment!.monaco.editor;
+      const model = editor.getModels()[0];
       return model ? model.getValue() === expected : false;
     },
     { expected: value }
