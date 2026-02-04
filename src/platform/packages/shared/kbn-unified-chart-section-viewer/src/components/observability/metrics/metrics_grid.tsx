@@ -178,7 +178,7 @@ export const MetricsGrid = ({
           })}
         </EuiFlexGrid>
       </A11yGridWrapper>
-      {flyoutData && isTabSelected !== false && (
+      {flyoutData && isTabSelected && (
         <MetricInsightsFlyout
           metric={flyoutData.metric}
           esqlQuery={flyoutData.esqlQuery}
