@@ -45,6 +45,7 @@ import type { GroupTakeActionItems } from '../../alerts_table/types';
 import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
 import { useGroupStats } from './grouping_settings/use_group_stats';
 import { AttacksTableSortSelect, DEFAULT_ATTACKS_SORT } from './attacks_table_sort_select';
+import { AlertActionItems } from './alerts_action_items';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 
@@ -233,10 +234,20 @@ export const TableSection = React.memo(
     );
 
     const groupTakeActionItems: GroupTakeActionItems = useCallback(
-      ({ selectedGroup, groupBucket, closePopover }) => {
+      ({ selectedGroup, groupBucket, groupNumber, query: _query, tableId, closePopover }) => {
         const attack = getAttack(selectedGroup, groupBucket);
-        if (!attack) return;
-        return <AttacksGroupTakeActionItems attack={attack} closePopover={closePopover} />;
+        if (!attack)
+          return (
+            <AlertActionItems
+              groupBucket={groupBucket}
+              selectedGroup={selectedGroup}
+              groupNumber={groupNumber}
+              query={_query}
+              tableId={tableId}
+              closePopover={closePopover}
+            />
+          );
+        return <AttacksGroupTakeActionItems attack={attack} />;
       },
       [getAttack]
     );
