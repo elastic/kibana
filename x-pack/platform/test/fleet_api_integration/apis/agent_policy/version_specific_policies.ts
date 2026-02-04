@@ -53,8 +53,8 @@ export default function (providerContext: FtrProviderContext) {
     describe('package level agent version condition', () => {
       let agentPolicyWithPPId: string;
       let packagePolicyId: string;
-      const agentId = `agent-${Date.now()}`;
-      const upgradedAgentId = `upgraded-agent-${Date.now()}`;
+      const agentId = `agent-package-${Date.now()}`;
+      const upgradedAgentId = `upgraded-package-${Date.now()}`;
 
       async function createAgentPolicyWithPackagePolicy() {
         const { body: agentPolicyResponse } = await supertest
@@ -100,17 +100,21 @@ export default function (providerContext: FtrProviderContext) {
         await createAgentPolicyWithPackagePolicy();
         await fleetAndAgents.generateAgent(
           'online',
+          agentId,
+          agentPolicyWithPPId,
+          previousMinorVersion,
+          undefined,
+          undefined,
+          true
+        );
+        await fleetAndAgents.generateAgent(
+          'online',
           upgradedAgentId,
           `${agentPolicyWithPPId}#${previousMinor}`,
           kibanaVersion,
           undefined,
-          new Date().toISOString()
-        );
-        await fleetAndAgents.generateAgent(
-          'online',
-          agentId,
-          agentPolicyWithPPId,
-          previousMinorVersion
+          new Date().toISOString(),
+          true
         );
       });
       after(async () => {
@@ -177,8 +181,8 @@ export default function (providerContext: FtrProviderContext) {
     describe('template level agent version condition', () => {
       let agentPolicyWithPPId: string;
       let packagePolicyId: string;
-      const agentId = `agent-${Date.now()}`;
-      const upgradedAgentId = `upgraded-agent-${Date.now()}`;
+      const agentId = `agent-template-${Date.now()}`;
+      const upgradedAgentId = `upgraded-template-${Date.now()}`;
 
       async function createAgentPolicyWithPackagePolicy() {
         const { body: agentPolicyResponse } = await supertest
@@ -270,17 +274,21 @@ export default function (providerContext: FtrProviderContext) {
         await createAgentPolicyWithPackagePolicy();
         await fleetAndAgents.generateAgent(
           'online',
+          agentId,
+          agentPolicyWithPPId,
+          previousMinorVersion,
+          undefined,
+          undefined,
+          true
+        );
+        await fleetAndAgents.generateAgent(
+          'online',
           upgradedAgentId,
           `${agentPolicyWithPPId}#${previousMinor}`,
           kibanaVersion,
           undefined,
-          new Date().toISOString()
-        );
-        await fleetAndAgents.generateAgent(
-          'online',
-          agentId,
-          agentPolicyWithPPId,
-          previousMinorVersion
+          new Date().toISOString(),
+          true
         );
       });
       after(async () => {
