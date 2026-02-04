@@ -58,25 +58,17 @@ export type ClientIndex<FullDocumentType> = (
 ) => Promise<ClientIndexResponse>;
 
 export interface ClientBulkOperation {
-  index?: Omit<api.BulkIndexOperation, '_index'>;
   create?: Omit<api.BulkCreateOperation, '_index'>;
-  update?: Omit<api.BulkUpdateOperation, '_index'>;
-  delete?: Omit<api.BulkDeleteOperation, '_index'>;
 }
 
 export type ClientBulkRequest<TDocument> = Omit<
   OmitIndexProp<api.BulkRequest<TDocument>>,
   'operations'
 > & {
-  operations: (
-    | ClientBulkOperation
-    | api.BulkUpdateAction<TDocument, Partial<TDocument>>
-    | TDocument
-  )[];
+  operations: (ClientBulkOperation | TDocument)[];
   /**
-   * Optional space identifier. When provided, prefixes document IDs for create/index
-   * operations and validates IDs for update/delete operations. When undefined, rejects
-   * space-prefixed IDs.
+   * Optional space identifier. When provided, prefixes document IDs for create
+   * operations. When undefined, rejects space-prefixed IDs.
    */
   space?: string;
 };

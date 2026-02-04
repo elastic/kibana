@@ -19,14 +19,15 @@ export function containsSpaceSeparator(id: string): boolean {
 }
 
 /**
- * Validate that an ID does NOT contain the space separator.
- * Used in space-agnostic mode to prevent injection attacks.
+ * Validate that a user-provided ID does NOT contain the space separator.
+ * This applies to both space-aware and space-agnostic modes to prevent confusion
+ * and potential injection attacks. The separator is reserved for system use.
  */
-export function rejectSpacePrefixedId(id: string): void {
+export function throwOnIdWithSeparator(id: string): void {
   if (containsSpaceSeparator(id)) {
     throw new Error(
-      `Invalid document ID: IDs cannot contain '${SPACE_ID_SEPARATOR}' when operating without a space. ` +
-        `Provide a 'space' parameter to work with space-bound documents.`
+      `Invalid document ID: IDs cannot contain '${SPACE_ID_SEPARATOR}'. ` +
+        `This separator is reserved for system use.`
     );
   }
 }
@@ -39,7 +40,7 @@ export function generateSpacePrefixedId(space: string, id?: string): string {
 
 /** Extract space from a prefixed ID. Throws if ID has no prefix. */
 export function extractSpaceFromId(id: string): { space: string; rawId: string } {
-  const separatorIndex = id.indexOf(SPACE_ID_SEPARATOR);
+  const separatorIndex = id.lastIndexOf(SPACE_ID_SEPARATOR);
   if (separatorIndex === -1) {
     throw new Error(`Invalid document ID format: missing space prefix '${SPACE_ID_SEPARATOR}'`);
   }
@@ -61,8 +62,8 @@ export function validateSpaceInId(id: string, expectedSpace: string): void {
 export function decorateDocumentWithSpace<T>(
   doc: T,
   space: string
-): T & { [SYSTEM_SPACE_PROPERTY]: string[] } {
-  return { ...doc, [SYSTEM_SPACE_PROPERTY]: [space] };
+): T & { kibana: { space_ids: string[] } } {
+  return { ...doc, kibana: { space_ids: [space] } };
 }
 
 /** Build ES term filter for a specific space. */

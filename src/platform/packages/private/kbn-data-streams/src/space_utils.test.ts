@@ -11,7 +11,7 @@ import {
   SPACE_ID_SEPARATOR,
   SYSTEM_SPACE_PROPERTY,
   containsSpaceSeparator,
-  rejectSpacePrefixedId,
+  throwOnIdWithSeparator,
   generateSpacePrefixedId,
   extractSpaceFromId,
   validateSpaceInId,
@@ -46,17 +46,15 @@ describe('space_utils', () => {
     });
   });
 
-  describe('rejectSpacePrefixedId', () => {
+  describe('throwOnIdWithSeparator', () => {
     it('should throw if ID contains separator', () => {
-      expect(() => rejectSpacePrefixedId('myspace::doc123')).toThrow(
-        /IDs cannot contain '::' when operating without a space/
-      );
+      expect(() => throwOnIdWithSeparator('myspace::doc123')).toThrow(/IDs cannot contain '::'/);
     });
 
     it('should not throw if ID does not contain separator', () => {
-      expect(() => rejectSpacePrefixedId('doc123')).not.toThrow();
-      expect(() => rejectSpacePrefixedId('uuid-with-dashes')).not.toThrow();
-      expect(() => rejectSpacePrefixedId('single:colon')).not.toThrow();
+      expect(() => throwOnIdWithSeparator('doc123')).not.toThrow();
+      expect(() => throwOnIdWithSeparator('uuid-with-dashes')).not.toThrow();
+      expect(() => throwOnIdWithSeparator('single:colon')).not.toThrow();
     });
   });
 
@@ -90,8 +88,8 @@ describe('space_utils', () => {
 
     it('should handle IDs with multiple separators', () => {
       expect(extractSpaceFromId('space::part1::part2')).toEqual({
-        space: 'space',
-        rawId: 'part1::part2',
+        space: 'space::part1',
+        rawId: 'part2',
       });
     });
 
@@ -122,7 +120,7 @@ describe('space_utils', () => {
       const result = decorateDocumentWithSpace(doc, 'myspace');
       expect(result).toEqual({
         field: 'value',
-        'kibana.space_ids': ['myspace'],
+        kibana: { space_ids: ['myspace'] },
       });
     });
 
@@ -133,7 +131,7 @@ describe('space_utils', () => {
         a: 1,
         b: 'two',
         c: true,
-        'kibana.space_ids': ['default'],
+        kibana: { space_ids: ['default'] },
       });
     });
   });

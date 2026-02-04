@@ -26,12 +26,11 @@ import { initialize } from './initialize';
 import { validateClientArgs } from './validate_client_args';
 import {
   generateSpacePrefixedId,
-  rejectSpacePrefixedId,
+  throwOnIdWithSeparator,
   validateSpaceInId,
   decorateDocumentWithSpace,
   buildSpaceFilter,
   buildSpaceAgnosticFilter,
-  SYSTEM_SPACE_PROPERTY,
 } from './space_utils';
 
 export class DataStreamClient<
@@ -90,49 +89,46 @@ export class DataStreamClient<
     let processedId: string | undefined = id;
     let processedDocument = document;
 
-    if (space !== undefined) {
+    // Validate that user-provided IDs don't contain the separator (applies to both modes)
+    if (typeof id !== 'undefined') {
+      throwOnIdWithSeparator(id);
+    }
+
+    if (typeof space !== 'undefined') {
       // Space-aware mode: prefix ID and decorate document
       processedId = generateSpacePrefixedId(space, id);
       if (document) {
         processedDocument = decorateDocumentWithSpace(document, space);
       }
-    } else if (id !== undefined) {
-      // Space-agnostic mode: reject IDs containing the space separator
-      rejectSpacePrefixedId(id);
+    } else {
+      // Space-agnostic mode: no prefixing or decoration
+      // Validation already done above
     }
 
     return this.client.index<FullDocumentType>({
       ...restArgs,
-      id: processedId,
+      ...(processedId && { id: processedId }),
       document: processedDocument,
       index: this.dataStreamDefinition.name,
+      // Data streams only support op_type: 'create'
+      op_type: 'create',
     });
   }
 
   public async bulk(args: ClientBulkRequest<FullDocumentType>) {
     const { space, operations, ...restArgs } = args;
 
-    const processedOperations: ClientBulkRequest<FullDocumentType>['operations'] = [];
-
-    for (let i = 0; i < operations.length; i++) {
-      const item = operations[i];
-
-      // Check if this is an action metadata object
-      if (this.isBulkActionMetadata(item)) {
-        processedOperations.push(this.processActionMetadata(item, space));
-
-        // For create/index, the next item is the document body
-        if ((item.create || item.index) && i + 1 < operations.length) {
-          const doc = operations[++i];
-          processedOperations.push(
-            space !== undefined ? decorateDocumentWithSpace(doc as FullDocumentType, space) : doc
-          );
-        }
+    const processedOperations = operations.map((metadataOrDocument) => {
+      if (this.isBulkActionMetadata(metadataOrDocument)) {
+        return this.processActionMetadata(metadataOrDocument, space);
       } else {
-        // Document body or update action payload
-        processedOperations.push(item);
+        if (space) {
+          return decorateDocumentWithSpace(metadataOrDocument, space);
+        } else {
+          return metadataOrDocument;
+        }
       }
-    }
+    });
 
     return this.client.bulk<FullDocumentType>({
       index: this.dataStreamDefinition.name,
@@ -141,74 +137,115 @@ export class DataStreamClient<
     });
   }
 
-  /** Check if an item is a bulk action metadata object (create, index, update, delete). */
+  /** Check if an item is a bulk action metadata object (create). */
   private isBulkActionMetadata(item: unknown): item is ClientBulkOperation {
     if (!item || typeof item !== 'object') return false;
     const op = item as ClientBulkOperation;
-    return !!(op.index || op.create || op.update || op.delete);
+    return !!op.create;
   }
 
-  /** Process bulk action metadata: prefix IDs for create/index, validate IDs for update/delete. */
+  /** Process bulk action metadata: prefix IDs for create operations. */
   private processActionMetadata(
     action: ClientBulkOperation,
     space: string | undefined
   ): ClientBulkOperation {
-    if (action.create || action.index) {
-      const op = action.create ?? action.index!;
-      const key = action.create ? 'create' : 'index';
-      const { _id, ...rest } = op;
+    const [key, metadata] = Object.entries(action).shift()!;
+    const { _id, ...rest } = metadata as { _id?: string; [key: string]: unknown };
 
-      if (space !== undefined) {
-        return { [key]: { ...rest, _id: generateSpacePrefixedId(space, _id) } };
+    if (key === 'create') {
+      // Validate that user-provided IDs don't contain the separator
+      if (typeof _id !== 'undefined') {
+        throwOnIdWithSeparator(_id);
       }
-      if (_id !== undefined) rejectSpacePrefixedId(_id);
-      return action;
-    }
-
-    if (action.update || action.delete) {
-      const op = action.update ?? action.delete!;
-      const { _id } = op;
-
-      if (_id === undefined) {
-        throw new Error(`${action.update ? 'Update' : 'Delete'} operation requires an _id`);
-      }
-      if (space !== undefined) {
-        validateSpaceInId(_id, space);
+      if (space) {
+        // When space is provided, prefix the ID (or generate one if not provided)
+        return { create: { ...rest, _id: generateSpacePrefixedId(space, _id) } };
       } else {
-        rejectSpacePrefixedId(_id);
+        // When space is not provided, no prefixing
+        return action;
       }
-      return action;
     }
 
-    return action;
+    throw new Error(`Unknown operation: '${key}'`);
   }
 
   public async get(args: ClientGetRequest) {
+    const { space, ...rest } = args;
+    return space ? this.getWithSpace({ ...rest, space }) : this.getSpaceAgnostic(rest);
+  }
+
+  private async getWithSpace(
+    args: ClientGetRequest & { space: string }
+  ): Promise<api.GetResponse<FullDocumentType>> {
     const { space, id, ...restArgs } = args;
 
-    if (space !== undefined) {
-      // Space-aware mode: validate that ID belongs to the expected space
-      validateSpaceInId(id, space);
-    } else {
-      // Space-agnostic mode: reject space-prefixed IDs
-      rejectSpacePrefixedId(id);
-    }
+    // Space-aware mode: validate that ID belongs to the expected space
+    validateSpaceInId(id, space);
 
-    const response = await this.client.get<FullDocumentType>({
+    // Use search with ids query to work across all backing indices
+    const idsQuery: api.QueryDslQueryContainer = { ids: { values: [id] } };
+    const spaceQuery = this.buildSpaceAwareQuery(idsQuery, space);
+
+    // We cannot use this.client.get() because it requires specifying the backing index.
+    const searchResponse = await this.client.search<FullDocumentType>({
       index: this.dataStreamDefinition.name,
-      id,
+      query: spaceQuery,
+      size: 1,
       ...restArgs,
     });
 
-    // Strip kibana.space_ids from the response if space was provided
-    if (space !== undefined && response._source) {
-      return {
-        ...response,
-        _source: this.stripSpaceProperty(response._source),
-      };
+    const hit = searchResponse.hits.hits[0];
+    if (!hit) {
+      throw new Error(`document not found: ${id}`);
     }
 
-    return response;
+    // Convert search hit to GetResponse format
+    return {
+      _id: hit._id!,
+      _index: hit._index,
+      _source: this.stripSpaceProperty(hit._source),
+      found: true,
+      _version: hit._version,
+      _seq_no: hit._seq_no,
+      _primary_term: hit._primary_term,
+    };
+  }
+
+  private async getSpaceAgnostic(
+    args: Omit<ClientGetRequest, 'space'>
+  ): Promise<api.GetResponse<FullDocumentType>> {
+    const { id, ...restArgs } = args;
+
+    // Space-agnostic mode: reject space-prefixed IDs
+    throwOnIdWithSeparator(id);
+
+    // Use search with ids query to work across all backing indices
+    const idsQuery: api.QueryDslQueryContainer = { ids: { values: [id] } };
+    const spaceQuery = this.buildSpaceAwareQuery(idsQuery, undefined);
+
+    // We cannot use this.client.get() because it requires specifying the backing index.
+    const searchResponse = await this.client.search<FullDocumentType>({
+      index: this.dataStreamDefinition.name,
+      query: spaceQuery,
+      size: 1,
+      ...restArgs,
+    });
+
+    const hit = searchResponse.hits.hits[0];
+    if (!hit) {
+      throw new Error(`document not found: ${id}`);
+    }
+
+    // Convert search hit to GetResponse format
+    return {
+      _id: hit._id!,
+      _index: hit._index,
+      _source: hit._source,
+      found: true,
+      _version: hit._version,
+      _seq_no: hit._seq_no,
+      _primary_term: hit._primary_term,
+    };
   }
 
   public async existsIndex() {
@@ -225,7 +262,6 @@ export class DataStreamClient<
 
     // Build the space-aware query
     const spaceQuery = this.buildSpaceAwareQuery(query, space);
-
     const response = await this.client.search<FullDocumentType, Agg>(
       {
         index: this.dataStreamDefinition.name,
@@ -238,7 +274,7 @@ export class DataStreamClient<
     );
 
     // Strip kibana.space_ids from all hits if space was provided
-    if (space !== undefined && response.hits?.hits) {
+    if (space && response.hits?.hits) {
       return {
         ...response,
         hits: {
@@ -258,10 +294,10 @@ export class DataStreamClient<
    * Build a space-aware query by wrapping the original query with space filtering.
    */
   private buildSpaceAwareQuery(
-    originalQuery: api.QueryDslQueryContainer | undefined,
-    space: string | undefined
+    originalQuery?: api.QueryDslQueryContainer,
+    space?: string
   ): api.QueryDslQueryContainer {
-    if (space !== undefined) {
+    if (space) {
       // Space-aware mode: filter to only documents in this space
       const spaceFilter = buildSpaceFilter(space);
       if (originalQuery) {
@@ -291,9 +327,11 @@ export class DataStreamClient<
   /**
    * Remove kibana.space_ids from document before returning to caller.
    */
-  private stripSpaceProperty(doc: FullDocumentType | undefined): FullDocumentType | undefined {
-    if (!doc || typeof doc !== 'object') return doc;
-    const { [SYSTEM_SPACE_PROPERTY]: _, ...rest } = doc as Record<string, unknown>;
+  private stripSpaceProperty(doc?: FullDocumentType): FullDocumentType | undefined {
+    if (typeof doc !== 'object') {
+      return doc;
+    }
+    const { kibana, ...rest } = doc as Record<string, unknown>;
     return rest as FullDocumentType;
   }
 }
