@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiPageHeader, EuiPageSection } from '@elastic/eui';
+import { EuiPageHeader, EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useParams } from 'react-router-dom';
 import { SIEM_READINESS_PATH } from '../../../common/constants';
@@ -43,10 +43,12 @@ const SiemReadinessDashboard = () => {
         })}
         bottomBorder={true}
       />
-      <EuiPageSection>
+      <EuiSpacer />
+      <EuiPageSection paddingSize="none">
         <VisibilitySectionBoxes selectedTabId={selectedTabId} onTabSelect={handleTabSelect} />
       </EuiPageSection>
-      <EuiPageSection>
+      <EuiSpacer />
+      <EuiPageSection paddingSize="none">
         <VisibilitySectionTabs selectedTabId={selectedTabId} onTabSelect={handleTabSelect} />
       </EuiPageSection>
     </div>
