@@ -68,7 +68,7 @@ export function getCurrentTraceId(): string | null {
     }
 
     const spanContext = activeSpan.spanContext();
-    if (!spanContext.traceId || spanContext.traceId === '00000000000000000000000000000000') {
+    if (!spanContext.traceId) {
       return null;
     }
 

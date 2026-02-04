@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { buildFlattenedScoreDocuments } from './report_model_score';
+import { mapToEvaluationScoreDocuments } from './report_model_score';
 import type { RanExperiment } from '../types';
+import { ModelProvider, ModelFamily } from '@kbn/inference-common';
 
-describe('buildFlattenedScoreDocuments', () => {
+describe('mapToEvaluationScoreDocuments', () => {
   const taskModel = {
     id: 'gpt-4',
-    family: 'openai',
-    provider: 'azure',
+    family: ModelFamily.GPT,
+    provider: ModelProvider.OpenAI,
   };
 
   const evaluatorModel = {
     id: 'claude-3',
-    family: 'claude',
-    provider: 'anthropic',
+    family: ModelFamily.Claude,
+    provider: ModelProvider.Anthropic,
   };
 
   it('builds documents with dataset name and input hash from runs', async () => {
@@ -28,20 +29,26 @@ describe('buildFlattenedScoreDocuments', () => {
         datasetId: 'dataset-1',
         datasetName: 'Dataset 1',
         runs: {
-          'run-1': { exampleIndex: 0, repetition: 0, input: { question: 'one' } },
+          'run-1': {
+            exampleIndex: 0,
+            repetition: 0,
+            input: { question: 'one' },
+            expected: undefined,
+            metadata: undefined,
+            output: undefined,
+          },
         },
         evaluationRuns: [
           {
             name: 'Correctness',
+            experimentRunId: 'run-1',
             result: { score: 0.5 },
-            exampleIndex: 0,
-            repetitionIndex: 0,
           },
         ],
       },
     ] as RanExperiment[];
 
-    const docs = await buildFlattenedScoreDocuments({
+    const docs = await mapToEvaluationScoreDocuments({
       experiments,
       taskModel,
       evaluatorModel,
@@ -62,23 +69,27 @@ describe('buildFlattenedScoreDocuments', () => {
         datasetName: 'Dataset 1',
         runs: {
           'run-1': {
-            datasetExampleId: 'example-2',
-            traceId: 'trace-1',
+            exampleIndex: 0,
+            repetition: 0,
             input: { question: 'two' },
+            expected: undefined,
+            metadata: undefined,
+            output: undefined,
+            traceId: 'trace-1',
           },
         },
         evaluationRuns: [
           {
             name: 'Correctness',
             experimentRunId: 'run-1',
-            repetitionIndex: 0,
             result: { score: 0.9 },
+            exampleId: 'example-2',
           },
         ],
       },
     ] as RanExperiment[];
 
-    const docs = await buildFlattenedScoreDocuments({
+    const docs = await mapToEvaluationScoreDocuments({
       experiments,
       taskModel,
       evaluatorModel,

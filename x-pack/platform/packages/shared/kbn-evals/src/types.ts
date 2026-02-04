@@ -138,32 +138,31 @@ export interface ExampleWithId extends Example {
   id: string;
 }
 
+export interface TaskRun {
+  exampleIndex: number;
+  repetition: number;
+  input: Example['input'];
+  expected: Example['output'];
+  metadata: Example['metadata'];
+  output: TaskOutput;
+  traceId?: string | null;
+}
+
+export interface EvaluationRun {
+  name: string;
+  result?: EvaluationResult;
+  experimentRunId: string;
+  traceId?: string | null;
+  exampleId?: string;
+}
+
 export interface RanExperiment {
   id: string;
   datasetId: string;
   datasetName: string;
   datasetDescription?: string;
-  runs: Record<
-    string,
-    {
-      exampleIndex: number;
-      repetition: number;
-      input: Example['input'];
-      expected: Example['output'];
-      metadata: Example['metadata'];
-      output: TaskOutput;
-      traceId?: string | null;
-    }
-  >;
-  evaluationRuns: Array<{
-    name: string;
-    result?: EvaluationResult;
-    exampleIndex?: number;
-    repetitionIndex?: number;
-    experimentRunId?: string;
-    traceId?: string | null;
-    exampleId?: string;
-  }>;
+  runs: Record<string, TaskRun>;
+  evaluationRuns: EvaluationRun[];
   experimentMetadata?: Record<string, unknown>;
 }
 

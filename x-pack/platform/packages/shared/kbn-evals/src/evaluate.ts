@@ -17,7 +17,7 @@ import type { EvaluationTestOptions } from './config/create_playwright_eval_conf
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import type { DefaultEvaluators, EvaluationSpecificWorkerFixtures } from './types';
-import { buildFlattenedScoreDocuments, exportEvaluations } from './utils/report_model_score';
+import { mapToEvaluationScoreDocuments, exportEvaluations } from './utils/report_model_score';
 import { getPhoenixConfig } from './utils/get_phoenix_config';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, getConnectorIdAsUuid } from './utils/create_connector_fixture';
@@ -213,7 +213,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         : esClient;
 
       const experiments = await executorClient.getRanExperiments();
-      const documents = await buildFlattenedScoreDocuments({
+      const documents = await mapToEvaluationScoreDocuments({
         experiments,
         taskModel: model,
         evaluatorModel,

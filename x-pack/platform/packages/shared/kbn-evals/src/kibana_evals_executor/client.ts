@@ -98,11 +98,11 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
               );
 
               const { taskOutput, traceId } = await withTaskSpan('task', {}, async () => {
-                const traceId = getCurrentTraceId();
-                const taskOutput = await task(example);
+                const _traceId = getCurrentTraceId();
+                const _taskOutput = await task(example);
                 return {
-                  taskOutput,
-                  traceId,
+                  taskOutput: _taskOutput,
+                  traceId: _traceId,
                 };
               });
 
@@ -125,37 +125,36 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   this.options.log.info(
                     `🧠 Evaluating run (exampleIndex=${exampleIndex}, repetition=${rep}) with evaluator "${evaluator.name}"`
                   );
-                  const { result, traceId } = await withEvaluatorSpan(
+                  const { result, evaluatorTraceId } = await withEvaluatorSpan(
                     evaluator.name,
                     {},
                     async () => {
-                      const traceId = getCurrentTraceId();
-                      const result = await evaluator.evaluate({
+                      const _traceId = getCurrentTraceId();
+                      const _result = await evaluator.evaluate({
                         input: example.input,
                         output: taskOutput,
                         expected: example.output ?? null,
                         metadata: example.metadata ?? {},
                       });
                       return {
-                        result,
-                        traceId,
+                        result: _result,
+                        evaluatorTraceId: _traceId,
                       };
                     }
                   );
                   this.options.log.info(
                     `✅ Evaluator "${evaluator.name}" on run (exampleIndex=${exampleIndex}, repetition=${rep}) completed`
                   );
-                  return { evaluatorName: evaluator.name, result, traceId };
+                  return { evaluatorName: evaluator.name, result, evaluatorTraceId };
                 })
               );
 
-              results.forEach(({ evaluatorName, result, traceId }) => {
+              results.forEach(({ evaluatorName, result, evaluatorTraceId }) => {
                 evaluationRuns.push({
                   name: evaluatorName,
                   result,
-                  exampleIndex,
-                  repetitionIndex: rep,
-                  traceId,
+                  experimentRunId: runKey,
+                  traceId: evaluatorTraceId,
                 });
               });
             })

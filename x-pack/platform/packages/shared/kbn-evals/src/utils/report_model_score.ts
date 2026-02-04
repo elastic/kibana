@@ -13,18 +13,17 @@ import { hostname } from 'os';
 import type { Model } from '@kbn/inference-common';
 import { EvaluationScoreRepository, type EvaluationScoreDocument } from './score_repository';
 import { getGitMetadata } from './git_metadata';
-import type { RanExperiment } from '../types';
+import type { RanExperiment, EvaluationRun, TaskRun } from '../types';
 
 function computeInputHash(input: unknown): string {
-  try {
-    const json = JSON.stringify(input);
-    return createHash('sha256').update(json).digest('hex').substring(0, 16);
-  } catch {
-    return '';
-  }
+  return createHash('sha256').update(JSON.stringify(input)).digest('hex').substring(0, 16);
 }
 
-export async function buildFlattenedScoreDocuments({
+function getTaskRun(evalRun: EvaluationRun, runs: RanExperiment['runs']): TaskRun {
+  return runs[evalRun.experimentRunId];
+}
+
+export async function mapToEvaluationScoreDocuments({
   experiments,
   taskModel,
   evaluatorModel,
@@ -43,51 +42,16 @@ export async function buildFlattenedScoreDocuments({
   const hostName = hostname();
 
   for (const experiment of experiments) {
-    const { datasetId, evaluationRuns, runs } = experiment;
-    const datasetName = experiment.datasetName ?? datasetId;
-    const runsById = runs ?? {};
-    const runsList = Object.values(runsById);
-
+    const { datasetId, evaluationRuns, runs = {} } = experiment;
     if (!evaluationRuns) {
       continue;
     }
 
-    for (const evalRun of evaluationRuns) {
-      const evalRunInfo = evalRun as {
-        exampleId?: string;
-        exampleIndex?: number;
-        repetitionIndex?: number;
-        experimentRunId?: string;
-        traceId?: string | null;
-        name: string;
-        result?: {
-          score?: number | null;
-          label?: string | null;
-          explanation?: string | null;
-          metadata?: Record<string, unknown> | null;
-        };
-      };
-      let runEntry: (typeof runsById)[string] | undefined;
-      if (evalRunInfo.experimentRunId && runsById[evalRunInfo.experimentRunId]) {
-        runEntry = runsById[evalRunInfo.experimentRunId];
-      } else if (
-        evalRunInfo.exampleIndex !== undefined &&
-        evalRunInfo.repetitionIndex !== undefined
-      ) {
-        runEntry = runsList.find(
-          (run) =>
-            run.exampleIndex === evalRunInfo.exampleIndex &&
-            run.repetition === evalRunInfo.repetitionIndex
-        );
-      }
+    const datasetName = experiment.datasetName ?? datasetId;
 
-      const exampleIndex = runEntry?.exampleIndex ?? evalRunInfo.exampleIndex ?? 0;
-      const repetitionIndex = evalRunInfo.repetitionIndex ?? runEntry?.repetition ?? 0;
-      const exampleId =
-        evalRunInfo.exampleId ??
-        (runEntry as any)?.datasetExampleId ??
-        (exampleIndex !== undefined ? String(exampleIndex) : '');
-      const inputHash = runEntry?.input ? computeInputHash(runEntry.input) : '';
+    for (const evalRun of evaluationRuns) {
+      const taskRun = getTaskRun(evalRun, runs);
+      const exampleId = evalRun.exampleId ?? String(taskRun.exampleIndex);
 
       documents.push({
         '@timestamp': timestamp,
@@ -95,25 +59,25 @@ export async function buildFlattenedScoreDocuments({
         experiment_id: experiment.id ?? '',
         example: {
           id: exampleId,
-          index: exampleIndex,
-          input_hash: inputHash,
+          index: taskRun.exampleIndex,
+          input_hash: computeInputHash(taskRun.input),
           dataset: {
             id: datasetId,
             name: datasetName,
           },
         },
         task: {
-          trace_id: runEntry?.traceId ?? null,
-          repetition_index: repetitionIndex,
+          trace_id: taskRun.traceId ?? null,
+          repetition_index: taskRun.repetition,
           model: taskModel,
         },
         evaluator: {
-          name: evalRunInfo.name,
-          score: evalRunInfo.result?.score ?? null,
-          label: evalRunInfo.result?.label ?? null,
-          explanation: evalRunInfo.result?.explanation ?? null,
-          metadata: evalRunInfo.result?.metadata ?? null,
-          trace_id: evalRunInfo.traceId ?? null,
+          name: evalRun.name,
+          score: evalRun.result?.score ?? null,
+          label: evalRun.result?.label ?? null,
+          explanation: evalRun.result?.explanation ?? null,
+          metadata: evalRun.result?.metadata ?? null,
+          trace_id: evalRun.traceId ?? null,
           model: evaluatorModel,
         },
         run_metadata: {
@@ -144,19 +108,14 @@ export async function exportEvaluations(
   log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
 
   const exporter = new EvaluationScoreRepository(esClient, log);
-
   await exporter.exportScores(documents);
 
-  const modelId = documents[0]?.task.model.id || 'unknown';
-  const hostName = documents[0]?.environment.hostname || hostname();
-  const runId = documents[0]?.run_id;
+  const { run_id: docRunId, task, environment } = documents[0];
 
   log.info(chalk.green('✅ Evaluation scores exported successfully!'));
-  if (runId) {
-    log.info(
-      chalk.gray(
-        `You can query the data using: environment.hostname:"${hostName}" AND task.model.id:"${modelId}" AND run_id:"${runId}"`
-      )
-    );
-  }
+  log.info(
+    chalk.gray(
+      `You can query the data using: environment.hostname:"${environment.hostname}" AND task.model.id:"${task.model.id}" AND run_id:"${docRunId}"`
+    )
+  );
 }
