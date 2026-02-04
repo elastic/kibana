@@ -588,6 +588,13 @@ export function initializeLayoutManager(
       panelIsPinned: (uuid: string) => {
         return Object.keys(layout$.getValue().pinnedPanels).includes(uuid);
       },
+      // panelIsPinned$: (uuid: string) => {
+      //   return layout$.pipe(
+      //     // pinned panels and panels in global section are treated identically; i.e. their section is `undefined`
+      //     map((layout) => uuid in layout.pinnedPanels),
+      //     distinctUntilChanged() // only trigger re-fetch when section changes
+      //   );
+      // },
       unpinPanel: (uuid: string) => {
         const panelToUnpin = layout$.getValue().pinnedPanels[uuid];
         if (!panelToUnpin) return;

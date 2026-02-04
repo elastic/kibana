@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
 import type { PublishingSubject } from '@kbn/presentation-publishing/publishing_subject';
 import type { PanelPackage } from './presentation_container';
 
@@ -33,6 +34,7 @@ export interface CanPinPanels {
   pinPanel: (panelId: string) => void;
   unpinPanel: (panelId: string) => void;
   panelIsPinned: (panelId: string) => boolean;
+  // panelIsPinned$: (uuid: string) => Observable<string | undefined>;
   addPinnedPanel: <StateType extends object, ApiType extends unknown = unknown>(
     panel: PanelPackage<StateType>
   ) => Promise<ApiType | undefined>;

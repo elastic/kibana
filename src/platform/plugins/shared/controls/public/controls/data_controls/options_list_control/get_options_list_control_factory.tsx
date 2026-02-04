@@ -28,7 +28,11 @@ import {
 } from '@kbn/controls-constants';
 import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import {
+  apiCanPinPanels,
+  apiHasSections,
+  initializeUnsavedChanges,
+} from '@kbn/presentation-containers';
 import {
   useStateFromPublishingSubject,
   type PublishingSubject,
@@ -81,6 +85,12 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager();
       const selectionsManager = initializeSelectionsManager(state);
+      const isPinned = apiCanPinPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
+
+      // const isPinned$ = apiCanPinPanels(parentApi) ? parentApi.panelIsPinned$(uuid) : of(undefined);
+      // isPinned$.subscribe((isPinned) => {
+      //   console.log({ uuid, isPinned });
+      // });
 
       const dataControlManager: DataControlStateManager =
         await initializeDataControlManager<EditorState>({
@@ -382,25 +392,29 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
                   <h2>Test</h2>
                 </figcaption>
               </EuiTitle> */}
-              <EuiFormRow
-                fullWidth
-                label="Text field"
-                css={({ euiTheme }) => css`
-                  padding: 4px 8px;
-                  width: 100%;
-                  row-gap: 2px;
-                  label {
-                    font-size: 1rem;
-                    font-weight: ${euiTheme.font.weight.regular};
-                    color: ${euiTheme.colors.textSubdued};
-                  }
-                  .euiFormRow__fieldWrapper {
-                    height: 100%;
-                  }
-                `}
-              >
+              {isPinned ? (
                 <OptionsListControl />
-              </EuiFormRow>
+              ) : (
+                <EuiFormRow
+                  fullWidth
+                  label="Text field"
+                  css={({ euiTheme }) => css`
+                    padding: 4px 8px;
+                    width: 100%;
+                    row-gap: 2px;
+                    label {
+                      font-size: 1rem;
+                      font-weight: ${euiTheme.font.weight.regular};
+                      color: ${euiTheme.colors.textSubdued};
+                    }
+                    .euiFormRow__fieldWrapper {
+                      height: 100%;
+                    }
+                  `}
+                >
+                  <OptionsListControl />
+                </EuiFormRow>
+              )}
             </OptionsListControlContext.Provider>
           );
         },
