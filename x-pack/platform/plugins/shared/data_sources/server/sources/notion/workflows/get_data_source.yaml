@@ -1,0 +1,16 @@
+version: '1'
+name: 'sources.notion.get_data_source'
+description: 'Given the ID of a data source, get information about its columns'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: data_source_id
+    type: string
+steps:
+  - name: get-data-source
+    type: notion.getDataSource
+    connector-id: <%= stackConnectorId %>
+    with:
+      dataSourceId: "${{inputs.data_source_id}}"
