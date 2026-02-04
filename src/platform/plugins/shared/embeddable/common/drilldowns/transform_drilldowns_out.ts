@@ -8,7 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { DrilldownsState, DrilldownState } from '../../server';
+import type { SerializedDrilldowns, DrilldownState } from '../../server';
 import { transformEnhancementsOut } from '../bwc/enhancements/transform_enhancements_out';
 
 export function getTransformDrilldownsOut(
@@ -16,7 +16,7 @@ export function getTransformDrilldownsOut(
     type: string
   ) => ((state: DrilldownState, references?: Reference[]) => DrilldownState) | undefined
 ) {
-  function transformDrilldownsOut<StoredState extends DrilldownsState>(
+  function transformDrilldownsOut<StoredState extends SerializedDrilldowns>(
     storedState: StoredState,
     references?: Reference[]
   ): StoredState {

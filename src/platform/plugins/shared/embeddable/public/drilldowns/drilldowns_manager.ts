@@ -10,17 +10,14 @@
 import { BehaviorSubject, map } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import type {
-  DrilldownsManager,
-  DrilldownStateInternal,
-} from './types';
+import type { DrilldownsManager, DrilldownStateInternal } from './types';
 import { createAction } from './create_action';
 import { deleteAction } from './delete_action';
-import { DrilldownsState, DrilldownState } from '../../server';
+import type { SerializedDrilldowns, DrilldownState } from '../../server';
 
 export function initializeDrilldownsManager(
   embeddableUuid: string,
-  state: DrilldownsState
+  state: SerializedDrilldowns
 ): DrilldownsManager {
   const drilldowns$ = new BehaviorSubject<DrilldownStateInternal[]>([]);
   const api: DrilldownsManager['api'] = {
@@ -48,7 +45,7 @@ export function initializeDrilldownsManager(
     cleanup: deleteActions,
     comparators: {
       drilldowns: 'deepEquality',
-    } as StateComparators<DrilldownsState>,
+    } as StateComparators<SerializedDrilldowns>,
     anyStateChange$: drilldowns$.pipe(map(() => undefined)),
     getLatestState: () => ({
       drilldowns: drilldowns$.value.map((drilldown) => {
@@ -56,7 +53,7 @@ export function initializeDrilldownsManager(
         return rest;
       }),
     }),
-    reinitializeState: (lastState: DrilldownsState) => {
+    reinitializeState: (lastState: SerializedDrilldowns) => {
       api.setDrilldowns(lastState.drilldowns ?? []);
     },
   };

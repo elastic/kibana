@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DrilldownsState } from '../../../server';
+import type { SerializedDrilldowns } from '../../../server';
 import { generateRefName } from './dynamic_actions/dashboard_drilldown_persistable_state';
 import type { DynamicActionsState, SerializedEvent } from './dynamic_actions/types';
 
-export function transformEnhancementsOut<StoredState extends DrilldownsState>(
+export function transformEnhancementsOut<StoredState extends SerializedDrilldowns>(
   state: StoredState & { enhancements?: { dynamicActions?: DynamicActionsState } }
 ): StoredState {
   const { enhancements, ...restOfState } = state;

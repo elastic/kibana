@@ -8,19 +8,16 @@
  */
 
 import type { LicenseType } from '@kbn/licensing-types';
-import type {
-  PublishingSubject,
-  StateComparators,
-} from '@kbn/presentation-publishing';
+import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { Observable } from 'rxjs';
-import type { DrilldownsState, DrilldownState } from '../../server';
+import type { SerializedDrilldowns, DrilldownState } from '../../server';
 
 export type DrilldownStateInternal = DrilldownState & { actionId: string };
 
 export type DrilldownDefinition<
   TDrilldownState extends DrilldownState = DrilldownState,
-  TContext extends object = object,
+  TContext extends object = object
 > = {
   /**
    * Implements the "navigation" action of the drilldown. This happens when
@@ -39,10 +36,7 @@ export type DrilldownDefinition<
   /**
    * Returns a link where drilldown should navigate on middle click or Ctrl + click.
    */
-  getHref?(
-    drilldownState: TDrilldownState,
-    context: TContext
-  ): Promise<string | undefined>;
+  getHref?(drilldownState: TDrilldownState, context: TContext): Promise<string | undefined>;
 
   isCompatible?: ActionDefinition['isCompatible'];
 
@@ -70,10 +64,10 @@ export type DrilldownDefinition<
 export interface DrilldownsManager {
   api: HasDrilldowns;
   cleanup: () => void;
-  comparators: StateComparators<DrilldownsState>;
+  comparators: StateComparators<SerializedDrilldowns>;
   anyStateChange$: Observable<void>;
-  getLatestState: () => DrilldownsState;
-  reinitializeState: (lastState: DrilldownsState) => void;
+  getLatestState: () => SerializedDrilldowns;
+  reinitializeState: (lastState: SerializedDrilldowns) => void;
 }
 
 export type HasDrilldowns = {

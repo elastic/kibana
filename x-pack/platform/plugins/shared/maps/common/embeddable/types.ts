@@ -6,13 +6,13 @@
  */
 
 import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
-import type { DrilldownsState } from '@kbn/embeddable-plugin/server';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type { MapCenterAndZoom, MapExtent, MapSettings } from '../descriptor_types';
 import type { MapAttributes } from '../../server';
 
 export type MapEmbeddableBaseState = SerializedTimeRange &
   SerializedTitles &
-  DrilldownsState & {
+  SerializedDrilldowns & {
     isLayerTOCOpen?: boolean;
     openTOCDetails?: string[];
     mapCenter?: MapCenterAndZoom;
