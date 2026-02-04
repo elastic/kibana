@@ -16,11 +16,6 @@ import { Serializable } from '@kbn/synthtrace-client';
 import { SampleParserClient } from '@kbn/sample-log-parser';
 import type { WiredIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/wired';
 import { castArray } from 'lodash';
-import {
-  LOGS_ROOT_STREAM_NAME,
-  LOGS_OTEL_STREAM_NAME,
-  LOGS_ECS_STREAM_NAME,
-} from '@kbn/streams-schema';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 
@@ -48,7 +43,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
       await streamsClient.enable();
 
       const setupChildStreams = async (rootStream: string) => {
-        const isEcsStream = rootStream === LOGS_ECS_STREAM_NAME;
+        const isEcsStream = rootStream === 'logs.ecs';
         // OTel streams use 'attributes.' prefix, ECS streams don't
         const prefix = isEcsStream ? '' : 'attributes.';
         const customPrefix = 'attributes.';
@@ -162,14 +157,14 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         // Set up legacy logs stream if enabled
         if (isLogsEnabled) {
           logger.info('Setting up legacy logs and child streams');
-          await setupChildStreams(LOGS_ROOT_STREAM_NAME);
+          await setupChildStreams('logs');
         }
 
         logger.info('Setting up logs.otel and child streams');
-        await setupChildStreams(LOGS_OTEL_STREAM_NAME);
+        await setupChildStreams('logs.otel');
 
         logger.info('Setting up logs.ecs and child streams');
-        await setupChildStreams(LOGS_ECS_STREAM_NAME);
+        await setupChildStreams('logs.ecs');
       } catch (error) {
         logger.error(new Error(`Error occurred while forking streams`, { cause: error }));
       }

@@ -8,12 +8,7 @@
  */
 
 import type { ESDocumentWithOperation } from '@kbn/synthtrace-client';
-import {
-  LOGS_ECS_STREAM_NAME,
-  LOGS_OTEL_STREAM_NAME,
-  ROOT_STREAM_NAMES,
-  type Streams,
-} from '@kbn/streams-schema';
+import { type Streams } from '@kbn/streams-schema';
 import type { Readable } from 'stream';
 import { Transform, pipeline } from 'stream';
 import type { Required } from 'utility-types';
@@ -159,8 +154,8 @@ function streamsRoutingTransform(isLogsEnabled: boolean = false) {
     transform(document: ESDocumentWithOperation<StreamsDocument>, encoding, callback) {
       // Determine target streams based on isLogsEnabled
       const targetStreams: string[] = isLogsEnabled
-        ? [...ROOT_STREAM_NAMES]
-        : [LOGS_OTEL_STREAM_NAME, LOGS_ECS_STREAM_NAME];
+        ? ['logs', 'logs.otel', 'logs.ecs']
+        : ['logs.otel', 'logs.ecs'];
 
       // Replicate document to each target stream
       targetStreams.forEach((streamName) => {
