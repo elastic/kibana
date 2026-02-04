@@ -71,8 +71,9 @@ describe('SortButton', () => {
 
     await waitFor(() => {
       // The selected option should have a checkmark (EuiSelectable adds 'euiSelectableListItem-isChecked' class)
-      const serviceOption = container.querySelector('[data-test-subj="sortButton"]');
-      expect(serviceOption).toBeInTheDocument();
+      const checkedOption = container.querySelector('.euiSelectableListItem-isChecked');
+      expect(checkedOption).toBeInTheDocument();
+      expect(checkedOption).toHaveTextContent('Service');
     });
   });
 
