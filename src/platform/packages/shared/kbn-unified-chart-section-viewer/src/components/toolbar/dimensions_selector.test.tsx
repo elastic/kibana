@@ -84,6 +84,13 @@ const mockDimensions: Dimension[] = [
   { name: 'container.id', type: ES_FIELD_TYPES.KEYWORD },
   { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
   { name: 'pod.name', type: ES_FIELD_TYPES.KEYWORD },
+  { name: 'namespace.name', type: ES_FIELD_TYPES.KEYWORD },
+  { name: 'node.name', type: ES_FIELD_TYPES.KEYWORD },
+  { name: 'zone.name', type: ES_FIELD_TYPES.KEYWORD },
+  { name: 'region.name', type: ES_FIELD_TYPES.KEYWORD },
+  { name: 'cloud.provider', type: ES_FIELD_TYPES.KEYWORD },
+  { name: 'cloud.region', type: ES_FIELD_TYPES.KEYWORD },
+  { name: 'cloud.availability_zone', type: ES_FIELD_TYPES.KEYWORD },
 ];
 
 const mockFields = [
@@ -155,6 +162,7 @@ describe('DimensionsSelector', () => {
       const maxSelected = mockDimensions.slice(0, MAX_DIMENSIONS_SELECTIONS);
       renderWithIntl(<DimensionsSelector {...defaultProps} selectedDimensions={maxSelected} />);
       const button = screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Button`);
+      expect(button).toHaveTextContent('Dimensions');
       expect(button).toHaveTextContent(String(MAX_DIMENSIONS_SELECTIONS));
 
       const tooltipAnchor = button.querySelector('.euiToolTipAnchor');
@@ -241,12 +249,13 @@ describe('DimensionsSelector', () => {
         { dimensions: [mockDimensions[1], mockDimensions[3]] },
         { dimensions: [mockDimensions[0], mockDimensions[1], mockDimensions[2]] },
       ];
+      const testDimensions = mockDimensions.slice(0, 4);
 
       renderWithIntl(
         <DimensionsSelector
           {...defaultProps}
           fields={fieldsWithIntersection}
-          dimensions={mockDimensions}
+          dimensions={testDimensions}
           selectedDimensions={[mockDimensions[0], mockDimensions[1]]}
         />
       );
