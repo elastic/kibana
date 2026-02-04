@@ -15,6 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ActionConnector } from '../../../../types';
+import { usesOAuthAuthorizationCode } from '../../../lib/check_oauth_auth_code';
 
 interface Props {
   onClose: () => void;
@@ -23,6 +25,9 @@ interface Props {
   showButtons: boolean;
   disabled: boolean;
   onClickSave: () => void;
+  connector: ActionConnector;
+  onAuthorize?: () => void;
+  isAuthorizing?: boolean;
 }
 
 const FlyoutFooterComponent: React.FC<Props> = ({
@@ -32,6 +37,9 @@ const FlyoutFooterComponent: React.FC<Props> = ({
   showButtons,
   disabled,
   onClickSave,
+  connector,
+  onAuthorize,
+  isAuthorizing,
 }) => {
   return (
     <EuiFlyoutFooter data-test-subj="edit-connector-flyout-footer">
@@ -44,29 +52,56 @@ const FlyoutFooterComponent: React.FC<Props> = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {showButtons && (
-            <EuiButton
-              fill
-              iconType={isSaved ? 'check' : undefined}
-              color="primary"
-              data-test-subj="edit-connector-flyout-save-btn"
-              isLoading={isSaving}
-              onClick={onClickSave}
-              disabled={disabled}
-            >
-              {isSaved ? (
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonSavedLabel"
-                  defaultMessage="Changes Saved"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel"
-                  defaultMessage="Save"
-                />
-              )}
-            </EuiButton>
-          )}
+          <EuiFlexGroup gutterSize="s">
+            {usesOAuthAuthorizationCode(connector) && onAuthorize && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="success"
+                  data-test-subj="edit-connector-flyout-authorize-btn"
+                  onClick={onAuthorize}
+                  isLoading={isAuthorizing}
+                  iconType="popout"
+                >
+                  {isAuthorizing ? (
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.editConnectorForm.authorizingButtonLabel"
+                      defaultMessage="Authorizing..."
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.editConnectorForm.authorizeButtonLabel"
+                      defaultMessage="Authorize"
+                    />
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            {showButtons && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  iconType={isSaved ? 'check' : undefined}
+                  color="primary"
+                  data-test-subj="edit-connector-flyout-save-btn"
+                  isLoading={isSaving}
+                  onClick={onClickSave}
+                  disabled={disabled}
+                >
+                  {isSaved ? (
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonSavedLabel"
+                      defaultMessage="Changes Saved"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel"
+                      defaultMessage="Save"
+                    />
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>

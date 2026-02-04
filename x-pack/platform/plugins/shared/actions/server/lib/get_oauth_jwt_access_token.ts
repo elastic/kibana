@@ -63,7 +63,10 @@ export const getOAuthJwtAccessToken = async ({
     hasErrors = errors;
   }
 
-  if (connectorToken === null || Date.parse(connectorToken.expiresAt) <= Date.now()) {
+  if (
+    connectorToken === null ||
+    (connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) <= Date.now() : false)
+  ) {
     // generate a new assertion
     const assertion = createJWTAssertion(logger, privateKey, privateKeyPassword, {
       audience: clientId,
