@@ -299,7 +299,9 @@ describe('tab mapping utils', () => {
           "title": "title",
           "usesAdHocDataView": false,
           "viewMode": undefined,
-          "visContext": undefined,
+          "visContext": Object {
+            "foo": "bar",
+          },
         }
       `);
     });
