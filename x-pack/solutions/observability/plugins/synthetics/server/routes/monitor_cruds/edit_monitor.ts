@@ -284,9 +284,11 @@ export const syncEditedMonitor = async ({
       await Promise.all([editedSOPromise, editSyncPromise]);
 
     if (activePolicyIds && activePolicyIds.length > 0) {
+      const savedObjectType = editedMonitorSavedObject.type ?? decryptedPreviousMonitor.type;
       await monitorConfigRepository.updatePackagePolicyReferences(
         decryptedPreviousMonitor.id,
-        activePolicyIds
+        activePolicyIds,
+        savedObjectType
       );
     }
 
