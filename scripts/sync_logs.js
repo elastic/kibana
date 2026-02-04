@@ -111,7 +111,7 @@ function parseConfig(log) {
   }
   var opts = getopts(process.argv.slice(2), {
     alias: { h: 'help', v: 'verbose', c: 'config' },
-    boolean: ['help', 'verbose', 'no-verify-certs', 'translate-timestamps'],
+    boolean: ['help', 'verbose', 'no-verify-certs'],
     string: [
       'config',
       'source-host',
@@ -125,6 +125,7 @@ function parseConfig(log) {
       'batch-size',
       'from',
       'to',
+      'translate-timestamps',
     ],
   });
 
@@ -146,7 +147,28 @@ function parseConfig(log) {
   var batchSize = get('batch-size', 'SYNC_BATCH_SIZE', '100');
   var from = get('from', 'SYNC_FROM', undefined);
   var to = get('to', 'SYNC_TO', undefined);
-  var translateTimestamps = opts['translate-timestamps'] || false;
+  var translateTimestampsRaw =
+    opts['translate-timestamps'] !== undefined
+      ? opts['translate-timestamps']
+      : process.env.SYNC_TRANSLATE_TIMESTAMPS;
+  var translateTimestamps;
+
+  if (translateTimestampsRaw !== undefined) {
+    if (translateTimestampsRaw === '' || translateTimestampsRaw === 'true') {
+      translateTimestamps = true;
+    } else {
+      var hours = parseFloat(translateTimestampsRaw);
+      if (Number.isNaN(hours) || hours <= 0) {
+        console.error(
+          'Error: --translate-timestamps/SYNC_TRANSLATE_TIMESTAMPS value must be a positive number of hours.'
+        );
+        process.exit(1);
+      }
+      translateTimestamps = hours;
+    }
+  } else {
+    translateTimestamps = false;
+  }
 
   var destEsConfig = readKibanaConfig(opts.config, log);
   var destHost;
@@ -332,17 +354,36 @@ function stripDataStreamFields(doc) {
   }
 }
 
-function transform(docs, config, timeOffset) {
+function transform(docs, config) {
+  var sourceRangeStart;
+  var sourceRange;
+  var targetRange;
+
+  if (config.translateTimestamps && config.from && config.to) {
+    sourceRangeStart = new Date(config.from).getTime();
+    sourceRange = new Date(config.to).getTime() - sourceRangeStart;
+
+    if (typeof config.translateTimestamps === 'number') {
+      targetRange = config.translateTimestamps * 60 * 60 * 1000;
+    } else {
+      targetRange = sourceRange;
+    }
+  }
+
   for (var i = 0; i < docs.length; i++) {
     var doc = docs[i];
     stripDataStreamFields(doc);
     if (config.targetIndex) {
       doc._index = config.targetIndex;
     }
-    if (config.translateTimestamps && timeOffset && doc._source && doc._source['@timestamp']) {
-      var originalTimestamp = new Date(doc._source['@timestamp']);
-      var newTimestamp = new Date(originalTimestamp.getTime() + timeOffset);
-      doc._source['@timestamp'] = newTimestamp.toISOString();
+    if (config.translateTimestamps && doc._source && doc._source['@timestamp'] && sourceRange > 0) {
+      var originalTimestampMs = new Date(doc._source['@timestamp']).getTime();
+      var now = new Date().getTime();
+      var targetEnd = now;
+      var targetStart = targetEnd - targetRange;
+      var normalized = (originalTimestampMs - sourceRangeStart) / sourceRange;
+      var newTimestampMs = targetStart + normalized * targetRange;
+      doc._source['@timestamp'] = new Date(newTimestampMs).toISOString();
     }
   }
 }
@@ -450,11 +491,7 @@ function runSyncCycle(sourceClient, destClient, config, cycleNumber, log, startT
   return search(sourceClient, config, cycleNumber, log, startTime, endTime).then(function (docs) {
     if (docs.length === 0) return 0;
 
-    var timeOffset;
-    if (config.translateTimestamps && config.from) {
-      timeOffset = new Date().getTime() - new Date(config.from).getTime();
-    }
-    transform(docs, config, timeOffset);
+    transform(docs, config);
 
     if (config.targetIndex) {
       return uploadDocumentsToStream(destClient, docs, config.targetIndex, config.batchSize, log);
@@ -513,7 +550,10 @@ Sync options:
   SYNC_BATCH_SIZE              or  --batch-size       (default: 100)
   SYNC_FROM                    or  --from             Start of the time range for syncing (ISO 8601 format)
   SYNC_TO                      or  --to               End of the time range for syncing (ISO 8601 format)
-  --translate-timestamps       Translate log timestamps to the current time, maintaining relative intervals. Requires --from and --to.
+  --translate-timestamps[=HOURS] Translate log timestamps to a new time range ending at the present.
+                                 With a value (in hours), normalizes to the last N hours.
+                                 Without a value, preserves the original duration.
+                                 Requires --from and --to.
 
 Other:
   --config, -c                 Path to Kibana config (default: config/kibana.dev.yml)
@@ -526,7 +566,7 @@ Other:
 function main() {
   var opts = getopts(process.argv.slice(2), {
     alias: { h: 'help', v: 'verbose' },
-    boolean: ['help', 'verbose', 'translate-timestamps'],
+    boolean: ['help', 'verbose'],
   });
   if (opts.help) {
     showHelp();
