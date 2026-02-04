@@ -34,7 +34,7 @@ jest.mock('../agent_policy', () => ({
       if (id === 'policyBothConditions') {
         inputs.unshift({
           meta: { package: { agentVersion: '>=9.3.0' } },
-        });
+        } as any);
       }
 
       return {
