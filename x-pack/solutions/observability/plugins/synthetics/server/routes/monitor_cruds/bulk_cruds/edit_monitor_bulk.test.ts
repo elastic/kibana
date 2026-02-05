@@ -88,12 +88,14 @@ describe('syncEditedMonitorBulk', () => {
 
       expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledWith(
         'monitor-1',
-        ['monitor-1-loc-1', 'monitor-1-loc-2']
+        ['monitor-1-loc-1', 'monitor-1-loc-2'],
+        'synthetics-monitor'
       );
 
       expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledWith(
         'monitor-2',
-        ['monitor-2-loc-1']
+        ['monitor-2-loc-1'],
+        'synthetics-monitor'
       );
     });
 
@@ -211,7 +213,8 @@ describe('syncEditedMonitorBulk', () => {
       expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledTimes(1);
       expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledWith(
         'monitor-1',
-        ['monitor-1-loc-1']
+        ['monitor-1-loc-1'],
+        'synthetics-monitor'
       );
     });
   });

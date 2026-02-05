@@ -161,8 +161,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       const packagePolicy: PackagePolicy = apiResponse.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitor.id + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitor.id + '-' + testFleetPolicyID
       );
       expect(packagePolicy.name).to.contain(NEW_LOCATION_LABEL);
     });
