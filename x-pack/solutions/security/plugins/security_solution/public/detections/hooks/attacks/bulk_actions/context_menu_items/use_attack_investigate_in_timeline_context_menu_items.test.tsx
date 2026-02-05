@@ -45,7 +45,6 @@ describe('useAttackInvestigateInTimelineContextMenuItems', () => {
     const { result } = renderHook(() =>
       useAttackInvestigateInTimelineContextMenuItems({
         attack: mockAttack,
-        filters: [],
       })
     );
 
@@ -56,7 +55,6 @@ describe('useAttackInvestigateInTimelineContextMenuItems', () => {
     const { result } = renderHook(() =>
       useAttackInvestigateInTimelineContextMenuItems({
         attack: mockAttack,
-        filters: [],
       })
     );
 
@@ -77,7 +75,6 @@ describe('useAttackInvestigateInTimelineContextMenuItems', () => {
     const { result } = renderHook(() =>
       useAttackInvestigateInTimelineContextMenuItems({
         attack: mockAttack,
-        filters: [],
         closePopover,
       })
     );
@@ -94,7 +91,6 @@ describe('useAttackInvestigateInTimelineContextMenuItems', () => {
     const { result } = renderHook(() =>
       useAttackInvestigateInTimelineContextMenuItems({
         attack: mockAttack,
-        filters: [],
       })
     );
 

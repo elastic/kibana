@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import type { Filter, Query } from '@kbn/es-query';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
@@ -17,14 +16,6 @@ import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../components/alerts_ta
 export interface UseAttackInvestigateInTimelineContextMenuItemsProps {
   attack: AttackDiscoveryAlert;
   /**
-   * Filters representing the current table scope (global + table filters).
-   */
-  filters: Filter[];
-  /**
-   * Query representing the current table scope.
-   */
-  query?: Query;
-  /**
    * Optional callback to close the containing popover menu
    */
   closePopover?: () => void;
@@ -32,8 +23,6 @@ export interface UseAttackInvestigateInTimelineContextMenuItemsProps {
 
 export const useAttackInvestigateInTimelineContextMenuItems = ({
   attack,
-  filters,
-  query,
   closePopover,
 }: UseAttackInvestigateInTimelineContextMenuItemsProps): {
   items: EuiContextMenuPanelItemDescriptorEntry[];
@@ -55,11 +44,10 @@ export const useAttackInvestigateInTimelineContextMenuItems = ({
 
   const onInvestigateInTimelineClick = useCallback(() => {
     investigateInTimeline({
-      query,
-      filters: [...filters, ...attackAlertIdFilters],
+      filters: attackAlertIdFilters,
     });
     closePopover?.();
-  }, [attackAlertIdFilters, closePopover, filters, investigateInTimeline, query]);
+  }, [attackAlertIdFilters, closePopover, investigateInTimeline]);
 
   const items = useMemo<EuiContextMenuPanelItemDescriptorEntry[]>(
     () =>
