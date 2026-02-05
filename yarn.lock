@@ -2723,10 +2723,10 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@3.1.15":
-  version "3.1.15"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.15.tgz#889c426f27e404baa3e0d77006d5be5fe94e1275"
-  integrity sha512-Sdij5LzWrvnIpvuVaCydA2MtHfvs8EL6YR7aH6VYvKYjRIOFvR/i12xEa0XuUoLwj7VROVnTOktHYRVWOqEIKg==
+"@elastic/monaco-esql@3.1.16":
+  version "3.1.16"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.16.tgz#b58d5830305582951e0a17fee4a4b308863b72b8"
+  integrity sha512-EvYVTy3gQ/hiByUkIiJy07ny0kv9k6jQdBoMH8mixkfkDpGZQ5RP1EGUPMqJRTPV7/L0tL0lNhbc45cJ34Sm0Q==
 
 "@elastic/node-crypto@1.2.3", "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -5193,6 +5193,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-list-provider-client@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-list-provider@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-access-control-public@link:src/platform/packages/shared/content-management/access_control/access_control_public":
   version "0.0.0"
   uid ""
@@ -6790,6 +6798,14 @@
   uid ""
 
 "@kbn/esql-language@link:src/platform/packages/shared/kbn-esql-language":
+  version "0.0.0"
+  uid ""
+
+"@kbn/esql-resource-browser-storybook-config@link:src/platform/packages/shared/kbn-esql-resource-browser/.storybook":
+  version "0.0.0"
+  uid ""
+
+"@kbn/esql-resource-browser@link:src/platform/packages/shared/kbn-esql-resource-browser":
   version "0.0.0"
   uid ""
 
@@ -9618,6 +9634,14 @@
   uid ""
 
 "@kbn/vis-type-xy-plugin@link:src/platform/plugins/private/vis_types/xy":
+  version "0.0.0"
+  uid ""
+
+"@kbn/visualization-listing-components@link:src/platform/packages/shared/kbn-visualization-listing-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/visualization-listing-plugin@link:src/platform/plugins/shared/visualization_listing":
   version "0.0.0"
   uid ""
 
@@ -15606,19 +15630,19 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@12.9.3":
-  version "12.9.3"
-  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.9.3.tgz#ceafa411c619bdc8d899301400ee80501fbddb96"
-  integrity sha512-PSWoJ8vHiEqSIkLIkge+0eiHWiw4C6dyFDA03VKWJkqbU4A13VlDIVwKqf/Znuysn2GQw/zA61zpHE4rGgax7Q==
+"@xyflow/react@12.10.0":
+  version "12.10.0"
+  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.10.0.tgz#d2924cb38074e8e6141643dd8bd7a0666aaac868"
+  integrity sha512-eOtz3whDMWrB4KWVatIBrKuxECHqip6PfA8fTpaS2RUGVpiEAe+nqDKsLqkViVWxDGreq0lWX71Xth/SPAzXiw==
   dependencies:
-    "@xyflow/system" "0.0.73"
+    "@xyflow/system" "0.0.74"
     classcat "^5.0.3"
     zustand "^4.4.0"
 
-"@xyflow/system@0.0.73":
-  version "0.0.73"
-  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.73.tgz#9646d95b2333f2d5f3abd94944cc230326ab8d7f"
-  integrity sha512-C2ymH2V4mYDkdVSiRx0D7R0s3dvfXiupVBcko6tXP5K4tVdSBMo22/e3V9yRNdn+2HQFv44RFKzwOyCcUUDAVQ==
+"@xyflow/system@0.0.74":
+  version "0.0.74"
+  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.74.tgz#4bc01af020504387c88a3b13ac6d426b47cba845"
+  integrity sha512-7v7B/PkiVrkdZzSbL+inGAo6tkR/WQHHG0/jhSvLQToCsfa8YubOGmBYd1s08tpKpihdHDZFwzQZeR69QSBb4Q==
   dependencies:
     "@types/d3-drag" "^3.0.7"
     "@types/d3-interpolate" "^3.0.4"
@@ -23585,10 +23609,10 @@ ipaddr.js@1.9.1:
   resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-1.9.1.tgz#bff38543eeb8984825079ff3a2a8e6cbd46781b3"
   integrity sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==
 
-ipaddr.js@2.2.0, ipaddr.js@^2.1.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-2.2.0.tgz#d33fa7bac284f4de7af949638c9d68157c6b92e8"
-  integrity sha512-Ag3wB2o37wslZS19hZqorUnrnzSkpOVy+IiiDEiTqNubEYpYuHWIf6K4psgN2ZWKExS4xhVCrRVfb/wfW8fWJA==
+ipaddr.js@2.3.0, ipaddr.js@^2.1.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-2.3.0.tgz#71dce70e1398122208996d1c22f2ba46a24b1abc"
+  integrity sha512-Zv/pA+ciVFbCSBBjGfaKUya/CcGmUHzTydLMaTwrUUEM2DIEO3iZvueGxmacvmN50fGpGVKeTXpb2LcYQxeVdg==
 
 irregular-plurals@^3.2.0:
   version "3.2.0"
@@ -25757,10 +25781,10 @@ lodash.uniq@^4.5.0:
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
   integrity sha1-0CJTc662Uq3BvILklFM5qEJ1R3M=
 
-lodash@4.17.21, lodash@^4.17.10, lodash@^4.17.13, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@^4.17.21, lodash@^4.17.4:
-  version "4.17.21"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
-  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
+lodash@4.17.21, lodash@4.17.23, lodash@^4.17.10, lodash@^4.17.13, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@^4.17.21, lodash@^4.17.4:
+  version "4.17.23"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.23.tgz#f113b0378386103be4f6893388c73d0bde7f2c5a"
+  integrity sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==
 
 log-symbols@^3.0.0:
   version "3.0.0"

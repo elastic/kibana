@@ -8,7 +8,7 @@
 import { ToolType, validateToolId } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { ToolRegistry } from '../tool_registry';
+import type { ToolRegistry } from '@kbn/agent-builder-server';
 import { validateConnector } from '../tool_types/mcp/validate_configuration';
 import type {
   BulkCreateMcpToolResult,
