@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import type { EuiDescriptionListProps, EuiIconTipProps } from '@elastic/eui';
 import {
   EuiAccordion,
-  EuiCodeBlock,
   euiContainerQuery,
   EuiDescriptionList,
   EuiFlexGroup,
@@ -38,6 +37,7 @@ import { SloFlyoutPanel } from '../../shared_flyout/flyout_panel';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { SloDetailsDefinitionProps } from '.';
 import { DESCRIPTION_LIST_ROW_WIDTH_BREAKPOINT } from '../../shared_flyout/constants';
+import { DisplayQuery } from '../overview/display_query';
 
 function AccordionHeader({ title }: { title: string }) {
   return (
@@ -240,28 +240,29 @@ export function SloDetailsFlyoutDefinition({ slo }: SloDetailsDefinitionProps) {
                 />
               </SloFlyoutPanel>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiPanel hasShadow={false} hasBorder>
-                <EuiFlexGroup direction="column" gutterSize="s">
-                  <EuiFlexItem>
-                    <EuiTitle size="xxs">
-                      <p>
-                        {i18n.translate('xpack.slo.flyoutDefinition.p.overallQueryLabel', {
-                          defaultMessage: 'Overall query',
-                        })}
-                      </p>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiCodeBlock>
-                      {i18n.translate('xpack.slo.flyoutDefinition.sampleQuery', {
-                        defaultMessage: 'transaction.name:*/api/v1/heroku/*',
-                      })}
-                    </EuiCodeBlock>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            </EuiFlexItem>
+            {slo.indicator.params.filter && (
+              <EuiFlexItem>
+                <EuiPanel hasShadow={false} hasBorder>
+                  <EuiFlexGroup direction="column" gutterSize="s">
+                    <EuiFlexItem>
+                      <EuiTitle size="xxs">
+                        <p>
+                          {i18n.translate('xpack.slo.flyoutDefinition.queryFilterLabel', {
+                            defaultMessage: 'Query filter',
+                          })}
+                        </p>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <DisplayQuery
+                        query={slo.indicator.params.filter}
+                        index={'index' in slo.indicator.params ? slo.indicator.params.index : ''}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiAccordion>
       </EuiFlexItem>
