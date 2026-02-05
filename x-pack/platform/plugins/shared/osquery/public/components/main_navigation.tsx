@@ -14,9 +14,11 @@ import { navCss } from './layouts/default';
 import { useRouterNavigate } from '../common/lib/kibana';
 import { ManageIntegrationLink } from './manage_integration_link';
 import { useKibana } from '../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 
 enum Section {
   LiveQueries = 'live_queries',
+  History = 'history',
   Packs = 'packs',
   SavedQueries = 'saved_queries',
 }
@@ -24,11 +26,16 @@ enum Section {
 export const MainNavigation = () => {
   const { notifications } = useKibana().services;
   const isFeedbackEnabled = notifications?.feedback?.isEnabled() ?? true;
+  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const location = useLocation();
   const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
   const feedbackButtonLabel = i18n.translate('xpack.osquery.appNavigation.giveFeedbackButton', {
     defaultMessage: 'Give feedback',
   });
+
+  const historySection = isHistoryEnabled ? Section.History : Section.LiveQueries;
+  const isHistoryTabSelected =
+    section === Section.History || section === Section.LiveQueries;
 
   return (
     <div css={navCss}>
@@ -36,13 +43,20 @@ export const MainNavigation = () => {
         <EuiFlexItem>
           <EuiTabs bottomBorder={false}>
             <EuiTab
-              isSelected={section === Section.LiveQueries}
-              {...useRouterNavigate(Section.LiveQueries)}
+              isSelected={isHistoryTabSelected}
+              {...useRouterNavigate(historySection)}
             >
-              <FormattedMessage
-                id="xpack.osquery.appNavigation.liveQueriesLinkText"
-                defaultMessage="Live queries"
-              />
+              {isHistoryEnabled ? (
+                <FormattedMessage
+                  id="xpack.osquery.appNavigation.historyLinkText"
+                  defaultMessage="History"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.osquery.appNavigation.liveQueriesLinkText"
+                  defaultMessage="Live queries"
+                />
+              )}
             </EuiTab>
             <EuiTab isSelected={section === Section.Packs} {...useRouterNavigate(Section.Packs)}>
               <FormattedMessage

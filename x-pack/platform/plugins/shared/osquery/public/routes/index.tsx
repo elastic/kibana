@@ -10,12 +10,15 @@ import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { useBreadcrumbs } from '../common/hooks/use_breadcrumbs';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { LiveQueries } from './live_queries';
+import { History } from './history';
 import { SavedQueries } from './saved_queries';
 import { Packs } from './packs';
 
 const OsqueryAppRoutesComponent = () => {
   useBreadcrumbs('base');
+  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
 
   return (
     <Routes>
@@ -25,10 +28,24 @@ const OsqueryAppRoutesComponent = () => {
       <Route path={`/saved_queries`}>
         <SavedQueries />
       </Route>
-      <Route path="/live_queries">
-        <LiveQueries />
-      </Route>
-      <Redirect to="/live_queries" />
+      {isHistoryEnabled ? (
+        <>
+          <Route path="/history">
+            <History />
+          </Route>
+          <Route path="/live_queries">
+            <Redirect to="/history" />
+          </Route>
+          <Redirect to="/history" />
+        </>
+      ) : (
+        <>
+          <Route path="/live_queries">
+            <LiveQueries />
+          </Route>
+          <Redirect to="/live_queries" />
+        </>
+      )}
     </Routes>
   );
 };

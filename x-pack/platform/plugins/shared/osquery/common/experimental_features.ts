@@ -11,10 +11,10 @@
  */
 export const allowedExperimentalValues = Object.freeze({
   /**
-   * Placeholder feature flag for testing experimental features infrastructure.
-   * This should be removed once the first real experimental feature is added.
+   * Enables the new History page with enriched data (result counts, cases, user avatars).
+   * When enabled, /live_queries redirects to /history and navigation shows "History" tab.
    */
-  _placeholder: false,
+  queryHistoryRework: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
