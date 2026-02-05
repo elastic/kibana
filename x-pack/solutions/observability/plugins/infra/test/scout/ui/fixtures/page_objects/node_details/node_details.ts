@@ -139,7 +139,7 @@ export class NodeDetailsPage {
     }
 
     // Set defaults
-    assetDetails.preferredSchema = 'semconv';
+    assetDetails.preferredSchema = 'ecs';
     assetDetails.tabId = 'overview';
 
     return rison.encodeUnknown(assetDetails) || '';
