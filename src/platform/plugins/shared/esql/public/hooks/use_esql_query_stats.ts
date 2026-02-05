@@ -29,7 +29,7 @@ export function useESQLQueryStats(
           durationInMs: stats.queryTime?.value,
           totalDocumentsProcessed: stats.documentsProcessed?.value,
         };
-        setQueryStats((currentStats) => {
+        setQueryStats((currentStats: ESQLQueryStats | undefined) => {
           if (!isEqual(currentStats, updatedStats)) {
             return updatedStats;
           }

@@ -11,6 +11,8 @@ import type {
   GetAutoImportIntegrationResponse,
 } from '../../../common/model/api/integrations/integration.gen';
 import type { DataStream } from '../../../common/model/common_attributes.gen';
+import { getLangSmithOptions } from './lang_smith';
+import type { LangSmithOptions } from './lang_smith';
 
 export const FLEET_PACKAGES_PATH = `/api/fleet/epm/packages`;
 export const AUTOMATIC_IMPORT_INTEGRATIONS_PATH = `/api/automatic_import_v2/integrations`;
@@ -49,6 +51,7 @@ export interface CreateUpdateIntegrationRequest {
   description: string;
   logo?: string;
   dataStreams?: DataStream[];
+  langSmithOptions?: LangSmithOptions;
 }
 
 export const createIntegration = async ({
@@ -58,7 +61,10 @@ export const createIntegration = async ({
 }: RequestDeps & CreateUpdateIntegrationRequest): Promise<CreateAutoImportIntegrationResponse> =>
   http.put<CreateAutoImportIntegrationResponse>(AUTOMATIC_IMPORT_INTEGRATIONS_PATH, {
     version: '1',
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      ...body,
+      langSmithOptions: body.langSmithOptions ?? getLangSmithOptions(),
+    }),
     signal: abortSignal,
   });
 
