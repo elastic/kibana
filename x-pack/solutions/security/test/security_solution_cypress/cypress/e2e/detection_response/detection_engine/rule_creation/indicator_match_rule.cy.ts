@@ -106,6 +106,7 @@ import { visit } from '../../../../tasks/navigation';
 import {
   getDetails,
   goBackToRulesTable,
+  goToAlertsTab,
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
 } from '../../../../tasks/rule_details';
@@ -489,6 +490,7 @@ describe(
               .should('have.text', `${rule.interval}`);
           });
 
+          goToAlertsTab();
           waitForTheRuleToBeExecuted();
           waitForAlertsToPopulate();
 
@@ -504,6 +506,7 @@ describe(
             (rule) => visitRuleDetailsPage(rule.body.id)
           );
 
+          goToAlertsTab();
           waitForAlertsToPopulate();
           investigateFirstAlertInTimeline();
 

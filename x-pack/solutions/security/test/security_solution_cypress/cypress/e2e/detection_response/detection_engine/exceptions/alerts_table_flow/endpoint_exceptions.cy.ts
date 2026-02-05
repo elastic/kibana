@@ -56,7 +56,9 @@ describe(
       deleteEndpointExceptionList();
 
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
-      createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
+      createRule(getEndpointRule()).then((rule) =>
+        visitRuleDetailsPage(rule.body.id, { tab: 'alerts' })
+      );
 
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();

@@ -48,7 +48,7 @@ import {
 import { login } from '../../../../tasks/login';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { visit } from '../../../../tasks/navigation';
-import { waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
+import { goToAlertsTab, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
 import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../../screens/alerts';
 
 // This test is meant to test touching all the common various components in rule creation
@@ -115,6 +115,7 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
     cy.get(DESCRIPTION_SETUP_GUIDE_BUTTON).click();
     cy.get(DESCRIPTION_SETUP_GUIDE_CONTENT).should('contain', 'test setup markdown'); // Markdown formatting should be removed
 
+    goToAlertsTab();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
