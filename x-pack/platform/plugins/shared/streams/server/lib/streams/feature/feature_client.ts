@@ -173,6 +173,27 @@ export class FeatureClient {
       (operation) => 'index' in operation || validDeleteIds.has(operation.delete.id)
     );
   }
+
+  async getAllFeatures(streams: string[]): Promise<{ hits: Feature[]; total: number }> {
+    if (streams.length === 0) {
+      return { hits: [], total: 0 };
+    }
+
+    const featuresResponse = await this.clients.storageClient.search({
+      size: 10_000,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: [{ terms: { [STREAM_NAME]: streams } }],
+        },
+      },
+    });
+
+    return {
+      hits: featuresResponse.hits.hits.map((hit) => fromStorage(hit._source)),
+      total: featuresResponse.hits.total.value,
+    };
+  }
 }
 
 function toStorage(stream: string, feature: Feature): StoredFeature {
@@ -199,6 +220,7 @@ function fromStorage(feature: StoredFeature): Feature {
   return {
     uuid: feature[FEATURE_UUID],
     id: feature[FEATURE_ID],
+    stream_name: feature[STREAM_NAME],
     type: feature[FEATURE_TYPE],
     subtype: feature[FEATURE_SUBTYPE],
     description: feature[FEATURE_DESCRIPTION],

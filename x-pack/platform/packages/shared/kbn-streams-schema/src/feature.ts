@@ -15,6 +15,7 @@ export const DATASET_ANALYSIS_FEATURE_TYPE = 'dataset_analysis' as const;
 
 export const baseFeatureSchema = z.object({
   id: z.string(),
+  stream_name: z.string(),
   type: z.string(),
   subtype: z.string().optional(),
   title: z.string().optional(),
