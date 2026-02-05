@@ -56,7 +56,10 @@ describe('useTopNavLinks', () => {
   // we default to false especially that there a specific test scenario for when this is true
   const hasShareIntegration = false;
 
-  const Wrapper: React.FC<{ children: React.ReactNode; state: Awaited<ReturnType<typeof getStateContainer>> }> = ({ children, state }) => {
+  const Wrapper: React.FC<{
+    children: React.ReactNode;
+    state: Awaited<ReturnType<typeof getStateContainer>>;
+  }> = ({ children, state }) => {
     return (
       <DiscoverTestProvider
         services={services}
