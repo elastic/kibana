@@ -18,6 +18,7 @@ import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
 import { TASK_STATUSES } from '../saved_objects/constants';
 import { AgentService } from '../agents/agent_service';
 import { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
+import type { LangSmithOptions } from '../../routes/types';
 import type { AutomaticImportV2PluginStartDependencies } from '../../types';
 import type { AutomaticImportSavedObjectService } from '../saved_objects/saved_objects_service';
 
@@ -28,6 +29,10 @@ export interface DataStreamTaskParams extends DataStreamParams {
    * Inference connector ID to use when the background task runs.
    */
   connectorId: string;
+  /**
+   * Optional LangSmith tracing options to propagate to the agent invocation.
+   */
+  langSmithOptions?: LangSmithOptions;
 }
 
 export interface DataStreamParams {
@@ -174,7 +179,8 @@ export class TaskManagerService {
     );
 
     const { id: taskId, params } = taskInstance;
-    const { integrationId, dataStreamId, connectorId } = params as DataStreamTaskParams;
+    const { integrationId, dataStreamId, connectorId, langSmithOptions } =
+      params as DataStreamTaskParams;
 
     this.logger.debug(
       `Running task ${taskId} with ${JSON.stringify({ integrationId, dataStreamId, connectorId })}`
@@ -208,7 +214,8 @@ export class TaskManagerService {
         integrationId,
         dataStreamId,
         esClient,
-        model
+        model,
+        langSmithOptions
       );
 
       this.logger.debug(`Task ${taskId} completed successfully`);

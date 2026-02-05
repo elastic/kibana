@@ -38,6 +38,9 @@ paths:
                 description:
                   description: The description of the integration
                   $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+                langSmithOptions:
+                  description: The LangSmith tracing options
+                  $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"
                 logo:
                   description: The logo of the integration
                   $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
@@ -123,6 +126,9 @@ paths:
                   description: Integration logo image blob
                   $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
                   format: binary
+                langSmithOptions:
+                  description: The LangSmith tracing options
+                  $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"
                 dataStreams:
                   description: The data streams of the integration
                   type: array
@@ -273,3 +279,6 @@ components:
         version:
           description: The version of the integration
           $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+        langSmithOptions:
+          description: The LangSmith tracing options
+          $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"
