@@ -122,7 +122,14 @@ export const OriginalSource = z.object({
  * The status of the task
  */
 export type TaskStatus = z.infer<typeof TaskStatus>;
-export const TaskStatus = z.enum(['pending', 'processing', 'completed', 'failed', 'cancelled']);
+export const TaskStatus = z.enum([
+  'pending',
+  'processing',
+  'completed',
+  'approved',
+  'failed',
+  'cancelled',
+]);
 export type TaskStatusEnum = typeof TaskStatus.enum;
 export const TaskStatusEnum = TaskStatus.enum;
 
@@ -210,3 +217,20 @@ export const AllIntegrationsResponseIntegration = z.object({
    */
   status: TaskStatus,
 });
+
+/**
+ * The LangSmith options object.
+ */
+export type LangSmithOptions = z.infer<typeof LangSmithOptions>;
+export const LangSmithOptions = z
+  .object({
+    /**
+     * The project name.
+     */
+    projectName: z.string(),
+    /**
+     * The apiKey to use for tracing.
+     */
+    apiKey: z.string(),
+  })
+  .strict();

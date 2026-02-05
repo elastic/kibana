@@ -1,6 +1,6 @@
-## LENGTH
+# LENGTH
 
-Returns the character length of a string.
+Returns the character length of a string. All strings are in UTF-8, so a single character can use multiple bytes.
 
 ## Syntax
 
@@ -8,11 +8,13 @@ Returns the character length of a string.
 
 ### Parameters
 
-#### `string`
+#### string
 
-String expression. If `null`, the function returns `null`.
+String expression to measure the length of. If the value is `null`, the function returns `null`.
 
 ## Examples
+
+Calculates the number of characters in each city name for airports located in India.
 
 ```esql
 FROM airports
@@ -20,5 +22,3 @@ FROM airports
 | KEEP city
 | EVAL fn_length = LENGTH(city)
 ```
-
-This example calculates the character length of the `city` field for airports located in India.
