@@ -1379,13 +1379,20 @@ export const runActionTestSuite = ({
   });
 
   describe('closePit', () => {
-    // temporarily skipped, see https://elastic.slack.com/archives/C5TQ33ND8/p1769442067974589
-    it.skip('closes PointInTime', async () => {
+    it('closes PointInTime', async () => {
       const openPitTask = openPit({ client, index: 'existing_index_with_docs' });
       const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
 
       const pitId = pitResponse.right.pitId;
       await closePit({ client, pitId })();
+
+      await client.bulk({
+        refresh: 'wait_for',
+        operations: [
+          { index: { _index: 'existing_index_with_docs', _id: 'pit-invalidation-doc' } },
+          { type: 'test', value: 1 },
+        ],
+      });
 
       const searchTask = client.search({ pit: { id: pitId } });
 

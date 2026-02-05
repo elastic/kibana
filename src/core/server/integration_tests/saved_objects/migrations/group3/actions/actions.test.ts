@@ -1337,6 +1337,14 @@ describe('migration actions', () => {
       const pitId = pitResponse.right.pitId;
       await closePit({ client, pitId })();
 
+      await client.bulk({
+        refresh: 'wait_for',
+        operations: [
+          { index: { _index: 'existing_index_with_docs', _id: 'pit-invalidation-doc' } },
+          { type: 'test', value: 1 },
+        ],
+      });
+
       const searchTask = client.search({ pit: { id: pitId } });
 
       await expect(searchTask).rejects.toThrow('search_phase_execution_exception');
