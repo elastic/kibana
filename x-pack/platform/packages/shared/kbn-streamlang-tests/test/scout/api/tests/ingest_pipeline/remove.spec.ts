@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { RemoveProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
@@ -34,8 +34,8 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
-      expect(source).not.toHaveProperty('temp_field');
-      expect(source).toHaveProperty('message', 'keep-this');
+      expect(source?.temp_field).toBeUndefined();
+      expect(source?.message).toBe('keep-this');
     });
 
     apiTest('should ignore missing field when ignore_missing is true', async ({ testBed }) => {
@@ -59,7 +59,7 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
-      expect(source).toHaveProperty('message', 'some_value');
+      expect(source?.message).toBe('some_value');
     });
 
     apiTest('should fail if field is missing and ignore_missing is false', async ({ testBed }) => {
@@ -112,13 +112,13 @@ apiTest.describe(
 
       // First doc should have temp_data removed (where condition matched)
       const doc1 = ingestedDocs.find((d: any) => d.message === 'doc1');
-      expect(doc1).not.toHaveProperty('temp_data');
-      expect(doc1).toHaveProperty('event.kind', 'test');
+      expect(doc1?.temp_data).toBeUndefined();
+      expect(doc1?.event?.kind).toBe('test');
 
       // Second doc should keep temp_data (where condition not matched)
       const doc2 = ingestedDocs.find((d: any) => d.message === 'doc2');
-      expect(doc2).toHaveProperty('temp_data.value', 'keep-me');
-      expect(doc2).toHaveProperty('event.kind', 'production');
+      expect(doc2?.temp_data?.value).toBe('keep-me');
+      expect(doc2?.event?.kind).toBe('production');
     });
 
     apiTest('default value of ignore_missing (false)', async ({ testBed }) => {

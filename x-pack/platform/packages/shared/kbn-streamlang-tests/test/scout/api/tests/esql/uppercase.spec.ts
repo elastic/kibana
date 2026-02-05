@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { StreamlangDSL, UppercaseProcessor } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -30,8 +30,8 @@ apiTest.describe('Streamlang to ES|QL - Uppercase Processor', { tag: ['@ess', '@
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(2);
-    expect(esqlResult.documents[0]).toHaveProperty('message', 'TEST MESSAGE 1');
-    expect(esqlResult.documents[1]).toHaveProperty('message', 'TEST MESSAGE 2');
+    expect(esqlResult.documents[0]?.message).toBe('TEST MESSAGE 1');
+    expect(esqlResult.documents[1]?.message).toBe('TEST MESSAGE 2');
   });
 
   apiTest('should uppercase a field into a target field', async ({ testBed, esql }) => {
@@ -54,8 +54,8 @@ apiTest.describe('Streamlang to ES|QL - Uppercase Processor', { tag: ['@ess', '@
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(2);
-    expect(esqlResult.documents[0]).toHaveProperty('message_upper', 'TEST MESSAGE 1');
-    expect(esqlResult.documents[1]).toHaveProperty('message_upper', 'TEST MESSAGE 2');
+    expect(esqlResult.documents[0]?.message_upper).toBe('TEST MESSAGE 1');
+    expect(esqlResult.documents[1]?.message_upper).toBe('TEST MESSAGE 2');
   });
 
   apiTest('should uppercase a field with a where condition', async ({ testBed, esql }) => {
@@ -84,8 +84,8 @@ apiTest.describe('Streamlang to ES|QL - Uppercase Processor', { tag: ['@ess', '@
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(2);
-    expect(esqlResult.documents[0]).toHaveProperty('message', 'TEST MESSAGE 1');
-    expect(esqlResult.documents[1]).toHaveProperty('message', 'test message 2');
+    expect(esqlResult.documents[0]?.message).toBe('TEST MESSAGE 1');
+    expect(esqlResult.documents[1]?.message).toBe('test message 2');
   });
 
   apiTest(
@@ -117,8 +117,8 @@ apiTest.describe('Streamlang to ES|QL - Uppercase Processor', { tag: ['@ess', '@
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]).toHaveProperty('message_upper', 'TEST MESSAGE 1');
-      expect(esqlResult.documents[1]).toHaveProperty('message_upper', null);
+      expect(esqlResult.documents[0]?.message_upper).toBe('TEST MESSAGE 1');
+      expect(esqlResult.documents[1]?.message_upper).toBeNull();
     }
   );
 });

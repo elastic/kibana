@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { SetProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
@@ -33,7 +33,7 @@ apiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'active');
+      expect(ingestedDocs[0]?.attributes?.status).toBe('active');
     });
 
     // Template syntax validation tests - these should now REJECT Mustache templates
@@ -99,7 +99,7 @@ apiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'should-be-copied');
+      expect(ingestedDocs[0]?.attributes?.status).toBe('should-be-copied');
     });
 
     apiTest('should not override an existing field when override is false', async ({ testBed }) => {
@@ -122,7 +122,7 @@ apiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'active');
+      expect(ingestedDocs[0]?.attributes?.status).toBe('active');
     });
 
     apiTest('should override an existing field when override is true', async ({ testBed }) => {
@@ -145,7 +145,7 @@ apiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'inactive');
+      expect(ingestedDocs[0]?.attributes?.status).toBe('inactive');
     });
 
     apiTest('should throw error if value and copy_from are missing', async () => {

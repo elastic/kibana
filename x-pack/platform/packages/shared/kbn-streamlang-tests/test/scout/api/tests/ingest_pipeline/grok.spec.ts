@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { GrokProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
@@ -37,11 +37,11 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
-      expect(source).toHaveProperty('client.ip', '55.3.244.1');
-      expect(source).toHaveProperty('http.request.method', 'GET');
-      expect(source).toHaveProperty('url.path', '/index.html');
-      expect(source).toHaveProperty('http.response.body.bytes', '15824');
-      expect(source).toHaveProperty('event.duration', '0.043');
+      expect(source?.client?.ip).toBe('55.3.244.1');
+      expect(source?.http?.request?.method).toBe('GET');
+      expect(source?.url?.path).toBe('/index.html');
+      expect(source?.http?.response?.body?.bytes).toBe('15824');
+      expect(source?.event?.duration).toBe('0.043');
     });
 
     apiTest('should ignore missing field when ignore_missing is true', async ({ testBed }) => {
@@ -66,7 +66,7 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
-      expect(source).not.toHaveProperty('client.ip');
+      expect(source?.client?.ip).toBeUndefined();
     });
 
     apiTest('should fail if field is missing and ignore_missing is false', async ({ testBed }) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { ConcatProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -37,7 +37,7 @@ apiTest.describe('Streamlang to ES|QL - Concat Processor', { tag: ['@ess', '@svl
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(1);
-    expect(esqlResult.documents[0]).toHaveProperty('full_email', 'john.doe@example.com');
+    expect(esqlResult.documents[0]?.full_email).toBe('john.doe@example.com');
   });
 
   apiTest(
@@ -75,8 +75,8 @@ apiTest.describe('Streamlang to ES|QL - Concat Processor', { tag: ['@ess', '@svl
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]).toHaveProperty('full_email', 'john.doe@example.com');
-      expect(esqlResult.documents[1]).toHaveProperty('full_email', null);
+      expect(esqlResult.documents[0]?.full_email).toBe('john.doe@example.com');
+      expect(esqlResult.documents[1]?.full_email).toBeNull();
     }
   );
 
@@ -112,8 +112,8 @@ apiTest.describe('Streamlang to ES|QL - Concat Processor', { tag: ['@ess', '@svl
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]).toHaveProperty('full_email', 'john.doe@example.com');
-      expect(esqlResult.documents[1]).toHaveProperty('full_email', 'jane.smith@');
+      expect(esqlResult.documents[0]?.full_email).toBe('john.doe@example.com');
+      expect(esqlResult.documents[1]?.full_email).toBe('jane.smith@');
     }
   );
 
@@ -149,8 +149,8 @@ apiTest.describe('Streamlang to ES|QL - Concat Processor', { tag: ['@ess', '@svl
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]).toHaveProperty('full_email', 'john.doe@example.com');
-      expect(esqlResult.documents[1]).toHaveProperty('full_email', null);
+      expect(esqlResult.documents[0]?.full_email).toBe('john.doe@example.com');
+      expect(esqlResult.documents[1]?.full_email).toBeNull();
     }
   );
 });

@@ -20,7 +20,7 @@ import {
   createRequestToEs,
   type Document as ConversationDocument,
 } from './converters';
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 jest.mock('@kbn/agent-builder-server/tools/utils');
 

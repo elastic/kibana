@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { ReplaceProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
@@ -35,7 +35,7 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('message', 'An warning occurred');
+      expect(ingestedDocs[0]?.message).toBe('An warning occurred');
     });
 
     apiTest('should replace a literal string to target field', async ({ testBed }) => {
@@ -60,8 +60,8 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('message', 'An error occurred'); // Original preserved
-      expect(ingestedDocs[0]).toHaveProperty('clean_message', 'An warning occurred'); // New field created
+      expect(ingestedDocs[0]?.message).toBe('An error occurred'); // Original preserved
+      expect(ingestedDocs[0]?.clean_message).toBe('An warning occurred'); // New field created
     });
 
     apiTest('should replace using regex pattern', async ({ testBed }) => {
@@ -85,7 +85,7 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('message', 'Error code [NUM] found');
+      expect(ingestedDocs[0]?.message).toBe('Error code [NUM] found');
     });
 
     apiTest('should replace using regex with capture groups', async ({ testBed }) => {
@@ -109,7 +109,7 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('message', 'Messages: 3 for user alice');
+      expect(ingestedDocs[0]?.message).toBe('Messages: 3 for user alice');
     });
 
     apiTest(
@@ -160,8 +160,8 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
-      expect(source).toHaveProperty('message', 'some_value');
-      expect(source).not.toHaveProperty('nonexistent');
+      expect(source?.message).toBe('some_value');
+      expect(source?.nonexistent).toBeUndefined();
     });
 
     apiTest('should replace field conditionally with where condition', async ({ testBed }) => {
@@ -195,13 +195,13 @@ apiTest.describe(
 
       // First doc should have message replaced (where condition matched)
       const doc1 = ingestedDocs.find((d: any) => d.event?.kind === 'test');
-      expect(doc1).toHaveProperty('message', 'An warning occurred');
-      expect(doc1).toHaveProperty('event.kind', 'test');
+      expect(doc1?.message).toBe('An warning occurred');
+      expect(doc1?.event?.kind).toBe('test');
 
       // Second doc should keep original message (where condition not matched)
       const doc2 = ingestedDocs.find((d: any) => d.event?.kind === 'production');
-      expect(doc2).toHaveProperty('message', 'An error occurred');
-      expect(doc2).toHaveProperty('event.kind', 'production');
+      expect(doc2?.message).toBe('An error occurred');
+      expect(doc2?.event?.kind).toBe('production');
     });
 
     apiTest(
@@ -238,15 +238,15 @@ apiTest.describe(
 
         // First doc should have clean_message created (where condition matched)
         const doc1 = ingestedDocs.find((d: any) => d.event?.kind === 'test');
-        expect(doc1).toHaveProperty('message', 'An error occurred'); // Original preserved
-        expect(doc1).toHaveProperty('clean_message', 'An warning occurred'); // New field created
-        expect(doc1).toHaveProperty('event.kind', 'test');
+        expect(doc1?.message).toBe('An error occurred'); // Original preserved
+        expect(doc1?.clean_message).toBe('An warning occurred'); // New field created
+        expect(doc1?.event?.kind).toBe('test');
 
         // Second doc should not have clean_message (where condition not matched)
         const doc2 = ingestedDocs.find((d: any) => d.event?.kind === 'production');
-        expect(doc2).toHaveProperty('message', 'An error occurred');
-        expect(doc2).not.toHaveProperty('clean_message');
-        expect(doc2).toHaveProperty('event.kind', 'production');
+        expect(doc2?.message).toBe('An error occurred');
+        expect(doc2?.clean_message).toBeUndefined();
+        expect(doc2?.event?.kind).toBe('production');
       }
     );
 

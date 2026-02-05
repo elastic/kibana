@@ -29,6 +29,19 @@ export function createGenericMatchers(actual: unknown, options?: ExpectOptions):
     toMatchObject: wrapMatcher((expected: Record<string, unknown> | unknown[]) =>
       base.toMatchObject(expected)
     ),
+    toMatch: wrapMatcher((expected: RegExp | string) => base.toMatch(expected)),
+    toBeNull: wrapMatcher(() => base.toBeNull()),
+    toBeCloseTo: wrapMatcher((expected: number, precision?: number) =>
+      base.toBeCloseTo(expected, precision)
+    ),
+    toBeInstanceOf: wrapMatcher((expected: new (...args: unknown[]) => unknown) =>
+      base.toBeInstanceOf(expected)
+    ),
+    toThrow: wrapMatcher((expected?: unknown) => base.toThrow(expected)),
+    toThrowError: wrapMatcher((expected?: unknown) => base.toThrowError(expected)),
+    rejects: {
+      toThrow: wrapMatcher((expected?: unknown) => base.rejects.toThrow(expected)),
+    },
     not: {
       toBe: wrapMatcher((expected: unknown) => base.not.toBe(expected)),
       toBeUndefined: wrapMatcher(() => base.not.toBeUndefined()),
@@ -40,6 +53,16 @@ export function createGenericMatchers(actual: unknown, options?: ExpectOptions):
       toMatchObject: wrapMatcher((expected: Record<string, unknown> | unknown[]) =>
         base.not.toMatchObject(expected)
       ),
+      toMatch: wrapMatcher((expected: string | RegExp) => base.not.toMatch(expected)),
+      toBeNull: wrapMatcher(() => base.not.toBeNull()),
+      toBeCloseTo: wrapMatcher((expected: number, precision?: number) =>
+        base.not.toBeCloseTo(expected, precision)
+      ),
+      toBeInstanceOf: wrapMatcher((expected: new (...args: unknown[]) => unknown) =>
+        base.not.toBeInstanceOf(expected)
+      ),
+      toThrow: wrapMatcher((expected?: unknown) => base.not.toThrow(expected)),
+      toThrowError: wrapMatcher((expected?: unknown) => base.not.toThrowError(expected)),
     },
   };
 }

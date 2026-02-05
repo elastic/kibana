@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { LowercaseProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
@@ -33,8 +33,8 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(2);
-      expect(ingestedDocs[0]).toHaveProperty('message', 'test message 1');
-      expect(ingestedDocs[1]).toHaveProperty('message', 'test message 2');
+      expect(ingestedDocs[0]?.message).toBe('test message 1');
+      expect(ingestedDocs[1]?.message).toBe('test message 2');
     });
 
     apiTest('should lowercase a field into a target field', async ({ testBed }) => {
@@ -57,8 +57,8 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(2);
-      expect(ingestedDocs[0]).toHaveProperty('message_lowercase', 'test message 1');
-      expect(ingestedDocs[1]).toHaveProperty('message_lowercase', 'test message 2');
+      expect(ingestedDocs[0]?.message_lowercase).toBe('test message 1');
+      expect(ingestedDocs[1]?.message_lowercase).toBe('test message 2');
     });
 
     apiTest(
@@ -89,8 +89,8 @@ apiTest.describe(
 
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(2);
-        expect(ingestedDocs[0]).toHaveProperty('message', 'test message 1');
-        expect(ingestedDocs[1]).toHaveProperty('message', 'TEST MESSAGE 2');
+        expect(ingestedDocs[0]?.message).toBe('test message 1');
+        expect(ingestedDocs[1]?.message).toBe('TEST MESSAGE 2');
       }
     );
 

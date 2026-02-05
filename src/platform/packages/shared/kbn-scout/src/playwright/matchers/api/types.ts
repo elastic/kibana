@@ -46,8 +46,26 @@ export interface GenericMatchers {
   toBeLessThan(expected: number): void;
   /** Compares contents of the value with contents of `expected`, performing "deep equality" check. Allows extra properties to be present in the value */
   toMatchObject(expected: unknown): void;
+  /** Ensures that string value matches a regular expression or string */
+  toMatch(expected: string | RegExp): void;
+  /** Ensures that value is `null` */
+  toBeNull(): void;
+  /** Compares floating point numbers for approximate equality. Use this method instead of `toBe` when comparing floating point numbers */
+  toBeCloseTo(expected: number, numDigits?: number): void;
+  /** Ensures that value is an instance of a class. Uses `instanceof` operator */
+  toBeInstanceOf(expected: new (...args: unknown[]) => unknown): void;
+  /** Calls the function and ensures it throws an error. Optionally compares the error with `expected` (string, regex, error object, or error class) */
+  toThrow(expected?: unknown): void;
+  /** An alias for `toThrow` */
+  toThrowError(expected?: unknown): void;
 
-  not: Omit<GenericMatchers, 'not' | 'toBeDefined'>;
+  /** Async matchers for promises that are expected to reject */
+  rejects: {
+    /** Ensures that a rejected promise throws an error that optionally matches `expected` */
+    toThrow(expected?: unknown): Promise<void>;
+  };
+
+  not: Omit<GenericMatchers, 'not' | 'toBeDefined' | 'rejects'>;
 }
 
 /**
@@ -69,7 +87,7 @@ export interface ResponseMatchers {
  */
 export type Matchers = GenericMatchers &
   ResponseMatchers & {
-    not: Omit<GenericMatchers, 'not' | 'toBeDefined'>;
+    not: Omit<GenericMatchers, 'not' | 'toBeDefined' | 'rejects'>;
   };
 
 /**
