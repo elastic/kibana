@@ -96,7 +96,11 @@ export const oauthAuthorizeRoute = (
           });
 
           const spaceId = spaces ? spaces.spacesService.getSpaceId(req) : 'default';
-          const oauthConfig = await oauthService.getOAuthConfig(connectorId, spaceId);
+          let namespace: string | undefined;
+          if (spaces && spaceId) {
+            namespace = spaces.spacesService.spaceIdToNamespace(spaceId);
+          }
+          const oauthConfig = await oauthService.getOAuthConfig(connectorId, namespace);
           const redirectUri = oauthService.getRedirectUri();
 
           // Validate and build return URL for post-OAuth redirect
@@ -135,6 +139,7 @@ export const oauthAuthorizeRoute = (
             connectorId,
             redirectUri,
             kibanaReturnUrl,
+            spaceId,
           });
 
           const authorizationUrl = oauthService.buildAuthorizationUrl({

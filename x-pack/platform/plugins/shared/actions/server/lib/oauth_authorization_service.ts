@@ -104,11 +104,11 @@ export class OAuthAuthorizationService {
   /**
    * Gets OAuth configuration for a connector with decrypted secrets
    * @param connectorId - The connector ID
-   * @param namespace - The space ID where the connector was created
+   * @param namespace - The space ID where the connector was created. For default space, it's undefined.
    * @returns OAuth configuration including authorizationUrl, clientId, and optional scope
    * @throws Error if connector is not found, not OAuth, or missing required config
    */
-  async getOAuthConfig(connectorId: string, namespace: string): Promise<OAuthConfig> {
+  async getOAuthConfig(connectorId: string, namespace: string | undefined): Promise<OAuthConfig> {
     // Get connector to verify it exists and check auth type
     const connector = await this.actionsClient.get({ id: connectorId });
     const config = connector.config as OAuthConnectorConfig;

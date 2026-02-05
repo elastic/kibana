@@ -312,7 +312,7 @@ export const oauthCallbackRoute = (
         }
 
         try {
-          const [, { encryptedSavedObjects }] = await coreSetup.getStartServices();
+          const [, { encryptedSavedObjects, spaces }] = await coreSetup.getStartServices();
 
           // Retrieve and validate state
           const oauthStateClient = new OAuthStateClient({
@@ -339,16 +339,20 @@ export const oauthCallbackRoute = (
             });
           }
 
-          // Get connector with decrypted secrets
+          // Get connector with decrypted secrets using the spaceId from the OAuth state
           const connectorEncryptedClient = encryptedSavedObjects.getClient({
             includedHiddenTypes: ['action'],
           });
+          const namespace =
+            spaces && oauthState.spaceId
+              ? spaces.spacesService.spaceIdToNamespace(oauthState.spaceId)
+              : undefined;
           const rawAction = await connectorEncryptedClient.getDecryptedAsInternalUser<{
             actionTypeId: string;
             name: string;
             config: OAuthConnectorConfig;
             secrets: OAuthConnectorSecrets;
-          }>('action', oauthState.connectorId);
+          }>('action', oauthState.connectorId, { namespace });
 
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
@@ -420,7 +424,7 @@ export const oauthCallbackRoute = (
           const errorMessage = err instanceof Error ? err.message : String(err);
           routeLogger.error(`OAuth callback failed: ${errorMessage}`);
           if (err instanceof Error && err.stack) {
-            routeLogger.debug(`OAuth callback error stack: ${err.stack}`);
+            routeLogger.info(`OAuth callback error stack: ${err.stack}`);
           }
           return res.ok({
             headers: { 'content-type': 'text/html' },

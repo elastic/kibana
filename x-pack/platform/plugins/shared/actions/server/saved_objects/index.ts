@@ -177,6 +177,7 @@ export function setupSavedObjects(
       'redirectUri',
       'authorizationUrl',
       'scope',
+      'spaceId',
       'createdAt',
       'expiresAt',
       'createdBy',
