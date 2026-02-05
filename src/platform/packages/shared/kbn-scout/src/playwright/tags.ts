@@ -40,6 +40,15 @@ export const tags = {
   CLEAN_ENV,
 };
 
+export const supportedTags = Array.from(
+  new Set([
+    ...tags.ESS_ONLY,
+    ...tags.SERVERLESS_ONLY,
+    ...tags.DEPLOYMENT_AGNOSTIC,
+    ...tags.PERFORMANCE,
+  ])
+);
+
 export const tagsByMode = {
   stateful: '@ess',
   serverless: {
