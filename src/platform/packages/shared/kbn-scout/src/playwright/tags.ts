@@ -46,6 +46,7 @@ export const supportedTags = Array.from(
     ...tags.SERVERLESS_ONLY,
     ...tags.DEPLOYMENT_AGNOSTIC,
     ...tags.PERFORMANCE,
+    ...tags.CLEAN_ENV,
   ])
 );
 
