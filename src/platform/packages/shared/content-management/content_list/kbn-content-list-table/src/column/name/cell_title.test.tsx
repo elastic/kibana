@@ -26,16 +26,17 @@ const mockFindItems = jest.fn(
 
 const createWrapper =
   (options?: { getHref?: (item: ContentListItem) => string }) =>
-  ({ children }: { children: React.ReactNode }) => (
-    <ContentListProvider
-      id="test-list"
-      labels={{ entity: 'item', entityPlural: 'items' }}
-      dataSource={{ findItems: mockFindItems }}
-      item={options?.getHref ? { getHref: options.getHref } : undefined}
-    >
-      {children}
-    </ContentListProvider>
-  );
+  ({ children }: { children: React.ReactNode }) =>
+    (
+      <ContentListProvider
+        id="test-list"
+        labels={{ entity: 'item', entityPlural: 'items' }}
+        dataSource={{ findItems: mockFindItems }}
+        item={options?.getHref ? { getHref: options.getHref } : undefined}
+      >
+        {children}
+      </ContentListProvider>
+    );
 
 const createItem = (overrides?: Partial<ContentListItem>): ContentListItem => ({
   id: '1',
@@ -70,8 +71,8 @@ describe('NameCellTitle', () => {
     expect(screen.queryByTestId('content-list-table-item-link')).not.toBeInTheDocument();
   });
 
-  it('renders as plain text when `getHref` returns undefined', () => {
-    const Wrapper = createWrapper({ getHref: () => undefined as unknown as string });
+  it('renders as plain text when `getHref` returns an empty string', () => {
+    const Wrapper = createWrapper({ getHref: () => '' });
     render(
       <Wrapper>
         <NameCellTitle item={createItem({ title: 'No Link Item' })} />
