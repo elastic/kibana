@@ -212,6 +212,7 @@ describe('ClusterClient', () => {
 
       expect(createTransportMock).toHaveBeenCalledTimes(1);
       expect(createTransportMock).toHaveBeenCalledWith({
+        scoped: true,
         getExecutionContext,
         getUnauthorizedErrorHandler: expect.any(Function),
       });
@@ -237,6 +238,7 @@ describe('ClusterClient', () => {
 
       expect(createTransportMock).toHaveBeenCalledTimes(1);
       expect(createTransportMock).toHaveBeenCalledWith({
+        scoped: true,
         getExecutionContext,
         getUnauthorizedErrorHandler: expect.any(Function),
       });

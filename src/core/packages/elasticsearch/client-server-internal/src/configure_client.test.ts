@@ -140,7 +140,7 @@ describe('configureClient', () => {
     });
 
     expect(createTransportMock).toHaveBeenCalledTimes(1);
-    expect(createTransportMock).toHaveBeenCalledWith({ getExecutionContext });
+    expect(createTransportMock).toHaveBeenCalledWith({ scoped: false, getExecutionContext });
 
     createTransportMock.mockClear();
 
@@ -154,7 +154,7 @@ describe('configureClient', () => {
     });
 
     expect(createTransportMock).toHaveBeenCalledTimes(1);
-    expect(createTransportMock).toHaveBeenCalledWith({ getExecutionContext });
+    expect(createTransportMock).toHaveBeenCalledWith({ scoped: true, getExecutionContext });
   });
 
   it('constructs a client using the Transport returned by `createTransport`', () => {

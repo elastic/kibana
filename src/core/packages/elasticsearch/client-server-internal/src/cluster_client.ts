@@ -93,6 +93,7 @@ export class ClusterClient implements ICustomClusterClient {
       const scopedHeaders = this.getScopedHeaders(request);
 
       const transportClass = createTransport({
+        scoped: true,
         getExecutionContext: this.getExecutionContext,
         getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
       });

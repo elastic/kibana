@@ -40,7 +40,7 @@ export const configureClient = (
   }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped, kibanaVersion);
-  const KibanaTransport = createTransport({ getExecutionContext });
+  const KibanaTransport = createTransport({ scoped, getExecutionContext });
   const client = new Client({
     ...clientOptions,
     agent: agentFactoryProvider.getAgentFactory(clientOptions.agent),

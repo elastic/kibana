@@ -12,7 +12,7 @@ import { transportConstructorMock, transportRequestMock } from './create_transpo
 import { errors } from '@elastic/elasticsearch';
 import type { BaseConnectionPool } from '@elastic/elasticsearch';
 import type { InternalUnauthorizedErrorHandler } from './retry_unauthorized';
-import type { ErrorHandlerAccessor } from './create_transport';
+import type { ErrorHandlerAccessor, OnRequestHandler } from './create_transport';
 import { createTransport } from './create_transport';
 
 const createConnectionPool = () => {
@@ -539,6 +539,139 @@ describe('createTransport', () => {
           headers: { authorization: 'retry', foo: 'bar' },
         })
       );
+    });
+  });
+
+  describe('`scoped` parameter and `onRequest` hook', () => {
+    it('calls onRequest with scoped: false when scoped is not provided', async () => {
+      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn();
+
+      const transportClass = createTransport({
+        getUnauthorizedErrorHandler,
+        getExecutionContext,
+        onRequest,
+      });
+      const transport = new transportClass(baseConstructorParams);
+      const requestParams = { method: 'GET', path: '/' };
+
+      await transport.request(requestParams, {});
+
+      expect(onRequest).toHaveBeenCalledTimes(1);
+      expect(onRequest).toHaveBeenCalledWith(
+        { scoped: false },
+        requestParams,
+        expect.any(Object)
+      );
+    });
+
+    it('calls onRequest with scoped: true when scoped is true', async () => {
+      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn();
+
+      const transportClass = createTransport({
+        scoped: true,
+        getUnauthorizedErrorHandler,
+        getExecutionContext,
+        onRequest,
+      });
+      const transport = new transportClass(baseConstructorParams);
+      const requestParams = { method: 'GET', path: '/' };
+
+      await transport.request(requestParams, {});
+
+      expect(onRequest).toHaveBeenCalledTimes(1);
+      expect(onRequest).toHaveBeenCalledWith(
+        { scoped: true },
+        requestParams,
+        expect.any(Object)
+      );
+    });
+
+    it('calls onRequest with scoped: false when scoped is explicitly false', async () => {
+      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn();
+
+      const transportClass = createTransport({
+        scoped: false,
+        getUnauthorizedErrorHandler,
+        getExecutionContext,
+        onRequest,
+      });
+      const transport = new transportClass(baseConstructorParams);
+      const requestParams = { method: 'GET', path: '/' };
+
+      await transport.request(requestParams, {});
+
+      expect(onRequest).toHaveBeenCalledTimes(1);
+      expect(onRequest).toHaveBeenCalledWith(
+        { scoped: false },
+        requestParams,
+        expect.any(Object)
+      );
+    });
+
+    it('passes the correct options to onRequest', async () => {
+      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn();
+
+      const transportClass = createTransport({
+        scoped: true,
+        getUnauthorizedErrorHandler,
+        getExecutionContext,
+        onRequest,
+      });
+      const headers = { authorization: 'test-auth' };
+      const transport = new transportClass({ ...baseConstructorParams, headers });
+      const requestParams = { method: 'GET', path: '/test' };
+      const requestOptions = { opaqueId: 'test-opaque-id' };
+
+      await transport.request(requestParams, requestOptions);
+
+      expect(onRequest).toHaveBeenCalledTimes(1);
+      expect(onRequest).toHaveBeenCalledWith(
+        { scoped: true },
+        requestParams,
+        expect.objectContaining({
+          opaqueId: 'test-opaque-id',
+          headers: { authorization: 'test-auth' },
+        })
+      );
+    });
+
+    it('succeeds when onRequest is not provided', async () => {
+      const transportClass = createTransport({
+        scoped: true,
+        getUnauthorizedErrorHandler,
+        getExecutionContext,
+      });
+      const transport = new transportClass(baseConstructorParams);
+      const requestParams = { method: 'GET', path: '/' };
+
+      await expect(transport.request(requestParams, {})).resolves.not.toThrow();
+
+      expect(transportRequestMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls onRequest before super.request', async () => {
+      const callOrder: string[] = [];
+      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn(() => {
+        callOrder.push('onRequest');
+      });
+
+      transportRequestMock.mockImplementation(() => {
+        callOrder.push('super.request');
+        return Promise.resolve({ body: {} });
+      });
+
+      const transportClass = createTransport({
+        scoped: true,
+        getUnauthorizedErrorHandler,
+        getExecutionContext,
+        onRequest,
+      });
+      const transport = new transportClass(baseConstructorParams);
+      const requestParams = { method: 'GET', path: '/' };
+
+      await transport.request(requestParams, {});
+
+      expect(callOrder).toEqual(['onRequest', 'super.request']);
     });
   });
 });
