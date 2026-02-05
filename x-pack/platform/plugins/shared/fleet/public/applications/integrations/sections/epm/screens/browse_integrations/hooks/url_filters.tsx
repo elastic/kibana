@@ -27,9 +27,13 @@ export function useAddUrlFilters() {
       method.call(history, {
         search: toUrlParams(
           {
-            ...omit(urlParams, 'q', 'sort'),
-            ...(Object.hasOwn(newFilters, 'q') ? { q: newFilters.q } : {}),
-            ...(Object.hasOwn(newFilters, 'sort') ? { sort: newFilters.sort } : {}),
+            ...omit(urlParams, 'q', 'sort', 'showBeta', 'showDeprecated'),
+            ...(newFilters.q ? { q: newFilters.q } : {}),
+            ...(newFilters.sort ? { sort: newFilters.sort } : {}),
+            // Only add showBeta to URL when explicitly true, otherwise omit to fall back to default
+            ...(newFilters.showBeta === true ? { showBeta: 'true' } : {}),
+            // Only add showDeprecated to URL when explicitly true, otherwise omit to fall back to default
+            ...(newFilters.showDeprecated === true ? { showDeprecated: 'true' } : {}),
           },
           {
             skipEmptyString: true,
@@ -55,9 +59,21 @@ export function useUrlFilters(): BrowseIntegrationsFilter {
       sort = urlParams.sort;
     }
 
+    let showBeta: BrowseIntegrationsFilter['showBeta'];
+    if (typeof urlParams.showBeta === 'string') {
+      showBeta = urlParams.showBeta === 'true';
+    }
+
+    let showDeprecated: BrowseIntegrationsFilter['showDeprecated'];
+    if (typeof urlParams.showDeprecated === 'string') {
+      showDeprecated = urlParams.showDeprecated === 'true';
+    }
+
     return {
       q,
       sort,
+      showBeta,
+      showDeprecated,
     };
   }, [urlParams]);
 }

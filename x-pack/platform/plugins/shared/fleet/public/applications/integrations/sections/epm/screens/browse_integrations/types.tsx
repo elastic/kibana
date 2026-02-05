@@ -8,6 +8,8 @@
 export interface BrowseIntegrationsFilter {
   q?: string;
   sort?: BrowseIntegrationSortType;
+  showBeta?: boolean;
+  showDeprecated?: boolean;
 }
 
 export type BrowseIntegrationSortType = 'recent-old' | 'old-recent' | 'a-z' | 'z-a';

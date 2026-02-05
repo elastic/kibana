@@ -72,10 +72,29 @@ export function useBrowseIntegrationHook({
         ) ?? []
       : [];
 
-    return searchTerm
+    let cards = searchTerm
       ? sortedCards.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : sortedCards;
-  }, [localSearch, searchTerm, sortedCards]);
+
+    // Apply deprecated filter (beta is handled at the query level via prerelease parameter)
+    // When showDeprecated is true, show ONLY deprecated integrations
+    // When showDeprecated is false or undefined, filter out deprecated integrations (show only non-deprecated)
+    const showDeprecated = urlFilters.showDeprecated;
+
+    cards = cards.filter((card) => {
+      const isDeprecated = 'isDeprecated' in card && card.isDeprecated === true;
+
+      if (showDeprecated === true) {
+        // Show only deprecated integrations
+        return isDeprecated;
+      } else {
+        // By default (undefined or false), filter out deprecated integrations
+        return !isDeprecated;
+      }
+    });
+
+    return cards;
+  }, [localSearch, searchTerm, sortedCards, urlFilters.showDeprecated]);
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {

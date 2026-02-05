@@ -52,6 +52,8 @@ export interface IntegrationsURLParameters {
   categoryId?: string;
   subCategoryId?: string;
   onlyAgentless?: boolean;
+  showBeta?: boolean;
+  showDeprecated?: boolean;
 }
 
 function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
@@ -157,6 +159,8 @@ export const useAvailablePackages = ({
     initialSelectedCategory,
     initialSubcategory,
     initialOnlyAgentless,
+    initialShowBeta,
+    initialShowDeprecated,
     setUrlandPushHistory,
     setUrlandReplaceHistory,
     getHref,
@@ -171,12 +175,19 @@ export const useAvailablePackages = ({
   );
   const [searchTerm, setSearchTerm] = useState(searchParam || '');
   const [onlyAgentlessFilter, setOnlyAgentlessFilter] = useState(initialOnlyAgentless);
+  const [showBeta, setShowBeta] = useState<boolean | undefined>(initialShowBeta);
+  const [showDeprecated, setShowDeprecated] = useState<boolean | undefined>(initialShowDeprecated);
+
+  // Use showBeta state if defined, otherwise fall back to prereleaseIntegrationsEnabled
+  // This ensures the query updates immediately when the filter changes
+  const effectivePrereleaseEnabled =
+    showBeta !== undefined ? showBeta : prereleaseIntegrationsEnabled;
 
   const {
     data: eprPackages,
     isLoading: isLoadingAllPackages,
     error: eprPackageLoadingError,
-  } = useGetPackagesQuery({ prerelease: prereleaseIntegrationsEnabled });
+  } = useGetPackagesQuery({ prerelease: effectivePrereleaseEnabled });
 
   // Remove Kubernetes package granularity
   if (eprPackages?.items) {
@@ -261,7 +272,7 @@ export const useAvailablePackages = ({
     data: eprCategoriesRes,
     isLoading: isLoadingCategories,
     error: eprCategoryLoadingError,
-  } = useGetCategoriesQuery({ prerelease: prereleaseIntegrationsEnabled });
+  } = useGetCategoriesQuery({ prerelease: effectivePrereleaseEnabled });
 
   const eprCategories = useMemo(() => eprCategoriesRes?.items || [], [eprCategoriesRes]);
 
@@ -305,6 +316,10 @@ export const useAvailablePackages = ({
     onlyAgentlessFilter,
     setOnlyAgentlessFilter,
     isAgentlessEnabled,
+    showBeta,
+    setShowBeta,
+    showDeprecated,
+    setShowDeprecated,
     isLoading:
       isLoadingReplacmentCustomIntegrations ||
       isLoadingAppendCustomIntegrations ||
