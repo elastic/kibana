@@ -85,7 +85,6 @@ describe('APIKeysAPIClient', () => {
     const apiClient = new APIKeysAPIClient(httpMock);
     const mockQueryParams = {
       query: {},
-      from: 0,
       size: 10,
       sort: { field: 'creation', direction: 'asc' },
       filters: {},
