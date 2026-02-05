@@ -45,9 +45,9 @@ describe('PROMQL columnsAfter', () => {
 
   it('returns only derived columns when a pipe follows', async () => {
     const result = await columnsAfter(
-      synth.cmd`PROMQL index=metrics step=5m sum by (job) (http_requests_total{env="prod"})`,
+      synth.cmd`PROMQL index=metrics step=5m col0=(sum by (job) (http_requests_total{env="prod"}))`,
       [],
-      'PROMQL index=metrics step=5m sum by (job) (http_requests_total{env="prod"}) | KEEP job',
+      'PROMQL index=metrics step=5m col0=(sum by (job) (http_requests_total{env="prod"})) | KEEP job',
       {
         fromFrom: () => Promise.resolve([]),
         fromJoin: () => Promise.resolve([]),
@@ -62,6 +62,6 @@ describe('PROMQL columnsAfter', () => {
       }
     );
 
-    expect(result.map(({ name }) => name)).toEqual(['step', 'job']);
+    expect(result.map(({ name }) => name)).toEqual(['step', 'col0', 'job']);
   });
 });
