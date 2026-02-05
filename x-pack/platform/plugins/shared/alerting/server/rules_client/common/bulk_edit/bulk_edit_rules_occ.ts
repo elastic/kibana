@@ -232,9 +232,9 @@ async function saveBulkUpdatedRules({
       } else if (!error && oldApiKey && !oldApiKeyCreatedByUser) {
         apiKeysToInvalidate.push(oldApiKey);
       }
-      if (error && newUiamApiKey) {
+      if (error && newUiamApiKey && !newApiKeyCreatedByUser) {
         apiKeysToInvalidate.push(newUiamApiKey);
-      } else if (!error && oldUiamApiKey) {
+      } else if (!error && oldUiamApiKey && !oldApiKeyCreatedByUser) {
         apiKeysToInvalidate.push(oldUiamApiKey);
       }
     });

@@ -19,17 +19,30 @@ export function apiKeyAsAlertAttributes(
   createdByUser: boolean
 ): Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey'> {
   if (apiKey && apiKey.apiKeysEnabled) {
+    const esApiKey = apiKey.result?.api_key;
+    const esApiKeyId = apiKey.result?.id;
     const uiamApiKey = apiKey.uiamResult?.api_key;
     const uiamApiKeyId = apiKey.uiamResult?.id;
+
+    if (esApiKey && uiamApiKey && createdByUser) {
+      throw new Error(
+        'Both ES and UIAM API keys were created for a rule, but only one should be created when the API key is created by a user. This should never happen.'
+      );
+    }
+
+    const encodedApiKey =
+      esApiKeyId && esApiKey ? Buffer.from(`${esApiKeyId}:${esApiKey}`).toString('base64') : null;
+
+    const encodedUiamApiKey =
+      uiamApiKeyId && uiamApiKey
+        ? Buffer.from(`${uiamApiKeyId}:${uiamApiKey}`).toString('base64')
+        : null;
+
     return {
       apiKeyOwner: username,
-      apiKey: Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64'),
+      apiKey: encodedApiKey,
       apiKeyCreatedByUser: createdByUser,
-      ...(uiamApiKey
-        ? {
-            uiamApiKey: Buffer.from(`${uiamApiKeyId}:${uiamApiKey}`).toString('base64'),
-          }
-        : {}),
+      ...(uiamApiKey ? { uiamApiKey: encodedUiamApiKey } : {}),
     };
   }
   return {
@@ -45,18 +58,30 @@ export function apiKeyAsRuleDomainProperties(
   createdByUser: boolean
 ): Pick<RuleDomain, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey'> {
   if (apiKey && apiKey.apiKeysEnabled) {
+    const esApiKey = apiKey.result?.api_key;
+    const esApiKeyId = apiKey.result?.id;
     const uiamApiKey = apiKey.uiamResult?.api_key;
     const uiamApiKeyId = apiKey.uiamResult?.id;
 
+    if (esApiKey && uiamApiKey && createdByUser) {
+      throw new Error(
+        'Both ES and UIAM API keys were created for a rule, but only one should be created when the API key is created by a user. This should never happen.'
+      );
+    }
+
+    const encodedApiKey =
+      esApiKeyId && esApiKey ? Buffer.from(`${esApiKeyId}:${esApiKey}`).toString('base64') : null;
+
+    const encodedUiamApiKey =
+      uiamApiKeyId && uiamApiKey
+        ? Buffer.from(`${uiamApiKeyId}:${uiamApiKey}`).toString('base64')
+        : null;
+
     return {
       apiKeyOwner: username,
-      apiKey: Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64'),
+      apiKey: encodedApiKey,
       apiKeyCreatedByUser: createdByUser,
-      ...(uiamApiKey
-        ? {
-            uiamApiKey: Buffer.from(`${uiamApiKeyId}:${uiamApiKey}`).toString('base64'),
-          }
-        : {}),
+      ...(uiamApiKey ? { uiamApiKey: encodedUiamApiKey } : {}),
     };
   }
   return {

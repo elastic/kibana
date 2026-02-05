@@ -282,6 +282,55 @@ describe('bulkDelete', () => {
     );
   });
 
+  test('does not invalidate API keys created by user', async () => {
+    rulesClient = new RulesClient({ ...rulesClientParams, isServerless: true });
+
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+      .fn()
+      .mockResolvedValueOnce({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield {
+            saved_objects: [
+              {
+                ...enabledRuleForBulkOpsWithActions1,
+                attributes: {
+                  ...enabledRuleForBulkOpsWithActions1.attributes,
+                  apiKeyCreatedByUser: true,
+                },
+              },
+              {
+                ...enabledRuleForBulkOpsWithActions2WithUiam,
+                attributes: {
+                  ...enabledRuleForBulkOpsWithActions2WithUiam.attributes,
+                  apiKeyCreatedByUser: true,
+                },
+              },
+            ],
+          };
+        },
+      });
+
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'id1', type: 'alert', success: true },
+        { id: 'uiam-1', type: 'alert', success: true },
+        { id: 'uiam-2', type: 'alert', success: true },
+      ],
+    });
+
+    await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      {
+        apiKeys: [],
+      },
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
   test('swallows errors when soft deleting gaps fails', async () => {
     mockCreatePointInTimeFinderAsInternalUser({
       saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],

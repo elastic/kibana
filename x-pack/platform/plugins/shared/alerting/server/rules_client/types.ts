@@ -114,7 +114,7 @@ export type CreateAPIKeyResult =
   | { apiKeysEnabled: false }
   | {
       apiKeysEnabled: true;
-      result: SecurityPluginGrantAPIKeyResult;
+      result?: SecurityPluginGrantAPIKeyResult;
       uiamResult?: SecurityPluginGrantAPIKeyResult;
     };
 export type InvalidateAPIKeyResult =

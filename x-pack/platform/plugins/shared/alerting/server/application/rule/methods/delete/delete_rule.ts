@@ -140,7 +140,7 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
       namespace: context.namespace,
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
     }),
-    (apiKeyToInvalidate && !apiKeyCreatedByUser) || uiamApiKeyToInvalidate
+    (apiKeyToInvalidate || uiamApiKeyToInvalidate) && !apiKeyCreatedByUser
       ? bulkMarkApiKeysForInvalidation(
           {
             apiKeys: [

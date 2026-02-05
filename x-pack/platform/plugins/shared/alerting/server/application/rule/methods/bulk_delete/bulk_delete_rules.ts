@@ -186,7 +186,7 @@ const bulkDeleteWithOCC = async (
           if (apiKey && !apiKeyCreatedByUser) {
             apiKeyToRuleIdMapping[rule.id] = apiKey;
           }
-          if (uiamApiKey) {
+          if (uiamApiKey && !apiKeyCreatedByUser) {
             uiamApiKeyToRuleIdMapping[rule.id] = uiamApiKey;
           }
           const ruleName = rule.attributes.name;

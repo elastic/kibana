@@ -85,7 +85,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
       apiKeysToInvalidate.push(apiKey);
     }
 
-    if (uiamApiKey) {
+    if (uiamApiKey && !apiKeyCreatedByUser) {
       apiKeysToInvalidate.push(uiamApiKey);
     }
 

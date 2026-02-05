@@ -221,7 +221,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
   if (apiKey && !apiKeyCreatedByUser) {
     apiKeysToInvalidate.push(apiKey);
   }
-  if (uiamApiKey) {
+  if (uiamApiKey && !apiKeyCreatedByUser) {
     apiKeysToInvalidate.push(uiamApiKey);
   }
 
@@ -363,19 +363,17 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   } catch (e) {
     const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updatedRuleAttributes;
 
-    const apiKeysInvalidate = [];
+    const apiKeysToInvalidate = [];
     if (apiKey && !apiKeyCreatedByUser) {
-      apiKeysInvalidate.push(apiKey);
+      apiKeysToInvalidate.push(apiKey);
     }
-    if (uiamApiKey) {
-      apiKeysInvalidate.push(uiamApiKey);
+    if (uiamApiKey && !apiKeyCreatedByUser) {
+      apiKeysToInvalidate.push(uiamApiKey);
     }
 
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
-      {
-        apiKeys: apiKeysInvalidate,
-      },
+      { apiKeys: apiKeysToInvalidate },
       context.logger,
       context.unsecuredSavedObjectsClient
     );

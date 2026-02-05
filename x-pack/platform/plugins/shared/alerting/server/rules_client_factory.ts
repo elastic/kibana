@@ -233,6 +233,7 @@ export class RulesClientFactory {
 
         // TODO should we return partial success  here  if one  of the two  creations fail?
         if (!createAPIKeyResult || (this.isServerless && !createUiamApiKeyResult)) {
+          this.logger.error(`Failed to create API key for alerting rule : ${name}`);
           return { apiKeysEnabled: false };
         }
 
@@ -273,12 +274,6 @@ export class RulesClientFactory {
           if (isUiamApiKey && this.isServerless) {
             return {
               apiKeysEnabled: true,
-              // TODO: Remove empty id when UIAM API keys support getting their own ID
-              result: {
-                name,
-                id: '',
-                api_key: '',
-              },
               uiamResult: {
                 name: `uiam-${name}`,
                 id: apiKey[0],

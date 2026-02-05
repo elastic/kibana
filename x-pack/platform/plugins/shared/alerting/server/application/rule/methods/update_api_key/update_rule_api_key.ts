@@ -150,7 +150,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
   if (oldApiKeyToInvalidate && !oldApiKeyCreatedByUser) {
     oldApiKeysToInvalidate.push(oldApiKeyToInvalidate);
   }
-  if (oldUiamApiKeyToInvalidate) {
+  if (oldUiamApiKeyToInvalidate && !oldApiKeyCreatedByUser) {
     oldApiKeysToInvalidate.push(oldUiamApiKeyToInvalidate);
   }
 
