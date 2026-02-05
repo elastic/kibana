@@ -94,31 +94,42 @@ jest.mock('../../../public/application/components/mappings_editor/mappings_state
   useDispatch: () => mockDispatch,
 }));
 
-const MockInferenceFlyoutWrapper = ({
-  onFlyoutClose,
-  onSubmitSuccess,
-}: {
-  onFlyoutClose: () => void;
-  onSubmitSuccess: (id: string) => void;
-  http?: unknown;
-  toasts?: unknown;
-  isEdit?: boolean;
-  enforceAdaptiveAllocations?: boolean;
-}) => (
-  <div data-test-subj="inference-flyout-wrapper">
-    <button data-test-subj="mock-flyout-close" onClick={onFlyoutClose}>
-      Close Flyout
-    </button>
-    <button data-test-subj="mock-flyout-submit" onClick={() => onSubmitSuccess('new-endpoint-id')}>
-      Submit
-    </button>
-  </div>
-);
+jest.mock('@kbn/inference-endpoint-ui-common', () => {
+  const SERVICE_PROVIDERS = {
+    elastic: { name: 'Elastic' },
+    openai: { name: 'OpenAI' },
+  };
 
-jest.mock('@kbn/inference-endpoint-ui-common', () => ({
-  __esModule: true,
-  default: MockInferenceFlyoutWrapper,
-}));
+  const MockInferenceFlyoutWrapper = ({
+    onFlyoutClose,
+    onSubmitSuccess,
+  }: {
+    onFlyoutClose: () => void;
+    onSubmitSuccess: (id: string) => void;
+    http?: unknown;
+    toasts?: unknown;
+    isEdit?: boolean;
+    enforceAdaptiveAllocations?: boolean;
+  }) => (
+    <div data-test-subj="inference-flyout-wrapper">
+      <button data-test-subj="mock-flyout-close" onClick={onFlyoutClose}>
+        Close Flyout
+      </button>
+      <button
+        data-test-subj="mock-flyout-submit"
+        onClick={() => onSubmitSuccess('new-endpoint-id')}
+      >
+        Submit
+      </button>
+    </div>
+  );
+
+  return {
+    __esModule: true,
+    default: MockInferenceFlyoutWrapper,
+    SERVICE_PROVIDERS,
+  };
+});
 
 jest.mock('../../../public/application/services/api', () => ({
   ...jest.requireActual('../../../public/application/services/api'),
@@ -414,9 +425,24 @@ describe('SelectInferenceId', () => {
       it('SHOULD prioritize .elser-2-elastic over other endpoints IF has enterprise license', async () => {
         setupInferenceEndpointsMocks({
           data: [
-            { inference_id: '.elser-2-elastic', task_type: 'sparse_embedding' },
-            { inference_id: '.preconfigured-elser', task_type: 'sparse_embedding' },
-            { inference_id: 'endpoint-1', task_type: 'text_embedding' },
+            {
+              inference_id: '.elser-2-elastic',
+              task_type: 'sparse_embedding',
+              service: 'elastic',
+              service_settings: { model_id: 'elser-2-elastic' },
+            },
+            {
+              inference_id: '.preconfigured-elser',
+              task_type: 'sparse_embedding',
+              service: 'elastic',
+              service_settings: { model_id: 'elser' },
+            },
+            {
+              inference_id: 'endpoint-1',
+              task_type: 'text_embedding',
+              service: 'openai',
+              service_settings: { model_id: 'text-embedding-3-large' },
+            },
           ] as InferenceAPIConfigResponse[],
         });
 
@@ -432,9 +458,24 @@ describe('SelectInferenceId', () => {
 
         setupInferenceEndpointsMocks({
           data: [
-            { inference_id: '.elser-2-elastic', task_type: 'sparse_embedding' },
-            { inference_id: '.preconfigured-elser', task_type: 'sparse_embedding' },
-            { inference_id: 'endpoint-1', task_type: 'text_embedding' },
+            {
+              inference_id: '.elser-2-elastic',
+              task_type: 'sparse_embedding',
+              service: 'elastic',
+              service_settings: { model_id: 'elser-2-elastic' },
+            },
+            {
+              inference_id: '.preconfigured-elser',
+              task_type: 'sparse_embedding',
+              service: 'elastic',
+              service_settings: { model_id: 'elser' },
+            },
+            {
+              inference_id: 'endpoint-1',
+              task_type: 'text_embedding',
+              service: 'openai',
+              service_settings: { model_id: 'text-embedding-3-large' },
+            },
           ] as InferenceAPIConfigResponse[],
         });
 
