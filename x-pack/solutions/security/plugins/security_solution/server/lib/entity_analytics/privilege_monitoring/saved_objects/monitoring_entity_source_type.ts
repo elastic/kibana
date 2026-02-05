@@ -52,48 +52,6 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
   },
 };
 
-const version1: SavedObjectsModelVersion = {
-  changes: [
-    {
-      type: 'mappings_addition',
-      addedMappings: {
-        matchersModifiedByUser: { type: 'boolean' },
-      },
-    },
-    {
-      type: 'data_backfill',
-      backfillFn: (document) => {
-        return {
-          attributes: {
-            ...document.attributes,
-            matchersModifiedByUser: false,
-          },
-        };
-      },
-    },
-  ],
-};
-
-const version2: SavedObjectsModelVersion = {
-  changes: [
-    {
-      type: 'mappings_addition',
-      addedMappings: {
-        managedVersion: { type: 'integer' },
-      },
-    },
-    {
-      type: 'data_backfill',
-      backfillFn: (document) => {
-        return {
-          attributes: {
-            ...document.attributes,
-            managedVersion: { MANAGED_SOURCES_VERSION },
-          },
-        };
-      },
-    },
-  ],
 const matcherSchema = schema.object(
   {
     fields: schema.arrayOf(schema.string(), { maxSize: 20 }), // do not expect many fields
@@ -117,11 +75,73 @@ const baseEntitySourceSchema = {
   filter: schema.maybe(schema.any()),
 };
 
+const baseEntitySourceSchemaV2 = {
+  ...baseEntitySourceSchema,
+  matchersModifiedByUser: schema.boolean({ defaultValue: false }),
+};
+
+const baseEntitySourceSchemaV3 = {
+  ...baseEntitySourceSchemaV2,
+  managedVersion: schema.maybe(schema.number()),
+};
+
 const monitoringEntitySourceModelVersion1: SavedObjectsModelVersion = {
   changes: [],
   schemas: {
     forwardCompatibility: schema.object(baseEntitySourceSchema, { unknowns: 'ignore' }),
     create: schema.object(baseEntitySourceSchema, { unknowns: 'ignore' }),
+  },
+};
+
+const monitoringEntitySourceModelVersion2: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        matchersModifiedByUser: { type: 'boolean' },
+      },
+    },
+    {
+      type: 'data_backfill',
+      backfillFn: (document) => {
+        return {
+          attributes: {
+            ...document.attributes,
+            matchersModifiedByUser: document.attributes.matchersModifiedByUser ?? false,
+          },
+        };
+      },
+    },
+  ],
+  schemas: {
+    forwardCompatibility: schema.object(baseEntitySourceSchemaV2, { unknowns: 'ignore' }),
+    create: schema.object(baseEntitySourceSchemaV2),
+  },
+};
+
+const monitoringEntitySourceModelVersion3: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        managedVersion: { type: 'integer' },
+      },
+    },
+    {
+      type: 'data_backfill',
+      backfillFn: (document) => {
+        return {
+          attributes: {
+            ...document.attributes,
+            managedVersion: MANAGED_SOURCES_VERSION,
+          },
+        };
+      },
+    },
+  ],
+  schemas: {
+    forwardCompatibility: schema.object(baseEntitySourceSchemaV3, { unknowns: 'ignore' }),
+    create: schema.object(baseEntitySourceSchemaV3),
   },
 };
 
@@ -133,5 +153,7 @@ export const monitoringEntitySourceType: SavedObjectsType = {
   mappings: monitoringEntitySourceTypeNameMappings,
   modelVersions: {
     '1': monitoringEntitySourceModelVersion1,
+    '2': monitoringEntitySourceModelVersion2,
+    '3': monitoringEntitySourceModelVersion3,
   },
 };
