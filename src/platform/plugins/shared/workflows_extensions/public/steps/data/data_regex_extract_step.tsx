@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -23,11 +24,7 @@ export const dataRegexExtractStepDefinition: PublicStepDefinition = {
   description: i18n.translate('workflowsExtensions.dataRegexExtractStep.description', {
     defaultMessage: 'Extract fields from text using regular expression capture groups',
   }),
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/search').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
+  icon: () => <EuiIcon type="search" />,
   actionsMenuGroup: ActionsMenuGroup.data,
   documentation: {
     details: i18n.translate('workflowsExtensions.dataRegexExtractStep.documentation.details', {

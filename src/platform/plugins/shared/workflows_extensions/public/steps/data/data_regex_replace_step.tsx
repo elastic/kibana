@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -23,11 +24,7 @@ export const dataRegexReplaceStepDefinition: PublicStepDefinition = {
   description: i18n.translate('workflowsExtensions.dataRegexReplaceStep.description', {
     defaultMessage: 'Replace text patterns using regular expressions',
   }),
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
+  icon: () => <EuiIcon type="pencil" />,
   actionsMenuGroup: ActionsMenuGroup.data,
   documentation: {
     details: i18n.translate('workflowsExtensions.dataRegexReplaceStep.documentation.details', {

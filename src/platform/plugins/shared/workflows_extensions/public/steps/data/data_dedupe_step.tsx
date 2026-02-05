@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { dataDedupeStepCommonDefinition } from '../../../common/steps/data';
 import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
@@ -15,11 +16,7 @@ export const dataDedupeStepDefinition: PublicStepDefinition = {
   ...dataDedupeStepCommonDefinition,
   label: 'Deduplicate Collection',
   description: 'Remove duplicate items from a collection based on unique keys',
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/filter').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
+  icon: () => <EuiIcon type="filter" />,
   actionsMenuGroup: ActionsMenuGroup.data,
   documentation: {
     details: `# Deduplicate Collection

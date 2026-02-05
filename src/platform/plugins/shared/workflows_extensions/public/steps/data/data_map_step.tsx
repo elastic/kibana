@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { dataMapStepCommonDefinition, DataMapStepTypeId } from '../../../common/steps/data';
@@ -14,11 +15,7 @@ import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry
 
 export const dataMapStepDefinition: PublicStepDefinition = {
   ...dataMapStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/list').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
+  icon: () => <EuiIcon type="list" />,
   label: i18n.translate('workflowsExtensions.dataMapStep.label', {
     defaultMessage: 'Map Collection',
   }),

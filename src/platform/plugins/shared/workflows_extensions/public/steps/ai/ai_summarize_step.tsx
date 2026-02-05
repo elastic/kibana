@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { AiSummarizeStepCommonDefinition, AiSummarizeStepTypeId } from '../../../common/steps/ai';
@@ -14,11 +15,7 @@ import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry
 
 export const AiSummarizeStepDefinition: PublicStepDefinition = {
   ...AiSummarizeStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/sparkles').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
+  icon: () => <EuiIcon type="sparkles" />,
   label: i18n.translate('workflowsExtensionsExample.AiSummarizeStep.label', {
     defaultMessage: 'AI Summarize',
   }),
