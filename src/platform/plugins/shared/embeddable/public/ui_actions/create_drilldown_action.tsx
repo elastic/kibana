@@ -78,20 +78,13 @@ export const createDrilldownAction: ActionDefinition<EmbeddableApiContext> = {
       core,
       parentApi: embeddable.parentApi,
       loadContent: async ({ closeFlyout }) => {
-        return <div>Create drilldowns placehodler</div>;
-        /*
-        const templates = createDrilldownTemplatesFromSiblings(embeddable);
+        const { DrilldownManager } = await import('../drilldowns/drilldowns_manager_ui/containers/drilldown_manager');
+        //const templates = createDrilldownTemplatesFromSiblings(embeddable);
         return (
           <DrilldownManager
-            closeAfterCreate
-            initialRoute={'/new'}
-            triggers={getEmbeddableTriggers(embeddable)}
-            placeContext={{ embeddable }}
-            templates={templates}
             onClose={closeFlyout}
           />
         );
-        */
       },
       flyoutProps: {
         'data-test-subj': 'createDrilldownFlyout',
