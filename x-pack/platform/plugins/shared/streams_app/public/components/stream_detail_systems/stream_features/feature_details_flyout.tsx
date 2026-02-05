@@ -64,6 +64,9 @@ export function FeatureDetailsFlyout({
   };
 
   const displayTitle = feature.title ?? feature.id;
+  const evidence = feature.evidence?.length ? feature.evidence : [];
+  const tags = feature.tags?.length && feature.tags.length > 0 ? feature.tags : [];
+
   const generalInfoItems = [
     {
       title: ID_LABEL,
@@ -85,11 +88,13 @@ export function FeatureDetailsFlyout({
       title: PROPERTIES_LABEL,
       description: (
         <EuiText size="s">
-          {Object.entries(feature.properties).map(([key, value]) => (
-            <div key={key}>
-              <b>{key}</b> {value}
-            </div>
-          ))}
+          {Object.entries(feature.properties)
+            .filter(([, value]) => typeof value === 'string')
+            .map(([key, value]) => (
+              <EuiText size="s" key={key}>
+                <strong>{key}</strong> {value as string}
+              </EuiText>
+            ))}
         </EuiText>
       ),
     },
@@ -102,9 +107,9 @@ export function FeatureDetailsFlyout({
     {
       title: TAGS_LABEL,
       description:
-        feature.tags.length > 0 ? (
+        tags.length > 0 ? (
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            {feature.tags.map((tag) => (
+            {tags.map((tag: string) => (
               <EuiFlexItem key={tag} grow={false}>
                 <EuiBadge color="hollow">{tag}</EuiBadge>
               </EuiFlexItem>
@@ -214,8 +219,8 @@ export function FeatureDetailsFlyout({
           </EuiFlexItem>
           <EuiFlexItem>
             <InfoPanel title={EVIDENCE_LABEL}>
-              {feature.evidence.length > 0 ? (
-                feature.evidence.map((item, index) => (
+              {evidence.length > 0 ? (
+                evidence.map((item: string, index: number) => (
                   <React.Fragment key={index}>
                     <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
                       <EuiFlexItem grow={false}>
@@ -225,7 +230,7 @@ export function FeatureDetailsFlyout({
                         <EuiText size="s">{item}</EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                    {index < feature.evidence.length - 1 && <EuiHorizontalRule margin="m" />}
+                    {index < evidence.length - 1 && <EuiHorizontalRule margin="m" />}
                   </React.Fragment>
                 ))
               ) : (
@@ -235,11 +240,11 @@ export function FeatureDetailsFlyout({
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="streamsAppFeatureDetailsFlyoutMeta">
             <InfoPanel title={META_LABEL}>
-              {Object.keys(feature.meta).length === 0 ? (
+              {Object.keys(feature.meta ?? {}).length === 0 ? (
                 <EuiText size="s">{NO_META_AVAILABLE}</EuiText>
               ) : (
                 <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
-                  {JSON.stringify(feature.meta, null, 2)}
+                  {JSON.stringify(feature.meta ?? {}, null, 2)}
                 </EuiCodeBlock>
               )}
             </InfoPanel>

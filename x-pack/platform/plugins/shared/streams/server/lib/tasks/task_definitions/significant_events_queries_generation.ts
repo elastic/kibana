@@ -13,6 +13,7 @@ import {
   type System,
 } from '@kbn/streams-schema';
 import pLimit from 'p-limit';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -150,7 +151,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   errorMessage.includes('ERR_CANCELED') ||
                   errorMessage.includes('Request was aborted')
                 ) {
-                  return;
+                  return getDeleteTaskRunResult();
                 }
 
                 taskContext.logger.error(
@@ -162,6 +163,8 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   { connectorId, start, end, systems, sampleDocsSize, streamName },
                   errorMessage
                 );
+
+                return getDeleteTaskRunResult();
               }
             },
             runContext,
