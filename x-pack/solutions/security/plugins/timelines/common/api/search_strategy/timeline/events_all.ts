@@ -20,6 +20,7 @@ const sort = z.array(extendedSortItem);
 
 export const timelineEventsAllSchema = requestPaginated.extend({
   authFilter: z.object({}).optional(),
+  dateRangeField: z.string().optional(),
   excludeEcsData: z.boolean().optional(),
   fieldRequested: z.array(z.string()),
   sort,
