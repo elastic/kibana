@@ -9,8 +9,14 @@ import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../fixtures';
 
-spaceTest.describe('Lens ES|QL conversion', { tag: ['@ess'] }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
+spaceTest.describe('Lens Convert to ES|QL', { tag: ['@ess'] }, () => {
+  spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
+    await apiServices.core.settings({
+      'feature_flags.overrides': {
+        'lens.enable_esql_conversion': 'true',
+      },
+    });
+
     await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.ESQL_CONVERSION_DASHBOARD);
     await scoutSpace.uiSettings.set({
       defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
@@ -19,9 +25,14 @@ spaceTest.describe('Lens ES|QL conversion', { tag: ['@ess'] }, () => {
     });
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.goto();
+    const { dashboard } = pageObjects;
+
+    await dashboard.goto();
+    await page.getByTestId(testData.ESQL_CONVERSION_DASHBOARD_TEST_ID).click();
+    await dashboard.waitForPanelsToLoad(2);
+    await dashboard.switchToEditMode();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -31,40 +42,30 @@ spaceTest.describe('Lens ES|QL conversion', { tag: ['@ess'] }, () => {
 
   spaceTest(
     'should display ES|QL conversion modal for inline visualizations',
-    async ({ page, pageObjects }) => {
+    async ({ pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-
-      await page.getByTestId(testData.ESQL_CONVERSION_DASHBOARD_TEST_ID).click();
-      await dashboard.waitForPanelsToLoad(2);
-      await dashboard.switchToEditMode();
 
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
 
       await lens.getConvertToEsqlButton().click();
 
-      await expect(lens.getConvertToEsqModal()).toBeVisible();
+      const modal = lens.getConvertToEsqModal();
+      await expect(modal).toBeVisible();
 
       await lens.getConvertToEsqModalConfirmButton().click();
 
-      await expect(lens.getConvertToEsqModal()).toBeHidden();
+      await expect(modal).toBeHidden();
 
       await lens.getApplyFlyoutButton().click();
 
-      // TODO: Add conversion assertions once logic is implemented (https://github.com/elastic/kibana/pull/248078)
+      // TODO: Add conversion assertions: https://github.com/elastic/kibana/issues/250385
     }
   );
 
   spaceTest(
     'should disable Convert to ES|QL button for visualizations saved to library',
-    async ({ browserAuth, page, pageObjects }) => {
-      await browserAuth.loginAsPrivilegedUser();
-
+    async ({ pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-
-      await dashboard.goto();
-      await page.getByTestId(testData.ESQL_CONVERSION_DASHBOARD_TEST_ID).click();
-      await dashboard.waitForPanelsToLoad(2);
-      await dashboard.switchToEditMode();
 
       await dashboard.openInlineEditor(testData.SAVED_METRIC_PANEL_ID);
 

@@ -8,11 +8,6 @@
 import { globalSetupHook } from '@kbn/scout';
 import { testData } from '../fixtures';
 
-globalSetupHook('Setup environment for Lens tests', async ({ esArchiver, apiServices }) => {
-  await apiServices.core.settings({
-    'feature_flags.overrides': {
-      'lens.enable_esql_conversion': 'true',
-    },
-  });
+globalSetupHook('Setup environment for Lens tests', async ({ esArchiver }) => {
   await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
 });
