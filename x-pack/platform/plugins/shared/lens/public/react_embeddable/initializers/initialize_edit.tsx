@@ -35,7 +35,10 @@ import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
 import { mountInlinePanel } from '../mount';
 import type { StateManagementConfig } from './initialize_state_management';
-import { apiPublishesInlineEditingCapabilities } from '../type_guards';
+import {
+  apiPublishesInlineEditingCapabilities,
+  apiPublishesIsEditableByUser,
+} from '../type_guards';
 import type { SearchContextConfig } from './initialize_search_context';
 
 function getSupportedTriggers(
@@ -310,9 +313,18 @@ export function initializeEditApi(
         );
       },
       isReadOnlyEnabled: () => {
+        // Check if user can actually edit this specific dashboard (considering access control)
+        const isEditableByUser = apiPublishesIsEditableByUser(parentApi)
+          ? parentApi.isEditableByUser
+          : true;
+
         return {
           read: Boolean(parentApi && apiHasAppContext(parentApi) && canShowConfig()),
-          write: Boolean(capabilities.dashboard_v2?.showWriteControls && !isManaged(getState())),
+          write: Boolean(
+            capabilities.dashboard_v2?.showWriteControls &&
+              !isManaged(getState()) &&
+              isEditableByUser
+          ),
         };
       },
       onShowConfig: async () => {

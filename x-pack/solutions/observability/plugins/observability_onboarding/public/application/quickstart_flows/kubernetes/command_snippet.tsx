@@ -47,7 +47,7 @@ export function CommandSnippet({
         <p>
           <FormattedMessage
             id="xpack.observability_onboarding.kubernetesPanel.installElasticAgentDescription"
-            defaultMessage="Copy and run the install command. Note that the following manifest contains resource limits that may not be appropriate for a production environment, review our guide on {scalingLink} before deploying this manifest."
+            defaultMessage="Copy and run the install command. Note that the following manifest contains resource limits that may not be appropriate for a production environment, review our guide on {scalingLink} before deploying this manifest. Refer to the {docsLink} for information on supported Helm versions."
             values={{
               scalingLink: (
                 <EuiLink
@@ -59,6 +59,19 @@ export function CommandSnippet({
                   {i18n.translate(
                     'xpack.observability_onboarding.kubernetesPanel.scalingElasticAgentOnLinkLabel',
                     { defaultMessage: 'Scaling Elastic Agent on Kubernetes' }
+                  )}
+                </EuiLink>
+              ),
+              docsLink: (
+                <EuiLink
+                  data-test-subj="observabilityOnboardingKubernetesPanelQuickstartDocsLink"
+                  href="https://www.elastic.co/docs/solutions/observability/get-started/quickstart-monitor-kubernetes-cluster-with-elastic-agent"
+                  external
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.observability_onboarding.kubernetesPanel.quickstartDocsLinkLabel',
+                    { defaultMessage: 'quickstart guide' }
                   )}
                 </EuiLink>
               ),

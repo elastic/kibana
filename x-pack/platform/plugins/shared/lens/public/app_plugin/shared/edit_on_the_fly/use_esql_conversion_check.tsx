@@ -27,7 +27,7 @@ import {
   esqlConversionFailureReasonMessages,
   getFailureTooltip,
 } from '../../../datasources/form_based/to_esql_failure_reasons';
-import type { ConvertibleLayer } from './convert_to_esql_modal';
+import type { ConvertibleLayer } from './esql_conversion_types';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { layerTypes } from '../../..';
