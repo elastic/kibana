@@ -8,6 +8,7 @@
 import { css } from '@emotion/css';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { KeyboardEvent } from 'react';
 import React, { useMemo } from 'react';
 import type {
   AttachmentRefOperation,
@@ -86,6 +87,18 @@ export const AttachmentReferencePill: React.FC<AttachmentReferencePillProps> = (
 
   const iconType = uiDefinition?.getIcon?.() ?? DEFAULT_ICON;
   const operationLabel = getOperationLabel(operation);
+  const onPillClick =
+    uiDefinition?.onClick && versionData
+      ? () =>
+          uiDefinition.onClick?.({
+            attachment: {
+              id: attachment.id,
+              type: attachment.type,
+              data: versionData.data,
+            },
+            version: versionData,
+          })
+      : undefined;
 
   const iconContainerStyles = css`
     display: flex;
@@ -115,7 +128,18 @@ export const AttachmentReferencePill: React.FC<AttachmentReferencePillProps> = (
       css={css`
         max-width: 220px;
         border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade};
+        ${onPillClick ? 'cursor: pointer;' : ''}
       `}
+      role={onPillClick ? 'button' : undefined}
+      tabIndex={onPillClick ? 0 : undefined}
+      onClick={onPillClick}
+      onKeyDown={(event?: KeyboardEvent<HTMLDivElement> | KeyboardEvent<HTMLButtonElement>) => {
+        if (!onPillClick) return;
+        if (event?.key === 'Enter' || event?.key === ' ') {
+          event?.preventDefault();
+          onPillClick();
+        }
+      }}
       data-test-subj={`agentBuilderAttachmentReferencePill-${attachment.id}-v${version}`}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
