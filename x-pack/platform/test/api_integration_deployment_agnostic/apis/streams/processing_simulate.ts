@@ -420,43 +420,60 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
       });
 
-      it('should correctly associate nested processors within Elasticsearch ingest pipeline', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
-          processing: {
-            steps: [
-              {
-                customIdentifier: 'draft',
-                action: 'manual_ingest_pipeline' as const,
-                processors: [
-                  {
-                    set: {
-                      field: 'attributes.test',
-                      value: 'test',
-                    },
-                  },
-                  {
-                    fail: {
-                      message: 'Failing',
-                    },
-                  },
-                ],
-                where: { always: {} },
-              },
-            ],
-          },
-          documents: [createTestDocument('test message')],
+      describe('manual_ingest_pipeline processor', () => {
+        // manual_ingest_pipeline is only allowed in classic streams, not wired streams
+        const CLASSIC_STREAM_NAME = 'logs-manual-pipeline-test-default';
+
+        before(async () => {
+          // Create a classic stream by indexing a document
+          await indexDocument(esClient, CLASSIC_STREAM_NAME, {
+            '@timestamp': TEST_TIMESTAMP,
+            message: 'test message',
+          });
         });
 
-        const processorsMetrics = response.body.processors_metrics;
-        const processorMetrics = processorsMetrics.draft;
+        after(async () => {
+          await esClient.indices.deleteDataStream({ name: CLASSIC_STREAM_NAME });
+        });
 
-        expect(processorMetrics.errors).to.eql([
-          {
-            processor_id: 'draft',
-            type: 'generic_processor_failure',
-            message: 'Failing',
-          },
-        ]);
+        it('should correctly associate nested processors within Elasticsearch ingest pipeline', async () => {
+          const response = await simulateProcessingForStream(apiClient, CLASSIC_STREAM_NAME, {
+            processing: {
+              steps: [
+                {
+                  customIdentifier: 'draft',
+                  action: 'manual_ingest_pipeline' as const,
+                  processors: [
+                    {
+                      set: {
+                        field: 'attributes.test',
+                        value: 'test',
+                      },
+                    },
+                    {
+                      fail: {
+                        message: 'Failing',
+                      },
+                    },
+                  ],
+                  where: { always: {} },
+                },
+              ],
+            },
+            documents: [createTestDocument('test message')],
+          });
+
+          const processorsMetrics = response.body.processors_metrics;
+          const processorMetrics = processorsMetrics.draft;
+
+          expect(processorMetrics.errors).to.eql([
+            {
+              processor_id: 'draft',
+              type: 'generic_processor_failure',
+              message: 'Failing',
+            },
+          ]);
+        });
       });
 
       it('should gracefully return mappings simulation errors', async () => {
