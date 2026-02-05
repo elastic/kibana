@@ -441,7 +441,7 @@ describe('McpConnector', () => {
       expect(mockMcpClient.disconnect).toHaveBeenCalledTimes(1); // Disconnect in finally block
     });
 
-    it('should parse response and return entire parsed JSON when parseResponse is true', async () => {
+    it('should parse response and return parsed JSON without full text content when parseResponse is true', async () => {
       const mockCallResult: CallToolResponse = {
         content: [
           {
@@ -461,10 +461,10 @@ describe('McpConnector', () => {
       );
 
       expect(result.parsed).toEqual({ response: { answer: 42 }, other: 'ignored' });
-      expect(result.content).toEqual(mockCallResult.content);
+      expect(result.content).toEqual([]);
     });
 
-    it('should return parsed null when parseResponse is true and text is invalid JSON', async () => {
+    it('should return parsed null and keep full text content when parseResponse is true and text is invalid JSON', async () => {
       const mockCallResult: CallToolResponse = {
         content: [
           {
@@ -487,7 +487,7 @@ describe('McpConnector', () => {
       expect(result.content).toEqual(mockCallResult.content);
     });
 
-    it('should return full parsed JSON when parseResponse is true regardless of shape', async () => {
+    it('should return parsed JSON without full text content when parseResponse is true regardless of shape', async () => {
       const mockCallResult: CallToolResponse = {
         content: [
           {
@@ -507,7 +507,7 @@ describe('McpConnector', () => {
       );
 
       expect(result.parsed).toEqual({ foo: 'bar' });
-      expect(result.content).toEqual(mockCallResult.content);
+      expect(result.content).toEqual([]);
     });
   });
 

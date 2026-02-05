@@ -308,6 +308,9 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
             parsed = null;
           }
         }
+        if (parsed !== null) {
+          return { ...result, content: [], parsed };
+        }
         return { ...result, parsed };
       }
 
