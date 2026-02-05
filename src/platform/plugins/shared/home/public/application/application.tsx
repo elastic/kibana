@@ -20,7 +20,13 @@ export const renderApp = async (
   coreStart: CoreStart,
   history: ScopedHistory
 ) => {
-  const { featureCatalogue, chrome, dataViewsService: dataViews, trackUiMetric } = getServices();
+  const {
+    featureCatalogue,
+    chrome,
+    dataViewsService: dataViews,
+    trackUiMetric,
+    sampleDataIngest,
+  } = getServices();
 
   // FIXME: use featureCatalogue.getFeatures$()
   const directories = featureCatalogue.get();
@@ -38,7 +44,7 @@ export const renderApp = async (
     render(
       coreStart.rendering.addContext(
         <KibanaContextProvider services={{ ...coreStart }}>
-          <SampleDataTabKibanaProvider {...{ coreStart, dataViews, trackUiMetric }}>
+          <SampleDataTabKibanaProvider {...{ coreStart, dataViews, trackUiMetric, sampleDataIngest }}>
             <HomeApp directories={directories} solutions={solutions} />
           </SampleDataTabKibanaProvider>
         </KibanaContextProvider>

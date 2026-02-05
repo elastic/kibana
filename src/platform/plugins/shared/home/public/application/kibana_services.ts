@@ -24,6 +24,7 @@ import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { SampleDataIngestPluginStart } from '@kbn/sample-data-ingest';
 import type { TutorialService } from '../services/tutorials';
 import type { AddDataService } from '../services/add_data';
 import type { FeatureCatalogueRegistry } from '../services/feature_catalogue';
@@ -59,6 +60,7 @@ export interface HomeKibanaServices {
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
   history: AppMountParameters['history'];
+  sampleDataIngest?: SampleDataIngestPluginStart;
 }
 
 let services: HomeKibanaServices | null = null;
