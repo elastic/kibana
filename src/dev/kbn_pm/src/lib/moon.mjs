@@ -14,7 +14,8 @@ const getMoonExec = (() => {
 
   return async () => {
     if (!moonExecPath) {
-      moonExecPath = (await run('yarn', ['bin', 'moon'])).trim();
+      moonExecPath = (await run('yarn', ['--silent', 'which', 'moon'])).trim();
+      console.warn(`Using moon at ${moonExecPath}`);
     }
     return moonExecPath;
   };
