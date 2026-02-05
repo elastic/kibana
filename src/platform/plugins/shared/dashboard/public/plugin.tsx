@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, filter, map } from 'rxjs';
+import { BehaviorSubject, filter, map, combineLatest, type Subscription } from 'rxjs';
 
 import type {
   ContentManagementPublicSetup,
@@ -16,6 +16,7 @@ import type {
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type {
   App,
+  AppDeepLink,
   AppMountParameters,
   AppUpdater,
   Plugin,
@@ -62,9 +63,9 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
-
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
+import type { DashboardListingTab } from './dashboard_listing/types';
 import {
   DASHBOARD_APP_ID,
   DASHBOARD_DRILLDOWN_TYPE,
@@ -119,8 +120,9 @@ export interface DashboardStartDependencies {
   cps?: CPSPluginStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface DashboardSetup {}
+export interface DashboardSetup {
+  registerListingPageTab: (tab: DashboardListingTab) => void;
+}
 
 /**
  * The start contract for the Dashboard plugin.
@@ -143,14 +145,18 @@ export class DashboardPlugin
     setLogger(initializerContext.logger.get('dashboard'));
   }
 
+  private appStateSubscription?: Subscription;
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private urlUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private deepLinksUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
+  private listingViewRegistry: Set<DashboardListingTab> = new Set();
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
     { embeddable, share, home, data, urlForwarding }: DashboardSetupDependencies
-  ) {
+  ): DashboardSetup {
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
       schema: {},
@@ -182,7 +188,7 @@ export class DashboardPlugin
       baseUrl: core.http.basePath.prepend('/app/dashboards'),
       defaultSubUrl: `#${LANDING_PAGE_PATH}`,
       storageKey: `lastUrl:${core.http.basePath.get()}:dashboard`,
-      navLinkUpdater$: this.appStateUpdater,
+      navLinkUpdater$: this.urlUpdater,
       toastNotifications: core.notifications.toasts,
       stateParams: [
         {
@@ -223,6 +229,15 @@ export class DashboardPlugin
       stopUrlTracker();
     };
 
+    this.appStateSubscription = combineLatest([this.urlUpdater, this.deepLinksUpdater]).subscribe(
+      ([urlUpdater, deepLinksUpdater]) => {
+        this.appStateUpdater.next((app) => ({
+          ...urlUpdater(app),
+          ...deepLinksUpdater(app),
+        }));
+      }
+    );
+
     const app: App = {
       id: DASHBOARD_APP_ID,
       title: 'Dashboards',
@@ -249,6 +264,7 @@ export class DashboardPlugin
           scopedHistory: () => this.currentHistory!,
           onAppLeave: params.onAppLeave,
           setHeaderActionMenu: params.setHeaderActionMenu,
+          getListingTabs: () => Array.from(this.listingViewRegistry as Set<DashboardListingTab>),
         };
 
         return mountApp({
@@ -292,7 +308,11 @@ export class DashboardPlugin
       return dashboardDrilldown;
     });
 
-    return {};
+    return {
+      registerListingPageTab: (tab: DashboardListingTab) => {
+        this.listingViewRegistry.add(tab);
+      },
+    };
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
@@ -310,6 +330,22 @@ export class DashboardPlugin
       return getDashboardsByIdsAction;
     });
 
+    const deepLinks: AppDeepLink[] = [];
+    for (const tab of this.listingViewRegistry as Set<DashboardListingTab>) {
+      if (tab.deepLink) {
+        deepLinks.push({
+          id: tab.id,
+          title: tab.deepLink.title,
+          path: `#${LANDING_PAGE_PATH}/${tab.id}`,
+          visibleIn: tab.deepLink.visibleIn,
+        });
+      }
+    }
+
+    if (deepLinks.length > 0) {
+      this.deepLinksUpdater.next(() => ({ deepLinks }));
+    }
+
     return {
       findDashboardsService: async () => {
         const { findService } = await import('./dashboard_client');
@@ -322,5 +358,6 @@ export class DashboardPlugin
     if (this.stopUrlTracking) {
       this.stopUrlTracking();
     }
+    this.appStateSubscription?.unsubscribe();
   }
 }
