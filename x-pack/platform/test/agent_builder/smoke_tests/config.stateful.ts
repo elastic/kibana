@@ -15,14 +15,6 @@ const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
 
 // eslint-disable-next-line import/no-default-export
 export default async function (ftrContext: FtrConfigProviderContext) {
-  // EIS smoke tests require a local ES instance with custom args - cannot run on Cloud
-  if (process.env.TEST_CLOUD) {
-    throw new Error(
-      'Agent Builder EIS smoke tests cannot run on Cloud deployments. ' +
-        'These tests require a local ES instance configured with EIS QA connectivity via CCM.'
-    );
-  }
-
   const preconfiguredConnectors = getPreconfiguredConnectorConfig();
   const eisServerArg = `xpack.inference.elastic.url=${EIS_QA_URL}`;
 
