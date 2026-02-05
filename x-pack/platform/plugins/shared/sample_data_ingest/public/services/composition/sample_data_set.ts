@@ -24,7 +24,9 @@ const DEFAULT_INDEX_PATTERN_ID = '0e5a8704-b6fa-4320-9b73-65f692379500';
 /**
  * Maps the sample_data_ingest InstallationStatus to the InstalledStatus type used by SampleDataSet.
  */
-const mapInstallationStatusToInstalledStatus = (status: InstallationStatus): InstalledStatus => {
+export const mapInstallationStatusToInstalledStatus = (
+  status: InstallationStatus
+): InstalledStatus => {
   switch (status) {
     case InstallationStatus.Installed:
       return 'installed';
@@ -50,6 +52,13 @@ const createAppLinks = (indexPatternId: string): AppLink[] => [
       defaultMessage: 'Discover',
     }),
     icon: 'discoverApp',
+  },
+  {
+    path: '/app/agent_builder',
+    label: i18n.translate('xpack.sampleDataIngest.sampleDataSet.viewAgentBuilderLink', {
+      defaultMessage: 'Agent Builder',
+    }),
+    icon: 'productRobot',
   },
 ];
 
