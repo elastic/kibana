@@ -7,9 +7,9 @@
 
 {{~#if $ref~}}
   {{~#if (isCircularRef $ref)~}}
-    z.lazy(() => {{referenceName}})
+    z.lazy(() => {{transformSchemaName referenceName}})
   {{~else~}}
-    {{referenceName}}
+      {{transformSchemaName referenceName}}
   {{~/if~}}
   {{~#if nullable}}.nullable(){{/if~}}
   {{~#if (eq requiredBool false)}}.optional(){{/if~}}
@@ -32,7 +32,7 @@
   {{#if discriminator}}
     z.discriminatedUnion('{{discriminator.propertyName}}', [
   {{else}}
-    z.union([ 
+    z.union([
   {{/if}}
   {{~#each anyOf~}}
     {{~> zod_schema_item ~}},
@@ -46,7 +46,7 @@
   {{#if discriminator}}
     z.discriminatedUnion('{{discriminator.propertyName}}', [
   {{else}}
-    z.union([ 
+    z.union([
   {{/if}}
   {{~#each oneOf~}}
     {{~> zod_schema_item ~}},
@@ -86,8 +86,8 @@ z.unknown()
   z.object({
     {{#each properties}}
       {{#if description}}
-      /** 
-      * {{{description}}} 
+      /**
+      * {{{description}}}
       */
       {{/if}}
       '{{@key}}':{{~> zod_schema_item requiredBool=(includes ../required @key)~}},
