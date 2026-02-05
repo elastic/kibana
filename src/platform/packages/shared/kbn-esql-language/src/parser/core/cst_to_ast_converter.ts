@@ -508,6 +508,12 @@ export class CstToAstConverter {
       return this.fromForkCommand(forkCommandCtx);
     }
 
+    const mmrCommand = ctx.mmrCommand();
+
+    if (mmrCommand) {
+      return this.fromMmrCommand(mmrCommand);
+    }
+
     // throw new Error(`Unknown processing command: ${this.getSrc(ctx)}`;
   }
 
@@ -2109,6 +2115,53 @@ export class CstToAstConverter {
     });
   }
 
+  // --------------------------------------------------------------------- MMR
+
+  private fromMmrCommand(ctx: cst.MmrCommandContext): ast.ESQLCommand<'mmr'> {
+    const command = this.createCommand<'mmr', ast.ESQLAstMmrCommand>('mmr', ctx);
+
+    this.parseMmrOnOption(ctx, command);
+    this.parseMmrLimitOption(ctx, command);
+    console.log('command', command);
+
+    return command;
+  }
+
+  private parseMmrOnOption(ctx: cst.MmrCommandContext, command: ast.ESQLAstMmrCommand): void {
+    const onToken = ctx.ON();
+    const diversifyFieldCtx = ctx.qualifiedName();
+
+    if (!onToken || !diversifyFieldCtx) {
+      return;
+    }
+
+    const diversifyField = this.toColumn(diversifyFieldCtx);
+    const onOption = this.toOption(onToken.getText().toLocaleLowerCase(), diversifyFieldCtx);
+
+    onOption.args.push(diversifyField);
+    onOption.location.min = onToken.symbol.start;
+    onOption.location.max = diversifyField.location.max;
+
+    command.args.push(onOption);
+  }
+
+  private parseMmrLimitOption(ctx: cst.MmrCommandContext, command: ast.ESQLAstMmrCommand): void {
+    const limitToken = ctx.MMR_LIMIT();
+    const limitValueCtx = ctx.integerValue();
+
+    if (!limitToken || !limitValueCtx) {
+      return;
+    }
+
+    const limitOption = this.toOption(limitToken.getText().toLocaleLowerCase(), limitValueCtx);
+
+    limitOption.args.push(this.fromConstantToArray(limitValueCtx));
+    limitOption.location.min = limitToken.symbol.start;
+    limitOption.location.max = limitValueCtx.stop?.stop ?? limitToken.symbol.stop;
+
+    command.args.push(limitOption);
+  }
+
   // -------------------------------------------------------------- expressions
 
   private toColumnsFromCommand(
@@ -3184,6 +3237,8 @@ export class CstToAstConverter {
       return this.toNumericLiteral(ctx.decimalValue(), 'double');
     } else if (ctx instanceof cst.IntegerLiteralContext) {
       return this.toNumericLiteral(ctx.integerValue(), 'integer');
+    } else if (ctx instanceof cst.IntegerValueContext) {
+      return this.toNumericLiteral(ctx, 'integer');
     } else if (ctx instanceof cst.BooleanLiteralContext) {
       return this.getBooleanValue(ctx);
     } else if (ctx instanceof cst.StringLiteralContext) {

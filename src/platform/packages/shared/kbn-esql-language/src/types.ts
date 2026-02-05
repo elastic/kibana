@@ -153,6 +153,8 @@ export interface ESQLAstForkCommand extends ESQLCommand<'fork'> {
   args: ESQLForkParens[];
 }
 
+export interface ESQLAstMmrCommand extends ESQLCommand<'mmr'> {}
+
 /**
  * Represents a PROMQL command.
  *
