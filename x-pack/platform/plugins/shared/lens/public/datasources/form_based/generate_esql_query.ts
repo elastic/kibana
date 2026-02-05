@@ -27,6 +27,7 @@ import { operationDefinitionMap } from './operations';
 import { resolveTimeShift } from './time_shift_utils';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
+import { defaultValue as defaultStaticValue } from './operations/definitions/static_value';
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
@@ -160,7 +161,7 @@ export function generateEsqlQuery(
   const staticValueEvals: string[] = [];
   staticValueEntries.forEach(([colId, col], index) => {
     const staticCol = col as StaticValueIndexPatternColumn;
-    const value = staticCol.params?.value ?? '100';
+    const value = staticCol.params?.value ?? defaultStaticValue;
 
     // Generate a column name for the static value
     // Priority: 1) semantic role name from visualization, 2) 'static_value' for single, 3) 'static_value_N' for multiple
