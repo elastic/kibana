@@ -36,6 +36,7 @@ fileGroups:
   src:
     - public/**/*
     - server/**/*
+    - common/**/*
     - '!target/**/*'
 tasks:
   jest:
