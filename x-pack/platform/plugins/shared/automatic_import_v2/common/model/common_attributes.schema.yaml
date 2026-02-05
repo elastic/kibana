@@ -198,3 +198,18 @@ components:
             status:
               description: The status of the integration
               $ref: "#/components/schemas/TaskStatus"
+
+    LangSmithOptions:
+      type: object
+      description: The LangSmith options object.
+      required:
+        - projectName
+        - apiKey
+      additionalProperties: false
+      properties:
+        projectName:
+          type: string
+          description: The project name.
+        apiKey:
+          type: string
+          description: The apiKey to use for tracing.
