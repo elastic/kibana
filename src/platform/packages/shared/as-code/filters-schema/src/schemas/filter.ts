@@ -162,7 +162,8 @@ const existsConditionSchema = baseConditionSchema.extends({
 /**
  * Discriminated union schema for filter conditions
  */
-const conditionSchema = schema.oneOf(
+const conditionSchema = schema.discriminatedUnion(
+  'operator',
   [singleConditionSchema, oneOfConditionSchema, rangeConditionSchema, existsConditionSchema],
   { meta: { description: 'A filter condition with strict operator/value type matching' } }
 );
