@@ -505,22 +505,11 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.includedDataStreamNamespacesForRuleExecutionDescription',
         {
           defaultMessage:
-            "When configured, only events from the specified data stream namespaces are searched during rule execution, e.g. 'data_stream.namespace':['namespace1', 'namespace2']",
+            'When configured, only events from the specified data stream namespaces are searched during rule execution. Provide an array of namespace strings, e.g. "namespace1","namespace2"',
         }
       ),
-      type: 'json',
-      schema: schema.object({
-        query: schema.object({
-          bool: schema.object({
-            filter: schema.object({
-              terms: schema.recordOf(
-                schema.string({ defaultValue: 'data_stream.namespace' }),
-                schema.any({ defaultValue: [] })
-              ),
-            }),
-          }),
-        }),
-      }),
+      type: 'array',
+      schema: schema.arrayOf(schema.string()),
       value: DATA_STREAM_NAMESPACES_DEFAULT_SETTING,
       category: [APP_ID],
       requiresPageReload: false,

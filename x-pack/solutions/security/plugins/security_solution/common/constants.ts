@@ -257,19 +257,8 @@ export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
 export const INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION =
   'securitySolution:includedDataStreamNamespacesForRuleExecution' as const;
 
-/** The default value for `IP Reputation Links` */
-export const DATA_STREAM_NAMESPACES_DEFAULT_SETTING = `
-{
-  "query": {
-    "bool": {
-      "filter": {
-        "terms": {
-          "data_stream.namespace": []
-        }
-      }
-    }
-  }
-}`;
+/** The default value for the included data stream namespaces setting (empty = no filter) */
+export const DATA_STREAM_NAMESPACES_DEFAULT_SETTING: string[] = [];
 
 /** This Kibana Advanced Setting allows users to enable/disable the Graph Visualizations for alerts and events */
 export const ENABLE_GRAPH_VISUALIZATION_SETTING =
