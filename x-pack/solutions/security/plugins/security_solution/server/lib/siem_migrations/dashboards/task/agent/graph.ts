@@ -15,7 +15,7 @@ import { getAggregateDashboardNode } from './nodes/aggregate_dashboard';
 import { RETRY_POLICY } from './constants';
 
 export function getDashboardMigrationAgent(params: MigrateDashboardGraphParams) {
-  const parseOriginalDashboardNode = getParseOriginalDashboardNode();
+  const parseOriginalDashboardNode = getParseOriginalDashboardNode(params);
   const createDescriptionsNode = getCreateDescriptionsNode(params);
   const translatePanel = getTranslatePanelNode(params);
   const aggregateDashboardNode = getAggregateDashboardNode();

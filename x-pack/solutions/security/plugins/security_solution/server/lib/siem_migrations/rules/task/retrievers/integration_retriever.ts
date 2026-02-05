@@ -6,10 +6,10 @@
  */
 
 import type { RuleMigrationIntegration } from '../../types';
-import type { RuleMigrationsRetrieverClients } from './rule_migrations_retriever';
+import type { RuleMigrationsRetrieverDeps } from './rule_migrations_retriever';
 
 export class IntegrationRetriever {
-  constructor(private readonly clients: RuleMigrationsRetrieverClients) {}
+  constructor(private readonly clients: RuleMigrationsRetrieverDeps) {}
 
   public async populateIndex() {
     return this.clients.data.integrations.populate();
