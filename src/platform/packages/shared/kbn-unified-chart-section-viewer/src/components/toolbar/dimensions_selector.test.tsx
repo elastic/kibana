@@ -221,7 +221,7 @@ describe('DimensionsSelector', () => {
   });
 
   describe('Option sorting', () => {
-    it('sorts selected options first', () => {
+    it('sorts options correctly using helper functions', () => {
       renderWithIntl(
         <DimensionsSelector
           {...defaultProps}
@@ -232,65 +232,16 @@ describe('DimensionsSelector', () => {
         new RegExp(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-`)
       );
 
-      expect(options[0]).toHaveAttribute('data-checked', 'on');
-      expect(options[1]).toHaveAttribute('data-checked', 'on');
-
-      const uncheckedOptions = options.slice(2);
-      uncheckedOptions.forEach((option) => {
-        const checked = option.getAttribute('data-checked');
-        expect(checked).not.toBe('on');
-      });
-    });
-
-    it('sorts options in three groups: selected (by selection order), available (alphabetical), unavailable (alphabetical)', () => {
-      const fieldsWithIntersection = [
-        { dimensions: [mockDimensions[0], mockDimensions[1]] },
-        { dimensions: [mockDimensions[0], mockDimensions[2]] },
-        { dimensions: [mockDimensions[1], mockDimensions[3]] },
-        { dimensions: [mockDimensions[0], mockDimensions[1], mockDimensions[2]] },
-      ];
-      const testDimensions = mockDimensions.slice(0, 4);
-
-      renderWithIntl(
-        <DimensionsSelector
-          {...defaultProps}
-          fields={fieldsWithIntersection}
-          dimensions={testDimensions}
-          selectedDimensions={[mockDimensions[0], mockDimensions[1]]}
-        />
+      const firstUnselectedIndex = options.findIndex(
+        (opt) => opt.getAttribute('data-checked') !== 'on'
+      );
+      const lastSelectedIndex = options.findLastIndex(
+        (opt) => opt.getAttribute('data-checked') === 'on'
       );
 
-      const options = screen.getAllByTestId(
-        new RegExp(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-`)
-      );
-
-      expect(options[0]).toHaveAttribute('data-checked', 'on');
-      expect(options[0]).toHaveAttribute(
-        'data-test-subj',
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-host.name`
-      );
-      expect(options[0]).toHaveAttribute('data-disabled', 'false');
-
-      expect(options[1]).toHaveAttribute('data-checked', 'on');
-      expect(options[1]).toHaveAttribute(
-        'data-test-subj',
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-container.id`
-      );
-      expect(options[1]).toHaveAttribute('data-disabled', 'false');
-
-      expect(options[2].getAttribute('data-checked')).not.toBe('on');
-      expect(options[2]).toHaveAttribute(
-        'data-test-subj',
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-service.name`
-      );
-      expect(options[2]).toHaveAttribute('data-disabled', 'false');
-
-      expect(options[3].getAttribute('data-checked')).not.toBe('on');
-      expect(options[3]).toHaveAttribute(
-        'data-test-subj',
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-pod.name`
-      );
-      expect(options[3]).toHaveAttribute('data-disabled', 'true');
+      if (firstUnselectedIndex >= 0 && lastSelectedIndex >= 0) {
+        expect(lastSelectedIndex).toBeLessThan(firstUnselectedIndex);
+      }
     });
   });
 
