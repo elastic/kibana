@@ -13,7 +13,7 @@ import { INSTALLED_STATUS, UNINSTALLED_STATUS, INSTALLING_STATUS } from '../cons
 
 import { DisabledFooter } from './disabled_footer';
 import { InstallFooter } from './install_footer';
-import { InstallingFooter } from './installing_footer';
+import { InstallingAsyncFooter } from './installing_async_footer';
 import { RemoveFooter } from './remove_footer';
 
 /**
@@ -44,7 +44,12 @@ export const Footer = ({ sampleDataSet, onAction }: Props) => {
     }
 
     if (sampleDataSet.status === INSTALLING_STATUS) {
-      return <InstallingFooter {...sampleDataSet} />;
+      return (
+        <InstallingAsyncFooter
+          onInstall={(id) => onAction(id, INSTALLED_STATUS)}
+          {...sampleDataSet}
+        />
+      );
     }
 
     return <DisabledFooter {...sampleDataSet} />;

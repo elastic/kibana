@@ -159,10 +159,7 @@ export async function pollForCustomInstallation(
           onFailedAttempt(error, error.attemptNumber);
         }
         // eslint-disable-next-line no-console
-        console.debug(
-          `Custom poll attempt ${error.attemptNumber}/${maxAttempts}:`,
-          error.message
-        );
+        console.debug(`Custom poll attempt ${error.attemptNumber}/${maxAttempts}:`, error.message);
       },
     }
   );
@@ -204,10 +201,7 @@ export async function pollForCustomRemoval(
           onFailedAttempt(error, error.attemptNumber);
         }
         // eslint-disable-next-line no-console
-        console.debug(
-          `Custom poll attempt ${error.attemptNumber}/${maxAttempts}:`,
-          error.message
-        );
+        console.debug(`Custom poll attempt ${error.attemptNumber}/${maxAttempts}:`, error.message);
       },
     }
   );

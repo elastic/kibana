@@ -31,7 +31,7 @@ export type Params = Pick<
  * in the process of being installed.
  *
  * After installation, this hook polls the status endpoint until the data is confirmed
- * as installed
+ * as installed.
  */
 export const useInstall = ({
   id,
@@ -54,12 +54,7 @@ export const useInstall = ({
 
         // Poll until installation is complete using custom status check if available
         if (customStatusCheck) {
-          await pollForCustomInstallation(customStatusCheck, {
-            maxAttempts: 60,
-            initialDelayMs: 2000,
-            minTimeout: 2000,
-            factor: 1.2,
-          });
+          await pollForCustomInstallation(customStatusCheck);
         }
       } else {
         // Call the default install API (bulk insert without refresh)

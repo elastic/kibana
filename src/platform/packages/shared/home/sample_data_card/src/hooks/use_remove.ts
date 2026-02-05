@@ -54,12 +54,7 @@ export const useRemove = ({
 
         // Poll until removal is complete using custom status check if available
         if (customStatusCheck) {
-          await pollForCustomRemoval(customStatusCheck, {
-            maxAttempts: 20,
-            initialDelayMs: 500,
-            minTimeout: 500,
-            factor: 1.5,
-          });
+          await pollForCustomRemoval(customStatusCheck);
         }
       } else {
         await removeSampleDataSet(id, defaultIndex);
