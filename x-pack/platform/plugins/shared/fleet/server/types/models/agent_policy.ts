@@ -536,7 +536,9 @@ export const FullAgentPolicyResponseSchema = schema.object({
             password: schema.maybe(schema.string()),
             api_key: schema.maybe(schema.string()),
             headers: schema.maybe(
-              schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }))
+              schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }), {
+                maxSize: 100,
+              })
             ),
           })
         ),
