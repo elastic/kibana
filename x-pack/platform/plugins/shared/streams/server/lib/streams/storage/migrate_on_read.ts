@@ -29,6 +29,13 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     };
     hasBeenMigrated = true;
   }
+
+  // Add ingest
+  if (!('ingest' in migratedDefinition)) {
+    set(migratedDefinition, 'ingest', {});
+    hasBeenMigrated = true;
+  }
+
   // Rename unwired to classic
   if (
     isObject(migratedDefinition.ingest) &&
