@@ -18,7 +18,7 @@ import type { TopAlert } from '../../../../../typings/alerts';
 
 const apmErrorCountParamsToKqlQuery = (
   params: TypeOf<typeof errorCountParamsSchema>,
-  _alert?: TopAlert,
+  _alert?: TopAlert
 ): string => {
   const filters = [];
 
