@@ -9,14 +9,19 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
+
 import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
-import { createRequestBodySchema, createResponseBodySchema } from './schemas';
+import {
+  createRequestBodySchema,
+  createRequestParamsSchema,
+  createResponseBodySchema,
+} from './schemas';
 import { create } from './create';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
 
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
-    path: MARKDOWN_API_PATH,
+    path: `${MARKDOWN_API_PATH}/{id?}`,
     summary: 'Create a markdown panel',
     ...commonRouteConfig,
   });
@@ -26,6 +31,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
       version: INTERNAL_API_VERSION,
       validate: () => ({
         request: {
+          params: createRequestParamsSchema,
           body: createRequestBodySchema,
         },
         response: {
@@ -37,7 +43,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
     },
     async (ctx, req, res) => {
       try {
-        const result = await create(ctx, req.body);
+        const result = await create(ctx, req.params, req.body);
         return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 403) {

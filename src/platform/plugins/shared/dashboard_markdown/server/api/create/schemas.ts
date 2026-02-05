@@ -11,7 +11,11 @@ import { schema } from '@kbn/config-schema';
 import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
 import { markdownAttributesSchema } from '../../markdown_saved_object/schema/v1';
 
-export const createRequestBodySchema = markdownAttributesSchema;
+export const createRequestParamsSchema = schema.maybe(
+  schema.object({ id: schema.maybe(schema.string()) }, { unknowns: 'forbid' })
+);
+
+export const createRequestBodySchema = schema.allOf([markdownAttributesSchema]);
 
 export const createResponseBodySchema = schema.object({
   id: schema.string(),
