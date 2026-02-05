@@ -26,9 +26,12 @@ import type {
   AttachmentsService,
   PromptManager,
   ConversationStateManager,
+  SkillsService,
+  ToolManager,
 } from '../runner';
 import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
+import type { ToolRegistry } from '../tools';
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
@@ -78,6 +81,11 @@ export interface AgentHandlerContext {
    */
   toolProvider: ToolProvider;
   /**
+   * Tool registry for accessing internal tool definitions.
+   * Used for features like tool-specific result summarization.
+   */
+  toolRegistry: ToolRegistry;
+  /**
    * AgentBuilder runner scoped to the current execution.
    */
   runner: ScopedRunner;
@@ -85,6 +93,14 @@ export interface AgentHandlerContext {
    * Attachment service to interact with attachments.
    */
   attachments: AttachmentsService;
+  /**
+   * Skills service to interact with skills.
+   */
+  skills: SkillsService;
+  /**
+   * Tool manager to manage active tools for the agent.
+   */
+  toolManager: ToolManager;
   /**
    * Result store to access and add tool results during execution.
    */
