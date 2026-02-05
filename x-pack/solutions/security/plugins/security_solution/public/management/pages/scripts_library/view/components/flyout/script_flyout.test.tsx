@@ -89,14 +89,6 @@ describe('EndpointScriptFlyout', () => {
     expect(renderResult.getByTestId('test-details-header')).toBeInTheDocument();
   });
 
-  it.each(['create', 'edit'])('should show script edit form when show is `%s`', (show) => {
-    act(() => {
-      // @ts-ignore type checks for show
-      render({ ...defaultProps, show, 'data-test-subj': `test-${show}` });
-    });
-    expect(renderResult.getByTestId(`test-${show}-header`)).toBeInTheDocument();
-  });
-
   it('should call onCloseFlyout when flyout is closed', () => {
     render();
     const { getByTestId, queryByTestId } = renderResult;
@@ -110,7 +102,8 @@ describe('EndpointScriptFlyout', () => {
     });
   });
 
-  it.each(['details', 'edit'])('should fetch script data when needed for `%s`', (show) => {
+  // TODO: also for `edit` in the next PR so using .each here
+  it.each(['details'])('should fetch script data when needed for `%s`', (show) => {
     const scriptData = scriptsGenerator.generate();
     const refetchMock = jest.fn().mockResolvedValue({ data: scriptData });
     (useGetEndpointScript as jest.Mock).mockImplementation(() => ({

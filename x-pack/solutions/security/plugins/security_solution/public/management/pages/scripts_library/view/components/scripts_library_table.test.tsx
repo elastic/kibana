@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { act } from '@testing-library/react';
-import userEvent, { type UserEvent } from '@testing-library/user-event';
+import { act, fireEvent } from '@testing-library/react';
+
 import {
   createAppRootMockRenderer,
   type AppContextTestRender,
@@ -26,7 +26,6 @@ jest.mock('../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 describe('ScriptsLibraryTable', () => {
-  let userEve: UserEvent;
   let render: (props?: ScriptsLibraryTableProps) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
@@ -51,21 +50,11 @@ describe('ScriptsLibraryTable', () => {
     'data-test-subj': 'test',
   };
 
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   beforeEach(() => {
     scriptsGenerator = new EndpointScriptsGenerator('seed');
     useUserPrivilegesMock.mockReturnValue({
       endpointPrivileges: getEndpointAuthzInitialStateMock(),
     });
-    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    userEve = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
 
@@ -149,7 +138,7 @@ describe('ScriptsLibraryTable', () => {
       render();
 
       const { getByTestId } = renderResult;
-      const nameButton = getByTestId('test-column-name-script-1-nav-link');
+      const nameButton = getByTestId('test-column-name-script-1-name-button');
       expect(nameButton).toHaveTextContent('Script One');
       // should be a button element
       expect(nameButton.tagName).toBe('BUTTON');
@@ -186,14 +175,13 @@ describe('ScriptsLibraryTable', () => {
 
       const typesPopover = getByTestId('test-typesDisplayPopoverButton');
       // click on types cell and verify popover content
-      await userEve.click(typesPopover).then(() => {
-        expect(getByTestId('test-typesDisplayPopoverTitle')).toHaveTextContent('Types');
-        const badges = getByTestId('test-typesDisplayPopoverWrapper').querySelectorAll('.euiBadge');
-        expect(badges).toHaveLength(11);
-        // verify all tags are present and are in sorted order
-        const tags = Array.from(badges).map((badge) => badge.textContent);
-        expect(tags).toEqual(Object.values(SCRIPT_TAGS).sort());
-      });
+      await fireEvent.click(typesPopover);
+      expect(getByTestId('test-typesDisplayPopoverTitle')).toHaveTextContent('Types');
+      const badges = getByTestId('test-typesDisplayPopoverWrapper').querySelectorAll('.euiBadge');
+      expect(badges).toHaveLength(11);
+      // verify all tags are present and are in sorted order
+      const tags = Array.from(badges).map((badge) => badge.textContent);
+      expect(tags).toEqual(Object.values(SCRIPT_TAGS).sort());
     });
 
     it('shows last updated info', () => {
@@ -229,7 +217,7 @@ describe('ScriptsLibraryTable', () => {
       const { getByText } = renderResult;
       const nameHeader = getByText('Name');
 
-      await userEve.click(nameHeader);
+      await fireEvent.click(nameHeader);
 
       expect(defaultProps.onChange).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -248,7 +236,7 @@ describe('ScriptsLibraryTable', () => {
       const { getByText } = renderResult;
       const lastUpdatedHeader = getByText('Last updated');
 
-      await userEve.click(lastUpdatedHeader);
+      await fireEvent.click(lastUpdatedHeader);
       expect(defaultProps.onChange).toHaveBeenCalledWith(
         expect.objectContaining({
           sort: {
@@ -266,7 +254,7 @@ describe('ScriptsLibraryTable', () => {
       const { getByText } = renderResult;
       const updatedByHeader = getByText('Updated by');
 
-      await userEve.click(updatedByHeader);
+      await fireEvent.click(updatedByHeader);
       expect(defaultProps.onChange).toHaveBeenCalledWith(
         expect.objectContaining({
           sort: {
@@ -284,7 +272,7 @@ describe('ScriptsLibraryTable', () => {
       const { getByText } = renderResult;
       const sizeHeader = getByText('Size');
 
-      await userEve.click(sizeHeader);
+      await fireEvent.click(sizeHeader);
       expect(defaultProps.onChange).toHaveBeenCalledWith(
         expect.objectContaining({
           sort: {
@@ -302,9 +290,9 @@ describe('ScriptsLibraryTable', () => {
       render();
 
       const { getByTestId } = renderResult;
-      const nameButton = getByTestId('test-column-name-script-1-nav-link');
+      const nameButton = getByTestId('test-column-name-script-1-name-button');
 
-      await userEve.click(nameButton);
+      await fireEvent.click(nameButton);
 
       expect(defaultProps.onClickAction).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -314,7 +302,7 @@ describe('ScriptsLibraryTable', () => {
       );
     });
 
-    it('should show `edit` and `delete` actions with `canWriteScriptsLibrary` privilege', async () => {
+    it('should show `delete` action with `canWriteScriptsLibrary` privilege', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: {
           ...getEndpointAuthzInitialStateMock(),
@@ -328,22 +316,17 @@ describe('ScriptsLibraryTable', () => {
       const { getByTestId } = renderResult;
       const actionsButton = getByTestId('test-row-actions-script-1');
 
-      await userEve.click(actionsButton);
+      await fireEvent.click(actionsButton);
 
       const actionPanel = getByTestId('test-row-actions-script-1-panel');
       expect(actionPanel).toBeInTheDocument();
       const actionItems = actionPanel.querySelectorAll('.euiContextMenuItem');
-      expect(actionItems).toHaveLength(4);
+      expect(actionItems).toHaveLength(3);
       const actionItemLabels = Array.from(actionItems).map((item) => item.textContent);
-      expect(actionItemLabels).toEqual([
-        'View details',
-        'Edit script',
-        'Download script',
-        'Delete script',
-      ]);
+      expect(actionItemLabels).toEqual(['View details', 'Download script', 'Delete script']);
     });
 
-    it('should not show `edit` and `delete` actions without `canWriteScriptsLibrary` privilege', async () => {
+    it('should not `delete` action without `canWriteScriptsLibrary` privilege', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: {
           ...getEndpointAuthzInitialStateMock(),
@@ -357,7 +340,7 @@ describe('ScriptsLibraryTable', () => {
       const { getByTestId } = renderResult;
       const actionsButton = getByTestId('test-row-actions-script-1');
 
-      await userEve.click(actionsButton);
+      await fireEvent.click(actionsButton);
 
       const actionPanel = getByTestId('test-row-actions-script-1-panel');
       expect(actionPanel).toBeInTheDocument();

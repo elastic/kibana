@@ -18,10 +18,6 @@ describe('ScriptNameNavLink component', () => {
   let renderResult: ReturnType<typeof render>;
   let defaultProps: ScriptNameNavLinkProps;
 
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
 
@@ -40,7 +36,14 @@ describe('ScriptNameNavLink component', () => {
 
   it('should render correctly', () => {
     const { getByTestId } = render();
-    const nameElement = getByTestId('test-name-nav-link');
+    const nameElement = getByTestId('test-name-button');
     expect(nameElement).toHaveTextContent('Test Script');
+  });
+
+  it('should call onClick when name is clicked', () => {
+    const { getByTestId } = render();
+    const nameElement = getByTestId('test-name-button');
+    nameElement.click();
+    expect(defaultProps.onClick).toHaveBeenCalled();
   });
 });
