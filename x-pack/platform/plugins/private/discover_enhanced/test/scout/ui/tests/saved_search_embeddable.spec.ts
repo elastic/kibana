@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ScoutWorkerFixtures, expect, tags } from '@kbn/scout';
+import { ScoutWorkerFixtures, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 
 const createSavedSearch = async (
