@@ -192,9 +192,7 @@ export const CategoryConfigurationPanel: React.FC<CategoryConfigurationPanelProp
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
-          <EuiSpacer size="xxl" />
-          <EuiSpacer size="xxl" />
-          <EuiSpacer size="xxl" />
+          <div style={{ height: '120px' }} />
           {selectedCount === 0 && (
             <>
               <EuiSpacer size="s" />
