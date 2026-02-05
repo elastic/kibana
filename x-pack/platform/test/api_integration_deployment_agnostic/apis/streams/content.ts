@@ -422,17 +422,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ]
         );
 
-        const response = await importContent(
-          apiClient,
-          'logs',
-          {
-            include: { objects: { all: {} } },
-            content: Readable.from(archive),
-            filename: 'content_pack-1.0.0.zip',
-          },
-          400
-        );
+        const response = await importContent(apiClient, 'logs', {
+          include: { objects: { all: {} } },
+          content: Readable.from(archive),
+          filename: 'content_pack-1.0.0.zip',
+        });
 
+        expect(response.statusCode).to.be(400);
         expect((response as unknown as { message: string }).message).to.match(
           /^Object \[content_pack-1.0.0\/stream\/a.big.stream.json\] exceeds the limit of \d+ bytes/
         );
@@ -465,6 +461,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           content: Readable.from(archiveBuffer),
           filename: 'branch_a_content_pack-1.0.0.zip',
         });
+        expect(importResponse).to.not.have.property('message');
+        expect(importResponse.statusCode).to.be(200);
         expect(importResponse.result.created).to.eql(['logs.branch_c.nested']);
 
         const updatedStream = (await getStream(
@@ -538,6 +536,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           filename: 'complete_tree-1.0.0.zip',
         });
 
+        expect(importResponse).to.not.have.property('message');
+        expect(importResponse.statusCode).to.be(200);
         expect(importResponse.result.created).to.eql([
           'logs.branch_d.branch_b',
           'logs.branch_d.branch_b.child1',
@@ -592,60 +592,50 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const targetStreamName = 'logs.branch_a';
 
         // fails when the field type changes
-        let response = await importContent(
-          apiClient,
-          targetStreamName,
-          {
-            include: { objects: { all: {} } },
-            content: Readable.from(
-              await generateWithMappings({
-                'resource.attributes.foo.bar': { type: 'long' },
-              })
-            ),
-            filename: 'conflict_pack-1.0.0.zip',
-          },
-          409
-        );
+        let response = await importContent(apiClient, targetStreamName, {
+          include: { objects: { all: {} } },
+          content: Readable.from(
+            await generateWithMappings({
+              'resource.attributes.foo.bar': { type: 'long' },
+            })
+          ),
+          filename: 'conflict_pack-1.0.0.zip',
+        });
 
+        expect(response.statusCode).to.be(409);
         expect((response as unknown as { message: string }).message).to.eql(
           'Cannot change mapping of [resource.attributes.foo.bar] for [logs.branch_a]'
         );
 
         // fails when field configuration changes
-        response = await importContent(
-          apiClient,
-          targetStreamName,
-          {
-            include: { objects: { all: {} } },
-            content: Readable.from(
-              await generateWithMappings({
-                'resource.attributes.foo.bar': { type: 'keyword', boost: 2.0 },
-              })
-            ),
-            filename: 'conflict_pack-1.0.0.zip',
-          },
-          409
-        );
+        response = await importContent(apiClient, targetStreamName, {
+          include: { objects: { all: {} } },
+          content: Readable.from(
+            await generateWithMappings({
+              'resource.attributes.foo.bar': { type: 'keyword', boost: 2.0 },
+            })
+          ),
+          filename: 'conflict_pack-1.0.0.zip',
+        });
 
+        expect(response.statusCode).to.be(409);
         expect((response as unknown as { message: string }).message).to.eql(
           'Cannot change mapping of [resource.attributes.foo.bar] for [logs.branch_a]'
         );
 
         // succeeds when the field configuration is unchanged
-        await importContent(
-          apiClient,
-          targetStreamName,
-          {
-            include: { objects: { all: {} } },
-            content: Readable.from(
-              await generateWithMappings({
-                'resource.attributes.foo.bar': { type: 'keyword' },
-              })
-            ),
-            filename: 'conflict_pack-1.0.0.zip',
-          },
-          200
-        );
+        response = await importContent(apiClient, targetStreamName, {
+          include: { objects: { all: {} } },
+          content: Readable.from(
+            await generateWithMappings({
+              'resource.attributes.foo.bar': { type: 'keyword' },
+            })
+          ),
+          filename: 'conflict_pack-1.0.0.zip',
+        });
+
+        expect(response).to.not.have.property('message');
+        expect(response.statusCode).to.be(200);
       });
 
       it('fails when importing overlapping child', async () => {
@@ -705,17 +695,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ]
         );
 
-        const response = await importContent(
-          apiClient,
-          'logs.overlapping',
-          {
-            include: { objects: { all: {} } },
-            content: Readable.from(archive),
-            filename: 'overlap-1.0.0.zip',
-          },
-          409
-        );
+        const response = await importContent(apiClient, 'logs.overlapping', {
+          include: { objects: { all: {} } },
+          content: Readable.from(archive),
+          filename: 'overlap-1.0.0.zip',
+        });
 
+        expect(response.statusCode).to.be(409);
         expect((response as unknown as { message: string }).message).to.eql(
           '[logs.overlapping.child] already exists'
         );
@@ -755,17 +741,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ]
         );
 
-        const response = await importContent(
-          apiClient,
-          'logs.branch_a.child1.nested',
-          {
-            include: { objects: { all: {} } },
-            content: Readable.from(archive),
-            filename: 'overlap-1.0.0.zip',
-          },
-          409
-        );
+        const response = await importContent(apiClient, 'logs.branch_a.child1.nested', {
+          include: { objects: { all: {} } },
+          content: Readable.from(archive),
+          filename: 'overlap-1.0.0.zip',
+        });
 
+        expect(response.statusCode).to.be(409);
         expect((response as unknown as { message: string }).message).to.eql(
           'Query [my-error-query | error query] already exists on [logs.branch_a.child1.nested]'
         );
