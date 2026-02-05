@@ -355,16 +355,12 @@ export class WorkflowsExecutionEnginePlugin
                 'workflow',
                 'execution'
               );
-              let executedBy: string;
-              try {
-                executedBy = await getAuthenticatedUser(
-                  fakeRequest,
-                  coreStart.security,
-                  coreStart.elasticsearch.client
-                );
-              } finally {
-                if (span) span.end();
-              }
+              const executedBy = await getAuthenticatedUser(
+                fakeRequest,
+                coreStart.security,
+                coreStart.elasticsearch.client
+              );
+              span?.end();
 
               const workflowExecution: Partial<EsWorkflowExecution> = {
                 id: generateUuid(),
@@ -479,7 +475,7 @@ export class WorkflowsExecutionEnginePlugin
       workflow: WorkflowExecutionEngineModel,
       context: Record<string, unknown>,
       defaultTriggeredBy: string,
-      request?: KibanaRequest
+      request: KibanaRequest
     ): Promise<{
       workflowExecution: Partial<EsWorkflowExecution>;
       repository: WorkflowExecutionRepository;
@@ -487,9 +483,11 @@ export class WorkflowsExecutionEnginePlugin
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
-      const executedBy = request
-        ? await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client)
-        : (context.executedBy as string | undefined) || 'system';
+      const executedBy = await getAuthenticatedUser(
+        request,
+        coreStart.security,
+        coreStart.elasticsearch.client
+      );
       const spaceId = (context.spaceId as string | undefined) || 'default';
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
@@ -643,11 +641,6 @@ export class WorkflowsExecutionEnginePlugin
     ) => {
       await checkLicense(plugins.licensing);
 
-      // Check if request is required before creating execution
-      // Workflow steps require user context to run with proper permissions
-      if (!request) {
-        throw new Error('Workflow steps cannot be executed without the user context');
-      }
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
       const context: Record<string, unknown> = {
@@ -655,9 +648,11 @@ export class WorkflowsExecutionEnginePlugin
       };
 
       const triggeredBy = (context.triggeredBy as string | undefined) || 'manual'; // 'manual' or 'scheduled'
-      const executedBy = request
-        ? await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client)
-        : (context.executedBy as string | undefined) || 'system';
+      const executedBy = await getAuthenticatedUser(
+        request,
+        coreStart.security,
+        coreStart.elasticsearch.client
+      );
       const workflowExecution = {
         id: generateUuid(),
         spaceId: workflow.spaceId,

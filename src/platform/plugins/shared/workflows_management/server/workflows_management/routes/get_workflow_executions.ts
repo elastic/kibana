@@ -72,7 +72,7 @@ export function registerGetWorkflowExecutionsRoute({
             )
           ),
           executedBy: schema.maybe(
-            schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
               defaultValue: [],
             })
           ),
