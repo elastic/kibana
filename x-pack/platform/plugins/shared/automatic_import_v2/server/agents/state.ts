@@ -18,19 +18,7 @@ export const AutomaticImportAgentState = MessagesZodState.extend({
         .describe('Optional failure handlers for the pipeline'),
     })
     .describe('The generated ingest pipeline to validate'),
-  pipeline_generation_results: z
-    .object({
-      docs: z
-        .array(
-          z.object({
-            doc: z.object({
-              _source: z.record(z.any()),
-            }),
-          })
-        )
-        .default([]),
-    })
-    .default({ docs: [] }),
+  pipeline_generation_results: z.array(z.object({})).default([]),
   failure_count: z.number().min(0).default(0),
   pipeline_validation_results: z
     .object({

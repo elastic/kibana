@@ -572,7 +572,7 @@ export class AutomaticImportSavedObjectService {
         ...dataStream.attributes,
         result: {
           ingest_pipeline: ingestPipeline,
-          ...results,
+          results,
         },
         job_info: {
           ...dataStream.attributes.job_info,
