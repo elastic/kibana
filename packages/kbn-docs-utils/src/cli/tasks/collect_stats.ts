@@ -61,12 +61,11 @@ export async function collectStats(
     allPluginStats[id] = {
       ...(await countEslintDisableLines(paths)),
       ...(await countEnzymeImports(paths)),
-      ...collectApiStatsForPlugin(
-        pluginApi,
+      ...collectApiStatsForPlugin(pluginApi, {
         missingApiItems,
         referencedDeprecations,
-        adoptionTrackedAPIs
-      ),
+        adoptionTrackedAPIs,
+      }),
       owner: plugin.manifest.owner,
       description: plugin.manifest.description,
       isPlugin: plugin.isPlugin,
