@@ -29,7 +29,7 @@ const getAlertsMenuItem = async (
   const { stateContainer } = await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
   });
-  
+
   toolkit.internalState.dispatch(
     internalStateActions.assignNextDataView({
       tabId: toolkit.getCurrentTab().id,

@@ -50,7 +50,7 @@ class MockControlGroupRendererApi {
 // --- Test Suite ---
 describe('useESQLVariables', () => {
   let mockControlGroupAPI: MockControlGroupRendererApi;
-  
+
   const setupToolkit = async () => {
     const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
     await toolkit.initializeTabs();
@@ -82,11 +82,13 @@ describe('useESQLVariables', () => {
       () =>
         useESQLVariables({
           stateContainer: actualToolkit.internalState.getState().tabs.unsafeCurrentId
-            ? require('../../state_management/redux').selectTabRuntimeState(
-                actualToolkit.runtimeStateManager,
-                actualToolkit.internalState.getState().tabs.unsafeCurrentId
-              ).stateContainer$.getValue()!
-            : undefined as any,
+            ? require('../../state_management/redux')
+                .selectTabRuntimeState(
+                  actualToolkit.runtimeStateManager,
+                  actualToolkit.internalState.getState().tabs.unsafeCurrentId
+                )
+                .stateContainer$.getValue()!
+            : (undefined as any),
           isEsqlMode,
           controlGroupApi,
           currentEsqlVariables,
@@ -143,10 +145,12 @@ describe('useESQLVariables', () => {
         isEsqlMode: true,
       });
       const dispatchSpy = jest.spyOn(toolkit.internalState, 'dispatch');
-      const stateContainer = require('../../state_management/redux').selectTabRuntimeState(
-        toolkit.runtimeStateManager,
-        toolkit.internalState.getState().tabs.unsafeCurrentId
-      ).stateContainer$.getValue()!;
+      const stateContainer = require('../../state_management/redux')
+        .selectTabRuntimeState(
+          toolkit.runtimeStateManager,
+          toolkit.internalState.getState().tabs.unsafeCurrentId
+        )
+        .stateContainer$.getValue()!;
       const updateControlStateSpy = jest.spyOn(
         stateContainer.savedSearchState,
         'updateControlState'

@@ -19,7 +19,7 @@ import { getTabStateMock } from '../../state_management/redux/__mocks__/internal
 const setupStateContainer = async ({ managed = false } = {}) => {
   const services = createDiscoverServicesMock();
   services.capabilities.discover_v2.save = true;
-  
+
   const toolkit = getDiscoverInternalStateMock({
     persistedDataViews: [dataViewMock],
     services,
@@ -76,7 +76,7 @@ describe('getTopNavBadges()', function () {
       const servicesWithSpaces = createDiscoverServicesMock();
       servicesWithSpaces.capabilities.discover_v2.save = true;
       servicesWithSpaces.spaces = spacesPluginMock.createStartContract();
-      
+
       const topNavBadges = getTopNavBadges({
         isMobile: false,
         services: servicesWithSpaces,

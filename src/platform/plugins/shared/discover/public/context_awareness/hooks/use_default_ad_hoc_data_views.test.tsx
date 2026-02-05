@@ -52,14 +52,12 @@ const renderDefaultAdHocDataViewsHook = async () => {
   await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
   });
-  
-  toolkit.internalState.dispatch(
-    internalStateActions.appendAdHocDataViews(existingAdHocDataVew)
-  );
+
+  toolkit.internalState.dispatch(internalStateActions.appendAdHocDataViews(existingAdHocDataVew));
   toolkit.internalState.dispatch(
     internalStateActions.setDefaultProfileAdHocDataViews(previousDataViews)
   );
-  
+
   const { result, unmount } = renderHook(useDefaultAdHocDataViews, {
     wrapper: ({ children }) => (
       <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
@@ -80,7 +78,8 @@ describe('useDefaultAdHocDataViews', () => {
   });
 
   it('should set default profile ad hoc data views', async () => {
-    const { result, toolkit, clearInstanceCache, createDataView } = await renderDefaultAdHocDataViewsHook();
+    const { result, toolkit, clearInstanceCache, createDataView } =
+      await renderDefaultAdHocDataViewsHook();
     expect(clearInstanceCache).not.toHaveBeenCalled();
     expect(createDataView).not.toHaveBeenCalled();
     expect(toolkit.runtimeStateManager.adHocDataViews$.getValue()).toEqual([
@@ -95,9 +94,10 @@ describe('useDefaultAdHocDataViews', () => {
     expect(createDataView.mock.calls).toEqual(
       newDataViews.map((dv) => [{ ...dv.toSpec(), managed: true }, true])
     );
-    expect(
-      toolkit.runtimeStateManager.adHocDataViews$.getValue().map((dv) => dv.id)
-    ).toEqual([existingAdHocDataVew.id, ...newDataViews.map((dv) => dv.id)]);
+    expect(toolkit.runtimeStateManager.adHocDataViews$.getValue().map((dv) => dv.id)).toEqual([
+      existingAdHocDataVew.id,
+      ...newDataViews.map((dv) => dv.id),
+    ]);
     expect(toolkit.internalState.getState().defaultProfileAdHocDataViewIds).toEqual(
       newDataViews.map((dv) => dv.id)
     );
@@ -115,9 +115,7 @@ describe('useDefaultAdHocDataViews', () => {
     );
     unmount();
     expect(clearInstanceCache.mock.calls).toEqual(previousDataViews.map((s) => [s.id]));
-    expect(toolkit.runtimeStateManager.adHocDataViews$.getValue()).toEqual([
-      existingAdHocDataVew,
-    ]);
+    expect(toolkit.runtimeStateManager.adHocDataViews$.getValue()).toEqual([existingAdHocDataVew]);
     expect(toolkit.internalState.getState().defaultProfileAdHocDataViewIds).toEqual([]);
   });
 });
