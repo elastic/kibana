@@ -34,6 +34,7 @@ export type UnknownAttachment = Attachment<string, unknown>;
 export type TextAttachment = Attachment<AttachmentType.text>;
 export type ScreenContextAttachment = Attachment<AttachmentType.screenContext>;
 export type EsqlAttachment = Attachment<AttachmentType.esql>;
+export type VisualizationRefAttachment = Attachment<AttachmentType.visualizationRef>;
 
 /**
  * Input version of an attachment, where the id is optional

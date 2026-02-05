@@ -54,7 +54,7 @@ export function defineQueryApiKeysAndAggregationsRoute({
           ),
           filters: schema.maybe(
             schema.object({
-              usernames: schema.maybe(schema.arrayOf(schema.string())),
+              usernames: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
               type: schema.maybe(
                 schema.oneOf([
                   schema.literal('rest'),
