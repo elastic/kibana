@@ -137,7 +137,6 @@ export const triggers: { [key: string]: Trigger } = {
     description:
       'This trigger is used to replace the cell actions for Discover session embeddable grid.',
   },
-  [DISCOVER_CELL_ACTIONS_TRIGGER_ID]: { id: DISCOVER_CELL_ACTIONS_TRIGGER_ID },
   [CONTEXT_MENU_TRIGGER]: {
     id: CONTEXT_MENU_TRIGGER,
     title: i18n.translate('embeddableApi.contextMenuTrigger.title', {
@@ -309,6 +308,7 @@ export const triggers: { [key: string]: Trigger } = {
     title: '',
     description: 'Single metric viewer entity field selection triggered',
   },
+  [DISCOVER_CELL_ACTIONS_TRIGGER_ID]: { id: DISCOVER_CELL_ACTIONS_TRIGGER_ID },
   [O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER]: { id: O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER },
   [O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER]: { id: O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER },
   [SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER]: {

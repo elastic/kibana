@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import {
+  ALERT_RULE_TRIGGER,
+  ROW_CLICK_TRIGGER,
+  APPLY_FILTER_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
   MULTI_VALUE_CLICK_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
-import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 export interface VisEventToTrigger {
   ['applyFilter']: typeof APPLY_FILTER_TRIGGER;

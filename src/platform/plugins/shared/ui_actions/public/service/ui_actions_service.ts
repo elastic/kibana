@@ -27,36 +27,16 @@ export interface UiActionsServiceParams {
 
 export class UiActionsService {
   public readonly executionService = new UiActionsExecutionService();
-  protected readonly triggers: TriggerRegistry;
   protected readonly actions: ActionRegistry;
   protected readonly triggerToActions: TriggerToActionsRegistry;
 
-  constructor({
-    triggers = new Map(),
-    actions = new Map(),
-    triggerToActions = new Map(),
-  }: UiActionsServiceParams = {}) {
-    this.triggers = triggers;
+  constructor({ actions = new Map(), triggerToActions = new Map() }: UiActionsServiceParams = {}) {
     this.actions = actions;
     this.triggerToActions = triggerToActions;
   }
 
-  /** @deprecated */
-  public readonly registerTrigger = (trigger: Trigger) => {
-    if (this.triggers.has(trigger.id)) {
-      throw new Error(`Trigger [trigger.id = ${trigger.id}] already registered.`);
-    }
-
-    this.triggers.set(trigger.id, trigger);
-    this.triggerToActions.set(trigger.id, []);
-  };
-
-  public readonly hasTrigger = (triggerId: string): boolean => {
-    return Boolean(this.triggers.get(triggerId));
-  };
-
   public readonly getTrigger = (triggerId: string): Trigger => {
-    const trigger = triggers[triggerId] ?? this.triggers.get(triggerId);
+    const trigger = triggers[triggerId];
 
     if (!trigger) {
       throw new Error(`Trigger [triggerId = ${triggerId}] does not exist.`);
@@ -111,7 +91,7 @@ export class UiActionsService {
   };
 
   public readonly attachAction = (triggerId: string, actionId: string): void => {
-    const trigger = this.getTrigger(triggerId);
+    const trigger = triggers[triggerId];
 
     if (!trigger) {
       throw new Error(
@@ -127,7 +107,7 @@ export class UiActionsService {
   };
 
   public readonly detachAction = (triggerId: string, actionId: string) => {
-    const trigger = this.triggers.get(triggerId);
+    const trigger = triggers[triggerId];
 
     if (!trigger) {
       throw new Error(
@@ -253,7 +233,6 @@ export class UiActionsService {
    */
   public readonly clear = () => {
     this.actions.clear();
-    this.triggers.clear();
     this.triggerToActions.clear();
   };
 
@@ -263,14 +242,12 @@ export class UiActionsService {
    * to this instance of `UiActionsService` are only available within this instance.
    */
   public readonly fork = (): UiActionsService => {
-    const triggers: TriggerRegistry = new Map();
     const actions: ActionRegistry = new Map();
     const triggerToActions: TriggerToActionsRegistry = new Map();
 
-    for (const [key, value] of this.triggers.entries()) triggers.set(key, value);
     for (const [key, value] of this.actions.entries()) actions.set(key, value);
     for (const [key, value] of this.triggerToActions.entries())
       triggerToActions.set(key, [...value]);
-    return new UiActionsService({ triggers, actions, triggerToActions });
+    return new UiActionsService({ actions, triggerToActions });
   };
 }
