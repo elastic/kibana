@@ -16,7 +16,8 @@ import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
 
-export const OBSERVABILITY_GET_APPLICATION_METRICS_TOOL_ID = 'observability.get_application_metrics';
+export const OBSERVABILITY_GET_APPLICATION_METRICS_TOOL_ID =
+  'observability.get_application_metrics';
 
 const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 
