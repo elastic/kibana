@@ -150,7 +150,7 @@ export class GridLayout implements LayoutService {
 
       return (
         <>
-          <GridLayoutGlobalStyles />
+          <GridLayoutGlobalStyles chromeStyle={chromeStyle} />
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout
               header={header}
