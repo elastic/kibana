@@ -8,44 +8,29 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { getFieldValue } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 
 export const CustomDocViewerHeader: React.FC<DocViewRenderProps> = ({ hit }) => {
-  const message = getFieldValue(hit, 'message') as string;
-  const logLevel = getFieldValue(hit, 'log.level') as string;
-
-  if (!message && !logLevel) {
-    return null;
-  }
+  const message = getFieldValue(hit, 'message')?.toString();
 
   return (
-    <>
-      <EuiCallOut
-        title="Example Custom Header"
-        color="primary"
-        iconType="iInCircle"
-        size="s"
-        data-test-subj="exampleCustomDocViewerHeader"
-      >
+    <EuiCallOut
+      title="Example custom header"
+      color="primary"
+      iconType="info"
+      data-test-subj="exampleCustomDocViewerHeader"
+    >
+      <p>
+        This is a custom header rendered via the <code>renderCustomHeader</code> extension point.
+      </p>
+      {message && (
         <p>
-          This is a custom header rendered via the <code>renderCustomHeader</code> extension point.
-          {logLevel && (
-            <>
-              {' '}
-              Log level: <strong>{logLevel}</strong>
-            </>
-          )}
+          <strong>Message preview:</strong> <em>{message.substring(0, 100)}</em>
+          {message.length > 100 && '...'}
         </p>
-        {message && (
-          <p>
-            Message preview: <em>{message.substring(0, 100)}</em>
-            {message.length > 100 && '...'}
-          </p>
-        )}
-      </EuiCallOut>
-      <EuiSpacer size="m" />
-    </>
+      )}
+    </EuiCallOut>
   );
 };
