@@ -15,8 +15,6 @@ import type SuperTest from 'supertest';
 
 type SuperTestAgent = SuperTest.Agent;
 
-type TestType = 'all' | 'simple' | 'tool' | 'conversation';
-
 const converse = async <T = ChatResponse>(
   supertest: SuperTestAgent,
   payload: ChatRequestBodyPayload,
@@ -31,84 +29,55 @@ const converse = async <T = ChatResponse>(
 };
 
 /**
- * Run a simple message test
- */
-const runSimpleMessageTest = async (
-  connectorId: string,
-  supertest: SuperTestAgent
-): Promise<void> => {
-  const response = await converse(supertest, {
-    input: 'Hello',
-    connector_id: connectorId,
-  });
-  expect(response.response.message!.length).to.be.greaterThan(0);
-};
-
-/**
- * Run a tool execution test
- */
-const runToolExecutionTest = async (
-  connectorId: string,
-  supertest: SuperTestAgent
-): Promise<void> => {
-  const response = await converse(supertest, {
-    input: `Using the "platform_core_list_indices" tool, please list my indices. Only call the tool once.`,
-    connector_id: connectorId,
-  });
-  expect(response.response.message!.length).to.be.greaterThan(0);
-  const toolCalls = response.steps.filter(isToolCallStep);
-  expect(toolCalls.length >= 1).to.be(true);
-  expect(toolCalls[0].tool_id).to.eql(platformCoreTools.listIndices);
-};
-
-/**
- * Run a conversation continuation test
- */
-const runConversationTest = async (
-  connectorId: string,
-  supertest: SuperTestAgent
-): Promise<void> => {
-  const response1 = await converse(supertest, {
-    input: 'Please say "hello"',
-    connector_id: connectorId,
-  });
-  expect(response1.response.message!.length).to.be.greaterThan(0);
-
-  const response2 = await converse(supertest, {
-    conversation_id: response1.conversation_id,
-    input: 'Please say it again.',
-    connector_id: connectorId,
-  });
-  expect(response2.response.message!.length).to.be.greaterThan(0);
-};
-
-/**
- * Runs converse smoke tests for a connector
+ * Converse API smoke test suite for a connector.
+ * Creates a Mocha describe block with tests for simple message, tool execution, and conversation.
  *
- * @param connectorId - The connector ID to test
+ * @param name - Display name for the test suite (e.g., model name or connector ID)
+ * @param getConnectorId - The connector ID, or a function that returns it (for dynamic lookup)
  * @param supertest - The supertest agent
- * @param testType - Which test(s) to run: 'all', 'simple', 'tool', or 'conversation'
  */
-export const runConverseTests = async (
-  connectorId: string,
-  supertest: SuperTestAgent,
-  testType: TestType = 'all'
-): Promise<void> => {
-  switch (testType) {
-    case 'simple':
-      await runSimpleMessageTest(connectorId, supertest);
-      break;
-    case 'tool':
-      await runToolExecutionTest(connectorId, supertest);
-      break;
-    case 'conversation':
-      await runConversationTest(connectorId, supertest);
-      break;
-    case 'all':
-    default:
-      await runSimpleMessageTest(connectorId, supertest);
-      await runToolExecutionTest(connectorId, supertest);
-      await runConversationTest(connectorId, supertest);
-      break;
-  }
+export const converseApiSuite = (
+  name: string,
+  getConnectorId: string | (() => string),
+  supertest: SuperTestAgent
+): void => {
+  const resolveConnectorId = () =>
+    typeof getConnectorId === 'string' ? getConnectorId : getConnectorId();
+
+  describe(`Connector: ${name}`, function () {
+    it('should respond to simple message', async () => {
+      const response = await converse(supertest, {
+        input: 'Hello',
+        connector_id: resolveConnectorId(),
+      });
+      expect(response.response.message!.length).to.be.greaterThan(0);
+    });
+
+    it('should execute tools', async () => {
+      const response = await converse(supertest, {
+        input: `Using the "platform_core_list_indices" tool, please list my indices. Only call the tool once.`,
+        connector_id: resolveConnectorId(),
+      });
+      expect(response.response.message!.length).to.be.greaterThan(0);
+      const toolCalls = response.steps.filter(isToolCallStep);
+      expect(toolCalls.length >= 1).to.be(true);
+      expect(toolCalls[0].tool_id).to.eql(platformCoreTools.listIndices);
+    });
+
+    it('should continue conversation', async () => {
+      const connectorId = resolveConnectorId();
+      const response1 = await converse(supertest, {
+        input: 'Please say "hello"',
+        connector_id: connectorId,
+      });
+      expect(response1.response.message!.length).to.be.greaterThan(0);
+
+      const response2 = await converse(supertest, {
+        conversation_id: response1.conversation_id,
+        input: 'Please say it again.',
+        connector_id: connectorId,
+      });
+      expect(response2.response.message!.length).to.be.greaterThan(0);
+    });
+  });
 };

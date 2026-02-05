@@ -5,17 +5,38 @@
  * 2.0.
  */
 
+import { readFileSync, existsSync } from 'fs';
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
-export interface EisModel {
+// Path to pre-discovered EIS models JSON file (created by CI "Discover EIS Models" step)
+const EIS_MODELS_PATH = resolve(REPO_ROOT, 'target/eis_models.json');
+
+export interface DiscoveredModel {
   inferenceId: string;
   modelId: string;
+}
+
+export interface EisModel extends DiscoveredModel {
   connectorId: string;
 }
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+export const getPreDiscoveredEisModels = (): DiscoveredModel[] => {
+  if (!existsSync(EIS_MODELS_PATH)) {
+    return [];
+  }
+  try {
+    const data = JSON.parse(readFileSync(EIS_MODELS_PATH, 'utf8'));
+    return data.models || [];
+  } catch {
+    return [];
+  }
+};
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
  * Enables Cloud Connected Mode (CCM) for EIS and waits for endpoints to be available.
@@ -30,9 +51,9 @@ export const enableCcm = async (es: Client, apiKey: string, log: ToolingLog): Pr
   });
   log.info('[EIS] ✅ CCM enabled');
 
-  // Wait for EIS to provision endpoints (similar to discovery script)
+  // Wait for EIS to provision endpoints
   log.info('[EIS] Waiting for EIS endpoints to be provisioned...');
-  const maxRetries = 10;
+  const maxRetries = 5;
   const retryDelayMs = 3000;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -46,7 +67,6 @@ export const enableCcm = async (es: Client, apiKey: string, log: ToolingLog): Pr
       log.info(`[EIS] ✅ Found ${eisEndpoints.length} EIS endpoints on attempt ${attempt}`);
       return;
     }
-
     if (attempt < maxRetries) {
       log.info(`[EIS] No endpoints yet (attempt ${attempt}/${maxRetries}), waiting...`);
       await sleep(retryDelayMs);
@@ -56,9 +76,7 @@ export const enableCcm = async (es: Client, apiKey: string, log: ToolingLog): Pr
   log.warning('[EIS] ⚠️ No EIS endpoints found after waiting - connector creation may fail');
 };
 
-/**
- * Creates inference connectors for discovered EIS models
- */
+// Creates inference connectors for discovered EIS models
 export const createEisConnectors = async (
   models: Array<{ inferenceId: string; modelId: string }>,
   supertest: SuperTest.Agent,
@@ -101,9 +119,7 @@ export const createEisConnectors = async (
   return { connectors, connectorIds };
 };
 
-/**
- * Deletes connectors created during test setup
- */
+// Deletes connectors created during test setup
 export const cleanupEisConnectors = async (
   connectorIds: string[],
   supertest: SuperTest.Agent,
