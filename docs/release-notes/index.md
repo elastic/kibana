@@ -24,6 +24,11 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % FEATURES, ENHANCEMENTS, FIXES
 % Paste in index.md
 
+:::{changelog} /releases/kibana
+:subsections:
+:config: /changelog.yml
+:::
+
 ## 9.3.2 [kibana-9.3.2-release-notes]
 
 :::{important}
@@ -159,6 +164,7 @@ For the Elastic Security 9.3.1 release information, refer to [Elastic Security S
 **Workflows**:
 * Adds datemath support to the KQL evaluator [#252840]({{kib-pull}}252840).
 
+<!--
 ## 9.3.0 [kibana-9.3.0-release-notes]
 
 % ::::{NOTE}
@@ -469,6 +475,7 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Adds refusal field to AI Assistant conversations [#243423]({{kib-pull}}243423).
 * Turns off custom suggestions on the embedded console [#241516]({{kib-pull}}241516).
 * Fixes an issue where form fields were resetting automatically when editing ingest pipeline settings [#237509]({{kib-pull}}237509).
+<<<<<<< HEAD
 
 ## 9.2.7 [kibana-9.2.7-release-notes]
 
@@ -553,6 +560,9 @@ For the Elastic Security 9.2.6 release information, refer to [Elastic Security S
 
 **Search**:
 * Reduces background polling on the Index Details page to avoid unnecessary API requests [#251446]({{kib-pull}}251446).
+=======
+-->
+>>>>>>> ab62c55e70e6 (Add changelog directives)
 
 ## 9.2.5 [kibana-9.2.5-release-notes]
 

@@ -92,3 +92,4 @@ products:
 areas:
 - Data ingestion and Fleet
 title: Adds a functionality for removing root privilege from Fleet managed agents if applicable.
+feature-id: test_feature3
