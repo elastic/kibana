@@ -35,7 +35,7 @@ import { transformToReactFlow } from '../../../../../../common/service_map/trans
 import type { ServiceMapResponse } from '../../../../../../common/service_map';
 
 function getHeight() {
-  return window.innerHeight - 250;
+  return window.innerHeight - 50;
 }
 
 const defaultEnvironment = 'ENVIRONMENT_ALL' as const;
