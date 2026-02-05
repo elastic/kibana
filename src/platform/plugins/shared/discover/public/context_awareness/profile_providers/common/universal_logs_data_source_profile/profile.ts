@@ -17,7 +17,6 @@ import {
   getPaginationConfig,
   getColumnsConfiguration,
   createRecommendedFields,
-  createGetDocViewer,
   createGetRowAdditionalLeadingControls,
 } from './accessors';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
@@ -54,7 +53,6 @@ export const createUniversalLogsDataSourceProfileProvider = (
       getPaginationConfig,
       getColumnsConfiguration,
       getRecommendedFields: createRecommendedFields({}),
-      getDocViewer: createGetDocViewer(services),
     },
     resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);

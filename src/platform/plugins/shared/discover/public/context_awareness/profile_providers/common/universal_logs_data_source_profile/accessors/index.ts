@@ -13,5 +13,4 @@ export { getRowIndicatorProvider } from './get_row_indicator_provider';
 export { getPaginationConfig } from './get_pagination_config';
 export { getColumnsConfiguration } from './get_columns_configuration';
 export { createRecommendedFields } from './get_recommended_fields';
-export { createGetDocViewer } from './get_doc_viewer';
 export { createGetRowAdditionalLeadingControls } from './get_row_additional_leading_controls';

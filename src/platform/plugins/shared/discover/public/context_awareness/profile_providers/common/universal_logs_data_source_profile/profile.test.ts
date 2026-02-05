@@ -111,7 +111,7 @@ describe('universal_logs_data_source_profile', () => {
       expect(logsProfile.profile.getPaginationConfig).toBeDefined();
       expect(logsProfile.profile.getColumnsConfiguration).toBeDefined();
       expect(logsProfile.profile.getRecommendedFields).toBeDefined();
-      expect(logsProfile.profile.getDocViewer).toBeDefined();
+      // Note: getDocViewer is implemented in the companion document profile
     });
 
     it('should configure infinite scroll pagination', () => {

@@ -19,7 +19,7 @@ import {
 } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DocViewRenderProps, DocViewActions } from '@kbn/unified-doc-viewer/types';
 import React from 'react';
-import type { DataSourceProfileProvider } from '../../../../profiles';
+import type { DocumentProfileProvider } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 
 /**
@@ -30,7 +30,7 @@ import type { ProfileProviderServices } from '../../../profile_provider_services
  * - Only shows AI features if available
  */
 export const createGetDocViewer =
-  (services: ProfileProviderServices): DataSourceProfileProvider['profile']['getDocViewer'] =>
+  (services: ProfileProviderServices): DocumentProfileProvider['profile']['getDocViewer'] =>
   (prev) =>
   (params) => {
     const prevDocViewer = prev(params);

@@ -17,6 +17,7 @@ import { createClassicNavRootProfileProvider } from './common/classic_nav_root_p
 import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs_data_source_profile';
 import { createPatternsDataSourceProfileProvider } from './common/patterns_data_source_profile';
 import { createUniversalLogsDataSourceProfileProvider } from './common/universal_logs_data_source_profile';
+import { createUniversalLogsDocumentProfileProvider } from './common/universal_logs_document_profile';
 import { registerEnabledProfileProviders } from './register_enabled_profile_providers';
 import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
 import { createExampleDocumentProfileProvider } from './example/example_document_profile';
@@ -138,4 +139,6 @@ const createDocumentProfileProviders = (providerServices: ProfileProviderService
   createExampleDocumentProfileProvider(),
   createSecurityDocumentProfileProvider(providerServices),
   ...createObservabilityDocumentProfileProviders(providerServices),
+  // Universal logs document profile comes last so solution-specific profiles take precedence
+  createUniversalLogsDocumentProfileProvider(providerServices),
 ];
