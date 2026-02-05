@@ -37,7 +37,7 @@ import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_
 import { getTransformIn } from '../common/embeddables/stats_overview/get_transform_in';
 import { getTransformOut } from '../common/embeddables/stats_overview/get_transform_out';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
-import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../common/constants';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../common/embeddables/monitors_overview/constants';
 import {
   syntheticsStatsOverviewEmbeddableSchema,
   syntheticsMonitorsEmbeddableSchema,

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../common/constants';
+export { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../common/embeddables/monitors_overview/constants';
 
 export const ALL_VALUE = '*';

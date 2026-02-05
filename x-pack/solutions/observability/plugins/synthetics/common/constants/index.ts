@@ -12,4 +12,3 @@ export * from './settings_defaults';
 export * from './ui';
 export * from './synthetics';
 export * from './filters_fields_with_logical_and';
-export { SYNTHETICS_MONITORS_EMBEDDABLE } from '../embeddables/monitors_overview/constants';
