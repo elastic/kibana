@@ -21,6 +21,7 @@ import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  SERVICE_TARGET_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
@@ -280,8 +281,30 @@ async function getUpstreamConnections({
           ...rangeQuery(start, end),
           ...getDocumentTypeFilterForServiceDestinationStatistics(true),
           ...excludeRumExitSpansQuery(),
-          // Find exit spans where the destination matches the target service
-          { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: serviceName } },
+          // Find exit spans where the destination matches the target service.
+          // Match against multiple fields because the service name can appear in different places:
+          // - span.destination.service.resource: "checkout", "checkout:5050", "10.0.0.1:5050"
+          // - service.target.name: "oteldemo.CheckoutService", "checkout", "checkout:5050"
+          {
+            bool: {
+              should: [
+                // Match span.destination.service.resource exactly or with port suffix
+                { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: serviceName } },
+                { prefix: { [SPAN_DESTINATION_SERVICE_RESOURCE]: `${serviceName}:` } },
+                // Match service.target.name exactly or with port suffix
+                { term: { [SERVICE_TARGET_NAME]: serviceName } },
+                { prefix: { [SERVICE_TARGET_NAME]: `${serviceName}:` } },
+                // Match service.target.name containing the service name (case-insensitive)
+                // Handles OTel naming conventions like "oteldemo.PaymentService"
+                {
+                  wildcard: {
+                    [SERVICE_TARGET_NAME]: { value: `*${serviceName}*`, case_insensitive: true },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
           ...environmentQuery(environment),
           ...kqlQuery(kuery),
         ],

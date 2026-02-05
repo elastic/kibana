@@ -20,7 +20,9 @@ import type { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 
 function createEditApi(
   servicesOverrides: Partial<LensEmbeddableStartServices> = {},
-  parentApiOverrides: Partial<PublishesViewMode | { isManaged: boolean }> = {}
+  parentApiOverrides: Partial<
+    PublishesViewMode | { isManaged: boolean; isEditableByUser: boolean }
+  > = {}
 ) {
   const internalApi = getLensInternalApiMock();
   const runtimeState = getLensRuntimeStateMock();
@@ -206,6 +208,81 @@ describe('edit features', () => {
       );
       expect(editApi.api.isReadOnlyEnabled()).toEqual({ read: true, write: false });
       expect(editApi.api.isEditingEnabled()).toBe(false);
+    });
+
+    describe('write-protected dashboard scenarios (using isEditableByUser from Dashboard API)', () => {
+      it('should enable read only mode when dashboard isEditableByUser is false', () => {
+        const editApi = createEditApi(
+          {
+            capabilities: {
+              visualize_v2: {
+                save: true,
+                saveQuery: true,
+                show: true,
+                createShortUrl: true,
+              },
+              dashboard_v2: {
+                showWriteControls: true,
+              },
+            } as unknown as ApplicationStart['capabilities'],
+          },
+          {
+            viewMode$: new BehaviorSubject('view' as ViewMode),
+            isEditableByUser: false, // Dashboard reports user cannot edit (write-protected, not owner)
+          }
+        );
+        // User has write permissions in space but dashboard says it's not editable by this user
+        expect(editApi.api.isReadOnlyEnabled()).toEqual({ read: true, write: false });
+        expect(editApi.api.isEditingEnabled()).toBe(false);
+      });
+
+      it('should allow write when dashboard isEditableByUser is true', () => {
+        const editApi = createEditApi(
+          {
+            capabilities: {
+              visualize_v2: {
+                save: true,
+                saveQuery: true,
+                show: true,
+                createShortUrl: true,
+              },
+              dashboard_v2: {
+                showWriteControls: true,
+              },
+            } as unknown as ApplicationStart['capabilities'],
+          },
+          {
+            viewMode$: new BehaviorSubject('view' as ViewMode),
+            isEditableByUser: true, // Dashboard reports user can edit (owner or default access mode)
+          }
+        );
+        // Dashboard says it's editable by user, so write should be true
+        expect(editApi.api.isReadOnlyEnabled()).toEqual({ read: true, write: true });
+      });
+
+      it('should default to allowing write when isEditableByUser is not provided', () => {
+        const editApi = createEditApi(
+          {
+            capabilities: {
+              visualize_v2: {
+                save: true,
+                saveQuery: true,
+                show: true,
+                createShortUrl: true,
+              },
+              dashboard_v2: {
+                showWriteControls: true,
+              },
+            } as unknown as ApplicationStart['capabilities'],
+          },
+          {
+            viewMode$: new BehaviorSubject('view' as ViewMode),
+            // isEditableByUser not provided - should fall back to default (true)
+          }
+        );
+        // No isEditableByUser property, fall back to default behavior (allow write)
+        expect(editApi.api.isReadOnlyEnabled()).toEqual({ read: true, write: true });
+      });
     });
   });
 });
