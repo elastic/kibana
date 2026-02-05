@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
-import React from 'react';
+import React, { useRef } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useElementHeight } from '../../../../../hooks/use_element_height';
 import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
 import { Waterfall } from './waterfall';
 import { OrphanTraceItemsWarning } from './waterfall/orphan_trace_items_warning';
@@ -52,6 +54,9 @@ export function WaterfallContainer({
   onShowCriticalPathChange,
 }: Props) {
   const history = useHistory();
+  const { euiTheme } = useEuiTheme();
+  const serviceBadgesRef = useRef<HTMLDivElement>(null);
+  const serviceBadgesHeight = useElementHeight(serviceBadgesRef, !!waterfall);
 
   if (!waterfall) {
     return null;
@@ -59,48 +64,63 @@ export function WaterfallContainer({
   const { legends, colorBy, orphanTraceItemsCount } = waterfall;
 
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <EuiSwitch
-          id="showCriticalPath"
-          label={i18n.translate('xpack.apm.waterfall.showCriticalPath', {
-            defaultMessage: 'Show critical path',
-          })}
-          checked={showCriticalPath}
-          onChange={(event) => {
-            onShowCriticalPathChange(event.target.checked);
-          }}
-        />
-      </EuiFlexItem>
+    <>
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiSwitch
+            id="showCriticalPath"
+            label={i18n.translate('xpack.apm.waterfall.showCriticalPath', {
+              defaultMessage: 'Show critical path',
+            })}
+            checked={showCriticalPath}
+            onChange={(event) => {
+              onShowCriticalPathChange(event.target.checked);
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup
+        ref={serviceBadgesRef}
+        justifyContent="spaceBetween"
+        css={css`
+          position: sticky;
+          top: var(--euiFixedHeadersOffset, 0);
+          z-index: ${euiTheme.levels.menu};
+          background-color: ${euiTheme.colors.backgroundBasePlain};
+          padding: ${euiTheme.size.s} 0;
+          margin-bottom: ${euiTheme.size.xs};
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
+        </EuiFlexItem>
+        {orphanTraceItemsCount > 0 ? (
           <EuiFlexItem grow={false}>
-            <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
+            <OrphanTraceItemsWarning orphanTraceItemsCount={orphanTraceItemsCount} />
           </EuiFlexItem>
-          {orphanTraceItemsCount > 0 ? (
-            <EuiFlexItem grow={false}>
-              <OrphanTraceItemsWarning orphanTraceItemsCount={orphanTraceItemsCount} />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <Waterfall
-          showCriticalPath={showCriticalPath}
+        ) : null}
+      </EuiFlexGroup>
+
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <Waterfall
+            showCriticalPath={showCriticalPath}
+            waterfallItemId={waterfallItemId}
+            waterfall={waterfall}
+            onNodeClick={(item: IWaterfallItem, flyoutDetailTab: string) =>
+              toggleFlyout({ history, item, flyoutDetailTab })
+            }
+            serviceBadgesHeight={serviceBadgesHeight}
+          />
+        </EuiFlexItem>
+
+        <WaterfallFlyout
           waterfallItemId={waterfallItemId}
           waterfall={waterfall}
-          onNodeClick={(item: IWaterfallItem, flyoutDetailTab: string) =>
-            toggleFlyout({ history, item, flyoutDetailTab })
-          }
+          toggleFlyout={toggleFlyout}
         />
-      </EuiFlexItem>
-
-      <WaterfallFlyout
-        waterfallItemId={waterfallItemId}
-        waterfall={waterfall}
-        toggleFlyout={toggleFlyout}
-      />
-    </EuiFlexGroup>
+      </EuiFlexGroup>
+    </>
   );
 }
