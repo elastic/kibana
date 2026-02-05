@@ -10,7 +10,14 @@ import { i18n } from '@kbn/i18n';
 import type { IlmPolicyPhases } from '@kbn/streams-schema';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSwitch, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiSwitch,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { IlmPhasesFlyoutFormInternal } from '../form';
 import { DownsampleIntervalField } from '../form';
 import { TIME_UNIT_OPTIONS } from '../constants';
@@ -28,6 +35,8 @@ export const DownsampleFieldSection = ({
 }: DownsampleFieldSectionProps) => {
   const enabledPath = `_meta.${phaseName}.downsampleEnabled`;
 
+  const titleId = useGeneratedHtmlId({ prefix: dataTestSubj });
+
   useFormData({ form, watch: enabledPath });
 
   const enabledField = form.getFields()[enabledPath];
@@ -40,13 +49,13 @@ export const DownsampleFieldSection = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiText size="m">
-                <h5>
+              <EuiTitle size="xxs">
+                <h3 id={titleId}>
                   {i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingTitle', {
                     defaultMessage: 'Downsampling',
                   })}
-                </h5>
-              </EuiText>
+                </h3>
+              </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiIconTip
@@ -62,6 +71,7 @@ export const DownsampleFieldSection = ({
           <EuiSwitch
             label=""
             showLabel={false}
+            aria-labelledby={titleId}
             compressed
             checked={isEnabled}
             data-test-subj={`${dataTestSubj}DownsamplingSwitch`}

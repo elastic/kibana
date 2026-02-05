@@ -8,7 +8,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
-import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import {
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { IlmPhasesFlyoutFormInternal } from '../types';
@@ -27,6 +33,11 @@ export const ReadOnlyToggleField = ({
   allowedPhases,
 }: ReadOnlyToggleFieldProps) => {
   const watchPath = phaseName ? `_meta.${phaseName}.readonlyEnabled` : `_meta.hot.readonlyEnabled`;
+
+  const checkboxId = useGeneratedHtmlId({
+    prefix: `${dataTestSubj}ReadOnlyCheckbox-${phaseName}`,
+  });
+
   useFormData({ form, watch: watchPath });
 
   if (!phaseName) return null;
@@ -43,7 +54,7 @@ export const ReadOnlyToggleField = ({
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiCheckbox
-          id={`${dataTestSubj}ReadOnlyCheckbox`}
+          id={checkboxId}
           checked={readonlyValue}
           label={i18n.translate('xpack.streams.editIlmPhasesFlyout.readOnlyLabel', {
             defaultMessage: 'Enable read-only access',

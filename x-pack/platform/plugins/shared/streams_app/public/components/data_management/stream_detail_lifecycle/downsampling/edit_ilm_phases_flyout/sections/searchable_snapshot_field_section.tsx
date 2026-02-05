@@ -10,7 +10,14 @@ import { i18n } from '@kbn/i18n';
 import type { IlmPolicyPhases } from '@kbn/streams-schema';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSwitch, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiSwitch,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { IlmPhasesFlyoutFormInternal } from '../form';
 import { SearchableSnapshotRepositoryField } from '../form';
 
@@ -38,6 +45,10 @@ export const SearchableSnapshotFieldSection = ({
   const repositoryPath = `_meta.searchableSnapshot.repository`;
   const enabledPath = `_meta.cold.searchableSnapshotEnabled`;
 
+  const titleId = useGeneratedHtmlId({
+    prefix: dataTestSubj,
+  });
+
   const isFrozenPhase = phaseName === 'frozen';
 
   useFormData({ form, watch: isFrozenPhase ? [repositoryPath] : [enabledPath, repositoryPath] });
@@ -60,13 +71,13 @@ export const SearchableSnapshotFieldSection = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiText size="m">
-                <h5>
+              <EuiTitle size="xxs">
+                <h3 id={titleId}>
                   {i18n.translate('xpack.streams.editIlmPhasesFlyout.searchableSnapshotTitle', {
                     defaultMessage: 'Searchable snapshot',
                   })}
-                </h5>
-              </EuiText>
+                </h3>
+              </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiIconTip
@@ -86,6 +97,7 @@ export const SearchableSnapshotFieldSection = ({
             <EuiSwitch
               label=""
               showLabel={false}
+              aria-labelledby={titleId}
               compressed
               checked={isEnabled}
               data-test-subj={`${dataTestSubj}SearchableSnapshotSwitch`}
