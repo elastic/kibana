@@ -105,17 +105,16 @@ export const DataCoveragePanel: React.FC = () => {
     [getIntegrations.data?.items]
   );
 
-  // Transform raw data into table rows, filtered by selected categories
+  // Transform raw data into table rows
   const coverageData = useMemo<CategoryCoverageData[]>(() => {
-    const mainCategoriesMap = getReadinessCategories.data?.mainCategoriesMap;
-    if (!mainCategoriesMap) {
+    if (!getReadinessCategories.data?.mainCategoriesMap) {
       return [];
     }
 
-    const categoryDataMap = new Map(mainCategoriesMap.map((item) => [item.category, item]));
+    const mainCategoriesMap = getReadinessCategories.data.mainCategoriesMap;
 
     return CATEGORY_ORDER.map((category) => {
-      const categoryData = categoryDataMap.get(category);
+      const categoryData = mainCategoriesMap.find((item) => item.category === category);
       const totalDocs = categoryData?.indices.reduce((sum, index) => sum + index.docs, 0) || 0;
 
       return {
