@@ -103,10 +103,12 @@ export const putDownloadSourcesHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  validateDownloadSourceAuth(request.body);
+  const { auth, ...restBody } = request.body;
+  const normalizedBody = { ...restBody, ...(auth !== null && { auth }) };
+  validateDownloadSourceAuth(normalizedBody);
 
   try {
-    await downloadSourceService.update(soClient, esClient, request.params.sourceId, request.body);
+    await downloadSourceService.update(soClient, esClient, request.params.sourceId, normalizedBody);
     const downloadSource = await downloadSourceService.get(request.params.sourceId);
     if (downloadSource.is_default) {
       await agentPolicyService.bumpAllAgentPolicies(esClient);
@@ -137,7 +139,8 @@ export const postDownloadSourcesHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const { id, ...data } = request.body;
+  const { id, auth, ...restData } = request.body;
+  const data = { ...restData, ...(auth !== null && { auth }) };
 
   validateDownloadSourceAuth(data);
 

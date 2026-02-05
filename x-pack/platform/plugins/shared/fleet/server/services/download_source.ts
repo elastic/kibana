@@ -285,30 +285,33 @@ class DownloadSourceService {
       newData.auth?.password !== undefined ||
       newData.secrets?.auth?.password !== undefined;
 
-    let computedAuth: Record<string, string> | null | undefined;
+    let computedAuth: DownloadSourceBase['auth'] | null | undefined;
     if (newData.auth) {
-      computedAuth = { ...newData.auth };
+      const authCopy = { ...newData.auth };
       // If API key is set, remove username/password from the auth object
       if (isApiKeyBeingSet) {
-        delete computedAuth.username;
-        delete computedAuth.password;
+        delete authCopy.username;
+        delete authCopy.password;
       }
       // If username/password is set, remove api_key from the auth object
       if (isUsernamePasswordBeingSet) {
-        delete computedAuth.api_key;
+        delete authCopy.api_key;
       }
+      computedAuth = authCopy;
     } else if (newData.auth === null) {
       // Explicitly set to null to allow to delete the field
       computedAuth = null;
     } else if (isApiKeyBeingSet && (originalItem.auth?.username || originalItem.auth?.password)) {
       // API key is being set via secrets but no new auth provided: clear the existing username/password
-      computedAuth = { ...originalItem.auth };
-      delete computedAuth.username;
-      delete computedAuth.password;
+      const authCopy = { ...originalItem.auth };
+      delete authCopy.username;
+      delete authCopy.password;
+      computedAuth = authCopy;
     } else if (isUsernamePasswordBeingSet && originalItem.auth?.api_key) {
       // Username/password is being set via secrets but no new auth provided: clear the existing api_key
-      computedAuth = { ...originalItem.auth };
-      delete computedAuth.api_key;
+      const authCopy = { ...originalItem.auth };
+      delete authCopy.api_key;
+      computedAuth = authCopy;
     }
 
     if (updateData.is_default) {
