@@ -186,9 +186,9 @@ export interface DocViewerExtension {
   /**
    * Optional render function to display a custom header section above the tabs
    * @param props The doc view render props
-   * @returns A React element to render above the tabs, or undefined to skip rendering
+   * @returns A React element to render above the tabs
    */
-  renderCustomHeader?: (props: DocViewRenderProps) => React.ReactElement | undefined;
+  renderCustomHeader?: (props: DocViewRenderProps) => React.ReactElement;
 }
 
 /**
