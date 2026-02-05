@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import { useTimefilter } from '../../../hooks/use_timefilter';
 
 export function useDiscoveryStreams() {
   const context = useKibana();
