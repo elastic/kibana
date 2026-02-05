@@ -51,6 +51,7 @@ export interface UnifiedDocViewerFlyoutProps
     doc: DataTableRecord;
     renderDefaultContent: () => React.ReactNode;
   }>;
+  renderCustomHeader?: (props: DocViewRenderProps) => React.ReactElement | undefined;
   services: {
     toastNotifications?: ToastsStart;
     chrome: ChromeStart;
@@ -94,6 +95,7 @@ export function UnifiedDocViewerFlyout({
   flyoutType,
   flyoutWidthLocalStorageKey,
   FlyoutCustomBody,
+  renderCustomHeader,
   services,
   docViewsRegistry,
   isEsqlQuery,
@@ -269,6 +271,41 @@ export function UnifiedDocViewerFlyout({
     [onFilter, addColumn, removeColumn]
   );
 
+  const docViewRenderProps = useMemo<DocViewRenderProps>(
+    () => ({
+      hit: actualHit,
+      dataView,
+      columns,
+      columnsMeta,
+      textBasedHits: isEsqlQuery ? hits : undefined,
+      filter: onFilter,
+      onAddColumn: addColumn,
+      onRemoveColumn: removeColumn,
+      docViewsRegistry,
+      hideFilteringOnComputedColumns,
+    }),
+    [
+      actualHit,
+      dataView,
+      columns,
+      columnsMeta,
+      isEsqlQuery,
+      hits,
+      onFilter,
+      addColumn,
+      removeColumn,
+      docViewsRegistry,
+      hideFilteringOnComputedColumns,
+    ]
+  );
+
+  const customHeaderContent = useMemo(() => {
+    if (!renderCustomHeader) {
+      return null;
+    }
+    return renderCustomHeader(docViewRenderProps);
+  }, [renderCustomHeader, docViewRenderProps]);
+
   const bodyContent = FlyoutCustomBody ? (
     <FlyoutCustomBody
       actions={contentActions}
@@ -276,7 +313,10 @@ export function UnifiedDocViewerFlyout({
       renderDefaultContent={renderDefaultContent}
     />
   ) : (
-    renderDefaultContent()
+    <>
+      {customHeaderContent}
+      {renderDefaultContent()}
+    </>
   );
 
   const defaultFlyoutTitle = isEsqlQuery
