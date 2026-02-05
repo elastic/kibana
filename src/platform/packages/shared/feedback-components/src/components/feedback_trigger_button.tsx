@@ -91,14 +91,14 @@ export const FeedbackTriggerButton = ({
         </EuiHeaderSectionItemButton>
       </EuiToolTip>
       {isModalOpen && (
-        <EuiModal
-          onClose={handleHideFeedbackContainer}
-          aria-label={i18n.translate('feedback.modal.ariaLabel', {
-            defaultMessage: 'Feedback form',
-          })}
-          css={modalCss}
-        >
-          <Suspense fallback={null}>
+        <Suspense fallback={null}>
+          <EuiModal
+            onClose={handleHideFeedbackContainer}
+            aria-label={i18n.translate('feedback.modal.ariaLabel', {
+              defaultMessage: 'Feedback form',
+            })}
+            css={modalCss}
+          >
             <LazyFeedbackContainer
               getAppDetails={getAppDetails}
               getQuestions={getQuestions}
@@ -107,8 +107,8 @@ export const FeedbackTriggerButton = ({
               showToast={showToast}
               hideFeedbackContainer={handleHideFeedbackContainer}
             />
-          </Suspense>
-        </EuiModal>
+          </EuiModal>
+        </Suspense>
       )}
     </>
   );
