@@ -30,6 +30,8 @@ import { internalDescriptionGenerationRoutes } from './internal/streams/descript
 import { featureRoutes as internalFeatureRoutes } from './internal/streams/features/route';
 import { internalInsightsRoutes } from './internal/streams/insights/route';
 import { internalTasksRoutes } from './internal/streams/tasks/route';
+import { internalOnboardingRoutes } from './internal/streams/onboarding/route';
+import { internalQueriesRoutes } from './internal/streams/queries/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -49,6 +51,8 @@ export const streamsRouteRepository = {
   ...internalFeatureRoutes,
   ...internalInsightsRoutes,
   ...internalTasksRoutes,
+  ...internalOnboardingRoutes,
+  ...internalQueriesRoutes,
   // public APIs
   ...docCountsRoutes,
   ...crudRoutes,
