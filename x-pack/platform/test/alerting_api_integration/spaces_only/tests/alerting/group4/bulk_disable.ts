@@ -137,7 +137,6 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
     before(async () => {
       await esTestIndexTool.setup();
 
-      await esTestIndexToolOutput.destroy();
       await esTestIndexToolOutput.setup();
 
       const endDateMillis = Date.now() + (RULE_INTERVALS_TO_WRITE - 1) * RULE_INTERVAL_MILLIS;
