@@ -2,16 +2,16 @@
 
 ## Purpose
 
-This is the foundational profile for all log data in Discover, implementing the "One Discover" philosophy: if the data looks like a log, it should look and behave like a log—regardless of which solution the user is in.
+Provides a consistent log-optimized Discover experience across all solution contexts based solely on data characteristics.
 
 ## Key Characteristics
 
-- **Universal Application**: Applies across all solution contexts (Default/Classic, Observability, Security, Search)
-- **Data-Driven**: Activates solely based on data characteristics, not solution context
-- **Contextual Rendering**: Provides essential log UX (badges, row indicators, infinite scroll) without imposing solution-specific workflows
-- **Lower Precedence**: Solution-specific profiles (e.g., Observability logs profile) take precedence when present
+- **Universal**: Works in Default/Classic, Observability, Security, Search, and all Serverless project types
+- **Data-Driven**: Activates when data is detected as logs (regardless of solution context)
+- **Capability-Aware**: Features adapt based on available apps (Streams, APM, etc.)
+- **Lower Precedence**: Solution-specific profiles take priority when present
 
-## What This Profile Provides
+## Extension Points
 
 ### Extension Points Implemented
 

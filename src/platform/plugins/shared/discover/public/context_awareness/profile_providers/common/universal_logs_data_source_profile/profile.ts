@@ -59,27 +59,10 @@ export const createUniversalLogsDataSourceProfileProvider = (
     resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);
 
-    // Debug logging
-    // eslint-disable-next-line no-console
-    console.log('[Universal Logs Profile] Checking index pattern:', indexPattern);
-    // eslint-disable-next-line no-console
-    console.log('[Universal Logs Profile] Solution Nav ID:', params.rootContext.solutionNavId);
-
-    // Check if this is a logs data source using the same logic as Observability
-    const isLogsPattern = services.logsContextService.isLogsIndexPattern(indexPattern);
-    // eslint-disable-next-line no-console
-    console.log('[Universal Logs Profile] Is logs pattern?', isLogsPattern);
-
-    if (!isLogsPattern) {
+    // Check if this is a logs data source using the same detection logic
+    if (!services.logsContextService.isLogsIndexPattern(indexPattern)) {
       return { isMatch: false };
     }
-
-    // No longer excluding ES3 - instead we'll check for app capabilities at render time
-    // eslint-disable-next-line no-console
-    console.log('[Universal Logs Profile] Using capability-based rendering');
-
-    // eslint-disable-next-line no-console
-    console.log('[Universal Logs Profile] ✅ ACTIVATED!');
 
     return {
       isMatch: true,
@@ -89,9 +72,6 @@ export const createUniversalLogsDataSourceProfileProvider = (
     };
   },
   };
-  
-  // eslint-disable-next-line no-console
-  console.log('[Universal Logs Profile] Profile created with extension points:', Object.keys(provider.profile));
   
   return provider;
 };

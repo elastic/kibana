@@ -7,100 +7,102 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  ObservabilityLogsAIAssistantFeature,
+  ObservabilityLogsAIInsightFeature,
+  ObservabilityStreamsFeature,
+} from '@kbn/discover-shared-plugin/public';
+import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { i18n } from '@kbn/i18n';
+import {
+  UnifiedDocViewerLogsOverview,
+} from '@kbn/unified-doc-viewer-plugin/public';
+import type { DocViewRenderProps, DocViewActions } from '@kbn/unified-doc-viewer/types';
 import React from 'react';
-import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 
 /**
  * Creates doc viewer with capability-based feature detection
- * Shows "Logs overview" tab, but only includes available features
+ * Shows "Logs overview" tab with smart feature detection:
+ * - Only shows Streams links if Streams feature exists
+ * - Only shows APM links if APM is available
+ * - Only shows AI features if available
  */
 export const createGetDocViewer =
   (services: ProfileProviderServices): DataSourceProfileProvider['profile']['getDocViewer'] =>
   (prev) =>
   (params) => {
-    // eslint-disable-next-line no-console
-    console.log('[Universal Logs Profile] getDocViewer called');
-
     const prevDocViewer = prev(params);
 
-    // Check for available features
-    const hasStreamsFeature = !!services.discoverShared?.features?.registry?.getById('streams');
-    const hasApmFeature = services.apmContextService?.tracesService?.getAllTracesIndexPattern;
-    
-    // eslint-disable-next-line no-console
-    console.log('[Universal Logs Profile] Available features:', {
-      streams: hasStreamsFeature,
-      apm: !!hasApmFeature,
-    });
+    // Check for available features (gracefully handle missing services)
+    let logsAIAssistantFeature: ObservabilityLogsAIAssistantFeature | undefined;
+    let logsAIInsightFeature: ObservabilityLogsAIInsightFeature | undefined;
+    let streamsFeature: ObservabilityStreamsFeature | undefined;
 
-    // Only add logs overview tab if we have at least some capabilities
-    // The tab will gracefully show available features
+    try {
+      logsAIAssistantFeature = services.discoverShared?.features?.registry?.getById(
+        'observability-logs-ai-assistant'
+      ) as ObservabilityLogsAIAssistantFeature | undefined;
+    } catch (e) {
+      // Feature not available
+    }
+
+    try {
+      logsAIInsightFeature = services.discoverShared?.features?.registry?.getById(
+        'observability-logs-ai-insight'
+      ) as ObservabilityLogsAIInsightFeature | undefined;
+    } catch (e) {
+      // Feature not available
+    }
+
+    try {
+      streamsFeature = services.discoverShared?.features?.registry?.getById(
+        'streams'
+      ) as ObservabilityStreamsFeature | undefined;
+    } catch (e) {
+      // Feature not available
+    }
+
+    // Build indexes object with safety checks
+    const indexes: ObservabilityIndexes = {
+      apm: {
+        errors: services.apmContextService?.errorsService?.getErrorsIndexPattern?.() || undefined,
+        traces: services.apmContextService?.tracesService?.getAllTracesIndexPattern?.() || undefined,
+      },
+      logs: services.logsContextService?.getAllLogsIndexPattern?.() || undefined,
+    };
+
     return {
-      title: prevDocViewer.title,
+      ...prevDocViewer,
       docViewsRegistry: (registry) => {
-        const existingRegistry = prevDocViewer.docViewsRegistry
-          ? prevDocViewer.docViewsRegistry(registry)
-          : registry;
-
-        // Add a simple logs overview tab
-        // In production, this would use UnifiedDocViewerLogsOverview with capability checks
-        existingRegistry.add({
+        // Add logs overview tab
+        registry.add({
           id: 'doc_view_logs_overview',
           title: i18n.translate('discover.universalLogsProfile.docViewer.logsOverviewTitle', {
-            defaultMessage: 'Log details',
+            defaultMessage: 'Log overview',
           }),
           order: 0,
-          component: (props) => (
-            <div style={{ padding: '16px' }}>
-              <EuiText>
-                <h3>
-                  {i18n.translate('discover.universalLogsProfile.docViewer.logDetailsHeading', {
-                    defaultMessage: 'Log Details',
-                  })}
-                </h3>
-                <p>
-                  {i18n.translate('discover.universalLogsProfile.docViewer.logDetailsDescription', {
-                    defaultMessage: 'Universal logs view - features adapt based on available capabilities',
-                  })}
-                </p>
-              </EuiText>
-              
-              {hasStreamsFeature && (
-                <EuiText size="s" color="subdued">
-                  <p>✓ Streams integration available</p>
-                </EuiText>
-              )}
-              
-              {hasApmFeature && (
-                <EuiText size="s" color="subdued">
-                  <p>✓ APM traces available</p>
-                </EuiText>
-              )}
-
-              {!hasStreamsFeature && !hasApmFeature && (
-                <EuiEmptyPrompt
-                  iconType="iInCircle"
-                  body={
-                    <p>
-                      {i18n.translate(
-                        'discover.universalLogsProfile.docViewer.limitedFeaturesMessage',
-                        {
-                          defaultMessage:
-                            'Some features are not available in this environment. Core log viewing is fully functional.',
-                        }
-                      )}
-                    </p>
-                  }
-                />
-              )}
-            </div>
-          ),
+          render: (props: DocViewRenderProps) => {
+            return (
+              <UnifiedDocViewerLogsOverview
+                {...props}
+                docViewActions={params.actions}
+                // Pass features - UnifiedDocViewerLogsOverview handles undefined gracefully
+                renderAIAssistant={logsAIAssistantFeature?.render}
+                renderAIInsight={logsAIInsightFeature?.render}
+                renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
+                renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
+                indexes={indexes}
+              />
+            );
+          },
         });
 
-        return existingRegistry;
+        // Apply previous doc viewer registry modifications
+        return prevDocViewer.docViewsRegistry
+          ? prevDocViewer.docViewsRegistry(registry)
+          : registry;
       },
     };
   };

@@ -7,24 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dataViewMock } from '../../../../__mocks__/data_view';
-import { createContextAwarenessMocks } from '../../../../__mocks__/context_awareness_context';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createUniversalLogsDataSourceProfileProvider } from './profile';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
+import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
+import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 
-const { profileProviderServices } = createContextAwarenessMocks();
+const mockServices = createProfileProviderSharedServicesMock();
 
 describe('universal_logs_data_source_profile', () => {
-  const logsProfile = createUniversalLogsDataSourceProfileProvider(profileProviderServices);
+  const logsProfile = createUniversalLogsDataSourceProfileProvider(mockServices);
 
   describe('resolve', () => {
-    it('should match logs index patterns', () => {
+    it('should match ES|QL queries with logs index patterns', () => {
       expect(
         logsProfile.resolve({
-          dataView: dataViewMock,
-          indexPattern: 'logs-*',
-          query: { query: '', language: 'kuery' },
-          rootContext: { solutionNavId: SolutionType.Default },
+          rootContext: { solutionType: SolutionType.Default },
+          dataSource: createEsqlDataSource(),
+          query: { esql: 'FROM logs-*' },
+        })
+      ).toEqual({
+        isMatch: true,
+        context: { category: DataSourceCategory.Logs },
+      });
+    });
+
+    it('should match data views with logs index patterns', () => {
+      const stubDataView = createStubIndexPattern({
+        spec: {
+          id: 'logs-test',
+          title: 'logs-*',
+        },
+      });
+
+      expect(
+        logsProfile.resolve({
+          rootContext: { solutionType: SolutionType.Default },
+          dataSource: createDataViewDataSource({ dataViewId: stubDataView.id! }),
+          dataView: stubDataView,
         })
       ).toEqual({
         isMatch: true,
@@ -35,10 +56,9 @@ describe('universal_logs_data_source_profile', () => {
     it('should match filebeat index patterns', () => {
       expect(
         logsProfile.resolve({
-          dataView: dataViewMock,
-          indexPattern: 'filebeat-*',
-          query: { query: '', language: 'kuery' },
-          rootContext: { solutionNavId: SolutionType.Default },
+          rootContext: { solutionType: SolutionType.Default },
+          dataSource: createEsqlDataSource(),
+          query: { esql: 'FROM filebeat-*' },
         })
       ).toEqual({
         isMatch: true,
@@ -49,82 +69,35 @@ describe('universal_logs_data_source_profile', () => {
     it('should not match when not a logs index pattern', () => {
       expect(
         logsProfile.resolve({
-          dataView: dataViewMock,
-          indexPattern: 'metrics-*',
-          query: { query: '', language: 'kuery' },
-          rootContext: { solutionNavId: SolutionType.Default },
+          rootContext: { solutionType: SolutionType.Default },
+          dataSource: createEsqlDataSource(),
+          query: { esql: 'FROM metrics-*' },
         })
       ).toEqual({
         isMatch: false,
       });
     });
 
-    it('should not match in ES3 (Elasticsearch serverless)', () => {
-      expect(
-        logsProfile.resolve({
-          dataView: dataViewMock,
-          indexPattern: 'logs-*',
-          query: { query: '', language: 'kuery' },
-          rootContext: { solutionNavId: 'es' },
-        })
-      ).toEqual({
-        isMatch: false,
-      });
-    });
+    it('should match in all solution contexts', () => {
+      const testCases = [
+        { context: SolutionType.Security, label: 'Security' },
+        { context: SolutionType.Observability, label: 'Observability' },
+        { context: SolutionType.Default, label: 'Default' },
+        { context: 'search' as const, label: 'Search' },
+        { context: 'es' as const, label: 'ES3' },
+      ];
 
-    it('should match in Security solution', () => {
-      expect(
-        logsProfile.resolve({
-          dataView: dataViewMock,
-          indexPattern: 'logs-*',
-          query: { query: '', language: 'kuery' },
-          rootContext: { solutionNavId: SolutionType.Security },
-        })
-      ).toEqual({
-        isMatch: true,
-        context: { category: DataSourceCategory.Logs },
-      });
-    });
-
-    it('should match in Observability solution', () => {
-      expect(
-        logsProfile.resolve({
-          dataView: dataViewMock,
-          indexPattern: 'logs-*',
-          query: { query: '', language: 'kuery' },
-          rootContext: { solutionNavId: SolutionType.Observability },
-        })
-      ).toEqual({
-        isMatch: true,
-        context: { category: DataSourceCategory.Logs },
-      });
-    });
-
-    it('should match in Search solution', () => {
-      expect(
-        logsProfile.resolve({
-          dataView: dataViewMock,
-          indexPattern: 'logs-*',
-          query: { query: '', language: 'kuery' },
-          rootContext: { solutionNavId: 'search' },
-        })
-      ).toEqual({
-        isMatch: true,
-        context: { category: DataSourceCategory.Logs },
-      });
-    });
-
-    it('should match in Classic/Default context', () => {
-      expect(
-        logsProfile.resolve({
-          dataView: dataViewMock,
-          indexPattern: 'logs-*',
-          query: { query: '', language: 'kuery' },
-          rootContext: { solutionNavId: SolutionType.Default },
-        })
-      ).toEqual({
-        isMatch: true,
-        context: { category: DataSourceCategory.Logs },
+      testCases.forEach(({ context, label }) => {
+        expect(
+          logsProfile.resolve({
+            rootContext: { solutionType: context },
+            dataSource: createEsqlDataSource(),
+            query: { esql: 'FROM logs-*' },
+          })
+        ).toEqual({
+          isMatch: true,
+          context: { category: DataSourceCategory.Logs },
+        });
       });
     });
   });
@@ -134,9 +107,18 @@ describe('universal_logs_data_source_profile', () => {
       expect(logsProfile.profile.getDefaultAppState).toBeDefined();
       expect(logsProfile.profile.getCellRenderers).toBeDefined();
       expect(logsProfile.profile.getRowIndicatorProvider).toBeDefined();
+      expect(logsProfile.profile.getRowAdditionalLeadingControls).toBeDefined();
       expect(logsProfile.profile.getPaginationConfig).toBeDefined();
       expect(logsProfile.profile.getColumnsConfiguration).toBeDefined();
       expect(logsProfile.profile.getRecommendedFields).toBeDefined();
+      expect(logsProfile.profile.getDocViewer).toBeDefined();
+    });
+
+    it('should configure infinite scroll pagination', () => {
+      const paginationConfig = logsProfile.profile.getPaginationConfig?.(() => ({}))(
+        {} as any
+      );
+      expect(paginationConfig?.paginationMode).toBe('infinite');
     });
   });
 });

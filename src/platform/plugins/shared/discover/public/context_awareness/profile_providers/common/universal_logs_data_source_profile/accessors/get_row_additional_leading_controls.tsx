@@ -16,12 +16,7 @@ import type { DataSourceProfileProvider } from '../../../../profiles';
  */
 export const getRowAdditionalLeadingControls: DataSourceProfileProvider['profile']['getRowAdditionalLeadingControls'] =
   (prev) => (params) => {
-    // eslint-disable-next-line no-console
-    console.log('[Universal Logs Profile] getRowAdditionalLeadingControls called');
-
     // Return the previous controls without adding any new ones
     // Solution-specific profiles (like O11y) can add their own controls
-    const additionalControls = prev(params) || [];
-    
-    return additionalControls;
+    return prev(params) || [];
   };

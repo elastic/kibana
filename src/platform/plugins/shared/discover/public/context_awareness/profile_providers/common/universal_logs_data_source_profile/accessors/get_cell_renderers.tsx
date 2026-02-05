@@ -19,28 +19,17 @@ import type { DataSourceProfileProvider } from '../../../../profiles';
  * - Summary column shows log content preview
  */
 export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRenderers'] =
-  (prev) => (params) => {
-    // eslint-disable-next-line no-console
-    console.log('[Universal Logs Profile] getCellRenderers called');
-    
-    const prevRenderers = prev(params);
-    const result = {
-      ...prevRenderers,
-      // Add log level badge rendering for all log level fields
-      ...LOG_LEVEL_FIELDS.reduce(
-        (acc, field) => ({
-          ...acc,
-          [field]: getLogLevelBadgeCell(field),
-          [`${field}.keyword`]: getLogLevelBadgeCell(`${field}.keyword`),
-        }),
-        {}
-      ),
-      // Add summary column for log preview
-      [SOURCE_COLUMN]: getSummaryColumn(params),
-    };
-    
-    // eslint-disable-next-line no-console
-    console.log('[Universal Logs Profile] Cell renderers:', Object.keys(result));
-    
-    return result;
-  };
+  (prev) => (params) => ({
+    ...prev(params),
+    // Add log level badge rendering for all log level fields
+    ...LOG_LEVEL_FIELDS.reduce(
+      (acc, field) => ({
+        ...acc,
+        [field]: getLogLevelBadgeCell(field),
+        [`${field}.keyword`]: getLogLevelBadgeCell(`${field}.keyword`),
+      }),
+      {}
+    ),
+    // Add summary column for log preview
+    [SOURCE_COLUMN]: getSummaryColumn(params),
+  });
