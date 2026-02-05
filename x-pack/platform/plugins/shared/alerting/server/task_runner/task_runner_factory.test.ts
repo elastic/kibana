@@ -132,6 +132,7 @@ describe('Task Runner Factory', () => {
     usageCounter: mockUsageCounter,
     isServerless: false,
     getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+    apiKeyType: 'es',
   };
 
   beforeEach(() => {

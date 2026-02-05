@@ -229,6 +229,7 @@ describe('Task Runner', () => {
       usageCounter: mockUsageCounter,
       isServerless: false,
       getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+      apiKeyType: 'es',
     };
 
     describe(`using ${label} for alert indices`, () => {

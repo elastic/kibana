@@ -70,6 +70,7 @@ export function generateAlertingConfig(overwrites: Partial<AlertingConfig> = {})
           max: 1000,
         },
       },
+      apiKeyType: 'es',
     },
     rulesSettings: { enabled: true, cacheInterval: 60000 },
     ...overwrites,

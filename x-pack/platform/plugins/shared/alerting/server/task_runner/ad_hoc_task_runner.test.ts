@@ -189,6 +189,7 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   usageCounter: mockUsageCounter,
   isServerless: false,
   getEventLogClient: jest.fn(),
+  apiKeyType: 'es',
 };
 
 const mockedTaskInstance: ConcreteTaskInstance = {

@@ -156,6 +156,7 @@ describe('Task Runner Cancel', () => {
     usageCounter: mockUsageCounter,
     isServerless: false,
     getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+    apiKeyType: 'es',
   };
 
   beforeEach(() => {

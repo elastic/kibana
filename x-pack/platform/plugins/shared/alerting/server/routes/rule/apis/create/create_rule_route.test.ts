@@ -60,6 +60,7 @@ describe('createRuleRoute', () => {
           max: 1000,
         },
       },
+      apiKeyType: 'es',
     },
     rulesSettings: {
       enabled: true,
@@ -68,7 +69,7 @@ describe('createRuleRoute', () => {
     maintenanceWindow: {
       enabled: true,
     },
-  };
+  } as const;
   const action: RuleAction = {
     actionTypeId: 'test',
     group: 'default',
