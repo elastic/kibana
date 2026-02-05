@@ -8,10 +8,10 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiText, EuiTextTruncate, EuiLink } from '@elastic/eui';
+import { EuiText, EuiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import React from 'react';
 import type { ErrorData, ErrorsByTraceId } from '@kbn/apm-types';
 import { where } from '@kbn/esql-composer';
 import {
@@ -22,12 +22,9 @@ import {
   ERROR_ID,
   EXCEPTION_MESSAGE,
 } from '@kbn/apm-types';
-import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
-import type { GenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
-import { getLinkActionProps } from '../../../../content_framework/utils/link_action';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
-import { useDocViewerExtensionActionsContext } from '../../../../../hooks/use_doc_viewer_extension_actions';
+import { DiscoverEsqlLink } from '../discover_esql_link';
 
 function createWhereClause({
   traceId,
@@ -82,39 +79,19 @@ const ErrorMessageLinkCell = ({
   item: ErrorsByTraceId['traceErrors'][0];
 }) => {
   const { indexes } = useDataSourcesContext();
-  const actions = useDocViewerExtensionActionsContext();
-  const openInNewTab = actions?.openInNewTab;
   const errorLabel = getErrorMessage(item.error);
-
-  const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
-    indexPattern: indexes.apm.errors,
-    whereClause: createWhereClause({ traceId, docId, source, item }),
-  });
-
-  const canOpenInNewTab = openInNewTab && esqlQueryString;
-
-  const onClick = useCallback(() => {
-    if (canOpenInNewTab) {
-      openInNewTab!({
-        query: { esql: esqlQueryString! },
-        tabLabel: errorLabel,
-      });
-    }
-  }, [canOpenInNewTab, esqlQueryString, openInNewTab, errorLabel]);
-
-  const linkProps = getLinkActionProps({
-    href: discoverUrl,
-    onClick: canOpenInNewTab ? onClick : undefined,
-  });
 
   const content = <EuiTextTruncate data-test-subj="error-exception-message" text={errorLabel} />;
 
-  return discoverUrl || canOpenInNewTab ? (
-    <EuiLink data-test-subj="error-group-link" {...linkProps}>
+  return (
+    <DiscoverEsqlLink
+      indexPattern={indexes.apm.errors}
+      whereClause={createWhereClause({ traceId, docId, source, item })}
+      tabLabel={errorLabel}
+      dataTestSubj="error-group-link"
+    >
       {content}
-    </EuiLink>
-  ) : (
-    content
+    </DiscoverEsqlLink>
   );
 };
 
@@ -131,12 +108,10 @@ const getErrorMessage = (error: ErrorData) => {
 };
 
 export const getColumns = ({
-  generateDiscoverLink,
   traceId,
   docId,
   source,
 }: {
-  generateDiscoverLink: GenerateDiscoverLink;
   traceId: string;
   docId?: string;
   source: ErrorsByTraceId['source'];
