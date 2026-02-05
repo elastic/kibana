@@ -208,12 +208,17 @@ const createProcessSchema = (
       return;
     }
 
-    stats.maxDepth = Math.max(stats.maxDepth, depth);
-
+    // Check depth limit first to prevent unbounded recursion
     if (depth > MAX_RECURSION_DEPTH) {
-      log.warning(`Max depth reached at ${context.path || 'unknown path'}`);
+      log.warning(
+        `Maximum recursion depth (${MAX_RECURSION_DEPTH}) exceeded at ${
+          context.path || 'unknown path'
+        }. ` + 'This may indicate a circular schema reference or excessively deep nesting.'
+      );
       return;
     }
+
+    stats.maxDepth = Math.max(stats.maxDepth, depth);
 
     ['oneOf', 'anyOf', 'allOf'].forEach((compType) => {
       if (schema[compType] && Array.isArray(schema[compType])) {
