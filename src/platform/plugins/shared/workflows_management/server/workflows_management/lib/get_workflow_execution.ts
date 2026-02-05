@@ -138,7 +138,7 @@ function transformToWorkflowExecutionDetailDto(
     isTestRun: workflowExecution.isTestRun ?? false,
     stepId: workflowExecution.stepId,
     stepExecutions,
-    executedBy: workflowExecution.executedBy,
+    executedBy: workflowExecution.executedBy ?? workflowExecution.createdBy,
     triggeredBy: workflowExecution.triggeredBy,
     yaml,
     traceId: workflowExecution.traceId,

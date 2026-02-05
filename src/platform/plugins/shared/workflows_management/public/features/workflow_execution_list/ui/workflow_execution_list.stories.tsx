@@ -19,6 +19,7 @@ const WorkflowExecutionListWithState = (props: WorkflowExecutionListProps) => {
   const [filters, setFilters] = useState<ExecutionListFiltersQueryParams>({
     statuses: [],
     executionTypes: [],
+    executedBy: [],
   });
   return <WorkflowExecutionList {...props} filters={filters} onFiltersChange={setFilters} />;
 };
@@ -36,6 +37,7 @@ type Story = StoryObj<typeof WorkflowExecutionList>;
 const mockFilters: WorkflowExecutionListProps['filters'] = {
   statuses: [ExecutionStatus.PENDING, ExecutionStatus.RUNNING, ExecutionStatus.WAITING_FOR_INPUT],
   executionTypes: [ExecutionType.PRODUCTION],
+  executedBy: [],
 };
 
 export const Default: Story = {

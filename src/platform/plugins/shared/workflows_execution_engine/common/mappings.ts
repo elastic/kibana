@@ -42,6 +42,9 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     createdBy: {
       type: 'keyword',
     },
+    executedBy: {
+      type: 'keyword',
+    },
     startedAt: {
       type: 'date',
     },

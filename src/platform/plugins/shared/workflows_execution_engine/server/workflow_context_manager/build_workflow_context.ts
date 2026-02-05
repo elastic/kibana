@@ -42,7 +42,7 @@ export function buildWorkflowContext(
       isTestRun: !!workflowExecution.isTestRun,
       startedAt: new Date(workflowExecution.startedAt),
       url: executionUrl,
-      executedBy: workflowExecution.executedBy,
+      executedBy: workflowExecution.executedBy ?? 'system',
       triggeredBy: workflowExecution.triggeredBy,
     },
     workflow: {
