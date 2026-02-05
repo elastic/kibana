@@ -70,6 +70,7 @@ export interface DataQualityResultDocument {
 
 export interface RelatedIntegrationRuleResponse {
   related_integrations?: Array<RelatedIntegration>;
+  enabled: boolean;
 }
 
 export interface RelatedIntegration {
