@@ -117,11 +117,6 @@ export class DatePicker {
     await getTestSubjLocator('querySubmitButton').click();
   }
 
-  async setAbsoluteRange({ from, to }: { from: string; to: string }) {
-    await this.showStartEndTimes();
-    await this.typeAbsoluteRange({ from, to, validateDates: true });
-  }
-
   async setAbsoluteRangeInRootContainer({
     from,
     to,
