@@ -47,6 +47,8 @@ export class DashboardMarkdownPlugin
       return markdownEmbeddableFactory;
     });
 
+    // Registering the markdown saved object type with content management
+    // so it will show up in the "Add from library" flyout in dashboard
     contentManagement.registry.register({
       id: MARKDOWN_SAVED_OBJECT_TYPE,
       name: 'Markdown',
