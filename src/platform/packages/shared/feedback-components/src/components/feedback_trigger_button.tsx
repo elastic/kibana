@@ -9,6 +9,7 @@
 
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon, EuiToolTip, EuiModal } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
 
@@ -65,6 +66,10 @@ export const FeedbackTriggerButton = ({
     setIsModalOpen(false);
   };
 
+  const modalCss = css`
+    overflow-y: auto;
+  `;
+
   return (
     <>
       <EuiToolTip
@@ -94,6 +99,7 @@ export const FeedbackTriggerButton = ({
           aria-label={i18n.translate('feedback.modal.ariaLabel', {
             defaultMessage: 'Feedback form',
           })}
+          css={modalCss}
         >
           <Suspense fallback={null}>
             <LazyFeedbackContainer
