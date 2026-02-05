@@ -75,7 +75,7 @@ export const oauthAuthorizeRoute = (
             });
           }
 
-          const [coreStart, { encryptedSavedObjects }] = await coreSetup.getStartServices();
+          const [coreStart, { encryptedSavedObjects, spaces }] = await coreSetup.getStartServices();
           const kibanaUrl = coreStart.http.basePath.publicBaseUrl;
           if (!kibanaUrl) {
             return res.badRequest({
@@ -94,7 +94,9 @@ export const oauthAuthorizeRoute = (
             }),
             kibanaBaseUrl: kibanaUrl,
           });
-          const oauthConfig = await oauthService.getOAuthConfig(connectorId);
+
+          const spaceId = spaces ? spaces.spacesService.getSpaceId(req) : 'default';
+          const oauthConfig = await oauthService.getOAuthConfig(connectorId, spaceId);
           const redirectUri = oauthService.getRedirectUri();
 
           // Validate and build return URL for post-OAuth redirect
