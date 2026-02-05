@@ -13,6 +13,23 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
   const browser = getService('browser');
   const retry = getService('retry');
 
+  /**
+   * Extracts the numeric count from a stats label text.
+   * Expected format: "Label: X" (e.g., "Services: 3", "Models: 8", "Endpoints: 12")
+   *
+   * @param text - The visible text from a stats element (e.g., "Services: 3")
+   * @returns The parsed integer count
+   * @throws Error if no number is found in the text, making test failures explicit
+   *         rather than silently defaulting to 0
+   */
+  const parseCountFromStatsLabel = (text: string): number => {
+    const match = text.match(/\d+/);
+    if (!match) {
+      throw new Error(`Expected stats label to contain a number, but got: "${text}"`);
+    }
+    return parseInt(match[0], 10);
+  };
+
   return {
     InferenceTabularPage: {
       async expectHeaderToBeExist() {
@@ -53,10 +70,9 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
         const modelsText = await testSubjects.getVisibleText('endpointStatsModels');
         const endpointsText = await testSubjects.getVisibleText('endpointStatsEndpoints');
 
-        // Extract numbers from the text (format: "Services: X")
-        const servicesCount = parseInt(servicesText.match(/\d+/)?.[0] || '0', 10);
-        const modelsCount = parseInt(modelsText.match(/\d+/)?.[0] || '0', 10);
-        const endpointsCount = parseInt(endpointsText.match(/\d+/)?.[0] || '0', 10);
+        const servicesCount = parseCountFromStatsLabel(servicesText);
+        const modelsCount = parseCountFromStatsLabel(modelsText);
+        const endpointsCount = parseCountFromStatsLabel(endpointsText);
 
         // We should have at least 1 service, 1 model, and 1 endpoint (preconfigured)
         expect(servicesCount).to.greaterThan(0);
@@ -67,7 +83,7 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
       async expectEndpointStatsToUpdateOnFilter() {
         // Get initial endpoint count
         const initialEndpointsText = await testSubjects.getVisibleText('endpointStatsEndpoints');
-        const initialCount = parseInt(initialEndpointsText.match(/\d+/)?.[0] || '0', 10);
+        const initialCount = parseCountFromStatsLabel(initialEndpointsText);
 
         // Apply a search filter to reduce results
         const searchField = await testSubjects.find('search-field-endpoints');
@@ -77,10 +93,10 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
         // Wait for table to update and check stats using retry
         await retry.try(async () => {
           const filteredEndpointsText = await testSubjects.getVisibleText('endpointStatsEndpoints');
-          const filteredCount = parseInt(filteredEndpointsText.match(/\d+/)?.[0] || '0', 10);
+          const filteredCount = parseCountFromStatsLabel(filteredEndpointsText);
 
-          // Filtered count should be less than or equal to initial count
-          expect(filteredCount).to.be.lessThan(initialCount + 1);
+          // Filtered count should be strictly less than initial count to confirm filter works
+          expect(filteredCount).to.be.lessThan(initialCount);
           expect(filteredCount).to.greaterThan(0);
         });
 
