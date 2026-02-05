@@ -196,7 +196,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
   onDelete,
 }) => {
   const {
-    services: { chrome },
+    services: { application },
   } = useKibana();
   const [selectedItems, setSelectedItems] = useState<ActiveSource[]>([]);
   const [activePage, setActivePage] = useState(0);
@@ -207,24 +207,22 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
     setActivePage(0); // Reset to first page when changing page size
   };
 
-  // Generate workflows URL with query param
-  const getWorkflowsUrl = useCallback(
+  // Navigate to workflows with query param
+  const handleWorkflowsClick = useCallback(
     (source: ActiveSource) => {
-      const baseUrl = chrome?.navLinks.get(WORKFLOWS_APP_ID)?.url;
-      if (!baseUrl) return undefined;
-      return `${baseUrl}?query=${encodeURIComponent(source.name)}`;
+      const path = `?query=${encodeURIComponent(source.name)}`;
+      application.navigateToApp(WORKFLOWS_APP_ID, { path, openInNewTab: true });
     },
-    [chrome]
+    [application]
   );
 
-  // Generate tools URL with search param
-  const getToolsUrl = useCallback(
+  // Navigate to tools with search param
+  const handleToolsClick = useCallback(
     (sourceType: string) => {
-      const baseUrl = chrome?.navLinks.get(AGENT_BUILDER_APP_ID)?.url;
-      if (!baseUrl) return undefined;
-      return `${baseUrl}/tools?search=${encodeURIComponent(sourceType)}`;
+      const path = `/tools?search=${encodeURIComponent(sourceType)}`;
+      application.navigateToApp(AGENT_BUILDER_APP_ID, { path, openInNewTab: true });
     },
-    [chrome]
+    [application]
   );
 
   const paginatedSources = useMemo(() => {
@@ -275,7 +273,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       align: 'center',
       render: (workflows: string[], source: ActiveSource) =>
         workflows.length > 0 ? (
-          <EuiLink href={getWorkflowsUrl(source)} data-test-subj="workflowsLink">
+          <EuiLink onClick={() => handleWorkflowsClick(source)} data-test-subj="workflowsLink">
             <EuiText size="s">{workflows.length}</EuiText>
           </EuiLink>
         ) : (
@@ -290,7 +288,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       align: 'center',
       render: (agentTools: string[], source: ActiveSource) =>
         agentTools.length > 0 ? (
-          <EuiLink href={getToolsUrl(source.type)} data-test-subj="toolsLink">
+          <EuiLink onClick={() => handleToolsClick(source.type)} data-test-subj="toolsLink">
             <EuiText size="s">{agentTools.length}</EuiText>
           </EuiLink>
         ) : (
