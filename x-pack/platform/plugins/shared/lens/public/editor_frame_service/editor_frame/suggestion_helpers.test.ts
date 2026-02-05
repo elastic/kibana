@@ -38,11 +38,11 @@ let dataViews: DataViewsState;
 
 beforeEach(() => {
   datasourceMap = {
-    mock: createMockDatasource('a'),
+    formBased: createMockDatasource('formBased'),
   };
 
   datasourceStates = {
-    mock: {
+    formBased: {
       isLoading: false,
       state: {},
     },
@@ -54,7 +54,7 @@ beforeEach(() => {
 describe('suggestion helpers', () => {
   it('should return suggestions array', () => {
     const mockVisualization = createMockVisualization();
-    datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+    datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       generateSuggestion(),
     ]);
     const suggestedState = {};
@@ -86,7 +86,7 @@ describe('suggestion helpers', () => {
   it('should concatenate suggestions from all visualizations', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
-    datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+    datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       generateSuggestion(),
     ]);
     const visualizationMap = {
@@ -131,7 +131,9 @@ describe('suggestion helpers', () => {
   });
 
   it('should call getDatasourceSuggestionsForField when a field is passed', () => {
-    datasourceMap.mock.getDatasourceSuggestionsForField.mockReturnValue([generateSuggestion()]);
+    datasourceMap.formBased.getDatasourceSuggestionsForField.mockReturnValue([
+      generateSuggestion(),
+    ]);
     const droppedField = {};
     const visualizationMap = {
       testVis: createMockVisualization(),
@@ -145,29 +147,31 @@ describe('suggestion helpers', () => {
       field: droppedField,
       dataViews,
     });
-    expect(datasourceMap.mock.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
-      datasourceStates.mock.state,
+    expect(datasourceMap.formBased.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
+      datasourceStates.formBased.state,
       droppedField,
       expect.any(Function),
       dataViews.indexPatterns
     );
   });
 
+  // Tests iteration over multiple datasources. Production only supports 2 (formBased, textBased),
+  // but the algorithm handles N datasources generically.
   it('should call getDatasourceSuggestionsForField from all datasources with a state', () => {
     const multiDatasourceStates = {
-      mock: {
+      formBased: {
         isLoading: false,
         state: {},
       },
-      mock2: {
+      textBased: {
         isLoading: false,
         state: {},
       },
     };
     const multiDatasourceMap = {
-      mock: createMockDatasource('a'),
-      mock2: createMockDatasource('a'),
-      mock3: createMockDatasource('a'),
+      formBased: createMockDatasource('formBased'),
+      textBased: createMockDatasource('textBased'),
+      thirdDatasource: createMockDatasource('thirdDatasource'),
     };
     const visualizationMap = {
       testVis: createMockVisualization(),
@@ -182,23 +186,25 @@ describe('suggestion helpers', () => {
       field: droppedField,
       dataViews,
     });
-    expect(multiDatasourceMap.mock.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
-      multiDatasourceStates.mock.state,
+    expect(multiDatasourceMap.formBased.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
+      multiDatasourceStates.formBased.state,
       droppedField,
       expect.any(Function),
       dataViews.indexPatterns
     );
-    expect(multiDatasourceMap.mock2.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
-      multiDatasourceStates.mock2.state,
+    expect(multiDatasourceMap.textBased.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
+      multiDatasourceStates.textBased.state,
       droppedField,
       expect.any(Function),
       dataViews.indexPatterns
     );
-    expect(multiDatasourceMap.mock3.getDatasourceSuggestionsForField).not.toHaveBeenCalled();
+    expect(
+      multiDatasourceMap.thirdDatasource.getDatasourceSuggestionsForField
+    ).not.toHaveBeenCalled();
   });
 
   it('should call getDatasourceSuggestionsForVisualizeField when a visualizeTriggerField is passed', () => {
-    datasourceMap.mock.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
+    datasourceMap.formBased.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
       generateSuggestion(),
     ]);
 
@@ -218,29 +224,31 @@ describe('suggestion helpers', () => {
       },
       dataViews,
     });
-    expect(datasourceMap.mock.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
-      datasourceStates.mock.state,
+    expect(datasourceMap.formBased.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
+      datasourceStates.formBased.state,
       '1',
       'test',
       dataViews.indexPatterns
     );
   });
 
+  // Tests iteration over multiple datasources. Production only supports 2 (formBased, textBased),
+  // but the algorithm handles N datasources generically.
   it('should call getDatasourceSuggestionsForVisualizeField from all datasources with a state', () => {
     const multiDatasourceStates = {
-      mock: {
+      formBased: {
         isLoading: false,
         state: {},
       },
-      mock2: {
+      textBased: {
         isLoading: false,
         state: {},
       },
     };
     const multiDatasourceMap = {
-      mock: createMockDatasource('a'),
-      mock2: createMockDatasource('a'),
-      mock3: createMockDatasource('a'),
+      formBased: createMockDatasource('formBased'),
+      textBased: createMockDatasource('textBased'),
+      thirdDatasource: createMockDatasource('thirdDatasource'),
     };
     const visualizeTriggerField = {
       dataViewSpec: { id: '1' },
@@ -259,27 +267,31 @@ describe('suggestion helpers', () => {
       visualizeTriggerFieldContext: visualizeTriggerField,
       dataViews,
     });
-    expect(multiDatasourceMap.mock.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
-      multiDatasourceStates.mock.state,
-      '1',
-      'test',
-      dataViews.indexPatterns
-    );
-    expect(multiDatasourceMap.mock2.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
-      multiDatasourceStates.mock2.state,
+    expect(
+      multiDatasourceMap.formBased.getDatasourceSuggestionsForVisualizeField
+    ).toHaveBeenCalledWith(
+      multiDatasourceStates.formBased.state,
       '1',
       'test',
       dataViews.indexPatterns
     );
     expect(
-      multiDatasourceMap.mock3.getDatasourceSuggestionsForVisualizeField
+      multiDatasourceMap.textBased.getDatasourceSuggestionsForVisualizeField
+    ).toHaveBeenCalledWith(
+      multiDatasourceStates.textBased.state,
+      '1',
+      'test',
+      dataViews.indexPatterns
+    );
+    expect(
+      multiDatasourceMap.thirdDatasource.getDatasourceSuggestionsForVisualizeField
     ).not.toHaveBeenCalled();
   });
 
   it('should rank the visualizations by score', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
-    datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+    datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       generateSuggestion(),
     ]);
     const visualizationMap = {
@@ -340,7 +352,7 @@ describe('suggestion helpers', () => {
       layerId: 'first',
       changeType: 'unchanged',
     };
-    datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+    datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       { state: {}, table: table1, keptLayerIds: ['first'] },
       { state: {}, table: table2, keptLayerIds: ['first'] },
     ]);
@@ -367,7 +379,7 @@ describe('suggestion helpers', () => {
     const mockVisualization2 = createMockVisualization();
     const tableState1 = {};
     const tableState2 = {};
-    datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+    datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       generateSuggestion(tableState1),
       generateSuggestion(tableState2),
     ]);
@@ -418,18 +430,18 @@ describe('suggestion helpers', () => {
       dataViews,
     });
     expect(suggestions[0].datasourceState).toBe(tableState1);
-    expect(suggestions[0].datasourceId).toBe('mock');
+    expect(suggestions[0].datasourceId).toBe('formBased');
     expect(suggestions[1].datasourceState).toBe(tableState2);
-    expect(suggestions[1].datasourceId).toBe('mock');
+    expect(suggestions[1].datasourceId).toBe('formBased');
     expect(suggestions[2].datasourceState).toBe(tableState2);
-    expect(suggestions[2].datasourceId).toBe('mock');
+    expect(suggestions[2].datasourceId).toBe('formBased');
   });
 
   it('should pass the state of the currently active visualization to getSuggestions', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
     const currentState = {};
-    datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+    datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       generateSuggestion(0),
       generateSuggestion(1),
     ]);
@@ -469,7 +481,7 @@ describe('suggestion helpers', () => {
         name: 'mock',
       },
     };
-    datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+    datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       generateSuggestion(0),
       generateSuggestion(1),
     ]);
@@ -509,7 +521,7 @@ describe('suggestion helpers', () => {
       },
     };
     mockVisualization1.getMainPalette = jest.fn(() => mainPalette);
-    datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+    datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       generateSuggestion(0),
       generateSuggestion(1),
     ]);
@@ -540,7 +552,7 @@ describe('suggestion helpers', () => {
     let mockDatasourceState: unknown;
     let defaultParams: Parameters<typeof getTopSuggestionForField>;
     beforeEach(() => {
-      datasourceMap.mock.getDatasourceSuggestionsForField.mockReturnValue([
+      datasourceMap.formBased.getDatasourceSuggestionsForField.mockReturnValue([
         {
           state: {},
           table: {
@@ -592,9 +604,9 @@ describe('suggestion helpers', () => {
           },
         },
         { activeId: 'testVis', state: {}, selectedLayerId: null },
-        { testDatasource: { state: mockDatasourceState, isLoading: false } },
+        { formBased: { state: mockDatasourceState, isLoading: false } },
         { testVis: mockVisualization1 },
-        datasourceMap.mock,
+        datasourceMap.formBased,
         { id: 'myfield', humanData: { label: 'myfieldLabel' } },
         dataViews,
       ];
@@ -603,7 +615,7 @@ describe('suggestion helpers', () => {
     it('should return top suggestion for field', () => {
       const result = getTopSuggestionForField(...defaultParams);
       expect(result!.title).toEqual('top suggestion');
-      expect(datasourceMap.mock.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
+      expect(datasourceMap.formBased.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
         mockDatasourceState,
         {
           id: 'myfield',
@@ -661,7 +673,7 @@ describe('suggestion helpers', () => {
     });
 
     it('should return nothing if datasource does not produce suggestions', () => {
-      datasourceMap.mock.getDatasourceSuggestionsForField.mockReturnValue([]);
+      datasourceMap.formBased.getDatasourceSuggestionsForField.mockReturnValue([]);
       defaultParams[3] = {
         testVis: { ...mockVisualization1, getSuggestions: () => [] },
         vis2: mockVisualization2,
