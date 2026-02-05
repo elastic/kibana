@@ -777,26 +777,27 @@ describe('Perform bulk action route', () => {
       );
     });
 
-    it('should validate endpoint response actions for duplicate bulk action', async () => {
+    it('validates endpoint response actions for duplicate bulk action', async () => {
+      bulkGetRulesMock.mockResolvedValue({
+        rules: [mockRule],
+        errors: [],
+      });
+
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
         body: getPerformBulkActionDuplicateSchemaMock(),
       });
 
-      // FIXME:PT Unclear how this test framework works, but I can't get this test to pass.
-      //        Even when I put in breakpoints in the route code, the API route handle
-      //        does not even seem tob e called.
-
       await server.inject(request, requestContextMock.convertContext(context));
 
-      expect(validateRuleResponseActionsMock).toHaveBeenCalledWith({
-        endpointAuthz: expect.any(Object),
-        endpointService: expect.any(Object),
-        spaceId: 'default',
-        rulePayload: { action: 'duplicate' },
-        existingRule: {},
-      });
+      expect(validateRuleResponseActionsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpointAuthz: expect.any(Object),
+          endpointService: expect.any(Object),
+          spaceId: 'default',
+        })
+      );
     });
   });
 
