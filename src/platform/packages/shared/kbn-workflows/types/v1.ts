@@ -545,6 +545,7 @@ export interface WorkflowsSearchParams {
   query?: string;
   createdBy?: string[];
   enabled?: boolean[];
+  tags?: string[];
 }
 
 export interface RequestOptions {
