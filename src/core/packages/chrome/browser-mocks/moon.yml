@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/core-chrome-browser-internal'
   - '@kbn/lazy-object'
+  - '@kbn/core-chrome-sidebar-mocks'
 tags:
   - shared-browser
   - package

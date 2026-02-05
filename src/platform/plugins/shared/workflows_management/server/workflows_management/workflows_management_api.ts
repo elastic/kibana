@@ -48,6 +48,7 @@ export interface GetWorkflowsParams {
   page: number;
   createdBy?: string[];
   enabled?: boolean[];
+  tags?: string[];
   query?: string;
   _full?: boolean;
 }

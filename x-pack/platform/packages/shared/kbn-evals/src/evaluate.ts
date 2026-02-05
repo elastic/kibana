@@ -17,12 +17,11 @@ import type { EvaluationTestOptions } from './config/create_playwright_eval_conf
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import type { DefaultEvaluators, EvaluationSpecificWorkerFixtures } from './types';
-import { buildEvaluationReport, exportEvaluations } from './utils/report_model_score';
+import { mapToEvaluationScoreDocuments, exportEvaluations } from './utils/report_model_score';
 import { getPhoenixConfig } from './utils/get_phoenix_config';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, getConnectorIdAsUuid } from './utils/create_connector_fixture';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
-import { EvaluationAnalysisService } from './utils/analysis';
 import { EvaluationScoreRepository } from './utils/score_repository';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 import {
@@ -212,30 +211,38 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             repetitions,
           });
 
+      const currentRunId = process.env.TEST_RUN_ID;
       await use(executorClient);
 
-      const report = await buildEvaluationReport({
-        experiments: await executorClient.getRanExperiments(),
-        model,
+      if (!currentRunId) {
+        throw new Error(
+          'runId must be provided via TEST_RUN_ID environment variable before exporting scores'
+        );
+      }
+
+      const experiments = await executorClient.getRanExperiments();
+      const documents = await mapToEvaluationScoreDocuments({
+        experiments,
+        taskModel: model,
         evaluatorModel,
-        repetitions,
-        runId: process.env.TEST_RUN_ID,
+        runId: currentRunId,
+        totalRepetitions: repetitions,
       });
+      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
 
       try {
-        await exportEvaluations(report, evaluationsEsClient, log);
+        await exportEvaluations(documents, scoreRepository, log);
       } catch (error) {
         log.error(
           new Error(
-            `Failed to export evaluation results to Elasticsearch for run ID: ${report.runId}.`,
+            `Failed to export evaluation results to Elasticsearch for run ID: ${currentRunId}.`,
             { cause: error }
           )
         );
         throw error;
       }
 
-      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
-      await reportModelScore(scoreRepository, report.runId, log);
+      await reportModelScore(scoreRepository, currentRunId, log);
     },
     {
       scope: 'worker',
@@ -337,14 +344,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       // Get repetitions from test options (set in playwright config)
       const repetitions = (testInfo.project.use as any).repetitions || 1;
       await use(repetitions);
-    },
-    { scope: 'worker' },
-  ],
-  evaluationAnalysisService: [
-    async ({ evaluationsEsClient, log }, use) => {
-      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
-      const helper = new EvaluationAnalysisService(scoreRepository, log);
-      await use(helper);
     },
     { scope: 'worker' },
   ],
