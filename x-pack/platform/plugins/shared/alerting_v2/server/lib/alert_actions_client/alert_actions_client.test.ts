@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { CreateAlertActionBody } from '../../routes/schemas/alert_action_schema';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
+import type { UserServiceContract } from '../services/user_service/user_service';
 import { AlertActionsClient } from './alert_actions_client';
 import {
   getBulkAlertEventsESQLResponse,
@@ -19,16 +18,17 @@ import {
 
 describe('AlertActionsClient', () => {
   jest.useFakeTimers().setSystemTime(new Date('2025-01-01T11:12:13.000Z'));
-  const request = httpServerMock.createKibanaRequest();
   const { queryService, mockEsClient: queryServiceEsClient } = createQueryService();
   const { storageService, mockEsClient: storageServiceEsClient } = createStorageService();
-  const security = securityMock.createStart();
+  const userService: jest.Mocked<UserServiceContract> = {
+    getCurrentUserProfileUid: jest.fn(),
+  };
   let client: AlertActionsClient;
 
   beforeEach(() => {
-    security.authc.getCurrentUser = jest.fn().mockReturnValue({ username: 'test-user' });
+    userService.getCurrentUserProfileUid.mockReturnValue('test-uid');
     storageServiceEsClient.bulk.mockResolvedValueOnce({ items: [], errors: false, took: 1 });
-    client = new AlertActionsClient(request, queryService, storageService, security);
+    client = new AlertActionsClient(queryService, storageService, userService);
   });
 
   afterEach(() => {
@@ -62,7 +62,7 @@ describe('AlertActionsClient', () => {
         episode_id: 'episode-1',
         rule_id: 'test-rule-id',
         last_series_event_timestamp: '2025-01-01T00:00:00.000Z',
-        actor: 'test-user',
+        actor: 'test-uid',
       });
       expect(docs[0]).toHaveProperty('@timestamp');
     });
@@ -104,14 +104,14 @@ describe('AlertActionsClient', () => {
       expect(docs[0]).toMatchObject({ episode_id: 'episode-2' });
     });
 
-    it('should handle null username when security is not available', async () => {
+    it('should handle null profile uid when security is not available', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
 
+      userService.getCurrentUserProfileUid.mockReturnValueOnce(null);
       const clientWithoutSecurity = new AlertActionsClient(
-        request,
         queryService,
         storageService,
-        undefined
+        userService
       );
 
       await clientWithoutSecurity.createAction({

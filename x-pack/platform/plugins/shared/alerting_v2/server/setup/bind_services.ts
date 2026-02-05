@@ -29,6 +29,7 @@ import { DirectorService } from '../lib/director/director';
 import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
+import { UserService } from '../lib/services/user_service/user_service';
 import {
   createTaskRunnerFactory,
   TaskRunnerFactoryToken,
@@ -37,6 +38,7 @@ import {
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
+  bind(UserService).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();
   bind(RetryServiceToken).toService(AlertingRetryService);
 
