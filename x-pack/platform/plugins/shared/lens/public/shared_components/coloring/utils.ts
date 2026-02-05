@@ -49,12 +49,18 @@ export function getPaletteDisplayColors(
 
 export function getAccessorTypeFromOperation(
   operation: Pick<OperationDescriptor, 'isBucketed' | 'dataType' | 'hasArraySupport'> | null,
-  dataTypeFallback?: DataType | DatatableColumnType
+  dataTypeFallback?: DataType | DatatableColumnType,
+  isTextBased?: boolean
 ) {
   const useFallback = operation?.dataType === 'unknown' && dataTypeFallback != null;
   const dataType = useFallback ? dataTypeFallback : operation?.dataType;
   const hasArraySupport = operation?.hasArraySupport;
-  const isBucketed = useFallback ? dataTypeFallback !== 'number' : operation?.isBucketed;
+
+  // For text_based datasource: when dataType is 'unknown', isBucketed is calculated as
+  // isNotNumeric('unknown') = true, which may be wrong. Recalculate from actual data.
+  // For form_based: trust operation.isBucketed as it's explicitly set by the operation definition.
+  const isBucketed =
+    useFallback && isTextBased ? dataTypeFallback !== 'number' : operation?.isBucketed;
 
   const isNumericTypeFromOperation = Boolean(
     !isBucketed && dataType === 'number' && !hasArraySupport
@@ -62,6 +68,7 @@ export function getAccessorTypeFromOperation(
   const isBucketableTypeFromOperationType = Boolean(
     isBucketed || (!['number', 'date'].includes(dataType || '') && !hasArraySupport)
   );
+
   return { isNumeric: isNumericTypeFromOperation, isCategory: isBucketableTypeFromOperationType };
 }
 
@@ -71,7 +78,9 @@ export function getAccessorTypeFromOperation(
  * Note: to be used for Lens UI only
  */
 export function getAccessorType(
-  datasource: Pick<DatasourcePublicAPI, 'getOperationForColumnId'> | undefined,
+  datasource:
+    | Pick<DatasourcePublicAPI, 'getOperationForColumnId' | 'isTextBasedLanguage'>
+    | undefined,
   accessor: string | undefined,
   dataTypeFallback?: DataType | DatatableColumnType
 ) {
@@ -81,8 +90,9 @@ export function getAccessorType(
   }
 
   const operation = datasource.getOperationForColumnId(accessor);
+  const isTextBased = datasource.isTextBasedLanguage();
 
-  return getAccessorTypeFromOperation(operation, dataTypeFallback);
+  return getAccessorTypeFromOperation(operation, dataTypeFallback, isTextBased);
 }
 
 /**
