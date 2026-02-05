@@ -54,7 +54,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
         bool: {
           filter: [
             getFilterRange(slo, indicator.params.timestampField, this.isServerless),
-            getElasticsearchQueryOrThrow(indicator.params.filter),
+            getElasticsearchQueryOrThrow(indicator.params.filter, dataView),
           ],
         },
       },
