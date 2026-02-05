@@ -8,6 +8,13 @@ if [[ -z "$EVAL_SUITE_ID" ]]; then
   exit 1
 fi
 
+# Ensure a stable run id across steps/jobs in the same Buildkite build.
+# If unset, Scout will generate a random run id when Playwright loads configs,
+# which makes it hard to correlate results across suites and connectors.
+if [[ -z "${TEST_RUN_ID:-}" ]] && [[ -n "${BUILDKITE_BUILD_ID:-}" ]]; then
+  export TEST_RUN_ID="bk-${BUILDKITE_BUILD_ID}"
+fi
+
 # Bootstrap workspace deps + download build artifacts (same setup as FTR/Scout CI steps)
 source .buildkite/scripts/steps/functional/common.sh
 
@@ -17,6 +24,73 @@ cleanup() {
   fi
 }
 trap cleanup EXIT
+
+# Fan out into one Buildkite step per connector project when requested.
+# This is the only practical way to run all connector projects within the 1h job timeout.
+EVAL_FANOUT="${EVAL_FANOUT:-}"
+EVAL_PROJECT="${EVAL_PROJECT:-}"
+EVAL_FANOUT_CONCURRENCY="${EVAL_FANOUT_CONCURRENCY:-4}"
+
+if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
+  if ! command -v buildkite-agent >/dev/null 2>&1; then
+    echo "EVAL_FANOUT=1 requires buildkite-agent; falling back to running all projects in-process"
+  else
+    CONNECTOR_IDS="$(
+      node -e "const cfg=JSON.parse(process.env.KIBANA_TESTING_AI_CONNECTORS||'{}'); console.log(Object.keys(cfg).join('\\n'));"
+    )"
+
+    if [[ -z "${CONNECTOR_IDS:-}" ]]; then
+      echo "No connectors found in KIBANA_TESTING_AI_CONNECTORS; falling back to running suite without --project"
+    else
+      echo "--- Uploading eval connector fanout steps"
+
+      # Buildkite YAML fragment (steps only) uploaded dynamically.
+      # NOTE: we re-invoke this script with EVAL_FANOUT=0 and EVAL_PROJECT=<connector-id>
+      # to avoid recursive fanout.
+      group_key_safe="$(printf '%s' "$EVAL_SUITE_ID" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+      YAML="$(cat <<EOF
+steps:
+  - group: "Evals: ${EVAL_SUITE_ID}"
+    key: "kbn-evals-${group_key_safe}-fanout"
+    steps:
+EOF
+)"
+
+      while IFS= read -r connector_id; do
+        [[ -z "$connector_id" ]] && continue
+        key_safe="$(printf '%s' "$connector_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+        YAML+=$(cat <<EOF
+      - label: "${connector_id}"
+        key: "kbn-evals-${group_key_safe}-${key_safe}"
+    command: "bash .buildkite/scripts/steps/evals/run_suite.sh"
+    env:
+      KBN_EVALS: "1"
+      EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+      EVAL_PROJECT: "${connector_id}"
+      EVAL_FANOUT: "0"
+      TEST_RUN_ID: "${TEST_RUN_ID:-}"
+    timeout_in_minutes: 60
+    concurrency_group: "kbn-evals-${EVAL_SUITE_ID}"
+    concurrency: ${EVAL_FANOUT_CONCURRENCY}
+    agents:
+      machineType: n2-standard-8
+      preemptible: true
+    retry:
+      automatic:
+        - exit_status: "-1"
+          limit: 3
+        - exit_status: "*"
+          limit: 1
+EOF
+)
+      done <<<"$CONNECTOR_IDS"
+
+      printf '%s\n' "$YAML" | buildkite-agent pipeline upload
+      echo "Fanout uploaded. Exiting parent step."
+      exit 0
+    fi
+  fi
+fi
 
 # Start Scout server in background (run Kibana from the distributable)
 node scripts/scout start-server --stateful --kibana-install-dir "${KIBANA_BUILD_LOCATION:?}" &
@@ -59,14 +133,9 @@ for _ in {1..180}; do
   sleep 5
 done
 
-# Run eval suite via @kbn/evals CLI (internal executor by default)
-# IMPORTANT: by default, Playwright will run *all* projects defined by the suite config.
-# Our @kbn/evals Playwright config generates one project per available connector id, which
-# is great for local iteration but too slow/flaky for CI.
-#
-# Default to running only the evaluation connector project unless overridden.
-EVAL_PROJECT="${EVAL_PROJECT:-${EVALUATION_CONNECTOR_ID:-}}"
-
+# Run eval suite via @kbn/evals CLI (internal executor by default).
+# If EVAL_PROJECT is set, run a single Playwright project (used by CI fanout steps).
+# Otherwise, Playwright will run all projects defined by the suite config (useful locally).
 if [[ -n "${EVAL_PROJECT:-}" ]]; then
   node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT"
 else

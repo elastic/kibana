@@ -16,6 +16,20 @@ export interface EvaluationScoreDocument {
   run_id: string;
   experiment_id: string;
   repetitions: number;
+  suite?: {
+    id?: string;
+  };
+  ci?: {
+    buildkite?: {
+      build_id?: string;
+      job_id?: string;
+      build_url?: string;
+      pipeline_slug?: string;
+      pull_request?: string;
+      branch?: string;
+      commit?: string;
+    };
+  };
   model: {
     id: string;
     family: string;
@@ -111,6 +125,29 @@ export class EvaluationScoreRepository {
             run_id: { type: 'keyword' },
             experiment_id: { type: 'keyword' },
             repetitions: { type: 'integer' },
+            suite: {
+              type: 'object',
+              properties: {
+                id: { type: 'keyword' },
+              },
+            },
+            ci: {
+              type: 'object',
+              properties: {
+                buildkite: {
+                  type: 'object',
+                  properties: {
+                    build_id: { type: 'keyword' },
+                    job_id: { type: 'keyword' },
+                    build_url: { type: 'keyword' },
+                    pipeline_slug: { type: 'keyword' },
+                    pull_request: { type: 'keyword' },
+                    branch: { type: 'keyword' },
+                    commit: { type: 'keyword' },
+                  },
+                },
+              },
+            },
             model: {
               type: 'object',
               properties: {
@@ -169,22 +206,15 @@ export class EvaluationScoreRepository {
     };
 
     try {
-      const templateExists = await this.esClient.indices
-        .existsIndexTemplate({
-          name: EVALUATIONS_DATA_STREAM_TEMPLATE,
-        })
-        .catch(() => false);
+      // Upsert template to keep mappings in sync as the schema evolves.
+      await this.esClient.indices.putIndexTemplate({
+        name: EVALUATIONS_DATA_STREAM_TEMPLATE,
+        index_patterns: templateBody.index_patterns,
+        data_stream: templateBody.data_stream,
+        template: templateBody.template as any,
+      });
 
-      if (!templateExists) {
-        await this.esClient.indices.putIndexTemplate({
-          name: EVALUATIONS_DATA_STREAM_TEMPLATE,
-          index_patterns: templateBody.index_patterns,
-          data_stream: templateBody.data_stream,
-          template: templateBody.template as any,
-        });
-
-        this.log.debug('Created Elasticsearch index template for evaluation scores');
-      }
+      this.log.debug('Upserted Elasticsearch index template for evaluation scores');
     } catch (error) {
       this.log.error('Failed to create index template:', error);
       throw error;
@@ -241,6 +271,24 @@ export class EvaluationScoreRepository {
             run_id: runId,
             experiment_id: dataset.experimentId,
             repetitions,
+            suite: {
+              id: process.env.EVAL_SUITE_ID,
+            },
+            ci: {
+              buildkite: {
+                build_id: process.env.BUILDKITE_BUILD_ID,
+                job_id: process.env.BUILDKITE_JOB_ID,
+                build_url: process.env.BUILDKITE_BUILD_URL,
+                pipeline_slug: process.env.BUILDKITE_PIPELINE_SLUG,
+                pull_request:
+                  process.env.BUILDKITE_PULL_REQUEST &&
+                  process.env.BUILDKITE_PULL_REQUEST !== 'false'
+                    ? process.env.BUILDKITE_PULL_REQUEST
+                    : undefined,
+                branch: process.env.BUILDKITE_BRANCH,
+                commit: process.env.BUILDKITE_COMMIT,
+              },
+            },
             model: {
               id: model.id || 'unknown',
               family: model.family,

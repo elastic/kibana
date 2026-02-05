@@ -90,6 +90,7 @@ function buildEvalsYaml(selectedSuites: EvalsSuiteMetadataEntry[]): string {
         `        env:`,
         `          KBN_EVALS: '1'`,
         `          EVAL_SUITE_ID: '${suite.id}'`,
+        `          EVAL_FANOUT: '1'`,
         `        timeout_in_minutes: 60`,
         `        agents:`,
         `          machineType: n2-standard-8`,
@@ -107,7 +108,7 @@ function buildEvalsYaml(selectedSuites: EvalsSuiteMetadataEntry[]): string {
   return [
     // NOTE: `getPipeline()` strips `steps:` from YAML fragments so they can be concatenated
     // under the single top-level `steps:` key. This must follow that convention.
-    `  - group: Kibana Evals`,
+    `  - group: LLM Evals`,
     `    key: kibana-evals`,
     `    depends_on:`,
     `      - build`,
