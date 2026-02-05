@@ -248,7 +248,7 @@ class DownloadSourceService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    newData: Partial<DownloadSource>
+    newData: Partial<DownloadSource> & { auth?: DownloadSource['auth'] | null }
   ) {
     let secretsToDelete: SecretReference[] = [];
 

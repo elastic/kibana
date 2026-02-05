@@ -26,7 +26,12 @@ import type {
 import { downloadSourceService } from '../../services/download_source';
 import { agentPolicyService } from '../../services';
 
-function validateDownloadSourceAuth(downloadSource: Partial<DownloadSource>) {
+// Support clearing auth via PUT requests
+type DownloadSourceWithNullableAuth = Partial<DownloadSource> & {
+  auth?: DownloadSource['auth'] | null;
+};
+
+function validateDownloadSourceAuth(downloadSource: DownloadSourceWithNullableAuth) {
   if (downloadSource.ssl?.key && downloadSource.secrets?.ssl?.key) {
     throw Boom.badRequest('Cannot specify both ssl.key and secrets.ssl.key');
   }
@@ -103,12 +108,11 @@ export const putDownloadSourcesHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const { auth, ...restBody } = request.body;
-  const normalizedBody = { ...restBody, ...(auth !== null && { auth }) };
-  validateDownloadSourceAuth(normalizedBody);
+  const data = request.body as DownloadSourceWithNullableAuth;
+  validateDownloadSourceAuth(data);
 
   try {
-    await downloadSourceService.update(soClient, esClient, request.params.sourceId, normalizedBody);
+    await downloadSourceService.update(soClient, esClient, request.params.sourceId, data);
     const downloadSource = await downloadSourceService.get(request.params.sourceId);
     if (downloadSource.is_default) {
       await agentPolicyService.bumpAllAgentPolicies(esClient);
