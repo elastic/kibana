@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
 const TEST_TIMEOUT = 3 * 60 * 1000; // 3 minutes timeout, needed to wait for the SLOs to be created
