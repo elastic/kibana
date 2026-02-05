@@ -434,7 +434,7 @@ describe('formatSyntheticsPolicy', () => {
                 'source.inline.script': {
                   type: 'yaml',
                   value:
-                    '"c3RlcCgiVmlzaXQgL3VzZXJzIGFwaSByb3V0ZSIsIGFzeW5jICgpID0+IHtcbiAgY29uc3QgcmVzcG9uc2UgPSBhd2FpdCBwYWdlLmdvdG8oJ2h0dHBzOi8vbmV4dGpzLXRlc3Qtc3ludGhldGljcy52ZXJjZWwuYXBwL2FwaS91c2VycycpO1xuICBleHBlY3QocmVzcG9uc2Uuc3RhdHVzKCkpLnRvRXF1YWwoMjAwKTtcbn0pOw=="',
+                    'c3RlcCgiVmlzaXQgL3VzZXJzIGFwaSByb3V0ZSIsIGFzeW5jICgpID0+IHtcbiAgY29uc3QgcmVzcG9uc2UgPSBhd2FpdCBwYWdlLmdvdG8oJ2h0dHBzOi8vbmV4dGpzLXRlc3Qtc3ludGhldGljcy52ZXJjZWwuYXBwL2FwaS91c2VycycpO1xuICBleHBlY3QocmVzcG9uc2Uuc3RhdHVzKCkpLnRvRXF1YWwoMjAwKTtcbn0pOw==',
                 },
                 'source.inline.encoding': {
                   type: 'text',
