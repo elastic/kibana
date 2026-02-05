@@ -30,8 +30,8 @@ export const createGetRowAdditionalLeadingControls = (services: ProfileProviderS
       const additionalControls = prev(params) || [];
 
       // Check if we have the necessary capabilities
-      const hasStreams = services.core.application.applications$.value.has('streams');
-      const hasApm = services.core.application.applications$.value.has('apm');
+      const hasStreams = services.core?.application?.applications$?.value?.has('streams') ?? false;
+      const hasApm = services.core?.application?.applications$?.value?.has('apm') ?? false;
 
       // Only add controls if we have backing services
       if (!hasStreams && !hasApm) {

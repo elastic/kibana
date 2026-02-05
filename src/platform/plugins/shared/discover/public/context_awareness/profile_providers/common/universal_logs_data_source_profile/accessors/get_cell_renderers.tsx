@@ -30,7 +30,7 @@ export const createGetCellRenderers = (services: ProfileProviderServices) => {
   const getCellRenderers: DataSourceProfileProvider['profile']['getCellRenderers'] =
     (prev) => (params) => {
       // Check if APM app is available
-      const hasApm = services.core.application.applications$.value.has('apm');
+      const hasApm = services.core?.application?.applications$?.value?.has('apm') ?? false;
 
       return {
         ...prev(params),
