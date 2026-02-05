@@ -6,11 +6,18 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { EuiLink } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+
+const linkStyle = css`
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+`;
 
 export function BaseDiscoverLink({
   dataTestSubj,
@@ -42,14 +49,14 @@ export function BaseDiscoverLink({
 
   if (isDisabled) {
     return (
-      <EuiLink data-test-subj={dataTestSubj} color="subdued" disabled>
+      <EuiLink data-test-subj={dataTestSubj} color="subdued" disabled css={linkStyle}>
         {children}
       </EuiLink>
     );
   }
 
   return (
-    <EuiLink data-test-subj={dataTestSubj} href={discoverHref}>
+    <EuiLink data-test-subj={dataTestSubj} href={discoverHref} css={linkStyle}>
       {children}
     </EuiLink>
   );

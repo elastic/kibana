@@ -139,16 +139,16 @@ export function LatencyChart({ height, kuery }: Props) {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <OpenChartInDiscoverLink dataTestSubj="apmLatencyChartOpenInDiscover" />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <MLHeader
                   hasValidMlLicense={license?.getFeature('ml').isAvailable}
                   mlJobId={preferredAnomalyTimeseries?.jobId}
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <OpenChartInDiscoverLink dataTestSubj="apmLatencyChartOpenInDiscover" />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
