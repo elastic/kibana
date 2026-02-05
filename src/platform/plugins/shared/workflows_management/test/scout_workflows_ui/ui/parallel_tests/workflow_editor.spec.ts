@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expect, KibanaCodeEditorWrapper, tags, spaceTest as test } from '@kbn/scout';
+import { expect, tags } from '@kbn/scout';
+import { spaceTest as test } from '../fixtures';
 
 const getDummyWorkflowYaml = (name: string) => `
 name: ${name}
@@ -49,21 +50,16 @@ test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  test('Create, save, run and view a dummy workflow', async ({ page }) => {
-    await page.gotoApp('workflows');
-    await page.testSubj.click('createWorkflowButton');
-    const yamlEditor = page.testSubj.locator('workflowYamlEditor');
-    const yamlEditorWrapper = new KibanaCodeEditorWrapper(page);
-    await expect(yamlEditor).toBeVisible();
+  test('Create, save, run and view a dummy workflow', async ({ pageObjects, page }) => {
+    await pageObjects.workflowEditor.gotoNewWorkflow();
 
     const workflowName = `Dummy workflow ${Math.floor(Math.random() * 1000)}`;
 
     // Set the editor value
-    await yamlEditorWrapper.setCodeEditorValue(getDummyWorkflowYaml(workflowName));
+    await pageObjects.workflowEditor.setYamlEditorValue(getDummyWorkflowYaml(workflowName));
 
     // Now the save button should be enabled and clicking it will save the correct value
-    await page.testSubj.click('saveWorkflowHeaderButton');
-    await page.testSubj.waitForSelector('workflowSavedChangesBadge');
+    await pageObjects.workflowEditor.saveWorkflow();
     await page.gotoApp('workflows');
     await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
 
@@ -76,8 +72,7 @@ test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
 
     const inputEditor = page.testSubj.locator('workflow-manual-json-editor');
     await expect(inputEditor).toBeVisible();
-    const inputEditorWrapper = new KibanaCodeEditorWrapper(page);
-    await inputEditorWrapper.setCodeEditorValue('{"message": "Hello Kibana"}');
+    await pageObjects.workflowEditor.setExecuteModalInputs({ message: 'Hello Kibana' });
     await page.testSubj.click('executeWorkflowButton');
 
     await page.waitForURL('**/workflows/*?executionId=*');
@@ -91,20 +86,14 @@ test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
   });
 
   test('should show validation errors for invalid workflow YAML and clear them when fixed', async ({
-    page,
+    pageObjects,
   }) => {
-    await page.gotoApp('workflows');
-    await page.testSubj.click('createWorkflowButton');
-
-    const yamlEditor = page.testSubj.locator('workflowYamlEditor');
-    await expect(yamlEditor).toBeVisible();
-
+    await pageObjects.workflowEditor.gotoNewWorkflow();
     const workflowName = `Invalid workflow ${Math.floor(Math.random() * 1000)}`;
-    const yamlEditorWrapper = new KibanaCodeEditorWrapper(page);
-    await yamlEditorWrapper.setCodeEditorValue(getInvalidWorkflowYaml(workflowName));
+    await pageObjects.workflowEditor.setYamlEditorValue(getInvalidWorkflowYaml(workflowName));
 
     // Wait for validation to complete and show errors
-    const validationAccordion = page.getByTestId('wf-yaml-editor-validation-errors-list');
+    const validationAccordion = pageObjects.workflowEditor.validationErrorsAccordion;
     await expect(validationAccordion).toBeVisible();
     await expect(validationAccordion).toContainText('error');
 
@@ -113,24 +102,19 @@ test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
     await expect(validationAccordion.getByText('missing property "steps"')).toBeVisible();
 
     // Fix the workflow by pasting valid YAML
-    await yamlEditorWrapper.setCodeEditorValue(getDummyWorkflowYaml(workflowName));
+    await pageObjects.workflowEditor.setYamlEditorValue(getDummyWorkflowYaml(workflowName));
 
     // Validation errors should disappear
     await expect(validationAccordion).toContainText('No validation errors');
   });
 
-  test('should show step type autocompletion suggestions', async ({ page }) => {
-    await page.gotoApp('workflows');
-    await page.testSubj.click('createWorkflowButton');
-
-    const yamlEditor = page.testSubj.locator('workflowYamlEditor');
-    await expect(yamlEditor).toBeVisible();
-
+  test('should show step type autocompletion suggestions', async ({ pageObjects, page }) => {
+    await pageObjects.workflowEditor.gotoNewWorkflow();
     const workflowName = `Autocomplete test ${Math.floor(Math.random() * 1000)}`;
-    const yamlEditorWrapper = new KibanaCodeEditorWrapper(page);
+    await pageObjects.workflowEditor.setYamlEditorValue(getIncompleteStepTypeYaml(workflowName));
 
     // Set incomplete YAML with empty step type
-    await yamlEditorWrapper.setCodeEditorValue(getIncompleteStepTypeYaml(workflowName));
+    await pageObjects.workflowEditor.setYamlEditorValue(getIncompleteStepTypeYaml(workflowName));
 
     // Click on the "type:" line to focus the editor at that position
     await page.getByText('type:', { exact: true }).click();
@@ -140,7 +124,7 @@ test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
     await page.keyboard.press('Space');
 
     // Verify the suggest widget appears with step type options
-    const suggestWidget = yamlEditorWrapper.getCodeEditorSuggestWidget();
+    const suggestWidget = pageObjects.workflowEditor.getYamlEditorSuggestWidget();
     await expect(suggestWidget).toBeVisible();
 
     await page.keyboard.type('ela');
@@ -157,5 +141,8 @@ test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
     await page.keyboard.press('Space');
 
     await expect(suggestWidget).toBeVisible();
+    await page.keyboard.type('ind');
+
+    await expect(suggestWidget.getByRole('option', { name: 'index' })).toBeVisible();
   });
 });
