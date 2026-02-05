@@ -16,7 +16,7 @@ import type {
 } from '../schema/color';
 import type { SerializableValueType } from '../schema/serializedValue';
 
-const LENS_COLOR_BY_VALUE_RANGE_TYPE = 'absolute';
+const LENS_COLOR_BY_VALUE_RANGE_TYPE = 'percentage';
 const LENS_DEFAULT_COLOR_MAPPING_PALETTE = 'default';
 
 const LEGACY_TO_API_RANGE_NAMES: Record<'percent' | 'number', 'percentage' | 'absolute'> = {
@@ -91,8 +91,8 @@ export function fromColorByValueLensStateToAPI(
   }
   return {
     type: 'dynamic',
-    min: color.params.rangeMin!,
-    max: color.params.rangeMax!,
+    min: color.params.rangeMin ?? 0,
+    max: color.params.rangeMax ?? 100,
     range: rangeType,
     steps:
       color.params.stops?.map((step, index) => {

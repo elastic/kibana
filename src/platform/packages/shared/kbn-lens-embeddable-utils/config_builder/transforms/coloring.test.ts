@@ -223,7 +223,7 @@ describe('Color util transforms', () => {
       });
     });
 
-    it('should default to absolute range when rangeType is not specified', () => {
+    it('should default to percentage range when rangeType is not specified', () => {
       const palette: PaletteOutput<CustomPaletteParams> = {
         type: 'palette',
         name: 'custom',
@@ -235,7 +235,13 @@ describe('Color util transforms', () => {
 
       const result = fromColorByValueLensStateToAPI(palette);
 
-      expect(result?.range).toBe('absolute');
+      expect(result).toEqual({
+        type: 'dynamic',
+        min: 0,
+        max: 100,
+        range: 'percentage',
+        steps: [{ type: 'from', color: '#ff0000', from: 50 }],
+      });
     });
 
     it('should handle empty stops array', () => {
