@@ -8,9 +8,10 @@
  */
 
 import { extractTabs, SavedSearchType } from '@kbn/saved-search-plugin/common';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
+import { flow } from 'lodash';
 import type {
   SearchEmbeddableByReferenceState,
   SearchEmbeddableByValueState,
@@ -29,19 +30,17 @@ function isByValue(
   );
 }
 
-export function getTransformOut(
-  transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
-) {
+export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
   function transformOut(
     storedState: StoredSearchEmbeddableState,
     references?: SavedObjectReference[]
   ) {
-    const state = transformTitlesOut(storedState);
-    const enhancementsState = state.enhancements
-      ? transformEnhancementsOut(state.enhancements, references ?? [])
-      : undefined;
+    const transformsFlow = flow(
+      transformTitlesOut<StoredSearchEmbeddableState>,
+      (state: StoredSearchEmbeddableState) => transformDrilldownsOut(state, references)
+    );
+    const state = transformsFlow(storedState);
 
-    const enhancements = enhancementsState ? { enhancements: enhancementsState } : {};
     if (isByValue(state)) {
       const tabsState = {
         ...state,
@@ -51,7 +50,6 @@ export function getTransformOut(
       return {
         ...state,
         attributes,
-        ...enhancements,
       } as SearchEmbeddableByValueState;
     }
 
@@ -60,7 +58,6 @@ export function getTransformOut(
     );
     return {
       ...state,
-      ...enhancements,
       ...(savedObjectRef?.id ? { savedObjectId: savedObjectRef.id } : {}),
     } as SearchEmbeddableByReferenceState;
   }
