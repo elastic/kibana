@@ -298,5 +298,28 @@ describe('Discover flyout', function () {
         })
       );
     });
+
+    it('should render custom header when provided by document profile', async () => {
+      const services = getServices();
+      const CustomHeader = () => <div data-test-subj="customDocViewerHeader">Custom Header</div>;
+
+      // Mock the profile to return a custom header
+      const mockProfile = {
+        getDocViewer: () => () => ({
+          title: 'Test Document',
+          docViewsRegistry: (registry: any) => registry,
+          renderCustomHeader: () => <CustomHeader />,
+        }),
+      };
+
+      jest.spyOn(services.profilesManager, 'resolveDocumentProfile').mockReturnValue(mockProfile);
+
+      const { component } = await mountComponent({ services });
+
+      // The custom header should be rendered in the flyout
+      const customHeader = findTestSubject(component, 'customDocViewerHeader');
+      expect(customHeader.length).toBe(1);
+      expect(customHeader.text()).toBe('Custom Header');
+    });
   });
 });
