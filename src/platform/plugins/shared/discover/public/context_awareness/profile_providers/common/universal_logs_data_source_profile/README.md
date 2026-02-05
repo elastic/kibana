@@ -1,8 +1,13 @@
-# Universal Base Logs Profile
+# Universal Base Logs Profiles
 
-## Purpose
+## Overview
 
 Provides a consistent log-optimized Discover experience across all solution contexts based solely on data characteristics.
+
+This implementation consists of **two complementary profiles** following Discover's architecture:
+
+1. **`universal_logs_data_source_profile`** - Table-level features (this directory)
+2. **`universal_logs_document_profile`** - Document-level features (see `../universal_logs_document_profile`)
 
 ## Key Characteristics
 
@@ -10,10 +15,13 @@ Provides a consistent log-optimized Discover experience across all solution cont
 - **Data-Driven**: Activates when data is detected as logs (regardless of solution context)
 - **Capability-Aware**: Features adapt based on available apps (Streams, APM, etc.)
 - **Lower Precedence**: Solution-specific profiles take priority when present
+- **Two-Profile Architecture**: Matches O11y pattern (data source + document profiles)
 
 ## Extension Points
 
-### Extension Points Implemented
+### Data Source Profile (This Profile)
+
+Implements table-level features:
 
 1. **getDefaultAppState** - Log-optimized defaults
    - Breakdown field: `log.level`
@@ -44,9 +52,15 @@ Provides a consistent log-optimized Discover experience across all solution cont
    - `host.name`, `service.name`, `trace.id`
    - Container and orchestration fields
 
-8. **getDocViewer** - Log-optimized document viewer
+### Document Profile (Companion Profile)
+
+Implements document-level features in `../universal_logs_document_profile`:
+
+1. **getDocViewer** - Log-optimized document viewer
    - **Capability-aware**: Streams and APM integrations (if apps available)
+   - Shows "Logs overview" tab with features when Streams/APM exist
    - Gracefully degrades in ES3 or environments without these apps
+   - **Why separate?**: Doc viewer features must be at document profile level per Discover architecture
 
 ## Detection Logic
 
@@ -80,29 +94,44 @@ All features check for app availability before enabling:
 - **Default/Security solutions**: Same as Classic - features adapt based on what's installed
 - **Single codebase**: No per-deployment variants needed
 
-## Relationship with Observability Logs Profile
+## Profile Architecture
 
-### Universal Base Logs Profile (this profile)
+### Universal Base Logs Profiles (this implementation)
+
+**Two complementary profiles:**
+- **Data Source Profile** (`universal_logs_data_source_profile`) - Table-level features
+- **Document Profile** (`universal_logs_document_profile`) - Doc viewer features
+
+**Characteristics:**
 - **Scope**: All solutions (Default, Security, Search, Observability*)
 - **Purpose**: Provide base log UX everywhere with intelligent feature detection
-- **Features**: 
-  - Core rendering (level badges, summary, infinite scroll)
-  - Capability-aware APM integration (service name links)
-  - Capability-aware row controls (degraded docs, stacktrace)
-  - Capability-aware doc viewer
 - **Activation**: Pure data-based detection, no solution restriction
+- **Architecture**: Matches O11y pattern (data source + document profiles)
 
-### Observability Logs Profile
+### Observability Logs Profiles
+
+**Two complementary profiles:**
+- **Data Source Profile** (`logs_data_source_profile`) - Table features + state management
+- **Document Profile** (`log_document_profile`) - Doc viewer with stateful interactions
+
+**Characteristics:**
 - **Scope**: Observability solution only
 - **Purpose**: Add O11y-specific state management and behaviors
-- **Key Difference**: Uses `logOverviewContext$` BehaviorSubject for stateful interactions
-- **Precedence**: Higher (registered before universal profile)
+- **Key Difference**: Uses `logOverviewContext$` BehaviorSubject for stateful coordination
+- **Precedence**: Higher (registered before universal profiles)
 
-**In Classic/ECH with APM+Streams installed**, the universal profile provides nearly identical features to the O11y profile, with the main difference being:
-- **O11y profile**: Uses stateful `logOverviewContext$` to communicate between row controls and doc viewer
-- **Universal profile**: Uses simpler stateless approach
+### Comparison
 
-When a user is in the Observability solution viewing logs, the Observability profile activates (providing enhanced state management). When a Security analyst queries logs, this universal profile activates (providing similar features via capability detection).
+| Aspect | Universal Profiles | O11y Profiles |
+|--------|-------------------|---------------|
+| **Activation** | All solutions | Observability only |
+| **State Management** | Stateless | Stateful (`logOverviewContext$`) |
+| **Feature Detection** | Runtime capability checks | Assumes apps exist |
+| **Architecture** | Data source + document | Data source + document |
+
+**In Classic/ECH with APM+Streams installed**, the universal profiles provide nearly identical features to the O11y profiles, with the main difference being state management approach.
+
+When a user is in the Observability solution viewing logs, the O11y profiles activate (providing enhanced state management). When a Security analyst queries logs, the universal profiles activate (providing similar features via capability detection).
 
 ## Example Scenarios
 
@@ -128,9 +157,14 @@ When a user is in the Observability solution viewing logs, the Observability pro
 
 ## Testing
 
-Run profile tests:
+Run data source profile tests:
 ```bash
 yarn test:jest --testPathPattern=universal_logs_data_source_profile
+```
+
+Run document profile tests:
+```bash
+yarn test:jest --testPathPattern=universal_logs_document_profile
 ```
 
 ## Future Enhancements
