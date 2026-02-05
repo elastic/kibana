@@ -225,7 +225,6 @@ for (const testSuite of testSuites) {
 
   if (testSuite.type === 'scoutConfig') {
     const usesParallelWorkers = testSuite.scoutConfig.endsWith('parallel.playwright.config.ts');
-    const scoutConfigGroupType = getScoutConfigGroupType(testSuite.scoutConfig);
     const serverRunFlags = getScoutServerRunFlags(testSuite.scoutConfig);
 
     steps.push({
