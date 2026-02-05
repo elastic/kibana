@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { CommonStepDefinition } from './step_registry/types';
-export type { TriggerDefinition } from './trigger_registry/types';
-export { DataMapStepTypeId } from './steps/data';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import { externalTriggerDefinition } from './external_trigger';
+
+export const registerTriggers = (workflowsExtensions: WorkflowsExtensionsServerPluginSetup) => {
+  workflowsExtensions.registerTrigger(externalTriggerDefinition);
+};

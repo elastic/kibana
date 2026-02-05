@@ -9,12 +9,13 @@
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { TriggerDefinition } from '../common';
 import type { ServerStepDefinition } from './step_registry/types';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
 
 /**
  * Server-side plugin setup contract.
- * Exposes methods for other plugins to register server-side custom workflow steps.
+ * Exposes methods for other plugins to register server-side custom workflow steps and triggers.
  */
 export interface WorkflowsExtensionsServerPluginSetup {
   /**
@@ -25,14 +26,47 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @throws Error if definition for the same step type ID is already registered
    */
   registerStepDefinition(definition: ServerStepDefinition): void;
+
+  /**
+   * Register a workflow trigger definition.
+   * This should be called during the plugin's setup phase.
+   *
+   * @param definition - The trigger definition
+   * @throws Error if trigger id is already registered, validation fails, or registration is attempted after setup
+   */
+  registerTrigger(definition: TriggerDefinition): void;
+}
+
+/**
+ * Server-side trigger API exposed on the workflows extensions start contract.
+ * Exposes methods for retrieving registered trigger definitions.
+ */
+export interface WorkflowsExtensionsTriggerStartContract {
+  /**
+   * Get definition for a specific trigger id.
+   * @param triggerId - The trigger identifier
+   * @returns The trigger definition, or undefined if not found
+   */
+  getTrigger(triggerId: string): TriggerDefinition | undefined;
+  /**
+   * Check if definition for a trigger id is registered.
+   * @param triggerId - The trigger identifier
+   * @returns True if definition for the trigger id is registered, false otherwise
+   */
+  hasTrigger(triggerId: string): boolean;
+  /**
+   * Get all registered trigger definitions.
+   * @returns Array of all registered trigger definitions
+   */
+  listTriggers(): TriggerDefinition[];
 }
 
 /**
  * Server-side plugin start contract.
- * Exposes methods for retrieving registered server-side step implementations.
+ * Exposes methods for retrieving registered server-side step implementations and trigger definitions.
  */
 export type WorkflowsExtensionsServerPluginStart =
-  WorkflowsExtensionsStartContract<ServerStepDefinition>;
+  WorkflowsExtensionsStartContract<ServerStepDefinition> & WorkflowsExtensionsTriggerStartContract;
 
 /**
  * Dependencies for the server plugin setup phase.

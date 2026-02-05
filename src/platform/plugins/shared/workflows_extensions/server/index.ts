@@ -23,6 +23,7 @@ export type {
   WorkflowsExtensionsServerPluginStart,
   WorkflowsExtensionsServerPluginSetupDeps,
   WorkflowsExtensionsServerPluginStartDeps,
+  WorkflowsExtensionsTriggerStartContract,
 } from './types';
 
 export type {
@@ -33,3 +34,5 @@ export type {
 } from './step_registry/types';
 
 export { createServerStepDefinition } from './step_registry/types';
+
+export { TriggerRegistry } from './trigger_registry';

@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServerStepDefinition } from './step_registry/types';
-import type { WorkflowsExtensionsServerPluginSetup } from './types';
-import type { WorkflowsExtensionsStartContract } from '../common/types';
+import type { WorkflowsExtensionsServerPluginSetup, WorkflowsExtensionsServerPluginStart } from './types';
 
 const createSetupMock: () => jest.Mocked<WorkflowsExtensionsServerPluginSetup> = () => {
   return {
     registerStepDefinition: jest.fn(),
+    registerTrigger: jest.fn(),
   };
 };
 
-const createStartMock: () => jest.Mocked<
-  WorkflowsExtensionsStartContract<ServerStepDefinition>
-> = () => {
+const createStartMock: () => jest.Mocked<WorkflowsExtensionsServerPluginStart> = () => {
   return {
     getStepDefinition: jest.fn(),
     hasStepDefinition: jest.fn(),
     getAllStepDefinitions: jest.fn(),
+    getTrigger: jest.fn(),
+    hasTrigger: jest.fn(),
+    listTriggers: jest.fn(),
   };
 };
 
