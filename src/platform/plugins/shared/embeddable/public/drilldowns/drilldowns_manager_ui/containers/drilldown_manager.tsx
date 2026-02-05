@@ -9,6 +9,7 @@
 
 import * as React from 'react';
 import { FlyoutFrame } from '../components/flyout_frame';
+import { DrilldownHelloBar } from '../components/drilldown_hello_bar/drilldown_hello_bar';
 
 interface Props {
   onClose: () => void
@@ -18,7 +19,7 @@ export const DrilldownManager = (props: Props) => {
   return (
     <FlyoutFrame
       title={<div>RenderDrilldownManagerTitle</div>}
-      banner={<div>HelloBar</div>}
+      banner={<DrilldownHelloBar />}
       footer={<div>RenderDrilldownManagerFooter</div>}
       onClose={props.onClose}
       onBack={() => {}}
