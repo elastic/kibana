@@ -39,6 +39,10 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 :::{include} _snippets/9.3.0/breaking-changes.md
 :::
 
+## 9.3.0 [kibana-9.3.0-breaking-changes]
+
+There are no breaking changes in this version.
+
 ## 9.2.0 [kibana-9.2.0-breaking-changes]
 $$$kibana-230067$$$
 ::::{dropdown} Improved advanced settings management APIs privilege checks 

@@ -33,4 +33,10 @@ export const ruleTemplateResponseSchema = schema.object({
 
   alert_delay: ruleResponseSchemaV1.getPropSchemas().alert_delay,
   flapping: ruleResponseSchemaV1.getPropSchemas().flapping,
+  description: schema.maybe(
+    schema.string({
+      meta: { description: 'The description of the rule template.' },
+    })
+  ),
+  artifacts: ruleResponseSchemaV1.getPropSchemas().artifacts,
 });

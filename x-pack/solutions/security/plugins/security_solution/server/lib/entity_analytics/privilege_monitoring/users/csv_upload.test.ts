@@ -173,9 +173,10 @@ describe('CSV Upload Service', () => {
 
       expect(result).toHaveProperty('errors');
       expect(result).toHaveProperty('stats');
-      expect(result.stats).toHaveProperty('total');
-      expect(result.stats).toHaveProperty('successful');
-      expect(result.stats).toHaveProperty('failed');
+      expect(result.stats).toHaveProperty('totalOperations');
+      expect(result.stats).toHaveProperty('successfulOperations');
+      expect(result.stats).toHaveProperty('failedOperations');
+      expect(result.stats).toHaveProperty('uploaded');
     });
 
     it('should handle empty CSV data', async () => {
@@ -185,9 +186,9 @@ describe('CSV Upload Service', () => {
 
       const result = await csvService.bulkUpload(mockStream, options);
 
-      expect(result.stats.total).toBe(0);
-      expect(result.stats.successful).toBe(0);
-      expect(result.stats.failed).toBe(0);
+      expect(result.stats.totalOperations).toBe(0);
+      expect(result.stats.successfulOperations).toBe(0);
+      expect(result.stats.failedOperations).toBe(0);
     });
 
     it('should handle CSV with headers only', async () => {
@@ -197,7 +198,7 @@ describe('CSV Upload Service', () => {
 
       const result = await csvService.bulkUpload(mockStream, options);
 
-      expect(result.stats.total).toBe(0);
+      expect(result.stats.totalOperations).toBe(0);
     });
   });
 
@@ -218,7 +219,7 @@ describe('CSV Upload Service', () => {
       const result = await csvService.bulkUpload(mockStream, options);
 
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.stats.failed).toBe(1);
+      expect(result.stats.failedOperations).toBe(1);
     });
   });
 
@@ -354,9 +355,9 @@ describe('CSV Upload Service', () => {
 
       const result = await csvService.bulkUpload(mockStream, options);
 
-      expect(result.stats.failed).toBe(2); // 1 from updated + 1 from deleted
-      expect(result.stats.successful).toBe(3); // 2 from updated + 1 from deleted
-      expect(result.stats.total).toBe(5); // failed + successful
+      expect(result.stats.failedOperations).toBe(2); // 1 from updated + 1 from deleted
+      expect(result.stats.successfulOperations).toBe(3); // 2 from updated + 1 from deleted
+      expect(result.stats.totalOperations).toBe(5); // failed + successful
       expect(result.errors).toHaveLength(1); // 1 error from deleted operation
     });
   });
