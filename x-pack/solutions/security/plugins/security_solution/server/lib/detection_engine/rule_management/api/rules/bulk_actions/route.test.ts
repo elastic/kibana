@@ -791,13 +791,13 @@ describe('Perform bulk action route', () => {
 
       await server.inject(request, requestContextMock.convertContext(context));
 
-      expect(validateRuleResponseActionsMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          endpointAuthz: expect.any(Object),
-          endpointService: expect.any(Object),
-          spaceId: 'default',
-        })
-      );
+      expect(validateRuleResponseActionsMock).toHaveBeenCalledWith({
+        endpointAuthz: expect.any(Object),
+        endpointService: expect.any(Object),
+        spaceId: 'default',
+        rulePayload: {},
+        existingRule: mockRule,
+      });
     });
   });
 
