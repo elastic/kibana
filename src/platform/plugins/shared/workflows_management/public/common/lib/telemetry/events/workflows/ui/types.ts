@@ -39,15 +39,8 @@ export interface ReportWorkflowListViewedActionParams {
    */
   pageNumber: number;
   /**
-   * Whether a search query was provided
-   */
-  hasQuery: boolean;
-  /**
-   * Whether any filters were applied
-   */
-  hasFilters: boolean;
-  /**
-   * Types of filters applied (e.g., 'enabled', 'createdBy')
+   * Types of filters/search applied (e.g., 'query', 'enabled', 'createdBy').
+   * Includes 'query' when a search query is used.
    */
   filterTypes?: string[];
 }

@@ -435,23 +435,26 @@ export class WorkflowsBaseTelemetry {
   }) => {
     const { workflowCount, pageNumber, search } = params;
 
-    // Extract query and filter information
-    const hasQuery = Boolean(search.query);
-    // Exclude size, page, and query from filterTypes and detect filter fields (array properties with length > 0)
-    const filterTypes = Object.entries(search)
+    // Build filterTypes array - includes "query" if search query is used, plus any filter fields
+    const filterTypes: string[] = [];
+
+    // Add "query" if a search query is provided
+    if (search.query) {
+      filterTypes.push('query');
+    }
+
+    // Add filter fields (array properties with length > 0, excluding size, page, query)
+    Object.entries(search)
       .filter(
         ([key, value]) =>
           !['size', 'page', 'query'].includes(key) && Array.isArray(value) && value.length > 0
       )
-      .map(([key]) => key);
-    const hasFilters = filterTypes.length > 0;
+      .forEach(([key]) => filterTypes.push(key));
 
     this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowListViewed, {
       eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowListViewed],
       workflowCount,
       pageNumber,
-      hasQuery,
-      hasFilters,
       ...(filterTypes.length > 0 && { filterTypes }),
     });
   };
