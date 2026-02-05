@@ -9,7 +9,11 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { getEntityDefinition } from './definitions/registry';
-import type { EntityType, ManagedEntityDefinition } from './definitions/entity_schema';
+import {
+  ALL_ENTITY_TYPES,
+  type EntityType,
+  type ManagedEntityDefinition,
+} from './definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 import type { EngineDescriptorClient, LogExtractionState } from './definitions/saved_objects';
@@ -124,8 +128,13 @@ export class AssetManager {
     }
   }
 
-  public async isInstalled(type: EntityType): Promise<boolean> {
-    const response = await this.engineDescriptorClient.find(type);
-    return response.total > 0;
+  public async isInstalled(): Promise<boolean> {
+    for (const type of ALL_ENTITY_TYPES) {
+      const response = await this.engineDescriptorClient.find(type);
+      if (response.total > 0) {
+        return true;
+      }
+    }
+    return false;
   }
 }

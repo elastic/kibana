@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { EntityNotFoundError } from './entity_not_found';
-export { DocumentVersionConflictError } from './document_version_conflict';
-export { EntityStoreNotInstalledError } from './entity_store_not_installed';
+export class EntityStoreNotInstalledError extends Error {
+  constructor() {
+    super(`No EntityStore engine is running`);
+  }
+}

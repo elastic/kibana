@@ -11,15 +11,20 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { EntityStoreNotInstalledError } from '../../domain/errors';
+import {
+  DocumentVersionConflictError,
+  EntityNotFoundError,
+  EntityStoreNotInstalledError,
+} from '../../domain/errors';
 
-// TODO: openapi schema for body
-const bodySchema = z.object({});
+const paramsSchema = z.object({
+  id: z.string(),
+});
 
-export function registerCRUDUpsert(router: EntityStorePluginRouter) {
+export function registerCRUDDelete(router: EntityStorePluginRouter) {
   router.versioned
-    .put({
-      path: '/api/entity-store/entities',
+    .delete({
+      path: '/api/entity-store/entities/{id}',
       access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
@@ -31,7 +36,7 @@ export function registerCRUDUpsert(router: EntityStorePluginRouter) {
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(bodySchema),
+            params: buildRouteValidationWithZod(paramsSchema),
           },
         },
       },
@@ -39,25 +44,31 @@ export function registerCRUDUpsert(router: EntityStorePluginRouter) {
         const entityStoreCtx = await ctx.entityStore;
         const { logger, assetManager, entityManager } = entityStoreCtx;
 
-        logger.debug('CRUD Upsert api called');
+        logger.debug('CRUD Delete api called');
         if (!(await assetManager.isInstalled())) {
           return res.customError({ statusCode: 503, body: new EntityStoreNotInstalledError() });
         }
-        // TODO: Check if skipping ?force flag does anything
-        // TODO: use req.body as entity to create
-        // TODO: ask guys do we REALLY need generated schemas
+
         try {
-          await entityManager.upsertEntity(req.body);
+          await entityManager.deleteEntity(req.params.id);
         } catch (error) {
+          if (error instanceof DocumentVersionConflictError) {
+            return res.customError({
+              statusCode: 409,
+              body: error as DocumentVersionConflictError,
+            });
+          }
+          if (error instanceof EntityNotFoundError) {
+            return res.customError({
+              statusCode: 404,
+              body: error as EntityNotFoundError,
+            });
+          }
           logger.error(error);
           throw error;
         }
 
-        return res.ok({
-          body: {
-            ok: true,
-          },
-        });
+        return res.ok();
       })
     );
 }

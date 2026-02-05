@@ -8,7 +8,6 @@
 import type { AuthzEnabled } from '@kbn/core/server';
 import type { z } from '@kbn/zod';
 import { LogExtractionState } from '../domain/definitions/saved_objects';
-import type { EntityType } from '../domain/definitions/entity_schema';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
@@ -35,9 +34,3 @@ export const LogExtractionBodyParams = LogExtractionState.pick({
   delay: true,
   docsLimit: true,
 }).partial();
-
-export class EngineNotRunningError extends Error {
-  constructor(engine: EntityType) {
-    super(`Entity Engine '${engine}' is not running`);
-  }
-}
