@@ -18,14 +18,12 @@
       "uiActionsEnhanced",
       "data",
       "discover",
-      "dashboardEnhanced",
       "developerExamples",
       "unifiedSearch",
       "embeddable",
       "share"
     ],
     "requiredBundles": [
-      "dashboardEnhanced",
       "embeddable",
       "kibanaUtils"
     ]
