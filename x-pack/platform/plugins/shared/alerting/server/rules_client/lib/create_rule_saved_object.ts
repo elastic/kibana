@@ -89,15 +89,13 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
       apiKeysToInvalidate.push(uiamApiKey);
     }
 
-    if (apiKeysToInvalidate.length > 0) {
-      await bulkMarkApiKeysForInvalidation(
-        {
-          apiKeys: apiKeysToInvalidate,
-        },
-        context.logger,
-        context.unsecuredSavedObjectsClient
-      );
-    }
+    await bulkMarkApiKeysForInvalidation(
+      {
+        apiKeys: apiKeysToInvalidate,
+      },
+      context.logger,
+      context.unsecuredSavedObjectsClient
+    );
 
     throw e;
   }
