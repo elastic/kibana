@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { getModelId } from '../../utils/get_model_id';
 import { SERVICES_LABEL, MODELS_LABEL, ENDPOINTS_LABEL } from './endpoint_stats_translations';
@@ -36,20 +36,29 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
   }, [endpoints]);
 
   return (
-    <EuiFlexGroup gutterSize="l" alignItems="center" data-test-subj="endpointStats">
+    <EuiFlexGroup gutterSize="m" alignItems="center" data-test-subj="endpointStats">
       <EuiFlexItem grow={false}>
         <EuiText size="s" data-test-subj="endpointStatsServices">
-          <strong>{SERVICES_LABEL}</strong> {stats.servicesCount}
+          <EuiTextColor color="subdued">{SERVICES_LABEL}</EuiTextColor>&nbsp;
+          <strong>{stats.servicesCount}</strong>
         </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">|</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" data-test-subj="endpointStatsModels">
-          <strong>{MODELS_LABEL}</strong> {stats.modelsCount}
+          <EuiTextColor color="subdued">{MODELS_LABEL}</EuiTextColor>&nbsp;
+          <strong>{stats.modelsCount}</strong>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
+        <EuiText size="s">|</EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiText size="s" data-test-subj="endpointStatsEndpoints">
-          <strong>{ENDPOINTS_LABEL}</strong> {stats.endpointsCount}
+          <EuiTextColor color="subdued">{ENDPOINTS_LABEL}</EuiTextColor>&nbsp;
+          <strong>{stats.endpointsCount}</strong>
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

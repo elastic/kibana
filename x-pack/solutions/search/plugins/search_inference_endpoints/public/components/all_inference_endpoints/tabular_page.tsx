@@ -252,14 +252,11 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           }
         />
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EndpointStats endpoints={tableData} />
+          <EuiFlexItem css={searchContainerStyles} grow={false}>
+            <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-              <EuiFlexItem css={searchContainerStyles} grow={false}>
-                <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
-              </EuiFlexItem>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <ServiceProviderFilter
                   optionKeys={filterOptions.provider}
@@ -277,6 +274,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EndpointStats endpoints={tableData} />
         <EuiFlexItem>
           <EuiBasicTable
             columns={tableColumns}
