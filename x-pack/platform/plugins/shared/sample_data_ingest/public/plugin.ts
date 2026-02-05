@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
 import type { SampleDataIngestPluginStart, SampleDataIngestPluginSetup } from './types';
 import { InstallationService } from './services/installation';
-import { createSampleDataSet } from './services/sample_data_set';
+import { createSampleDataSet } from './services/composition/sample_data_set';
 import { isSampleIndex } from './services/utils';
 import { MINIMUM_LICENSE_TYPE } from '../common';
 
