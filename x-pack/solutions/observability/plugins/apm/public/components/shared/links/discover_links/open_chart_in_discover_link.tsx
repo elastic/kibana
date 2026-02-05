@@ -87,17 +87,23 @@ export function OpenChartInDiscoverLink({ dataTestSubj }: { dataTestSubj: string
   const { query: queryParams } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
     '/services/{serviceName}/transactions',
+    '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/overview',
-    '/mobile-services/{serviceName}/transactions'
+    '/mobile-services/{serviceName}/transactions',
+    '/mobile-services/{serviceName}/transactions/view'
   );
 
   const { rangeFrom, rangeTo, kuery } = queryParams;
+
+  const transactionName =
+    'transactionName' in queryParams ? queryParams.transactionName : undefined;
 
   const esqlQuery = getESQLQuery({
     params: {
       serviceName,
       kuery,
       environment,
+      transactionName,
       transactionType,
     },
     indexSettings,
