@@ -132,6 +132,8 @@ export interface CreateExceptionListOptions {
   immutable: Immutable;
   /** document version */
   version: Version;
+  /** item os types to apply */
+  osTypes: OsTypeArray;
 }
 
 /**

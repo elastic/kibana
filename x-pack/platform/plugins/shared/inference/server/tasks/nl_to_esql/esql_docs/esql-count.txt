@@ -1,6 +1,6 @@
-## COUNT
+# COUNT
 
-The `COUNT` function returns the total number of input values. If no field is specified, it counts the number of rows.
+The COUNT function returns the total number of input values. If no field is specified, it counts the number of rows.
 
 ## Syntax
 
@@ -8,22 +8,20 @@ The `COUNT` function returns the total number of input values. If no field is sp
 
 ### Parameters
 
-#### `field`
+#### field
 
-An expression that outputs values to be counted. If omitted, the function is equivalent to `COUNT(*)`, which counts the number of rows.
+Expression that outputs values to be counted. If omitted, COUNT returns the number of rows, equivalent to `COUNT(*)`.
 
 ## Examples
 
-### Count specific field values
+Counts the number of non-null values in the `height` field from the `employees` data.
 
 ```esql
 FROM employees
 | STATS COUNT(height)
 ```
 
-Count the number of non-null values in the `height` field.
-
-### Count the number of rows
+Counts the total number of rows for each language in the `employees` data, sorting the results by language in descending order.
 
 ```esql
 FROM employees
@@ -31,18 +29,14 @@ FROM employees
 | SORT languages DESC
 ```
 
-Count the total number of rows grouped by the `languages` field and sort the results in descending order.
-
-### Count values using inline functions
+Counts the number of elements produced by splitting the `words` string on the semicolon character.
 
 ```esql
 ROW words="foo;bar;baz;qux;quux;foo"
 | STATS word_count = COUNT(SPLIT(words, ";"))
 ```
 
-Count the number of elements in a string split by the `;` delimiter.
-
-### Count values based on a condition
+Counts the number of times the value of `n` is less than 0 by filtering with `WHERE`.
 
 ```esql
 ROW n=1
@@ -50,13 +44,9 @@ ROW n=1
 | STATS COUNT(n)
 ```
 
-Count the number of rows where the value of `n` is less than 0.
-
-### Count based on two different expressions
+Counts the number of times `n` is greater than 0 and less than 0, respectively, by evaluating two different expressions in the same data stream.
 
 ```esql
 ROW n=1
 | STATS COUNT(n > 0 OR NULL), COUNT(n < 0 OR NULL)
 ```
-
-Count the number of rows where `n > 0` and `n < 0` separately.
