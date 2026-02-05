@@ -6,6 +6,7 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
+import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 
 globalSetupHook('Setup environment for Streams API tests', async ({ kbnClient, esClient, log }) => {
   log.debug('[setup] Enabling Streams...');
@@ -18,6 +19,17 @@ globalSetupHook('Setup environment for Streams API tests', async ({ kbnClient, e
     log.debug('[setup] Streams enabled successfully');
   } catch (error) {
     log.debug(`[setup] Streams may already be enabled: ${error}`);
+  }
+
+  // Enable significant events feature (required for insights API)
+  log.debug('[setup] Enabling significant events feature...');
+  try {
+    await kbnClient.uiSettings.update({
+      [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
+    });
+    log.debug('[setup] Significant events feature enabled successfully');
+  } catch (error) {
+    log.debug(`[setup] Failed to enable significant events: ${error}`);
   }
 
   // Index a document to the 'logs' stream to initialize the data stream
