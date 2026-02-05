@@ -17,7 +17,6 @@ import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { initializeTitleManager, titleComparators } from '@kbn/presentation-publishing';
 
-import { IMAGE_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { ImageEmbeddableState } from '../../server';
 import { ImageEmbeddable as ImageEmbeddableComponent } from '../components/image_embeddable';
 import type { FileImageMetadata } from '../imports';
