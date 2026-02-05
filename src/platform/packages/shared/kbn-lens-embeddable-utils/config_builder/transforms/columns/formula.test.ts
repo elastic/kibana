@@ -95,6 +95,7 @@ describe('Formula Transforms', () => {
       const expected: LensApiFormulaOperation = {
         operation: 'formula',
         formula: 'count(col1) / sum(col2)',
+        label: 'count(col1) / sum(col2)',
       };
 
       expect(fromFormulaLensStateToAPI(input)).toEqual(expected);

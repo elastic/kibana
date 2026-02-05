@@ -106,6 +106,7 @@ describe('Unique Count Transforms', () => {
       const expected: LensApiUniqueCountMetricOperation = {
         operation: 'unique_count',
         field: 'user_id',
+        label: 'Unique Count of user_id',
         empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       };
 

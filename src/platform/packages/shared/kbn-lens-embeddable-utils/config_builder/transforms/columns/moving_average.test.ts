@@ -126,6 +126,7 @@ describe('Moving Average Transforms', () => {
 
       const expected: LensApiMovingAverageOperation = {
         operation: 'moving_average',
+        label: 'Moving average of Sum of sales',
         window: 7,
         of: referenceOp,
       };

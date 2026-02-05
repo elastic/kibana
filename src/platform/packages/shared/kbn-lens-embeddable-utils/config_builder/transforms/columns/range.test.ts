@@ -120,6 +120,7 @@ describe('Range Transforms', () => {
       const expected: LensApiRangeOperation = {
         operation: 'range',
         field: 'price',
+        label: 'price',
         ranges: [
           { gt: 0, lte: 50, label: 'Low' },
           { gt: 50, lte: 100, label: 'Medium' },
@@ -151,6 +152,7 @@ describe('Range Transforms', () => {
       const expected: LensApiHistogramOperation = {
         operation: 'histogram',
         field: 'price',
+        label: 'price',
         granularity: 'auto',
         include_empty_rows: true,
         format: { type: 'number', decimals: 0, compact: false },

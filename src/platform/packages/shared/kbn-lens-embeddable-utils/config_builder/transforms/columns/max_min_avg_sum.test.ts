@@ -103,6 +103,7 @@ describe('Max, Min, Avg, Median, Standard Deviation, Sum Transforms', () => {
       expect(result).toEqual({
         operation: type,
         field: 'price',
+        label,
       });
     });
 
@@ -188,6 +189,7 @@ describe('Max, Min, Avg, Median, Standard Deviation, Sum Transforms', () => {
         const expected: LensApiSumMetricOperation = {
           operation: 'sum',
           field: 'revenue',
+          label: 'Sum of revenue',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         };
 

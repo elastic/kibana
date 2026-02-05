@@ -85,6 +85,7 @@ describe('Counter Rate Transforms', () => {
       const expected: LensApiCounterRateOperation = {
         operation: 'counter_rate',
         field: 'bytes',
+        label: 'Counter rate of bytes',
       };
 
       expect(fromCounterRateLensStateToAPI(input, columnRef)).toEqual(expected);

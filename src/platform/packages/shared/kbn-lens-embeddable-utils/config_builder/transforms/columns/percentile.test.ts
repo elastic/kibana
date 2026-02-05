@@ -99,6 +99,7 @@ describe('Percentile Transforms', () => {
       const expected: LensApiPercentileOperation = {
         operation: 'percentile',
         field: 'response_time',
+        label: '90th Percentile of response_time',
         percentile: 90,
       };
 
@@ -120,6 +121,7 @@ describe('Percentile Transforms', () => {
       const expected: LensApiPercentileOperation = {
         operation: 'percentile',
         field: 'response_time',
+        label: '95th Percentile of response_time',
         percentile: LENS_PERCENTILE_DEFAULT_VALUE,
       };
 

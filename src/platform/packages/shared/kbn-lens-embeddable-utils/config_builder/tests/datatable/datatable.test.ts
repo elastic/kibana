@@ -16,6 +16,7 @@ import {
   fullConfigDatatableAttributes,
   sortedByTransposedMetricColumnDatatableAttributes,
   sortedByRowDatatableAttributes,
+  withReferenceMetric,
 } from './lens_state_config_dsl.mock';
 import {
   singleMetricESQLDatatableAttributes,
@@ -39,6 +40,8 @@ import {
   sortedByTransposedMetricColumnESQLDatatable,
   sortedByRowColumnESQLDatatable,
 } from './lens_api_config_esql.mock';
+import type { LensAttributes } from '../..';
+import { LensConfigBuilder } from '../..';
 
 describe('Datatable', () => {
   describe('validateConverter', () => {
@@ -64,6 +67,28 @@ describe('Datatable', () => {
 
     it('should convert a datatable chart sorted by a row', () => {
       validateConverter(sortedByRowDatatableAttributes, datatableStateSchema);
+    });
+
+    it('should convert a datatable chart with a reference metric', () => {
+      const getColumnsFromAttributes = (attributes: LensAttributes) => {
+        const columns = Object.values(
+          attributes.state.datasourceStates.formBased?.layers.layer_0.columns
+        );
+        const movingAverageColumn = columns.find((col) => col.operationType === 'moving_average');
+        const lastValueColumn = columns.find((col) => col.operationType === 'last_value');
+        return { movingAverageColumn, lastValueColumn };
+      };
+
+      const builder = new LensConfigBuilder(undefined, true);
+      const newAttributes = builder.fromAPIFormat(builder.toAPIFormat(withReferenceMetric));
+
+      expect(getColumnsFromAttributes(withReferenceMetric).lastValueColumn?.label).not.toBeFalsy();
+      expect(
+        getColumnsFromAttributes(withReferenceMetric).movingAverageColumn?.label
+      ).not.toBeFalsy();
+
+      expect(getColumnsFromAttributes(newAttributes).lastValueColumn?.label).not.toBeFalsy();
+      expect(getColumnsFromAttributes(newAttributes).movingAverageColumn?.label).not.toBeFalsy();
     });
 
     it('should convert an ESQL datatable chart with single metric column', () => {

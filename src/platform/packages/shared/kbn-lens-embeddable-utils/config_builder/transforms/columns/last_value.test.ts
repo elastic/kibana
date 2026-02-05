@@ -104,6 +104,7 @@ describe('Last Value Transforms', () => {
       const expected: LensApiLastValueOperation = {
         operation: 'last_value',
         field: 'status',
+        label: 'Last value of status',
         sort_by: '@timestamp',
         show_array_values: false,
       };

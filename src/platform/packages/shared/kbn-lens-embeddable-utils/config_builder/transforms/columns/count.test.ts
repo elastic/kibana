@@ -109,6 +109,7 @@ describe('Count Transforms', () => {
       const expected: LensApiCountMetricOperation = {
         operation: 'count',
         field: 'events',
+        label: 'Count of events',
         empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       };
 

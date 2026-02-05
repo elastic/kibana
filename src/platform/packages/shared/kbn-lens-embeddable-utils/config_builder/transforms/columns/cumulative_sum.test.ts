@@ -103,6 +103,7 @@ describe('Cumulative Sum Transforms', () => {
       const expected: LensApiCumulativeSumOperation = {
         operation: 'cumulative_sum',
         field: 'sales',
+        label: 'Cumulative sum of sales',
       };
 
       expect(fromCumulativeSumLensStateToAPI(input, columnRef)).toEqual(expected);

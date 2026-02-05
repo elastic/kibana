@@ -8,11 +8,13 @@
  */
 
 import type {
+  AvgIndexPatternColumn,
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
+  LastValueIndexPatternColumn,
   MedianIndexPatternColumn,
+  MovingAverageIndexPatternColumn,
   TermsIndexPatternColumn,
-  AvgIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
 
@@ -1017,6 +1019,99 @@ export const sortedByRowDatatableAttributes: LensAttributes = {
       type: 'index-pattern',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
       name: 'indexpattern-datasource-layer-a08718f8-c67e-42d1-bbe3-ee1e6a457983',
+    },
+  ],
+};
+
+export const withReferenceMetric: LensAttributes = {
+  description: '',
+  visualizationType: 'lnsDatatable',
+  state: {
+    visualization: {
+      layerId: 'layer_0',
+      layerType: 'data',
+      columns: [
+        {
+          columnId: 'datatable_accessor_metric_0',
+          isTransposed: false,
+          isMetric: true,
+        },
+        {
+          columnId: 'datatable_accessor_row_0',
+          isTransposed: false,
+          isMetric: false,
+        },
+      ],
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          layer_0: {
+            sampling: 1,
+            ignoreGlobalFilters: false,
+            columns: {
+              datatable_accessor_row_0: {
+                operationType: 'date_histogram',
+                dataType: 'date',
+                sourceField: 'timestamp',
+                label: 'timestamp',
+                customLabel: false,
+                isBucketed: true,
+                params: {
+                  interval: 'auto',
+                  includeEmptyRows: true,
+                  dropPartials: false,
+                  ignoreTimeRange: false,
+                },
+              } as DateHistogramIndexPatternColumn,
+              datatable_accessor_metric_0: {
+                label: 'Moving average of Last value of bytes_gauge',
+                dataType: 'number',
+                operationType: 'moving_average',
+                isBucketed: false,
+                references: ['b7751123-d115-4e5d-98da-0e51bd989b67'],
+                params: {
+                  window: 5,
+                },
+              } as MovingAverageIndexPatternColumn,
+              'b7751123-d115-4e5d-98da-0e51bd989b67': {
+                operationType: 'last_value',
+                sourceField: 'bytes_gauge',
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Last value of bytes_gauge',
+                customLabel: false,
+                params: {
+                  sortField: 'timestamp',
+                  showArrayValues: false,
+                },
+              } as LastValueIndexPatternColumn,
+            },
+            columnOrder: [
+              'datatable_accessor_row_0',
+              'datatable_accessor_metric_0',
+              'b7751123-d115-4e5d-98da-0e51bd989b67',
+            ],
+            incompleteColumns: {},
+          },
+        },
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  title: 'Table with reference metric',
+  version: 2,
+  references: [
+    {
+      type: 'index-pattern',
+      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      name: 'indexpattern-datasource-layer-layer_0',
     },
   ],
 };

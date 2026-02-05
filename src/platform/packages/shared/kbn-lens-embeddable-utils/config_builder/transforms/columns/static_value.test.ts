@@ -96,6 +96,7 @@ describe('Static Value Transforms', () => {
       const expected: LensApiStaticValueOperation = {
         operation: 'static_value',
         value: 42,
+        label: 'Static value: 42',
       };
 
       expect(fromStaticValueLensStateToAPI(input)).toEqual(expected);

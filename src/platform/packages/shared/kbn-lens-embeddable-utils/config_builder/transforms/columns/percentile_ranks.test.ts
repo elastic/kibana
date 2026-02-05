@@ -103,6 +103,7 @@ describe('Percentile Ranks Transforms', () => {
       const expected: LensApiPercentileRanksOperation = {
         operation: 'percentile_rank',
         field: 'response_time',
+        label: 'Percentile rank (95) of response_time',
         rank: 95,
       };
 

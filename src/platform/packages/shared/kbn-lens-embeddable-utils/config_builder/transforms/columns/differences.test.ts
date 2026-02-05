@@ -95,6 +95,7 @@ describe('Differences Transforms', () => {
 
       const expected: LensApiDifferencesOperation = {
         operation: 'differences',
+        label: 'Differences of Sum of Total Sales',
         of: referenceOp,
       };
 
@@ -172,7 +173,7 @@ describe('Differences Transforms', () => {
           ref
         );
         expect(result.of).toEqual(ref);
-        expect(result.label).toBeUndefined();
+        expect(result.label).toBe(`Differences of ${ref.label!}`);
       }
     });
   });

@@ -59,7 +59,7 @@ export function getLensAPIMetricSharedProps(options: {
   label?: string;
 }) {
   return {
-    ...(options.customLabel ? { label: options.label } : {}),
+    ...(options.label ? { label: options.label } : {}),
     ...(options.timeScale ? { time_scale: options.timeScale } : {}),
     ...(options.reducedTimeRange ? { reduced_time_range: options.reducedTimeRange } : {}),
     ...(options.timeShift ? { time_shift: options.timeShift } : {}),
@@ -83,7 +83,7 @@ export function getLensAPIBucketSharedProps(options: {
 }) {
   return {
     field: options.sourceField,
-    ...(options.customLabel ? { label: options.label } : {}),
+    ...(options.label ? { label: options.label } : {}),
   };
 }
 
