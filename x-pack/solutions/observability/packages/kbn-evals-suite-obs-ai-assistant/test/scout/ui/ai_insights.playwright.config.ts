@@ -8,5 +8,5 @@ import Path from 'path';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 export default createPlaywrightEvalsConfig({
-  testDir: Path.join(__dirname, './evals'),
+  testDir: Path.resolve(__dirname, '../../../ai_insights'),
 });

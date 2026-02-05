@@ -112,25 +112,25 @@ Then run the evaluations:
 
 ```bash
 # Run all AgentBuilder evaluations
-node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
 
 # Run specific test file
-node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts evals/kb/kb.spec.ts
+node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts evals/kb/kb.spec.ts
 
 # Run with specific connector
-node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts --project="my-connector"
+node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts --project="my-connector"
 
 # Run with LLM-as-a-judge for consistent evaluation results
-EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
 
 # Run only selected evaluators
-SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
 
 # Override RAG evaluator K value (takes priority over config)
-RAG_EVAL_K=5 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+RAG_EVAL_K=5 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
 
 # Retrieve traces from another (monitoring) cluster
-TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
 
 ```
 
@@ -140,7 +140,7 @@ If you want to run evaluations against a dataset that exists in Phoenix and not 
 
 ```bash
 DATASET_NAME="my-phoenix-dataset" \
-node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts evals/external/external_dataset.spec.ts
+node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts evals/external/external_dataset.spec.ts
 ```
 
 Notes:
