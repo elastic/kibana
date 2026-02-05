@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
 import type { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
 import type { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
@@ -14,9 +13,10 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { FlyoutEditDrilldownActionApi } from './flyout_edit_drilldown';
 import { MenuItem } from './menu_item';
+import { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 
 test('<MenuItem/>', () => {
-  const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>({
+  const dynamicActionsState$ = new BehaviorSubject<SerializedDrilldowns>({
     dynamicActions: { events: [] },
   });
 

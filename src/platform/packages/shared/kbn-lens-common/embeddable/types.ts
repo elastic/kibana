@@ -44,7 +44,6 @@ import type { PaletteOutput } from '@kbn/coloring';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { InspectorOptions } from '@kbn/inspector-plugin/public';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import type { Ast } from '@kbn/interpreter';
 import type {
@@ -68,6 +67,7 @@ import type { DatatableVisualizationState } from '../visualizations/datatable/ty
 import type { ChoroplethChartState } from '../visualizations/region_map/types';
 import type { LensTagCloudState } from '../visualizations/tagcloud/types';
 import type { LensTableRowContextMenuEvent } from '../visualizations/types';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface LensApiProps {}
@@ -255,8 +255,9 @@ export type LensSerializedSharedState = Simplify<
     LensUnifiedSearchContext &
     LensPanelProps &
     SerializedTitles &
+    SerializedDrilldowns &
     Omit<LensSharedProps, 'noPadding'> &
-    Partial<DynamicActionsSerializedState> & { isNewPanel?: boolean }
+    { isNewPanel?: boolean }
 >;
 
 export type LensByValueSerializedState = Simplify<LensSerializedSharedState & LensByValueBase>;

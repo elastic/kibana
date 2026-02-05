@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
 
 interface Option {
@@ -26,5 +26,5 @@ export interface OverviewStatsEmbeddableCustomState {
 }
 
 export type OverviewStatsEmbeddableState = SerializedTitles &
-  DynamicActionsSerializedState &
+  SerializedDrilldowns &
   OverviewStatsEmbeddableCustomState;

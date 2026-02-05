@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  apiHasDynamicActions,
-  type HasDynamicActions,
-} from '@kbn/embeddable-enhanced-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { type PresentationContainer } from '@kbn/presentation-containers';
@@ -46,13 +42,13 @@ export interface OpenFlyoutAddDrilldownParams {
 }
 
 export type FlyoutCreateDrilldownActionApi = CanAccessViewMode &
-  Required<HasDynamicActions> &
+  Required<HasDrilldowns> &
   HasParentApi<HasType & Partial<PresentationContainer>> &
   HasSupportedTriggers &
   Partial<HasUniqueId>;
 
 const isApiCompatible = (api: unknown | null): api is FlyoutCreateDrilldownActionApi =>
-  apiHasDynamicActions(api) &&
+  // apiHasDynamicActions(api) &&
   apiHasParentApi(api) &&
   apiCanAccessViewMode(api) &&
   apiHasSupportedTriggers(api);

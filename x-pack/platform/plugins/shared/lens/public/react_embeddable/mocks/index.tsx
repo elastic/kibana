@@ -22,7 +22,6 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public';
 import type {
   Datasource,
   DatasourceMap,
@@ -35,6 +34,7 @@ import type {
   LensSerializedState,
 } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
+import type { DrilldownsManager } from '@kbn/embeddable-plugin/public';
 import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
@@ -199,30 +199,24 @@ export function makeEmbeddableServices(
       ...services.uiActions,
       getTrigger: jest.fn().mockImplementation(() => ({ exec: jest.fn() })),
     },
-    embeddableEnhanced: {
-      initializeEmbeddableDynamicActions: jest.fn().mockResolvedValue(mockDynamicActionsManager),
-    },
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   };
 }
 
-export function mockDynamicActionsManager() {
+export function mockDrilldownsManager() {
   return {
     api: {
-      enhancements: { dynamicActions: {} },
-      setDynamicActions: jest.fn(),
-      dynamicActionsState$: {},
-    } as unknown as EmbeddableDynamicActionsManager['api'],
+      setDrilldowns: jest.fn(),
+      drilldowns$: {},
+    } as unknown as DrilldownsManager['api'],
     anyStateChange$: of(undefined),
+    cleanup: jest.fn(),
     comparators: {
       drilldown: jest.fn(),
-      enhancements: jest.fn(),
-    } as unknown as EmbeddableDynamicActionsManager['comparators'],
+    } as unknown as DrilldownsManager['comparators'],
     getLatestState: jest.fn(),
-    serializeState: jest.fn(),
     reinitializeState: jest.fn(),
-    startDynamicActions: jest.fn(),
-  } as EmbeddableDynamicActionsManager;
+  } as DrilldownsManager;
 }
 
 export const mockVisualizationMap = (

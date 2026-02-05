@@ -67,7 +67,6 @@ import type {
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-components';
 import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -190,7 +189,6 @@ export interface LensPluginStartDependencies {
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
   licensing?: LicensingPluginStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
   cps?: CPSPluginStart;
 }

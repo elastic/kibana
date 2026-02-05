@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/discover-plugin'
   - '@kbn/home-plugin'
   - '@kbn/embeddable-plugin'
-  - '@kbn/embeddable-enhanced-plugin'
   - '@kbn/data-plugin'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/inspector-plugin'

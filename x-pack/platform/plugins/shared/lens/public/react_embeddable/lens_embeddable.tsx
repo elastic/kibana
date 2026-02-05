@@ -54,15 +54,16 @@ export const createLensEmbeddableFactory = (
      *                  from the Lens component container to the Lens embeddable.
      * @returns an object with the Lens API and the React component to render in the Embeddable
      */
-    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      parentApi,
+      uuid,
+    }) => {
       const titleManager = initializeTitleManager(initialState);
 
-      const dynamicActionsManager =
-        await services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
-          uuid,
-          () => titleManager.api.title$.getValue(),
-          initialState
-        );
+      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
 
       const initialRuntimeState = await deserializeState(services, initialState);
 
@@ -123,7 +124,7 @@ export const createLensEmbeddableFactory = (
         searchContextConfig.api,
         internalApi,
         services,
-        dynamicActionsManager
+        drilldownsManager
       );
 
       /**

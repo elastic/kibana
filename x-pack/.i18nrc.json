@@ -40,7 +40,6 @@
     "xpack.elasticAssistantCommon": "platform/packages/shared/kbn-elastic-assistant-common",
     "xpack.elasticAssistantPlugin": "solutions/security/plugins/elastic_assistant",
     "xpack.ecsDataQualityDashboard": "solutions/security/plugins/ecs_data_quality_dashboard",
-    "xpack.embeddableEnhanced": "platform/plugins/shared/embeddable_enhanced",
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "solutions/search/plugins/enterprise_search",
     "xpack.features": "platform/plugins/shared/features",

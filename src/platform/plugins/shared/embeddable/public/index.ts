@@ -46,7 +46,9 @@ export {
   type EmbeddableFactory,
 } from './react_embeddable_system';
 
-export type { HasDrilldowns } from './drilldowns/types';
+export type { DrilldownsManager, HasDrilldowns } from './drilldowns/types';
+
+export type { SerializedDrilldowns } from '../server';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);

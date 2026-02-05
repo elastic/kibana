@@ -12,12 +12,9 @@ import {
   type PresentationContainer,
 } from '@kbn/presentation-containers';
 import {
-  getTitle,
-  type PublishesTitle,
   type HasUniqueId,
   type HasParentApi,
 } from '@kbn/presentation-publishing';
-import { apiHasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import type { UiActionsEnhancedDrilldownTemplate as DrilldownTemplate } from '@kbn/ui-actions-enhanced-plugin/public';
 
 /**
@@ -52,8 +49,9 @@ export const createDrilldownTemplatesFromSiblings = (
   const parentApi = embeddable.parentApi;
   if (!apiIsPresentationContainer(parentApi)) return [];
 
-  const templates: DrilldownTemplate[] = [];
-  for (const childId of Object.keys(parentApi.children$.value)) {
+  // const templates: DrilldownTemplate[] = [];
+  return [];
+  /*for (const childId of Object.keys(parentApi.children$.value)) {
     const child = parentApi.children$.value[childId] as Partial<HasUniqueId & PublishesTitle>;
     if (childId === embeddable.uuid) continue;
     if (!apiHasDynamicActions(child)) continue;
@@ -73,7 +71,7 @@ export const createDrilldownTemplatesFromSiblings = (
     }
   }
 
-  return templates;
+  return templates;*/
 };
 
 export const DRILLDOWN_ACTION_GROUP = { id: 'drilldown', order: 3 } as const;

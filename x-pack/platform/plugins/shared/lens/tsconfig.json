@@ -107,7 +107,6 @@
     "@kbn/licensing-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
-    "@kbn/embeddable-enhanced-plugin",
     "@kbn/es-types",
     "@kbn/esql-datagrid",
     "@kbn/transpose-utils",

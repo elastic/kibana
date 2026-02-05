@@ -8,7 +8,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
   EmbeddableApiContext,
@@ -30,10 +30,7 @@ import type { SavedSearch, SerializableSavedSearch } from '@kbn/saved-search-plu
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import type { BehaviorSubject } from 'rxjs';
 import type { PublishesWritableDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
-import type {
-  DynamicActionsSerializedState,
-  HasDynamicActions,
-} from '@kbn/embeddable-enhanced-plugin/public';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
   EditableSavedSearchAttributes,
   NonPersistedDisplayOptions,
@@ -73,7 +70,7 @@ export type SearchEmbeddableSerializedAttributes = Omit<
 export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes &
   SerializedTitles &
   SerializedTimeRange &
-  Partial<DynamicActionsSerializedState> & {
+  SerializedDrilldowns & {
     rawSavedObjectAttributes?: EditableSavedSearchAttributes;
     savedObjectTitle?: string;
     savedObjectId?: string;
@@ -95,7 +92,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &
   HasTimeRange &
   HasInspectorAdapters &
   Partial<HasEditCapabilities & PublishesSavedObjectId> &
-  HasDynamicActions &
+  HasDrilldowns &
   HasSupportedTriggers;
 
 export interface PublishesSavedSearch {

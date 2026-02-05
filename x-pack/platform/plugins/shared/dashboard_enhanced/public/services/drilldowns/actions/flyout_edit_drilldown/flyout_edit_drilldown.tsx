@@ -21,10 +21,6 @@ import {
   apiHasUniqueId,
 } from '@kbn/presentation-publishing';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import {
-  apiHasDynamicActions,
-  type HasDynamicActions,
-} from '@kbn/embeddable-enhanced-plugin/public';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { txtDisplayName } from './i18n';
@@ -44,13 +40,14 @@ export interface FlyoutEditDrilldownParams {
 }
 
 export type FlyoutEditDrilldownActionApi = CanAccessViewMode &
-  Required<HasDynamicActions> &
+  Required<HasDrilldowns> &
   HasParentApi<Partial<PresentationContainer>> &
   HasSupportedTriggers &
   Partial<HasUniqueId>;
 
 const isApiCompatible = (api: unknown | null): api is FlyoutEditDrilldownActionApi =>
-  apiHasDynamicActions(api) && apiCanAccessViewMode(api) && apiHasSupportedTriggers(api);
+  // apiHasDynamicActions(api) && 
+  apiCanAccessViewMode(api) && apiHasSupportedTriggers(api);
 
 export const flyoutEditDrilldownAction: ActionDefinition<EmbeddableApiContext> = {
   id: OPEN_FLYOUT_EDIT_DRILLDOWN,

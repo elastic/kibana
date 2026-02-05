@@ -11,7 +11,6 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart, EuiText } from '@elastic
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { EmbeddableStart, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
@@ -57,26 +56,22 @@ import { checkForDuplicateTitle } from '../utils/saved_objects_utils';
 
 export const getVisualizeEmbeddableFactory: (deps: {
   embeddableStart: EmbeddableStart;
-  embeddableEnhancedStart?: EmbeddableEnhancedPluginStart;
-}) => EmbeddableFactory<VisualizeEmbeddableState, VisualizeApi> = ({
-  embeddableStart,
-  embeddableEnhancedStart,
-}) => ({
+}) => EmbeddableFactory<VisualizeEmbeddableState, VisualizeApi> = ({ embeddableStart }) => ({
   type: VISUALIZE_EMBEDDABLE_TYPE,
-  buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+  buildEmbeddable: async ({
+    initializeDrilldownsManager,
+    initialState,
+    finalizeApi,
+    parentApi,
+    uuid,
+  }) => {
     // Runtime state may contain title loaded from saved object
     // Initialize titleManager with serialized state
     // to avoid tracking runtime state title as serialized state title
     const titleManager = initializeTitleManager(initialState);
 
     // Initialize dynamic actions
-    const dynamicActionsManager = await embeddableEnhancedStart?.initializeEmbeddableDynamicActions(
-      uuid,
-      () => titleManager.api.title$.getValue(),
-      initialState
-    );
-    // if it is provided, start the dynamic actions manager
-    const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
+    const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
 
     const runtimeState = await deserializeState(initialState);
 
@@ -186,7 +181,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         ...(runtimeState.savedObjectProperties
           ? { savedObjectProperties: runtimeState.savedObjectProperties }
           : {}),
-        getDynamicActionsState: dynamicActionsManager?.getLatestState,
+        getDynamicActionsState: drilldownsManager.getLatestState,
         ...timeRangeManager.getLatestState(),
       });
     };
@@ -198,7 +193,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         return serializeVisualizeEmbeddable(savedObjectId$.getValue(), linkedToLibrary);
       },
       anyStateChange$: merge(
-        ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : []),
+        drilldownsManager.anyStateChange$,
         savedObjectId$,
         serializedVis$,
         titleManager.anyStateChange$,
@@ -206,7 +201,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       ).pipe(map(() => undefined)),
       getComparators: () => {
         return {
-          ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
+          ...drilldownsManager.comparators,
           ...titleComparators,
           ...timeRangeComparators,
           savedObjectId: 'skip',
@@ -237,7 +232,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         };
       },
       onReset: async (lastSaved) => {
-        dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+        drilldownsManager.reinitializeState(lastSaved ?? {});
         timeRangeManager.reinitializeState(lastSaved);
         titleManager.reinitializeState(lastSaved);
 
@@ -250,7 +245,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const api = finalizeApi({
       ...timeRangeManager.api,
       ...titleManager.api,
-      ...(dynamicActionsManager?.api ?? {}),
+      ...drilldownsManager.api,
       ...unsavedChangesApi,
       defaultTitle$,
       dataLoading$,
@@ -494,9 +489,9 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
         useEffect(() => {
           return () => {
+            drilldownsManager.cleanup();
             fetchSubscription.unsubscribe();
             serializedVisSubscription.unsubscribe();
-            maybeStopDynamicActions?.stopDynamicActions();
           };
         }, []);
 

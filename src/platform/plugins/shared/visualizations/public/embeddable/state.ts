@@ -10,7 +10,7 @@
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
 import { isEmpty } from 'lodash';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
   VisualizeByReferenceState,
   VisualizeByValueState,
@@ -117,7 +117,7 @@ export const serializeState: (props: {
   id?: string;
   savedObjectProperties?: ExtraSavedObjectProperties;
   linkedToLibrary?: boolean;
-  getDynamicActionsState?: (() => DynamicActionsSerializedState) | undefined;
+  getDynamicActionsState?: () => SerializedDrilldowns;
   timeRange?: VisualizeRuntimeState['timeRange'];
 }) => VisualizeEmbeddableState = ({
   serializedVis, // Serialize the vis before passing it to this function for easier testing
