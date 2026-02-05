@@ -34,7 +34,7 @@ import {
 } from './bwc/legacy_url_transform';
 import { registerDrilldown } from './drilldowns/registry';
 import { CONTEXT_MENU_TRIGGER } from '../common/constants';
-import { CREATE_DRILLDOWN_ACTION } from './ui_actions/constants';
+import { CREATE_DRILLDOWN_ACTION, MANAGE_DRILLDOWNS_ACTION } from './ui_actions/constants';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
@@ -49,6 +49,11 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, CREATE_DRILLDOWN_ACTION, async () => {
       const { createDrilldownAction } = await import('./async_module');
       return createDrilldownAction;
+    });
+
+    uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, MANAGE_DRILLDOWNS_ACTION, async () => {
+      const { manageDrilldownsAction } = await import('./async_module');
+      return manageDrilldownsAction;
     });
 
     return {

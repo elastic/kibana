@@ -9,3 +9,4 @@
 
 export const DRILLDOWN_ACTION_GROUP = { id: 'drilldown', order: 3 } as const;
 export const CREATE_DRILLDOWN_ACTION = 'CREATE_DRILLDOWN_ACTION';
+export const MANAGE_DRILLDOWNS_ACTION = 'MANAGE_DRILLDOWNS_ACTION';
