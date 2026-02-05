@@ -28,7 +28,7 @@ describe('Type Guards', () => {
       it('should reject non-condition filters', () => {
         const filter: AsCodeGroupFilter = {
           type: 'group',
-          group: { type: 'and', conditions: [] },
+          group: { operator: 'and', conditions: [] },
         };
         expect(isConditionFilter(filter)).toBe(false);
       });
@@ -38,7 +38,7 @@ describe('Type Guards', () => {
       it('should detect group filters', () => {
         const filter: AsCodeGroupFilter = {
           type: 'group',
-          group: { type: 'and', conditions: [] },
+          group: { operator: 'and', conditions: [] },
         };
         expect(isGroupFilter(filter)).toBe(true);
       });
@@ -75,7 +75,7 @@ describe('Type Guards', () => {
     describe('isNestedFilterGroup', () => {
       it('should detect nested filter groups', () => {
         const group: AsCodeGroupFilter['group'] = {
-          type: 'and',
+          operator: 'and',
           conditions: [{ field: 'test', operator: 'is', value: 'test' }],
         };
         expect(isNestedFilterGroup(group)).toBe(true);

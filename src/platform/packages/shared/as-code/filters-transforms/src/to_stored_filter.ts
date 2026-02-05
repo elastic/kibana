@@ -265,7 +265,7 @@ function convertFromFilterGroup(
     meta: {
       ...baseStored.meta,
       type: FILTERS.COMBINED,
-      relation: group.type.toUpperCase(),
+      relation: group.operator.toUpperCase(),
       params: filterParams,
     },
   };

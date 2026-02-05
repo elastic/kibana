@@ -206,7 +206,7 @@ function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFilter['gr
 
   // ExtendedFilter type includes optional 'relation' property
   // Note: relation can be 'or'/'OR' or 'and'/'AND' - normalize to lowercase
-  const type = storedFilter.meta.relation?.toString().toLowerCase() === 'or' ? 'or' : 'and';
+  const operator = storedFilter.meta.relation?.toString().toLowerCase() === 'or' ? 'or' : 'and';
 
   // isCombinedFilter already validated params is a non-empty Filter[] array
   const params = storedFilter.meta.params as StoredFilter[];
@@ -228,7 +228,7 @@ function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFilter['gr
   });
 
   return {
-    type,
+    operator,
     conditions: conditions as AsCodeGroupFilter['group']['conditions'],
   };
 }

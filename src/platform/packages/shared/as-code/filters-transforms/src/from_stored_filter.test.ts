@@ -534,7 +534,7 @@ describe('fromStoredFilter', () => {
       expect(isGroupFilter(result)).toBe(true);
       if (isGroupFilter(result)) {
         expect(result.group).toEqual({
-          type: 'and',
+          operator: 'and',
           conditions: [
             {
               field: 'machine.os.keyword',
@@ -543,7 +543,7 @@ describe('fromStoredFilter', () => {
               negate: true,
             },
             {
-              type: 'or',
+              operator: 'or',
               conditions: [
                 {
                   field: 'geo.src',

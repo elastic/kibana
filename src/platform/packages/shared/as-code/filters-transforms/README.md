@@ -80,7 +80,7 @@ function processFilter(filter: AsCodeFilter) {
     console.log(filter.condition.field, filter.condition.operator);
   } else if (isGroupFilter(filter)) {
     // TypeScript knows filter is AsCodeGroupFilter
-    console.log(filter.group.type, filter.group.conditions);
+    console.log(filter.group.operator, filter.group.conditions);
   } else if (isDSLFilter(filter)) {
     // TypeScript knows filter is AsCodeDSLFilter
     console.log(filter.dsl);
@@ -191,7 +191,7 @@ An OR group with same-field IS conditions gets optimized to a more compact `phra
 // Original: Group filter with OR operator
 const asCodeFilter = {
   group: {
-    type: 'or',
+    operator: 'or',
     conditions: [
       { field: 'status', operator: 'is', value: 'active' },
       { field: 'status', operator: 'is', value: 'pending' },
