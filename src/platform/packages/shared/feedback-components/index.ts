@@ -16,7 +16,7 @@ export { EmailConsentCheck } from './src';
 export { EmailSection } from './src';
 export { CsatButtons } from './src';
 export { FeedbackTextArea } from './src';
-export { SessionInfoDisclaimer } from './src';
+export { PrivacyAndSessionDisclaimer } from './src';
 export { FeedbackBody } from './src';
 
 export { SendFeedbackButton } from './src';
