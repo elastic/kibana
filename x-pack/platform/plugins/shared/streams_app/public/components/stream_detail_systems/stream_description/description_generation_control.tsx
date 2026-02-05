@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { DescriptionGenerationTaskResult } from '@kbn/streams-plugin/server/routes/internal/streams/description_generation/route';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
 import { useTaskPolling } from '../../../hooks/use_task_polling';
+import { getTaskErrorMessage } from '../../../util/errors';
 import { ConnectorListButton } from '../../connector_list_button/connector_list_button';
 
 interface DescriptionGenerationControlProps {
@@ -177,7 +178,7 @@ export function DescriptionGenerationControl({
             color="danger"
             iconType="error"
           >
-            {task.error}
+            {getTaskErrorMessage(task.error)}
           </EuiCallOut>
         </EuiFlexItem>
       </EuiFlexGroup>
