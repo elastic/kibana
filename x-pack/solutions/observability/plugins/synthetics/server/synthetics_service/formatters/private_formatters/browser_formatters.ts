@@ -52,7 +52,6 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.URLS]: stringToJsonFormatter,
   [ConfigKey.METADATA]: objectToJsonFormatter,
   [ConfigKey.SOURCE_INLINE]: base64InlineScriptFormatter,
-  [ConfigKey.SOURCE_INLINE_ENCODING]: null,
   [ConfigKey.SYNTHETICS_ARGS]: arrayToJsonFormatter,
   [ConfigKey.JOURNEY_FILTERS_MATCH]: stringToJsonFormatter,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayToJsonFormatter,

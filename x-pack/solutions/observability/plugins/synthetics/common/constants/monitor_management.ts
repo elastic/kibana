@@ -59,7 +59,6 @@ export enum ConfigKey {
   SCREENSHOTS = 'screenshots',
   SOURCE_PROJECT_CONTENT = 'source.project.content',
   SOURCE_INLINE = 'source.inline.script',
-  SOURCE_INLINE_ENCODING = 'source.inline.encoding',
   IPV4 = 'ipv4',
   IPV6 = 'ipv6',
   PROJECT_ID = 'project_id',

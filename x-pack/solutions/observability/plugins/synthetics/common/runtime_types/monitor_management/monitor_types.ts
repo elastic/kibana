@@ -258,9 +258,6 @@ export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
     [ConfigKey.URLS]: t.union([t.string, t.null]),
     [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),
-  t.partial({
-    [ConfigKey.SOURCE_INLINE_ENCODING]: t.union([t.string, t.null]),
-  }),
   CommonFieldsCodec,
 ]);
 

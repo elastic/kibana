@@ -46,7 +46,6 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.URLS]: null,
   [ConfigKey.METADATA]: objectFormatter,
   [ConfigKey.SOURCE_INLINE]: inlineSourceFormatter,
-  [ConfigKey.SOURCE_INLINE_ENCODING]: null,
   [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
   [ConfigKey.JOURNEY_FILTERS_MATCH]: null,
   [ConfigKey.SYNTHETICS_ARGS]: arrayFormatter,
