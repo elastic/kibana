@@ -62,8 +62,6 @@ export class DashboardMarkdownPlugin
             panelType: MARKDOWN_EMBEDDABLE_TYPE,
             serializedState: {
               savedObjectId: savedObject.id,
-              title: savedObject.attributes.title,
-              description: savedObject.attributes.description,
             },
           },
           {
