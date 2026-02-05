@@ -40,17 +40,24 @@ export function measureInteraction(pathname: string) {
       if (eventData?.meta?.rangeFrom && eventData?.meta?.rangeTo) {
         const { rangeFrom, rangeTo } = eventData.meta;
 
-        // Convert the date range  to epoch timestamps (in milliseconds)
-        const dateRangesInEpoch = getDateRange({
-          from: rangeFrom,
-          to: rangeTo,
-        });
+        // Convert the date range to epoch timestamps (in milliseconds)
+        // Wrapped in try-catch because getDateRange throws when start > end,
+        // which can happen with edge cases like relative dates that evaluate to invalid ranges.
+        // Telemetry code should not crash the UI.
+        try {
+          const dateRangesInEpoch = getDateRange({
+            from: rangeFrom,
+            to: rangeTo,
+          });
 
-        performanceMeta.queryRangeSecs = getTimeDifferenceInSeconds(dateRangesInEpoch);
-        performanceMeta.queryFromOffsetSecs =
-          rangeFrom === 'now' ? 0 : getOffsetFromNowInSeconds(dateRangesInEpoch.startDate);
-        performanceMeta.queryToOffsetSecs =
-          rangeTo === 'now' ? 0 : getOffsetFromNowInSeconds(dateRangesInEpoch.endDate);
+          performanceMeta.queryRangeSecs = getTimeDifferenceInSeconds(dateRangesInEpoch);
+          performanceMeta.queryFromOffsetSecs =
+            rangeFrom === 'now' ? 0 : getOffsetFromNowInSeconds(dateRangesInEpoch.startDate);
+          performanceMeta.queryToOffsetSecs =
+            rangeTo === 'now' ? 0 : getOffsetFromNowInSeconds(dateRangesInEpoch.endDate);
+        } catch {
+          // Silently skip date range metadata if the date range is invalid
+        }
       }
 
       if (eventData?.meta?.description) {

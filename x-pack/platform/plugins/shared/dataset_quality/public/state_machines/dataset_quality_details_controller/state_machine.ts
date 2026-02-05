@@ -6,11 +6,11 @@
  */
 
 import type { IToasts } from '@kbn/core-notifications-browser';
-import { getDateISORange } from '@kbn/timerange';
 import type { DoneInvokeEvent, InterpreterFrom } from 'xstate';
 import { assign, createMachine, raise } from 'xstate';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { omit } from 'lodash';
+import { getSafeDateISORange } from '../../utils';
 import type {
   Dashboard,
   DataStreamDetails,
@@ -872,7 +872,12 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
     },
     services: {
       checkDatasetIsAggregatable: (context) => {
-        const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
+        const dateRange = getSafeDateISORange(context.timeRange);
+        if (!dateRange) {
+          // Return aggregatable: true as fallback when date range is invalid
+          return Promise.resolve({ aggregatable: true, datasets: [] });
+        }
+        const { startDate: start, endDate: end } = dateRange;
 
         return dataStreamDetailsClient.getNonAggregatableDatasets({
           start,
@@ -881,7 +886,12 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         });
       },
       loadDataStreamDetails: (context) => {
-        const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
+        const dateRange = getSafeDateISORange(context.timeRange);
+        if (!dateRange) {
+          // Return empty details when date range is invalid
+          return Promise.resolve({});
+        }
+        const { startDate: start, endDate: end } = dateRange;
 
         return dataStreamDetailsClient.getDataStreamDetails({
           dataStream: context.dataStream,
@@ -911,7 +921,12 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return false;
       },
       loadFailedDocsDetails: (context) => {
-        const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
+        const dateRange = getSafeDateISORange(context.timeRange);
+        if (!dateRange) {
+          // Return empty details when date range is invalid
+          return Promise.resolve({ failedDocs: 0 });
+        }
+        const { startDate: start, endDate: end } = dateRange;
 
         return dataStreamDetailsClient.getFailedDocsDetails({
           dataStream: context.dataStream,
@@ -920,7 +935,12 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         });
       },
       loadDegradedFields: (context) => {
-        const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
+        const dateRange = getSafeDateISORange(context.timeRange);
+        if (!dateRange) {
+          // Return empty when date range is invalid
+          return Promise.resolve();
+        }
+        const { startDate: start, endDate: end } = dateRange;
 
         if (!context?.isNonAggregatable) {
           return dataStreamDetailsClient.getDataStreamDegradedFields({
@@ -966,7 +986,12 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
       },
       loadfailedDocsErrors: (context) => {
         if ('expandedQualityIssue' in context && context.expandedQualityIssue) {
-          const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
+          const dateRange = getSafeDateISORange(context.timeRange);
+          if (!dateRange) {
+            // Return empty errors when date range is invalid
+            return Promise.resolve({ errors: [] });
+          }
+          const { startDate: start, endDate: end } = dateRange;
 
           return dataStreamDetailsClient.getFailedDocsErrors({
             dataStream: context.dataStream,
