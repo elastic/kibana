@@ -51,12 +51,28 @@ export const ScriptsLibrary = memo(() => {
     undefined
   );
 
+  const safePaging = useMemo(
+    () => ({
+      // page should not be more than 1000
+      // and page * pageSize should not exceed 10000 (max result window)
+      page:
+        paginationFromUrlParams.page > 0 && paginationFromUrlParams.page <= 1000
+          ? paginationFromUrlParams.page
+          : 1,
+      pageSize:
+        paginationFromUrlParams.pageSize > 0 && paginationFromUrlParams.pageSize <= 1000
+          ? paginationFromUrlParams.pageSize
+          : 10,
+    }),
+    [paginationFromUrlParams.page, paginationFromUrlParams.pageSize]
+  );
+
   const [queryParams, setQueryParams] = useState<ListScriptsRequestQuery>({
     kuery: kueryFromUrl,
     sortField: sortFieldFromUrl as SortableScriptLibraryFields,
     sortDirection: sortDirectionFromUrl,
-    page: paginationFromUrlParams.page,
-    pageSize: paginationFromUrlParams.pageSize,
+    page: safePaging.page,
+    pageSize: safePaging.pageSize,
   });
 
   const {
@@ -76,8 +92,8 @@ export const ScriptsLibrary = memo(() => {
       kuery: kueryFromUrl,
       sortField: sortFieldFromUrl as SortableScriptLibraryFields,
       sortDirection: sortDirectionFromUrl,
-      page: paginationFromUrlParams.page,
-      pageSize: paginationFromUrlParams.pageSize,
+      page: safePaging.page,
+      pageSize: safePaging.pageSize,
     });
     setSelectedItemForFlyout(
       selectedScriptId
@@ -88,8 +104,8 @@ export const ScriptsLibrary = memo(() => {
     kueryFromUrl,
     sortDirectionFromUrl,
     sortFieldFromUrl,
-    paginationFromUrlParams.page,
-    paginationFromUrlParams.pageSize,
+    safePaging.page,
+    safePaging.pageSize,
     scriptsData?.data,
     selectedScriptId,
     setSelectedItemForFlyout,
