@@ -7,15 +7,16 @@
 
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
+import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
-import { useStreamSystems } from '../../../stream_detail_systems/stream_systems/hooks/use_stream_systems';
+import { useStreamFeatures } from '../../../../hooks/use_stream_features';
 
-interface SystemsColumnProps {
-  streamName: string;
+interface FeaturesColumnProps {
+  stream: Streams.all.Definition;
 }
 
-export function SystemsColumn({ streamName }: SystemsColumnProps) {
-  const { systems } = useStreamSystems(streamName);
+export function FeaturesColumn({ stream }: FeaturesColumnProps) {
+  const { features } = useStreamFeatures(stream);
 
   return (
     <EuiText
@@ -25,7 +26,7 @@ export function SystemsColumn({ streamName }: SystemsColumnProps) {
         font-family: 'Roboto Mono', monospace;
       `}
     >
-      {systems.length || '—'}
+      {features.length || '—'}
     </EuiText>
   );
 }
