@@ -23,4 +23,3 @@ When you want to render an attachment in the UI, emit a custom XML element:
 * Do not include any other attributes or content within the \`<${tagName}>\` element.
 * Never wrap the \`<${tagName}>\` element in backticks or code blocks.`;
 };
-

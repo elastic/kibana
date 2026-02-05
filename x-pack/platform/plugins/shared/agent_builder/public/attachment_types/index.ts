@@ -26,4 +26,3 @@ export const registerAttachmentUiDefinitions = ({
     renderContent: createVisualizationAttachmentRenderer(startDependencies),
   });
 };
-

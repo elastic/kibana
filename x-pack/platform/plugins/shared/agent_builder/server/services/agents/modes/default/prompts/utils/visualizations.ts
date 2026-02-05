@@ -29,4 +29,3 @@ When a tool call returns a result of type "${tabularData}", you may render a vis
 * Do not invent, alter, or guess \`tool_result_id\`. You must use the exact id provided in the tool response.
 * You must not include any other attributes or content within the \`<${tagName}>\` element.`;
 };
-
