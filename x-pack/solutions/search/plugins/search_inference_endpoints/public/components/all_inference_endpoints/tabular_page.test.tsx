@@ -313,6 +313,9 @@ describe('When the tabular page is loaded', () => {
     // 8 unique models
     expect(screen.getByTestId('endpointStatsModels')).toHaveTextContent('Models: 8');
 
+    // 4 unique types: sparse_embedding, text_embedding, rerank, chat_completion
+    expect(screen.getByTestId('endpointStatsTypes')).toHaveTextContent('Types: 4');
+
     // 11 endpoints total
     expect(screen.getByTestId('endpointStatsEndpoints')).toHaveTextContent('Endpoints: 11');
   });

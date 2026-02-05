@@ -10,7 +10,13 @@ import { i18n as kbnI18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type {
   InferenceInferenceEndpointInfo,
@@ -39,19 +45,20 @@ import { EditInferenceFlyout } from '../edit_inference_endpoints/edit_inference_
 import { docLinks } from '../../../common/doc_links';
 import { EndpointStats } from './endpoint_stats';
 
+const searchContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
+  width: ${euiTheme.base * 25}px;
+`;
+
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
 }
 
 export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
   const {
     services: { notifications, cloud, application },
   } = useKibana();
   const toasts = notifications?.toasts;
-  const searchContainerStyles = css`
-    width: ${euiTheme.base * 25}px;
-  `;
   const [showDeleteAction, setShowDeleteAction] = useState(false);
   const [showInferenceFlyout, setShowInferenceFlyout] = useState(false);
   const [selectedInferenceEndpoint, setSelectedInferenceEndpoint] = useState<
@@ -252,7 +259,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           }
         />
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem css={searchContainerStyles} grow={false}>
+          <EuiFlexItem css={searchContainerStyles(euiThemeContext)} grow={false}>
             <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

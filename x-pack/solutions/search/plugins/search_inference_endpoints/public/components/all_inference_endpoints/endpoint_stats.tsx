@@ -28,12 +28,10 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
 
     endpoints.forEach((endpoint) => {
       services.add(endpoint.service);
+      tasks.add(endpoint.task_type);
       const modelId = getModelId(endpoint);
       if (modelId) {
         models.add(modelId);
-      }
-      if (endpoint.task_type) {
-        tasks.add(endpoint.task_type);
       }
     });
 
