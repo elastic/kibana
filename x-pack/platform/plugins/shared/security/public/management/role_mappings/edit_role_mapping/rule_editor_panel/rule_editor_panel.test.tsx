@@ -16,7 +16,6 @@ import '@kbn/code-editor-mock/jest_helper';
 import { JSONRuleEditor } from './json_rule_editor';
 import { RuleEditorPanel } from './rule_editor_panel';
 import { VisualRuleEditor } from './visual_rule_editor';
-import * as VisualRuleEditorModule from './visual_rule_editor';
 import { AllRule, FieldRule } from '../../model';
 
 describe('RuleEditorPanel', () => {
@@ -111,27 +110,18 @@ describe('RuleEditorPanel', () => {
   });
 
   it('catches errors thrown by child components', () => {
-    // Mock VisualRuleEditor to throw an error
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
-    jest.spyOn(VisualRuleEditorModule, 'VisualRuleEditor').mockImplementation(() => {
-      throw new Error('Something awful happened here.');
-    });
-
     const props = {
       rawRules: {},
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
     };
-
     const wrapper = renderView(props);
 
-    // Error boundary should have caught the error
+    wrapper.find(VisualRuleEditor).simulateError(new Error('Something awful happened here.'));
+
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(0);
     expect(wrapper.find(EuiErrorBoundary)).toHaveLength(1);
-
-    consoleError.mockRestore();
-    jest.restoreAllMocks();
   });
 
   describe('can render a readonly view', () => {
