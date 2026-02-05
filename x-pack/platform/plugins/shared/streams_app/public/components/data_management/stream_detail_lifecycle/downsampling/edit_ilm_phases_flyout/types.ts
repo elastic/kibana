@@ -13,6 +13,7 @@ export interface EditIlmPhasesFlyoutProps {
   onSave: (next: IlmPolicyPhases) => void;
   onClose: () => void;
   isSaving?: boolean;
+  canCreateRepository?: boolean;
   searchableSnapshotRepositories?: string[];
   isLoadingSearchableSnapshotRepositories?: boolean;
   onRefreshSearchableSnapshotRepositories?: () => void;

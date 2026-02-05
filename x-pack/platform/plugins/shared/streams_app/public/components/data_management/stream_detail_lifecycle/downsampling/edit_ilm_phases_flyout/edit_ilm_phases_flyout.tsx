@@ -41,6 +41,7 @@ export const EditIlmPhasesFlyout = ({
   onSave,
   onClose,
   isSaving,
+  canCreateRepository = false,
   searchableSnapshotRepositories = [],
   isLoadingSearchableSnapshotRepositories,
   onRefreshSearchableSnapshotRepositories,
@@ -195,6 +196,8 @@ export const EditIlmPhasesFlyout = ({
             <PhaseTabsRow
               form={form}
               enabledPhases={enabledPhases}
+              searchableSnapshotRepositories={searchableSnapshotRepositories}
+              canCreateRepository={canCreateRepository}
               selectedIlmPhase={selectedIlmPhase}
               setSelectedIlmPhase={setSelectedIlmPhase}
               pendingSelectedIlmPhaseRef={pendingSelectedIlmPhaseRef}
@@ -221,6 +224,7 @@ export const EditIlmPhasesFlyout = ({
                 dataTestSubj={dataTestSubj}
                 sectionStyles={sectionStyles}
                 searchableSnapshotRepositories={searchableSnapshotRepositories}
+                canCreateRepository={canCreateRepository}
                 isLoadingSearchableSnapshotRepositories={isLoadingSearchableSnapshotRepositories}
                 onRefreshSearchableSnapshotRepositories={onRefreshSearchableSnapshotRepositories}
                 onCreateSnapshotRepository={onCreateSnapshotRepository}

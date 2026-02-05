@@ -28,6 +28,7 @@ export interface PhasePanelProps {
   dataTestSubj: string;
   sectionStyles: SerializedStyles;
   searchableSnapshotRepositories: string[];
+  canCreateRepository: boolean;
   isLoadingSearchableSnapshotRepositories?: boolean;
   onRefreshSearchableSnapshotRepositories?: () => void;
   onCreateSnapshotRepository?: () => void;
@@ -42,6 +43,7 @@ export const PhasePanel = ({
   dataTestSubj,
   sectionStyles,
   searchableSnapshotRepositories,
+  canCreateRepository,
   isLoadingSearchableSnapshotRepositories,
   onRefreshSearchableSnapshotRepositories,
   onCreateSnapshotRepository,
@@ -53,6 +55,8 @@ export const PhasePanel = ({
   const isColdPhase = phase === 'cold';
   const isFrozenPhase = phase === 'frozen';
   const isDeletePhase = phase === 'delete';
+  const showSearchableSnapshotSectionForCold =
+    canCreateRepository || searchableSnapshotRepositories.length > 0;
 
   return (
     <div hidden={isHidden} aria-hidden={isHidden}>
@@ -106,7 +110,7 @@ export const PhasePanel = ({
         </>
       )}
 
-      {(isColdPhase || isFrozenPhase) && (
+      {((isColdPhase && showSearchableSnapshotSectionForCold) || isFrozenPhase) && (
         <>
           <EuiHorizontalRule margin="none" />
           <div css={sectionStyles}>
@@ -115,6 +119,7 @@ export const PhasePanel = ({
               phaseName={phase}
               dataTestSubj={dataTestSubj}
               searchableSnapshotRepositories={searchableSnapshotRepositories}
+              canCreateRepository={canCreateRepository}
               isLoadingSearchableSnapshotRepositories={isLoadingSearchableSnapshotRepositories}
               onRefreshSearchableSnapshotRepositories={onRefreshSearchableSnapshotRepositories}
               onCreateSnapshotRepository={onCreateSnapshotRepository}

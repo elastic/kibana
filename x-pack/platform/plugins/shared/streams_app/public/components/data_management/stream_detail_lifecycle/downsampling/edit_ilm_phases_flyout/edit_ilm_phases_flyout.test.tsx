@@ -218,6 +218,28 @@ describe('EditIlmPhasesFlyout', () => {
   });
 
   describe('searchable snapshots', () => {
+    it('hides searchable snapshot section in cold when cannot create repository and no repositories exist', async () => {
+      renderFlyout({
+        canCreateRepository: false,
+        searchableSnapshotRepositories: [],
+        initialPhases: {
+          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+          cold: { name: 'cold', size_in_bytes: 0, min_age: '20d' },
+        },
+      });
+
+      await tick();
+      fireEvent.click(getTab('cold'));
+
+      const coldPanel = withinPhase('cold');
+      expect(
+        coldPanel.queryByTestId(`${DATA_TEST_SUBJ}SearchableSnapshotSwitch`)
+      ).not.toBeInTheDocument();
+      expect(
+        coldPanel.queryByTestId(`${DATA_TEST_SUBJ}SnapshotRepositorySelect`)
+      ).not.toBeInTheDocument();
+    });
+
     it('shows a toggle for cold, but not for frozen (frozen is always enabled)', async () => {
       renderFlyout({
         initialPhases: {
@@ -299,6 +321,32 @@ describe('EditIlmPhasesFlyout', () => {
           },
         })
       );
+    });
+
+    it('auto-selects the only snapshot repository option when enabling cold snapshots', async () => {
+      renderFlyout({
+        initialPhases: {
+          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+          cold: {
+            name: 'cold',
+            size_in_bytes: 0,
+            min_age: '20d',
+          },
+        },
+        searchableSnapshotRepositories: ['repo1'],
+      });
+
+      await tick();
+      fireEvent.click(getTab('cold'));
+
+      const coldPanel = withinPhase('cold');
+      fireEvent.click(coldPanel.getByTestId(`${DATA_TEST_SUBJ}SearchableSnapshotSwitch`));
+
+      const select = coldPanel.getByTestId(
+        `${DATA_TEST_SUBJ}SnapshotRepositorySelect`
+      ) as HTMLSelectElement;
+
+      await waitFor(() => expect(select.value).toBe('repo1'));
     });
 
     it('invokes refresh callback when refreshing snapshot repositories (scoped)', async () => {

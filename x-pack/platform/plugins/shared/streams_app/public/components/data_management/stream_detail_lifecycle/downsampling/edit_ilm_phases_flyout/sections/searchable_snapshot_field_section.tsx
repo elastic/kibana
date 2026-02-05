@@ -19,6 +19,7 @@ export interface SearchableSnapshotFieldSectionProps {
   phaseName: 'cold' | 'frozen';
   dataTestSubj: string;
   searchableSnapshotRepositories: string[];
+  canCreateRepository: boolean;
   isLoadingSearchableSnapshotRepositories?: boolean;
   onRefreshSearchableSnapshotRepositories?: () => void;
   onCreateSnapshotRepository?: () => void;
@@ -29,6 +30,7 @@ export const SearchableSnapshotFieldSection = ({
   phaseName,
   dataTestSubj,
   searchableSnapshotRepositories,
+  canCreateRepository,
   isLoadingSearchableSnapshotRepositories,
   onRefreshSearchableSnapshotRepositories,
   onCreateSnapshotRepository,
@@ -90,6 +92,17 @@ export const SearchableSnapshotFieldSection = ({
               onChange={(e) => {
                 const enabled = e.target.checked;
                 enabledField!.setValue(enabled);
+
+                if (!enabled) return;
+                if (searchableSnapshotRepositories.length !== 1) return;
+
+                const repository = searchableSnapshotRepositories[0];
+                if (!repository) return;
+
+                const currentValue = String(repositoryField.value ?? '').trim();
+                if (currentValue !== '') return;
+
+                repositoryField.setValue(repository);
               }}
             />
           </EuiFlexItem>
@@ -103,6 +116,7 @@ export const SearchableSnapshotFieldSection = ({
           isLoadingSearchableSnapshotRepositories={isLoadingSearchableSnapshotRepositories}
           onRefreshSearchableSnapshotRepositories={onRefreshSearchableSnapshotRepositories}
           onCreateSnapshotRepository={onCreateSnapshotRepository}
+          showCreateRepositoryLink={canCreateRepository}
           dataTestSubj={dataTestSubj}
         />
       )}

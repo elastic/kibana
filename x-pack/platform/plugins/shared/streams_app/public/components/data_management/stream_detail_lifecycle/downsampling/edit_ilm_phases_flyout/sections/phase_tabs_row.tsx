@@ -28,6 +28,8 @@ import { DEFAULT_NEW_PHASE_MIN_AGE, PHASE_LABELS } from '../constants';
 export interface PhaseTabsRowProps {
   form: FormHook<IlmPolicyPhases, IlmPhasesFlyoutFormInternal>;
   enabledPhases: PhaseName[];
+  searchableSnapshotRepositories: string[];
+  canCreateRepository: boolean;
   selectedIlmPhase: PhaseName | undefined;
   setSelectedIlmPhase: React.Dispatch<React.SetStateAction<PhaseName | undefined>>;
   pendingSelectedIlmPhaseRef: React.MutableRefObject<PhaseName | null>;
@@ -38,12 +40,20 @@ export interface PhaseTabsRowProps {
 export const PhaseTabsRow = ({
   form,
   enabledPhases,
+  searchableSnapshotRepositories,
+  canCreateRepository,
   selectedIlmPhase,
   setSelectedIlmPhase,
   pendingSelectedIlmPhaseRef,
   tabHasErrors,
   dataTestSubj,
 }: PhaseTabsRowProps) => {
+  const canSelectFrozen = canCreateRepository || searchableSnapshotRepositories.length > 0;
+  const excludedPhases = useMemo(
+    () => (canSelectFrozen ? [] : (['frozen'] as PhaseName[])),
+    [canSelectFrozen]
+  );
+
   const getDefaultMinAge = useCallback((): { value: string; unit: TimeUnit } => {
     const candidates: Array<'warm' | 'cold' | 'frozen' | 'delete'> = [
       'warm',
@@ -79,6 +89,14 @@ export const PhaseTabsRow = ({
       pendingSelectedIlmPhaseRef.current = phase;
       form.setFieldValue(`_meta.${phase}.enabled`, true);
 
+      if (phase === 'frozen' && searchableSnapshotRepositories.length === 1) {
+        const repositoryField = form.getFields()['_meta.searchableSnapshot.repository'];
+        const currentValue = String(repositoryField?.value ?? '').trim();
+        if (repositoryField && currentValue === '') {
+          repositoryField.setValue(searchableSnapshotRepositories[0]);
+        }
+      }
+
       if (phase !== 'hot') {
         const valuePath = `_meta.${phase}.minAgeValue`;
         const unitPath = `_meta.${phase}.minAgeUnit`;
@@ -104,7 +122,14 @@ export const PhaseTabsRow = ({
 
       setSelectedIlmPhase(phase);
     },
-    [enabledPhases, form, getDefaultMinAge, pendingSelectedIlmPhaseRef, setSelectedIlmPhase]
+    [
+      enabledPhases,
+      form,
+      getDefaultMinAge,
+      pendingSelectedIlmPhaseRef,
+      searchableSnapshotRepositories,
+      setSelectedIlmPhase,
+    ]
   );
 
   const tabs = useMemo(() => {
@@ -135,6 +160,7 @@ export const PhaseTabsRow = ({
       <EuiFlexItem grow={false}>
         <IlmPhaseSelect
           selectedPhases={enabledPhases}
+          excludedPhases={excludedPhases}
           onSelect={onSelectPhase}
           renderButton={(buttonProps) => {
             const button = (

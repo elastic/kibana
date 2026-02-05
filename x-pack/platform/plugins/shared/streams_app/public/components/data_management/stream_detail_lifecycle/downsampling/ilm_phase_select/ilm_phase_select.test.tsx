@@ -80,6 +80,25 @@ describe('IlmPhaseSelect', () => {
     expect(screen.getByTestId('ilmPhaseSelectOption-warm')).toBeInTheDocument();
   });
 
+  it('omits excludedPhases from the list', () => {
+    render(
+      <IlmPhaseSelect
+        renderButton={(props) => (
+          <EuiButtonEmpty {...props}>Add data phase and downsampling</EuiButtonEmpty>
+        )}
+        selectedPhases={[]}
+        excludedPhases={['frozen', 'delete']}
+        onSelect={() => {}}
+        initialIsOpen={true}
+      />
+    );
+
+    expect(screen.queryByTestId('ilmPhaseSelectOption-frozen')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ilmPhaseSelectOption-delete')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ilmPhaseSelectOption-hot')).toBeInTheDocument();
+    expect(screen.getByTestId('ilmPhaseSelectOption-warm')).toBeInTheDocument();
+  });
+
   it('disables the trigger when all phases are already selected', () => {
     render(
       <IlmPhaseSelect

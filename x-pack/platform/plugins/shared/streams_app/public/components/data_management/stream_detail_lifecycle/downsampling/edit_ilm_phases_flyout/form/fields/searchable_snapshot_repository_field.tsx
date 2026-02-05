@@ -22,6 +22,7 @@ export interface SearchableSnapshotRepositoryFieldProps {
   isLoadingSearchableSnapshotRepositories?: boolean;
   onRefreshSearchableSnapshotRepositories?: () => void;
   onCreateSnapshotRepository?: () => void;
+  showCreateRepositoryLink?: boolean;
   dataTestSubj: string;
 }
 
@@ -31,15 +32,20 @@ export const SearchableSnapshotRepositoryField = ({
   isLoadingSearchableSnapshotRepositories,
   onRefreshSearchableSnapshotRepositories,
   onCreateSnapshotRepository,
+  showCreateRepositoryLink = true,
   dataTestSubj,
 }: SearchableSnapshotRepositoryFieldProps) => {
   const path = `_meta.searchableSnapshot.repository`;
   useFormData({ form, watch: path });
   const field = form.getFields()[path];
+  const value = String(field?.value ?? '');
+
   if (!field) return null;
 
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const value = String(field.value ?? '');
+
+  const canShowCreateRepositoryLink =
+    showCreateRepositoryLink && typeof onCreateSnapshotRepository === 'function';
 
   return (
     <EuiFormRow
@@ -47,16 +53,18 @@ export const SearchableSnapshotRepositoryField = ({
         defaultMessage: 'Snapshot repository',
       })}
       labelAppend={
-        <EuiText size="xs">
-          <EuiLink
-            onClick={onCreateSnapshotRepository}
-            data-test-subj={`${dataTestSubj}CreateSnapshotRepositoryLink`}
-          >
-            {i18n.translate('xpack.streams.editIlmPhasesFlyout.createSnapshotRepository', {
-              defaultMessage: 'Create repository',
-            })}
-          </EuiLink>
-        </EuiText>
+        canShowCreateRepositoryLink ? (
+          <EuiText size="xs">
+            <EuiLink
+              onClick={onCreateSnapshotRepository}
+              data-test-subj={`${dataTestSubj}CreateSnapshotRepositoryLink`}
+            >
+              {i18n.translate('xpack.streams.editIlmPhasesFlyout.createSnapshotRepository', {
+                defaultMessage: 'Create repository',
+              })}
+            </EuiLink>
+          </EuiText>
+        ) : undefined
       }
       helpText={i18n.translate('xpack.streams.editIlmPhasesFlyout.snapshotRepositoryHelp', {
         defaultMessage: 'Each phase uses the same snapshot repository.',
@@ -67,6 +75,7 @@ export const SearchableSnapshotRepositoryField = ({
       <EuiSelect
         fullWidth
         isInvalid={isInvalid}
+        hasNoInitialSelection
         aria-label={i18n.translate(
           'xpack.streams.editIlmPhasesFlyout.snapshotRepositoryAriaLabel',
           {
@@ -76,7 +85,7 @@ export const SearchableSnapshotRepositoryField = ({
         data-test-subj={`${dataTestSubj}SnapshotRepositorySelect`}
         options={repositoryOptions}
         value={value}
-        onChange={(e) => field.onChange(e)}
+        onChange={(e) => field.setValue(e.target.value)}
         append={
           <EuiButtonIcon
             display="empty"

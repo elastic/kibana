@@ -15,13 +15,30 @@ import { EditIlmPhasesFlyout } from './edit_ilm_phases_flyout';
 const meta: Meta<typeof EditIlmPhasesFlyout> = {
   component: EditIlmPhasesFlyout,
   title: 'streams/EditIlmPhasesFlyout',
+  argTypes: {
+    canCreateRepository: { control: 'boolean' },
+    searchableSnapshotRepositories: { control: 'object' },
+    isLoadingSearchableSnapshotRepositories: { control: 'boolean' },
+    initialPhases: { control: false },
+    onChange: { control: false },
+    onSave: { control: false },
+    onClose: { control: false },
+    onRefreshSearchableSnapshotRepositories: { control: false },
+    onCreateSnapshotRepository: { control: false },
+    isSaving: { control: false },
+    'data-test-subj': { control: false },
+  },
 };
 
 export default meta;
 type Story = StoryObj<typeof EditIlmPhasesFlyout>;
 
 export const Default: Story = {
-  render: () => {
+  args: {
+    canCreateRepository: true,
+    searchableSnapshotRepositories: ['found-snapshots', 'another-repo'],
+  },
+  render: (args) => {
     const StoryComponent = () => {
       const initialPhases: IlmPolicyPhases = {
         hot: {
@@ -58,7 +75,8 @@ export const Default: Story = {
           <EuiFlexItem grow={false}>
             <EditIlmPhasesFlyout
               initialPhases={initialPhases}
-              searchableSnapshotRepositories={['found-snapshots', 'another-repo']}
+              canCreateRepository={args.canCreateRepository}
+              searchableSnapshotRepositories={args.searchableSnapshotRepositories}
               onRefreshSearchableSnapshotRepositories={() =>
                 action('onRefreshSearchableSnapshots')()
               }
