@@ -19,8 +19,6 @@ project:
     sourceRoot: src/platform/plugins/shared/ui_actions_enhanced
 dependsOn:
   - '@kbn/core'
-  - '@kbn/data-plugin'
-  - '@kbn/embeddable-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/ui-actions-plugin'

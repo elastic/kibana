@@ -17,10 +17,7 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-ui-actions-browser
-dependsOn:
-  - '@kbn/i18n'
-  - '@kbn/expressions-plugin'
-  - '@kbn/presentation-publishing'
+dependsOn: []
 tags:
   - shared-common
   - package
