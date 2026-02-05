@@ -18,7 +18,9 @@ import {
   EuiTabs,
   EuiTextColor,
   EuiToolTip,
+  useEuiOverflowScroll,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { IlmPhaseSelect } from '../../ilm_phase_select/ilm_phase_select';
 import type { IlmPhasesFlyoutFormInternal, TimeUnit } from '../form';
@@ -154,7 +156,12 @@ export const PhaseTabsRow = ({
 
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          ${useEuiOverflowScroll('x', true)}
+        `}
+      >
         <EuiTabs bottomBorder={false}>{tabs}</EuiTabs>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
