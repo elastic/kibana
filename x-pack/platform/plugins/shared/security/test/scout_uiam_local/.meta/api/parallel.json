@@ -1,0 +1,71 @@
+{
+  "lastModified": "2026-02-02T17:19:55.576Z",
+  "sha1": "06e425ce97a8f9970c1acac6bba67f1e3e7bc521",
+  "tests": [
+    {
+      "id": "a0d24173047b2e4-f5d34cb95fb2e09",
+      "title": "Create new UIAM session should be able to authenticate as UIAM user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_create_session.spec.ts",
+        "line": 13,
+        "column": 10
+      }
+    },
+    {
+      "id": "a2e99e58c5b1cc7-0cf9fedf6f86f59",
+      "title": "[NON-MKI] Invalidate UIAM session UIAM session tokens should not be usable after logging out",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_invalidate_session.spec.ts",
+        "line": 65,
+        "column": 10
+      }
+    },
+    {
+      "id": "1e3fcf6c9db6e26-d57ad83f33154d2",
+      "title": "[NON-MKI] Refresh UIAM session should be able to authenticate as UIAM user even if the access token has expired",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
+        "line": 46,
+        "column": 10
+      }
+    },
+    {
+      "id": "1e3fcf6c9db6e26-123fa16328f07b4",
+      "title": "[NON-MKI] Refresh UIAM session should be able to authenticate as UIAM user when the tokens are refreshed concurrently",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
+        "line": 70,
+        "column": 10
+      }
+    },
+    {
+      "id": "1e3fcf6c9db6e26-69b150baffe6b8c",
+      "title": "[NON-MKI] Refresh UIAM session should fail if both access and refresh tokens have expired",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSecurity"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
+        "line": 100,
+        "column": 10
+      }
+    }
+  ]
+}
