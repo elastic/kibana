@@ -9,7 +9,8 @@ import type { hostsModel } from '../store';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { HOSTS_PATH } from '../../../../common/constants';
 
-export const hostDetailsPagePath = `${HOSTS_PATH}/name/:detailName`;
+/** Path for host details when URL includes entityIdentifiers segment for precise entity resolution */
+export const hostDetailsPagePathWithEntityIdentifiers = `${HOSTS_PATH}/name/:detailName/:entityIdentifiers`;
 
 export type HostsTabsProps = GlobalTimeArgs & {
   filterQuery?: string;

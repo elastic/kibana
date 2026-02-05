@@ -42,7 +42,7 @@ const sorting = {
 const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
   startDate,
   endDate,
-  userName,
+  entityIdentifiers,
   skip,
   type,
 }) => {
@@ -112,7 +112,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
     startDate,
     endDate,
     skip: querySkip,
-    criteriaFields: getCriteriaFromUsersType(type, userName),
+    criteriaFields: getCriteriaFromUsersType(type, entityIdentifiers),
     filterQuery: {
       exists: { field: 'user.name' },
     },
@@ -120,7 +120,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
     aggregationInterval: selectedInterval,
   });
 
-  const users = convertAnomaliesToUsers(tableData, jobNameById, userName);
+  const users = convertAnomaliesToUsers(tableData, jobNameById, entityIdentifiers);
   const columns = getAnomaliesUserTableColumnsCurated(type, startDate, endDate);
   const pagination = {
     initialPageIndex: 0,

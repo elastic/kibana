@@ -21,7 +21,10 @@ import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../common/search_strategy';
-import { buildHostNamesFilter } from '../../../../common/search_strategy';
+import {
+  buildHostFilterFromEntityIdentifiers,
+  buildHostNamesFilter,
+} from '../../../../common/search_strategy';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelFooter } from './footer';
@@ -33,15 +36,19 @@ import { useObservedHost } from './hooks/use_observed_host';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
-import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
-  hostName: string;
   isPreviewMode: boolean;
+  /**
+   * Entity identifiers for the host (following entity store EUID logic)
+   */
+  entityIdentifiers: EntityIdentifiers;
 }
 
 export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -61,21 +68,31 @@ const FIRST_RECORD_PAGINATION = {
 export const HostPanel = ({
   contextID,
   scopeId,
-  hostName,
   isPreviewMode = false,
+  entityIdentifiers,
 }: HostPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
 
+  // Extract hostName from entityIdentifiers
+  // Priority: entityIdentifiers['host.name'] > entityIdentifiers[first key]
+  const effectiveHostName = useMemo<string>(() => {
+    const hostNameFromIdentifiers =
+      entityIdentifiers['host.name'] || Object.values(entityIdentifiers)[0];
+    return hostNameFromIdentifiers as string;
+  }, [entityIdentifiers]);
+
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
-  const hostNameFilterQuery = useMemo(
-    () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
-    [hostName]
+  const hostFilterQuery = useMemo(
+    () =>
+      buildHostFilterFromEntityIdentifiers(entityIdentifiers) ??
+      (effectiveHostName ? buildHostNamesFilter([effectiveHostName]) : undefined),
+    [entityIdentifiers, effectiveHostName]
   );
 
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.host,
-    filterQuery: hostNameFilterQuery,
+    filterQuery: hostFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
   });
@@ -92,17 +109,16 @@ export const HostPanel = ({
 
   const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
     EntityType.host,
-    hostName,
+    effectiveHostName,
     { onSuccess: refetchRiskScore }
   );
 
-  const { hasMisconfigurationFindings } = useHasMisconfigurations('host.name', hostName);
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
 
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', hostName);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(entityIdentifiers);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: EntityIdentifierFields.hostName,
-    value: hostName,
+    entityIdentifiers,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_RIGHT`,
@@ -118,7 +134,7 @@ export const HostPanel = ({
   });
 
   const openDetailsPanel = useNavigateToHostDetails({
-    hostName,
+    entityIdentifiers,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -138,7 +154,7 @@ export const HostPanel = ({
     [isRiskScoreExist, openDetailsPanel]
   );
 
-  const observedHost = useObservedHost(hostName, scopeId);
+  const observedHost = useObservedHost(entityIdentifiers, scopeId);
 
   if (observedHost.isLoading) {
     return <FlyoutLoading />;
@@ -174,9 +190,12 @@ export const HostPanel = ({
               isPreviewMode={isPreviewMode}
               isRulePreview={scopeId === TableId.rulePreview}
             />
-            <HostPanelHeader hostName={hostName} observedHost={observedHostWithAnomalies} />
+            <HostPanelHeader
+              entityIdentifiers={entityIdentifiers}
+              observedHost={observedHostWithAnomalies}
+            />
             <HostPanelContent
-              hostName={hostName}
+              entityIdentifiers={entityIdentifiers}
               observedHost={observedHostWithAnomalies}
               riskScoreState={riskScoreState}
               contextID={contextID}
@@ -187,9 +206,15 @@ export const HostPanel = ({
               isPreviewMode={isPreviewMode}
             />
             {isPreviewMode && (
-              <HostPreviewPanelFooter hostName={hostName} contextID={contextID} scopeId={scopeId} />
+              <HostPreviewPanelFooter
+                entityIdentifiers={entityIdentifiers}
+                contextID={contextID}
+                scopeId={scopeId}
+              />
             )}
-            {!isPreviewMode && assetInventoryEnabled && <HostPanelFooter hostName={hostName} />}
+            {!isPreviewMode && assetInventoryEnabled && (
+              <HostPanelFooter hostName={effectiveHostName} />
+            )}
           </>
         );
       }}

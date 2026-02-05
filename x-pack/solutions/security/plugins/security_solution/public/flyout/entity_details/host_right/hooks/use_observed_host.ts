@@ -22,7 +22,7 @@ import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const useObservedHost = (
-  hostName: string,
+  entityIdentifiers: Record<string, string>,
   scopeId: string
 ): Omit<ObservedEntityData<HostItem>, 'anomalies'> => {
   const timelineTime = useDeepEqualSelector((state) =>
@@ -43,7 +43,7 @@ export const useObservedHost = (
 
   const [isLoading, { hostDetails, inspect: inspectObservedHost }, refetch] = useHostDetails({
     endDate: to,
-    hostName,
+    entityIdentifiers,
     indexNames: securityDefaultPatterns,
     id: HOST_PANEL_RISK_SCORE_QUERY_ID,
     skip: isInitializing,
@@ -60,16 +60,14 @@ export const useObservedHost = (
   });
 
   const [loadingFirstSeen, { firstSeen }] = useFirstLastSeen({
-    field: 'host.name',
-    value: hostName,
+    entityIdentifiers,
     defaultIndex: securityDefaultPatterns,
     order: Direction.asc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
   });
 
   const [loadingLastSeen, { lastSeen }] = useFirstLastSeen({
-    field: 'host.name',
-    value: hostName,
+    entityIdentifiers,
     defaultIndex: securityDefaultPatterns,
     order: Direction.desc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,

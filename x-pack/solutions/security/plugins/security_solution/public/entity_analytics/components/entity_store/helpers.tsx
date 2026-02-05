@@ -15,10 +15,20 @@ import {
 } from '../../../../common/constants';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 
-export const getEntityType = (record: Entity): EntityType => {
-  // Looking at `entity.type` to keep backward compatibility
-  const entityType = record.entity.EngineMetadata?.Type || record.entity.type;
+/** Keys used when entity fields are flattened at top level (e.g. from ES/search API) */
+const FLAT_ENTITY_TYPE_KEY = 'entity.type';
+const FLAT_ENTITY_ENGINE_TYPE_KEY = 'entity.EngineMetadata.Type';
 
+export const getEntityType = (record: Entity): EntityType => {
+  // Prefer nested form, then flattened top-level keys (e.g. entity store / search results)
+  const recordAny = record as Record<string, unknown>;
+  const entityType =
+    record.entity?.EngineMetadata?.Type ??
+    record.entity?.type ??
+    recordAny[FLAT_ENTITY_ENGINE_TYPE_KEY] ??
+    recordAny[FLAT_ENTITY_TYPE_KEY];
+
+  console.log('entityType', entityType);
   if (!entityType || !Object.values(EntityType).includes(entityType as EntityType)) {
     throw new Error(`Unexpected entity: ${JSON.stringify(record)}`);
   }

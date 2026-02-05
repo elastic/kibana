@@ -32,12 +32,13 @@ import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityIdentifiers } from '../utils';
 
 interface VulnerabilitiesInsightProps {
   /**
-   *  Host name to retrieve vulnerabilities for
+   * Entity identifiers used to filter the vulnerabilities by.
    */
-  hostName: string;
+  entityIdentifiers: EntityIdentifiers;
   /**
    * The direction of the flex group
    */
@@ -57,10 +58,10 @@ interface VulnerabilitiesInsightProps {
 }
 
 /*
- * Displays a distribution bar and the total vulnerabilities count for a given host
+ * Displays a distribution bar and the total vulnerabilities count for a given entity
  */
 export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
-  hostName,
+  entityIdentifiers,
   direction,
   'data-test-subj': dataTestSubj,
   telemetryKey,
@@ -70,7 +71,7 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
   const { euiTheme } = useEuiTheme();
   const { getSeverityStatusColor } = useGetSeverityStatusColor();
   const { data } = useVulnerabilitiesPreview({
-    query: buildGenericEntityFlyoutPreviewQuery('host.name', hostName),
+    query: buildGenericEntityFlyoutPreviewQuery(entityIdentifiers),
     sort: [],
     enabled: true,
     pageSize: 1,

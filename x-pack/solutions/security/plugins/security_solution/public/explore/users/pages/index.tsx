@@ -9,18 +9,35 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
+import {
+  decodeEntityIdentifiersFromUrl,
+  encodeEntityIdentifiersForUrl,
+} from '../../../common/components/link_to/redirect_to_users';
 import { USERS_PATH } from '../../../../common/constants';
 import { UsersTableType } from '../store/model';
 import { Users } from './users';
 import { UsersDetails } from './details';
 import { usersDetailsPagePath, usersDetailsTabPath, usersTabPath } from './constants';
 
+const parseEntityIdentifiersFromParams = (
+  detailName: string,
+  encodedSegment: string | undefined
+): Record<string, string> => {
+  const decoded = encodedSegment ? decodeEntityIdentifiersFromUrl(encodedSegment) : null;
+  return decoded ?? { 'user.name': detailName };
+};
+
 export const UsersContainer = React.memo(() => {
   return (
     <Routes>
-      <Route path={usersTabPath}>
-        <Users />
-      </Route>
+      <Route
+        path={usersTabPath}
+        render={({
+          match: {
+            params: { entityIdentifiers: entityIdentifiersSegment },
+          },
+        }) => <Users encodedEntityIdentifiersSegment={entityIdentifiersSegment} />}
+      />
       <Route // Compatibility redirect for the old external alert path to events page with external alerts showing.
         path={`${USERS_PATH}/externalAlerts`}
         render={({ location: { search = '' } }) => (
@@ -36,17 +53,41 @@ export const UsersContainer = React.memo(() => {
         path={usersDetailsTabPath}
         render={({
           match: {
-            params: { detailName },
+            params: { detailName, entityIdentifiers: entityIdentifiersSegment },
           },
         }) => (
           <UsersDetails
             usersDetailsPagePath={usersDetailsPagePath}
-            detailName={decodeURIComponent(detailName)}
+            entityIdentifiers={parseEntityIdentifiersFromParams(
+              detailName,
+              entityIdentifiersSegment
+            )}
+            encodedEntityIdentifiersSegment={entityIdentifiersSegment}
           />
         )}
       />
       <Route // Redirect to the first tab when tabName is not present.
         path={usersDetailsPagePath}
+        render={({
+          match: {
+            params: { detailName, entityIdentifiers: entityIdentifiersSegment },
+          },
+          location: { search = '' },
+        }) => (
+          <Redirect
+            to={{
+              pathname: `${USERS_PATH}/name/${encodeURIComponent(detailName)}/${
+                entityIdentifiersSegment ??
+                encodeEntityIdentifiersForUrl({ 'user.name': detailName })
+              }/${UsersTableType.events}`,
+              search,
+            }}
+          />
+        )}
+      />
+      <Route // Compatibility redirect for old URL without entityIdentifiers segment: /users/name/:detailName -> add segment and go to events tab.
+        path={`${USERS_PATH}/name/:detailName`}
+        exact
         render={({
           match: {
             params: { detailName },
@@ -55,14 +96,17 @@ export const UsersContainer = React.memo(() => {
         }) => (
           <Redirect
             to={{
-              pathname: `${USERS_PATH}/name/${detailName}/${UsersTableType.events}`,
+              pathname: `${USERS_PATH}/name/${encodeURIComponent(
+                detailName
+              )}/${encodeEntityIdentifiersForUrl({ 'user.name': detailName })}/${
+                UsersTableType.events
+              }`,
               search,
             }}
           />
         )}
       />
-
-      <Route // Compatibility redirect for the old user detail path.
+      <Route // Compatibility redirect for the old user detail path (without /name/ and without entityIdentifiers segment).
         path={`${USERS_PATH}/:detailName/:tabName?`}
         render={({
           match: {
@@ -72,7 +116,9 @@ export const UsersContainer = React.memo(() => {
         }) => (
           <Redirect
             to={{
-              pathname: `${USERS_PATH}/name/${detailName}/${tabName}`,
+              pathname: `${USERS_PATH}/name/${encodeURIComponent(
+                detailName
+              )}/${encodeEntityIdentifiersForUrl({ 'user.name': detailName })}/${tabName}`,
               search,
             }}
           />

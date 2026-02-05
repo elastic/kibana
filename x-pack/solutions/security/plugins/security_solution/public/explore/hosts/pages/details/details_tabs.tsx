@@ -25,7 +25,14 @@ import {
 } from '../navigation';
 
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
-  ({ detailName, filterQuery, indexNames, hostDetailsPagePath, hostDetailsFilter }) => {
+  ({
+    detailName,
+    filterQuery,
+    indexNames,
+    hostDetailsPagePath,
+    hostDetailsFilter,
+    entityIdentifiers,
+  }) => {
     const { from, to, isInitializing, deleteQuery, setQuery } = useGlobalTime();
 
     const tabProps = {
@@ -37,7 +44,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       startDate: from,
       type: HostsType.details,
       indexNames,
-      hostName: detailName,
+      entityIdentifiers,
     };
 
     return (
@@ -60,11 +67,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
           />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}>
-          <RiskDetailsTabBody
-            {...tabProps}
-            riskEntity={EntityType.host}
-            entityName={tabProps.hostName}
-          />
+          <RiskDetailsTabBody {...tabProps} riskEntity={EntityType.host} entityName={detailName} />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.sessions})`}>
           <SessionsTabBody {...tabProps} />

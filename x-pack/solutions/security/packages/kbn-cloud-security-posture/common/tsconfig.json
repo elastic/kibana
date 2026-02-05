@@ -17,6 +17,7 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/data-views-plugin",
+    "@kbn/entity-store",
     "@kbn/i18n",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",

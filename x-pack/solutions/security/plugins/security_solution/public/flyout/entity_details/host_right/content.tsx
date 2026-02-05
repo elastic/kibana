@@ -21,6 +21,7 @@ import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } fro
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedHostFields } from './hooks/use_observed_host_fields';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 interface HostPanelContentProps {
   observedHost: ObservedEntityData<HostItem>;
@@ -28,14 +29,14 @@ interface HostPanelContentProps {
   contextID: string;
   scopeId: string;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  hostName: string;
+  entityIdentifiers: EntityIdentifiers;
   onAssetCriticalityChange: () => void;
   recalculatingScore: boolean;
   isPreviewMode: boolean;
 }
 
 export const HostPanelContent = ({
-  hostName,
+  entityIdentifiers,
   observedHost,
   riskScoreState,
   recalculatingScore,
@@ -50,6 +51,11 @@ export const HostPanelContent = ({
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
   );
+
+  // Extract hostName from entityIdentifiers for components that need a string
+  // Priority: entityIdentifiers['host.name'] > entityIdentifiers[first key]
+  const hostName =
+    entityIdentifiers[EntityIdentifierFields.hostName] || Object.values(entityIdentifiers)[0] || '';
 
   return (
     <FlyoutBody>
@@ -74,8 +80,7 @@ export const HostPanelContent = ({
         onChange={onAssetCriticalityChange}
       />
       <EntityInsight
-        value={hostName}
-        field={EntityIdentifierFields.hostName}
+        entityIdentifiers={entityIdentifiers}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
       />

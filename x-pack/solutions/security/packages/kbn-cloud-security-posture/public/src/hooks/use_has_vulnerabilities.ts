@@ -9,9 +9,9 @@ import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-postur
 import { useVulnerabilitiesPreview } from './use_vulnerabilities_preview';
 import { hasVulnerabilitiesData } from '../utils/vulnerability_helpers';
 
-export const useHasVulnerabilities = (field: string, value: string) => {
+export const useHasVulnerabilities = (entityIdentifiers: Record<string, string>) => {
   const { data: vulnerabilitiesData } = useVulnerabilitiesPreview({
-    query: buildGenericEntityFlyoutPreviewQuery(field, value),
+    query: buildGenericEntityFlyoutPreviewQuery(entityIdentifiers),
     sort: [],
     enabled: true,
     pageSize: 1,

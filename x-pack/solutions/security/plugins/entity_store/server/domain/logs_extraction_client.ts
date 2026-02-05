@@ -10,8 +10,11 @@ import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { EntityType, ManagedEntityDefinition } from './definitions/entity_schema';
-import { getEntityDefinition } from './definitions/registry';
+import type {
+  EntityType,
+  ManagedEntityDefinition,
+} from '../../common/domain/definitions/entity_schema';
+import { getEntityDefinition } from '../../common/domain/definitions/registry';
 import {
   buildLogsExtractionEsqlQuery,
   HASHED_ID,

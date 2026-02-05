@@ -239,7 +239,11 @@ export interface PluginStart {
   setSolutionNavigationTree: (navigationTree: NavigationTreeDefinition | null) => void;
 }
 
-export type InspectResponse = Inspect & { response: string[] };
+export type InspectResponse = Inspect & {
+  response: string[];
+  /** Index pattern(s) for the Inspect Statistics tab (e.g. entity store queries). */
+  indexPattern?: string[];
+};
 
 export const CASES_SUB_PLUGIN_KEY = 'cases';
 

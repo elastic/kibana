@@ -9,9 +9,11 @@ import { useEffect, useMemo } from 'react';
 import * as i18n from './translations';
 
 import { useSearchStrategy } from '../use_search_strategy';
+import { useSpaceId } from '../../hooks/use_space_id';
 import { FirstLastSeenQuery } from '../../../../common/search_strategy';
 import type { Direction } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
+import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
 
 export interface FirstLastSeenArgs {
   errorMessage: string | null;
@@ -19,20 +21,19 @@ export interface FirstLastSeenArgs {
   lastSeen?: string | null;
 }
 export interface UseFirstLastSeen {
-  field: string;
-  value: string;
+  entityIdentifiers: EntityIdentifiers;
   order: Direction.asc | Direction.desc;
   defaultIndex: string[];
   filterQuery?: ESQuery | string;
 }
 
 export const useFirstLastSeen = ({
-  field,
-  value,
+  entityIdentifiers,
   order,
   defaultIndex,
   filterQuery,
 }: UseFirstLastSeen): [boolean, FirstLastSeenArgs] => {
+  const spaceId = useSpaceId();
   const { loading, result, search, error } = useSearchStrategy<typeof FirstLastSeenQuery>({
     factoryQueryType: FirstLastSeenQuery,
     initialResult: {
@@ -45,12 +46,12 @@ export const useFirstLastSeen = ({
   useEffect(() => {
     search({
       defaultIndex,
-      field,
-      value,
+      entityIdentifiers,
       order,
       filterQuery,
+      spaceId,
     });
-  }, [defaultIndex, field, value, order, search, filterQuery]);
+  }, [defaultIndex, entityIdentifiers, order, search, filterQuery, spaceId]);
 
   const setFirstLastSeenResponse: FirstLastSeenArgs = useMemo(
     () => ({

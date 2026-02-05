@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/entity-store/common';
 
 import { i18n } from '@kbn/i18n';
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
@@ -58,67 +59,22 @@ export const buildMutedRulesFilter = (
   return mutedRulesFilterQuery;
 };
 
-export const buildGenericEntityFlyoutPreviewQuery = (
-  field: string,
-  queryValue?: string,
-  status?: string,
-  queryField?: string
-) => {
-  return {
-    bool: {
-      filter: [
-        {
-          bool: {
-            should: [
-              {
-                term: {
-                  [field]: `${queryValue || ''}`,
-                },
-              },
-            ],
-            minimum_should_match: 1,
-          },
-        },
-        status && queryField
-          ? {
-              bool: {
-                should: [
-                  {
-                    term: {
-                      [queryField]: {
-                        value: status,
-                        case_insensitive: true,
-                      },
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
-              },
-            }
-          : undefined,
-      ].filter(Boolean),
-    },
-  };
-};
-
 // Higher-order function for Misconfiguration
 export const buildMisconfigurationEntityFlyoutPreviewQuery = (
-  field: string,
-  queryValue?: string,
+  entityIdentifiers: Record<string, string>,
   status?: string
 ) => {
   const queryField = 'result.evaluation';
-  return buildGenericEntityFlyoutPreviewQuery(field, queryValue, status, queryField);
+  return buildGenericEntityFlyoutPreviewQuery(entityIdentifiers, status, queryField);
 };
 
 // Higher-order function for Vulnerability
 export const buildVulnerabilityEntityFlyoutPreviewQuery = (
-  field: string,
-  queryValue?: string,
+  entityIdentifiers: Record<string, string>,
   status?: string
 ) => {
   const queryField = 'vulnerability.severity';
-  return buildGenericEntityFlyoutPreviewQuery(field, queryValue, status, queryField);
+  return buildGenericEntityFlyoutPreviewQuery(entityIdentifiers, status, queryField);
 };
 
 export const buildEntityAlertsQuery = ({

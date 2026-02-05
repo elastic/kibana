@@ -28,7 +28,7 @@ export interface HostDetailsArgs {
 
 interface UseHostDetails {
   endDate: string;
-  hostName: string;
+  entityIdentifiers: Record<string, string>;
   id?: string;
   indexNames: string[];
   skip?: boolean;
@@ -37,7 +37,7 @@ interface UseHostDetails {
 
 export const useHostDetails = ({
   endDate,
-  hostName,
+  entityIdentifiers,
   indexNames,
   id = ID,
   skip = false,
@@ -75,14 +75,14 @@ export const useHostDetails = ({
     () => ({
       defaultIndex: indexNames,
       factoryQueryType: HostsQueries.details,
-      hostName,
+      ...(entityIdentifiers ? { entityIdentifiers } : {}),
       timerange: {
         interval: '12h',
         from: startDate,
         to: endDate,
       },
     }),
-    [endDate, hostName, indexNames, startDate]
+    [endDate, entityIdentifiers, indexNames, startDate]
   );
 
   useEffect(() => {

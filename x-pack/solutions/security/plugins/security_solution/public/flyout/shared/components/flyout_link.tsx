@@ -14,16 +14,13 @@ import { DocumentEventTypes } from '../../../common/lib/telemetry';
 import { PreviewLink } from './preview_link';
 import { getRightPanelParams } from '../utils/link_utils';
 import { useWhichFlyout } from '../../document_details/shared/hooks/use_which_flyout';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 interface FlyoutLinkProps {
   /**
-   * Field name
+   * Entity identifiers - key-value pairs of field names and their values
    */
-  field: string;
-  /**
-   * Value to display in EuiLink
-   */
-  value: string;
+  entityIdentifiers: EntityIdentifiers;
   /**
    * Scope id to use for the preview panel
    */
@@ -56,8 +53,7 @@ interface FlyoutLinkProps {
  * flyout that uses in memory state, use the `isFlyoutOpen` prop.
  */
 export const FlyoutLink: FC<FlyoutLinkProps> = ({
-  field,
-  value,
+  entityIdentifiers,
   scopeId,
   isFlyoutOpen = false,
   ruleId,
@@ -69,15 +65,26 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
   const whichFlyout = useWhichFlyout();
   const renderPreview = isFlyoutOpen || whichFlyout !== null;
 
+  // Extract primary field and value from entityIdentifiers
+  // Priority: host.name/user.name > first available field
+  const primaryField = useMemo(() => {
+    if (entityIdentifiers['host.name']) return 'host.name';
+    if (entityIdentifiers['user.name']) return 'user.name';
+    return Object.keys(entityIdentifiers)[0];
+  }, [entityIdentifiers]);
+
+  const primaryValue = useMemo(() => {
+    return primaryField ? entityIdentifiers[primaryField] : '';
+  }, [entityIdentifiers, primaryField]);
+
   const rightPanelParams = useMemo(
     () =>
       getRightPanelParams({
-        value,
-        field,
+        entityIdentifiers,
         scopeId,
         ruleId,
       }),
-    [value, field, scopeId, ruleId]
+    [entityIdentifiers, scopeId, ruleId]
   );
 
   const onClick = useCallback(() => {
@@ -98,7 +105,11 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
   // If the flyout is open, render the preview link
   if (renderPreview) {
     return (
-      <PreviewLink field={field} value={value} scopeId={scopeId} data-test-subj={dataTestSubj}>
+      <PreviewLink
+        entityIdentifiers={entityIdentifiers}
+        scopeId={scopeId}
+        data-test-subj={dataTestSubj}
+      >
         {children}
       </PreviewLink>
     );
@@ -106,9 +117,9 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
 
   return rightPanelParams ? (
     <EuiLink onClick={onClick} data-test-subj={dataTestSubj ?? FLYOUT_LINK_TEST_ID}>
-      {children ?? value}
+      {children ?? primaryValue}
     </EuiLink>
   ) : (
-    <>{children ?? value}</>
+    <>{children ?? primaryValue}</>
   );
 };

@@ -7,14 +7,17 @@
 
 import { HostsType } from '../../../../explore/hosts/store/model';
 import type { CriteriaFields } from '../types';
+import type { EntityIdentifiers } from '../../../containers/anomalies/anomalies_query_tab_body/types';
 
 export const getCriteriaFromHostType = (
   type: HostsType,
-  hostName: string | undefined
+  entityIdentifiers?: EntityIdentifiers
 ): CriteriaFields[] => {
-  if (type === HostsType.details && hostName != null) {
-    return [{ fieldName: 'host.name', fieldValue: hostName }];
-  } else {
-    return [];
+  if (type === HostsType.details && entityIdentifiers != null) {
+    const hostName = entityIdentifiers['host.name'] || entityIdentifiers['host.hostname'];
+    if (hostName != null) {
+      return [{ fieldName: 'host.name', fieldValue: hostName }];
+    }
   }
+  return [];
 };

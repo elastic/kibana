@@ -9,25 +9,40 @@ import { EuiSpacer, EuiBadge, EuiText, EuiFlexItem, EuiFlexGroup } from '@elasti
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import type { HostItem } from '../../../../common/search_strategy';
 import { getHostDetailsUrl } from '../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 
 interface HostPanelHeaderProps {
-  hostName: string;
+  entityIdentifiers: EntityIdentifiers;
   observedHost: ObservedEntityData<HostItem>;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
 
-export const HostPanelHeader = ({ hostName, observedHost }: HostPanelHeaderProps) => {
+export const HostPanelHeader = ({ entityIdentifiers, observedHost }: HostPanelHeaderProps) => {
+  const hostName = useMemo(
+    () =>
+      entityIdentifiers[EntityIdentifierFields.hostName] ||
+      Object.values(entityIdentifiers)[0] ||
+      '',
+    [entityIdentifiers]
+  );
+
   const lastSeenDate = useMemo(
     () => observedHost.lastSeen.date && new Date(observedHost.lastSeen.date),
     [observedHost.lastSeen.date]
+  );
+
+  const hostDetailsPath = useMemo(
+    () => getHostDetailsUrl(hostName, undefined, entityIdentifiers),
+    [hostName, entityIdentifiers]
   );
 
   return (
@@ -42,7 +57,7 @@ export const HostPanelHeader = ({ hostName, observedHost }: HostPanelHeaderProps
         <EuiFlexItem grow={false}>
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.hosts}
-            path={getHostDetailsUrl(hostName)}
+            path={hostDetailsPath}
             target={'_blank'}
             external={false}
             css={linkTitleCSS}

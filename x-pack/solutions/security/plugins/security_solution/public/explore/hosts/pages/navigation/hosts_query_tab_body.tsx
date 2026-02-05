@@ -19,7 +19,6 @@ export const HostsQueryTabBody = ({
   deleteQuery,
   endDate,
   filterQuery,
-  indexNames,
   skip,
   setQuery,
   startDate,
@@ -34,7 +33,6 @@ export const HostsQueryTabBody = ({
     useAllHost({
       endDate,
       filterQuery,
-      indexNames,
       skip: querySkip,
       startDate,
       type,

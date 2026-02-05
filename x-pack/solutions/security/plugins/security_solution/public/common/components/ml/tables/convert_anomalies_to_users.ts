@@ -5,23 +5,28 @@
  * 2.0.
  */
 
-import type { Anomalies, AnomaliesByUser, Anomaly } from '../types';
+import type { Anomalies, AnomaliesByUser, Anomaly, EntityIdentifiers } from '../types';
 import { getUserNameFromInfluencers } from '../influencers/get_user_name_from_influencers';
+import type { EntityIdentifiers as QueryTabEntityIdentifiers } from '../../../containers/anomalies/anomalies_query_tab_body/types';
 
 export const convertAnomaliesToUsers = (
   anomalies: Anomalies | null,
   jobNameById: Record<string, string | undefined>,
-  userName?: string
+  entityIdentifiers?: QueryTabEntityIdentifiers
 ): AnomaliesByUser[] => {
   if (anomalies == null) {
     return [];
   } else {
+    const userName = entityIdentifiers?.['user.name'];
     return anomalies.anomalies.reduce<AnomaliesByUser[]>((accum, item) => {
       if (getUserNameFromEntity(item, userName)) {
+        const userEntityIdentifiers: EntityIdentifiers = {
+          'user.name': item.entityValue,
+        };
         return [
           ...accum,
           {
-            userName: item.entityValue,
+            entityIdentifiers: userEntityIdentifiers,
             jobName: jobNameById[item.jobId] ?? item.jobId,
             anomaly: item,
           },
@@ -29,10 +34,13 @@ export const convertAnomaliesToUsers = (
       } else {
         const userNameFromInfluencers = getUserNameFromInfluencers(item.influencers, userName);
         if (userNameFromInfluencers != null) {
+          const userEntityIdentifiers: EntityIdentifiers = {
+            'user.name': userNameFromInfluencers,
+          };
           return [
             ...accum,
             {
-              userName: userNameFromInfluencers,
+              entityIdentifiers: userEntityIdentifiers,
               jobName: jobNameById[item.jobId] ?? item.jobId,
               anomaly: item,
             },

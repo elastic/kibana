@@ -20,19 +20,19 @@ import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { euid } from '@kbn/entity-store/common';
+import type { ESQuery } from '../../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
-import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { DescriptionList } from '../../../../../common/utility_types';
-import { USER_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { getField } from '../../shared/utils';
 import { CellActions } from '../../shared/components/cell_actions';
 import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../../common/components/first_last_seen/first_last_seen';
-import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
@@ -67,10 +67,7 @@ const USER_ICON = 'user';
 const USER_ENTITY_OVERVIEW_ID = 'user-entity-overview';
 
 export interface UserEntityOverviewProps {
-  /**
-   * User name for looking up user related ip addresses and risk level
-   */
-  userName: string;
+  entityIdentifiers: Record<string, string>;
 }
 
 export const USER_PREVIEW_BANNER = {
@@ -84,7 +81,7 @@ export const USER_PREVIEW_BANNER = {
 /**
  * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
-export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
+export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ entityIdentifiers }) => {
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
@@ -104,13 +101,10 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     [from, to]
   );
 
-  const filterQuery = useMemo(
-    () => (userName ? buildUserNamesFilter([userName]) : undefined),
-    [userName]
-  );
+  const filterQuery = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers) as ESQuery;
   const [isUserDetailsLoading, { userDetails }] = useObservedUserDetails({
     endDate: to,
-    userName,
+    entityIdentifiers,
     indexNames: selectedPatterns,
     startDate: from,
   });
@@ -127,20 +121,16 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
   const isRiskScoreExist = !!userRiskData?.user.risk;
 
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    EntityIdentifierFields.userName,
-    userName
-  );
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: EntityIdentifierFields.userName,
-    value: userName,
+    entityIdentifiers,
     to,
     from,
     queryId: USER_ENTITY_OVERVIEW_ID,
   });
 
   const openDetailsPanel = useNavigateToUserDetails({
-    userName,
+    entityIdentifiers,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -176,14 +166,13 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
         description: (
           <FirstLastSeen
             indexPatterns={selectedPatterns}
-            field={USER_NAME_FIELD_NAME}
-            value={userName}
+            entityIdentifiers={entityIdentifiers}
             type={FirstLastSeenType.LAST_SEEN}
           />
         ),
       },
     ],
-    [userName, selectedPatterns]
+    [entityIdentifiers, selectedPatterns]
   );
 
   const { euiTheme } = useEuiTheme();
@@ -228,8 +217,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <PreviewLink
-              field={USER_NAME_FIELD_NAME}
-              value={userName}
+              entityIdentifiers={entityIdentifiers}
               scopeId={scopeId}
               data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
             >
@@ -239,7 +227,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
                   font-weight: ${euiTheme.font.weight.bold};
                 `}
               >
-                {userName}
+                {entityIdentifiers['user.name']}
               </EuiText>
             </PreviewLink>
           </EuiFlexItem>
@@ -279,14 +267,12 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
         )}
       </EuiFlexItem>
       <AlertCountInsight
-        fieldName={'user.name'}
-        name={userName}
+        entityIdentifiers={entityIdentifiers}
         openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID}
       />
       <MisconfigurationsInsight
-        fieldName={'user.name'}
-        name={userName}
+        entityIdentifiers={entityIdentifiers}
         openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
         telemetryKey={MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW}

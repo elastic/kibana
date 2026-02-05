@@ -6,21 +6,48 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { euid } from '@kbn/entity-store/common';
 import type { ISearchRequestParams } from '@kbn/search-types';
 import type { ObservedUserDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { buildFieldsTermAggregation } from '../../hosts/details/helpers';
 import { USER_FIELDS } from './helpers';
 
+/**
+ * Converts flat dotted keys (e.g. user.name, user.entity.id) to nested structure
+ * expected by getEuidDslFilterBasedOnDocument.
+ */
+const flatEntityIdentifiersToNestedDoc = (
+  flat: Record<string, string>
+): Record<string, unknown> => {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(flat)) {
+    const parts = key.split('.');
+    let current = result;
+    for (let i = 0; i < parts.length - 1; i++) {
+      const p = parts[i];
+      const next = (current as Record<string, unknown>)[p];
+      if (next === undefined || typeof next !== 'object') {
+        (current as Record<string, unknown>)[p] = {};
+      }
+      current = (current as Record<string, unknown>)[p] as Record<string, unknown>;
+    }
+    (current as Record<string, unknown>)[parts[parts.length - 1]] = value;
+  }
+  return result;
+};
+
 export const buildObservedUserDetailsQuery = ({
-  userName,
+  entityIdentifiers,
   defaultIndex,
   timerange: { from, to },
   filterQuery,
 }: ObservedUserDetailsRequestOptions): ISearchRequestParams => {
+  const nestedDoc = flatEntityIdentifiersToNestedDoc(entityIdentifiers);
+  const entityFilters = euid.getEuidDslFilterBasedOnDocument('user', nestedDoc);
   const filter: QueryDslQueryContainer[] = [
     ...createQueryFilterClauses(filterQuery),
-    { term: { 'user.name': userName } },
+    ...(entityFilters ? [entityFilters] : []),
     {
       range: {
         '@timestamp': {

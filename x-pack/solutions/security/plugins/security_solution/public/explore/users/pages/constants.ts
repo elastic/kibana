@@ -8,8 +8,8 @@
 import { USERS_PATH } from '../../../../common/constants';
 import { UsersTableType } from '../store/model';
 
-export const usersDetailsPagePath = `${USERS_PATH}/name/:detailName`;
+export const usersDetailsPagePath = `${USERS_PATH}/name/:detailName/:entityIdentifiers`;
 
-export const usersTabPath = `${USERS_PATH}/:tabName(${UsersTableType.allUsers}|${UsersTableType.authentications}|${UsersTableType.anomalies}|${UsersTableType.risk}|${UsersTableType.events}|)`;
+export const usersTabPath = `${USERS_PATH}/:entityIdentifiers?/:tabName(${UsersTableType.allUsers}|${UsersTableType.authentications}|${UsersTableType.anomalies}|${UsersTableType.risk}|${UsersTableType.events}|)`;
 
 export const usersDetailsTabPath = `${usersDetailsPagePath}/:tabName(${UsersTableType.authentications}|${UsersTableType.anomalies}|${UsersTableType.events}|${UsersTableType.risk})`;

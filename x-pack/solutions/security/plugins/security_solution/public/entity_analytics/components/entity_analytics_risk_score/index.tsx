@@ -82,7 +82,7 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
         openRightPanel({
           id: panelKey,
           params: {
-            [panelParam]: entityName,
+            entityIdentifiers: { [`${riskEntity}.name`]: entityName },
             contextID: ENTITY_RISK_SCORE_TABLE_ID,
             scopeId: ENTITY_RISK_SCORE_TABLE_ID,
           },

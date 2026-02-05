@@ -197,8 +197,9 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     () =>
       attributes?.state?.adHocDataViews != null
         ? Object.values(attributes?.state?.adHocDataViews).reduce((acc, adHocDataView) => {
-            if (adHocDataView?.name != null) {
-              acc.push(adHocDataView?.name);
+            const indexPattern = adHocDataView?.name ?? adHocDataView?.title;
+            if (indexPattern != null) {
+              acc.push(indexPattern);
             }
             return acc;
           }, [] as string[])
