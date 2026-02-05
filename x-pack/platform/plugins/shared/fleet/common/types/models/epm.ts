@@ -266,6 +266,7 @@ export enum RegistryPolicyTemplateKeys {
   deployment_modes = 'deployment_modes',
   configuration_links = 'configuration_links',
   fips_compatible = 'fips_compatible',
+  dynamic_signal_types = 'dynamic_signal_types',
   deprecated = 'deprecated',
 }
 interface BaseTemplate {
@@ -293,6 +294,7 @@ export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.template_path]: string;
   [RegistryPolicyTemplateKeys.required_vars]?: RegistryRequiredVars;
   [RegistryPolicyTemplateKeys.vars]?: RegistryVarsEntry[];
+  [RegistryPolicyTemplateKeys.dynamic_signal_types]?: boolean;
 }
 
 export type RegistryPolicyTemplate =

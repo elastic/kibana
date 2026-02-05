@@ -34,6 +34,8 @@ dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/core-theme-browser-mocks'
   - '@kbn/presentation-publishing'
+  - '@kbn/config-schema'
+  - '@kbn/ui-actions-browser'
 tags:
   - plugin
   - prod
@@ -42,7 +44,9 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
+    - common/**/*
     - public/**/*
+    - server/**/*
     - '!target/**/*'
 tasks:
   jest:
