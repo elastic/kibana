@@ -613,7 +613,7 @@ describe('create()', () => {
 
       const actionType = getConnectorType({
         id: 'my-connector-type',
-        preSaveHook: preSaveHook,
+        preSaveHook,
       });
 
       (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
@@ -642,7 +642,7 @@ describe('create()', () => {
     test('logs audit event and throws when preSaveHook fails', async () => {
       const actionType = getConnectorType({
         id: 'my-connector-type',
-        preSaveHook: preSaveHook,
+        preSaveHook,
       });
 
       (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
@@ -688,7 +688,7 @@ describe('create()', () => {
 
       const actionType = getConnectorType({
         id: 'my-connector-type',
-        postSaveHook: postSaveHook,
+        postSaveHook,
       });
 
       (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
@@ -720,7 +720,7 @@ describe('create()', () => {
 
       const actionType = getConnectorType({
         id: 'my-connector-type',
-        postSaveHook: postSaveHook,
+        postSaveHook,
       });
 
       (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
@@ -765,7 +765,7 @@ describe('create()', () => {
 
       const actionType = getConnectorType({
         id: 'my-connector-type',
-        postSaveHook: postSaveHook,
+        postSaveHook,
       });
 
       (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
