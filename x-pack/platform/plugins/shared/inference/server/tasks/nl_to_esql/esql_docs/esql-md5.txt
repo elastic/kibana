@@ -1,0 +1,24 @@
+# MD5
+
+The MD5 command computes the MD5 hash of the input value, if the MD5 hash function is available on the JVM.
+
+## Syntax
+
+`MD5(input)`
+
+### Parameters
+
+#### input
+
+The value to hash.
+
+## Examples
+
+Calculates the MD5 hash of the `message` column for all rows except those where the message is "Connection error", and displays both the original message and its hash.
+
+```esql
+FROM sample_data
+| WHERE message != "Connection error"
+| EVAL md5 = md5(message)
+| KEEP message, md5
+```
