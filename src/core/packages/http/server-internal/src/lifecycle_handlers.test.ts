@@ -227,10 +227,7 @@ describe('excludeRoutes pre-auth handler', () => {
   });
 
   it('forwards when no excluded routes are configured', () => {
-    const handler = createExcludeRoutesPreAuthHandler(
-      createConfig({ excludeRoutes: [] }),
-      logger
-    );
+    const handler = createExcludeRoutesPreAuthHandler(createConfig({ excludeRoutes: [] }), logger);
     const request = forgeRequest({ path: '/api/status' });
 
     toolkit.next.mockReturnValue('next' as any);
