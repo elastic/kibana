@@ -104,7 +104,8 @@ export class OAuthAuthorizationService {
   /**
    * Gets OAuth configuration for a connector with decrypted secrets
    * @param connectorId - The connector ID
-   * @param namespace - The space ID where the connector was created. For default space, it's undefined.
+   * @param namespace - The space ID where to look for the connector. For default space, it's undefined.
+   * The namespace is the same as where the authorization was initiated from, which should be the space where the connector was created.
    * @returns OAuth configuration including authorizationUrl, clientId, and optional scope
    * @throws Error if connector is not found, not OAuth, or missing required config
    */
