@@ -38,7 +38,7 @@ export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => 
         data-test-subj="secAuthenticationStatePageHeader"
         css={css`
           position: relative;
-          padding: ${euiTheme.size.xl};
+          padding: ${euiTheme.size.m};
           z-index: 10;
         `}
       >
