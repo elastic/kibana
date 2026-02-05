@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import { FlyoutFrame } from '../components/flyout_frame';
+import { FlyoutFrame } from '../components/flyout_frame/flyout_frame';
 import { DrilldownHelloBar } from '../components/drilldown_hello_bar/drilldown_hello_bar';
 
 interface Props {
