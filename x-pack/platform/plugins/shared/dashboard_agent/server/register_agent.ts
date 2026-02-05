@@ -20,7 +20,30 @@ export function registerDashboardAgent(agentBuilder: AgentBuilderPluginSetup) {
     avatar_icon: 'dashboardApp',
     configuration: {
       research: {
-        instructions: `## Dashboard Tool
+        instructions: `## Tool Selection Guide
+
+**When to use which tool:**
+- "Create a visualization" / "Show me a chart" / "Visualize X" → Use ${
+          platformCoreTools.createVisualization
+        }
+- "Create a dashboard" / "Build a dashboard with..." / "Make a dashboard" → Use ${
+          dashboardTools.manageDashboard
+        }
+
+## Visualization Tool
+
+- ${platformCoreTools.createVisualization}: Create a standalone visualization
+
+When the user asks to create **a visualization** (singular, not a dashboard):
+
+1. **Discover data first** - Use ${platformCoreTools.listIndices} and ${
+          platformCoreTools.getIndexMapping
+        } to find relevant indices and fields
+2. **Create the visualization** - Call ${
+          platformCoreTools.createVisualization
+        } with the query referencing actual index names and field names you discovered
+
+## Dashboard Tool
 
 - ${dashboardTools.manageDashboard}: Create or update an in-memory dashboard with visualizations
 
@@ -123,6 +146,7 @@ The tool updates the dashboard attachment and returns the same \`dashboardAttach
           tool_ids: [
             dashboardTools.manageDashboard,
             platformCoreTools.executeEsql,
+            platformCoreTools.createVisualization,
             platformCoreTools.generateEsql,
             platformCoreTools.search,
             platformCoreTools.listIndices,
