@@ -729,6 +729,258 @@ describe('getAll()', () => {
         },
       ]);
     });
+
+    test('returns connector with authMode "shared"', async () => {
+      const expectedResult = {
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'type',
+            attributes: {
+              name: 'test',
+              actionTypeId: '.test-connector-type',
+              isMissingSecrets: false,
+              config: {
+                foo: 'bar',
+              },
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      };
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            '1': { doc_count: 6 },
+            testWithAuthMode: { doc_count: 2 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'testWithAuthMode',
+            actionTypeId: '.webhook',
+            isPreconfigured: true,
+            name: 'test with authMode',
+            config: {
+              url: 'https://example.com',
+            },
+            authMode: 'shared',
+          }),
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll();
+
+      expect(result).toContainConnectorsFindResult([
+        {
+          id: '1',
+          name: 'test',
+          isMissingSecrets: false,
+          config: { foo: 'bar' },
+          referencedByCount: 6,
+        },
+        {
+          id: 'testWithAuthMode',
+          actionTypeId: '.webhook',
+          name: 'test with authMode',
+          isPreconfigured: true,
+          authMode: 'shared',
+          referencedByCount: 2,
+        },
+      ]);
+    });
+
+    test('returns connector with authMode "per-user"', async () => {
+      const expectedResult = {
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'type',
+            attributes: {
+              name: 'test',
+              actionTypeId: '.test-connector-type',
+              isMissingSecrets: false,
+              config: {
+                foo: 'bar',
+              },
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      };
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            '1': { doc_count: 6 },
+            testWithPerUserAuth: { doc_count: 3 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'testWithPerUserAuth',
+            actionTypeId: '.webhook',
+            isPreconfigured: true,
+            name: 'test with per-user auth',
+            config: {
+              url: 'https://example.com',
+            },
+            authMode: 'per-user',
+          }),
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll();
+
+      expect(result).toContainConnectorsFindResult([
+        {
+          id: '1',
+          name: 'test',
+          isMissingSecrets: false,
+          config: { foo: 'bar' },
+          referencedByCount: 6,
+        },
+        {
+          id: 'testWithPerUserAuth',
+          actionTypeId: '.webhook',
+          name: 'test with per-user auth',
+          isPreconfigured: true,
+          authMode: 'per-user',
+          referencedByCount: 3,
+        },
+      ]);
+    });
+
+    test('returns connector without authMode when not set', async () => {
+      const expectedResult = {
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'type',
+            attributes: {
+              name: 'test',
+              actionTypeId: '.test-connector-type',
+              isMissingSecrets: false,
+              config: {
+                foo: 'bar',
+              },
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      };
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            '1': { doc_count: 6 },
+            testWithoutAuthMode: { doc_count: 1 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'testWithoutAuthMode',
+            actionTypeId: '.slack',
+            isPreconfigured: true,
+            name: 'test without authMode',
+            config: {
+              url: 'https://slack.example.com',
+            },
+          }),
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll();
+
+      expect(result).toContainConnectorsFindResult([
+        {
+          id: '1',
+          name: 'test',
+          isMissingSecrets: false,
+          config: { foo: 'bar' },
+          referencedByCount: 6,
+        },
+        {
+          id: 'testWithoutAuthMode',
+          actionTypeId: '.slack',
+          name: 'test without authMode',
+          isPreconfigured: true,
+          referencedByCount: 1,
+        },
+      ]);
+
+      // Ensure authMode is not in the result
+      const connectorWithoutAuthMode = result.find((c) => c.id === 'testWithoutAuthMode');
+      expect(connectorWithoutAuthMode).toBeDefined();
+      expect(connectorWithoutAuthMode).not.toHaveProperty('authMode');
+    });
   });
 
   describe('getAllSystemConnectors()', () => {

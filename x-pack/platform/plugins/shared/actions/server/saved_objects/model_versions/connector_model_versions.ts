@@ -6,13 +6,31 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { rawConnectorSchemaV1 } from '../schemas/raw_connector';
+import { rawConnectorSchemaV1, rawConnectorSchemaV2 } from '../schemas/raw_connector';
 
 export const connectorModelVersions: SavedObjectsModelVersionMap = {
   '1': {
     changes: [],
     schemas: {
       create: rawConnectorSchemaV1,
+    },
+  },
+  '2': {
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          const { config, authMode } = doc.attributes;
+          if (config && config.authType && !authMode) {
+            return { ...doc, attributes: { ...doc.attributes, authMode: 'shared' } };
+          }
+          return doc;
+        },
+      },
+    ],
+    schemas: {
+      create: rawConnectorSchemaV2,
+      forwardCompatibility: rawConnectorSchemaV2.extends({}, { unknowns: 'ignore' }),
     },
   },
 };
