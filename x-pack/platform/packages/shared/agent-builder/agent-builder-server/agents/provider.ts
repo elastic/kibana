@@ -26,6 +26,8 @@ import type {
   AttachmentsService,
   PromptManager,
   ConversationStateManager,
+  SkillsService,
+  ToolManager,
 } from '../runner';
 import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
@@ -91,6 +93,14 @@ export interface AgentHandlerContext {
    * Attachment service to interact with attachments.
    */
   attachments: AttachmentsService;
+  /**
+   * Skills service to interact with skills.
+   */
+  skills: SkillsService;
+  /**
+   * Tool manager to manage active tools for the agent.
+   */
+  toolManager: ToolManager;
   /**
    * Result store to access and add tool results during execution.
    */

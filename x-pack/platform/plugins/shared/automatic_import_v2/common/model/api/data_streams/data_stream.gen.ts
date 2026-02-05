@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../primitive.gen';
-import { OriginalSource } from '../../common_attributes.gen';
+import { OriginalSource, LangSmithOptions } from '../../common_attributes.gen';
 
 export type DeleteDataStreamRequestParams = z.infer<typeof DeleteDataStreamRequestParams>;
 export const DeleteDataStreamRequestParams = z.object({
@@ -78,6 +78,10 @@ export const UploadSamplesToDataStreamRequestBody = z.object({
    * The original source of the samples
    */
   originalSource: OriginalSource,
+  /**
+   * The LangSmith tracing options
+   */
+  langSmithOptions: LangSmithOptions.optional(),
 });
 export type UploadSamplesToDataStreamRequestBodyInput = z.input<
   typeof UploadSamplesToDataStreamRequestBody
