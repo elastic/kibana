@@ -1705,7 +1705,6 @@ export class CstToAstConverter {
     if (query) {
       command.query = query;
       args.push(query);
-      command.incomplete ||= query.incomplete;
     } else {
       command.incomplete = true;
     }
