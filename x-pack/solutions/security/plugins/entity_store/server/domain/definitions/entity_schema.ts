@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type EntityType = z.infer<typeof EntityType>;
 export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
-export const ALL_ENTITY_TYPES = Object.values(EntityType.Values);
+export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
+console.log('ALL_ENTITY_TYPES ============= ', ALL_ENTITY_TYPES);
 
 const mappingSchema = z.any();
 

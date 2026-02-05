@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { EntityType } from '../entity_schema';
 
 export type EngineStatus = z.infer<typeof EngineStatus>;
