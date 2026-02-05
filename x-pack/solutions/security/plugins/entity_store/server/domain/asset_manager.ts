@@ -123,4 +123,9 @@ export class AssetManager {
       throw error;
     }
   }
+
+  public async isInstalled(type: EntityType): Promise<boolean> {
+    const response = await this.engineDescriptorClient.find(type);
+    return response.total > 0;
+  }
 }
