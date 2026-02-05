@@ -653,6 +653,7 @@ src/platform/packages/shared/kbn-user-profile-components @elastic/kibana-securit
 src/platform/packages/shared/kbn-utility-types @elastic/kibana-core
 src/platform/packages/shared/kbn-utility-types-jest @elastic/kibana-operations
 src/platform/packages/shared/kbn-utils @elastic/kibana-operations
+src/platform/packages/shared/kbn-visualization-listing-components @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-visualization-ui-components @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-visualization-utils @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-visualizations-common @elastic/kibana-visualizations
@@ -818,6 +819,7 @@ src/platform/plugins/shared/unified_doc_viewer @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_search @elastic/kibana-presentation
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
 src/platform/plugins/shared/vis_types/timeseries @elastic/kibana-visualizations
+src/platform/plugins/shared/visualization_listing @elastic/kibana-visualizations
 src/platform/plugins/shared/visualizations @elastic/kibana-visualizations
 src/platform/plugins/shared/workflows_execution_engine @elastic/workflows-eng
 src/platform/plugins/shared/workflows_extensions @elastic/workflows-eng
@@ -3253,6 +3255,7 @@ x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 
 # Leads approval
 /AGENTS.md @elastic/kibana-tech-leads
+.cursorignore @elastic/kibana-tech-leads
 /.claude/ @elastic/kibana-tech-leads
 
 ####
