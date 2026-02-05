@@ -14,12 +14,9 @@ import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { LOG_LEVEL_FIELDS } from '../../../../../../common/data_types/logs/constants';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
-const CONTENT_LABEL = i18n.translate(
-  'discover.universalLogsProfile.columnsConfiguration.content',
-  {
-    defaultMessage: 'Content',
-  }
-);
+const CONTENT_LABEL = i18n.translate('discover.universalLogsProfile.columnsConfiguration.content', {
+  defaultMessage: 'Content',
+});
 
 const LOG_LEVEL_LABEL = i18n.translate(
   'discover.universalLogsProfile.columnsConfiguration.logLevel',

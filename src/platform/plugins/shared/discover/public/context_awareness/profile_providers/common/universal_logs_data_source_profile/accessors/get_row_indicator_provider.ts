@@ -23,15 +23,16 @@ import type { DataSourceProfileProvider } from '../../../../profiles';
  * - Only activates if log level fields exist in the data view
  */
 export const getRowIndicatorProvider: DataSourceProfileProvider['profile']['getRowIndicatorProvider'] =
-  () =>
-  ({ dataView }) => {
-    // Check if the data view has any of the log level fields
-    if (!LOG_LEVEL_FIELDS.some((field) => dataView.getFieldByName(field))) {
-      // Don't set row indicator if no log level fields exist
-      return undefined;
-    }
-    return getRowIndicator;
-  };
+
+    () =>
+    ({ dataView }) => {
+      // Check if the data view has any of the log level fields
+      if (!LOG_LEVEL_FIELDS.some((field) => dataView.getFieldByName(field))) {
+        // Don't set row indicator if no log level fields exist
+        return undefined;
+      }
+      return getRowIndicator;
+    };
 
 const getRowIndicator: UnifiedDataTableProps['getRowIndicator'] = (row, euiTheme) => {
   // Find the first log level value in the row
