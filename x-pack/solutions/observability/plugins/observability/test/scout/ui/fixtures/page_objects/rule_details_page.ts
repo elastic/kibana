@@ -6,7 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { RULE_DETAILS_TEST_SUBJECTS, BIGGER_TIMEOUT, SHORTER_TIMEOUT } from '../constants';
 
 export class RuleDetailsPage {

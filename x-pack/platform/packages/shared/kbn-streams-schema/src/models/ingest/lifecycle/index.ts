@@ -12,6 +12,7 @@ import { createIsNarrowSchema } from '../../../shared/type_guards';
 export interface IngestStreamLifecycleDSL {
   dsl: {
     data_retention?: string;
+    downsample?: DownsampleStep[];
   };
 }
 
@@ -59,8 +60,16 @@ export type IngestStreamEffectiveLifecycle =
   | WiredIngestStreamEffectiveLifecycle
   | ClassicIngestStreamEffectiveLifecycle;
 
+const downsampleStepSchema = z.object({
+  after: NonEmptyString,
+  fixed_interval: NonEmptyString,
+});
+
 const dslLifecycleSchema = z.object({
-  dsl: z.object({ data_retention: z.optional(NonEmptyString) }),
+  dsl: z.object({
+    data_retention: z.optional(NonEmptyString),
+    downsample: z.optional(z.array(downsampleStepSchema)),
+  }),
 });
 const ilmLifecycleSchema = z.object({ ilm: z.object({ policy: NonEmptyString }) });
 const inheritLifecycleSchema = z.object({ inherit: z.strictObject({}) });
@@ -109,10 +118,18 @@ export const isDisabledLifecycle = createIsNarrowSchema(
 
 export type PhaseName = 'hot' | 'warm' | 'cold' | 'frozen' | 'delete';
 
+export interface DownsampleStep {
+  after: string;
+  fixed_interval: string;
+}
+
 export interface IlmPolicyPhase {
   name: PhaseName;
   size_in_bytes: number;
   min_age?: string;
+  downsample?: DownsampleStep;
+  readonly?: boolean;
+  searchable_snapshot?: string;
 }
 
 export interface IlmPolicyHotPhase extends IlmPolicyPhase {

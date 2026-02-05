@@ -25,5 +25,8 @@ export const ruleTemplateMappings: SavedObjectsTypeMappingDefinition = {
     tags: {
       type: 'keyword',
     },
+    description: {
+      type: 'text',
+    },
   },
 };
