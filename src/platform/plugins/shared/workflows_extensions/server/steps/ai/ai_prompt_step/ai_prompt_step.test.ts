@@ -11,11 +11,11 @@ import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 // Mock external dependencies
-jest.mock('./utils/resolve_connector_id', () => ({
+jest.mock('../utils/resolve_connector_id', () => ({
   resolveConnectorId: jest.fn(),
 }));
 
-jest.mock('../../../common/steps/ai', () => ({
+jest.mock('../../../../common/steps/ai', () => ({
   AiPromptStepCommonDefinition: {
     id: 'ai.prompt',
     inputSchema: {},
@@ -23,15 +23,15 @@ jest.mock('../../../common/steps/ai', () => ({
   },
 }));
 
-jest.mock('../../step_registry/types', () => ({
+jest.mock('../../../step_registry/types', () => ({
   createServerStepDefinition: jest.fn((definition) => definition),
 }));
 
-import { aiPromptStepDefinition } from './ai_prompt_step';
-import { resolveConnectorId } from './utils/resolve_connector_id';
-import type { ContextManager, StepHandlerContext } from '../../step_registry/types';
-import { createServerStepDefinition } from '../../step_registry/types';
-import type { WorkflowsExtensionsServerPluginStartDeps } from '../../types';
+import { aiPromptStepDefinition } from './step';
+import type { ContextManager, StepHandlerContext } from '../../../step_registry/types';
+import { createServerStepDefinition } from '../../../step_registry/types';
+import type { WorkflowsExtensionsServerPluginStartDeps } from '../../../types';
+import { resolveConnectorId } from '../utils/resolve_connector_id';
 
 const mockResolveConnectorId = resolveConnectorId as jest.MockedFunction<typeof resolveConnectorId>;
 const mockCreateServerStepDefinition = createServerStepDefinition as jest.MockedFunction<
@@ -77,15 +77,15 @@ describe('aiPromptStepDefinition', () => {
 
     // Mock step handler context
     mockContext = {
-      config: {},
+      config: {
+        'connector-id': 'test-connector-id',
+      },
       input: {
         prompt: 'Test prompt',
-        connectorId: 'test-connector-id',
         temperature: 0.7,
       },
       rawInput: {
         prompt: 'Test prompt',
-        connectorId: 'test-connector-id',
         temperature: 0.7,
       },
       contextManager: mockContextManager,
@@ -144,7 +144,7 @@ describe('aiPromptStepDefinition', () => {
         };
 
         mockChatModel.invoke.mockResolvedValue(mockResponse);
-
+        mockContext.input.systemPrompt = 'You are a helpful assistant.';
         const result = await handler(mockContext);
 
         expect(mockCoreSetup.getStartServices).toHaveBeenCalledTimes(1);
@@ -162,14 +162,17 @@ describe('aiPromptStepDefinition', () => {
           },
         });
         expect(mockChatModel.invoke).toHaveBeenCalledWith(
-          [{ role: 'user', content: 'Test prompt' }],
+          [
+            { role: 'system', content: 'You are a helpful assistant.' },
+            { role: 'user', content: 'Test prompt' },
+          ],
           { signal: mockAbortController.signal }
         );
 
         expect(result).toEqual({
           output: {
             content: 'AI generated response',
-            response_metadata: { model: 'gpt-3.5-turbo', usage: { tokens: 100 } },
+            metadata: { model: 'gpt-3.5-turbo', usage: { tokens: 100 } },
           },
         });
       });
@@ -205,6 +208,10 @@ describe('aiPromptStepDefinition', () => {
       it('should handle missing connectorId in input', async () => {
         const contextWithoutConnectorId = {
           ...mockContext,
+          config: {
+            ...mockContext.config,
+            'connector-id': undefined,
+          },
           input: {
             prompt: 'Test prompt',
             temperature: 0.5,
@@ -234,7 +241,7 @@ describe('aiPromptStepDefinition', () => {
           ...mockContext,
           input: {
             ...mockContext.input,
-            outputSchema: {
+            schema: {
               type: 'object',
               properties: {
                 summary: { type: 'string' },
@@ -251,22 +258,34 @@ describe('aiPromptStepDefinition', () => {
           },
         };
 
-        mockRunnable.invoke.mockResolvedValue(mockStructuredResponse);
+        mockRunnable.invoke.mockResolvedValue({
+          parsed: mockStructuredResponse,
+          raw: {
+            response_metadata: { tokens_used: 150 },
+          },
+        });
 
         const result = await handler(contextWithSchema);
 
-        expect(mockChatModel.withStructuredOutput).toHaveBeenCalledWith({
-          type: 'object',
-          properties: {
-            response: {
-              type: 'object',
-              properties: {
-                summary: { type: 'string' },
-                sentiment: { type: 'string' },
+        expect(mockChatModel.withStructuredOutput).toHaveBeenCalledWith(
+          {
+            type: 'object',
+            properties: {
+              response: {
+                type: 'object',
+                properties: {
+                  summary: { type: 'string' },
+                  sentiment: { type: 'string' },
+                },
               },
             },
           },
-        });
+          {
+            name: 'extract_structured_response',
+            includeRaw: true,
+            method: 'jsonMode',
+          }
+        );
 
         expect(mockRunnable.invoke).toHaveBeenCalledWith(
           [{ role: 'user', content: 'Test prompt' }],
@@ -279,6 +298,7 @@ describe('aiPromptStepDefinition', () => {
               summary: 'This is a summary',
               sentiment: 'positive',
             },
+            metadata: { tokens_used: 150 },
           },
         });
 
@@ -291,7 +311,7 @@ describe('aiPromptStepDefinition', () => {
           ...mockContext,
           input: {
             ...mockContext.input,
-            outputSchema: {
+            schema: {
               type: 'array',
               items: { type: 'string' },
             },
@@ -302,24 +322,36 @@ describe('aiPromptStepDefinition', () => {
           response: ['item1', 'item2', 'item3'],
         };
 
-        mockRunnable.invoke.mockResolvedValue(mockStructuredResponse);
-
-        const result = await handler(contextWithArraySchema);
-
-        expect(mockChatModel.withStructuredOutput).toHaveBeenCalledWith({
-          type: 'object',
-          properties: {
-            response: {
-              type: 'array',
-              items: { type: 'string' },
-            },
+        mockRunnable.invoke.mockResolvedValue({
+          parsed: mockStructuredResponse,
+          raw: {
+            response_metadata: { tokens_used: 150 },
           },
         });
 
-        expect(result).toEqual({
-          output: {
-            content: ['item1', 'item2', 'item3'],
+        const result = await handler(contextWithArraySchema);
+
+        expect(mockChatModel.withStructuredOutput).toHaveBeenCalledWith(
+          {
+            type: 'object',
+            properties: {
+              response: {
+                type: 'array',
+                items: { type: 'string' },
+              },
+            },
           },
+          {
+            name: 'extract_structured_response',
+            includeRaw: true,
+            method: 'jsonMode',
+          }
+        );
+
+        expect(result).toEqual({
+          output: expect.objectContaining({
+            content: ['item1', 'item2', 'item3'],
+          }),
         });
       });
     });
@@ -351,7 +383,7 @@ describe('aiPromptStepDefinition', () => {
           ...mockContext,
           input: {
             ...mockContext.input,
-            outputSchema: { type: 'object', properties: {} },
+            schema: { type: 'object', properties: {} },
           },
         };
 
