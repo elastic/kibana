@@ -11,14 +11,14 @@ import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import {
-  getCellRenderers,
+  createGetCellRenderers,
   getRowIndicatorProvider,
   createGetDefaultAppState,
   getPaginationConfig,
   getColumnsConfiguration,
   createRecommendedFields,
   createGetDocViewer,
-  getRowAdditionalLeadingControls,
+  createGetRowAdditionalLeadingControls,
 } from './accessors';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
@@ -48,9 +48,9 @@ export const createUniversalLogsDataSourceProfileProvider = (
     profileId: UNIVERSAL_LOGS_DATA_SOURCE_PROFILE_ID,
     profile: {
       getDefaultAppState: createGetDefaultAppState(),
-      getCellRenderers,
+      getCellRenderers: createGetCellRenderers(services),
       getRowIndicatorProvider,
-      getRowAdditionalLeadingControls,
+      getRowAdditionalLeadingControls: createGetRowAdditionalLeadingControls(services),
       getPaginationConfig,
       getColumnsConfiguration,
       getRecommendedFields: createRecommendedFields({}),

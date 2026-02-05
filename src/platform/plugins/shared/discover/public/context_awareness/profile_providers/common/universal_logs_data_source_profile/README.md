@@ -22,22 +22,31 @@ Provides a consistent log-optimized Discover experience across all solution cont
 2. **getCellRenderers** - Log-specific cell formatting
    - Colored badges for `log.level` fields
    - Summary column for log preview
+   - **Capability-aware**: Service name cells with APM links (if APM app available)
 
 3. **getRowIndicatorProvider** - Visual row highlighting
    - Red indicator for ERROR logs
    - Yellow indicator for WARN logs
 
-4. **getPaginationConfig** - Infinite scroll mode
+4. **getRowAdditionalLeadingControls** - Enhanced row actions
+   - **Capability-aware**: Degraded docs and stacktrace controls (if Streams/APM available)
+   - Gracefully degrades in ES3 or environments without these apps
+
+5. **getPaginationConfig** - Infinite scroll mode
    - Better UX for chronological log exploration
 
-5. **getColumnsConfiguration** - Custom column headers
+6. **getColumnsConfiguration** - Custom column headers
    - Source column labeled as "Content"
    - Log level fields with custom icons
 
-6. **getRecommendedFields** - Surfaced log fields
+7. **getRecommendedFields** - Surfaced log fields
    - `log.level`, `message`, `error.message`
    - `host.name`, `service.name`, `trace.id`
    - Container and orchestration fields
+
+8. **getDocViewer** - Log-optimized document viewer
+   - **Capability-aware**: Streams and APM integrations (if apps available)
+   - Gracefully degrades in ES3 or environments without these apps
 
 ## Detection Logic
 
@@ -55,41 +64,67 @@ A data source is identified as "logs" if it matches **any** of:
 - ✅ Adapts automatically based on available capabilities
 
 **How It Works:**
-- Checks if Streams app exists → Shows "View in Streams" if available
-- Checks if APM exists → Shows "View in APM" if available  
-- Checks if SLO exists → Shows "Create SLO" if available
-- Always shows "Logs overview" tab, but features adapt to environment
+
+All features check for app availability before enabling:
+
+| Feature | Requires | Behavior |
+|---------|----------|----------|
+| Service name cells (APM links) | `apm` app | Shows clickable links if APM available, plain text otherwise |
+| Degraded docs control | `streams` or `apm` app | Shows row control if apps available, hidden otherwise |
+| Stacktrace control | `streams` or `apm` app | Shows row control if apps available, hidden otherwise |
+| Doc viewer integrations | `streams` or `apm` app | Shows "Logs overview" tab with features if apps available |
 
 **Result:**
-- Full-featured environments (O11y with all apps) → All features available
-- Limited environments (ES3) → Gracefully degrades, core log UX still works
-- Single codebase → No per-deployment variants needed
+- **Classic/ECH with APM/Streams**: Full experience with service links, row controls, and integrations
+- **ES3 (Serverless Search)**: Core log UX (level badges, infinite scroll, summary) without APM/Streams features
+- **Default/Security solutions**: Same as Classic - features adapt based on what's installed
+- **Single codebase**: No per-deployment variants needed
 
 ## Relationship with Observability Logs Profile
 
 ### Universal Base Logs Profile (this profile)
-- **Scope**: All solutions
-- **Purpose**: Provide base log UX everywhere
-- **Features**: Core rendering, navigation, field recommendations
-- **Excludes**: Solution-specific actions (no "View in APM", "Create SLO", etc.)
+- **Scope**: All solutions (Default, Security, Search, Observability*)
+- **Purpose**: Provide base log UX everywhere with intelligent feature detection
+- **Features**: 
+  - Core rendering (level badges, summary, infinite scroll)
+  - Capability-aware APM integration (service name links)
+  - Capability-aware row controls (degraded docs, stacktrace)
+  - Capability-aware doc viewer
+- **Activation**: Pure data-based detection, no solution restriction
 
 ### Observability Logs Profile
 - **Scope**: Observability solution only
-- **Purpose**: Extend base profile with O11y-specific features
-- **Features**: Links to Streams, APM, SLO creation, etc.
+- **Purpose**: Add O11y-specific state management and behaviors
+- **Key Difference**: Uses `logOverviewContext$` BehaviorSubject for stateful interactions
 - **Precedence**: Higher (registered before universal profile)
 
-When a user is in the Observability solution viewing logs, the Observability profile activates (not this one). When a Security analyst queries logs, this universal profile activates.
+**In Classic/ECH with APM+Streams installed**, the universal profile provides nearly identical features to the O11y profile, with the main difference being:
+- **O11y profile**: Uses stateful `logOverviewContext$` to communicate between row controls and doc viewer
+- **Universal profile**: Uses simpler stateless approach
 
-## Example Scenario
+When a user is in the Observability solution viewing logs, the Observability profile activates (providing enhanced state management). When a Security analyst queries logs, this universal profile activates (providing similar features via capability detection).
 
+## Example Scenarios
+
+### Scenario 1: Security Analyst in Classic (with APM installed)
 **User**: Security analyst investigating an incident  
 **Action**: Switch query from alerts to `FROM logs-nginx.access-*`  
 **Result**: 
 - Universal Base Logs Profile activates
-- Table transforms to show status badges, infinite scroll, error highlighting
-- No Observability-specific links appear
-- User gets log-optimized experience while staying in Security context
+- Table shows: log level badges, service name links to APM, infinite scroll
+- Row controls: degraded docs and stacktrace buttons appear
+- Doc viewer: logs overview tab with APM integration
+- User gets **full log-optimized experience** with APM/Streams features
+
+### Scenario 2: Search User in ES3 (Serverless Search)
+**User**: Developer building search application  
+**Action**: Query `FROM logs-application-*` to debug  
+**Result**: 
+- Universal Base Logs Profile activates
+- Table shows: log level badges, plain service names (no APM), infinite scroll
+- Row controls: degraded docs and stacktrace buttons **hidden** (no APM/Streams)
+- Doc viewer: standard Discover tabs only
+- User gets **core log-optimized UX** that gracefully degrades
 
 ## Testing
 
@@ -101,9 +136,8 @@ yarn test:jest --testPathPattern=universal_logs_data_source_profile
 ## Future Enhancements
 
 1. **Streaming support**: When streaming becomes available, consider enabling by default for logs
-2. **ES3 enablement**: Extend to Elasticsearch Serverless in Phase 2
-3. **Additional cell renderers**: HTTP status codes, duration fields
-4. **Doc viewer customization**: Log-specific flyout tabs
+2. **Additional cell renderers**: HTTP status codes, duration fields
+3. **Enhanced capability detection**: More granular feature flags for fine-tuned degradation
 
 ## Related Documentation
 
