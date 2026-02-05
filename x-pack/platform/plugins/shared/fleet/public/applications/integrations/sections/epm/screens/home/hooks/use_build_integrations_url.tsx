@@ -52,8 +52,8 @@ export const useBuildIntegrationsUrl = () => {
       subCategory: subCategoryId ? subCategoryId : '',
       searchTerm: searchString ? searchString : '',
       onlyAgentless: onlyAgentless || false,
-      showBeta,
-      showDeprecated,
+      showBeta: showBeta ?? false,
+      showDeprecated: showDeprecated ?? false,
     })[1];
     return url;
   };

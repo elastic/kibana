@@ -16,13 +16,15 @@ export const wrapTitle = ({
   deprecated,
   packageInfo,
   integrationInfo,
+  defaultTitle = '',
 }: {
   title?: string;
   deprecated?: boolean;
   packageInfo?: PackageInfo | null;
   integrationInfo?: RegistryPolicyTemplate;
+  defaultTitle?: string;
 }) => {
-  const titleToWrap = title || integrationInfo?.title || packageInfo?.title || '';
+  const titleToWrap = title || integrationInfo?.title || packageInfo?.title || defaultTitle;
   const isDeprecated: boolean =
     deprecated ||
     !!packageInfo?.deprecated ||

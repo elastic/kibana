@@ -333,6 +333,7 @@ export const SettingsPage: React.FC<Props> = memo(
                       <EuiSpacer size="l" />
                       <p>
                         <UpdateButton
+                          {...packageInfo}
                           name={packageInfo.name}
                           title={wrapTitle({ packageInfo })}
                           version={latestVersion}

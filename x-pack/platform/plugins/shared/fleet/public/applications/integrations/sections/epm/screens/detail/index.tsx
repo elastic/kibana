@@ -885,7 +885,7 @@ export function Detail() {
       )}
       {isEditOpen && (
         <EditIntegrationFlyout
-          integrationName={wrapTitle({ packageInfo, integrationInfo })}
+          integrationName={wrapTitle({ packageInfo, integrationInfo, defaultTitle: 'Integration' })}
           onClose={() => setIsEditOpen(false)}
           packageInfo={packageInfo}
           setIsEditOpen={setIsEditOpen}
