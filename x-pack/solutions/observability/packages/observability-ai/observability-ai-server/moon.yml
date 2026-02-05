@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/traced-es-client'
   - '@kbn/es-query'
   - '@kbn/ai-tools'
+  - '@kbn/std'
 tags:
   - shared-server
   - package
