@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
 import { FeedbackTextArea } from './feedback_text_area';
 import { EmailSection } from './email';
-import { SessionInfoDisclaimer } from './session_info_disclaimer';
+import { PrivacyAndSessionDisclaimer } from './privacy_and_session_disclaimer';
 import { CsatButtons } from './csat_buttons';
 
 export interface FeedbackBodyProps {
@@ -96,7 +96,7 @@ export const FeedbackBody = ({
         </EuiForm>
       </EuiFlexItem>
       <EuiFlexItem>
-        <SessionInfoDisclaimer />
+        <PrivacyAndSessionDisclaimer />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

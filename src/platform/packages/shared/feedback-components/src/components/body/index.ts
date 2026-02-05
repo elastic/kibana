@@ -15,6 +15,6 @@ export { CsatButtons } from './csat_buttons';
 
 export { FeedbackTextArea } from './feedback_text_area';
 
-export { SessionInfoDisclaimer } from './session_info_disclaimer';
+export { PrivacyAndSessionDisclaimer } from './privacy_and_session_disclaimer';
 
 export { FeedbackBody } from './feedback_body';

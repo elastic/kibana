@@ -8,14 +8,16 @@
  */
 
 import React from 'react';
-import { SessionInfoDisclaimer } from './session_info_disclaimer';
+import { PrivacyAndSessionDisclaimer } from './privacy_and_session_disclaimer';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/dom';
 
-describe('SessionInfoDisclaimer', () => {
-  it('should render session info disclaimer', () => {
-    renderWithI18n(<SessionInfoDisclaimer />);
+describe('PrivacyAndSessionDisclaimer', () => {
+  it('should render privacy and session disclaimers', () => {
+    renderWithI18n(<PrivacyAndSessionDisclaimer />);
 
-    expect(screen.getByTestId('feedbackSessionInfoDisclaimer')).toBeInTheDocument();
+    expect(screen.getByTestId('feedbackDisclaimerSupportInfo')).toBeInTheDocument();
+    expect(screen.getByTestId('feedbackDisclaimerSessionInfo')).toBeInTheDocument();
+    expect(screen.getByTestId('feedbackDisclaimerPrivacyStatement')).toBeInTheDocument();
   });
 });

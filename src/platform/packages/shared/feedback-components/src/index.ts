@@ -16,7 +16,7 @@ export { EmailConsentCheck } from './components';
 export { EmailSection } from './components';
 export { CsatButtons } from './components';
 export { FeedbackTextArea } from './components';
-export { SessionInfoDisclaimer } from './components';
+export { PrivacyAndSessionDisclaimer } from './components';
 export { FeedbackBody } from './components';
 
 export { SendFeedbackButton } from './components';
