@@ -22,6 +22,9 @@ cleanup() {
   if [[ -n "${SCOUT_PID:-}" ]]; then
     kill "$SCOUT_PID" 2>/dev/null || true
   fi
+  if [[ -n "${FANOUT_PIPELINE_FILE:-}" ]]; then
+    rm -f "$FANOUT_PIPELINE_FILE" 2>/dev/null || true
+  fi
 }
 trap cleanup EXIT
 
@@ -76,18 +79,21 @@ NODE
       # NOTE: we re-invoke this script with EVAL_FANOUT=0 and EVAL_PROJECT=<connector-id>
       # to avoid recursive fanout.
       group_key_safe="$(printf '%s' "$EVAL_SUITE_ID" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
-      YAML="$(cat <<EOF
+
+      # NOTE: Avoid building YAML via command substitution, because it strips trailing newlines.
+      # That can accidentally concatenate lines (producing invalid YAML) when appending blocks.
+      FANOUT_PIPELINE_FILE="$(mktemp -t kbn-evals-fanout.XXXXXX.yml)"
+      cat >"$FANOUT_PIPELINE_FILE" <<EOF
 steps:
   - group: "Evals: ${EVAL_SUITE_ID}"
     key: "kbn-evals-${group_key_safe}-fanout"
     steps:
 EOF
-)"
 
       while IFS= read -r connector_id; do
         [[ -z "$connector_id" ]] && continue
         key_safe="$(printf '%s' "$connector_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
-        YAML+=$(cat <<EOF
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "${connector_id}"
         key: "kbn-evals-${group_key_safe}-${key_safe}"
         command: "bash .buildkite/scripts/steps/evals/run_suite.sh"
@@ -110,10 +116,13 @@ EOF
             - exit_status: "*"
               limit: 1
 EOF
-)
       done <<<"$CONNECTOR_IDS"
 
-      printf '%s\n' "$YAML" | buildkite-agent pipeline upload
+      if ! buildkite-agent pipeline upload "$FANOUT_PIPELINE_FILE"; then
+        echo "Fanout pipeline upload failed. Dumping generated YAML with line numbers:"
+        nl -ba "$FANOUT_PIPELINE_FILE" || true
+        exit 1
+      fi
       echo "Fanout uploaded. Exiting parent step."
       exit 0
     fi
