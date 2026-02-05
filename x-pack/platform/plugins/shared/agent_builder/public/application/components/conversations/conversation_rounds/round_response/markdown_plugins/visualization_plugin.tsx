@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiCode, EuiText } from '@elastic/eui';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import {
-  type TabularDataResult,
+  type EsqlResults,
   type VisualizationResult,
   ToolResultType,
 } from '@kbn/agent-builder-common/tools/tool_result';
@@ -68,9 +68,9 @@ export function createVisualizationRenderer({
       </EuiCode>
     );
 
-    // First, look for tabular data results (from execute_esql)
-    let toolResult: TabularDataResult | VisualizationResult | undefined =
-      findToolResult<TabularDataResult>(steps, toolResultId, ToolResultType.tabularData);
+    // First, look for esql results (from execute_esql)
+    let toolResult: EsqlResults | VisualizationResult | undefined =
+      findToolResult<EsqlResults>(steps, toolResultId, ToolResultType.esqlResults);
 
     // If not found, look for visualization results (from create_visualization)
     if (!toolResult) {

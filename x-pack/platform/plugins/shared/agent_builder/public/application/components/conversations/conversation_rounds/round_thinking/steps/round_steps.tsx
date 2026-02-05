@@ -38,10 +38,10 @@ const labels = {
 
 // TODO: fix logic
 
-// Exposed in main thinking chain, for now query and tabular data
+// Exposed in main thinking chain, for now query and esql results
 const mainThinkingResultTypes: string[] = [
   ToolResultType.query,
-  ToolResultType.tabularData,
+  ToolResultType.esqlResults,
   ToolResultType.error,
 ];
 // Populated in flyout

@@ -8,11 +8,11 @@
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   isQueryResult,
-  isTabularDataResult,
+  isEsqlResults,
   isErrorResult,
 } from '@kbn/agent-builder-common/tools/tool_result';
 import React from 'react';
-import { TabularDataResultStep } from './tabular_data_result_step';
+import { EsqlResultsStep } from './esql_results_step';
 import { OtherResultStep } from './other_result_step';
 import { QueryResultStep } from './query_result_step';
 import { ErrorResultStep } from './error_result_step';
@@ -25,8 +25,8 @@ export const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolResult
   if (isQueryResult(toolResult)) {
     return <QueryResultStep result={toolResult} />;
   }
-  if (isTabularDataResult(toolResult)) {
-    return <TabularDataResultStep result={toolResult} />;
+  if (isEsqlResults(toolResult)) {
+    return <EsqlResultsStep result={toolResult} />;
   }
   if (isErrorResult(toolResult)) {
     return <ErrorResultStep result={toolResult} />;

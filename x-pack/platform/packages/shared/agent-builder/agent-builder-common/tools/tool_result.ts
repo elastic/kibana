@@ -9,7 +9,7 @@ import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/
 
 export enum ToolResultType {
   resource = 'resource',
-  tabularData = 'tabular_data',
+  esqlResults = 'esql_results',
   dashboard = 'dashboard',
   query = 'query',
   visualization = 'visualization',
@@ -20,7 +20,7 @@ export enum ToolResultType {
 
 interface ToolResultTypeDataMap {
   [ToolResultType.resource]: ResourceResultData;
-  [ToolResultType.tabularData]: TabularDataResultData;
+  [ToolResultType.esqlResults]: EsqlResultsData;
   [ToolResultType.dashboard]: DashboardResultData;
   [ToolResultType.query]: QueryResultData;
   [ToolResultType.visualization]: VisualizationResultData;
@@ -65,16 +65,16 @@ export interface ResourceResultData {
 
 export type ResourceResult = ToolResultMixin<ToolResultType.resource>;
 
-// tabular data
+// esql results
 
-export interface TabularDataResultData {
+export interface EsqlResultsData {
   source?: 'esql';
   query: string;
   columns: EsqlEsqlColumnInfo[];
   values: FieldValue[][];
 }
 
-export type TabularDataResult = ToolResultMixin<ToolResultType.tabularData>;
+export type EsqlResults = ToolResultMixin<ToolResultType.esqlResults>;
 
 // dashboard
 
@@ -147,8 +147,8 @@ export const isResourceResult = (result: ToolResult): result is ResourceResult =
   return result.type === ToolResultType.resource;
 };
 
-export const isTabularDataResult = (result: ToolResult): result is TabularDataResult => {
-  return result.type === ToolResultType.tabularData;
+export const isEsqlResults = (result: ToolResult): result is EsqlResults => {
+  return result.type === ToolResultType.esqlResults;
 };
 
 export const isQueryResult = (result: ToolResult): result is QueryResult => {

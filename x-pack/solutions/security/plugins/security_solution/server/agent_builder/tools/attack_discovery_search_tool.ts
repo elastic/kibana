@@ -107,9 +107,8 @@ export const attackDiscoverySearchTool = (
             },
           },
           {
-            type: ToolResultType.tabularData,
+            type: ToolResultType.esqlResults,
             data: {
-              source: 'esql',
               query: esqlQuery,
               columns: esqlResponse.columns,
               values: esqlResponse.values,

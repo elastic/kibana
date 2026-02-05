@@ -132,7 +132,7 @@ export const createNaturalLanguageSearchTool = ({
                 },
                 {
                   tool_result_id: getToolResultId(),
-                  type: ToolResultType.tabularData,
+                  type: ToolResultType.esqlResults,
                   data: {
                     source: 'esql',
                     query: response.generatedQuery,
