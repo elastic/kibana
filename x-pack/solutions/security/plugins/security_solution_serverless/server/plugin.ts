@@ -15,6 +15,7 @@ import type {
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '@kbn/security-solution-navigation';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -86,6 +87,11 @@ export class SecuritySolutionServerlessPlugin
     telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));
 
     const projectSettings = [...SECURITY_PROJECT_SETTINGS];
+
+    // This setting is only registered when `enableAlertsAndAttacksAlignment` is enabled
+    if (this.config.experimentalFeatures.enableAlertsAndAttacksAlignment) {
+      projectSettings.push(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
+    }
 
     // This setting is only registered in complete and ease tiers. Adding it to the project settings list while in the essentials tier causes an error.
     // This is a temporary UI setting to enable workflows, it's planned to be removed on 9.4.0 release.
