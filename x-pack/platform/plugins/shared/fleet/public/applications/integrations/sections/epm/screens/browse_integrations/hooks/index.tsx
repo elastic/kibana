@@ -78,18 +78,18 @@ export function useBrowseIntegrationHook({
 
     // Apply deprecated filter (beta is handled at the query level via prerelease parameter)
     // When showDeprecated is true, show ONLY deprecated integrations
-    // When showDeprecated is false or undefined, filter out deprecated integrations (show only non-deprecated)
+    // When showDeprecated is false or undefined return all integrations except deprecated ones
     const showDeprecated = urlFilters.showDeprecated;
 
     cards = cards.filter((card) => {
       const isDeprecated = 'isDeprecated' in card && card.isDeprecated === true;
 
       if (showDeprecated === true) {
-        // Show only deprecated integrations
+        // When showDeprecated is true, return only deprecated integrations
         return isDeprecated;
       } else {
-        // By default (undefined or false), filter out deprecated integrations
-        return !isDeprecated;
+        // By default (undefined or false), return all integrations except deprecated ones
+        return true;
       }
     });
 
