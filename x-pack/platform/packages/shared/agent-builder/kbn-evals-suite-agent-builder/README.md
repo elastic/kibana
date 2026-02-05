@@ -129,6 +129,12 @@ SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright 
 # Override RAG evaluator K value (takes priority over config)
 RAG_EVAL_K=5 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
 
+# Run RAG evaluators with multiple K values using patterns (Precision@K matches Precision@5, Precision@10, etc.)
+SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,Factuality" RAG_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
+
+# Override RAG evaluator K value (supports comma-separated values for multi-K evaluation)
+RAG_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
+
 # Retrieve traces from another (monitoring) cluster
 TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
 
