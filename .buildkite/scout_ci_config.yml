@@ -24,8 +24,6 @@ plugins:
     - streams
     - streams_app
     - transform
-    - fleet
-    - entity_store
     - dashboard
     - workflows_extensions
   disabled:
