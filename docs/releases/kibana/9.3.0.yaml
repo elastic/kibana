@@ -1,10 +1,9 @@
 ﻿products:
 - product: kibana
   target: 9.3.0
-- product: observability
-  target: 9.3.0
-- product: security
-  target: 9.3.0
+  repo: kibana
+hide-features:
+- test_feature1
 entries:
 - file:
     name: 238646.yaml
@@ -3544,16 +3543,17 @@ entries:
   pr: "247355"
 - file:
     name: 224552.yaml
-    checksum: 043b0f3ce378ae73e4f16799f35f7032f2045043
+    checksum: a16086dab10665e5f0ae0a30bb4bef8e776782ed
   type: feature
   title: 'Feature branch '
   products:
   - product: kibana
     target: 9.3.0
   description: Kibana Dashboards now support ownership and "write_restricted" mode. Users can now keep dashboards publicly editable or in a write-restricted state until they are ready to publish, giving them more control over who can edit their dashboards, regardless of broader space permissions.
+  feature-id: test_feature1
   areas:
   - Dashboards and Visualizations
-  pr: "224552"
+  pr: https://github.com/elastic/kibana/pull/224552
   issues:
   - https://github.com/elastic/kibana-team/issues/808
 - file:
@@ -5688,12 +5688,13 @@ entries:
   - https://github.com/elastic/kibana/issues/240376
 - file:
     name: 237790.yaml
-    checksum: b1c817e7820ec69fe4e7a9079c041e6e1dfb4007
+    checksum: e7ec58867fed0405929ed3cef1b994f36933ba6a
   type: feature
   title: Adds a functionality for removing root privilege from Fleet managed agents if applicable.
   products:
   - product: kibana
     target: 9.3.0
+  feature-id: test_feature3
   areas:
   - Data ingestion and Fleet
   pr: "237790"
@@ -6116,14 +6117,15 @@ entries:
   - https://github.com/elastic/kibana/issues/241159
 - file:
     name: 237713.yaml
-    checksum: c472c4b5a109508b1e1054a2ad2687db3bb3061c
+    checksum: e63b8a5c6c22c890e7e73c162bc8b439ba66d526
   type: feature
-  title: '[Endpoint] Add file download relative URI to response actions that provide file output'
+  title: Add file download relative URI to response actions that provide file output
   products:
   - product: kibana
     target: 9.3.0
   - product: security
     target: 9.3.0
+  feature-id: test_feature2
   areas:
   - Elastic Security solution
   pr: "237713"

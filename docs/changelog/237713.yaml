@@ -90,4 +90,5 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Endpoint] Add file download relative URI to response actions that provide file output'
+title: Add file download relative URI to response actions that provide file output
+feature-id: test_feature2
