@@ -30,37 +30,8 @@ fi
 
 passed_count=0
 failedModes=()
-noTestModes=()
-htmlReportLines=()
 
 FINAL_EXIT_CODE=0
-
-sanitize_mode_for_path() {
-  echo "$1" | sed 's/[^a-zA-Z0-9_-]/_/g'
-}
-
-cleanup_scout_reports() {
-  if [ -d ".scout/reports" ]; then
-    for dir in .scout/reports/scout-playwright-*; do
-      if [ -d "$dir" ] && [[ "$dir" != *"scout-playwright-test-failures-"* ]]; then
-        rm -rf "$dir"
-      fi
-    done
-  fi
-  # Keep .scout/reports/scout-playwright-test-failures-* and .scout/test-artifacts/ for failed test reporter
-}
-
-capture_html_report() {
-  local mode="$1"
-  if [ -f ".scout/reports/index.html" ]; then
-    local mode_slug
-    mode_slug=$(sanitize_mode_for_path "$mode")
-    local report_dir=".scout/html-reports/${mode_slug}"
-    mkdir -p "$report_dir"
-    cp -R .scout/reports/. "$report_dir"
-    htmlReportLines+=("- \`${mode}\`: [HTML report](artifact://${report_dir}/index.html)")
-  fi
-}
 
 run_failed_test_reporter_and_annotate() {
   if ! ls .scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson >/dev/null 2>&1; then
@@ -94,6 +65,7 @@ run_failed_test_reporter_and_annotate() {
   ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
 }
 
+
 echo "--- Config: $config_path"
 echo "   Modes: $(echo "$config_run_modes" | tr '\n' ' ')"
 
@@ -121,53 +93,22 @@ while read -r mode; do
     duration="${timeSec}s"
   fi
 
-  if [[ $EXIT_CODE -eq 2 ]]; then
-    noTestModes+=("$mode")
-  elif [[ $EXIT_CODE -ne 0 ]]; then
-    capture_html_report "$mode"
+  if [[ $EXIT_CODE -ne 0 ]]; then
     failedModes+=("$mode")
     FINAL_EXIT_CODE=10  # Ensure we exit with failure if any test fails with (exit code 10 to match FTR)
     echo "Scout test exited with code $EXIT_CODE for $config_path ($mode)"
     echo "^^^ +++"
   else
-    capture_html_report "$mode"
     passed_count=$((passed_count + 1))
   fi
 
-  cleanup_scout_reports
 done <<< "$config_run_modes"
-
-if [[ ${#htmlReportLines[@]} -gt 0 ]]; then
-  buildkite-agent artifact upload ".scout/html-reports/**/*"
-  {
-    echo "### Scout HTML report"
-    echo ""
-    printf '%s\n' "${htmlReportLines[@]}"
-  } | buildkite-agent annotate --style "info" --context "scout-html-report"
-elif [[ -f ".scout/reports/index.html" ]]; then
-  buildkite-agent artifact upload ".scout/reports/**/*"
-  {
-    echo "### Scout HTML report"
-    echo ""
-    echo "- [HTML report](artifact://.scout/reports/index.html)"
-  } | buildkite-agent annotate --style "info" --context "scout-html-report"
-fi
 
 if [[ ${#failedModes[@]} -gt 0 ]]; then
   run_failed_test_reporter_and_annotate
 fi
 
-echo "--- Scout Test Run Complete: passed=${passed_count} no-tests=${#noTestModes[@]} failed=${#failedModes[@]}"
-
-if [[ ${#noTestModes[@]} -gt 0 ]]; then
-{
-  echo "Scout Playwright modes without tests:"
-  echo ""
-  for mode in "${noTestModes[@]}"; do
-    echo "- $mode"
-  done
-} | buildkite-agent annotate --style "warning" --context "no-tests"
-fi
+echo "--- Scout Test Run Complete: passed=${passed_count} failed=${#failedModes[@]}"
 
 if [[ ${#failedModes[@]} -gt 0 ]]; then
   echo "❌ Failed modes:"
