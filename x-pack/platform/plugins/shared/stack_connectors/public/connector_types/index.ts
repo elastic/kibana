@@ -67,9 +67,9 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getServiceNowITSMConnectorType());
   connectorTypeRegistry.register(getServiceNowITOMConnectorType());
   connectorTypeRegistry.register(getServiceNowSIRConnectorType());
+  connectorTypeRegistry.register(getJiraConnectorType());
   connectorTypeRegistry.register(getResilientConnectorType());
   connectorTypeRegistry.register(getOpsgenieConnectorType());
-  connectorTypeRegistry.register(getJiraConnectorType());
   connectorTypeRegistry.register(getJiraServiceManagementConnectorType());
   connectorTypeRegistry.register(getOpenAIConnectorType());
   connectorTypeRegistry.register(getBedrockConnectorType());
