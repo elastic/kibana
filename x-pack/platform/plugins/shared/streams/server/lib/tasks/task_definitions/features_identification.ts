@@ -16,6 +16,7 @@ import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
+import { getErrorMessage } from '../get_error_message';
 import { MAX_FEATURE_AGE_MS } from '../../streams/feature/feature_client';
 
 export interface FeaturesIdentificationTaskParams {
@@ -144,7 +145,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
-                  : error.message;
+                  : getErrorMessage(error);
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||

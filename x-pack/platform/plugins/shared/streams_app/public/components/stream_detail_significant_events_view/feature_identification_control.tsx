@@ -14,7 +14,6 @@ import { TaskStatus, type Streams } from '@kbn/streams-schema';
 import type { AIFeatures } from '../../hooks/use_ai_features';
 import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { useTaskPolling } from '../../hooks/use_task_polling';
-import { getTaskErrorMessage } from '../../util/errors';
 import { ConnectorListButtonBase } from '../connector_list_button/connector_list_button';
 
 interface FeatureIdentificationControlProps {
@@ -140,7 +139,7 @@ export function FeatureIdentificationControl({
           calloutIcon="error"
           aiFeatures={aiFeatures}
         >
-          {getTaskErrorMessage(task.error)}
+          {task.error}
         </StateWithCallout>
       );
 

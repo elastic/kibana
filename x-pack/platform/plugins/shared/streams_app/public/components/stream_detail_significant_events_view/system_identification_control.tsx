@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import type { AIFeatures } from '../../hooks/use_ai_features';
 import { useStreamSystemsApi } from '../../hooks/use_stream_systems_api';
 import { useTaskPolling } from '../../hooks/use_task_polling';
-import { getTaskErrorMessage } from '../../util/errors';
 import { StreamSystemsFlyout } from '../stream_detail_systems/stream_systems/stream_systems_flyout';
 import { ConnectorListButtonBase } from '../connector_list_button/connector_list_button';
 
@@ -242,7 +241,7 @@ export function SystemIdentificationControl({
             color="danger"
             iconType="error"
           >
-            {getTaskErrorMessage(task.error)}
+            {task.error}
           </EuiCallOut>
         </EuiFlexItem>
       </EuiFlexGroup>

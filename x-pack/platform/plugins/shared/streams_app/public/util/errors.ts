@@ -18,14 +18,3 @@ export const getFormattedError = (error: Error) => {
   }
   return error;
 };
-
-/**
- * Safely extracts a displayable error message from a task error.
- * Handles cases where the error might be an Error object instead of
- * the expected string type due to server-side serialization edge cases.
- */
-export const getTaskErrorMessage = (error: unknown): string => {
-  if (typeof error === 'string') return error;
-  if (error instanceof Error) return error.message;
-  return String(error);
-};

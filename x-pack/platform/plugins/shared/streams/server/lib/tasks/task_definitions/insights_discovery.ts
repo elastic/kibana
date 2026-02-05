@@ -10,6 +10,7 @@ import { isInferenceProviderError } from '@kbn/inference-common';
 import type { InsightsResult } from '@kbn/streams-schema';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
+import { getErrorMessage } from '../get_error_message';
 import type { TaskParams } from '../types';
 import { generateInsights } from '../../significant_events/insights/generate_insights';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
@@ -73,7 +74,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
-                  : error.message;
+                  : getErrorMessage(error);
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||

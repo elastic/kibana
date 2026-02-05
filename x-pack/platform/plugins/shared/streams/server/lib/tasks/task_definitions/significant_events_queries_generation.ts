@@ -18,6 +18,7 @@ import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
+import { getErrorMessage } from '../get_error_message';
 import { generateSignificantEventDefinitions } from '../../significant_events/generate_significant_events';
 
 export interface SignificantEventsQueriesGenerationTaskParams {
@@ -140,7 +141,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
-                  : error.message;
+                  : getErrorMessage(error);
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
