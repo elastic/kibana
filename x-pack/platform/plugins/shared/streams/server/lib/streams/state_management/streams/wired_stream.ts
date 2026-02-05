@@ -32,7 +32,7 @@ import {
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { validateStreamlang } from '@kbn/streamlang';
-import { MAX_STREAM_NAME_LENGTH } from '../../../../../common/constants';
+import { validateStreamName } from '../../../../../common/constants';
 import { generateLayer } from '../../component_templates/generate_layer';
 import { getComponentTemplateName } from '../../component_templates/name';
 import { isDefinitionNotFoundError } from '../../errors/definition_not_found_error';
@@ -331,6 +331,15 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       };
     }
 
+    // Validate the stream's own name
+    const nameValidation = validateStreamName(this._definition.name);
+    if (!nameValidation.valid) {
+      return {
+        isValid: false,
+        errors: [new Error(nameValidation.message)],
+      };
+    }
+
     const nestingLevel = getSegments(this._definition.name).length;
 
     if (nestingLevel > MAX_NESTING_LEVEL) {
@@ -384,25 +393,18 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     const children: Set<string> = new Set();
     const prefix = this.definition.name + '.';
     for (const routing of this._definition.ingest.wired.routing) {
-      const hasUpperCaseChars = routing.destination !== routing.destination.toLowerCase();
-      if (hasUpperCaseChars) {
+      // Validate the child stream name using shared validation
+      const childNameValidation = validateStreamName(routing.destination);
+      if (!childNameValidation.valid) {
         return {
           isValid: false,
-          errors: [new Error(`Stream name cannot contain uppercase characters.`)],
+          errors: [new Error(childNameValidation.message)],
         };
       }
       if (routing.destination.length <= prefix.length) {
         return {
           isValid: false,
           errors: [new Error(`Stream name must not be empty.`)],
-        };
-      }
-      if (routing.destination.length > MAX_STREAM_NAME_LENGTH) {
-        return {
-          isValid: false,
-          errors: [
-            new Error(`Stream name cannot be longer than ${MAX_STREAM_NAME_LENGTH} characters.`),
-          ],
         };
       }
       if (children.has(routing.destination)) {

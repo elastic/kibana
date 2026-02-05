@@ -23,6 +23,7 @@ import {
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import _, { cloneDeep } from 'lodash';
+import { validateStreamName } from '../../../../../common/constants';
 import type { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
 import { StatusError } from '../../errors/status_error';
 import { validateClassicFields, validateSimulation } from '../../helpers/validate_fields';
@@ -148,6 +149,15 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     desiredState: State,
     startingState: State
   ): Promise<ValidationResult> {
+    // Validate the stream's name
+    const nameValidation = validateStreamName(this._definition.name);
+    if (!nameValidation.valid) {
+      return {
+        isValid: false,
+        errors: [new Error(nameValidation.message)],
+      };
+    }
+
     if (this.dependencies.isServerless) {
       if (isIlmLifecycle(this.getLifecycle())) {
         return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
