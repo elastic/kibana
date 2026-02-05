@@ -413,6 +413,8 @@ src/platform/packages/shared/content-management/content_editor @elastic/appex-sh
 src/platform/packages/shared/content-management/content_insights/content_insights_public @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_server @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_list/kbn-content-list-provider @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_common @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_public @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_server @elastic/appex-sharedux
@@ -3245,6 +3247,7 @@ x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 
 # Leads approval
 /AGENTS.md @elastic/kibana-tech-leads
+.cursorignore @elastic/kibana-tech-leads
 /.claude/ @elastic/kibana-tech-leads
 
 ####
