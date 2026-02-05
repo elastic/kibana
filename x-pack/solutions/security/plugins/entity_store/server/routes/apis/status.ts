@@ -17,26 +17,16 @@ import { LogExtractionState } from '../../domain/definitions/saved_objects';
 /**
  * Legacy engine descriptor from V1. will be removed in a future version.
  */
-export type LegacyEngineDescriptorV1 = z.infer<typeof LegacyEngineDescriptorV1>;
-export const LegacyEngineDescriptorV1 = LogExtractionState.pick({
-  delay: true,
-  timeout: true,
-  frequency: true,
-  lookbackPeriod: true,
-  fieldHistoryLength: true,
-  filter: true,
-}).merge(
-  z.object({
-    docsPerSecond: z.literal(-1),
-    indexPattern: z.literal(''),
-    enrichPolicyExecutionInterval: z.null(),
-    timestampField: z.literal('@timestamp'),
-    maxPageSearchSize: z.literal(10000),
-  })
-);
+type LogExtractionStateForV1 = Omit<LogExtractionState, 'additionalIndexPattern' | 'docsLimit' | 'paginationTimestamp' | 'lastExecutionTimestamp'>;
+interface LegacyEngineDescriptorV1 extends LogExtractionStateForV1 {
+  docsPerSecond: -1;
+  indexPattern: '';
+  enrichPolicyExecutionInterval: null;
+  timestampField: '@timestamp';
+  maxPageSearchSize: 10000;
+};
 
-type StatusEngine = Omit<GetStatusResult['engines'][number], 'versionState'> &
-  LegacyEngineDescriptorV1;
+type StatusEngine = Omit<GetStatusResult['engines'][number], 'versionState'> & LegacyEngineDescriptorV1;
 
 interface EntityStoreStatusResponseBody {
   status: EntityStoreStatus;
