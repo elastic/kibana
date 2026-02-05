@@ -29,7 +29,6 @@ export const LogRateAnalysisInfoPopoverButton: FC<{
       iconType="question"
       iconSide="right"
       color="hollow"
-
       onClick={onClick}
       onClickAriaLabel='Click to open "Log rate analysis info" popover'
       data-test-subj="aiopsLogRateAnalysisInfoPopoverButton"
