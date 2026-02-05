@@ -32,7 +32,7 @@ export const useWorkflowEditorStyles = () => {
         minHeight: 0,
 
         // Template variables decorations
-        '.template-variable-valid': {
+        '.template-variable-info, .template-variable-valid': {
           backgroundColor: transparentize(euiTheme.colors.primary, 0.12),
           borderRadius: '2px',
         },
