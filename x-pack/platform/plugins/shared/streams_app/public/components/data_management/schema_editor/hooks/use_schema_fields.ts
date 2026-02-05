@@ -246,5 +246,9 @@ export const getDefinitionFields = (definition: Streams.ingest.all.GetResponse):
     status: 'mapped',
   }));
 
-  return [...mappedFields, ...inheritedFields];
+  // Filter out inherited fields that are overridden by mapped fields (more specific wins)
+  const mappedFieldNames = new Set(mappedFields.map((f) => f.name));
+  const filteredInheritedFields = inheritedFields.filter((f) => !mappedFieldNames.has(f.name));
+
+  return [...mappedFields, ...filteredInheritedFields];
 };

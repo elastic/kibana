@@ -451,6 +451,98 @@ describe('useSchemaFields', () => {
       expect(fields).toEqual([]);
     });
 
+    it('deduplicates fields that exist in both inherited_fields and wired.fields', () => {
+      // Regression test: when a child stream overrides a field from a parent (e.g., to add a description),
+      // the same field may appear in both inherited_fields and wired.fields. The mapped (local) version
+      // should take precedence, and the field should only appear once in the result.
+      const definition = createMockWiredStreamDefinition({
+        stream: {
+          name: 'logs.child',
+          description: '',
+          updated_at: '2024-01-01T00:00:00.000Z',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [], updated_at: '2024-01-01T00:00:00.000Z' },
+            settings: {},
+            failure_store: { inherit: {} },
+            wired: {
+              fields: {
+                // Child overrides 'message' to add a description
+                message: {
+                  type: 'keyword',
+                  description: 'Child stream description for message field',
+                },
+              },
+              routing: [],
+            },
+          },
+        },
+        inherited_fields: {
+          // Parent also defines 'message' without a description
+          message: {
+            type: 'keyword',
+            from: 'logs.parent',
+          },
+        },
+      });
+
+      const fields = getDefinitionFields(definition);
+
+      // Field should only appear once (deduplicated)
+      const messageFields = fields.filter((f) => f.name === 'message');
+      expect(messageFields).toHaveLength(1);
+
+      // The mapped (local) version should win, with status 'mapped' and the child's description
+      expect(messageFields[0]).toEqual(
+        expect.objectContaining({
+          name: 'message',
+          type: 'keyword',
+          description: 'Child stream description for message field',
+          status: 'mapped',
+          parent: 'logs.child',
+        })
+      );
+    });
+
+    it('does not show pending changes when an inherited field is locally overridden with description', async () => {
+      // Regression test: when a field exists in both inherited_fields and wired.fields,
+      // it should not be marked as uncommitted on initial load (the save bar should not show).
+      const definition = createMockWiredStreamDefinition({
+        stream: {
+          name: 'logs.child',
+          description: '',
+          updated_at: '2024-01-01T00:00:00.000Z',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [], updated_at: '2024-01-01T00:00:00.000Z' },
+            settings: {},
+            failure_store: { inherit: {} },
+            wired: {
+              fields: {
+                message: {
+                  type: 'keyword',
+                  description: 'Local description',
+                },
+              },
+              routing: [],
+            },
+          },
+        },
+        inherited_fields: {
+          message: {
+            type: 'keyword',
+            from: 'logs.parent',
+          },
+        },
+      });
+
+      const { result } = renderUseSchemaFields(definition);
+      await waitForFieldsToInitialize(result);
+
+      // Should have no pending changes on initial load
+      expect(result.current.pendingChangesCount).toBe(0);
+    });
+
     it('extracts fields with type "unmapped" from wired stream definition with status "mapped"', () => {
       // Fields with type: 'unmapped' are documentation-only fields that exist in the definition
       // but are not mapped to Elasticsearch. The getDefinitionFields function correctly assigns

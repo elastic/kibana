@@ -248,7 +248,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     }
 
     const propertiesForSimulation: StreamsMappingProperties = Object.fromEntries(
-      userFieldDefinitions.map(({ name, ...field }) => [name, field])
+      userFieldDefinitions.map(({ name, description: _description, ...field }) => [name, field])
     );
 
     const fieldDefinitionKeys = Object.keys(propertiesForSimulation);
