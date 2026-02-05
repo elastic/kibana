@@ -180,4 +180,16 @@ export class LensApp {
     await this.chartSwitchPopover.click();
     await expect(this.chartSwitchList).toBeVisible();
   }
+  
+  getConvertToEsqlButton() {
+    return this.page.getByRole('button', { name: 'Convert to ES|QL' });
+  }
+
+  getConvertToEsqModal() {
+    return this.page.getByTestId('lnsConvertToEsqlModal');
+  }
+
+  getConvertToEsqModalConfirmButton() {
+    return this.page.getByTestId('confirmModalConfirmButton');
+  }
 }
