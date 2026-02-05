@@ -9,6 +9,8 @@ import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import { generateStreamDescription } from '@kbn/streams-ai';
+import type { GenerateDescriptionResult } from '@kbn/streams-schema';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -26,10 +28,6 @@ export interface DescriptionGenerationTaskParams {
   start: number;
   end: number;
   streamName: string;
-}
-
-export interface GenerateDescriptionResult {
-  description: string;
 }
 
 export function createStreamsDescriptionGenerationTask(taskContext: TaskContext) {
@@ -94,7 +92,7 @@ export function createStreamsDescriptionGenerationTask(taskContext: TaskContext)
                   errorMessage.includes('ERR_CANCELED') ||
                   errorMessage.includes('Request was aborted')
                 ) {
-                  return;
+                  return getDeleteTaskRunResult();
                 }
 
                 taskContext.logger.error(
@@ -111,6 +109,7 @@ export function createStreamsDescriptionGenerationTask(taskContext: TaskContext)
                   },
                   errorMessage
                 );
+                return getDeleteTaskRunResult();
               }
             },
             runContext,
