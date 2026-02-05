@@ -14,13 +14,14 @@ apiTest.describe(
   'Cross-compatibility - User Agent Processor',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    // *** Compatible Cases ***
-    // ES|QL now supports the USER_AGENT command for parsing browser user agent strings.
-    // These tests verify that both Ingest Pipeline and ES|QL produce similar results.
+    // *** Ingest Pipeline Only ***
+    // ES|QL does not currently support user_agent parsing.
+    // The ES|QL transpiler emits a warning instead of a USER_AGENT command.
+    // These tests verify Ingest Pipeline works correctly and ES|QL emits warning.
 
     apiTest(
-      'should extract user agent in both ingest pipeline and ES|QL',
-      async ({ testBed, esql }) => {
+      'should extract user agent in ingest pipeline (ES|QL emits warning)',
+      async ({ testBed }) => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
@@ -34,9 +35,8 @@ apiTest.describe(
         const { processors } = transpileIngestPipeline(streamlangDSL);
         const { query } = transpileEsql(streamlangDSL);
 
-        // ES|QL should contain the USER_AGENT command
-        expect(query).toContain('USER_AGENT');
-        expect(query).toContain('parsed_agent');
+        // ES|QL should contain a warning since USER_AGENT is not supported
+        expect(query).toContain('WARNING: user_agent processor not supported in ES|QL');
 
         const docs = [
           {
@@ -49,23 +49,15 @@ apiTest.describe(
         await testBed.ingest('ingest-user-agent-compat', docs, processors);
         const ingestResult = await testBed.getDocs('ingest-user-agent-compat');
 
-        // ES|QL should also process user_agent with USER_AGENT command
-        await testBed.ingest('esql-user-agent-compat', docs);
-        const esqlResult = await esql.queryOnIndex('esql-user-agent-compat', query);
-
         // Ingest Pipeline: user_agent is extracted
         expect(ingestResult[0]).toHaveProperty('parsed_agent.name', 'Chrome');
         expect(ingestResult[0]).toHaveProperty('parsed_agent.os.name', 'Mac OS X');
-
-        // ES|QL: user_agent is also extracted via USER_AGENT command
-        expect(esqlResult.documents[0]).toHaveProperty('parsed_agent.name', 'Chrome');
-        expect(esqlResult.documents[0]).toHaveProperty('parsed_agent.os.name', 'Mac OS X');
       }
     );
 
     apiTest(
-      'should extract user agent in both transpilers (ES|QL extracts all properties)',
-      async ({ testBed, esql }) => {
+      'should extract user agent with properties in ingest pipeline (ES|QL emits warning)',
+      async ({ testBed }) => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
@@ -79,6 +71,9 @@ apiTest.describe(
         const { processors } = transpileIngestPipeline(streamlangDSL);
         const { query } = transpileEsql(streamlangDSL);
 
+        // ES|QL emits warning
+        expect(query).toContain('WARNING: user_agent processor not supported in ES|QL');
+
         const docs = [
           {
             agent_string:
@@ -89,26 +84,17 @@ apiTest.describe(
         await testBed.ingest('ingest-user-agent-props', docs, processors);
         const ingestResult = await testBed.getDocs('ingest-user-agent-props');
 
-        await testBed.ingest('esql-user-agent-props', docs);
-        const esqlResult = await esql.queryOnIndex('esql-user-agent-props', query);
-
         // Ingest Pipeline: only specified properties are extracted
         expect(ingestResult[0]).toHaveProperty('user_agent.name', 'Chrome');
         expect(ingestResult[0]).toHaveProperty('user_agent.version', '91.0.4472.124');
         expect(ingestResult[0]).toHaveProperty('user_agent.os.name', 'Windows');
         expect(ingestResult[0]).not.toHaveProperty('user_agent.device');
-
-        // ES|QL: USER_AGENT extracts all properties (properties filter not supported in ES|QL)
-        // Note: ES|QL USER_AGENT extracts all properties, unlike Ingest which can filter
-        expect(esqlResult.documents[0]).toHaveProperty('user_agent.name', 'Chrome');
-        expect(esqlResult.documents[0]).toHaveProperty('user_agent.version', '91.0.4472.124');
-        expect(esqlResult.documents[0]).toHaveProperty('user_agent.os.name', 'Windows');
       }
     );
 
     apiTest(
-      'should handle where condition in both ingest pipeline and ES|QL',
-      async ({ testBed, esql }) => {
+      'should handle where condition in ingest pipeline (ES|QL emits warning)',
+      async ({ testBed }) => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
@@ -126,6 +112,9 @@ apiTest.describe(
         const { processors } = transpileIngestPipeline(streamlangDSL);
         const { query } = transpileEsql(streamlangDSL);
 
+        // ES|QL emits warning
+        expect(query).toContain('WARNING: user_agent processor not supported in ES|QL');
+
         const docs = [
           {
             case: 'parse',
@@ -142,16 +131,9 @@ apiTest.describe(
         await testBed.ingest('ingest-user-agent-where', docs, processors);
         const ingestResult = await testBed.getDocsOrdered('ingest-user-agent-where');
 
-        await testBed.ingest('esql-user-agent-where', docs);
-        const esqlResult = await esql.queryOnIndex('esql-user-agent-where', query);
-
         // Ingest Pipeline: only first document is processed due to where condition
         expect(ingestResult[0]).toHaveProperty('parsed_agent.name', 'Chrome');
         expect(ingestResult[1]).not.toHaveProperty('parsed_agent');
-
-        // ES|QL: same behavior - only first document is processed due to where condition
-        expect(esqlResult.documentsOrdered[0]).toHaveProperty('parsed_agent.name', 'Chrome');
-        expect(esqlResult.documentsOrdered[1]).not.toHaveProperty('parsed_agent');
       }
     );
 
@@ -190,8 +172,8 @@ apiTest.describe(
     });
 
     apiTest(
-      'should handle ignore_missing in both ingest pipeline and ES|QL',
-      async ({ testBed, esql }) => {
+      'should handle ignore_missing in ingest pipeline (ES|QL emits warning)',
+      async ({ testBed }) => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
@@ -206,6 +188,9 @@ apiTest.describe(
         const { processors } = transpileIngestPipeline(streamlangDSL);
         const { query } = transpileEsql(streamlangDSL);
 
+        // ES|QL emits warning
+        expect(query).toContain('WARNING: user_agent processor not supported in ES|QL');
+
         // Document without the source field
         const docs = [
           {
@@ -216,23 +201,15 @@ apiTest.describe(
         await testBed.ingest('ingest-user-agent-ignore', docs, processors);
         const ingestResult = await testBed.getDocs('ingest-user-agent-ignore');
 
-        await testBed.ingest('esql-user-agent-ignore', docs);
-        const esqlResult = await esql.queryOnIndex('esql-user-agent-ignore', query);
-
         // Ingest Pipeline: document is ingested without error (ignore_missing: true)
         expect(ingestResult).toHaveLength(1);
         expect(ingestResult[0]).not.toHaveProperty('parsed_agent');
         expect(ingestResult[0]).toHaveProperty('other_field', 'some_value');
-
-        // ES|QL: document is returned without user_agent processing (conditional execution handles missing field)
-        expect(esqlResult.documents).toHaveLength(1);
-        expect(esqlResult.documents[0]).not.toHaveProperty('parsed_agent');
-        expect(esqlResult.documents[0]).toHaveProperty('other_field', 'some_value');
       }
     );
 
     apiTest(
-      'should work with mixed processors where user_agent is between supported processors',
+      'should work with mixed processors in ingest pipeline (ES|QL skips user_agent)',
       async ({ testBed, esql }) => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
@@ -257,6 +234,9 @@ apiTest.describe(
         const { processors } = transpileIngestPipeline(streamlangDSL);
         const { query } = transpileEsql(streamlangDSL);
 
+        // ES|QL should contain warning for user_agent but still process other steps
+        expect(query).toContain('WARNING: user_agent processor not supported in ES|QL');
+
         const docs = [
           {
             agent_string: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/120.0.0.0',
@@ -275,9 +255,11 @@ apiTest.describe(
         expect(esqlResult.documents[0]).toHaveProperty('before_user_agent', 'before');
         expect(esqlResult.documents[0]).toHaveProperty('after_user_agent', 'after');
 
-        // Both should have user_agent parsed
+        // Ingest Pipeline: user_agent is parsed
         expect(ingestResult[0]).toHaveProperty('parsed_agent.name', 'Chrome');
-        expect(esqlResult.documents[0]).toHaveProperty('parsed_agent.name', 'Chrome');
+
+        // ES|QL: user_agent is NOT parsed (warning was emitted instead)
+        expect(esqlResult.documents[0]).not.toHaveProperty('parsed_agent');
       }
     );
   }
