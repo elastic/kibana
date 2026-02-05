@@ -90,25 +90,25 @@ EOF
         YAML+=$(cat <<EOF
       - label: "${connector_id}"
         key: "kbn-evals-${group_key_safe}-${key_safe}"
-    command: "bash .buildkite/scripts/steps/evals/run_suite.sh"
-    env:
-      KBN_EVALS: "1"
-      EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
-      EVAL_PROJECT: "${connector_id}"
-      EVAL_FANOUT: "0"
-      TEST_RUN_ID: "${TEST_RUN_ID:-}"
-    timeout_in_minutes: 60
-    concurrency_group: "kbn-evals-${EVAL_SUITE_ID}"
-    concurrency: ${EVAL_FANOUT_CONCURRENCY}
-    agents:
-      machineType: n2-standard-8
-      preemptible: true
-    retry:
-      automatic:
-        - exit_status: "-1"
-          limit: 3
-        - exit_status: "*"
-          limit: 1
+        command: "bash .buildkite/scripts/steps/evals/run_suite.sh"
+        env:
+          KBN_EVALS: "1"
+          EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+          EVAL_PROJECT: "${connector_id}"
+          EVAL_FANOUT: "0"
+          TEST_RUN_ID: "${TEST_RUN_ID:-}"
+        timeout_in_minutes: 60
+        concurrency_group: "kbn-evals-${group_key_safe}"
+        concurrency: ${EVAL_FANOUT_CONCURRENCY}
+        agents:
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: "-1"
+              limit: 3
+            - exit_status: "*"
+              limit: 1
 EOF
 )
       done <<<"$CONNECTOR_IDS"
