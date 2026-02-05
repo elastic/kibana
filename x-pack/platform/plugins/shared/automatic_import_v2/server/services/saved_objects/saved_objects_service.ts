@@ -32,7 +32,7 @@ import { IntegrationAlreadyExistsError } from '../../errors';
 export interface UpdateDataStreamParams {
   integrationId: string;
   dataStreamId: string;
-  ingestPipeline: string;
+  ingestPipeline: Record<string, unknown>;
   results?: Array<Record<string, unknown>>;
   status: keyof typeof TASK_STATUSES;
 }
@@ -571,8 +571,8 @@ export class AutomaticImportSavedObjectService {
       const updatedDataStreamData: DataStreamAttributes = {
         ...dataStream.attributes,
         result: {
-          ingest_pipeline: ingestPipeline,
-          results,
+          ingest_pipeline: ingestPipeline as any,
+          ...(results ? { results } : {}),
         },
         job_info: {
           ...dataStream.attributes.job_info,

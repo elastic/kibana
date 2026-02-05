@@ -1075,7 +1075,7 @@ describe('AutomaticImportSavedObjectService', () => {
       expect(initialDataStream.attributes.result).toBeUndefined();
 
       // Update the data stream with ingest pipeline and completed status
-      const ingestPipeline = JSON.stringify({
+      const ingestPipeline = {
         processors: [
           {
             set: {
@@ -1084,7 +1084,7 @@ describe('AutomaticImportSavedObjectService', () => {
             },
           },
         ],
-      });
+      };
 
       await savedObjectService.updateDataStreamSavedObjectAttributes({
         integrationId: 'test-update-ds-integration',
@@ -1100,7 +1100,7 @@ describe('AutomaticImportSavedObjectService', () => {
       );
       expect(updatedDataStream.attributes.job_info.status).toBe(TASK_STATUSES.completed);
       expect(updatedDataStream.attributes.result).toBeDefined();
-      expect(updatedDataStream.attributes.result?.ingest_pipeline).toBe(ingestPipeline);
+      expect(updatedDataStream.attributes.result?.ingest_pipeline).toEqual(ingestPipeline);
 
       // Cleanup
       await savedObjectsClient.delete(
@@ -1115,7 +1115,7 @@ describe('AutomaticImportSavedObjectService', () => {
         savedObjectService.updateDataStreamSavedObjectAttributes({
           integrationId: '',
           dataStreamId: 'test-ds',
-          ingestPipeline: '{}',
+          ingestPipeline: {},
           status: TASK_STATUSES.completed,
         })
       ).rejects.toThrow('Integration ID is required');
@@ -1126,7 +1126,7 @@ describe('AutomaticImportSavedObjectService', () => {
         savedObjectService.updateDataStreamSavedObjectAttributes({
           integrationId: 'test-integration',
           dataStreamId: '',
-          ingestPipeline: '{}',
+          ingestPipeline: {},
           status: TASK_STATUSES.completed,
         })
       ).rejects.toThrow('Data stream ID is required');
@@ -1137,7 +1137,7 @@ describe('AutomaticImportSavedObjectService', () => {
         savedObjectService.updateDataStreamSavedObjectAttributes({
           integrationId: 'non-existent-integration',
           dataStreamId: 'non-existent-ds',
-          ingestPipeline: '{}',
+          ingestPipeline: {},
           status: TASK_STATUSES.completed,
         })
       ).rejects.toThrow('Data stream non-existent-ds not found');

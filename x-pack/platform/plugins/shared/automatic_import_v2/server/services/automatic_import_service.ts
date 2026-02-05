@@ -329,7 +329,7 @@ export class AutomaticImportService {
     integrationId: string,
     dataStreamId: string
   ): Promise<{
-    ingest_pipeline: string;
+    ingest_pipeline: Record<string, unknown>;
     results: Array<Record<string, unknown>>;
   }> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
@@ -347,15 +347,15 @@ export class AutomaticImportService {
       `Data stream ${dataStreamId} results: ${JSON.stringify(dataStreamSO.attributes.result)}`
     );
 
-    const ingestPipeline = dataStreamSO.attributes.result?.ingest_pipeline;
+    const ingestPipelineObj = dataStreamSO.attributes.result?.ingest_pipeline;
     const results = dataStreamSO.attributes.result?.results ?? [];
 
-    if (!ingestPipeline) {
+    if (!ingestPipelineObj) {
       throw new Error(`Data stream ${dataStreamId} has no ingest pipeline results`);
     }
 
     return {
-      ingest_pipeline: ingestPipeline,
+      ingest_pipeline: ingestPipelineObj,
       results,
     };
   }

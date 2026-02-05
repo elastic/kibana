@@ -213,10 +213,10 @@ export class TaskManagerService {
 
       this.logger.debug(`Task ${taskId} completed successfully`);
 
-      // Extract and convert the pipeline to JSON string
-      const pipelineString = JSON.stringify(result.current_pipeline || {});
-
+      const pipelineObject = (result.current_pipeline || {}) as Record<string, unknown>;
       const pipelineGenerationResultsObjects = result.pipeline_generation_results;
+
+      this.logger.debug(`Pipeline object: ${JSON.stringify(pipelineObject)}`);
       this.logger.debug(
         `Pipeline generation results objects: ${JSON.stringify(result.pipeline_generation_results)}`
       );
@@ -225,7 +225,7 @@ export class TaskManagerService {
       await automaticImportSavedObjectService.updateDataStreamSavedObjectAttributes({
         integrationId,
         dataStreamId,
-        ingestPipeline: pipelineString,
+        ingestPipeline: pipelineObject,
         results: pipelineGenerationResultsObjects,
         status: TASK_STATUSES.completed,
       });
@@ -237,7 +237,7 @@ export class TaskManagerService {
         state: {
           task_status: TASK_STATUSES.completed,
           result: {
-            ingest_pipeline: pipelineString,
+            ingest_pipeline: pipelineObject,
             pipeline_generation_results: pipelineGenerationResultsObjects,
           },
         },
