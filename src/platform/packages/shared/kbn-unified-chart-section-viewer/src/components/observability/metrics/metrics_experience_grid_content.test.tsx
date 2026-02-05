@@ -108,6 +108,9 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutTabChange: jest.fn(),
     });
 
     usePaginationMock.mockReturnValue({
@@ -162,6 +165,9 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: 'cpu',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutTabChange: jest.fn(),
     });
 
     const cpuFields = allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu'));
