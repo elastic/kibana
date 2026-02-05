@@ -159,20 +159,6 @@ const logFlattenedConfigs = (flattenedConfigs: FlattenedConfigGroup[], log: Tool
   });
 };
 
-const sortConfigsByCleanEnvTag = (modules: ModuleDiscoveryInfo[]): ModuleDiscoveryInfo[] => {
-  return modules.map((module) => ({
-    ...module,
-    configs: [...module.configs].sort((left, right) => {
-      const leftIsCleanEnv = left.tags.includes(CLEAN_ENV_TAG);
-      const rightIsCleanEnv = right.tags.includes(CLEAN_ENV_TAG);
-      if (leftIsCleanEnv !== rightIsCleanEnv) {
-        return leftIsCleanEnv ? -1 : 1;
-      }
-      return left.path.localeCompare(right.path);
-    }),
-  }));
-};
-
 const handleFlattenedOutput = (
   filteredModules: ModuleDiscoveryInfo[],
   flagsReader: FlagsReader,
@@ -183,9 +169,7 @@ const handleFlattenedOutput = (
     ? filterModulesByScoutCiConfig(log, filteredModules)
     : filteredModules;
 
-  const flattenedConfigs = flattenModulesByServerRunFlag(
-    sortConfigsByCleanEnvTag(modulesToFlatten)
-  );
+  const flattenedConfigs = flattenModulesByServerRunFlag(modulesToFlatten);
 
   if (flagsReader.boolean('save')) {
     saveFlattenedConfigGroups(flattenedConfigs, log);
@@ -240,9 +224,8 @@ const handleNonFlattenedOutput = (
 ): void => {
   if (flagsReader.boolean('save')) {
     const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModules);
-    const sortedForCiModules = sortConfigsByCleanEnvTag(filteredForCiModules);
     // 'streams_app' tests are quite time consuming, let's split run by 'serverRunFlags' before saving
-    const splitModules = splitStreamsTestsByServerRunFlags(sortedForCiModules);
+    const splitModules = splitStreamsTestsByServerRunFlags(filteredForCiModules);
     saveModuleDiscoveryInfo(splitModules, log);
 
     const { plugins: savedPluginCount, packages: savedPackageCount } =
@@ -259,7 +242,7 @@ const handleNonFlattenedOutput = (
     return;
   }
 
-  logDiscoveredModules(sortConfigsByCleanEnvTag(filteredModules), log);
+  logDiscoveredModules(filteredModules, log);
 };
 
 // Discovers and processes Playwright configuration files with Scout tests
