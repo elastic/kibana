@@ -11,6 +11,12 @@ import { times } from 'lodash';
 import type { Locator, Page } from 'playwright';
 import type { monaco } from '@kbn/monaco';
 
+interface WithMonacoEnvironment {
+  MonacoEnvironment: {
+    monaco: typeof monaco;
+  };
+}
+
 export const journey = new Journey({
   kbnArchives: ['src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view'],
   esArchives: ['src/platform/test/functional/fixtures/es_archiver/many_fields'],
@@ -113,14 +119,15 @@ const setMonacoEditorValue = async (value: string, page: Page) => {
   // Wait for Monaco to be ready
   await page.waitForFunction(() => {
     // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
-    const monacoEditor = getMonacoEditorInstance();
+    const monacoEditor = (window as unknown as WithMonacoEnvironment).MonacoEnvironment.monaco
+      .editor;
     return Boolean(monacoEditor?.getModels && monacoEditor.getModels().length);
   });
 
   // Set the value directly via Monaco's API
   await page.evaluate(
     ({ codeEditorValue }) => {
-      const editor = getMonacoEditorInstance();
+      const editor = (window as unknown as WithMonacoEnvironment).MonacoEnvironment.monaco.editor;
       const models = editor.getModels();
       models[0].setValue(codeEditorValue);
     },
@@ -130,7 +137,7 @@ const setMonacoEditorValue = async (value: string, page: Page) => {
   // Assert the value has been set correctly
   await page.waitForFunction(
     ({ expected }) => {
-      const editor = getMonacoEditorInstance();
+      const editor = (window as unknown as WithMonacoEnvironment).MonacoEnvironment.monaco.editor;
       const model = editor.getModels()[0];
       return model ? model.getValue() === expected : false;
     },
@@ -148,17 +155,4 @@ const buildLargeQuery = (linesNumber: number) => {
 
   const largeQuery = ['FROM indices-stats*', ...evalLines].join('\n');
   return largeQuery;
-};
-
-const getMonacoEditorInstance = () => {
-  // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
-  return (
-    window as {
-      MonacoEnvironment: {
-        monaco: {
-          editor: typeof monaco.editor;
-        };
-      };
-    }
-  ).MonacoEnvironment!.monaco.editor;
 };
