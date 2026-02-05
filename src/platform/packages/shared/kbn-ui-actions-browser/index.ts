@@ -8,10 +8,3 @@
  */
 
 export type * from './src/types';
-export type { Trigger, RowClickContext } from './src/triggers';
-export {
-  VISUALIZE_FIELD_TRIGGER,
-  VISUALIZE_GEO_FIELD_TRIGGER,
-  ROW_CLICK_TRIGGER,
-  defaultTrigger,
-} from './src/triggers';

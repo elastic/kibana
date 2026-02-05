@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 import { asyncMap } from '@kbn/std';
-import type { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
+import type { Trigger, ActionRegistry, TriggerToActionsRegistry } from '../types';
 import type { Action, ActionDefinition, FrequentCompatibilityChangeAction } from '../actions';
 import { ActionInternal } from '../actions';
 import { UiActionsExecutionService } from './ui_actions_execution_service';
 import { triggers } from '../triggers';
 
 export interface UiActionsServiceParams {
-  readonly triggers?: TriggerRegistry;
   readonly actions?: ActionRegistry;
 
   /**

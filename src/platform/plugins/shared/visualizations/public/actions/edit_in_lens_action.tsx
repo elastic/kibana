@@ -27,6 +27,7 @@ import {
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 import { take } from 'rxjs';
+import { DASHBOARD_VISUALIZATION_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   apiHasVisualizeConfig,
   type HasVisualizeConfig,
@@ -40,7 +41,6 @@ import {
   getUiActions,
   getUsageCollection,
 } from '../services';
-import { DASHBOARD_VISUALIZATION_PANEL_TRIGGER } from '../triggers';
 import { ACTION_EDIT_IN_LENS } from './constants';
 
 const displayName = i18n.translate('visualizations.actions.editInLens.displayName', {

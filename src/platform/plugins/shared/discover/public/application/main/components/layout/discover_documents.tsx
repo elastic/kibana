@@ -52,6 +52,7 @@ import { useQuerySubscriber } from '@kbn/unified-field-list';
 import type { DocViewerApi, DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import useLatest from 'react-use/lib/useLatest';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/redux';
@@ -73,11 +74,7 @@ import type {
   OpenInNewTabParams,
   UpdateESQLQueryFn,
 } from '../../../../context_awareness';
-import {
-  DISCOVER_CELL_ACTIONS_TRIGGER,
-  useAdditionalCellActions,
-  useProfileAccessor,
-} from '../../../../context_awareness';
+import { useAdditionalCellActions, useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
   useCurrentTabAction,
@@ -609,7 +606,7 @@ function DiscoverDocumentsComponent({
             onUpdateDataGridDensity={onUpdateDensity}
             onUpdateESQLQuery={onUpdateESQLQuery}
             query={query}
-            cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+            cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER_ID}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"
             initialState={dataGridUiState}

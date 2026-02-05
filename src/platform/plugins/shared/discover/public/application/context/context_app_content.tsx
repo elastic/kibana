@@ -35,6 +35,7 @@ import { useQuerySubscriber } from '@kbn/unified-field-list';
 import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
+import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../common/constants';
 import { LoadingStatus } from './services/context_query_state';
@@ -45,11 +46,7 @@ import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
-import {
-  DISCOVER_CELL_ACTIONS_TRIGGER,
-  useAdditionalCellActions,
-  useProfileAccessor,
-} from '../../context_awareness';
+import { useAdditionalCellActions, useProfileAccessor } from '../../context_awareness';
 import { createDataSource } from '../../../common/data_sources';
 
 export interface ContextAppContentProps {
@@ -224,7 +221,7 @@ export function ContextAppContent({
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <DiscoverGrid
             ariaLabelledBy="surDocumentsAriaLabel"
-            cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+            cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER_ID}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"
             columns={columns}

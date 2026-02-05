@@ -10,7 +10,7 @@
 import { uniqBy } from 'lodash';
 import type { Defer } from '@kbn/kibana-utils-plugin/public';
 import { defer as createDefer } from '@kbn/kibana-utils-plugin/public';
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
+import type { Trigger } from '../types';
 import type { Action } from '../actions';
 import { buildContextMenuForActions, openContextMenu } from '../context_menu';
 

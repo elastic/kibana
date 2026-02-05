@@ -26,8 +26,7 @@ export type {
   PresentableGroup as UiActionsPresentableGroup,
   PresentableGrouping as UiActionsPresentableGrouping,
 } from '@kbn/ui-actions-browser/src/types';
-export type { Trigger, RowClickContext } from '@kbn/ui-actions-browser/src/triggers';
-export type { VisualizeFieldContext } from './types';
+export type { Trigger, RowClickContext, VisualizeFieldContext } from './types';
 export {
   ACTION_VISUALIZE_FIELD,
   ACTION_VISUALIZE_GEO_FIELD,
@@ -39,3 +38,4 @@ export type {
   ActionMenuItemProps,
   FrequentCompatibilityChangeAction,
 } from './actions';
+export { triggers } from './triggers';

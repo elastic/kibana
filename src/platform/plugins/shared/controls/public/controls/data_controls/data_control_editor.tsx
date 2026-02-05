@@ -32,7 +32,6 @@ import {
 } from '@elastic/eui';
 import type { ControlGroupEditorConfig } from '@kbn/control-group-renderer';
 import { apiHasEditorConfig } from '@kbn/control-group-renderer';
-import { CONTROL_MENU_TRIGGER } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { type SerializedTitles } from '@kbn/presentation-publishing';
@@ -43,10 +42,9 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { asyncForEach } from '@kbn/std';
 
-import {
-  addControlMenuTrigger,
-  type CreateControlTypeAction,
-} from '../../actions/control_panel_actions';
+import { triggers } from '@kbn/ui-actions-plugin/public';
+import { CONTROL_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { type CreateControlTypeAction } from '../../actions/control_panel_actions';
 import { coreServices, dataViewsService, uiActionsService } from '../../services/kibana_services';
 import { DataControlEditorStrings } from './data_control_constants';
 
@@ -114,7 +112,7 @@ const CompatibleControlTypesComponent = ({
 
   const controlTypeContext = useMemo(
     () => ({
-      trigger: addControlMenuTrigger,
+      trigger: triggers[CONTROL_MENU_TRIGGER],
       embeddable: undefined, // parentApi isn't necessary for this
       state: { dataViewId, fieldName },
     }),
@@ -433,7 +431,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                   // we need to create a new control from scratch
                   try {
                     controlActionRegistry[selectedControlType]?.execute({
-                      trigger: addControlMenuTrigger,
+                      trigger: triggers[CONTROL_MENU_TRIGGER],
                       embeddable: parentApi,
                       state: transformedState ?? editorState,
                       controlId,

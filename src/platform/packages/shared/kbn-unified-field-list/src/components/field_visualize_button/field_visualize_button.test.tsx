@@ -9,15 +9,14 @@
 
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { ActionInternal } from '@kbn/ui-actions-plugin/public';
+import { ACTION_VISUALIZE_LENS_FIELD, ActionInternal } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { getFieldVisualizeButton } from './field_visualize_button';
 import type { Trigger, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import {
-  ACTION_VISUALIZE_LENS_FIELD,
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
-} from '@kbn/ui-actions-plugin/public';
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 

@@ -146,9 +146,10 @@ export const LensChart = (props: {
             onClick={() => {
               props?.setPanelActive?.(props.isESQL ? 1 : 2);
               if (triggerOptions) {
-                props.plugins.uiActions
-                  .getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER')
-                  .exec(triggerOptions);
+                props.plugins.uiActions.executeTriggerActions(
+                  'IN_APP_EMBEDDABLE_EDIT_TRIGGER',
+                  triggerOptions
+                );
                 props?.setIsinlineEditingVisible?.(true);
               }
             }}

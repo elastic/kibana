@@ -8,7 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 import {
   ADD_PANEL_TRIGGER,
   ALERT_RULE_TRIGGER,
@@ -51,6 +50,7 @@ import {
   SECURITY_CELL_ACTIONS_ALERTS_COUNT,
   SECURITY_CELL_ACTIONS_CASE_EVENTS,
 } from '../common/trigger_ids';
+import type { Trigger } from './types';
 
 export const triggers: { [key: string]: Trigger } = {
   [ADD_PANEL_TRIGGER]: {

@@ -8,9 +8,7 @@
 import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   areTriggersDisabled,
   initializeTimeRangeManager,
@@ -22,6 +20,10 @@ import {
 import { BehaviorSubject, merge } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import {
+  APPLY_FILTER_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { MapApi } from './types';
 import { SavedMap } from '../routes/map_page';
