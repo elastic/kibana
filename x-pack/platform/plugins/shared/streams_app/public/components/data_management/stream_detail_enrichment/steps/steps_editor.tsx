@@ -247,9 +247,6 @@ export const StepsEditor = React.memo(() => {
   );
 
   // Pipeline suggestion state
-  const isLoadingExistingSuggestion = useInteractiveModeSelector((snapshot) =>
-    snapshot.matches({ pipelineSuggestion: 'loadingExistingSuggestion' })
-  );
   const isLoadingSuggestion = useInteractiveModeSelector((snapshot) =>
     snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' })
   );
@@ -287,8 +284,9 @@ export const StepsEditor = React.memo(() => {
   const canUsePipelineSuggestionsPending = !aiFeatures || (aiFeatures.enabled && isLoadingSamples);
 
   if (aiFeatures && aiFeatures.enabled) {
-    // Show loading prompt while loading existing suggestion or generating new one
-    if (isLoadingExistingSuggestion || isLoadingSuggestion) {
+    // Show loading prompt only while actively generating a new suggestion
+    // Don't show during isLoadingExistingSuggestion as it briefly flashes while checking for existing tasks
+    if (isLoadingSuggestion) {
       return (
         <SuggestionLoadingPrompt
           onCancel={() => {

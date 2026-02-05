@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Direction, EuiSearchBarProps, CriteriaWithPagination, Query } from '@elastic/eui';
 import {
@@ -114,25 +114,6 @@ export function StreamsTreeTable({
       }),
     [streamsRepositoryClient],
     { disableToastOnError: true }
-  );
-
-  const handleDismissSuggestion = useCallback(
-    async (streamName: string) => {
-      // Cancel/delete the suggestion task
-      await streamsRepositoryClient.fetch(
-        'POST /internal/streams/{name}/_pipeline_suggestion/_task',
-        {
-          signal: null,
-          params: {
-            path: { name: streamName },
-            body: { action: 'cancel' as const },
-          },
-        }
-      );
-      // Refresh the suggestion status list
-      suggestionStatusResult.refresh();
-    },
-    [streamsRepositoryClient, suggestionStatusResult]
   );
 
   const totalDocsResult = useAsync(() => docCountsFetch.docCount, [docCountsFetch]);
@@ -537,7 +518,6 @@ export function StreamsTreeTable({
                 streamName={item.stream.name}
                 status={suggestionStatusByStream[item.stream.name]}
                 isLoading={suggestionStatusResult.loading}
-                onDismiss={handleDismissSuggestion}
               />
             ) : null,
         },

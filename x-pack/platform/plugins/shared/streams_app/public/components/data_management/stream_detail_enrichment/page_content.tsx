@@ -245,7 +245,7 @@ export function StreamDetailEnrichmentContentImpl() {
   };
 
   useUnsavedChangesPrompt({
-    hasUnsavedChanges: hasChanges,
+    hasUnsavedChanges: hasChanges && !isSuggestionVisible,
     history: appParams.history,
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,
