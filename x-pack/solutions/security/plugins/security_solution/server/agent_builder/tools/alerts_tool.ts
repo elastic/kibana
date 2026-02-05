@@ -82,6 +82,7 @@ export const alertsTool = (
       { query: nlQuery, index, isCount },
       { esClient, modelProvider, spaceId, events }
     ) => {
+      console.log({ index, spaceId });
       const searchIndex = index ?? `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
       // Enhance the query with KEEP clause instructions if searching alerts index

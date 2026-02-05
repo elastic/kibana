@@ -42,4 +42,7 @@ export const onechatMocks = {
   attachments: {
     createFormatContextMock,
   },
+  tools: {
+    createHandlerContext: jest.fn(),
+  },
 };

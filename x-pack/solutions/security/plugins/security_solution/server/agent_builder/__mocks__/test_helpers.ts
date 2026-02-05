@@ -10,13 +10,6 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { ToolHandlerContext, ToolAvailabilityContext } from '@kbn/onechat-server/tools';
-import type {
-  ModelProvider,
-  ToolProvider,
-  ScopedRunner,
-  ToolResultStore,
-  ToolEventEmitter,
-} from '@kbn/onechat-server';
 
 /**
  * Creates common mocks for tool tests
@@ -93,16 +86,20 @@ export const createToolHandlerContext = (
   mockLogger: ReturnType<typeof loggingSystemMock.createLogger>,
   additionalContext: Partial<Omit<ToolHandlerContext, 'request' | 'esClient' | 'logger'>> = {}
 ): ToolHandlerContext => {
-  return {
-    request: mockRequest,
-    esClient: mockEsClient,
-    logger: mockLogger,
-    spaceId: 'default',
+  const baseMock = {
     modelProvider: additionalContext.modelProvider ?? createMockModelProvider(),
     toolProvider: additionalContext.toolProvider ?? createMockToolProvider(),
     runner: additionalContext.runner ?? createMockScopedRunner(),
     resultStore: additionalContext.resultStore ?? createMockToolResultStore(),
     events: additionalContext.events ?? createMockToolEventEmitter(),
+  };
+  return {
+    ...baseMock,
+    request: mockRequest,
+    esClient: mockEsClient,
+    logger: mockLogger,
+    spaceId: 'default',
+    ...additionalContext,
   };
 };
 
