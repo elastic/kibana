@@ -26,7 +26,11 @@ import { isCreateRestAPIKeyParams } from '@kbn/security-plugin-types-server';
 
 import { getFakeKibanaRequest } from './fake_kibana_request';
 import type { SecurityLicense } from '../../../common';
-import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
+import {
+  getScopedClient,
+  transformPrivilegesToElasticsearchPrivileges,
+  validateKibanaPrivileges,
+} from '../../lib';
 import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../routes/api_keys';
 import { isUiamCredential, type UiamServicePublic } from '../../uiam';
 import {
@@ -162,7 +166,7 @@ export class APIKeys implements NativeAPIKeysType {
       return null;
     }
     const { type, expiration, name, metadata } = createParams;
-    const scopedClusterClient = this.getScopedClient(request);
+    const scopedClusterClient = getScopedClient(request, this.clusterClient, this.uiam);
 
     this.logger.debug('Trying to create an API key');
 
@@ -217,7 +221,7 @@ export class APIKeys implements NativeAPIKeysType {
     }
 
     const { type, id, metadata } = updateParams;
-    const scopedClusterClient = this.getScopedClient(request);
+    const scopedClusterClient = getScopedClient(request, this.clusterClient, this.uiam);
 
     this.logger.debug('Trying to edit an API key');
 
@@ -281,6 +285,7 @@ export class APIKeys implements NativeAPIKeysType {
     // client credentials that might have been provided. Otherwise, try to extract optional Elasticsearch client
     // credentials from `es-client-authentication` HTTP header (currently only used by JWT).
     let clientAuthentication: ClientAuthentication | undefined;
+
     if (this.uiam && isUiamCredential(authorizationHeader)) {
       clientAuthentication = this.uiam.getClientAuthentication();
     } else {
@@ -288,6 +293,7 @@ export class APIKeys implements NativeAPIKeysType {
         request,
         ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER
       );
+
       if (clientAuthorizationHeader) {
         clientAuthentication = {
           scheme: clientAuthorizationHeader.scheme,
@@ -338,7 +344,11 @@ export class APIKeys implements NativeAPIKeysType {
     let result: InvalidateAPIKeyResult;
     try {
       // User needs `manage_api_key` privilege to use this API
-      result = await this.getScopedClient(request).asCurrentUser.security.invalidateApiKey({
+      result = await getScopedClient(
+        request,
+        this.clusterClient,
+        this.uiam
+      ).asCurrentUser.security.invalidateApiKey({
         ids: params.ids,
       });
       this.logger.debug(
@@ -398,7 +408,11 @@ export class APIKeys implements NativeAPIKeysType {
 
     this.logger.debug(`Trying to validate an API key`);
     try {
-      await this.getScopedClient(fakeRequest).asCurrentUser.security.authenticate();
+      await getScopedClient(
+        fakeRequest,
+        this.clusterClient,
+        this.uiam
+      ).asCurrentUser.security.authenticate();
       this.logger.debug(`API key was validated successfully`);
       return true;
     } catch (e) {
@@ -490,24 +504,6 @@ export class APIKeys implements NativeAPIKeysType {
     }
 
     return roleDescriptors;
-  }
-
-  private getScopedClient(request: KibanaRequest) {
-    // If we're not in UIAM mode or if the request is not a fake request, use request scope directly.
-    if (!this.uiam || request.isFakeRequest === false) {
-      return this.clusterClient.asScoped(request);
-    }
-
-    // In UIAM mode and for fake requests, it's still possible that the request is authenticated with non-UIAM credentials.
-    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-    if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
-      return this.clusterClient.asScoped(request);
-    }
-
-    // For UIAM credentials, we need to add the UIAM authentication header to the scoped client.
-    return this.clusterClient.asScoped({
-      headers: { ...request.headers, ...this.uiam.getEsClientAuthenticationHeader() },
-    });
   }
 }
 
