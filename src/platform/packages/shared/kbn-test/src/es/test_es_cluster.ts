@@ -82,7 +82,7 @@ export interface CreateTestEsClusterOptions {
   /**
    * Controls how much of Elasticsearch stdout is forwarded to the `ToolingLog`.
    *
-   * Defaults to `'all'`. Can also be set globally via `KBN_ES_STDOUT_LOG_LEVEL`.
+   * Defaults to `'warn'`.
    */
   esStdoutLogLevel?: 'all' | 'info' | 'warn' | 'error' | 'silent';
   /**

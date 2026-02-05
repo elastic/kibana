@@ -47,20 +47,6 @@ import { waitUntilClusterReady } from './utils/wait_until_cluster_ready';
 
 type EsStdoutLogLevel = NonNullable<EsClusterExecOptions['esStdoutLogLevel']>;
 
-function parseEsStdoutLogLevel(value: unknown): EsStdoutLogLevel | undefined {
-  if (typeof value !== 'string') return;
-  switch (value.toLowerCase()) {
-    case 'all':
-    case 'info':
-    case 'warn':
-    case 'error':
-    case 'silent':
-      return value.toLowerCase() as EsStdoutLogLevel;
-    default:
-      return;
-  }
-}
-
 // ES logs include more granular levels than our CLI threshold; use numeric ranks to compare severity.
 function shouldForwardEsStdoutLine(esLevel: string | undefined, threshold: EsStdoutLogLevel) {
   if (threshold === 'silent') return false;
@@ -516,52 +502,51 @@ export class Cluster {
     });
 
     let reportSent = false;
+    const stdoutThreshold = opts.esStdoutLogLevel ?? 'warn';
+
     // parse and forward es stdout to the log
     this.process.stdout!.on('data', (data) => {
       const chunk = data.toString();
       const lines = parseEsLog(chunk);
 
-      // If we are writing logs to a file, do not duplicate them per parsed line.
+      // Check for readiness regardless of log destination
+      if (!reportSent) {
+        for (const line of lines) {
+          if (line.message.includes('publish_address')) {
+            reportSent = true;
+            reportTime(startTime, 'ready', {
+              success: true,
+            });
+            break;
+          }
+        }
+      }
+
+      // When writing to a file, write the raw chunk and skip log forwarding
       if (this.stdioTarget) {
         this.stdioTarget.write(chunk);
+        return;
       }
 
-      const envStdoutLogLevel = process.env.KBN_ES_STDOUT_LOG_LEVEL;
-      const parsedStdoutLogLevel = parseEsStdoutLogLevel(envStdoutLogLevel);
-      if (envStdoutLogLevel && !parsedStdoutLogLevel) {
-        this.log.warning(
-          `Invalid KBN_ES_STDOUT_LOG_LEVEL="${envStdoutLogLevel}", defaulting to "all".`
-        );
-      }
-      const stdoutThreshold = opts.esStdoutLogLevel ?? parsedStdoutLogLevel ?? 'all';
-
-      lines.forEach((line) => {
-        if (!reportSent && line.message.includes('publish_address')) {
-          reportSent = true;
-          reportTime(startTime, 'ready', {
-            success: true,
-          });
-        }
-
-        if (this.stdioTarget) return;
-        if (!shouldForwardEsStdoutLine(line.level, stdoutThreshold)) return;
+      for (const line of lines) {
+        if (!shouldForwardEsStdoutLine(line.level, stdoutThreshold)) continue;
 
         switch (line.level) {
           case 'fatal':
           case 'error':
             this.log.error(line.formattedMessage);
-            return;
+            break;
           case 'warn':
             this.log.warning(line.formattedMessage);
-            return;
+            break;
           case 'debug':
           case 'trace':
             this.log.debug(line.formattedMessage);
-            return;
+            break;
           default:
             this.log.info(line.formattedMessage);
         }
-      });
+      }
     });
 
     // forward es stderr to the log
