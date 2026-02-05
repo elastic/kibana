@@ -9,7 +9,7 @@ import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 import { times } from 'lodash';
 import type { Locator, Page } from 'playwright';
-import '@kbn/monaco/src/register_globals';
+import type { monaco } from '@kbn/monaco';
 
 export const journey = new Journey({
   kbnArchives: ['src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view'],
@@ -113,14 +113,14 @@ const setMonacoEditorValue = async (value: string, page: Page) => {
   // Wait for Monaco to be ready
   await page.waitForFunction(() => {
     // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
-    const monacoEditor = window.MonacoEnvironment!.monaco.editor;
+    const monacoEditor = getMonacoEditorInstance();
     return Boolean(monacoEditor?.getModels && monacoEditor.getModels().length);
   });
 
   // Set the value directly via Monaco's API
   await page.evaluate(
     ({ codeEditorValue }) => {
-      const editor = window.MonacoEnvironment!.monaco.editor;
+      const editor = getMonacoEditorInstance();
       const models = editor.getModels();
       models[0].setValue(codeEditorValue);
     },
@@ -130,7 +130,7 @@ const setMonacoEditorValue = async (value: string, page: Page) => {
   // Assert the value has been set correctly
   await page.waitForFunction(
     ({ expected }) => {
-      const editor = window.MonacoEnvironment!.monaco.editor;
+      const editor = getMonacoEditorInstance();
       const model = editor.getModels()[0];
       return model ? model.getValue() === expected : false;
     },
@@ -148,4 +148,17 @@ const buildLargeQuery = (linesNumber: number) => {
 
   const largeQuery = ['FROM indices-stats*', ...evalLines].join('\n');
   return largeQuery;
+};
+
+const getMonacoEditorInstance = () => {
+  // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
+  return (
+    window as {
+      MonacoEnvironment: {
+        monaco: {
+          editor: typeof monaco.editor;
+        };
+      };
+    }
+  ).MonacoEnvironment!.monaco.editor;
 };
