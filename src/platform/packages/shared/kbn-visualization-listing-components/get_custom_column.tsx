@@ -8,11 +8,10 @@
  */
 
 import React from 'react';
-import { EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiBetaBadge, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CustomSortingOptions } from '@kbn/content-management-table-list-view-table';
-import type { VisualizationListItem } from '../..';
+import type { VisualizationListItem } from './types';
 
 const getBadge = (item: VisualizationListItem) => {
   if (item.stage === 'beta') {
@@ -87,7 +86,7 @@ export const getCustomColumn = () => {
       if (!record.typeTitle) {
         return (
           <EuiToolTip position="left" content={record.error}>
-            <span>
+            <span tabIndex={0}>
               <EuiIcon
                 className="visListingTable__typeIcon"
                 aria-hidden="true"
@@ -101,10 +100,9 @@ export const getCustomColumn = () => {
         );
       }
 
-      // We should have a way to display generic item errors from TableListViewTable
       return (
         <EuiToolTip position="left" content={record.error}>
-          <span>
+          <span tabIndex={0}>
             <EuiIcon
               className="visListingTable__typeIcon"
               aria-hidden="true"
@@ -119,53 +117,3 @@ export const getCustomColumn = () => {
     },
   };
 };
-
-export const getCustomSortingOptions = (): CustomSortingOptions => {
-  return {
-    field: 'typeTitle',
-    sortingLabels: [
-      {
-        label: i18n.translate('visualizations.listing.table.sortingByTypeColumnNameAsc', {
-          defaultMessage: 'Type A-Z',
-        }),
-        direction: 'asc',
-      },
-      {
-        label: i18n.translate('visualizations.listing.table.sortingByTypeColumnNameDesc', {
-          defaultMessage: 'Type Z-A',
-        }),
-        direction: 'desc',
-      },
-    ],
-  };
-};
-
-export const getNoItemsMessage = (createItem: () => void) => (
-  <EuiEmptyPrompt
-    iconType="visualizeApp"
-    title={
-      <h1 id="visualizeListingHeading" data-test-subj="emptyListPrompt">
-        <FormattedMessage
-          id="visualizations.listing.createNew.title"
-          defaultMessage="Create your first visualization"
-        />
-      </h1>
-    }
-    body={
-      <p>
-        <FormattedMessage
-          id="visualizations.listing.createNew.description"
-          defaultMessage="You can create different visualizations based on your data."
-        />
-      </p>
-    }
-    actions={
-      <EuiButton onClick={createItem} fill iconType="plusInCircle" data-test-subj="newItemButton">
-        <FormattedMessage
-          id="visualizations.listing.createNew.createButtonLabel"
-          defaultMessage="Create new visualization"
-        />
-      </EuiButton>
-    }
-  />
-);
