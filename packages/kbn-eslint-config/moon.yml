@@ -26,18 +26,14 @@ tags:
 fileGroups:
   src:
     - version_dependencies.txt
-    - jest.js
-    - react.js
-    - restricted_globals.js
-    - typescript.js
 tasks:
   extract-version-dependencies:
     command: node
     args:
-     - $workspaceRoot/scripts/extract_version_dependencies.js
-     - $projectRoot/version_dependencies.txt
-     - --collect
-     - eslint
+      - $workspaceRoot/scripts/extract_version_dependencies.js
+      - $projectRoot/version_dependencies.txt
+      - '--collect'
+      - eslint
     env:
       CI_STATS_DISABLED: 'true'
     inputs:
