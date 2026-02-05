@@ -7,7 +7,7 @@
 
 import qs from 'query-string';
 import axios from 'axios';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import type { Logger } from '@kbn/core/server';
 import { request } from './axios_utils';
 import type { ActionsConfigurationUtilities } from '../actions_config';
@@ -51,7 +51,7 @@ export async function requestOAuthToken<T>(
       expiresIn: res.data.expires_in,
     };
   } else {
-    const errString = stringify(res.data);
+    const errString = stableStringify(res.data);
     logger.warn(`error thrown getting the access token from ${tokenUrl}: ${errString}`);
     throw new Error(errString);
   }

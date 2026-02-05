@@ -6,7 +6,7 @@
  */
 
 import type { Crypto, EncryptOutput } from '@elastic/node-crypto';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import typeDetect from 'type-detect';
 
 import type { Logger } from '@kbn/core/server';
@@ -648,7 +648,7 @@ export class EncryptedSavedObjectsService {
     }
 
     // Always add the descriptor to the AAD.
-    return stringify([...descriptorToArray(descriptor), attributesAAD]);
+    return stableStringify([...descriptorToArray(descriptor), attributesAAD]);
   }
 
   /**

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import { Version } from './versions_picker/constants';
 import {
   ThreeWayDiffOutcome,
@@ -49,7 +49,7 @@ export const stringifyToSortedJson = (fieldValue: unknown): string => {
     return fieldValue;
   }
 
-  return stringify(fieldValue, { space: 2 });
+  return stableStringify(fieldValue, { space: 2 });
 };
 
 interface OptionDetails {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import type {
   RuleSchedule,
   SimpleRuleSchedule,
@@ -29,7 +29,7 @@ export const sortAndStringifyJson = (fieldValue: unknown): string => {
   if (typeof fieldValue === 'string') {
     return fieldValue;
   }
-  return stringify(fieldValue, { space: 2 });
+  return stableStringify(fieldValue, { space: 2 });
 };
 
 export const getFieldDiffsForDataSource = (

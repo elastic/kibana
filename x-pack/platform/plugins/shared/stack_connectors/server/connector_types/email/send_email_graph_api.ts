@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-// @ts-expect-error missing type def
-import stringify from 'json-stringify-safe';
 import type { AxiosInstance, AxiosResponse } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
+import { safeJsonStringify } from '@kbn/std';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
@@ -91,7 +90,7 @@ async function sendEmail({
   if (res.status === 202) {
     return res.data;
   }
-  const errString = stringify(res.data);
+  const errString = safeJsonStringify(res.data);
   logger.warn(
     `error thrown sending Microsoft Exchange email for clientID: ${options.transport.clientId}: ${errString}`
   );
@@ -215,7 +214,7 @@ async function createDraft({
   });
 
   if (res.status !== 201) {
-    const errString = stringify(res.data);
+    const errString = safeJsonStringify(res.data);
     logger.warn(
       `error thrown creating Microsoft Exchange email with attachments for clientID: ${options.transport.clientId}: ${errString}`
     );
@@ -253,7 +252,7 @@ async function sendDraft(
   if (res.status === 202) {
     return res.data;
   }
-  const errString = stringify(res.data);
+  const errString = safeJsonStringify(res.data);
   logger.warn(
     `error thrown sending Microsoft Exchange email with attachments for clientID: ${options.transport.clientId}: ${errString}`
   );
@@ -295,7 +294,7 @@ async function createUploadSession(
     connectorUsageCollector,
   });
   if (res.status !== 201) {
-    const errString = stringify(res.data);
+    const errString = safeJsonStringify(res.data);
     logger.warn(
       `error thrown creating Microsoft Exchange attachment upload session for clientID: ${options.transport.clientId}: ${errString}`
     );
@@ -328,7 +327,7 @@ async function closeUploadSession(
   if (res.status === 204) {
     return res.data;
   }
-  const errString = stringify(`${res.status} ${res.statusText}`);
+  const errString = safeJsonStringify(`${res.status} ${res.statusText}`);
   logger.warn(
     `error thrown closing Microsoft Exchange attachment upload session for clientID: ${options.transport.clientId}: ${errString}`
   );
@@ -378,7 +377,7 @@ async function addAttachment(
   if (res.status === 201) {
     return res.data;
   }
-  const errString = stringify(res.data);
+  const errString = safeJsonStringify(res.data);
   logger.warn(
     `error thrown adding attachment to Microsoft Exchange email for clientID: ${options.transport.clientId}: ${errString}`
   );
@@ -420,7 +419,7 @@ async function uploadAttachmentChunk(
   });
 
   if (res.status !== 200 && res.status !== 201) {
-    const errString = stringify(res.data);
+    const errString = safeJsonStringify(res.data);
     logger.warn(
       `error thrown uploading attachment to Microsoft Exchange email for clientID: ${options.transport.clientId}: ${errString}`
     );

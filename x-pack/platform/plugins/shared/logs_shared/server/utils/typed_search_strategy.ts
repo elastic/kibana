@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import type { JsonValue } from '@kbn/utility-types';
 import { jsonValueRT } from '../../common/typed_json';
 import type { SearchStrategyError } from '../../common/search_strategies/common/errors';
@@ -22,7 +22,7 @@ export const jsonFromBase64StringRT = new rt.Type<JsonValue, string, string>(
       return rt.failure(error, context);
     }
   },
-  (a) => Buffer.from(stringify(a)).toString('base64')
+  (a) => Buffer.from(stableStringify(a)).toString('base64')
 );
 
 export const createAsyncRequestRTs = <StateCodec extends rt.Mixed, ParamsCodec extends rt.Mixed>(

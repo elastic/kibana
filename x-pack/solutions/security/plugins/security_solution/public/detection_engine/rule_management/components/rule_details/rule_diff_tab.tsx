@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { omit, pick } from 'lodash';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import {
   EuiSpacer,
   EuiPanel,
@@ -61,7 +61,7 @@ const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
 ];
 
 const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
-  stringify(jsObject, { space: 2 });
+  stableStringify(jsObject, { space: 2 });
 
 /**
  * Normalizes the rule object, making it suitable for comparison with another normalized rule.

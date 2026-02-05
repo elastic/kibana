@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import stringify from 'json-stable-stringify';
 import pMap from 'p-map';
 import { get, partition, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { Logger } from '@kbn/core/server';
-import { getFlattenedObject } from '@kbn/std';
+import { getFlattenedObject, stableStringify } from '@kbn/std';
 import type {
   CustomFieldsConfiguration,
   TemplatesConfiguration,
@@ -246,7 +245,7 @@ export class CasesConnectorExecutor {
 
     for (const alert of alertsWithAllGroupingFields) {
       const alertWithOnlyTheGroupingFields = pick(alert, uniqueGroupingByFields);
-      const groupingKey = stringify(alertWithOnlyTheGroupingFields);
+      const groupingKey = stableStringify(alertWithOnlyTheGroupingFields);
 
       if (this.logger.isLevelEnabled('debug')) {
         this.logger.debug(
@@ -265,7 +264,7 @@ export class CasesConnectorExecutor {
     if (noGroupedAlerts.length > 0) {
       const noGroupedGrouping = this.generateNoGroupAlertGrouping(params.groupingBy);
 
-      groupingMap.set(stringify(noGroupedGrouping), {
+      groupingMap.set(stableStringify(noGroupedGrouping), {
         alerts: noGroupedAlerts,
         grouping: noGroupedGrouping,
       });

@@ -36,6 +36,11 @@ export { matchWildcardPattern } from './src/match_wildcard_pattern';
 
 export { safeJsonParse } from './src/safe_json_parse';
 export { safeJsonStringify } from './src/safe_json_stringify';
+export { stableStringify, type StableStringifyOptions } from './src/stable_stringify';
+export {
+  prettyCompactStringify,
+  type PrettyCompactStringifyOptions,
+} from './src/pretty_compact_stringify';
 
 export { bytePartition } from './src/byte_partition/byte_partition';
 
