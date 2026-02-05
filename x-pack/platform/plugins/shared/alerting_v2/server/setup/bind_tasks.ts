@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { ContainerModuleLoadOptions } from 'inversify';
 import { PluginSetup } from '@kbn/core-di';
+import type { ContainerModuleLoadOptions } from 'inversify';
+import { DispatcherTaskDefinition } from '../lib/dispatcher/task_definition';
+import { RuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
 import {
   TaskDefinition,
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
-import { RuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
-import { DispatcherTaskDefinition } from '../lib/dispatcher/task_definition';
 import type { AlertingServerSetupDependencies } from '../types';
 
 export function bindTasks({ bind, onActivation }: ContainerModuleLoadOptions) {
@@ -33,16 +33,16 @@ export function bindTasks({ bind, onActivation }: ContainerModuleLoadOptions) {
       [definition.taskType]: {
         title: definition.title,
         timeout: definition.timeout,
+        paramsSchema: definition.paramsSchema,
+        maxAttempts: definition.maxAttempts,
         createTaskRunner,
-        ...(definition.paramsSchema && { paramsSchema: definition.paramsSchema }),
-        ...(definition.maxAttempts && { maxAttempts: definition.maxAttempts }),
       },
     });
 
     return definition;
   });
 
-  // Bind task definitions
+  // Bind task definitions - add more tasks here as needed
   bind(TaskDefinition).toConstantValue(RuleExecutorTaskDefinition);
   bind(TaskDefinition).toConstantValue(DispatcherTaskDefinition);
 }

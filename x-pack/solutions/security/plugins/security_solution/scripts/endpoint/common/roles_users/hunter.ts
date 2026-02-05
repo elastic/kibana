@@ -33,7 +33,7 @@ export const getHunter: () => Omit<Role, 'name'> = () => {
             'process_operations_all',
             'actions_log_management_all',
           ],
-          securitySolutionRulesV1: ['all'],
+          securitySolutionRulesV2: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },
