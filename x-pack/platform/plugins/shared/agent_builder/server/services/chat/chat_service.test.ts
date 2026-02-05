@@ -206,6 +206,7 @@ describe('ChatService', () => {
         conversation: expect.anything(),
         title$: expect.anything(),
         roundCompletedEvents$: expect.anything(),
+        resend: false,
       });
       expect(createConversationMock$).not.toHaveBeenCalled();
     });
@@ -233,6 +234,7 @@ describe('ChatService', () => {
         conversation: expect.anything(),
         title$: expect.anything(),
         roundCompletedEvents$: expect.anything(),
+        resend: false,
       });
       expect(createConversationMock$).not.toHaveBeenCalled();
     });
@@ -286,6 +288,7 @@ describe('ChatService', () => {
         conversationId: 'test-conversation',
         autoCreateConversationWithId: true,
         conversationClient: expect.anything(),
+        resend: false,
       });
     });
   });
