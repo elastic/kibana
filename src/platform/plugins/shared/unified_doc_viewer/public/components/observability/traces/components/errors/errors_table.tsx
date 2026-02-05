@@ -24,7 +24,6 @@ import { ContentFrameworkSection } from '../../../../content_framework/lazy_cont
 import { getColumns } from './get_columns';
 import { useFetchErrorsByTraceId } from './use_fetch_errors_by_trace_id';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
-import { useGetGenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
 import { createTraceContextWhereClauseForErrors } from '../../common/create_trace_context_where_clause';
 import {
   ScrollableSectionWrapper,
@@ -57,10 +56,6 @@ const sorting: EuiInMemoryTableProps['sorting'] = {
 export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
   ({ traceId, docId }, ref) => {
     const { indexes } = useDataSourcesContext();
-    const { generateDiscoverLink } = useGetGenerateDiscoverLink({
-      indexPattern: indexes.apm.errors,
-    });
-
     const { loading, error, response } = useFetchErrorsByTraceId({
       traceId,
       docId,
@@ -83,10 +78,10 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
     );
 
     const { columns } = useMemo(() => {
-      const cols = getColumns({ traceId, docId, generateDiscoverLink, source: response.source });
+      const cols = getColumns({ traceId, docId, source: response.source });
 
       return { columns: cols };
-    }, [traceId, docId, generateDiscoverLink, response.source]);
+    }, [traceId, docId, response.source]);
 
     if (loading || (!error && response.traceErrors.length === 0)) {
       return null;
