@@ -21,13 +21,14 @@ import {
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
-import { debounce, sortBy } from 'lodash';
+import { debounce } from 'lodash';
 import type { Dimension } from '../../types';
 import {
   MAX_DIMENSIONS_SELECTIONS,
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
   DEBOUNCE_TIME,
 } from '../../common/constants';
+import { getOptionDisabledState, sortDimensionOptions } from './dimensions_selector_helpers';
 
 interface DimensionsSelectorProps {
   fields: Array<{ dimensions: Dimension[] }>;
@@ -91,42 +92,26 @@ export const DimensionsSelector = ({
 
   const options: SelectableEntry[] = useMemo(() => {
     const isAtMaxLimit = localSelectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
+
     const mappedOptions = dimensions.map<SelectableEntry>((dimension) => {
       const isSelected = selectedNamesSet.has(dimension.name);
       const isIntersecting = intersectingDimensions.has(dimension.name);
-      const isDisabledByLimit = singleSelection ? false : !isSelected && isAtMaxLimit;
 
       return {
         value: dimension.name,
         label: dimension.name,
         checked: isSelected ? 'on' : undefined,
-        // In single-selection mode, don't check intersections since we're replacing, not adding
-        // Selected dimensions should always be enabled
-        disabled: singleSelection
-          ? false
-          : isSelected
-          ? false
-          : !isIntersecting || isDisabledByLimit,
+        disabled: getOptionDisabledState({
+          singleSelection,
+          isSelected,
+          isIntersecting,
+          isAtMaxLimit,
+        }),
         key: dimension.name,
       };
     });
-    // Sort by selected > available > unavailable options
-    return sortBy(mappedOptions, [
-      (option) => {
-        if (option.checked === 'on') return 0;
-        if (option.disabled) return 2;
-        return 1;
-      },
-      (option) => {
-        if (option.checked === 'on') {
-          const selectionIndex = localSelectedDimensions.findIndex(
-            (dim) => dim.name === option.value
-          );
-          return selectionIndex !== -1 ? selectionIndex : Infinity;
-        }
-        return option.label.toLowerCase();
-      },
-    ]);
+
+    return sortDimensionOptions(mappedOptions, localSelectedDimensions);
   }, [
     dimensions,
     selectedNamesSet,
@@ -191,7 +176,7 @@ export const DimensionsSelector = ({
 
   const buttonLabel = useMemo(() => {
     const count = localSelectedDimensions.length;
-    const isAtMaxDimensions = localSelectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
+    const isAtMaxDimensions = count >= MAX_DIMENSIONS_SELECTIONS;
 
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
