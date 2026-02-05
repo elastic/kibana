@@ -2658,10 +2658,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@112.1.0":
-  version "112.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-112.1.0.tgz#2c1fe3d426e5f40036fa1ac8fd5f2cb96a537193"
-  integrity sha512-tWM6E6iQ+yqxhOBApvsOzdQKR0u4SYSaj7LFi334grUARXWNsYbZOqJoqXcacpkjE0aw20BtdM7OC19AhVB+bw==
+"@elastic/eui@112.2.0":
+  version "112.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-112.2.0.tgz#5252e02bc549512d2ab40179b81bfc9984bec556"
+  integrity sha512-yzkNmS6louveSlYlK5M80Qjndax1xYE1gsbe6hb9JE8kol5ulDM1Eno8LlQm2u7UTRI1EnB7B1Xn0oQzet0qEQ==
   dependencies:
     "@elastic/eui-theme-common" "7.3.0"
     "@elastic/prismjs-esql" "^1.1.2"
@@ -2723,10 +2723,10 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@3.1.15":
-  version "3.1.15"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.15.tgz#889c426f27e404baa3e0d77006d5be5fe94e1275"
-  integrity sha512-Sdij5LzWrvnIpvuVaCydA2MtHfvs8EL6YR7aH6VYvKYjRIOFvR/i12xEa0XuUoLwj7VROVnTOktHYRVWOqEIKg==
+"@elastic/monaco-esql@3.1.16":
+  version "3.1.16"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.16.tgz#b58d5830305582951e0a17fee4a4b308863b72b8"
+  integrity sha512-EvYVTy3gQ/hiByUkIiJy07ny0kv9k6jQdBoMH8mixkfkDpGZQ5RP1EGUPMqJRTPV7/L0tL0lNhbc45cJ34Sm0Q==
 
 "@elastic/node-crypto@1.2.3", "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -5193,6 +5193,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-list-provider-client@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-list-provider@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-access-control-public@link:src/platform/packages/shared/content-management/access_control/access_control_public":
   version "0.0.0"
   uid ""
@@ -5438,6 +5446,26 @@
   uid ""
 
 "@kbn/core-chrome-navigation@link:src/core/packages/chrome/navigation":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-sidebar-components@link:src/core/packages/chrome/sidebar/sidebar-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-sidebar-context@link:src/core/packages/chrome/sidebar/sidebar-context":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-sidebar-internal@link:src/core/packages/chrome/sidebar/sidebar-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-sidebar-mocks@link:src/core/packages/chrome/sidebar/sidebar-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-sidebar@link:src/core/packages/chrome/sidebar/sidebar":
   version "0.0.0"
   uid ""
 
@@ -9049,6 +9077,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/sidebar-examples-plugin@link:examples/sidebar_examples":
+  version "0.0.0"
+  uid ""
+
 "@kbn/siem-readiness@link:x-pack/solutions/security/packages/siem-readiness":
   version "0.0.0"
   uid ""
@@ -9626,6 +9658,14 @@
   uid ""
 
 "@kbn/vis-type-xy-plugin@link:src/platform/plugins/private/vis_types/xy":
+  version "0.0.0"
+  uid ""
+
+"@kbn/visualization-listing-components@link:src/platform/packages/shared/kbn-visualization-listing-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/visualization-listing-plugin@link:src/platform/plugins/shared/visualization_listing":
   version "0.0.0"
   uid ""
 

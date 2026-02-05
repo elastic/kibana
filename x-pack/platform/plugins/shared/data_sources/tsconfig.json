@@ -45,6 +45,7 @@
     "@kbn/connector-schemas",
     "@kbn/task-manager-plugin",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/alerts-ui-shared"
+    "@kbn/alerts-ui-shared",
+    "@kbn/workflows"
   ]
 }
