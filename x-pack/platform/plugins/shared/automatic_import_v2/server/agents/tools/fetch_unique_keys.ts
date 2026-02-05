@@ -72,6 +72,24 @@ const formatSample = (value: unknown): unknown => {
   return value ?? '';
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const extractSource = (value: unknown): Record<string, unknown> => {
+  if (!isRecord(value)) return {};
+
+  const docContainer = value.doc;
+  if (isRecord(docContainer) && isRecord(docContainer._source)) {
+    return docContainer._source;
+  }
+
+  if (isRecord(value._source)) {
+    return value._source;
+  }
+
+  return value;
+};
+
 export function fetchUniqueKeysTool(): DynamicStructuredTool {
   const schema = z.object({});
 
@@ -109,7 +127,7 @@ export function fetchUniqueKeysTool(): DynamicStructuredTool {
       const uniqueKeySamples = new Map<string, unknown>();
 
       docs.forEach((doc) => {
-        const source = doc?.doc?._source ?? doc?._source ?? doc ?? {};
+        const source = extractSource(doc);
         collectKeysWithSamples(source, uniqueKeySamples);
       });
 
