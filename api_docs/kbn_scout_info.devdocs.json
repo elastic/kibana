@@ -39,13 +39,27 @@
     "misc": [
       {
         "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_CONFIG_MANIFEST_PATH_GLOB",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_CONFIG_MANIFEST_PATH_GLOB",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
         "id": "def-common.SCOUT_CONFIG_PATH_GLOB",
         "type": "string",
         "tags": [],
         "label": "SCOUT_CONFIG_PATH_GLOB",
         "description": [],
         "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
-        "lineNumber": 46,
+        "lineNumber": 49,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -199,6 +213,23 @@
       },
       {
         "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_TEST_CATEGORIES",
+        "type": "Array",
+        "tags": [],
+        "label": "SCOUT_TEST_CATEGORIES",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
         "id": "def-common.SCOUT_TEST_CONFIG_STATS_PATH",
         "type": "string",
         "tags": [],
@@ -261,7 +292,7 @@
         "label": "TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB",
         "description": [],
         "signature": [
-          "\"{src/platform,x-pack/**}/{plugins,packages}/**/test/scout\""
+          "\"{src/platform,x-pack/**}/{plugins,packages}/**/test/scout{_*,}\""
         ],
         "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
         "lineNumber": 35,
@@ -283,7 +314,7 @@
           "RegExp"
         ],
         "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
-        "lineNumber": 49,
+        "lineNumber": 53,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

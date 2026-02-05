@@ -882,7 +882,7 @@
                   "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
-                "lineNumber": 36,
+                "lineNumber": 48,
                 "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false
@@ -899,7 +899,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
-                "lineNumber": 36,
+                "lineNumber": 48,
                 "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1058,7 +1058,7 @@
           "\nAPIs to open and manage fly-out dialogs.\n"
         ],
         "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
-        "lineNumber": 22,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1081,7 +1081,7 @@
               "OverlayRef"
             ],
             "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
-            "lineNumber": 28,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1099,7 +1099,7 @@
                   "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
-                "lineNumber": 36,
+                "lineNumber": 48,
                 "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1119,7 +1119,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
-                "lineNumber": 36,
+                "lineNumber": 48,
                 "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1163,11 +1163,15 @@
         "type": "Type",
         "tags": [],
         "label": "OverlaySystemFlyoutOpenOptions",
-        "description": [],
+        "description": [
+          "\nOptions for opening a system flyout."
+        ],
         "signature": [
           "Omit<",
           "OverlayFlyoutOpenOptions",
-          ", \"session\"> & { session?: \"start\" | \"inherit\" | \"never\" | undefined; }"
+          ", \"session\"> & { session?: \"start\" | \"inherit\" | \"never\" | undefined; title?: string | undefined; flyoutMenuProps?: ",
+          "EuiFlyoutMenuProps",
+          " | undefined; }"
         ],
         "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
         "lineNumber": 14,

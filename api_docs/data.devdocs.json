@@ -9902,8 +9902,8 @@
         "signature": [
           "\"FILTER_TRIGGER\""
         ],
-        "path": "src/platform/plugins/shared/data/public/triggers/apply_filter_trigger.ts",
-        "lineNumber": 13,
+        "path": "src/platform/plugins/shared/data/common/constants.ts",
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -24975,6 +24975,23 @@
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
         "lineNumber": 350,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.APPLY_FILTER_TRIGGER",
+        "type": "string",
+        "tags": [],
+        "label": "APPLY_FILTER_TRIGGER",
+        "description": [],
+        "signature": [
+          "\"FILTER_TRIGGER\""
+        ],
+        "path": "src/platform/plugins/shared/data/common/constants.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
