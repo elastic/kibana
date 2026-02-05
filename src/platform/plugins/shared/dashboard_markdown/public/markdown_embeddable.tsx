@@ -162,7 +162,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
         const { id } = await markdownClient.create({
           ...markdownStateManager.getLatestState(),
           title,
-          description: defaultDescription$.getValue(),
+          description: titleManager.getLatestState().description,
         });
         return id;
       },
