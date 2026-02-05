@@ -24,11 +24,11 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
   const stats = useMemo(() => {
     const services = new Set<string>();
     const models = new Set<string>();
-    const tasks = new Set<string>();
+    const types = new Set<string>();
 
     endpoints.forEach((endpoint) => {
       services.add(endpoint.service);
-      tasks.add(endpoint.task_type);
+      types.add(endpoint.task_type);
       const modelId = getModelId(endpoint);
       if (modelId) {
         models.add(modelId);
@@ -38,7 +38,7 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
     return {
       servicesCount: services.size,
       modelsCount: models.size,
-      tasksCount: tasks.size,
+      typesCount: types.size,
       endpointsCount: endpoints.length,
     };
   }, [endpoints]);
@@ -80,7 +80,7 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
       <EuiFlexItem grow={false}>
         <EuiText size="s" data-test-subj="endpointStatsTypes">
           <EuiTextColor color="subdued">{TYPES_LABEL}</EuiTextColor>&nbsp;
-          <strong>{stats.tasksCount}</strong>
+          <strong>{stats.typesCount}</strong>
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

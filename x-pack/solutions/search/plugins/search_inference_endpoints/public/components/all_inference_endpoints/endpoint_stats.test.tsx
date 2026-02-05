@@ -64,7 +64,7 @@ describe('EndpointStats', () => {
     expect(screen.getByTestId('endpointStatsEndpoints')).toBeInTheDocument();
   });
 
-  it('displays correct counts for services, models, tasks, and endpoints', () => {
+  it('displays correct counts for services, models, types, and endpoints', () => {
     render(<EndpointStats endpoints={mockEndpoints} />);
 
     // 3 unique services: elasticsearch, elastic, openai
