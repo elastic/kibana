@@ -59,11 +59,9 @@ export function createAddPatternAnalysisEmbeddableAction(
         >({
           panelType: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
           serializedState: {
-            rawState: {
-              minimumTimeRangeOption: DEFAULT_MINIMUM_TIME_RANGE_OPTION,
-              randomSamplerMode: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
-              randomSamplerProbability: DEFAULT_PROBABILITY,
-            },
+            minimumTimeRangeOption: DEFAULT_MINIMUM_TIME_RANGE_OPTION,
+            randomSamplerMode: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
+            randomSamplerProbability: DEFAULT_PROBABILITY,
           },
         });
 

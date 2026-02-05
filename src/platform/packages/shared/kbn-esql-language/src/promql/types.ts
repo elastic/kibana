@@ -428,3 +428,18 @@ export interface PromQLParseResult<T extends PromQLAstNode = PromQLAstQueryExpre
    */
   errors: EditorError[];
 }
+
+/**
+ * Result of findPromqlAstPosition.
+ */
+export interface PromQLPositionResult {
+  /**
+   * The deepest node containing the offset.
+   */
+  node: PromQLAstNode | undefined;
+
+  /**
+   * Parent node of the current node.
+   */
+  parent: PromQLAstNode | undefined;
+}

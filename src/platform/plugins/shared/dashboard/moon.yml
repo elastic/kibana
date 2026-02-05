@@ -110,6 +110,10 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/core-chrome-layout-utils'
   - '@kbn/cps'
+  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/core-chrome-app-menu'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/image-embeddable-plugin'
 tags:
   - plugin
   - prod

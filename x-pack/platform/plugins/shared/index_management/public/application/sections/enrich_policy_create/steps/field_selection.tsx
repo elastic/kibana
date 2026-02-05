@@ -97,9 +97,12 @@ export const FieldSelectionStep = ({ onBack, onNext }: Props) => {
   const { draft, updateDraft, updateCompletionState } = useCreatePolicyContext();
 
   useEffect(() => {
+    let isCancelled = false;
+
     const fetchFields = async () => {
       setIsLoading(true);
       const { data } = await getFieldsFromIndices(draft.sourceIndices as string[]);
+      if (isCancelled) return;
       setIsLoading(false);
 
       if (data?.commonFields?.length) {
@@ -120,6 +123,10 @@ export const FieldSelectionStep = ({ onBack, onNext }: Props) => {
     };
 
     fetchFields();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [draft.sourceIndices]);
 
   const { form } = useForm({

@@ -27,12 +27,12 @@ export const countModulesByType = (
 
 /**
  * Determines deployment type for ECH (stateful) based on group
- * - 'platform' => 'general'
+ * - 'platform' => 'classic'
  * - Other groups => solution name from group (e.g., 'search' => 'elasticsearch')
  */
 const getDeploymentTypeForEch = (group: string): DeploymentType => {
   if (group === 'platform') {
-    return 'general';
+    return 'classic';
   }
   // Map group to solution name
   if (group === 'search') {

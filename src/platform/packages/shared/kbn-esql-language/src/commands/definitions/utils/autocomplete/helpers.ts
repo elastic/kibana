@@ -471,7 +471,9 @@ export function getValidSignaturesAndTypesToSuggestNext(
   context: ICommandContext,
   fnDefinition: FunctionDefinition
 ) {
-  const argTypes = node.args.map((arg) => getExpressionType(arg, context?.columns));
+  const argTypes = node.args.map((arg) =>
+    getExpressionType(arg, context?.columns, context?.unmappedFieldsStrategy)
+  );
   const enrichedArgs = node.args.map((arg, idx) => ({
     ...arg,
     dataType: argTypes[idx],

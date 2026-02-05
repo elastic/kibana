@@ -6,20 +6,15 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import { getRollupIntervalForTimeRange } from '@kbn/apm-data-access-plugin/server/utils';
 import { getErrorSampleDetails } from '../../routes/errors/get_error_groups/get_error_sample_details';
 import { parseDatemath } from '../utils/time';
-import { getRollupIntervalForTimeRange } from '../utils/get_rollup_interval_for_time_range';
-import { getApmServiceSummary } from '../../routes/assistant_functions/get_apm_service_summary';
-import { getApmDownstreamDependencies } from '../../routes/assistant_functions/get_apm_downstream_dependencies';
+import { getApmServiceSummary } from './get_apm_service_summary';
+import { getApmDownstreamDependencies } from './get_apm_downstream_dependencies';
 import { getServicesItems } from '../../routes/services/get_services/get_services_items';
-import { getApmErrors } from '../../routes/assistant_functions/get_observability_alert_details_context/get_apm_errors';
 import { ApmDocumentType } from '../../../common/document_type';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import {
-  getExitSpanChangePoints,
-  getServiceChangePoints,
-} from '../../routes/assistant_functions/get_changepoints';
-import { getTraceMetrics } from '../tools/get_trace_metrics';
+import { getExitSpanChangePoints, getServiceChangePoints } from './get_change_points';
 import { buildApmToolResources } from '../utils/build_apm_tool_resources';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 
@@ -84,14 +79,6 @@ export function registerDataProviders({
           end,
         },
       });
-    }
-  );
-
-  observabilityAgentBuilder.registerDataProvider(
-    'apmErrors',
-    async ({ request, serviceName, serviceEnvironment, start, end }) => {
-      const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
-      return getApmErrors({ apmEventClient, serviceName, serviceEnvironment, start, end });
     }
   );
 
@@ -181,30 +168,6 @@ export function registerDataProviders({
         rollupInterval: getRollupIntervalForTimeRange(startMs, endMs),
         useDurationSummary: true, // Note: This will not work for pre 8.7 data. See: https://github.com/elastic/kibana/issues/167578
         searchQuery,
-      });
-    }
-  );
-
-  observabilityAgentBuilder.registerDataProvider(
-    'traceMetrics',
-    async ({ request, start, end, kqlFilter, groupBy }) => {
-      const { apmEventClient, apmDataAccessServices } = await buildApmToolResources({
-        core,
-        plugins,
-        request,
-        logger,
-      });
-
-      const startMs = parseDatemath(start);
-      const endMs = parseDatemath(end);
-
-      return getTraceMetrics({
-        apmEventClient,
-        apmDataAccessServices,
-        start: startMs,
-        end: endMs,
-        kqlFilter,
-        groupBy,
       });
     }
   );

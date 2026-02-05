@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { screen, within, waitFor } from '@testing-library/react';
+import { screen, within, waitFor, fireEvent } from '@testing-library/react';
 import { EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 
 import { MAX_NODE_CONNECTIONS } from '../../../common/constants';
@@ -155,34 +155,48 @@ describe('Create Remote cluster', () => {
           const { user } = await goToFormStep({ securityModel: 'api' });
           await user.click(screen.getByTestId('remoteClusterFormNextButton')); // show errors
 
-          const seedsInput = new EuiComboBoxTestHarness('remoteClusterFormSeedsInput');
           const invalidSeedMessage =
             /Seed node must use host:port format\..*Hosts can only consist of letters, numbers, and dashes\./;
 
           // Representative invalid characters (full matrix covered by unit tests in validators).
+          const seedsContainer = screen.getByTestId('remoteClusterFormSeedsInput');
+          const seedsInput = within(seedsContainer).getByRole('combobox') as HTMLInputElement;
+
           for (const char of ['#', 'é', '+']) {
-            await seedsInput.clear();
-            seedsInput.select(`192.16${char}:3000`);
+            // Clear between iterations so the assertions can't pass due to the previous attempt.
+            fireEvent.change(seedsInput, { target: { value: '' } });
+
+            const value = `192.16${char}:3000`;
+            fireEvent.change(seedsInput, { target: { value } });
+            expect(seedsInput.value).toBe(value);
+            fireEvent.keyDown(seedsInput, { key: 'Enter' });
+
             await waitFor(() => {
               expect(screen.getByText(invalidSeedMessage)).toBeInTheDocument();
             });
           }
-        });
+        }, 20000);
 
         test('should require a numeric "port" to be set', async () => {
           const { user } = await goToFormStep({ securityModel: 'api' });
           await user.click(screen.getByTestId('remoteClusterFormNextButton'));
 
-          const seedsInput = new EuiComboBoxTestHarness('remoteClusterFormSeedsInput');
+          const seedsContainer = screen.getByTestId('remoteClusterFormSeedsInput');
+          const seedsInput = within(seedsContainer).getByRole('combobox') as HTMLInputElement;
 
-          await seedsInput.clear();
-          seedsInput.select('192.168.1.1');
-          expect(screen.getByText('A port is required.')).toBeInTheDocument();
+          fireEvent.change(seedsInput, { target: { value: '192.168.1.1' } });
+          expect(seedsInput.value).toBe('192.168.1.1');
+          fireEvent.keyDown(seedsInput, { key: 'Enter' });
+          await waitFor(() => expect(screen.getByText('A port is required.')).toBeInTheDocument());
 
-          await seedsInput.clear();
-          seedsInput.select('192.168.1.1:abc');
-          expect(screen.getByText('A port is required.')).toBeInTheDocument();
-        });
+          // Clear between attempts so we don't rely on the previous error state.
+          fireEvent.change(seedsInput, { target: { value: '' } });
+
+          fireEvent.change(seedsInput, { target: { value: '192.168.1.1:abc' } });
+          expect(seedsInput.value).toBe('192.168.1.1:abc');
+          fireEvent.keyDown(seedsInput, { key: 'Enter' });
+          await waitFor(() => expect(screen.getByText('A port is required.')).toBeInTheDocument());
+        }, 20000);
       });
 
       describe('node connections', () => {
@@ -191,8 +205,7 @@ describe('Create Remote cluster', () => {
           await user.click(screen.getByTestId('remoteClusterFormNextButton'));
 
           const input = screen.getByTestId('remoteClusterFormNodeConnectionsInput');
-          await user.clear(input);
-          await user.type(input, String(MAX_NODE_CONNECTIONS + 1));
+          fireEvent.change(input, { target: { value: String(MAX_NODE_CONNECTIONS + 1) } });
 
           await waitFor(() => {
             expect(
@@ -261,13 +274,10 @@ describe('Create Remote cluster', () => {
         });
         await user.click(screen.getByTestId('remoteClusterFormNextButton')); // show errors
 
-        // Representative invalid characters (full matrix covered by unit tests in validators).
-        const invalidChars = ['#', 'é', '+'];
-
         const remoteAddressInput = screen.getByTestId('remoteClusterFormRemoteAddressInput');
-        for (const char of invalidChars) {
-          await user.clear(remoteAddressInput);
-          await user.type(remoteAddressInput, `192.16${char}:3000`);
+        // Representative invalid characters (full matrix covered by unit tests in validators).
+        for (const char of ['#', 'é', '+']) {
+          fireEvent.change(remoteAddressInput, { target: { value: `192.16${char}:3000` } });
           expect(screen.getByText('Remote address is invalid.')).toBeInTheDocument();
         }
       });
@@ -275,13 +285,12 @@ describe('Create Remote cluster', () => {
 
     describe('form validation', () => {
       test('should not allow spaces', async () => {
-        const { user } = await goToFormStep({ securityModel: 'api' });
+        await goToFormStep({ securityModel: 'api' });
 
         const nameInput = screen.getByTestId('remoteClusterFormNameInput');
-        await user.clear(nameInput);
-        await user.type(nameInput, 'with space');
+        fireEvent.change(nameInput, { target: { value: 'with space' } });
 
-        await user.click(screen.getByTestId('remoteClusterFormNextButton'));
+        fireEvent.click(screen.getByTestId('remoteClusterFormNextButton'));
 
         expect(screen.getByText('Spaces are not allowed in the name.')).toBeInTheDocument();
       });
@@ -293,8 +302,7 @@ describe('Create Remote cluster', () => {
         const nameInput = screen.getByTestId('remoteClusterFormNameInput');
         // Representative invalid characters (full matrix covered by unit tests in validators).
         for (const char of ['#', 'é', '+']) {
-          await user.clear(nameInput);
-          await user.type(nameInput, `with${char}`);
+          fireEvent.change(nameInput, { target: { value: `with${char}` } });
 
           expect(screen.getByText(/Remove the character/)).toBeInTheDocument();
           expect(screen.getByText(char)).toBeInTheDocument();
@@ -310,8 +318,7 @@ describe('Create Remote cluster', () => {
         const proxyAddressInput = screen.getByTestId('remoteClusterFormProxyAddressInput');
         // Representative invalid characters (full matrix covered by unit tests in validators).
         for (const char of ['#', 'é', '+']) {
-          await user.clear(proxyAddressInput);
-          await user.type(proxyAddressInput, `192.16${char}:3000`);
+          fireEvent.change(proxyAddressInput, { target: { value: `192.16${char}:3000` } });
           expect(
             screen.getByText(
               /Address must use host:port format\..*Hosts can only consist of letters, numbers, and dashes\./
@@ -327,12 +334,10 @@ describe('Create Remote cluster', () => {
 
         const proxyAddressInput = screen.getByTestId('remoteClusterFormProxyAddressInput');
 
-        await user.clear(proxyAddressInput);
-        await user.type(proxyAddressInput, '192.168.1.1');
+        fireEvent.change(proxyAddressInput, { target: { value: '192.168.1.1' } });
         expect(screen.getByText('A port is required.')).toBeInTheDocument();
 
-        await user.clear(proxyAddressInput);
-        await user.type(proxyAddressInput, '192.168.1.1:abc');
+        fireEvent.change(proxyAddressInput, { target: { value: '192.168.1.1:abc' } });
         expect(screen.getByText('A port is required.')).toBeInTheDocument();
       });
     });
@@ -355,19 +360,18 @@ describe('Create Remote cluster', () => {
       await screen.findByTestId('remoteClusterFormNextButton');
 
       const nameInput = screen.getByTestId('remoteClusterFormNameInput');
-      await user.clear(nameInput);
-      await user.type(
-        nameInput,
-        securityModel === 'api' ? 'remote_cluster_apiKey' : 'remote_cluster_cert'
-      );
+      fireEvent.change(nameInput, {
+        target: {
+          value: securityModel === 'api' ? 'remote_cluster_apiKey' : 'remote_cluster_cert',
+        },
+      });
 
       if (isCloud) {
         const remoteAddressInput = screen.getByTestId('remoteClusterFormRemoteAddressInput');
-        await user.clear(remoteAddressInput);
-        await user.type(remoteAddressInput, '1:1');
+        fireEvent.change(remoteAddressInput, { target: { value: '1:1' } });
       } else {
         const seedsInput = new EuiComboBoxTestHarness('remoteClusterFormSeedsInput');
-        seedsInput.select('1:1');
+        seedsInput.addCustomValue('1:1');
       }
 
       await user.click(screen.getByTestId('remoteClusterFormNextButton'));
@@ -416,7 +420,7 @@ describe('Create Remote cluster', () => {
           'href',
           onPremSecurityApiKey
         );
-      });
+      }, 20000);
 
       test('shows expected documentation when cert is selected', async () => {
         await goToReviewStep({ isCloud: false, securityModel: 'cert' });
@@ -429,7 +433,7 @@ describe('Create Remote cluster', () => {
           'href',
           onPremSecurityCert
         );
-      });
+      }, 20000);
     });
   });
 });

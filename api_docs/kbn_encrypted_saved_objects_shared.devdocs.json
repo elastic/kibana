@@ -28,6 +28,8 @@
         "label": "EncryptedSavedObjectsClient",
         "description": [],
         "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "<T>>"
             ],
             "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -60,6 +64,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+                "lineNumber": 20,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -75,6 +81,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+                "lineNumber": 21,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -91,6 +99,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+                "lineNumber": 22,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -117,6 +127,8 @@
               "<T, A>>"
             ],
             "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -133,6 +145,8 @@
                   "SavedObjectsCreatePointInTimeFinderOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+                "lineNumber": 46,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -151,6 +165,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+                "lineNumber": 47,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -169,6 +185,8 @@
         "label": "EncryptedSavedObjectsClientOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -183,6 +201,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

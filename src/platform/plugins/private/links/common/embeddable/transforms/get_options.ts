@@ -15,18 +15,32 @@ export function getOptions(type: LinkType, options: LinkOptions) {
   if (!options) return undefined;
 
   if (type === DASHBOARD_LINK_TYPE) {
-    const dashboardOptions = options as Required<DashboardLink>['options'];
+    const dashboardOptions = options as DashboardLink['options'];
     return {
-      ...(typeof dashboardOptions.openInNewTab === 'boolean' && {
-        openInNewTab: dashboardOptions.openInNewTab,
+      ...(typeof dashboardOptions?.open_in_new_tab === 'boolean' && {
+        open_in_new_tab: dashboardOptions.open_in_new_tab,
       }),
-      ...(typeof dashboardOptions.useCurrentFilters === 'boolean' && {
-        useCurrentFilters: dashboardOptions.useCurrentFilters,
+      // <9.4 stored as openInNewTab
+      ...(typeof (dashboardOptions as { openInNewTab?: boolean })?.openInNewTab === 'boolean' && {
+        open_in_new_tab: (dashboardOptions as { openInNewTab?: boolean }).openInNewTab,
       }),
-      ...(typeof dashboardOptions.useCurrentDateRange === 'boolean' && {
-        useCurrentDateRange: dashboardOptions.useCurrentDateRange,
+      ...(typeof dashboardOptions?.use_filters === 'boolean' && {
+        use_filters: dashboardOptions.use_filters,
       }),
-    };
+      // <9.4 stored as useCurrentFilters
+      ...(typeof (dashboardOptions as { useCurrentFilters?: boolean })?.useCurrentFilters ===
+        'boolean' && {
+        use_filters: (dashboardOptions as { useCurrentFilters?: boolean }).useCurrentFilters,
+      }),
+      ...(typeof dashboardOptions?.use_time_range === 'boolean' && {
+        use_time_range: dashboardOptions.use_time_range,
+      }),
+      // <9.4 stored as useCurrentDateRange
+      ...(typeof (dashboardOptions as { useCurrentDateRange?: boolean })?.useCurrentDateRange ===
+        'boolean' && {
+        use_time_range: (dashboardOptions as { useCurrentDateRange?: boolean }).useCurrentDateRange,
+      }),
+    } as DashboardLink['options'];
   }
 
   const urlOptions = options as Required<ExternalLink>['options'];

@@ -22,4 +22,5 @@ export interface CoreContext {
 export interface CoreEnv {
   mode: Readonly<EnvironmentMode>;
   packageInfo: Readonly<PackageInfo>;
+  airgapped: boolean;
 }

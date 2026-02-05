@@ -16,7 +16,7 @@ import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_serv
 const ADD_COLUMN_ACTION_ID = 'add-column';
 
 const addColumnText = i18n.translate('indexEditor.dataGrid.addColumn', {
-  defaultMessage: 'Add Column',
+  defaultMessage: 'Add field',
 });
 
 export const getAddColumnControl = (

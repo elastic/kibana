@@ -35,7 +35,8 @@ import type {
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { FilesStart } from '@kbn/files-plugin/server';
-import { KIBANA_SYSTEM_USERNAME, SAVED_OBJECT_TYPES } from '../../common/constants';
+import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import { KIBANA_SYSTEM_USERNAME } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
   CaseConfigureService,
@@ -54,6 +55,8 @@ import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_fram
 import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
+import type { ConfigType } from '../config';
+import { getSavedObjectsTypes } from '../../common';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
@@ -70,6 +73,8 @@ interface CasesClientFactoryArgs {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
   filesPluginStart: FilesStart;
+  usageCounter?: IUsageCounter;
+  config: ConfigType;
 }
 
 /**
@@ -126,7 +131,7 @@ export class CasesClientFactory {
     });
 
     const unsecuredSavedObjectsClient = savedObjectsService.getScopedClient(request, {
-      includedHiddenTypes: SAVED_OBJECT_TYPES,
+      includedHiddenTypes: getSavedObjectsTypes(this.options.config),
       // this tells the security plugin to not perform SO authorization and audit logging since we are handling
       // that manually using our Authorization class and audit logger.
       excludedExtensions: [SECURITY_EXTENSION_ID],
@@ -164,6 +169,7 @@ export class CasesClientFactory {
         this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
       savedObjectsSerializer,
       fileService,
+      usageCounter: this.options.usageCounter,
     });
   }
 

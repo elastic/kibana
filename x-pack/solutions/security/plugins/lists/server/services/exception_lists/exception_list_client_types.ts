@@ -12,11 +12,11 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsOpenPointInTimeOptions,
 } from '@kbn/core/server';
+import type { ExceptionListItemEntryArray } from '@kbn/securitysolution-exceptions-common/api';
 import type {
   CreateCommentsArray,
   Description,
   DescriptionOrUndefined,
-  EntriesArray,
   ExceptionListItemType,
   ExceptionListItemTypeOrUndefined,
   ExceptionListSchema,
@@ -132,6 +132,8 @@ export interface CreateExceptionListOptions {
   immutable: Immutable;
   /** document version */
   version: Version;
+  /** item os types to apply */
+  osTypes: OsTypeArray;
 }
 
 /**
@@ -243,7 +245,7 @@ export interface CreateExceptionListItemOptions {
   /** User comments for the exception list item */
   comments: CreateCommentsArray;
   /** an array with the exception list item entries */
-  entries: EntriesArray;
+  entries: ExceptionListItemEntryArray;
   /** an optional datetime string with an expiration time */
   expireTime: ExpireTimeOrUndefined;
   /** the "item_id" of the exception list item */
@@ -274,7 +276,7 @@ export interface CreateEndpointListItemOptions {
   /** The comments of the endpoint list item */
   comments: CreateCommentsArray;
   /** The entries of the endpoint list item */
-  entries: EntriesArray;
+  entries: ExceptionListItemEntryArray;
   /** The item id of the list item */
   itemId: ItemId;
   /** The name of the list item */
@@ -314,7 +316,7 @@ export interface UpdateExceptionListItemOptions {
   /** user comments attached to item */
   comments: UpdateCommentsArray;
   /** item exception entries logic */
-  entries: EntriesArray;
+  entries: ExceptionListItemEntryArray;
   /** an optional datetime string with an expiration time */
   expireTime: ExpireTimeOrUndefined;
   /** the "id" of the exception list item */
@@ -347,7 +349,7 @@ export interface UpdateEndpointListItemOptions {
   /** The comments of the endpoint list item */
   comments: UpdateCommentsArray;
   /** The entries of the endpoint list item */
-  entries: EntriesArray;
+  entries: ExceptionListItemEntryArray;
   /** The id of the list item (Either this or itemId has to be defined) */
   id: IdOrUndefined;
   /** The item id of the list item (Either this or id has to be defined) */

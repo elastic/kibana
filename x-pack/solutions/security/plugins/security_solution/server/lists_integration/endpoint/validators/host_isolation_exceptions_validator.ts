@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import type {
   CreateExceptionListItemOptions,
@@ -58,7 +58,7 @@ const HostIsolationBasicDataSchema = BasicEndpointExceptionDataSchema.extends({
 
 export class HostIsolationExceptionsValidator extends BaseValidator {
   static isHostIsolationException(item: { listId: string }): boolean {
-    return item.listId === ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID;
+    return item.listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id;
   }
 
   protected async validateHasWritePrivilege(): Promise<void> {

@@ -118,7 +118,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsMetric_breakdownByDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
+        keepOpen: true,
       });
+      await lens.setTermsNumberOfValues(5); // Default is 9
+      await lens.closeDimensionEditor();
 
       await lens.waitForVisualization('mtrVis');
       const data = await lens.getMetricVisualizationData();

@@ -28,6 +28,8 @@
           "; }, stats: unknown) => void"
         ],
         "path": "src/platform/packages/private/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+        "lineNumber": 131,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
             "label": "telemetrySchema",
             "description": [],
             "path": "src/platform/packages/private/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+            "lineNumber": 137,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -53,6 +57,8 @@
                   "TelemetrySchemaObject"
                 ],
                 "path": "src/platform/packages/private/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+                "lineNumber": 137,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -67,6 +73,8 @@
                   "TelemetrySchemaObject"
                 ],
                 "path": "src/platform/packages/private/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+                "lineNumber": 137,
+                "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -85,6 +93,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/private/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -104,6 +114,8 @@
           "() => void"
         ],
         "path": "src/platform/packages/private/kbn-telemetry-tools/src/cli/run_telemetry_check.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -121,6 +133,8 @@
           "() => void"
         ],
         "path": "src/platform/packages/private/kbn-telemetry-tools/src/cli/run_telemetry_extract.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

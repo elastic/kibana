@@ -259,7 +259,7 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
     withParams: Record<string, unknown>
   ): string {
     const lines = [
-      `${apiInfo.method} ${apiInfo.path}`,
+      `${apiInfo.method} ${decodeURIComponent(apiInfo.path)}`,
       'Content-Type: application/json',
       'kbn-xsrf: true',
     ];

@@ -26,6 +26,7 @@ import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -417,50 +418,8 @@ export class DiscoverPlugin
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
-        const {
-          addControlsFromSavedSession,
-          apiPublishesEditablePauseFetch,
-          apiHasUniqueId,
-          apiPublishesESQLVariables,
-        } = await getEmbeddableServices();
-
-        const savedSessionAttributes = savedObject.attributes as SavedSearchAttributes;
-
-        const mightHaveVariables =
-          apiPublishesESQLVariables(container) &&
-          savedSessionAttributes.controlGroupJson &&
-          savedSessionAttributes.controlGroupJson.length > 0;
-
-        // pause fetching so that we don't try to build an ES|QL query without necessary variables
-        const shouldPauseFetch = mightHaveVariables && apiPublishesEditablePauseFetch(container);
-        if (shouldPauseFetch) container.setFetchPaused(true);
-
-        const api = await container.addNewPanel(
-          {
-            panelType: SEARCH_EMBEDDABLE_TYPE,
-            serializedState: {
-              rawState: {
-                savedObjectId: savedObject.id,
-              },
-              references: [],
-            },
-          },
-          {
-            displaySuccessMessage: true,
-          }
-        );
-
-        const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
-        if (mightHaveVariables) {
-          await addControlsFromSavedSession(
-            container,
-            savedSessionAttributes.controlGroupJson!, // this is verified via mightHaveVariables
-            uuid
-          );
-        }
-
-        // unpause fetching if necessary now that ES|QL variables exist
-        if (shouldPauseFetch) container.setFetchPaused(false);
+        const { addPanelFromLibrary } = await getEmbeddableServices();
+        await addPanelFromLibrary(container, savedObject);
       },
       savedObjectType: SavedSearchType,
       savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {
@@ -497,12 +456,13 @@ export class DiscoverPlugin
       });
     });
 
-    plugins.embeddable.registerLegacyURLTransform(SEARCH_EMBEDDABLE_TYPE, async () => {
-      const { getSearchEmbeddableTransforms } = await getEmbeddableServices();
-      const { transformEnhancementsIn, transformEnhancementsOut } = plugins.embeddable;
-      return getSearchEmbeddableTransforms(transformEnhancementsIn, transformEnhancementsOut)
-        .transformOut;
-    });
+    plugins.embeddable.registerLegacyURLTransform(
+      SEARCH_EMBEDDABLE_TYPE,
+      async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+        const { getTransformOut } = await getEmbeddableServices();
+        return getTransformOut(transformDrilldownsOut);
+      }
+    );
   }
 }
 

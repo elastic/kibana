@@ -36,5 +36,3 @@ export const ALL_CASES_TAGS = (tag: string) => {
 };
 
 export const ALL_CASES_TAGS_COUNT = '[data-test-subj="options-filter-popover-button-tags"]';
-
-export const EDIT_EXTERNAL_CONNECTION = '[data-test-subj="configure-case-button"]';

@@ -32,12 +32,14 @@ import { useQuery } from '@kbn/react-query';
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
+  OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../../../../../../../common/constants';
 
 import { sendGetDataStreams, useStartServices } from '../../../../../../../../hooks';
 
 import {
   getRegistryDataStreamAssetBaseName,
+  isInputOnlyPolicyTemplate,
   mapPackageReleaseToIntegrationCardRelease,
 } from '../../../../../../../../../common/services';
 
@@ -52,12 +54,17 @@ import type { PackagePolicyConfigValidationResults } from '../../../services';
 import { isAdvancedVar, validationHasErrors } from '../../../services';
 import { PackagePolicyEditorDatastreamPipelines } from '../../datastream_pipelines';
 import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings';
+import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
 
 import { useIndexTemplateExists } from '../../datastream_hooks';
 
+import type { RegistryPolicyInputOnlyTemplate } from '../../../../../../../../../common/types/models/epm';
+import { shouldShowVar, isVarRequiredByVarGroup } from '../../../services/var_group_helpers';
+
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
-import { useDataStreamId } from './hooks';
+import { useDataStreamId, useVarGroupSelections } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
+import { VarGroupSelector } from './var_group_selector';
 
 const ScrollAnchor = styled.div`
   display: none;
@@ -73,6 +80,7 @@ interface Props {
   forceShowErrors?: boolean;
   isEditPage?: boolean;
   totalStreams?: number;
+  varGroupSelections?: Record<string, string>;
 }
 
 export const PackagePolicyInputStreamConfig = memo<Props>(
@@ -85,8 +93,10 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     forceShowErrors,
     isEditPage,
     totalStreams,
+    varGroupSelections = {},
   }) => {
     const { docLinks } = useStartServices();
+    const { isAgentlessEnabled } = useAgentless();
 
     const {
       params: { packagePolicyId },
@@ -104,8 +114,27 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const customDatasetVarValue = customDatasetVar?.value?.dataset || customDatasetVar?.value;
 
     const customDataStreamTypeVar = packagePolicyInputStream.vars?.[DATA_STREAM_TYPE_VAR_NAME];
+
+    // Check if package uses dynamic_signal_types
+    const dynamicSignalTypes = useMemo(() => {
+      const inputOnlyTemplate = packageInfo?.policy_templates?.find(
+        (template) =>
+          isInputOnlyPolicyTemplate(template) && template.input === OTEL_COLLECTOR_INPUT_TYPE
+      ) as RegistryPolicyInputOnlyTemplate | undefined;
+
+      return inputOnlyTemplate?.dynamic_signal_types === true;
+    }, [packageInfo?.policy_templates]);
+
     const customDataStreamTypeVarValue =
       customDataStreamTypeVar?.value || packagePolicyInputStream.data_stream.type || 'logs';
+
+    const dataStreamTypeOptions = useMemo(() => {
+      return [
+        { id: 'logs', label: 'Logs' },
+        { id: 'metrics', label: 'Metrics' },
+        { id: 'traces', label: 'Traces' },
+      ];
+    }, []);
 
     const { exists: indexTemplateExists, isLoading: isLoadingIndexTemplate } =
       useIndexTemplateExists(
@@ -128,14 +157,49 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       }
     }, [isDefaultDatastream, containerRef]);
 
-    // Split vars into required and advanced
+    // Determine if this stream has its own var_groups (stream-level) or should use package-level
+    const hasStreamLevelVarGroups =
+      packageInputStream.var_groups && packageInputStream.var_groups.length > 0;
+
+    // Use stream-level var_groups if present, otherwise fall back to package-level
+    const effectiveVarGroups = hasStreamLevelVarGroups
+      ? packageInputStream.var_groups
+      : packageInfo.var_groups;
+
+    // Stream-level var group selections - derives from policy, initializes defaults, handles changes
+    const {
+      selections: streamVarGroupSelections,
+      handleSelectionChange: handleStreamVarGroupSelectionChange,
+    } = useVarGroupSelections({
+      varGroups: hasStreamLevelVarGroups ? packageInputStream.var_groups : undefined,
+      savedSelections: packagePolicyInputStream.var_group_selections,
+      isAgentlessEnabled,
+      onSelectionsChange: updatePackagePolicyInputStream,
+    });
+
+    // Use stream-level selections, or fall back to package-level prop
+    const effectiveVarGroupSelections = hasStreamLevelVarGroups
+      ? streamVarGroupSelections
+      : varGroupSelections;
+
+    // Split vars into required and advanced, filtering by var_group visibility
     const [requiredVars, advancedVars] = useMemo(() => {
       const _requiredVars: RegistryVarsEntry[] = [];
       const _advancedVars: RegistryVarsEntry[] = [];
 
       if (packageInputStream.vars && packageInputStream.vars.length) {
         packageInputStream.vars.forEach((varDef) => {
-          if (isAdvancedVar(varDef)) {
+          // Check if var should be shown based on var_group selections
+          // Use effective var_groups (stream-level if present, otherwise package-level)
+          if (
+            effectiveVarGroups &&
+            effectiveVarGroups.length > 0 &&
+            !shouldShowVar(varDef.name, effectiveVarGroups, effectiveVarGroupSelections)
+          ) {
+            return; // Skip this var, it's hidden by var_group selection
+          }
+
+          if (isAdvancedVar(varDef, effectiveVarGroups, effectiveVarGroupSelections)) {
             _advancedVars.push(varDef);
           } else {
             _requiredVars.push(varDef);
@@ -143,7 +207,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
         });
       }
       return [_requiredVars, _advancedVars];
-    }, [packageInputStream]);
+    }, [packageInputStream, effectiveVarGroups, effectiveVarGroupSelections]);
 
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
@@ -173,7 +237,10 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
 
     return (
       <>
-        <EuiFlexGrid columns={2} data-test-subj="streamOptions.inputStreams">
+        <EuiFlexGrid
+          columns={2}
+          data-test-subj={`streamOptions.inputStreams.${packageInputStream.data_stream.dataset}`}
+        >
           <ScrollAnchor ref={containerRef} />
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="none" alignItems="flexStart">
@@ -260,12 +327,30 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="m">
+              {/* Stream-level Var Group Selectors */}
+              {hasStreamLevelVarGroups &&
+                packageInputStream.var_groups?.map((varGroup) => (
+                  <EuiFlexItem key={varGroup.name}>
+                    <VarGroupSelector
+                      varGroup={varGroup}
+                      selectedOptionName={streamVarGroupSelections[varGroup.name]}
+                      onSelectionChange={handleStreamVarGroupSelectionChange}
+                      isAgentlessEnabled={isAgentlessEnabled}
+                    />
+                  </EuiFlexItem>
+                ))}
+
               {requiredVars.map((varDef) => {
                 if (!packagePolicyInputStream?.vars) return null;
                 const { name: varName, type: varType } = varDef;
                 const varConfigEntry = packagePolicyInputStream.vars?.[varName];
                 const value = varConfigEntry?.value;
                 const frozen = varConfigEntry?.frozen ?? false;
+                const requiredByVarGroup = isVarRequiredByVarGroup(
+                  varName,
+                  effectiveVarGroups,
+                  effectiveVarGroupSelections
+                );
                 return (
                   <EuiFlexItem key={varName}>
                     <PackagePolicyInputVarField
@@ -289,6 +374,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       packageName={packageInfo.name}
                       datastreams={datastreams}
                       isEditPage={isEditPage}
+                      isRequiredByVarGroup={requiredByVarGroup}
                     />
                   </EuiFlexItem>
                 );
@@ -329,7 +415,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                   </EuiFlexItem>
                   {isShowingAdvanced ? (
                     <>
-                      {packageInfo.type === 'input' && (
+                      {packageInfo.type === 'input' && !dynamicSignalTypes && (
                         <EuiFlexItem>
                           <EuiFormRow
                             label={
@@ -369,20 +455,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               data-test-subj="packagePolicyDataStreamType"
                               disabled={isEditPage}
                               idSelected={customDataStreamTypeVarValue}
-                              options={[
-                                {
-                                  id: 'logs',
-                                  label: 'Logs',
-                                },
-                                {
-                                  id: 'metrics',
-                                  label: 'Metrics',
-                                },
-                                {
-                                  id: 'traces',
-                                  label: 'Traces',
-                                },
-                              ]}
+                              options={dataStreamTypeOptions}
                               onChange={(type: string) => {
                                 updatePackagePolicyInputStream({
                                   vars: {
@@ -403,6 +476,11 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                         if (!packagePolicyInputStream.vars) return null;
                         const { name: varName, type: varType } = varDef;
                         const value = packagePolicyInputStream.vars?.[varName]?.value;
+                        const requiredByVarGroup = isVarRequiredByVarGroup(
+                          varName,
+                          effectiveVarGroups,
+                          effectiveVarGroupSelections
+                        );
 
                         return (
                           <EuiFlexItem key={varName}>
@@ -426,6 +504,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               packageName={packageInfo.name}
                               datastreams={datastreams}
                               isEditPage={isEditPage}
+                              isRequiredByVarGroup={requiredByVarGroup}
                             />
                           </EuiFlexItem>
                         );

@@ -41,7 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        hideAnnouncements: true,
       });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');

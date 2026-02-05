@@ -79,3 +79,74 @@ export type NotAnArrowFnType = typeof notAnArrowFn;
  * @internal
  */
 export const iShouldBeInternalFn = () => 'hi';
+
+// Expected issues:
+//   missing comments (27):
+//     line 24 - a
+//     line 24 - a
+//     line 24 - a
+//     line 25 - b
+//     line 25 - b
+//     line 25 - b
+//     line 26 - c
+//     line 26 - c
+//     line 26 - c
+//     line 27 - d
+//     line 27 - d
+//     line 27 - d
+//     line 28 - e
+//     line 28 - e
+//     line 28 - e
+//     line 66 - hi
+//     line 66 - obj
+//     line 67 - { fn1, fn2 }
+//     line 67 - fn1
+//     line 67 - fn2
+//     line 67 - foo
+//     line 67 - param
+//     line 68 - { str }
+//     line 68 - str
+//     line 74 - a
+//     line 74 - fnWithNonExportedRef
+//     line 76 - NotAnArrowFnType
+//   no references (40):
+//     line 13 - notAnArrowFn
+//     line 24 - a
+//     line 24 - a
+//     line 24 - a
+//     line 24 - a
+//     line 25 - b
+//     line 25 - b
+//     line 25 - b
+//     line 25 - b
+//     line 26 - c
+//     line 26 - c
+//     line 26 - c
+//     line 26 - c
+//     line 27 - d
+//     line 27 - d
+//     line 27 - d
+//     line 27 - d
+//     line 28 - e
+//     line 28 - e
+//     line 28 - e
+//     line 28 - e
+//     line 43 - arrowFn
+//     line 44 - a
+//     line 45 - b
+//     line 46 - c
+//     line 47 - d
+//     line 48 - e
+//     line 64 - crazyFunction
+//     line 66 - hi
+//     line 66 - obj
+//     line 67 - { fn1, fn2 }
+//     line 67 - fn1
+//     line 67 - fn2
+//     line 67 - foo
+//     line 67 - param
+//     line 68 - { str }
+//     line 68 - str
+//     line 74 - a
+//     line 74 - fnWithNonExportedRef
+//     line 76 - NotAnArrowFnType

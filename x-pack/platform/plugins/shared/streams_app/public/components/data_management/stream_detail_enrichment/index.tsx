@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { Streams } from '@kbn/streams-schema';
 import { isRootStreamDefinition } from '@kbn/streams-schema';
-import { usePerformanceContext } from '@kbn/ebt-tools';
-import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
+
 import { RootStreamEmptyPrompt } from './empty_prompts';
 
 const StreamDetailEnrichmentContent = dynamic(() =>
@@ -27,23 +26,7 @@ export function StreamDetailEnrichment({
   definition,
   refreshDefinition,
 }: StreamDetailEnrichmentProps) {
-  const { onPageReady } = usePerformanceContext();
-
   const isRootStream = isRootStreamDefinition(definition.stream);
-
-  // Telemetry for TTFMP (time to first meaningful paint)
-  useEffect(() => {
-    const streamType = getStreamTypeFromDefinition(definition.stream);
-    onPageReady({
-      meta: {
-        description: `[ttfmp_streams] streamType: ${streamType}`,
-      },
-      customMetrics: {
-        key1: 'isRootStream',
-        value1: isRootStream ? 1 : 0,
-      },
-    });
-  }, [isRootStream, onPageReady, definition.stream]);
 
   if (isRootStream) {
     return <RootStreamEmptyPrompt />;

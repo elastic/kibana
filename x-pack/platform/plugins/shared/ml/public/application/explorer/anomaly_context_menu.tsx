@@ -194,7 +194,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       };
 
       const state = {
-        serializedState: { rawState: embeddableInput, references: [] },
+        serializedState: embeddableInput,
         type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
       };
 

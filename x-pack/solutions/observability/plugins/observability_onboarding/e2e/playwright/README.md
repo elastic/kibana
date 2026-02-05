@@ -15,6 +15,7 @@ KIBANA_USERNAME = "elastic"
 KIBANA_PASSWORD = "changeme"
 CLUSTER_ENVIRONMENT = local
 ARTIFACTS_FOLDER = ./.playwright
+# OS_NAME = darwin  # Optional for testing macOS OTel host flow
 ```
 1. Run the `playwright test`
 ```bash

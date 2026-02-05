@@ -28,6 +28,8 @@
         "label": "Comparator",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-alerting-comparators/src/comparators.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
             "label": "text",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-alerting-comparators/src/comparators.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -50,6 +54,8 @@
             "label": "value",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-alerting-comparators/src/comparators.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -61,6 +67,8 @@
             "label": "requiredValues",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-alerting-comparators/src/comparators.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -77,6 +85,8 @@
         "label": "COMPARATORS",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-alerting-comparators/src/comparators.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

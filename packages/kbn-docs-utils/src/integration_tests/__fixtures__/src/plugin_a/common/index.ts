@@ -12,3 +12,11 @@ export { commonFoo } from './foo';
 export interface ImACommonType {
   goo: number;
 }
+
+// Expected issues:
+//   missing comments (2):
+//     line 12 - ImACommonType
+//     line 13 - goo
+//   no references (2):
+//     line 12 - ImACommonType
+//     line 13 - goo

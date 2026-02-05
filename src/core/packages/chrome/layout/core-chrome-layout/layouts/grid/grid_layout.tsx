@@ -28,6 +28,7 @@ import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
 
 const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig } = {
   classic: {
+    chromeStyle: 'classic',
     headerHeight: 96,
     bannerHeight: 32,
 
@@ -37,6 +38,7 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
     navigationWidth: 48,
   },
   project: {
+    chromeStyle: 'project',
     headerHeight: 48,
     bannerHeight: 32,
 
@@ -76,8 +78,8 @@ export class GridLayout implements LayoutService {
     const chromeStyle$ = chrome.getChromeStyle$();
     const debug = this.params.debug ?? false;
 
-    const classicChromeHeader = chrome.getClassicHeaderComponentForGridLayout();
-    const projectChromeHeader = chrome.getProjectHeaderComponentForGridLayout();
+    const classicChromeHeader = chrome.getClassicHeaderComponent();
+    const projectChromeHeader = chrome.getProjectHeaderComponent();
     const headerBanner = chrome.getHeaderBanner();
 
     // chromeless header is used when chrome is not visible and responsible for displaying the data-test-subj and fixed loading bar
@@ -89,7 +91,7 @@ export class GridLayout implements LayoutService {
       map(([menu, appMenu]) => !!menu || !!appMenu)
     );
 
-    const projectSideNavigation = chrome.getProjectSideNavComponentForGridLayout();
+    const projectSideNavigation = chrome.getProjectSideNavComponent();
 
     const footer$ = chrome.getGlobalFooter$();
 

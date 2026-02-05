@@ -10,11 +10,10 @@ import { ToolType } from '@kbn/agent-builder-common';
 import type { ErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
@@ -43,17 +42,15 @@ const getAnomalyDetectionJobsSchema = z.object({
     .array(z.string().min(1))
     .min(1)
     .max(20)
-    .describe(
-      'Optional list of ML job IDs to query. Leave empty to include all anomaly detection jobs in this space.'
-    )
-    .optional(),
+    .optional()
+    .describe('Specific ML job IDs to query. Omit to include all jobs in this space.'),
   limit: z
     .number()
     .int()
     .min(1)
     .max(25)
-    .describe(`Maximum number of jobs to return. Defaults to ${DEFAULT_JOBS_LIMIT}.`)
-    .optional(),
+    .default(DEFAULT_JOBS_LIMIT)
+    .describe('Maximum number of jobs to return.'),
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
 });
 
@@ -62,10 +59,7 @@ export function createGetAnomalyDetectionJobsTool({
   plugins,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }): StaticToolRegistration<typeof getAnomalyDetectionJobsSchema> {
@@ -92,12 +86,7 @@ When to use:
     ): Promise<{
       results: (GetAnomalyDetectionJobsToolResult | Omit<ErrorResult, 'tool_result_id'>)[];
     }> => {
-      const {
-        jobIds,
-        limit: jobsLimit = DEFAULT_JOBS_LIMIT,
-        start: rangeStart = DEFAULT_TIME_RANGE.start,
-        end: rangeEnd = DEFAULT_TIME_RANGE.end,
-      } = toolParams;
+      const { jobIds, limit: jobsLimit, start: rangeStart, end: rangeEnd } = toolParams;
       const scopedEsClient = esClient.asCurrentUser;
       const mlClient = scopedEsClient.ml;
 

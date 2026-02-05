@@ -8,209 +8,110 @@
  */
 
 import type {
-  AppMenuActionBase,
-  AppMenuActionSubmenuBase,
-  AppMenuActionSubmenuCustom,
-  AppMenuSubmenuHorizontalRule,
-  AppMenuActionSubmenuSecondary,
-  AppMenuItem,
-  AppMenuItemCustom,
-  AppMenuItemPrimary,
-  AppMenuItemSecondary,
-  AppMenuSubmenuActionCustom,
-} from './types';
-import { AppMenuActionType } from './types';
-
-export class AppMenuRegistry {
-  static CUSTOM_ITEMS_LIMIT = 2;
-
-  private appMenuItems: AppMenuItem[];
-  /**
-   * As custom actions can be registered under a submenu from both root and data source profiles, we need to keep track of them separately.
-   * Otherwise, it would be less predictable. For example, we would override/reset the actions from the data source profile with the ones from the root profile.
-   * @internal
-   */
-  private customSubmenuItemsBySubmenuId: Map<
-    string,
-    Array<AppMenuSubmenuActionCustom | AppMenuSubmenuHorizontalRule>
-  >;
-
-  constructor(primaryAndSecondaryActions: Array<AppMenuItemPrimary | AppMenuItemSecondary>) {
-    this.appMenuItems = assignOrderToActions(primaryAndSecondaryActions);
-    this.customSubmenuItemsBySubmenuId = new Map();
-  }
-
-  public isActionRegistered(appMenuItemId: string) {
-    return (
-      this.appMenuItems.some((item) => {
-        if (item.id === appMenuItemId) {
-          return true;
-        }
-        if (isAppMenuActionSubmenu(item)) {
-          return item.actions.some((submenuItem) => submenuItem.id === appMenuItemId);
-        }
-        return false;
-      }) ||
-      [...this.customSubmenuItemsBySubmenuId.values()].some((submenuItems) =>
-        submenuItems.some((item) => item.id === appMenuItemId)
-      )
-    );
-  }
-
-  /**
-   * Register a custom action to the app menu. It can be a simple action or a submenu with more actions and horizontal rules.
-   * Note: Only 2 top level custom actions are allowed to be rendered in the app menu. The rest will be ignored.
-   * A custom action can also open a flyout or a modal. For that, return your custom react node from action's `onClick` event and call `onFinishAction` when you're done.
-   * @param appMenuItem
-   */
-  public registerCustomAction(appMenuItem: AppMenuItemCustom) {
-    this.appMenuItems = [
-      ...this.appMenuItems.filter(
-        // prevent duplicates
-        (item) => !(item.id === appMenuItem.id && item.type === AppMenuActionType.custom)
-      ),
-      appMenuItem,
-    ];
-  }
-
-  /**
-   * Register a custom action under a submenu. It can be an action or a horizontal rule.
-   * Any number of submenu actions can be registered and rendered.
-   * You can also extend an existing submenu with more actions. For example, AppMenuActionType.alerts.
-   * `order` property is optional and can be used to control the order of actions in the submenu.
-   * @param submenuId
-   * @param appMenuItem
-   */
-  public registerCustomActionUnderSubmenu(
-    submenuId: string,
-    appMenuItem: AppMenuSubmenuActionCustom | AppMenuSubmenuHorizontalRule
-  ) {
-    this.customSubmenuItemsBySubmenuId.set(submenuId, [
-      ...(this.customSubmenuItemsBySubmenuId.get(submenuId) ?? []).filter(
-        // prevent duplicates and allow overrides
-        (item) => item.id !== appMenuItem.id
-      ),
-      appMenuItem,
-    ]);
-  }
-
-  private getSortedItemsForType(type: AppMenuActionType) {
-    let actions = this.appMenuItems.filter((item) => item.type === type);
-
-    if (type === AppMenuActionType.custom && actions.length > AppMenuRegistry.CUSTOM_ITEMS_LIMIT) {
-      // apply the limitation on how many custom items can be shown
-      actions = actions.slice(0, AppMenuRegistry.CUSTOM_ITEMS_LIMIT);
-    }
-
-    // enrich submenus with custom actions
-    if (type === AppMenuActionType.secondary || type === AppMenuActionType.custom) {
-      [...this.customSubmenuItemsBySubmenuId.entries()].forEach(([submenuId, customActions]) => {
-        actions = actions.map((item) => {
-          if (item.id === submenuId && isAppMenuActionSubmenu(item)) {
-            return extendSubmenuWithCustomActions(item, customActions);
-          }
-          return item;
-        });
-      });
-    }
-
-    return sortAppMenuItemsByOrder(actions);
-  }
-
-  /**
-   * Get the resulting app menu items sorted by type and order.
-   */
-  public getSortedItems() {
-    const primaryItems = this.getSortedItemsForType(AppMenuActionType.primary);
-    const secondaryItems = this.getSortedItemsForType(AppMenuActionType.secondary);
-    const customItems = this.getSortedItemsForType(AppMenuActionType.custom);
-
-    return [...customItems, ...secondaryItems, ...primaryItems].filter(
-      (item) => !isAppMenuActionSubmenu(item) || item.actions.length > 0
-    );
-  }
-}
-
-function isAppMenuActionSubmenu(
-  appMenuItem: AppMenuItem
-): appMenuItem is AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom {
-  return 'actions' in appMenuItem && Array.isArray(appMenuItem.actions);
-}
-
-const FALLBACK_ORDER = Number.MAX_SAFE_INTEGER;
-
-function sortByOrder<T extends AppMenuActionBase>(a: T, b: T): number {
-  return (a.order ?? FALLBACK_ORDER) - (b.order ?? FALLBACK_ORDER);
-}
-
-function getAppMenuSubmenuWithSortedItemsByOrder<
-  T extends AppMenuActionSubmenuBase = AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom
->(appMenuItem: T): T {
-  return {
-    ...appMenuItem,
-    actions: [...appMenuItem.actions].sort(sortByOrder),
-  };
-}
-
-function sortAppMenuItemsByOrder(appMenuItems: AppMenuItem[]): AppMenuItem[] {
-  const sortedAppMenuItems = [...appMenuItems].sort(sortByOrder);
-  return sortedAppMenuItems.map((appMenuItem) => {
-    if (isAppMenuActionSubmenu(appMenuItem)) {
-      return getAppMenuSubmenuWithSortedItemsByOrder(appMenuItem);
-    }
-    return appMenuItem;
-  });
-}
-
-function getAppMenuSubmenuWithAssignedOrder<
-  T extends AppMenuActionSubmenuBase = AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom
->(appMenuItem: T, order: number): T {
-  let orderInSubmenu = 0;
-  const actionsWithOrder = appMenuItem.actions.map((action) => {
-    orderInSubmenu = orderInSubmenu + 100;
-    return {
-      ...action,
-      order: action.order ?? orderInSubmenu,
-    };
-  });
-  return {
-    ...appMenuItem,
-    order: appMenuItem.order ?? order,
-    actions: actionsWithOrder,
-  };
-}
-
-function extendSubmenuWithCustomActions<
-  T extends AppMenuActionSubmenuBase = AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom
->(
-  appMenuItem: T,
-  customActions: Array<AppMenuSubmenuActionCustom | AppMenuSubmenuHorizontalRule>
-): T {
-  const customActionsIds = new Set(customActions.map((action) => action.id));
-  return {
-    ...appMenuItem,
-    actions: [
-      ...appMenuItem.actions.filter((item) => !customActionsIds.has(item.id)), // allow to override secondary actions with custom ones
-      ...customActions,
-    ],
-  };
-}
+  DiscoverAppMenuConfig,
+  DiscoverAppMenuItemType,
+  DiscoverAppMenuPopoverItem,
+  DiscoverAppMenuPrimaryActionItem,
+  DiscoverAppMenuSecondaryActionItem,
+} from '../../types';
 
 /**
- * All primary and secondary actions by default get order 100, 200, 300,... assigned to them.
- * Same for actions under a submenu.
- * @param appMenuItems
+ * Registry for managing AppMenuConfig items with Discover-specific types.
+ * All run actions automatically receive DiscoverAppMenuRunActionParams with guaranteed onFinishAction.
  */
-function assignOrderToActions(appMenuItems: AppMenuItem[]): AppMenuItem[] {
-  let order = 0;
-  return appMenuItems.map((appMenuItem) => {
-    order = order + 100;
-    if (isAppMenuActionSubmenu(appMenuItem)) {
-      return getAppMenuSubmenuWithAssignedOrder(appMenuItem, order);
+export class AppMenuRegistry {
+  static CUSTOM_ITEMS_LIMIT = 2;
+  private items: Map<string, DiscoverAppMenuItemType & { isCustom?: boolean }> = new Map();
+  private primaryActionItem?: DiscoverAppMenuPrimaryActionItem;
+  private secondaryActionItem?: DiscoverAppMenuSecondaryActionItem;
+
+  /**
+   * Register a custom menu item.
+   * @param item The menu item to register
+   */
+  public registerCustomItem(item: DiscoverAppMenuItemType) {
+    this.items.set(item.id, { ...item, isCustom: true });
+  }
+
+  /**
+   * Register a custom popover item under a parent menu item.
+   * @param parentId The ID of the parent menu item
+   * @param popoverItem The popover item to register
+   */
+  public registerCustomPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
+    const parent = this.items.get(parentId);
+    if (parent) {
+      this.items.set(parentId, {
+        ...parent,
+        items: [...(parent.items || []), popoverItem],
+      });
     }
+  }
+
+  /**
+   * Register a menu item.
+   * @param item The menu item to register
+   */
+  public registerItem(item: DiscoverAppMenuItemType) {
+    this.items.set(item.id, { ...item, isCustom: false });
+  }
+
+  /**
+   * Register multiple menu items at once.
+   * @param items Array of menu items to register
+   */
+  public registerItems(items: DiscoverAppMenuItemType[]) {
+    items.forEach((item) => this.registerItem(item));
+  }
+
+  /**
+   * Set the primary action item for the app menu.
+   * @param item The primary action item
+   */
+  public setPrimaryActionItem(item: DiscoverAppMenuPrimaryActionItem) {
+    this.primaryActionItem = item;
+  }
+
+  /**
+   * Set the secondary action item for the app menu.
+   * @param item The secondary action item
+   */
+  public setSecondaryActionItem(item: DiscoverAppMenuSecondaryActionItem) {
+    this.secondaryActionItem = item;
+  }
+
+  /**
+   * Register a popover item for a specific parent menu item.
+   * @param parentId The ID of the parent menu item
+   * @param popoverItem The popover item to register
+   */
+  public registerPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
+    const parent = this.items.get(parentId);
+    if (parent) {
+      this.items.set(parentId, {
+        ...parent,
+        items: [...(parent.items || []), popoverItem],
+      });
+    }
+  }
+
+  /**
+   * Get the complete AppMenuConfig.
+   * Items with registered popover items will have their items property populated.
+   */
+  public getAppMenuConfig(): DiscoverAppMenuConfig {
+    const allItems = Array.from(this.items.values());
+    const regularItems = allItems.filter((item) => !item.isCustom);
+    const customItems = allItems
+      .filter((item) => item.isCustom)
+      .slice(0, AppMenuRegistry.CUSTOM_ITEMS_LIMIT);
+
+    const cleanItems = [...regularItems, ...customItems].map(({ isCustom, ...item }) => item);
+
     return {
-      ...appMenuItem,
-      order: appMenuItem.order ?? order,
+      items: cleanItems,
+      primaryActionItem: this.primaryActionItem,
+      secondaryActionItem: this.secondaryActionItem,
     };
-  });
+  }
 }

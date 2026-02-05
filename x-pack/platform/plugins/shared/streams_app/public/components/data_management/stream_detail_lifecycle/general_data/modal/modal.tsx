@@ -67,8 +67,9 @@ export function EditLifecycleModal({
   const isCurrentLifecycleInherit = isInheritLifecycle(definition.stream.ingest.lifecycle);
   const initialSelectedAction: LifecycleEditAction = isIlmLifecycle(definition.effective_lifecycle)
     ? 'ilm'
-    : isDslLifecycle(definition.effective_lifecycle) &&
-      !definition.effective_lifecycle.dsl.data_retention
+    : (isDslLifecycle(definition.effective_lifecycle) &&
+        !definition.effective_lifecycle.dsl.data_retention) ||
+      isDisabledLifecycle(definition.effective_lifecycle)
     ? 'indefinite'
     : 'custom';
 
@@ -79,7 +80,7 @@ export function EditLifecycleModal({
   );
 
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState<boolean>(
-    selectedAction === 'ilm'
+    isCurrentLifecycleInherit || selectedAction === 'ilm'
   );
 
   const isWired = Streams.WiredStream.GetResponse.is(definition);
@@ -198,9 +199,14 @@ export function EditLifecycleModal({
                       setSelectedAction(initialSelectedAction);
                     }
                     setIsInheritToggleOn(true);
-                    setIsSaveButtonDisabled(false);
+                    setIsSaveButtonDisabled(isCurrentLifecycleInherit);
                   } else {
                     setIsInheritToggleOn(false);
+                    // When disabling inheritance with 'indefinite' selected and lifecycle is disabled,
+                    // convert to DSL lifecycle without data retention so it can be saved
+                    if (selectedAction === 'indefinite' && isDisabledLifecycle(lifecycle)) {
+                      setLifecycle({ dsl: {} });
+                    }
                     setIsSaveButtonDisabled(selectedAction === 'ilm');
                   }
                 }}
@@ -346,12 +352,12 @@ function buildUpdatedLifecycle(
   lifecycle: IngestStreamLifecycleAll,
   { isInheritToggleOn }: { isInheritToggleOn: boolean }
 ): IngestStreamLifecycle | undefined {
-  if (isDisabledLifecycle(lifecycle) || isErrorLifecycle(lifecycle)) {
-    return;
-  }
-
   if (isInheritToggleOn) {
     return { inherit: {} };
+  }
+
+  if (isDisabledLifecycle(lifecycle) || isErrorLifecycle(lifecycle)) {
+    return;
   }
 
   return lifecycle;

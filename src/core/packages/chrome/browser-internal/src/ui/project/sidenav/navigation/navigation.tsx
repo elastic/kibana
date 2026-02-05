@@ -44,10 +44,11 @@ export interface ChromeNavigationProps {
 
   // other state that might be needed later
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
-  isFeedbackBtnVisible$: Observable<boolean>;
   loadingCount$: Observable<number>;
   dataTestSubj$?: Observable<string | undefined>;
 
+  isFeedbackBtnVisible$: Observable<boolean>;
+  isFeedbackEnabled$: Observable<boolean>;
   feedbackUrlParams$: Observable<URLSearchParams | undefined>;
 
   // collapse toggle callback
@@ -58,6 +59,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems(props);
   const dataTestSubj = useObservable(props.dataTestSubj$ ?? EMPTY, undefined);
   const feedbackUrlParams = useObservable(props.feedbackUrlParams$ ?? EMPTY, undefined);
+  const isFeedbackEnabled = useObservable(props.isFeedbackEnabled$ ?? EMPTY, true);
 
   if (!state) {
     return null;
@@ -72,6 +74,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         logo={logoItem}
         sidePanelFooter={
           <NavigationFeedbackSnippet
+            isEnabled={isFeedbackEnabled}
             solutionId={solutionId}
             feedbackUrlParams={feedbackUrlParams}
           />

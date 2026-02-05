@@ -79,6 +79,10 @@ describe('tab mapping utils', () => {
             "sort": Array [],
             "viewMode": undefined,
           },
+          "cascadedDocumentsState": Object {
+            "availableCascadeGroups": Array [],
+            "selectedCascadeGroups": Array [],
+          },
           "controlGroupState": undefined,
           "dataRequestParams": Object {
             "isSearchSessionRestored": false,
@@ -88,6 +92,7 @@ describe('tab mapping utils', () => {
           },
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
+          "expandedDoc": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {
@@ -159,6 +164,10 @@ describe('tab mapping utils', () => {
             "sort": Array [],
             "viewMode": undefined,
           },
+          "cascadedDocumentsState": Object {
+            "availableCascadeGroups": Array [],
+            "selectedCascadeGroups": Array [],
+          },
           "controlGroupState": undefined,
           "dataRequestParams": Object {
             "isSearchSessionRestored": false,
@@ -168,6 +177,7 @@ describe('tab mapping utils', () => {
           },
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
+          "expandedDoc": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {

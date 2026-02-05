@@ -40,7 +40,8 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
-import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import type { ValueSuggestionsGetFn } from '@kbn/kql/public/autocomplete/providers/value_suggestion_provider';
 import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
 import { FormattedError } from '../../../../components/formatted_error';
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
@@ -72,7 +73,9 @@ import {
   RULE_NAME,
 } from '../event_filters_list';
 import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
-import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../constants';
+import { EVENT_FILTER_LIST_TYPE } from '../../constants';
+
+const ENDPOINT_EVENT_FILTERS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
 
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';

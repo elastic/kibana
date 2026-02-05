@@ -116,3 +116,39 @@ export interface ExampleInterface extends AnotherInterface<string> {
 export interface IReturnAReactComponent {
   component: React.ComponentType;
 }
+
+// Expected issues:
+//   missing comments (9):
+//     line 32 - t
+//     line 41 - t
+//     line 44 - ExampleClass
+//     line 50 - component
+//     line 52 - Constructor
+//     line 52 - t
+//     line 71 - CrazyClass
+//     line 94 - foo
+//     line 117 - component
+//   no references (23):
+//     line 28 - WithGen
+//     line 32 - t
+//     line 41 - t
+//     line 44 - ExampleClass
+//     line 50 - component
+//     line 52 - Constructor
+//     line 52 - t
+//     line 56 - arrowFn
+//     line 60 - a
+//     line 62 - getVar
+//     line 66 - a
+//     line 71 - CrazyClass
+//     line 73 - ExampleInterface
+//     line 78 - getAPromiseThatResolvesToString
+//     line 83 - aFnWithGen
+//     line 89 - t
+//     line 91 - anOptionalFn
+//     line 94 - foo
+//     line 96 - aFn
+//     line 101 - fnTypeWithGeneric
+//     line 107 - fnTypeWithGenericThatIsOptional
+//     line 113 - IReturnAReactComponent
+//     line 117 - component

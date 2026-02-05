@@ -17,6 +17,7 @@ import {
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { DeleteEntitySourceRequestParams } from '../../../../../../common/api/entity_analytics';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const deleteMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -42,7 +43,7 @@ export const deleteMonitoringEntitySourceRoute = (
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse> => {
+      withMinimumLicense(async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -70,6 +71,6 @@ export const deleteMonitoringEntitySourceRoute = (
             body: error.message,
           });
         }
-      }
+      }, 'platinum')
     );
 };

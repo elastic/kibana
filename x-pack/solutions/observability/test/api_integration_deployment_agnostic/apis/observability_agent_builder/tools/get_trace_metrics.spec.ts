@@ -14,15 +14,9 @@ import {
 } from '@kbn/synthtrace';
 import type { OtherResult } from '@kbn/agent-builder-common';
 import { OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
+import type { TraceMetricsItem } from '@kbn/observability-agent-builder-plugin/server/tools/get_trace_metrics/handler';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-
-interface TraceMetricsItem {
-  group: string;
-  latency: number | null;
-  throughput: number;
-  failureRate: number;
-}
 
 interface GetTraceMetricsToolResult extends OtherResult {
   data: {
@@ -945,13 +939,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(items).to.have.length(0);
       });
 
-      it('defaults to service.name grouping when groupBy is an empty string', async () => {
+      it('defaults to service.name grouping when groupBy is not provided', async () => {
         const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: START,
             end: END,
-            groupBy: '',
           },
         });
 

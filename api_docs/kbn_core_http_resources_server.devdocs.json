@@ -22,6 +22,8 @@
           "\nHttpResources service is responsible for serving static & dynamic assets for Kibana application via HTTP.\nProvides API allowing plug-ins to respond with:\n- a pre-configured HTML page bootstrapping Kibana client app\n- custom HTML page\n- custom JS script file."
         ],
         "path": "src/core/packages/http/resources-server/src/types.ts",
+        "lineNumber": 95,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "<P, Q, B, Context>) => void"
             ],
             "path": "src/core/packages/http/resources-server/src/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -61,6 +65,8 @@
                   "<P, Q, B, \"get\">"
                 ],
                 "path": "src/core/packages/http/resources-server/src/types.ts",
+                "lineNumber": 106,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -77,6 +83,8 @@
                   "<P, Q, B, Context>"
                 ],
                 "path": "src/core/packages/http/resources-server/src/types.ts",
+                "lineNumber": 107,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -97,6 +105,8 @@
           "\nAllows to configure HTTP response parameters"
         ],
         "path": "src/core/packages/http/resources-server/src/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -114,6 +124,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/http/resources-server/src/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -130,6 +142,8 @@
           "\nExtended set of {@link KibanaResponseFactory} helpers used to respond with HTML or JS resource."
         ],
         "path": "src/core/packages/http/resources-server/src/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -150,6 +164,8 @@
               "<any>>"
             ],
             "path": "src/core/packages/http/resources-server/src/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -165,6 +181,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/http/resources-server/src/types.ts",
+                "lineNumber": 50,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -189,6 +207,8 @@
               "<any>>"
             ],
             "path": "src/core/packages/http/resources-server/src/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -204,6 +224,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/http/resources-server/src/types.ts",
+                "lineNumber": 57,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -228,6 +250,8 @@
               "<any>"
             ],
             "path": "src/core/packages/http/resources-server/src/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -242,6 +266,8 @@
                   "HttpResourcesResponseOptions"
                 ],
                 "path": "src/core/packages/http/resources-server/src/types.ts",
+                "lineNumber": 59,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -266,6 +292,8 @@
               "<any>"
             ],
             "path": "src/core/packages/http/resources-server/src/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -280,6 +308,8 @@
                   "HttpResourcesResponseOptions"
                 ],
                 "path": "src/core/packages/http/resources-server/src/types.ts",
+                "lineNumber": 61,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -304,6 +334,8 @@
               "<any>"
             ],
             "path": "src/core/packages/http/resources-server/src/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -318,6 +350,8 @@
                   "HttpResourcesResponseOptions"
                 ],
                 "path": "src/core/packages/http/resources-server/src/types.ts",
+                "lineNumber": 63,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -376,6 +410,8 @@
           "<any>>"
         ],
         "path": "src/core/packages/http/resources-server/src/types.ts",
+        "lineNumber": 66,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -393,6 +429,8 @@
               "Context"
             ],
             "path": "src/core/packages/http/server/src/router/request_handler.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -410,6 +448,8 @@
               "<P, Q, B, Method>"
             ],
             "path": "src/core/packages/http/server/src/router/request_handler.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -426,6 +466,8 @@
               "ResponseFactory"
             ],
             "path": "src/core/packages/http/server/src/router/request_handler.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -446,6 +488,8 @@
           "<any>"
         ],
         "path": "src/core/packages/http/resources-server/src/types.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

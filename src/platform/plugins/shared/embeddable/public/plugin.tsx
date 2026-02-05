@@ -21,7 +21,6 @@ import { EmbeddableStateTransfer } from './state_transfer';
 import { setKibanaServices } from './kibana_services';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
-import { EnhancementsRegistry } from '../common/enhancements/registry';
 import type {
   EmbeddableSetup,
   EmbeddableSetupDependencies,
@@ -32,13 +31,12 @@ import {
   registerLegacyURLTransform,
   hasLegacyURLTransform,
   getLegacyURLTransform,
-} from './transforms_registry';
+} from './bwc/legacy_url_transform';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
   private appList?: ReadonlyMap<string, PublicAppInfo>;
   private appListSubscription?: Subscription;
-  private enhancementsRegistry = new EnhancementsRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -49,9 +47,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       registerReactEmbeddableFactory,
       registerAddFromLibraryType,
       registerLegacyURLTransform,
-      registerEnhancement: this.enhancementsRegistry.registerEnhancement,
-      transformEnhancementsIn: this.enhancementsRegistry.transformIn,
-      transformEnhancementsOut: this.enhancementsRegistry.transformOut,
     };
   }
 
@@ -82,7 +77,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
           : this.stateTransferService,
       hasLegacyURLTransform,
       getLegacyURLTransform,
-      getEnhancement: this.enhancementsRegistry.getEnhancement,
     };
 
     setKibanaServices(core, embeddableStart, deps);

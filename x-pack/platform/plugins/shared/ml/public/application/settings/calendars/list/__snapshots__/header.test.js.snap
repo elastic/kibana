@@ -3,7 +3,7 @@
 exports[`CalendarListsHeader renders header 1`] = `
 <div>
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-baseline-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-baseline-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"

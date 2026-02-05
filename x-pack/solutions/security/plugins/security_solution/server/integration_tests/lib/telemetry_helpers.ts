@@ -14,6 +14,7 @@ import type {
 import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
+  OsTypeArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -290,7 +291,14 @@ export async function createAgentPolicy(
   const agentPolicyType = await getAgentPolicySavedObjectType();
   await soClient.get<unknown>(agentPolicyType, id).catch(async (e) => {
     try {
-      return await soClient.create<unknown>(agentPolicyType, {}, { id });
+      return await soClient.create<unknown>(
+        agentPolicyType,
+        {
+          name: 'Elastic Cloud agent policy',
+          namespace: 'default',
+        },
+        { id }
+      );
     } catch {
       logger.error(`>> Error searching for agent: ${e}`);
       throw Error(`>> Error searching for agent: ${e}`);
@@ -334,6 +342,7 @@ export async function createMockedExceptionList(so: SavedObjectsServiceStart) {
   const meta = undefined;
   const user = '';
   const version = 1;
+  const osTypes: OsTypeArray = ['linux'];
   const tags: string[] = [];
   const tieBreaker = '';
 
@@ -346,6 +355,7 @@ export async function createMockedExceptionList(so: SavedObjectsServiceStart) {
     description,
     meta,
     user,
+    osTypes,
     tags,
     tieBreaker,
     type,

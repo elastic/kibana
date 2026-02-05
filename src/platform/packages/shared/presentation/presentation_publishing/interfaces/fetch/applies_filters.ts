@@ -26,3 +26,15 @@ export interface AppliesTimeslice {
 export const apiAppliesTimeslice = (unknownApi: unknown): unknownApi is AppliesTimeslice => {
   return Boolean(unknownApi && (unknownApi as AppliesTimeslice)?.appliedTimeslice$ !== undefined);
 };
+
+export interface HasUseGlobalFiltersSetting {
+  useGlobalFilters$: PublishingSubject<boolean | undefined>;
+}
+
+export const apiHasUseGlobalFiltersSetting = (
+  unknownApi: unknown
+): unknownApi is HasUseGlobalFiltersSetting => {
+  return Boolean(
+    unknownApi && (unknownApi as HasUseGlobalFiltersSetting)?.useGlobalFilters$ !== undefined
+  );
+};

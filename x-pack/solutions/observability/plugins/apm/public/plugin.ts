@@ -84,6 +84,8 @@ import type {
   DiscoverSharedPublicSetup,
   DiscoverSharedPublicStart,
 } from '@kbn/discover-shared-plugin/public';
+import type { KqlPluginSetup, KqlPluginStart } from '@kbn/kql/public';
+import type { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import { registerEmbeddables } from './embeddable/register_embeddables';
@@ -98,6 +100,8 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
+import { createLazyFocusedTraceWaterfallRenderer } from './components/shared/focused_trace_waterfall/lazy_create_focused_trace_waterfall_renderer';
+import { createLazyFullTraceWaterfallRenderer } from './components/shared/trace_waterfall/lazy_create_full_trace_waterfall_renderer';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
@@ -109,6 +113,7 @@ export interface ApmPluginSetupDeps {
   embeddable: EmbeddableSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginSetup;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
@@ -154,6 +159,7 @@ export interface ApmPluginStartDeps {
   serverless?: ServerlessPluginStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   storage: IStorageWrapper;
   lens: LensPublicStart;
   uiActions: UiActionsStart;
@@ -171,6 +177,7 @@ export interface ApmPluginStartDeps {
   discoverShared: DiscoverSharedPublicStart;
   agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
+  slo?: SLOPublicStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
@@ -514,7 +521,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   }
 
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    const { fleet } = plugins;
+    const { fleet, discoverShared } = plugins;
 
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');
@@ -522,6 +529,16 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       mod.registerAssistantFunctions({
         registerRenderFunction,
       });
+    });
+
+    discoverShared.features.registry.register({
+      id: 'observability-focused-trace-waterfall',
+      render: createLazyFocusedTraceWaterfallRenderer({ core }),
+    });
+
+    discoverShared.features.registry.register({
+      id: 'observability-full-trace-waterfall',
+      render: createLazyFullTraceWaterfallRenderer({ core }),
     });
 
     if (fleet) {

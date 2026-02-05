@@ -12,7 +12,35 @@ import { getOrResolveObject } from '../../common/utils';
 
 export function getWorkflowJsonSchema(zodSchema: z.ZodType): z.core.JSONSchema.JSONSchema | null {
   try {
-    return z.toJSONSchema(zodSchema, {
+    // Unwrap ZodPipe/ZodTransform/ZodEffects to get the base schema for JSON Schema generation
+    // z.toJSONSchema on a transform/pipe schema may not generate the correct structure for Monaco YAML
+    // We need to use the base schema (before transform) to get proper property definitions
+    let schemaToConvert = zodSchema;
+
+    // Check if it's a ZodPipe (which is used when chaining transforms)
+    const def = zodSchema._def as {
+      type?: string;
+      in?: z.ZodType;
+      out?: z.ZodType;
+      typeName?: string;
+      effect?: { type?: string; schema?: z.ZodType };
+      schema?: z.ZodType;
+    };
+
+    if (def.type === 'pipe' && def.in) {
+      // ZodPipe: use the input schema (before pipe)
+      schemaToConvert = def.in;
+    } else if (def.typeName === 'ZodEffects') {
+      if (def.effect?.type === 'transform' && def.effect.schema) {
+        // ZodEffects with transform: use the input schema
+        schemaToConvert = def.effect.schema;
+      } else if (def.effect?.type === 'refinement' && def.schema) {
+        // ZodEffects with refine: unwrap to get base schema for JSON Schema generation
+        schemaToConvert = def.schema;
+      }
+    }
+
+    return z.toJSONSchema(schemaToConvert, {
       target: 'draft-7',
       unrepresentable: 'any', // do not throw an error for unrepresentable types
       reused: 'ref', // using ref reduces the size of the schema 4x
@@ -47,13 +75,14 @@ function filterRequiredFields(ctx: {
         fieldObject as z.core.JSONSchema.JSONSchema,
         ctx.jsonSchema
       );
-      // filter out from 'required' array, if field has default or optional
-      return (
-        fieldSchema &&
-        typeof fieldSchema === 'object' &&
-        !('default' in fieldSchema) &&
-        !('optional' in fieldSchema)
-      );
+      // Conservative approach: if we can't resolve the ref, keep as required
+      // This happens when fieldObject is a $ref but ctx.jsonSchema doesn't have definitions
+      // (definitions are only at the root level, not in nested contexts)
+      if (!fieldSchema || typeof fieldSchema !== 'object') {
+        return true; // Keep as required (safer default)
+      }
+      // filter out from 'required' array only if field has default or optional
+      return !('default' in fieldSchema) && !('optional' in fieldSchema);
     });
     ctx.jsonSchema.required = newRequired.length > 0 ? newRequired : undefined;
   }

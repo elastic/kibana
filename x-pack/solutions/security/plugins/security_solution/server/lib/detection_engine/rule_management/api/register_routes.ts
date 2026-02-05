@@ -37,7 +37,7 @@ export const registerRuleManagementRoutes = (
   deleteRuleRoute(router);
 
   // Rules bulk actions
-  performBulkActionRoute(router, ml, config);
+  performBulkActionRoute(router, ml);
 
   // Rules export/import
   exportRulesRoute(router, config, logger);

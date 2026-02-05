@@ -14,32 +14,11 @@ describe('embeddable getAllMigratons', () => {
     { migrations: { '7.11.0': (state: unknown) => state } },
     { migrations: () => ({ '7.13.0': (state: unknown) => state }) },
   ];
-  const enhacements = [
-    { migrations: { '7.12.0': (state: unknown) => state } },
-    { migrations: () => ({ '7.14.0': (state: unknown) => state }) },
-  ];
   const migrateFn = jest.fn();
 
-  test('returns base migrations', () => {
-    expect(getAllMigrations([], [], migrateFn)).toHaveProperty(['8.7.0']);
-  });
-
-  test('returns embeddable factory migrations', () => {
-    expect(getAllMigrations(factories, [], migrateFn)).toHaveProperty(['7.11.0']);
-    expect(getAllMigrations(factories, [], migrateFn)).toHaveProperty(['7.13.0']);
-  });
-
-  test('returns enhancement migrations', () => {
-    const migrations = getAllMigrations([], enhacements, migrateFn);
-    expect(migrations).toHaveProperty(['7.12.0']);
-    expect(migrations).toHaveProperty(['7.14.0']);
-  });
-
   test('returns all migrations', () => {
-    const migrations = getAllMigrations(factories, enhacements, migrateFn);
+    const migrations = getAllMigrations(factories, migrateFn);
     expect(migrations).toHaveProperty(['7.11.0']);
-    expect(migrations).toHaveProperty(['7.12.0']);
     expect(migrations).toHaveProperty(['7.13.0']);
-    expect(migrations).toHaveProperty(['7.14.0']);
   });
 });

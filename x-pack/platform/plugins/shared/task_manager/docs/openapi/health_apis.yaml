@@ -37,7 +37,7 @@ paths:
                     # description:
                   last_update:
                     type: string
-                    # description: 
+                    # description:
                   stats:
                     type: object
                     properties:
@@ -61,10 +61,10 @@ paths:
                           This object summarizes the work load across the cluster, including the tasks in the system, their types, and current status.
                   status:
                     type: string
-                    # description: 
+                    # description:
                   timestamp:
                     type: string
-                    # description: 
+                    # description:
               examples:
                 taskManagerHealthResponse1:
                   # summary:
@@ -273,12 +273,6 @@ paths:
                                 "p90": 910986970,
                                 "p95": 910986970,
                                 "p99": 910986970
-                              },
-                              "logs-data-telemetry": {
-                                "p50": 846187459,
-                                "p90": 846187459,
-                                "p95": 846187459,
-                                "p99": 846187459
                               },
                               "security:telemetry-lists": {
                                 "p50": 846187459,
@@ -516,12 +510,6 @@ paths:
                                   "p90": 56,
                                   "p95": 56,
                                   "p99": 56
-                                },
-                                "logs-data-telemetry": {
-                                  "p50": 14,
-                                  "p90": 14,
-                                  "p95": 14,
-                                  "p99": 14
                                 },
                                 "security:telemetry-lists": {
                                   "p50": 14,
@@ -771,12 +759,6 @@ paths:
                                   "Failed": 0,
                                   "status": "OK"
                                 },
-                                "logs-data-telemetry": {
-                                  "Success": 100,
-                                  "RetryScheduled": 0,
-                                  "Failed": 0,
-                                  "status": "OK"
-                                },
                                 "security:telemetry-lists": {
                                   "Success": 100,
                                   "RetryScheduled": 0,
@@ -1016,13 +998,6 @@ paths:
                                 }
                               },
                               "fleet:unenroll-inactive-agents-task": {
-                                "count": 1,
-                                "cost": 2,
-                                "status": {
-                                  "idle": 1
-                                }
-                              },
-                              "logs-data-telemetry": {
                                 "count": 1,
                                 "cost": 2,
                                 "status": {

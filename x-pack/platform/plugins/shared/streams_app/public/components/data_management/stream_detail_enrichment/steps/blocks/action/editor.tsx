@@ -21,7 +21,7 @@ import { isActionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate5/react';
 import { isEmpty, isEqual } from 'lodash';
 import React, { forwardRef, useEffect, useState } from 'react';
-import type { SubmitHandler } from 'react-hook-form';
+import type { DefaultValues, SubmitHandler } from 'react-hook-form';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import type { ActionBlockProps } from '.';
 import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
@@ -56,6 +56,8 @@ import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './pro
 import { ReplaceProcessorForm } from './replace';
 import { SetProcessorForm } from './set';
 import { TransformStringProcessorForm } from './transform_string';
+import { ConcatProcessorForm } from './concat';
+import { JoinProcessorForm } from './join';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
@@ -80,8 +82,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
   });
 
   const methods = useForm<ProcessorFormState>({
-    // TODO: See if this can be stricter, DeepPartial<ProcessorFormState> doesn't work
-    defaultValues: defaultValues as any,
+    defaultValues: defaultValues as DefaultValues<ProcessorFormState>,
     mode: 'onChange',
   });
 
@@ -200,6 +201,8 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                     )}
                   />
                 )}
+                {type === 'concat' && <ConcatProcessorForm />}
+                {type === 'join' && <JoinProcessorForm />}
                 {!SPECIALISED_TYPES.includes(type) && (
                   <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
                 )}

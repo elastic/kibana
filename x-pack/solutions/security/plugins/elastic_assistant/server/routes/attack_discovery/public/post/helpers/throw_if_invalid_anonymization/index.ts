@@ -27,3 +27,6 @@ export const throwIfInvalidAnonymization = (
     throw new Error(i18n.ID_FIELD_REQUIRED);
   }
 };
+
+export const isInvalidAnonymizationError = (error: Error) =>
+  error.message === i18n.NO_FIELDS_ALLOWED || error.message === i18n.ID_FIELD_REQUIRED;

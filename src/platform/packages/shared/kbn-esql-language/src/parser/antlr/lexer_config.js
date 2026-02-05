@@ -35,8 +35,7 @@ export default class lexer_config extends Lexer {
     return this._promqlDepth;
   }
 
-  // Returns true if we're inside a nested PromQL query (depth > 1)
   isPromqlQuery() {
-    return this._promqlDepth > 1;
+    return this._promqlDepth > 0;
   }
 }

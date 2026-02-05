@@ -269,9 +269,7 @@ describe('useESQLVariables', () => {
       expect(mockControlGroupAPI.addNewPanel).toHaveBeenCalledWith({
         panelType: 'esqlControl',
         serializedState: {
-          rawState: {
-            ...mockControlState,
-          },
+          ...mockControlState,
         },
       });
       expect(mockOnTextLangQueryChange).not.toHaveBeenCalled();

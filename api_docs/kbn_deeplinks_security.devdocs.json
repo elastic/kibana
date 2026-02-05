@@ -29,6 +29,8 @@
         "label": "SecurityPageName",
         "description": [],
         "path": "src/platform/packages/shared/deeplinks/security/deep_links.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -46,6 +48,8 @@
           "\"securitySolutionUI\""
         ],
         "path": "src/platform/packages/shared/deeplinks/security/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -61,6 +65,8 @@
           "\"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:configurations\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-vulnerability_dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:asset_inventory\" | \"securitySolutionUI:network\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:cloud_defend\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:attacks\" | \"securitySolutionUI:ai_value\" | \"securitySolutionUI:attack_discovery\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:alert_detections\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoint_exceptions\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-all\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:hosts-sessions\" | \"securitySolutionUI:hosts-uncommon_processes\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-flows\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:rules-management\" | \"securitySolutionUI:scripts_library\" | \"securitySolutionUI:siem_readiness\" | \"securitySolutionUI:siem_migrations\" | \"securitySolutionUI:siem_migrations-rules\" | \"securitySolutionUI:siem_migrations-dashboards\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:trusted_devices\" | \"securitySolutionUI:users-all\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:entity_analytics-landing\" | \"securitySolutionUI:entity_analytics-privileged_user_monitoring\" | \"securitySolutionUI:entity_analytics-overview\" | \"securitySolutionUI:entity_analytics-threat_hunting\" | \"securitySolutionUI:entity_analytics-entity_store_management\" | \"securitySolutionUI:coverage-overview\" | \"securitySolutionUI:notes\" | \"securitySolutionUI:alert_summary\" | \"securitySolutionUI:configurations-integrations\" | \"securitySolutionUI:configurations-ai_settings\" | \"securitySolutionUI:configurations-basic_rules\""
         ],
         "path": "src/platform/packages/shared/deeplinks/security/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -76,6 +82,8 @@
           "\"\" | \"cases\" | \"rules\" | \"dashboards\" | \"alerts\" | \"policy\" | \"overview\" | \"kubernetes\" | \"configurations\" | \"cases_create\" | \"cases_configure\" | \"hosts\" | \"users\" | \"cloud_defend-policies\" | \"cloud_security_posture-dashboard\" | \"cloud_security_posture-vulnerability_dashboard\" | \"cloud_security_posture-findings\" | \"cloud_security_posture-benchmarks\" | \"asset_inventory\" | \"network\" | \"data_quality\" | \"endpoints\" | \"explore\" | \"cloud_defend\" | \"administration\" | \"attacks\" | \"ai_value\" | \"attack_discovery\" | \"blocklist\" | \"alert_detections\" | \"cloud_security_posture-rules\" | \"detections\" | \"detection_response\" | \"endpoint_exceptions\" | \"event_filters\" | \"exceptions\" | \"host_isolation_exceptions\" | \"hosts-all\" | \"hosts-anomalies\" | \"hosts-risk\" | \"hosts-events\" | \"hosts-sessions\" | \"hosts-uncommon_processes\" | \"get_started\" | \"network-anomalies\" | \"network-dns\" | \"network-events\" | \"network-flows\" | \"network-http\" | \"network-tls\" | \"response_actions_history\" | \"rules-add\" | \"rules-create\" | \"rules-landing\" | \"rules-management\" | \"scripts_library\" | \"siem_readiness\" | \"siem_migrations\" | \"siem_migrations-rules\" | \"siem_migrations-dashboards\" | \"threat_intelligence\" | \"timelines\" | \"timelines-templates\" | \"trusted_apps\" | \"trusted_devices\" | \"users-all\" | \"users-anomalies\" | \"users-authentications\" | \"users-events\" | \"users-risk\" | \"entity_analytics\" | \"entity_analytics-management\" | \"entity_analytics-landing\" | \"entity_analytics-privileged_user_monitoring\" | \"entity_analytics-overview\" | \"entity_analytics-threat_hunting\" | \"entity_analytics-entity_store_management\" | \"coverage-overview\" | \"notes\" | \"alert_summary\" | \"configurations-integrations\" | \"configurations-ai_settings\" | \"configurations-basic_rules\""
         ],
         "path": "src/platform/packages/shared/deeplinks/security/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -91,6 +99,8 @@
           "\"securitySolutionUI\""
         ],
         "path": "src/platform/packages/shared/deeplinks/security/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

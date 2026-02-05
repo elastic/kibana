@@ -39,9 +39,7 @@ export class WorkflowsExtensionsPublicPlugin
     registerInternalStepDefinitions(this.stepRegistry);
 
     return {
-      registerStepDefinition: (metadata) => {
-        this.stepRegistry.register(metadata);
-      },
+      registerStepDefinition: (definition) => this.stepRegistry.register(definition),
     };
   }
 

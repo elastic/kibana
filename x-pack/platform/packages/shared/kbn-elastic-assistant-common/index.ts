@@ -98,6 +98,8 @@ export {
 export { transformAttackDiscoveryAlertFromApi } from './impl/utils/transform_attack_discovery_alert_from_api';
 export { transformAttackDiscoveryAlertToApi } from './impl/utils/transform_attack_discovery_alert_to_api';
 export { transformAttackDiscoveryScheduleFromApi } from './impl/utils/transform_attack_discovery_schedule_from_api';
+
+export * from './impl/connectors/outdated_connectors';
 export { transformAttackDiscoveryScheduleToApi } from './impl/utils/transform_attack_discovery_schedule_to_api';
 export { transformAttackDiscoveryScheduleCreatePropsToApi } from './impl/utils/transform_attack_discovery_schedule_create_props_to_api';
 export { transformAttackDiscoveryScheduleUpdatePropsToApi } from './impl/utils/transform_attack_discovery_schedule_update_props_to_api';

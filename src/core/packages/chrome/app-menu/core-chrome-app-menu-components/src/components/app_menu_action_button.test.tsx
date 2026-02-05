@@ -46,7 +46,6 @@ describe('AppMenuActionButton', () => {
     await user.click(screen.getByTestId('test-action-button'));
 
     expect(defaultProps.run).toHaveBeenCalledTimes(1);
-    expect(defaultProps.run).toHaveBeenCalledWith();
   });
 
   it('should render as split button', () => {

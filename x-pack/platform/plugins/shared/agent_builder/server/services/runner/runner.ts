@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { isAgentBuilderError, createInternalError } from '@kbn/agent-builder-common';
@@ -30,6 +31,7 @@ import type {
   ConversationStateManager,
   PromptManager,
 } from '@kbn/agent-builder-server/runner';
+import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolsServiceStart } from '../tools';
@@ -39,14 +41,15 @@ import type { ModelProviderFactoryFn } from './model_provider';
 import type { TrackingService } from '../../telemetry';
 import { createEmptyRunContext, createConversationStateManager } from './utils';
 import { createPromptManager, getAgentPromptStorageState } from './utils/prompts';
-import { createResultStore } from './tool_result_store';
 import { runTool, runInternalTool } from './run_tool';
 import { runAgent } from './run_agent';
+import { createStore } from './store';
 
 export interface CreateScopedRunnerDeps {
   // core services
   elasticsearch: ElasticsearchServiceStart;
   security: SecurityServiceStart;
+  savedObjects: SavedObjectsServiceStart;
   // external plugin deps
   spaces: SpacesPluginStart | undefined;
   actions: ActionsPluginStart;
@@ -65,6 +68,7 @@ export interface CreateScopedRunnerDeps {
   // context-aware deps
   resultStore: WritableToolResultStore;
   attachmentStateManager: AttachmentStateManager;
+  filestore: IFileStore;
 }
 
 export type CreateRunnerDeps = Omit<
@@ -76,6 +80,7 @@ export type CreateRunnerDeps = Omit<
   | 'modelProvider'
   | 'promptManager'
   | 'stateManager'
+  | 'filestore'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
 };
@@ -158,8 +163,12 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
   }): ScopedRunner => {
-    const resultStore = createResultStore(conversation?.rounds);
-    const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? []);
+    const { resultStore, filestore } = createStore({ conversation });
+
+    const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? [], {
+      getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
+    });
+
     const stateManager = createConversationStateManager(conversation);
     const promptManager = createPromptManager({ state: promptState });
 
@@ -173,6 +182,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       attachmentStateManager,
       stateManager,
       promptManager,
+      filestore,
     };
     return createScopedRunner(allDeps);
   };

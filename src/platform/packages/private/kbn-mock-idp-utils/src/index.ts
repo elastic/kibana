@@ -42,4 +42,5 @@ export {
   createSAMLResponse,
   ensureSAMLRoleMapping,
   generateCosmosDBApiRequestHeaders,
+  getSAMLRequestId,
 } from './utils';

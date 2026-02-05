@@ -33,7 +33,11 @@ import { createArtifactsClientMock } from '../services/artifacts/mocks';
 import { createOutputClientMock } from '../services/output_client.mock';
 
 import type { PackagePolicyClient } from '../services/package_policy_service';
-import type { AgentPolicyServiceInterface, CloudConnectorServiceInterface } from '../services';
+import type {
+  AgentlessPoliciesService,
+  AgentPolicyServiceInterface,
+  CloudConnectorServiceInterface,
+} from '../services';
 import type { FleetAppContext, FleetStartContract } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 import type { FleetConfigType } from '../../common/types';
@@ -137,6 +141,14 @@ export const createAppContextStartContractMock = (
     soClients.withoutSpaceExtensions ?? createSavedObjectClientMock();
 
   mockedSavedObject.getScopedClient.mockImplementation((request, options) => {
+    if (options?.excludedExtensions?.includes(SPACES_EXTENSION_ID)) {
+      return internalSoClientWithoutSpaceExtension;
+    }
+
+    return internalSoClient;
+  });
+
+  mockedSavedObject.getUnsafeInternalClient.mockImplementation((options) => {
     if (options?.excludedExtensions?.includes(SPACES_EXTENSION_ID)) {
       return internalSoClientWithoutSpaceExtension;
     }
@@ -294,6 +306,16 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
 };
 
 /**
+ * Create mock AgentPolicyService
+ */
+export const createMockAgentlessPoliciesService = (): jest.Mocked<AgentlessPoliciesService> => {
+  return {
+    createAgentlessPolicy: jest.fn().mockReturnValue(Promise.resolve()),
+    deleteAgentlessPolicy: jest.fn().mockReturnValue(Promise.resolve()),
+  };
+};
+
+/**
  * Create mock CloudConnectorService
  */
 export const createMockCloudConnectorService = (): jest.Mocked<CloudConnectorServiceInterface> => {
@@ -366,6 +388,7 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
     agentService: createMockAgentService(),
     packagePolicyService: createPackagePolicyServiceMock(),
     agentPolicyService: createMockAgentPolicyService(),
+    agentlessPoliciesService: createMockAgentlessPoliciesService(),
     cloudConnectorService: {
       create: jest.fn().mockReturnValue(Promise.resolve()),
       getList: jest.fn().mockReturnValue(Promise.resolve()),

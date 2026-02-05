@@ -52,9 +52,7 @@ export const useESQLVariables = ({
         {
           panelType: 'esqlControl',
           serializedState: {
-            rawState: {
-              ...controlState,
-            },
+            ...controlState,
           },
         },
         {

@@ -6,14 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
@@ -30,13 +29,11 @@ const getServicesSchema = z.object({
     .string()
     .min(1)
     .optional()
-    .describe('Optionally filter the services by the environments that they are running in.'),
+    .describe('Filter services by environment. Examples: "production", "staging".'),
   healthStatus: z
     .array(z.enum(['unknown', 'healthy', 'warning', 'critical']))
     .optional()
-    .describe(
-      'Optional list of health statuses to filter services by (e.g., ["healthy", "warning"]). Valid values: "unknown", "healthy", "warning", "critical".'
-    ),
+    .describe('Filter by health status. Example: ["warning", "critical"].'),
 });
 
 export function createGetServicesTool({
@@ -45,10 +42,7 @@ export function createGetServicesTool({
   dataRegistry,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   logger: Logger;
@@ -75,12 +69,7 @@ When to use:
       },
     },
     handler: async (toolParams, context) => {
-      const {
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
-        environment,
-        healthStatus,
-      } = toolParams;
+      const { start, end, environment, healthStatus } = toolParams;
       const { request, esClient } = context;
 
       try {

@@ -6,13 +6,20 @@
  */
 
 import { last } from 'lodash';
-import type { LlmProxy } from '../llm_proxy';
+import type { LlmProxy, LLmError } from '@kbn/ftr-llm-proxy';
 import { createToolCallMessage } from '../llm_proxy';
 
 export const mockTitleGeneration = (llmProxy: LlmProxy, title: string) => {
   void llmProxy.interceptors.toolChoice({
     name: 'set_title',
     response: createToolCallMessage('set_title', { title }),
+  });
+};
+
+export const mockTitleGenerationWithError = (llmProxy: LlmProxy, error: LLmError) => {
+  void llmProxy.interceptors.toolChoice({
+    name: 'set_title',
+    response: error,
   });
 };
 
@@ -37,7 +44,7 @@ export const mockAgentToolCall = ({
   });
 };
 
-export const mockHandoverToAnswer = (llmProxy: LlmProxy, answer: string) => {
+export const mockHandoverToAnswer = (llmProxy: LlmProxy, answer: string | LLmError) => {
   void llmProxy
     .intercept({
       name: 'handover-to-answer',

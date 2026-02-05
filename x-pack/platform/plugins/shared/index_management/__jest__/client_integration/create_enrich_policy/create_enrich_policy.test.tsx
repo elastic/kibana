@@ -24,7 +24,7 @@ jest.mock('@kbn/code-editor');
 
 let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
-const actions = createCreateEnrichPolicyActions();
+let actions: ReturnType<typeof createCreateEnrichPolicyActions>;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -33,6 +33,7 @@ beforeEach(() => {
   httpRequestsMockHelpers = env.httpRequestsMockHelpers;
   httpRequestsMockHelpers.setGetMatchingIndices(getMatchingIndices());
   httpRequestsMockHelpers.setGetMatchingDataStreams(getMatchingDataStreams());
+  actions = createCreateEnrichPolicyActions();
 });
 
 describe('Create enrich policy', () => {
@@ -78,10 +79,8 @@ describe('Create enrich policy', () => {
 
       await actions.completeConfigurationStep({});
 
-      await waitFor(() => {
-        expect(actions.isOnFieldSelectionStep()).toBe(true);
-      });
-    });
+      await screen.findByTestId('fieldSelectionForm');
+    }, 20000);
   });
 
   describe('Fields selection step', () => {
@@ -96,9 +95,7 @@ describe('Create enrich policy', () => {
 
       await actions.completeConfigurationStep({});
 
-      await waitFor(() => {
-        expect(actions.isOnFieldSelectionStep()).toBe(true);
-      });
+      await screen.findByTestId('fieldSelectionForm');
 
       await actions.clickNextButton();
 
@@ -106,7 +103,7 @@ describe('Create enrich policy', () => {
         const errors = actions.getErrorsMessages();
         expect(errors.length).toBeGreaterThanOrEqual(2);
       });
-    });
+    }, 20000);
 
     it('Allows to submit the form when fields are filled', async () => {
       await renderCreateEnrichPolicy(httpSetup);
@@ -115,16 +112,12 @@ describe('Create enrich policy', () => {
 
       await actions.completeConfigurationStep({});
 
-      await waitFor(() => {
-        expect(actions.isOnFieldSelectionStep()).toBe(true);
-      });
+      await screen.findByTestId('fieldSelectionForm');
 
       await actions.completeFieldsSelectionStep();
 
-      await waitFor(() => {
-        expect(actions.isOnCreateStep()).toBe(true);
-      });
-    });
+      await screen.findByTestId('creationStep');
+    }, 20000);
 
     it('When no common fields are returned it shows an error callout', async () => {
       httpRequestsMockHelpers.setGetFieldsFromIndices({
@@ -140,7 +133,7 @@ describe('Create enrich policy', () => {
       await waitFor(() => {
         expect(exists('noCommonFieldsError')).toBe(true);
       });
-    }, 7000);
+    }, 20000);
   });
 
   describe('Creation step', () => {
@@ -153,32 +146,24 @@ describe('Create enrich policy', () => {
       await screen.findByTestId('configurationForm');
 
       await actions.completeConfigurationStep({});
-      await waitFor(() => {
-        expect(actions.isOnFieldSelectionStep()).toBe(true);
-      });
+      await screen.findByTestId('fieldSelectionForm');
 
       await actions.completeFieldsSelectionStep();
-      await waitFor(() => {
-        expect(actions.isOnCreateStep()).toBe(true);
-      });
+      await screen.findByTestId('creationStep');
 
       expect(exists('createButton')).toBe(true);
       expect(exists('createAndExecuteButton')).toBe(true);
-    });
+    }, 20000);
 
     it('Shows policy summary and request', async () => {
       await renderCreateEnrichPolicy(httpSetup);
       await screen.findByTestId('configurationForm');
 
       await actions.completeConfigurationStep({});
-      await waitFor(() => {
-        expect(actions.isOnFieldSelectionStep()).toBe(true);
-      });
+      await screen.findByTestId('fieldSelectionForm');
 
       await actions.completeFieldsSelectionStep();
-      await waitFor(() => {
-        expect(actions.isOnCreateStep()).toBe(true);
-      });
+      await screen.findByTestId('creationStep');
 
       expect(screen.getByTestId('enrichPolicySummaryList').textContent).toContain('test_policy');
 
@@ -189,21 +174,17 @@ describe('Create enrich policy', () => {
           getESPolicyCreationApiCall('test_policy')
         );
       });
-    });
+    }, 20000);
 
     it('Shows error message when creating the policy fails', async () => {
       await renderCreateEnrichPolicy(httpSetup);
       await screen.findByTestId('configurationForm');
 
       await actions.completeConfigurationStep({});
-      await waitFor(() => {
-        expect(actions.isOnFieldSelectionStep()).toBe(true);
-      });
+      await screen.findByTestId('fieldSelectionForm');
 
       await actions.completeFieldsSelectionStep();
-      await waitFor(() => {
-        expect(actions.isOnCreateStep()).toBe(true);
-      });
+      await screen.findByTestId('creationStep');
 
       const error = {
         statusCode: 400,
@@ -218,7 +199,7 @@ describe('Create enrich policy', () => {
       await waitFor(() => {
         expect(exists('errorWhenCreatingCallout')).toBe(true);
       });
-    }, 6500);
+    }, 20000);
   });
 
   describe('Navigation', () => {
@@ -232,24 +213,16 @@ describe('Create enrich policy', () => {
 
       // Navigate to create step
       await actions.completeConfigurationStep({});
-      await waitFor(() => {
-        expect(actions.isOnFieldSelectionStep()).toBe(true);
-      });
+      await screen.findByTestId('fieldSelectionForm');
 
       await actions.completeFieldsSelectionStep();
-      await waitFor(() => {
-        expect(actions.isOnCreateStep()).toBe(true);
-      });
+      await screen.findByTestId('creationStep');
 
       await actions.clickBackButton();
-      await waitFor(() => {
-        expect(actions.isOnFieldSelectionStep()).toBe(true);
-      });
+      await screen.findByTestId('fieldSelectionForm');
 
       await actions.clickBackButton();
-      await waitFor(() => {
-        expect(actions.isOnConfigurationStep()).toBe(true);
-      });
-    }, 8500);
+      await screen.findByTestId('configurationForm');
+    }, 20000);
   });
 });

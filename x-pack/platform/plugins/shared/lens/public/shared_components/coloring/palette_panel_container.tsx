@@ -12,6 +12,7 @@ import { EuiButtonIcon, EuiFlexItem, EuiColorPaletteDisplay, EuiToolTip } from '
 import { FIXED_PROGRESSION } from '@kbn/coloring';
 
 import { css } from '@emotion/react';
+import { MAX_PALETTE_INDICATOR_COLORS } from '@kbn/visualization-ui-components/components/dimension_buttons/constants';
 import { SettingWithSiblingFlyout } from '../setting_with_sibling_flyout';
 export function PalettePanelContainer(props: {
   palette: string[];
@@ -29,7 +30,7 @@ export function PalettePanelContainer(props: {
           <EuiFlexItem>
             <EuiColorPaletteDisplay
               data-test-subj="lns_dynamicColoring_edit"
-              palette={props.palette}
+              palette={props.palette.slice(0, MAX_PALETTE_INDICATOR_COLORS)}
               type={FIXED_PROGRESSION}
               onClick={onClick}
               css={css`
