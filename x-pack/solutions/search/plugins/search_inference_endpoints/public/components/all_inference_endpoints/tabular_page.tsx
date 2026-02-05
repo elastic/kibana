@@ -9,14 +9,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n as kbnI18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-  type UseEuiTheme,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn, UseEuiTheme } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type {
   InferenceInferenceEndpointInfo,
@@ -54,7 +48,6 @@ interface TabularPageProps {
 }
 
 export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
-  const euiThemeContext = useEuiTheme();
   const {
     services: { notifications, cloud, application },
   } = useKibana();
@@ -259,7 +252,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           }
         />
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem css={searchContainerStyles(euiThemeContext)} grow={false}>
+          <EuiFlexItem css={searchContainerStyles} grow={false}>
             <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
