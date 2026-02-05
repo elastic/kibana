@@ -20,15 +20,9 @@ import {
 
 const TRANSLATIONS = Object.freeze({
   all: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.allPrivilegeName',
+    'securitySolutionPackages.features.featureRegistry.subFeatures.manageExceptions',
     {
       defaultMessage: 'Manage Exceptions',
-    }
-  ),
-  read: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.readPrivilegeName',
-    {
-      defaultMessage: 'Read',
     }
   ),
 });
