@@ -30,13 +30,13 @@ export function apiKeyAsAlertAttributes(
       );
     }
 
-    const encodedApiKey =
-      esApiKeyId && esApiKey ? Buffer.from(`${esApiKeyId}:${esApiKey}`).toString('base64') : null;
+    const encodedApiKey = esApiKey
+      ? Buffer.from(`${esApiKeyId}:${esApiKey}`).toString('base64')
+      : null;
 
-    const encodedUiamApiKey =
-      uiamApiKeyId && uiamApiKey
-        ? Buffer.from(`${uiamApiKeyId}:${uiamApiKey}`).toString('base64')
-        : null;
+    const encodedUiamApiKey = uiamApiKey
+      ? Buffer.from(`${uiamApiKeyId}:${uiamApiKey}`).toString('base64')
+      : null;
 
     return {
       apiKeyOwner: username,

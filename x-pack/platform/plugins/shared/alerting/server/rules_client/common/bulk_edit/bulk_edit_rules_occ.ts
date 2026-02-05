@@ -198,7 +198,7 @@ async function saveBulkUpdatedRules({
       const newApiKeysToInvalidate = [];
 
       for (const { newUiamApiKey, newApiKey, newApiKeyCreatedByUser } of apiKeysMap.values()) {
-        if (newUiamApiKey) {
+        if (newUiamApiKey && !newApiKeyCreatedByUser) {
           newApiKeysToInvalidate.push(newUiamApiKey);
         }
         if (newApiKey && !newApiKeyCreatedByUser) {
@@ -218,12 +218,14 @@ async function saveBulkUpdatedRules({
 
   if (shouldInvalidateApiKeys) {
     result.saved_objects.map(({ id, error }) => {
-      const oldApiKey = apiKeysMap.get(id)?.oldApiKey;
-      const oldApiKeyCreatedByUser = apiKeysMap.get(id)?.oldApiKeyCreatedByUser;
-      const newApiKey = apiKeysMap.get(id)?.newApiKey;
-      const newApiKeyCreatedByUser = apiKeysMap.get(id)?.newApiKeyCreatedByUser;
-      const oldUiamApiKey = apiKeysMap.get(id)?.oldUiamApiKey;
-      const newUiamApiKey = apiKeysMap.get(id)?.newUiamApiKey;
+      const apiKey = apiKeysMap.get(id);
+
+      const oldApiKey = apiKey?.oldApiKey;
+      const oldApiKeyCreatedByUser = apiKey?.oldApiKeyCreatedByUser;
+      const newApiKey = apiKey?.newApiKey;
+      const newApiKeyCreatedByUser = apiKey?.newApiKeyCreatedByUser;
+      const oldUiamApiKey = apiKey?.oldUiamApiKey;
+      const newUiamApiKey = apiKey?.newUiamApiKey;
 
       // if SO wasn't saved and has new API key it will be invalidated
       if (error && newApiKey && !newApiKeyCreatedByUser) {
@@ -232,6 +234,7 @@ async function saveBulkUpdatedRules({
       } else if (!error && oldApiKey && !oldApiKeyCreatedByUser) {
         apiKeysToInvalidate.push(oldApiKey);
       }
+
       if (error && newUiamApiKey && !newApiKeyCreatedByUser) {
         apiKeysToInvalidate.push(newUiamApiKey);
       } else if (!error && oldUiamApiKey && !oldApiKeyCreatedByUser) {
