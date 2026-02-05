@@ -16,6 +16,7 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
+import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
@@ -67,7 +68,9 @@ export const DetectionEngineSpaceRulesHealthPage = memo(
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
-                <h3>{'Detection Engine Health'}</h3>
+                <h3>
+                  {'Detection Engine Space Rules Health'} <TechnicalPreviewBadge label="" />
+                </h3>
               </EuiTitle>
               <EuiSpacer size="m" />
               {isLoading ? skeleton : data}
