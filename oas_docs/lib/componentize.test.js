@@ -1007,7 +1007,9 @@ describe('componentizeObjectSchemas', () => {
       await expect(componentizeObjectSchemas(testFile, { log: mockLog })).resolves.not.toThrow(); // we might want to throw though
 
       // Should warn about max depth
-      expect(mockLog.warning).toHaveBeenCalledWith(expect.stringContaining('Max depth reached'));
+      expect(mockLog.warning).toHaveBeenCalledWith(
+        expect.stringContaining('Maximum recursion depth')
+      );
     });
   });
 
