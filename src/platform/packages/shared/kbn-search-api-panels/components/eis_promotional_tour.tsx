@@ -23,6 +23,7 @@ import {
   EIS_PROMO_TOUR_TITLE,
 } from '../translations';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
+import { useKibana } from '../hooks/use_kibana';
 
 export interface EisPromotionalTourProps {
   anchorPosition?: EuiTourStepProps['anchorPosition'];
@@ -44,8 +45,12 @@ export const EisPromotionalTour = ({
     promoId: `${promoId}EisPromoTour`,
   });
   const dataId = `${promoId}-eis-promo-tour`;
+  const {
+    services: { notifications },
+  } = useKibana();
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
 
-  if (!isPromoVisible || !isCloudEnabled) {
+  if (!isPromoVisible || !isCloudEnabled || !isTourEnabled) {
     return children;
   }
 
