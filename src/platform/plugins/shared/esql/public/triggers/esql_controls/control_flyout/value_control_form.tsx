@@ -38,6 +38,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { ESQLLangEditor } from '../../../create_editor';
 import type { ServiceDeps } from '../../../kibana_services';
 import { ChooseColumnPopover } from './choose_column_popover';
@@ -53,7 +54,6 @@ interface ValueControlFormProps {
   initialState?: ESQLControlState;
   valuesRetrieval?: string;
   timeRange?: TimeRange;
-  currentApp?: string;
   esqlVariables: ESQLControlVariable[];
 }
 
@@ -75,7 +75,6 @@ export function ValueControlForm({
   setControlState,
   valuesRetrieval,
   timeRange,
-  currentApp,
   esqlVariables,
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
@@ -166,6 +165,7 @@ export function ValueControlForm({
   const onValuesQuerySubmit = useCallback(
     async (query: string) => {
       try {
+        const timezone = core.uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
         getESQLResults({
           esqlQuery: query,
           search,
@@ -173,6 +173,7 @@ export function ValueControlForm({
           filter: undefined,
           dropNullColumns: true,
           timeRange,
+          timezone,
           variables: esqlVariables,
         }).then((results) => {
           if (!isMounted()) {
@@ -203,7 +204,7 @@ export function ValueControlForm({
         setEsqlQueryErrors([e]);
       }
     },
-    [isMounted, search, timeRange, esqlVariables]
+    [isMounted, search, timeRange, esqlVariables, core.uiSettings]
   );
 
   const setSuggestedQuery = useCallback(async () => {
