@@ -16,7 +16,8 @@ import {
   EuiPageTemplate,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
@@ -36,11 +37,35 @@ export function WorkflowsPage() {
   const { application, featureFlags } = useKibana().services;
   const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy']);
   const { euiTheme } = useEuiTheme();
-  const [search, setSearch] = useState<WorkflowsSearchParams>({
-    size: WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
-    page: 1,
-    query: '',
+  const location = useLocation();
+  const history = useHistory();
+  const [search, setSearch] = useState<WorkflowsSearchParams>(() => {
+    const params = new URLSearchParams(location.search);
+    return {
+      size: WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
+      page: 1,
+      query: params.get('query') || '',
+    };
   });
+
+  // Sync search.query to URL whenever it changes
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+
+    if (search.query) {
+      params.set('query', search.query);
+    } else {
+      params.delete('query');
+    }
+
+    const newSearch = params.toString();
+    const currentSearch = location.search.replace(/^\?/, '');
+
+    // Only update if URL actually changed to avoid infinite loops
+    if (newSearch !== currentSearch) {
+      history.replace({ search: newSearch });
+    }
+  }, [search.query, history, location.search]);
 
   const navigateToCreateWorkflow = useCallback(() => {
     application.navigateToApp(PLUGIN_ID, { path: '/create' });

@@ -207,10 +207,15 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
     setActivePage(0); // Reset to first page when changing page size
   };
 
-  // Get workflow URL for linking
-  const workflowsUrl = useMemo(() => {
-    return chrome?.navLinks.get(WORKFLOWS_APP_ID)?.url;
-  }, [chrome]);
+  // Generate workflows URL with query param
+  const getWorkflowsUrl = useCallback(
+    (source: ActiveSource) => {
+      const baseUrl = chrome?.navLinks.get(WORKFLOWS_APP_ID)?.url;
+      if (!baseUrl) return undefined;
+      return `${baseUrl}?query=${encodeURIComponent(source.name)}`;
+    },
+    [chrome]
+  );
 
   // Generate tools URL with search param
   const getToolsUrl = useCallback(
@@ -268,9 +273,9 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
         defaultMessage: 'Workflows',
       }),
       align: 'center',
-      render: (workflows: string[]) =>
+      render: (workflows: string[], source: ActiveSource) =>
         workflows.length > 0 ? (
-          <EuiLink href={workflowsUrl} data-test-subj="workflowsLink">
+          <EuiLink href={getWorkflowsUrl(source)} data-test-subj="workflowsLink">
             <EuiText size="s">{workflows.length}</EuiText>
           </EuiLink>
         ) : (
