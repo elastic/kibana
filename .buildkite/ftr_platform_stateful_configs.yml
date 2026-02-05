@@ -255,6 +255,7 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/data_frame_analytics/group2/config.ts
   - x-pack/platform/test/functional/apps/ml/data_visualizer/group1/config.ts
   - x-pack/platform/test/functional/apps/ml/data_visualizer/group2/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_visualizer/group3/config.ts
   - x-pack/platform/test/functional/apps/ml/permissions/config.ts
   - x-pack/platform/test/functional/apps/ml/short_tests/config.ts
   - x-pack/platform/test/functional/apps/ml/stack_management_jobs/config.ts
