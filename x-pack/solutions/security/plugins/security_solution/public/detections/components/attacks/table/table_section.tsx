@@ -234,19 +234,9 @@ export const TableSection = React.memo(
     );
 
     const groupTakeActionItems: GroupTakeActionItems = useCallback(
-      ({ selectedGroup, groupBucket, groupNumber, query: _query, tableId, closePopover }) => {
-        const attack = getAttack(selectedGroup, groupBucket);
-        if (!attack)
-          return (
-            <AlertActionItems
-              groupBucket={groupBucket}
-              selectedGroup={selectedGroup}
-              groupNumber={groupNumber}
-              query={_query}
-              tableId={tableId}
-              closePopover={closePopover}
-            />
-          );
+      (props) => {
+        const attack = getAttack(props.selectedGroup, props.groupBucket);
+        if (!attack) return <AlertActionItems {...props} />;
         return <AttacksGroupTakeActionItems attack={attack} />;
       },
       [getAttack]

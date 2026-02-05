@@ -7,9 +7,13 @@
 
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
 import type { GroupTakeActionItems } from '../../alerts_table/types';
+import { useUserData } from '../../user_info';
 
 export function AlertActionItems(props: Parameters<GroupTakeActionItems>[0]) {
-  const getActionItems = useGroupTakeActionsItems({});
+  const [{ hasIndexWrite, hasIndexMaintenance }] = useUserData();
+  const getActionItems = useGroupTakeActionsItems({
+    showAlertStatusActions: Boolean(hasIndexWrite) && Boolean(hasIndexMaintenance),
+  });
 
   return getActionItems(props);
 }
