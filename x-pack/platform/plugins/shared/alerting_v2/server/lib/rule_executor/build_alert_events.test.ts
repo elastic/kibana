@@ -22,6 +22,7 @@ describe('buildAlertEventsFromEsqlResponse', () => {
   it('transforms ES|QL response rows into alert documents', () => {
     const ruleAttributes: RuleSavedObjectAttributes = {
       name: 'My ES|QL Rule',
+      kind: 'alert',
       tags: ['esql', 'test'],
       schedule: { custom: '1m' },
       enabled: true,

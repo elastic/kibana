@@ -40,6 +40,7 @@ export function createRuleResponse(overrides: Partial<RuleResponse> = {}): RuleR
   return {
     id: 'rule-1',
     name: 'test-rule',
+    kind: 'alert',
     tags: [],
     schedule: { custom: '1m' },
     enabled: true,

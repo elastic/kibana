@@ -67,6 +67,7 @@ export class RulesClient {
 
     const ruleAttributes: RuleSavedObjectAttributes = {
       name: parsed.data.name,
+      kind: parsed.data.kind,
       tags: parsed.data.tags,
       schedule: parsed.data.schedule,
       enabled: parsed.data.enabled,
