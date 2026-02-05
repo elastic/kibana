@@ -18,7 +18,7 @@ export const DISPATCHER_TASK_ID = 'alerting_v2:dispatcher:1.0.0' as const;
  */
 export const DispatcherTaskDefinition: AlertingTaskDefinition<DispatcherTaskRunner> = {
   taskType: DISPATCHER_TASK_TYPE,
-  title: 'Alerting v2 dispatcher (ES|QL)',
+  title: 'Alerting v2 dispatcher',
   timeout: '1m',
   maxAttempts: 1,
   paramsSchema: schema.object({}),

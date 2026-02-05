@@ -12,7 +12,6 @@ import { DirectorService } from '../lib/director/director';
 import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
 import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
-import { DispatcherTaskRunner } from '../lib/dispatcher/task_runner';
 import { RulesClient } from '../lib/rules_client';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
@@ -101,7 +100,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inSingletonScope();
 
   bind(DispatcherService).toSelf().inSingletonScope();
-  bind(DispatcherTaskRunner).toSelf().inSingletonScope();
 
   bind(DirectorService).toSelf().inSingletonScope();
   bind(TransitionStrategyFactory).toSelf().inSingletonScope();
