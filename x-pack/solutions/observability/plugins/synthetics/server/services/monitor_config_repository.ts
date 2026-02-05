@@ -195,27 +195,35 @@ export class MonitorConfigRepository {
   }
 
   /**
-   * Updates the package policy references for a monitor.
-   * This tracks which Fleet package policies are associated with this monitor
+   * Updates the package policy references for monitors (single or bulk).
+   * This tracks which Fleet package policies are associated with each monitor
    * using the built-in saved object references array.
    */
-  async updatePackagePolicyReferences(
-    monitorId: string,
-    packagePolicyIds: string[],
-    savedObjectType?: string
+  async bulkUpdatePackagePolicyReferences(
+    updates: Array<{
+      monitorId: string;
+      packagePolicyIds: string[];
+      savedObjectType?: string;
+    }>,
+    namespace?: string
   ) {
-    const references = packagePolicyIds.map((policyId) => ({
-      id: policyId,
-      name: policyId,
-      type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    if (updates.length === 0) {
+      return { saved_objects: [] };
+    }
+
+    const bulkUpdateObjects = updates.map(({ monitorId, packagePolicyIds, savedObjectType }) => ({
+      type: savedObjectType ?? syntheticsMonitorSavedObjectType,
+      id: monitorId,
+      attributes: {},
+      references: packagePolicyIds.map((policyId) => ({
+        id: policyId,
+        name: policyId,
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      })),
+      namespace,
     }));
 
-    return this.soClient.update(
-      savedObjectType ?? syntheticsMonitorSavedObjectType,
-      monitorId,
-      {},
-      { references }
-    );
+    return this.soClient.bulkUpdate(bulkUpdateObjects);
   }
 
   async bulkUpdate({

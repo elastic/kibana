@@ -285,11 +285,13 @@ export const syncEditedMonitor = async ({
 
     if (activePolicyIds && activePolicyIds.length > 0) {
       const savedObjectType = editedMonitorSavedObject.type ?? decryptedPreviousMonitor.type;
-      await monitorConfigRepository.updatePackagePolicyReferences(
-        decryptedPreviousMonitor.id,
-        activePolicyIds,
-        savedObjectType
-      );
+      await monitorConfigRepository.bulkUpdatePackagePolicyReferences([
+        {
+          monitorId: decryptedPreviousMonitor.id,
+          packagePolicyIds: activePolicyIds,
+          savedObjectType,
+        },
+      ]);
     }
 
     sendTelemetryEvents(

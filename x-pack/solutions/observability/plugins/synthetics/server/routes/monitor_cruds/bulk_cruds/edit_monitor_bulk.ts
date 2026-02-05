@@ -109,16 +109,16 @@ export const syncEditedMonitorBulk = async ({
         }
       }
 
-      await Promise.all(
-        [...policyIdsByMonitor.entries()].map(([monitorId, policyIds]) =>
-          monitorConfigRepository.updatePackagePolicyReferences(
-            monitorId,
-            policyIds,
-            monitorsToUpdate.find((m) => m.decryptedPreviousMonitor.id === monitorId)
-              ?.decryptedPreviousMonitor.type
-          )
-        )
-      );
+      const updates = [...policyIdsByMonitor.entries()].map(([monitorId, policyIds]) => ({
+        monitorId,
+        packagePolicyIds: policyIds,
+        savedObjectType: monitorsToUpdate.find((m) => m.decryptedPreviousMonitor.id === monitorId)
+          ?.decryptedPreviousMonitor.type,
+      }));
+
+      const namespace = spaceId !== routeContext.spaceId ? spaceId : undefined;
+
+      await monitorConfigRepository.bulkUpdatePackagePolicyReferences(updates, namespace);
     }
 
     monitorsToUpdate.forEach(({ normalizedMonitor, decryptedPreviousMonitor }) => {

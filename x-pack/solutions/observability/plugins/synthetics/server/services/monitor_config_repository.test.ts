@@ -871,51 +871,84 @@ describe('MonitorConfigRepository', () => {
     error: jest.fn(),
   };
 
-  describe('updatePackagePolicyReferences', () => {
-    it('should update monitor with package policy references using built-in references array', async () => {
-      const monitorId = 'test-monitor-id';
-      const packagePolicyIds = ['policy-id-1', 'policy-id-2'];
-
-      const expectedReferences = [
-        { id: 'policy-id-1', name: 'policy-id-1', type: PACKAGE_POLICY_SAVED_OBJECT_TYPE },
-        { id: 'policy-id-2', name: 'policy-id-2', type: PACKAGE_POLICY_SAVED_OBJECT_TYPE },
+  describe('bulkUpdatePackagePolicyReferences', () => {
+    it('should update monitors with package policy references using bulkUpdate', async () => {
+      const updates = [
+        { monitorId: 'monitor-1', packagePolicyIds: ['policy-1', 'policy-2'] },
+        { monitorId: 'monitor-2', packagePolicyIds: ['policy-3'] },
       ];
 
-      const mockUpdateResult = {
-        id: monitorId,
-        attributes: {},
-        type: syntheticsMonitorSavedObjectType,
-        references: expectedReferences,
+      const mockBulkUpdateResult = {
+        saved_objects: [
+          {
+            id: 'monitor-1',
+            attributes: {},
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+          {
+            id: 'monitor-2',
+            attributes: {},
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+        ],
       };
 
-      soClient.update.mockResolvedValue(mockUpdateResult);
+      soClient.bulkUpdate.mockResolvedValue(mockBulkUpdateResult as any);
 
-      const result = await repository.updatePackagePolicyReferences(monitorId, packagePolicyIds);
+      const result = await repository.bulkUpdatePackagePolicyReferences(updates);
 
-      expect(soClient.update).toHaveBeenCalledWith(
-        syntheticsMonitorSavedObjectType,
-        monitorId,
-        {},
-        { references: expectedReferences }
-      );
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          type: syntheticsMonitorSavedObjectType,
+          id: 'monitor-1',
+          attributes: {},
+          references: [
+            { id: 'policy-1', name: 'policy-1', type: PACKAGE_POLICY_SAVED_OBJECT_TYPE },
+            { id: 'policy-2', name: 'policy-2', type: PACKAGE_POLICY_SAVED_OBJECT_TYPE },
+          ],
+          namespace: undefined,
+        },
+        {
+          type: syntheticsMonitorSavedObjectType,
+          id: 'monitor-2',
+          attributes: {},
+          references: [
+            { id: 'policy-3', name: 'policy-3', type: PACKAGE_POLICY_SAVED_OBJECT_TYPE },
+          ],
+          namespace: undefined,
+        },
+      ]);
 
-      expect(result).toBe(mockUpdateResult);
+      expect(result).toBe(mockBulkUpdateResult);
     });
 
-    it('should handle empty package policy ids', async () => {
-      const monitorId = 'test-monitor-id';
-      const packagePolicyIds: string[] = [];
+    it('should pass namespace for cross-space updates', async () => {
+      const updates = [{ monitorId: 'monitor-1', packagePolicyIds: ['policy-1'] }];
 
-      soClient.update.mockResolvedValue({} as any);
+      soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
 
-      await repository.updatePackagePolicyReferences(monitorId, packagePolicyIds);
+      await repository.bulkUpdatePackagePolicyReferences(updates, 'other-space');
 
-      expect(soClient.update).toHaveBeenCalledWith(
-        syntheticsMonitorSavedObjectType,
-        monitorId,
-        {},
-        { references: [] }
-      );
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          type: syntheticsMonitorSavedObjectType,
+          id: 'monitor-1',
+          attributes: {},
+          references: [
+            { id: 'policy-1', name: 'policy-1', type: PACKAGE_POLICY_SAVED_OBJECT_TYPE },
+          ],
+          namespace: 'other-space',
+        },
+      ]);
+    });
+
+    it('should return empty result for empty updates array', async () => {
+      const result = await repository.bulkUpdatePackagePolicyReferences([]);
+
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(result).toEqual({ saved_objects: [] });
     });
   });
 

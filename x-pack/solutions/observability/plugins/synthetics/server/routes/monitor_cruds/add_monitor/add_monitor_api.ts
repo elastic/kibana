@@ -104,11 +104,13 @@ export class AddEditMonitorAPI {
 
       if (packagePolicyResult?.created && packagePolicyResult.created.length > 0) {
         const policyIds = packagePolicyResult.created.map((policy) => policy.id);
-        await this.routeContext.monitorConfigRepository.updatePackagePolicyReferences(
-          newMonitorId,
-          policyIds,
-          savedObjectType
-        );
+        await this.routeContext.monitorConfigRepository.bulkUpdatePackagePolicyReferences([
+          {
+            monitorId: newMonitorId,
+            packagePolicyIds: policyIds,
+            savedObjectType,
+          },
+        ]);
       }
 
       sendTelemetryEvents(

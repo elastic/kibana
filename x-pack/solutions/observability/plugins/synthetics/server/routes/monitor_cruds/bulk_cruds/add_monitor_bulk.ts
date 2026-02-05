@@ -91,15 +91,13 @@ export const syncNewMonitorBulk = async ({
         }
       }
 
-      await Promise.all(
-        [...policyIdsByMonitor.entries()].map(([monitorId, policyIds]) =>
-          monitorConfigRepository.updatePackagePolicyReferences(
-            monitorId,
-            policyIds,
-            query.savedObjectType
-          )
-        )
-      );
+      const updates = [...policyIdsByMonitor.entries()].map(([monitorId, policyIds]) => ({
+        monitorId,
+        packagePolicyIds: policyIds,
+        savedObjectType: query.savedObjectType,
+      }));
+
+      await monitorConfigRepository.bulkUpdatePackagePolicyReferences(updates);
     }
 
     sendNewMonitorTelemetry(server, newMonitors, syncErrors);

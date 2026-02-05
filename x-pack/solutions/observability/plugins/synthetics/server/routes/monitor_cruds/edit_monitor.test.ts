@@ -103,11 +103,15 @@ describe('syncEditedMonitor', () => {
       spaceId: 'test-space',
     });
 
-    expect(routeContext.monitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledWith(
-      '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
-      activePolicyIds,
-      'synthetics-monitor'
-    );
+    expect(
+      routeContext.monitorConfigRepository.bulkUpdatePackagePolicyReferences
+    ).toHaveBeenCalledWith([
+      {
+        monitorId: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+        packagePolicyIds: activePolicyIds,
+        savedObjectType: 'synthetics-monitor',
+      },
+    ]);
   });
 
   it('does not update references when no active policies are returned', async () => {
@@ -126,7 +130,7 @@ describe('syncEditedMonitor', () => {
     });
 
     expect(
-      routeContext.monitorConfigRepository.updatePackagePolicyReferences
+      routeContext.monitorConfigRepository.bulkUpdatePackagePolicyReferences
     ).not.toHaveBeenCalled();
   });
 });

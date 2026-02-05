@@ -20,7 +20,7 @@ jest.mock('../../telemetry/monitor_upgrade_sender', () => ({
 describe('syncNewMonitorBulk', () => {
   const mockMonitorConfigRepository = {
     createBulk: jest.fn(),
-    updatePackagePolicyReferences: jest.fn(),
+    bulkUpdatePackagePolicyReferences: jest.fn(),
   };
 
   const mockSyntheticsMonitorClient = {
@@ -66,7 +66,9 @@ describe('syncNewMonitorBulk', () => {
         { created: createdPolicies, failed: [] },
         [],
       ]);
-      mockMonitorConfigRepository.updatePackagePolicyReferences.mockResolvedValue({});
+      mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences.mockResolvedValue({
+        saved_objects: [],
+      });
 
       await syncNewMonitorBulk({
         routeContext: mockRouteContext,
@@ -75,18 +77,23 @@ describe('syncNewMonitorBulk', () => {
         spaceId: 'default',
       });
 
-      expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledTimes(2);
-
-      expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledWith(
-        'monitor-1',
-        ['monitor-1-loc-1', 'monitor-1-loc-2'],
-        undefined
+      expect(mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences).toHaveBeenCalledTimes(
+        1
       );
 
-      expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledWith(
-        'monitor-2',
-        ['monitor-2-loc-1'],
-        undefined
+      expect(mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          {
+            monitorId: 'monitor-1',
+            packagePolicyIds: ['monitor-1-loc-1', 'monitor-1-loc-2'],
+            savedObjectType: undefined,
+          },
+          {
+            monitorId: 'monitor-2',
+            packagePolicyIds: ['monitor-2-loc-1'],
+            savedObjectType: undefined,
+          },
+        ])
       );
     });
 
@@ -105,7 +112,7 @@ describe('syncNewMonitorBulk', () => {
         spaceId: 'default',
       });
 
-      expect(mockMonitorConfigRepository.updatePackagePolicyReferences).not.toHaveBeenCalled();
+      expect(mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences).not.toHaveBeenCalled();
     });
 
     it('should handle policies that do not match any monitor', async () => {
@@ -124,7 +131,9 @@ describe('syncNewMonitorBulk', () => {
         },
         [],
       ]);
-      mockMonitorConfigRepository.updatePackagePolicyReferences.mockResolvedValue({});
+      mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences.mockResolvedValue({
+        saved_objects: [],
+      });
 
       await syncNewMonitorBulk({
         routeContext: mockRouteContext,
@@ -133,12 +142,16 @@ describe('syncNewMonitorBulk', () => {
         spaceId: 'default',
       });
 
-      expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledTimes(1);
-      expect(mockMonitorConfigRepository.updatePackagePolicyReferences).toHaveBeenCalledWith(
-        'monitor-1',
-        ['monitor-1-loc-1'],
-        undefined
+      expect(mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences).toHaveBeenCalledTimes(
+        1
       );
+      expect(mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences).toHaveBeenCalledWith([
+        {
+          monitorId: 'monitor-1',
+          packagePolicyIds: ['monitor-1-loc-1'],
+          savedObjectType: undefined,
+        },
+      ]);
     });
   });
 });

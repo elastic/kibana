@@ -24,7 +24,9 @@ export const getRouteContextMock = () => {
 
   const syntheticsMonitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
 
-  monitorConfigRepo.updatePackagePolicyReferences = jest.fn().mockResolvedValue({});
+  monitorConfigRepo.bulkUpdatePackagePolicyReferences = jest
+    .fn()
+    .mockResolvedValue({ saved_objects: [] });
 
   return {
     routeContext: {
