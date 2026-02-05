@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
@@ -79,7 +80,9 @@ export const DetectionEngineRuleHealthPage = memo(
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
-                <h3>{`Detection Engine Rule Health (${id})`}</h3>
+                <h3>
+                  {`Detection Engine Rule Health (${id})`} <TechnicalPreviewBadge label="" />
+                </h3>
               </EuiTitle>
               <EuiSpacer size="m" />
               {isLoading ? skeleton : data}{' '}
