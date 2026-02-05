@@ -16,6 +16,7 @@ import { getFixtureJson } from './helpers/get_fixture_json';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
+  const adminSuperTest = getService('supertest');
   const spaces = getService('spaces');
   const samlAuth = getService('samlAuth');
   const testPrivateLocations = new PrivateLocationTestService(getService);
@@ -47,6 +48,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     beforeEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await adminSuperTest
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
       const testPolicyName = `Test Private Location Policy ${uuidv4()}`;
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
       const testPolicyId = apiResponse.body.item.id;
@@ -74,13 +79,31 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`/s/${space1}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
         .set(superuser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send(monitor);
+        .send(monitor)
+        .expect(200);
 
       monitorId = createResponse.body.id;
 
+      // expect monitor has been created
+      await supertest
+        .get(`/s/${space1}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
+        .set(superuser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      // expect that references to policies have been included correctly
+      const monitorSavedObject = await kibanaServer.savedObjects.get({
+        type: 'synthetics-monitor-multi-space',
+        id: monitorId,
+        space: space1,
+      });
+      expect(monitorSavedObject.references.length).to.be(1);
+      expect(monitorSavedObject.references[0].type).to.be('fleet-package-policies');
+      expect(monitorSavedObject.references[0].id).to.be(`${monitorId}-${privateLocations[0].id}`);
+
       const { body: allPoliciesAfterCreate } = await supertest
         .get(
-          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=fleet-package-policies.package.name%3A%20synthetics'
         )
         .set(superuser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -100,6 +123,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .send(updatedMonitor)
         .expect(200);
+      expect(updatedMonitorResponse.body.name).to.be('Updated Monitor Name');
 
       // Query all synthetics package policies
       const { body: allPolicies } = await supertest
@@ -113,7 +137,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(allPolicies.total).to.be(1);
 
       // Check that the original package policy was updated
-      const originalPolicyId = `${monitorId}-${privateLocations[0].id}-${space1}`;
+      const originalPolicyId = `${monitorId}-${privateLocations[0].id}`;
       const updatedPolicy = allPolicies.items.find((p: PackagePolicy) => p.id === originalPolicyId);
       expect(updatedPolicy).to.not.be(undefined);
       expect(updatedPolicy.name).to.contain('Updated Monitor Name');
@@ -169,15 +193,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(allPolicies.total).to.be(1);
 
       // The original policy should be the one that was updated
-      const originalPolicyId = `${monitorId}-${privateLocations[0].id}-${space1}`;
+      const originalPolicyId = `${monitorId}-${privateLocations[0].id}`;
       const updatedPolicy = allPolicies.items.find((p: PackagePolicy) => p.id === originalPolicyId);
       expect(updatedPolicy).to.not.be(undefined);
       expect(updatedPolicy.name).to.contain('Updated and Space Removed');
-
-      // No new policy should have been created
-      const newPolicyId = `${monitorId}-${privateLocations[0].id}-${space2}`;
-      const newPolicy = allPolicies.items.find((p: PackagePolicy) => p.id === newPolicyId);
-      expect(newPolicy).to.be(undefined);
     });
   });
 }

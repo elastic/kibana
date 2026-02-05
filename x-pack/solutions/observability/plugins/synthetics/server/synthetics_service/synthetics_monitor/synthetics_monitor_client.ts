@@ -66,7 +66,6 @@ export class SyntheticsMonitorClient {
       if (privateLocations.length > 0) {
         privateConfigs.push({ config: formattedConfig, globalParams: params });
       }
-
       if (publicLocations.length > 0) {
         publicConfigs.push(config);
       }
@@ -95,6 +94,7 @@ export class SyntheticsMonitorClient {
   ) {
     const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =
       [];
+    const monitorIdtoPackagePolicyIdMap: Record<string, string[]> = {};
 
     const publicConfigs: ConfigData[] = [];
     const deletedPublicConfigs: ConfigData[] = [];
@@ -140,17 +140,23 @@ export class SyntheticsMonitorClient {
       ) {
         privateConfigs.push({ config: editedConfig, globalParams: params });
       }
+
+      monitorIdtoPackagePolicyIdMap[editedMonitor.id] =
+        editedMonitor.decryptedPreviousMonitor.references
+          .filter((ref) => ref.type === 'fleet-package-policies')
+          .map((ref) => ref.id);
     }
 
     if (deletedPublicConfigs.length > 0) {
       await this.syntheticsService.deleteConfigs(deletedPublicConfigs);
     }
 
-    const privateEditPromise = this.privateLocationAPI.editMonitors(
+    const privateEditPromise = this.privateLocationAPI.updatePackagePolicies(
       privateConfigs,
       allPrivateLocations,
       spaceId,
-      maintenanceWindows
+      maintenanceWindows,
+      monitorIdtoPackagePolicyIdMap
     );
 
     const publicConfigsPromise = this.syntheticsService.editConfig(
@@ -168,6 +174,7 @@ export class SyntheticsMonitorClient {
 
     return { failedPolicyUpdates, publicSyncErrors };
   }
+
   async deleteMonitors(monitors: SyntheticsMonitorWithId[], spaceId: string) {
     const privateDeletePromise = this.privateLocationAPI.deleteMonitors(monitors, spaceId);
 
@@ -226,6 +233,7 @@ export class SyntheticsMonitorClient {
       allPrivateLocations,
       spaceId,
       [],
+      monitorIdtoPackagePolicyIdMap,
       monitor.testRunId,
       runOnce
     );
@@ -338,6 +346,20 @@ export class SyntheticsMonitorClient {
 
     const [publicConfigs, privateConfig] = await Promise.all([publicPromise, privatePromise]);
     return { publicConfigs, privateConfig };
+  }
+
+  getMonitorToPolicyIdMap(monitors: SavedObject<SyntheticsMonitorWithSecretsAttributes>[]) {
+    const monitorToPolicyIdMap: Record<string, string[]> = {};
+    monitors.reduce((map, monitor) => {
+      const policyIds = monitor.references
+        .filter((ref) => ref.type === 'fleet-package-policies')
+        .map((ref) => ref.id);
+      if (policyIds.length > 0) {
+        map[monitor.id] = policyIds;
+      }
+      return map;
+    }, monitorToPolicyIdMap);
+    return monitorToPolicyIdMap;
   }
 }
 

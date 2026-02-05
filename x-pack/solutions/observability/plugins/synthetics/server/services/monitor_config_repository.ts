@@ -10,6 +10,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindResult,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
 import {
   type SavedObjectsBulkCreateObject,
@@ -36,6 +37,7 @@ import type {
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../common/runtime_types';
+import { getPolicyIdsForLocations } from '../synthetics_service/private_location/synthetics_private_location';
 import { ConfigKey } from '../../common/runtime_types';
 import { combineAndSortSavedObjects } from './utils/combine_and_sort_saved_objects';
 
@@ -55,7 +57,7 @@ export class MonitorConfigRepository {
   constructor(
     private soClient: SavedObjectsClientContract,
     private encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-    private logger?: Logger // Replace with appropriate logger type
+    private logger?: Logger // Replace with appropriate logger type,
   ) {}
 
   async get(id: string) {
@@ -124,10 +126,23 @@ export class MonitorConfigRepository {
       spaces = [...(spaces ?? []), spaceId];
     }
 
+    const policyIdsForMonitor = this.getPolicyIdsForPrivateLocations(
+      {
+        origin: normalizedMonitor[ConfigKey.MONITOR_SOURCE_TYPE],
+        id,
+      },
+      normalizedMonitor.locations
+    );
+
     const opts: SavedObjectsCreateOptions = {
       id,
       ...(id && { overwrite: true }),
       ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
+      references: [policyIdsForMonitor].flat().map((policyId) => ({
+        id: policyId,
+        type: 'fleet-package-policies',
+        name: `synthetics-policy-${policyId}`,
+      })),
     };
 
     return await this.soClient.create<EncryptedSyntheticsMonitorAttributes>(
@@ -153,6 +168,14 @@ export class MonitorConfigRepository {
     const newMonitors: Array<SavedObjectsBulkCreateObject<EncryptedSyntheticsMonitorAttributes>> =
       monitors.map(({ id, monitor }) => {
         const { spaces } = monitor;
+        const policyIds = this.getPolicyIdsForPrivateLocations(
+          {
+            origin: monitor[ConfigKey.MONITOR_SOURCE_TYPE],
+            id,
+          },
+          monitor.locations
+        );
+        const references = this.formatReferences(policyIds);
 
         return {
           id,
@@ -163,6 +186,7 @@ export class MonitorConfigRepository {
             [ConfigKey.CONFIG_ID]: id,
             revision: 1,
           }),
+          references,
           ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
         };
       });
@@ -176,19 +200,48 @@ export class MonitorConfigRepository {
     id: string,
     data: SyntheticsMonitorWithSecretsAttributes,
     decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>
-  ) {
+  ): Promise<SavedObjectsUpdateResponse<MonitorFields>> {
     const soType = decryptedPreviousMonitor.type;
     const prevSpaces = (decryptedPreviousMonitor.namespaces || []).sort();
+
+    // start using a package policy id structure without kibana space
+
+    // start saving that policy id as a reference on create
+
+    // fetch the policy id from the reference on edit and deletion
+
+    // bulk update via task for all existing monitors that do not have references
+
+    // get previous policy id from the decryptedPreviousMonitor.references
+
+    // check to see if any of those have been deleted using the data
+    // update references accordingly
+
+    // How can I get that id?
+
+    // monitorId-locationId-spaceId
+
+    // spaceId is not determinate - can't really rely on it
+    const policyIdsForMonitor = this.getPolicyIdsForPrivateLocations(
+      {
+        origin: data[ConfigKey.MONITOR_SOURCE_TYPE],
+        id,
+      },
+      data.locations
+    );
+
+    const references = this.formatReferences(policyIdsForMonitor);
 
     const spaces = (data.spaces || []).sort();
     // If the spaces have changed, we need to delete the saved object and recreate it
     if (isEqual(prevSpaces, spaces)) {
-      return this.soClient.update<MonitorFields>(soType, id, data);
+      return this.soClient.update<MonitorFields>(soType, id, data, { references });
     } else {
       await this.soClient.delete(soType, id, { force: true });
       return await this.soClient.create(syntheticsMonitorSavedObjectType, data, {
         id,
         ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
+        references,
       });
     }
   }
@@ -215,6 +268,7 @@ export class MonitorConfigRepository {
       id: string;
       attributes: MonitorFields;
       namespace?: string;
+      references: Array<{ id: string; type: string; name: string }>;
     }> = [];
 
     for (const monitor of monitors) {
@@ -225,12 +279,18 @@ export class MonitorConfigRepository {
         toRecreate.push({ id, attributes, previousMonitor });
         continue;
       }
+      const policyIds = this.getPolicyIdsForPrivateLocations(
+        { origin: attributes[ConfigKey.MONITOR_SOURCE_TYPE], id },
+        attributes.locations
+      );
+      const references = this.formatReferences(policyIds);
 
       toUpdate.push({
         type: previousMonitor?.type,
         id,
         attributes,
         namespace,
+        references,
       });
     }
 
@@ -415,5 +475,24 @@ export class MonitorConfigRepository {
       this.logger?.error(`Error parsing handleLegacyOptions: ${e}`);
       return options;
     }
+  }
+
+  formatReferences(policyIds: string[]) {
+    return policyIds.map((policyId) => ({
+      id: policyId,
+      type: 'fleet-package-policies',
+      name: `synthetics-policy-${policyId}`,
+    }));
+  }
+
+  getPolicyIdsForPrivateLocations(
+    monitor: { origin?: string; id: string },
+    locations: SyntheticsMonitor['locations']
+  ) {
+    const privateLocations = locations.filter((loc) => !loc.isServiceManaged);
+    return getPolicyIdsForLocations(
+      monitor,
+      privateLocations.map((loc) => loc.id)
+    );
   }
 }

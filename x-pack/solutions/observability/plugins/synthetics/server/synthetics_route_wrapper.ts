@@ -9,6 +9,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { isEmpty } from 'lodash';
 import { isKibanaResponse } from '@kbn/core-http-server';
 import { MonitorConfigRepository } from './services/monitor_config_repository';
+import { SyntheticsPrivateLocation } from './synthetics_service/private_location/synthetics_private_location';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
@@ -58,6 +59,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 
       server.syntheticsEsClient = syntheticsEsClient;
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
+      const syntheticsPrivateLocationClient = new SyntheticsPrivateLocation(server);
       const monitorConfigRepository = new MonitorConfigRepository(
         savedObjectsClient,
         encryptedSavedObjectsClient
@@ -76,6 +78,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           spaceId,
           syntheticsMonitorClient,
           monitorConfigRepository,
+          syntheticsPrivateLocationClient,
         };
 
         const res = await server.fleet.runWithCache(() => syntheticsRoute.handler(data));

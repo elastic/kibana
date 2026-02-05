@@ -192,7 +192,7 @@ describe('SyntheticsMonitorClient', () => {
       undefined
     );
     expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);
-    expect(client.privateLocationAPI.editMonitors).toHaveBeenCalledTimes(1);
+    expect(client.privateLocationAPI.updatePackagePolicies).toHaveBeenCalledTimes(1);
   });
 
   it('should delete a monitor', async () => {
