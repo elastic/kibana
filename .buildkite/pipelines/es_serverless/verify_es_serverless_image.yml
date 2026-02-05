@@ -82,22 +82,6 @@ steps:
             - exit_status: '*'
               limit: 1
 
-      - command: .buildkite/scripts/steps/test/scout_uiam_tests.sh
-        label: 'Scout UIAM Tests'
-        agents:
-          image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
-          provider: gcp
-          machineType: n2-standard-4
-          diskSizeGb: 115
-        timeout_in_minutes: 15
-        depends_on:
-          - build
-        retry:
-          automatic:
-            - exit_status: '*'
-              limit: 1
-
       - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
         label: 'Serverless Entity Analytics - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
