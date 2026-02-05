@@ -144,6 +144,31 @@ describe('entityRiskScoreTool', () => {
       mockCreateGetRiskScores.mockReturnValue(jest.fn());
     });
 
+    it('passes handler context spaceId into createGetRiskScores', async () => {
+      const mockGetRiskScores = jest.fn().mockResolvedValue([
+        {
+          '@timestamp': '2023-01-01T00:00:00Z',
+          id_field: 'host.name',
+          id_value: 'hostname-1',
+          calculated_score_norm: 75,
+          calculated_level: 'High',
+          calculated_score: 150,
+          notes: [],
+          inputs: [],
+        },
+      ]);
+      mockCreateGetRiskScores.mockReturnValue(mockGetRiskScores);
+
+      await tool.handler(
+        { identifierType: 'host', identifier: 'hostname-1' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, { spaceId: 'custom-space' })
+      );
+
+      expect(mockCreateGetRiskScores).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'custom-space' })
+      );
+    });
+
     it('successfully fetches risk score with valid identifierType and identifier', async () => {
       const mockGetRiskScores = jest.fn().mockResolvedValue([
         {
