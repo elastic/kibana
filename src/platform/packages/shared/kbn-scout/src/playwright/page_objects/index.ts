@@ -15,7 +15,6 @@ import { DashboardApp } from './dashboard_app';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
 import { FilterBar } from './fiter_bar';
-import { LensApp } from './lens_app';
 import { MapsPage } from './maps_page';
 import { RenderablePage } from './renderable_page';
 import { Toasts } from './toasts';
@@ -33,7 +32,6 @@ export interface PageObjects {
   datePicker: DatePicker;
   discover: DiscoverApp;
   dashboard: DashboardApp;
-  lens: LensApp;
   filterBar: FilterBar;
   maps: MapsPage;
   renderable: RenderablePage;
@@ -54,7 +52,6 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     datePicker: createLazyPageObject(DatePicker, fixtures.page),
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
-    lens: createLazyPageObject(LensApp, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
     maps: createLazyPageObject(MapsPage, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
