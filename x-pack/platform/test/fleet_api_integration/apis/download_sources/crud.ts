@@ -959,6 +959,152 @@ export default function (providerContext: FtrProviderContext) {
         ]);
       });
 
+      it('should preserve SSL secrets when updating only name/host', async function () {
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '8.12.0');
+
+        const { body: createRes } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Preserve SSL secrets test ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            ssl: {
+              certificate_authorities: ['cert authorities'],
+              certificate: 'path/to/cert',
+            },
+            secrets: { ssl: { key: 'SSL_KEY_VALUE' } },
+          })
+          .expect(200);
+
+        const dsId = createRes.item.id;
+        const secretId = createRes.item.secrets.ssl.key.id;
+
+        const secret = await getSecretById(secretId);
+        // @ts-ignore _source unknown type
+        expect(secret._source.value).to.equal('SSL_KEY_VALUE');
+
+        const { body: updateRes } = await supertest
+          .put(`/api/fleet/agent_download_sources/${dsId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Preserve SSL secrets test updated ${Date.now()}`,
+            host: 'http://updated.test.fr:443',
+            is_default: false,
+          })
+          .expect(200);
+
+        expect(updateRes.item.secrets.ssl.key.id).to.equal(secretId);
+        expect(updateRes.item.ssl.certificate).to.equal('path/to/cert');
+        expect(updateRes.item.ssl.certificate_authorities).to.eql(['cert authorities']);
+
+        const secretAfterUpdate = await getSecretById(secretId);
+        // @ts-ignore _source unknown type
+        expect(secretAfterUpdate._source.value).to.equal('SSL_KEY_VALUE');
+      });
+
+      it('should preserve auth secrets when updating only name/host', async function () {
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.4.0');
+
+        const { body: createRes } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Preserve auth secrets test ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              username: 'testuser',
+              headers: [{ key: 'X-Custom-Header', value: 'custom-value' }],
+            },
+            secrets: { auth: { password: 'SECRET_PASSWORD' } },
+          })
+          .expect(200);
+
+        const dsId = createRes.item.id;
+        const secretId = createRes.item.secrets.auth.password.id;
+
+        const secret = await getSecretById(secretId);
+        // @ts-ignore _source unknown type
+        expect(secret._source.value).to.equal('SECRET_PASSWORD');
+
+        const { body: updateRes } = await supertest
+          .put(`/api/fleet/agent_download_sources/${dsId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Preserve auth secrets test updated ${Date.now()}`,
+            host: 'http://updated.test.fr:443',
+            is_default: false,
+          })
+          .expect(200);
+
+        expect(updateRes.item.secrets.auth.password.id).to.equal(secretId);
+        expect(updateRes.item.auth.username).to.equal('testuser');
+        expect(updateRes.item.auth.headers).to.eql([
+          { key: 'X-Custom-Header', value: 'custom-value' },
+        ]);
+
+        const secretAfterUpdate = await getSecretById(secretId);
+        // @ts-ignore _source unknown type
+        expect(secretAfterUpdate._source.value).to.equal('SECRET_PASSWORD');
+      });
+
+      it('should preserve both SSL and auth secrets when updating only name/host', async function () {
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.4.0');
+
+        const { body: createRes } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Preserve all secrets test ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            ssl: {
+              certificate_authorities: ['cert authorities'],
+              certificate: 'path/to/cert',
+            },
+            secrets: {
+              ssl: { key: 'SSL_KEY_VALUE' },
+              auth: { password: 'SECRET_PASSWORD' },
+            },
+            auth: {
+              username: 'testuser',
+              headers: [{ key: 'X-Custom-Header', value: 'custom-value' }],
+            },
+          })
+          .expect(200);
+
+        const dsId = createRes.item.id;
+        const sslSecretId = createRes.item.secrets.ssl.key.id;
+        const authSecretId = createRes.item.secrets.auth.password.id;
+
+        const { body: updateRes } = await supertest
+          .put(`/api/fleet/agent_download_sources/${dsId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Preserve all secrets test updated ${Date.now()}`,
+            host: 'http://updated.test.fr:443',
+            is_default: false,
+          })
+          .expect(200);
+
+        expect(updateRes.item.secrets.ssl.key.id).to.equal(sslSecretId);
+        expect(updateRes.item.secrets.auth.password.id).to.equal(authSecretId);
+        expect(updateRes.item.ssl.certificate).to.equal('path/to/cert');
+        expect(updateRes.item.auth.username).to.equal('testuser');
+
+        const sslSecretAfterUpdate = await getSecretById(sslSecretId);
+        // @ts-ignore _source unknown type
+        expect(sslSecretAfterUpdate._source.value).to.equal('SSL_KEY_VALUE');
+
+        const authSecretAfterUpdate = await getSecretById(authSecretId);
+        // @ts-ignore _source unknown type
+        expect(authSecretAfterUpdate._source.value).to.equal('SECRET_PASSWORD');
+      });
+
       it('should clear auth and headers when setting auth to null', async function () {
         const { body: createRes } = await supertest
           .post(`/api/fleet/agent_download_sources`)

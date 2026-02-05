@@ -328,6 +328,16 @@ class DownloadSourceService {
       soClient
     );
 
+    const isSslBeingUpdated = newData.ssl !== undefined || newData.secrets?.ssl !== undefined;
+    const isAuthBeingUpdated = newData.auth !== undefined || newData.secrets?.auth !== undefined;
+
+    const getSecretId = (soSecret: unknown): string | undefined => {
+      if (typeof soSecret === 'object' && soSecret !== null && 'id' in soSecret) {
+        return (soSecret as { id: string }).id;
+      }
+      return undefined;
+    };
+
     // Store secret values if enabled; if not, store plain text values
     if (sslSecretStorageEnabled || authSecretStorageEnabled) {
       const secretsRes = await extractAndUpdateDownloadSourceSecrets({
@@ -338,7 +348,21 @@ class DownloadSourceService {
         includeAuthSecrets: authSecretStorageEnabled,
       });
 
-      secretsToDelete = secretsRes.secretsToDelete;
+      // Filter out secrets for fields that are not being updated
+      secretsToDelete = secretsRes.secretsToDelete.filter((secret) => {
+        const sslKeyId = getSecretId(originalItem.secrets?.ssl?.key);
+        if (sslKeyId === secret.id && !isSslBeingUpdated) {
+          return false;
+        }
+
+        const authPasswordId = getSecretId(originalItem.secrets?.auth?.password);
+        const authApiKeyId = getSecretId(originalItem.secrets?.auth?.api_key);
+        if ((authPasswordId === secret.id || authApiKeyId === secret.id) && !isAuthBeingUpdated) {
+          return false;
+        }
+
+        return true;
+      });
 
       const oldSecrets = (originalItem.secrets || {}) as DownloadSourceSOAttributes['secrets'];
       const newSecrets = (secretsRes.downloadSourceUpdate.secrets ||
@@ -347,15 +371,20 @@ class DownloadSourceService {
       const mergedSecrets: DownloadSourceSOAttributes['secrets'] = {};
 
       // SSL secrets: merge old and new, then remove deleted ones
+      // When SSL is NOT being updated, preserve the old SSL secrets
       if (sslSecretStorageEnabled) {
-        mergedSecrets.ssl = { ...oldSecrets?.ssl, ...newSecrets?.ssl };
-        for (const secretToDelete of secretsToDelete) {
-          if (mergedSecrets.ssl?.key?.id === secretToDelete.id) {
-            delete mergedSecrets.ssl.key;
+        if (isSslBeingUpdated) {
+          mergedSecrets.ssl = { ...oldSecrets?.ssl, ...newSecrets?.ssl };
+          for (const secretToDelete of secretsToDelete) {
+            if (mergedSecrets.ssl?.key?.id === secretToDelete.id) {
+              delete mergedSecrets.ssl.key;
+            }
           }
-        }
-        if (mergedSecrets.ssl && Object.keys(mergedSecrets.ssl).length === 0) {
-          delete mergedSecrets.ssl;
+          if (mergedSecrets.ssl && Object.keys(mergedSecrets.ssl).length === 0) {
+            delete mergedSecrets.ssl;
+          }
+        } else {
+          mergedSecrets.ssl = oldSecrets?.ssl;
         }
       }
 
@@ -363,8 +392,6 @@ class DownloadSourceService {
       // When auth is being updated, use ONLY the new auth secrets
       // When auth is NOT being updated, preserve the old auth secrets
       if (authSecretStorageEnabled) {
-        const isAuthBeingUpdated =
-          newData.auth !== undefined || newData.secrets?.auth !== undefined;
         if (isAuthBeingUpdated) {
           const newAuthSecrets = newSecrets?.auth;
           mergedSecrets.auth = {

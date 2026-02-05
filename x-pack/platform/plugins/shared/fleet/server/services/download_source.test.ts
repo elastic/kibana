@@ -23,6 +23,7 @@ import {
   extractAndWriteDownloadSourcesSecrets,
   extractAndUpdateDownloadSourceSecrets,
   deleteDownloadSourceSecrets,
+  deleteSecrets,
 } from './secrets';
 
 jest.mock('./app_context');
@@ -54,6 +55,7 @@ const mockedExtractAndUpdateDownloadSourceSecrets =
 const mockedDeleteDownloadSourceSecrets = deleteDownloadSourceSecrets as jest.MockedFunction<
   typeof deleteDownloadSourceSecrets
 >;
+const mockedDeleteSecrets = deleteSecrets as jest.MockedFunction<typeof deleteSecrets>;
 
 function mockDownloadSourceSO(id: string, attributes: any = {}) {
   return {
@@ -227,6 +229,7 @@ describe('Download Service', () => {
       })
     );
     mockedDeleteDownloadSourceSecrets.mockResolvedValue();
+    mockedDeleteSecrets.mockResolvedValue();
   });
 
   afterEach(() => {
@@ -240,6 +243,7 @@ describe('Download Service', () => {
     mockedExtractAndWriteDownloadSourcesSecrets.mockReset();
     mockedExtractAndUpdateDownloadSourceSecrets.mockReset();
     mockedDeleteDownloadSourceSecrets.mockReset();
+    mockedDeleteSecrets.mockReset();
   });
 
   const esClient = elasticsearchServiceMock.createInternalClient();
@@ -942,6 +946,121 @@ describe('Download Service', () => {
           'download-source-test',
           expect.objectContaining({
             auth: null,
+          })
+        );
+      });
+
+      it('should preserve SSL secrets when updating only name/host (not SSL fields)', async () => {
+        const soClientMock = getMockedSoClient();
+        mockedIsSSLSecretStorageEnabled.mockResolvedValue(true);
+        mockedIsDownloadSourceAuthSecretStorageEnabled.mockResolvedValue(false);
+
+        const esoClientMockLocal = getMockedEncryptedSoClient();
+        esoClientMockLocal.getDecryptedAsInternalUser.mockResolvedValue(
+          mockDownloadSourceSO('download-source-test', {
+            is_default: false,
+            name: 'Test',
+            host: 'http://test.co',
+            ssl: JSON.stringify({ certificate: 'cert' }),
+            secrets: { ssl: { key: { id: 'existing-ssl-secret-id' } } },
+          })
+        );
+
+        mockedExtractAndUpdateDownloadSourceSecrets.mockResolvedValue({
+          downloadSourceUpdate: {
+            name: 'Updated Name',
+          },
+          secretReferences: [],
+          secretsToDelete: [{ id: 'existing-ssl-secret-id' }],
+        });
+
+        await downloadSourceService.update(soClientMock, esClient, 'download-source-test', {
+          name: 'Updated Name',
+        });
+
+        expect(mockedDeleteSecrets).not.toBeCalled();
+
+        expect(soClientMock.update).toBeCalledWith(
+          expect.anything(),
+          'download-source-test',
+          expect.objectContaining({
+            secrets: expect.objectContaining({
+              ssl: { key: { id: 'existing-ssl-secret-id' } },
+            }),
+          })
+        );
+      });
+
+      it('should preserve auth secrets when updating only name/host (not auth fields)', async () => {
+        const soClientMock = getMockedSoClient();
+        mockedIsSSLSecretStorageEnabled.mockResolvedValue(false);
+        mockedIsDownloadSourceAuthSecretStorageEnabled.mockResolvedValue(true);
+
+        const esoClientMockLocal = getMockedEncryptedSoClient();
+        esoClientMockLocal.getDecryptedAsInternalUser.mockResolvedValue(
+          mockDownloadSourceSO('download-source-test', {
+            is_default: false,
+            name: 'Test',
+            host: 'http://test.co',
+            auth: JSON.stringify({ username: 'user1' }),
+            secrets: { auth: { password: { id: 'existing-auth-secret-id' } } },
+          })
+        );
+
+        mockedExtractAndUpdateDownloadSourceSecrets.mockResolvedValue({
+          downloadSourceUpdate: {
+            name: 'Updated Name',
+          },
+          secretReferences: [],
+          secretsToDelete: [{ id: 'existing-auth-secret-id' }],
+        });
+
+        await downloadSourceService.update(soClientMock, esClient, 'download-source-test', {
+          name: 'Updated Name',
+        });
+
+        expect(mockedDeleteSecrets).not.toBeCalled();
+
+        expect(soClientMock.update).toBeCalledWith(
+          expect.anything(),
+          'download-source-test',
+          expect.objectContaining({
+            secrets: expect.objectContaining({
+              auth: { password: { id: 'existing-auth-secret-id' } },
+            }),
+          })
+        );
+      });
+
+      it('should delete auth secrets when explicitly setting auth to null', async () => {
+        const soClientMock = getMockedSoClient();
+        mockedIsSSLSecretStorageEnabled.mockResolvedValue(false);
+        mockedIsDownloadSourceAuthSecretStorageEnabled.mockResolvedValue(true);
+
+        const esoClientMockLocal = getMockedEncryptedSoClient();
+        esoClientMockLocal.getDecryptedAsInternalUser.mockResolvedValue(
+          mockDownloadSourceSO('download-source-test', {
+            is_default: false,
+            name: 'Test',
+            host: 'http://test.co',
+            auth: JSON.stringify({ username: 'user1' }),
+            secrets: { auth: { password: { id: 'existing-auth-secret-id' } } },
+          })
+        );
+
+        mockedExtractAndUpdateDownloadSourceSecrets.mockResolvedValue({
+          downloadSourceUpdate: {},
+          secretReferences: [],
+          secretsToDelete: [{ id: 'existing-auth-secret-id' }],
+        });
+
+        await downloadSourceService.update(soClientMock, esClient, 'download-source-test', {
+          auth: null,
+        } as Parameters<typeof downloadSourceService.update>[3]);
+
+        expect(mockedDeleteSecrets).toBeCalledWith(
+          expect.objectContaining({
+            ids: ['existing-auth-secret-id'],
           })
         );
       });
