@@ -45,6 +45,39 @@ import type { LoginState } from '../../../common/login_state';
 import type { LogoutReason } from '../../../common/types';
 import type { ConfigType } from '../../config';
 
+// Check if current date is within Valentine's period (Feb 1-14)
+const isValentinesPeriod = (): boolean => {
+  const now = new Date();
+  const month = now.getMonth(); // 0-indexed (Jan = 0, Feb = 1)
+  const day = now.getDate();
+  return month === 1 && day >= 1 && day <= 14;
+};
+
+// Heart icon using Elastic brand colours, shown during Valentine's period
+const HeartIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="64"
+    height="64"
+    viewBox="0 0 100 100"
+    shapeRendering="geometricPrecision"
+  >
+    <defs>
+      <clipPath id="loginHeartClip" clipPathUnits="userSpaceOnUse">
+        <path d="M50 25 C50 12 42 4 30 4 C16 4 5 16 5 30 C12 48 28 72 50 95 C72 72 88 48 95 30 C95 16 84 4 70 4 C58 4 50 12 50 25 Z" />
+      </clipPath>
+    </defs>
+    <g clipPath="url(#loginHeartClip)">
+      <path fill="#EE5097" d="M0 0 L50 0 L33 20 L0 26 Z" />
+      <path fill="#FDD009" d="M50 0 L100 0 L100 38 L58 38 L46 44 L33 20 Z" />
+      <path fill="#17A7E0" d="M0 26 L33 20 L46 44 L0 56 Z" />
+      <path fill="#23BAB1" d="M0 56 L46 44 L58 38 L64 66 L50 100 L0 100 Z" />
+      <path fill="#0678A0" d="M100 38 L58 38 L64 66 L100 52 Z" />
+      <path fill="#92C73D" d="M100 52 L64 66 L50 100 L100 100 Z" />
+    </g>
+  </svg>
+);
+
 interface Props {
   http: HttpStart;
   notifications: NotificationsStart;
@@ -159,11 +192,13 @@ export class LoginPage extends Component<Props, State> {
     const customLogo = this.state.customBranding?.logo;
     const logo = customLogo ? (
       <EuiImage src={customLogo} size={40} alt="logo" />
+    ) : isValentinesPeriod() ? (
+      <HeartIcon />
     ) : (
       <EuiIcon type="logoElastic" size="xxl" />
     );
-    // custom logo needs to be centered
-    const logoStyle = customLogo ? { padding: 0 } : {};
+    // custom logo / heart icon needs to be centered
+    const logoStyle = customLogo || isValentinesPeriod() ? { padding: 0 } : {};
     return (
       <div data-test-subj="loginForm" css={kbnFullScreenBgCss}>
         <header

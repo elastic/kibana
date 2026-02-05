@@ -13,12 +13,20 @@ import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import { i18n } from '@kbn/i18n';
 import type { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';
-import { Logo } from './logo';
+import { Logo, Heart } from './logo';
 import { Styles } from './styles';
 
 interface Props {
   metadata: RenderingMetadata;
 }
+
+// Helper function to check if current date is within Valentine's period (Feb 1-14)
+const isValentinesPeriod = (): boolean => {
+  const now = new Date();
+  const month = now.getMonth(); // 0-indexed (Jan = 0, Feb = 1)
+  const day = now.getDate();
+  return month === 1 && day >= 1 && day <= 14;
+};
 
 export const Template: FunctionComponent<Props> = ({
   metadata: {
@@ -37,10 +45,11 @@ export const Template: FunctionComponent<Props> = ({
   const title = customBranding.pageTitle ?? 'Elastic';
   const favIcon = customBranding.faviconSVG ?? `${uiPublicUrl}/favicons/favicon.svg`;
   const favIconPng = customBranding.faviconPNG ?? `${uiPublicUrl}/favicons/favicon.png`;
+  const DefaultIcon = isValentinesPeriod() ? Heart : Logo;
   const logo = customBranding.logo ? (
     <img src={customBranding.logo} width="64" height="64" alt="logo" />
   ) : (
-    <Logo />
+    <DefaultIcon />
   );
   return (
     <html lang={locale}>
