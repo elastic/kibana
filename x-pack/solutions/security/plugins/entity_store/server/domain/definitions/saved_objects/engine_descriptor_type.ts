@@ -25,8 +25,8 @@ export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
         filter: {
           type: 'keyword',
         },
-        additionalIndexPattern: {
-          type: 'keyword',
+        additionalIndexPatterns: {
+          type: 'keyword', // array of strings (ES keyword supports multi-value)
         },
         fieldHistoryLength: {
           type: 'integer',
@@ -96,7 +96,7 @@ const engineDescriptorAttributesSchema = {
   ]),
   logExtractionState: schema.object({
     filter: schema.string(),
-    additionalIndexPattern: schema.string(),
+    additionalIndexPatterns: schema.arrayOf(schema.string()),
     fieldHistoryLength: schema.number(),
     lookbackPeriod: schema.string(),
     delay: schema.string(),

@@ -129,7 +129,7 @@ export class LogsExtractionClient {
     const { docsLimit } = engineDescriptor.logExtractionState;
     const indexPatterns = await this.getIndexPatterns(
       engineDescriptor.type,
-      engineDescriptor.logExtractionState.additionalIndexPattern
+      engineDescriptor.logExtractionState.additionalIndexPatterns
     );
     const latestIndex = getLatestEntitiesIndexName(engineDescriptor.type, this.namespace);
 
@@ -231,12 +231,9 @@ export class LogsExtractionClient {
     return { success: false, error };
   }
 
-  private async getIndexPatterns(type: EntityType, additionalIndexPatterns: string) {
+  private async getIndexPatterns(type: EntityType, additionalIndexPatterns: string[]) {
     const updatesDataStream = getUpdatesEntitiesDataStreamName(type, this.namespace);
-    const cleanAdditionalIndicesPatterns = additionalIndexPatterns
-      .split(',')
-      .filter((index) => index !== '');
-    const indexPatterns: string[] = [updatesDataStream, ...cleanAdditionalIndicesPatterns];
+    const indexPatterns: string[] = [updatesDataStream, ...additionalIndexPatterns];
 
     try {
       const secSolDataView = await this.dataViewsService.get(

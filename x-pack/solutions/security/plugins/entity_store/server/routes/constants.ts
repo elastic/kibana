@@ -28,7 +28,7 @@ export type LogExtractionBodyParams = z.infer<typeof LogExtractionBodyParams>;
 export const LogExtractionBodyParams = LogExtractionState.pick({
   filter: true,
   fieldHistoryLength: true,
-  additionalIndexPattern: true,
+  additionalIndexPatterns: true,
   lookbackPeriod: true,
   frequency: true,
   delay: true,
