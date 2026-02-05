@@ -29,3 +29,7 @@ yaml-language-server
 @atlaskit/pragmatic-drag-and-drop-hitbox
 @opentelemetry/exporter-metrics-otlp-proto
 @opentelemetry/instrumentation-hapi
+@opentelemetry/api-logs
+@opentelemetry/exporter-logs-otlp-http
+@opentelemetry/resources
+@opentelemetry/sdk-logs

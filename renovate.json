@@ -947,7 +947,11 @@
         "@types/json5",
         "@types/mock-fs",
         "@types/node-fetch",
-        "@types/type-detect"
+        "@types/type-detect",
+        "@opentelemetry/api-logs",
+        "@opentelemetry/exporter-logs-otlp-http",
+        "@opentelemetry/resources",
+        "@opentelemetry/sdk-logs"
       ],
       "reviewers": [
         "team:kibana-core"
