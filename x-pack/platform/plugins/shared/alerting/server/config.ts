@@ -61,6 +61,9 @@ const rulesSchema = schema.object({
     }),
     ruleTypeOverrides: schema.maybe(schema.arrayOf(ruleTypeSchema)),
   }),
+  apiKeyType: schema.oneOf([schema.literal('es'), schema.literal('uiam')], {
+    defaultValue: 'es',
+  }),
 });
 
 export const configSchema = schema.object({

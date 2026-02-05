@@ -185,6 +185,7 @@ export interface TaskRunnerContext {
   maxAlerts: number;
   ruleTypeRegistry: RuleTypeRegistry;
   rulesSettingsService: RulesSettingsService;
+  apiKeyType: 'es' | 'uiam';
   savedObjects: SavedObjectsServiceStart;
   share: SharePluginStart;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;

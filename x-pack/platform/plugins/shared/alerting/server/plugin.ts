@@ -733,6 +733,7 @@ export class AlertingPlugin {
       usageCounter: this.usageCounter,
       getEventLogClient: (request: KibanaRequest) => plugins.eventLog.getClient(request),
       isServerless: this.isServerless,
+      apiKeyType: this.config.rules.apiKeyType ?? 'es',
     });
 
     this.eventLogService!.registerSavedObjectProvider(
