@@ -6,8 +6,6 @@
  */
 
 import { URL } from 'url';
-import { Readable } from 'stream';
-import type { ReadableStream as WebReadableStream } from 'stream/web';
 
 import mime from 'mime-types';
 import semverGte from 'semver/functions/gte';
@@ -654,7 +652,7 @@ export async function getPackageArchiveSignatureOrUndefined({
   try {
     const res = await fetchFile(signaturePath);
 
-    if (res?.body) return streamToString(Readable.fromWeb(res.body as WebReadableStream));
+    if (res?.body) return streamToString(res.body);
     return undefined;
   } catch (e) {
     logger.error(`Error retrieving package signature at '${signaturePath}' : ${e}`);
