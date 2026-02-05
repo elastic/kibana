@@ -96,7 +96,10 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
     });
 
     await test.step('opens span flyout and shows span links details', async () => {
-      await page.locator('button').filter({ hasText: 'Span B100 ms' }).click();
+      await page
+        .getByTestId('waterfall')
+        .getByLabel('View details for Span B', { exact: true })
+        .click();
       await transactionDetailsPage.getSpanLinksTab().click();
 
       const consumerMultipleLink = page.getByRole('link', {
