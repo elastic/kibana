@@ -30,26 +30,31 @@ export type MonitorOption = TypeOf<typeof monitorOptionSchema>;
 export const monitorFiltersSchema = schema.object({
   projects: schema.maybe(
     schema.arrayOf(monitorOptionSchema, {
+      maxSize: 100,
       meta: { description: 'Filter by project' },
     })
   ),
   tags: schema.maybe(
     schema.arrayOf(monitorOptionSchema, {
+      maxSize: 100,
       meta: { description: 'Filter by tags' },
     })
   ),
   monitorIds: schema.maybe(
     schema.arrayOf(monitorOptionSchema, {
+      maxSize: 1000,
       meta: { description: 'Filter by monitor IDs' },
     })
   ),
   monitorTypes: schema.maybe(
     schema.arrayOf(monitorOptionSchema, {
+      maxSize: 10,
       meta: { description: 'Filter by monitor types' },
     })
   ),
   locations: schema.maybe(
     schema.arrayOf(monitorOptionSchema, {
+      maxSize: 100,
       meta: { description: 'Filter by monitor locations' },
     })
   ),
