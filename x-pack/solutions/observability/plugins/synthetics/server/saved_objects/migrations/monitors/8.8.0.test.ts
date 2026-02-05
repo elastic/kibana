@@ -166,7 +166,6 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
           labels: {},
           maintenance_windows: [],
           spaces: [],
-          'source.inline.encoding': 'base64',
         },
         coreMigrationVersion: '8.8.0',
         created_at: '2023-03-31T20:31:24.177Z',
