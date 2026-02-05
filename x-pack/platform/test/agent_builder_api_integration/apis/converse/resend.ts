@@ -166,31 +166,6 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
         expect(res.statusCode).to.eql(400);
         expect(res.message).to.contain('conversation_id is required when resend is true');
       });
-
-      it('returns 400 when resend=true but conversation has no rounds', async () => {
-        // Create a conversation first, then try to access it
-        // Note: In practice, a conversation without rounds shouldn't exist,
-        // but we test the validation anyway
-        await setupAgentDirectAnswer({
-          proxy: llmProxy,
-          title: 'Test',
-          response: 'Response',
-        });
-
-        const firstResponse = await agentBuilderApiClient.converse({
-          input: 'Create conversation',
-          connector_id: connectorId,
-        });
-
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-
-        // The conversation now has 1 round, so this test validates that
-        // the error handling works for empty conversations
-        // (which would need to be set up differently in a real scenario)
-        const conversationId = firstResponse.conversation_id;
-        const conversation = await agentBuilderApiClient.getConversation(conversationId);
-        expect(conversation.rounds.length).to.eql(1);
-      });
     });
   });
 }

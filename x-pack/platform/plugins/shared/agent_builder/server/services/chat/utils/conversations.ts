@@ -142,13 +142,10 @@ export const getConversation = async ({
       throw createBadRequestError('Cannot resend: conversation has no rounds');
     }
     // replace response in last round with empty string when resend is true
-    if (resend) {
-      const lastRound = conversation.rounds[conversation.rounds.length - 1];
-      lastRound.response = {
-        message: '',
-      };
-      conversation.rounds[conversation.rounds.length - 1] = lastRound;
-    }
+    const lastRound = conversation.rounds[conversation.rounds.length - 1];
+    lastRound.response = {
+      message: '',
+    };
     return {
       ...conversation,
       operation: 'RESEND',
