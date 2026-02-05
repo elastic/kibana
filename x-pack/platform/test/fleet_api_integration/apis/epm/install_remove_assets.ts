@@ -34,12 +34,14 @@ export default function (providerContext: FtrProviderContext) {
   const logsTemplateName = `logs-${pkgName}.test_logs`;
   const metricsTemplateName = `metrics-${pkgName}.test_metrics`;
 
-  const uninstallPackage = async (pkg: string, version: string) => {
-    await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
-  };
-  const installPackage = async (pkg: string, version: string) => {
+  const uninstallPackage = async (pkg: string, version?: string) => {
     await supertest
-      .post(`/api/fleet/epm/packages/${pkg}/${version}`)
+      .delete(`/api/fleet/epm/packages/${pkg}${version ? `/${version}` : ''}`)
+      .set('kbn-xsrf', 'xxxx');
+  };
+  const installPackage = async (pkg: string, version?: string) => {
+    await supertest
+      .post(`/api/fleet/epm/packages/${pkg}${version ? `/${version}` : '?prerelease=true'}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true });
   };
@@ -444,14 +446,16 @@ const expectAssetsInstalled = ({
       { meta: true }
     );
     expect(resPipeline1.statusCode).equal(200);
-    const resPipeline2 = await es.transport.request(
-      {
-        method: 'GET',
-        path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline2`,
-      },
-      { meta: true }
-    );
-    expect(resPipeline2.statusCode).equal(200);
+    if (pkgVersion === '0.1.0') {
+      const resPipeline2 = await es.transport.request(
+        {
+          method: 'GET',
+          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline2`,
+        },
+        { meta: true }
+      );
+      expect(resPipeline2.statusCode).equal(200);
+    }
   });
   it('should have installed the ml model', async function () {
     const res = await es.transport.request(
@@ -494,12 +498,16 @@ const expectAssetsInstalled = ({
     expect(resDashboard.id).equal('sample_dashboard');
     expect(resDashboard.managed).be(true);
     expect(resDashboard.references.map((ref: any) => ref.id).includes('sample_tag')).equal(true);
-    const resDashboard2 = await kibanaServer.savedObjects.get({
-      type: 'dashboard',
-      id: 'sample_dashboard2',
-    });
-    expect(resDashboard2.id).equal('sample_dashboard2');
-    expect(resDashboard2.managed).be(true);
+    // sample_dashboard2 is only installed in version 0.1.0
+    if (pkgVersion === '0.1.0') {
+      const resDashboard2 = await kibanaServer.savedObjects.get({
+        type: 'dashboard',
+        id: 'sample_dashboard2',
+      });
+      expect(resDashboard2.id).equal('sample_dashboard2');
+
+      expect(resDashboard2.managed).be(true);
+    }
     const resVis = await kibanaServer.savedObjects.get({
       type: 'visualization',
       id: 'sample_visualization',
@@ -507,12 +515,21 @@ const expectAssetsInstalled = ({
 
     expect(resVis.id).equal('sample_visualization');
     expect(resVis.managed).be(true);
-    const resSearch = await kibanaServer.savedObjects.get({
-      type: 'search',
-      id: 'sample_search',
-    });
-    expect(resSearch.id).equal('sample_search');
-    expect(resSearch.managed).be(true);
+    if (pkgVersion === '0.1.0') {
+      const resSearch = await kibanaServer.savedObjects.get({
+        type: 'search',
+        id: 'sample_search',
+      });
+      expect(resSearch.id).equal('sample_search');
+      expect(resSearch.managed).be(true);
+    } else if (pkgVersion === '0.2.0') {
+      const resSearch = await kibanaServer.savedObjects.get({
+        type: 'search',
+        id: 'sample_search2',
+      });
+      expect(resSearch.id).equal('sample_search2');
+      expect(resSearch.managed).be(true);
+    }
     const resLens = await kibanaServer.savedObjects.get({
       type: 'lens',
       id: 'sample_lens',
@@ -544,30 +561,41 @@ const expectAssetsInstalled = ({
     });
     expect(resOsquerySavedObject.id).equal('sample_osquery_saved_query');
     expect(resOsquerySavedObject.managed).be(true);
-    const resCloudSecurityPostureRuleTemplate = await kibanaServer.savedObjects.get({
-      type: 'csp-rule-template',
-      id: 'sample_csp_rule_template',
-    });
+    if (pkgVersion === '0.1.0') {
+      const resCloudSecurityPostureRuleTemplate = await kibanaServer.savedObjects.get({
+        type: 'csp-rule-template',
+        id: 'sample_csp_rule_template',
+      });
+      expect(resCloudSecurityPostureRuleTemplate.id).equal('sample_csp_rule_template');
+      expect(resCloudSecurityPostureRuleTemplate.managed).be(true);
+    } else {
+      const resCloudSecurityPostureRuleTemplate = await kibanaServer.savedObjects.get({
+        type: 'csp-rule-template',
+        id: 'sample_csp_rule_template2',
+      });
+      expect(resCloudSecurityPostureRuleTemplate.id).equal('sample_csp_rule_template2');
+      expect(resCloudSecurityPostureRuleTemplate.managed).be(true);
+    }
     const resSecurityAiPrompt = await kibanaServer.savedObjects.get({
       type: 'security-ai-prompt',
       id: 'sample_security_ai_prompt',
     });
     expect(resSecurityAiPrompt.id).equal('sample_security_ai_prompt');
     expect(resSecurityAiPrompt.managed).be(true);
-    expect(resCloudSecurityPostureRuleTemplate.id).equal('sample_csp_rule_template');
-    expect(resCloudSecurityPostureRuleTemplate.managed).be(true);
     const resTag = await kibanaServer.savedObjects.get({
       type: 'tag',
       id: 'sample_tag',
     });
     expect(resTag.managed).be(true);
     expect(resTag.id).equal('sample_tag');
-    const resIndexPattern = await kibanaServer.savedObjects.get({
-      type: 'index-pattern',
-      id: 'test-*',
-    });
-    expect(resIndexPattern.managed).be(true);
-    expect(resIndexPattern.id).equal('test-*');
+    if (pkgVersion === '0.1.0') {
+      const resIndexPattern = await kibanaServer.savedObjects.get({
+        type: 'index-pattern',
+        id: 'test-*',
+      });
+      expect(resIndexPattern.managed).be(true);
+      expect(resIndexPattern.id).equal('test-*');
+    }
 
     let resInvalidTypeIndexPattern;
     try {
@@ -919,14 +947,19 @@ const expectAssetsInstalled = ({
         verification_key_id: null,
       };
 
-      expectedSavedObject.installed_es.forEach((item) => {
-        expect(
-          sortedRes.installed_es.find(
-            (asset: any) => asset.type === item.type && asset.id === item.id
-          )
-        ).to.not.be(undefined);
+      expectedSavedObject.installed_es
+        .filter((item) => item.type !== 'knowledge_base') // Exclude knowledge_base types as they are installed asynchronously
+        .forEach((item) => {
+          expect(
+            sortedRes.installed_es.find(
+              (asset: any) => asset.type === item.type && asset.id === item.id
+            )
+          ).to.not.be(undefined);
+        });
+      expect({ ...sortedRes, installed_es: [] }).eql({
+        ...expectedSavedObject,
+        installed_es: [],
       });
-      expect({ ...sortedRes, installed_es: [] }).eql({ ...expectedSavedObject, installed_es: [] });
     }
 
     await verifySO();

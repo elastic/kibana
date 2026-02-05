@@ -74,7 +74,6 @@ export class DatePicker {
     from,
     to,
     validateDates = false,
-    containerLocator,
   }: {
     from: string;
     to: string;
@@ -142,6 +141,11 @@ export class DatePicker {
       .filter({ visible: true });
     await expect(absoluteTab).toHaveCount(1);
     await absoluteTab.click();
+  }
+
+  async setAbsoluteRange({ from, to }: { from: string; to: string }) {
+    await this.showStartEndTimes();
+    await this.typeAbsoluteRange({ from, to, validateDates: true });
   }
 
   async getTimeConfig(): Promise<{ start: string; end: string }> {

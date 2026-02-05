@@ -86,6 +86,20 @@ describe('attackDiscoverySearchTool', () => {
       expect(callArgs.query).toContain('LIMIT 100');
     });
 
+    it('uses handler context spaceId in ES|QL index pattern', async () => {
+      (executeEsql as jest.Mock).mockResolvedValue({ columns: [], values: [] });
+
+      await tool.handler(
+        { alertIds: ['alert-1'] },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, { spaceId: 'custom-space' })
+      );
+
+      const callArgs = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(callArgs.query).toContain(
+        'FROM .alerts-security.attack.discovery.alerts-custom-space*'
+      );
+    });
+
     it('executes ES|QL query and returns tabular data', async () => {
       const mockEsqlResponse = {
         columns: [
