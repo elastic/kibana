@@ -426,6 +426,106 @@ describe('LoginPage', () => {
     });
   });
 
+  describe('Valentine period logo', () => {
+    const fakeTimerOptions = {
+      now: new Date(2026, 1, 5),
+      doNotFake: [
+        'setTimeout',
+        'setInterval',
+        'clearTimeout',
+        'clearInterval',
+        'setImmediate',
+        'clearImmediate',
+        'nextTick',
+        'queueMicrotask',
+      ] as const,
+    };
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('renders the HeartIcon during Valentine period (Feb 1-14)', async () => {
+      jest.useFakeTimers({ ...fakeTimerOptions, now: new Date(2026, 1, 5) });
+
+      const coreStartMock = coreMock.createStart();
+      customBrandingMock.customBranding$ = of({});
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+          customBranding={customBrandingMock}
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find('HeartIcon').exists()).toBe(true);
+      expect(wrapper.find('EuiIcon[type="logoElastic"]').exists()).toBe(false);
+    });
+
+    it('renders the default EuiIcon outside Valentine period', async () => {
+      jest.useFakeTimers({ ...fakeTimerOptions, now: new Date(2026, 5, 15) });
+
+      const coreStartMock = coreMock.createStart();
+      customBrandingMock.customBranding$ = of({});
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+          customBranding={customBrandingMock}
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find('HeartIcon').exists()).toBe(false);
+      expect(wrapper.find('EuiIcon[type="logoElastic"]').exists()).toBe(true);
+    });
+
+    it('uses custom branding logo over HeartIcon even during Valentine period', async () => {
+      jest.useFakeTimers({ ...fakeTimerOptions, now: new Date(2026, 1, 10) });
+
+      const coreStartMock = coreMock.createStart();
+      customBrandingMock.customBranding$ = of({ logo: 'https://example.com/logo.png' });
+      httpMock.get.mockResolvedValue(
+        createLoginState({ customBranding: { logo: 'https://example.com/logo.png' } })
+      );
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+          customBranding={customBrandingMock}
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find('HeartIcon').exists()).toBe(false);
+      expect(wrapper.find('EuiImage').exists()).toBe(true);
+    });
+  });
+
   describe('API calls', () => {
     it('GET login_state success', async () => {
       const coreStartMock = coreMock.createStart();
