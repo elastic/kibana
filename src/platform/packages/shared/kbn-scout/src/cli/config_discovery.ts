@@ -77,6 +77,7 @@ const filterModulesByTargetTags = (
         .filter((config) => config.tags.some((tag) => targetTagsSet.has(tag)))
         .map((config) => {
           const filteredTags = config.tags.filter((tag) => targetTagsSet.has(tag));
+          // guarding to keep @cleanEnv from being stripped out by the target tag filter and use later for sorting
           if (config.tags.includes(CLEAN_ENV_TAG) && !filteredTags.includes(CLEAN_ENV_TAG)) {
             filteredTags.push(CLEAN_ENV_TAG);
           }

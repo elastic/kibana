@@ -132,6 +132,7 @@ export const flattenModulesByServerRunFlag = (
 
   for (const [key, group] of groupsMap.entries()) {
     const configsForGroup = configsByGroup.get(key) ?? [];
+    // sort configs within group: those with @cleanEnv first, then alphabetically by path
     const sortedConfigs = configsForGroup.sort((left, right) => {
       const leftIsCleanEnv = left.tags.includes(CLEAN_ENV_TAG);
       const rightIsCleanEnv = right.tags.includes(CLEAN_ENV_TAG);
