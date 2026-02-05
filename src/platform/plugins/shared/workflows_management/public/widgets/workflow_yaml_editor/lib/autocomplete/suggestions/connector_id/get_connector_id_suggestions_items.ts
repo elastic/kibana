@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import type { LineColumnPosition } from '../../../../../../entities/workflows/store';
+import { getActionTypeIdFromStepType } from '../../../../../../shared/lib/action_type_utils';
 
 // We need to come up with a better way for suggestions due to custom steps support
 // We use this workaround until that happens.
@@ -60,18 +63,37 @@ export function getConnectorIdSuggestionsItems(
     });
   });
 
-  // If no instances are configured, still allow manual input
-  if (instances.length === 0) {
-    suggestions.push({
-      label: 'Enter connector ID manually',
-      kind: monaco.languages.CompletionItemKind.Text,
-      insertText: '',
-      range,
-      detail: 'No configured instances found',
-      documentation: `No instances of ${connectorType} are currently configured. You can enter a connector ID manually.`,
-      sortText: 'z_manual',
-    });
-  }
+  // Use provided insertPosition or calculate from range
+  const insertPosition: LineColumnPosition =
+    'startLineNumber' in range
+      ? { lineNumber: range.startLineNumber, column: range.startColumn }
+      : { lineNumber: range.replace.startLineNumber, column: range.replace.startColumn };
+
+  // Create a zero-width range at the insert position to prevent Monaco from replacing any text
+  // when the empty insertText is applied. The command will handle the insertion after connector creation.
+  const zeroWidthRange: monaco.IRange = {
+    startLineNumber: insertPosition.lineNumber,
+    endLineNumber: insertPosition.lineNumber,
+    startColumn: insertPosition.column,
+    endColumn: insertPosition.column,
+  };
+
+  suggestions.push({
+    label: i18n.translate('workflows.editor.autocomplete.createConnectorLabel', {
+      defaultMessage: 'Create a new connector',
+    }),
+    kind: monaco.languages.CompletionItemKind.Text,
+    insertText: '',
+    range: zeroWidthRange,
+    detail: connectorType,
+    documentation: `Create a new connector of type ${connectorType}`,
+    sortText: 'z_create',
+    command: {
+      id: 'workflows.editor.action.createConnector',
+      title: 'Create connector',
+      arguments: [{ connectorType: getActionTypeIdFromStepType(connectorType), insertPosition }],
+    },
+  });
 
   return suggestions;
 }
