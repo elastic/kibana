@@ -24,12 +24,10 @@ import type {
   AttachmentRepresentation,
   AttachmentBoundedTool,
 } from '@kbn/agent-builder-server/attachments';
-import type { ToolRegistry } from '../../../tools';
 import {
   prepareAttachmentPresentation,
   type AttachmentPresentation,
 } from './attachment_presentation';
-import { cleanToolCallHistory } from './clean_tool_history';
 
 export interface ProcessedAttachment {
   attachment: Attachment;
@@ -88,7 +86,7 @@ const mergeInputAttachmentsIntoAttachmentState = async (
   for (const input of inputs) {
     // Prefer stable IDs (if provided)
     if (input.id) {
-      const existing = attachmentStateManager.get(input.id);
+      const existing = attachmentStateManager.getAttachmentRecord(input.id);
       if (existing) {
         await attachmentStateManager.update(
           input.id,
@@ -130,12 +128,10 @@ export const prepareConversation = async ({
   previousRounds,
   nextInput,
   context,
-  toolRegistry,
 }: {
   previousRounds: ConversationRound[];
   nextInput: ConverseInput;
   context: AgentHandlerContext;
-  toolRegistry?: ToolRegistry;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
   const formatContext = createFormatContext(context);
@@ -159,12 +155,8 @@ export const prepareConversation = async ({
     formatContext,
   });
 
-  const cleanedRounds = toolRegistry
-    ? await cleanToolCallHistory(previousRounds, toolRegistry)
-    : previousRounds;
-
   const processedRounds = await Promise.all(
-    cleanedRounds.map((round) => {
+    previousRounds.map((round) => {
       const strippedRound: ConversationRound = {
         ...round,
         input: { ...round.input, attachments: [] },
@@ -197,6 +189,16 @@ export const prepareConversation = async ({
     })
   );
 
+  const activeAttachments = attachmentStateManager.getActive();
+  await Promise.all(
+    activeAttachments.map(async (attachment) => {
+      await attachmentStateManager.get(attachment.id, {
+        version: attachment.current_version,
+        context,
+      });
+    })
+  );
+
   const versionedAttachmentPresentation = await prepareAttachmentPresentation(
     attachmentStateManager.getAll(),
     undefined,
@@ -220,11 +222,11 @@ export const prepareConversation = async ({
           },
           formatContext
         );
-        if (!formatted.getRepresentation) {
+        if (!formatted?.getRepresentation) {
           return undefined;
         }
         const representation = await formatted.getRepresentation();
-        return representation.type === 'text' ? representation.value : undefined;
+        return representation?.type === 'text' ? representation.value : undefined;
       } catch {
         return undefined;
       }
@@ -298,12 +300,21 @@ const prepareAttachment = async ({
   try {
     const formatted = await definition.format(attachment, formatContext);
     const tools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
+    if (!formatted.getRepresentation) {
+      return {
+        attachment,
+        representation: { type: 'text', value: JSON.stringify(attachment.data) },
+        tools,
+      };
+    }
+    const baseRepresentation = await formatted.getRepresentation();
+    const representation = definition.resolve
+      ? withByReferenceNote({ representation: baseRepresentation, attachment })
+      : baseRepresentation;
 
     return {
       attachment,
-      representation: formatted.getRepresentation
-        ? await formatted.getRepresentation()
-        : { type: 'text', value: JSON.stringify(attachment.data) },
+      representation,
       tools,
     };
   } catch (e) {
@@ -313,6 +324,43 @@ const prepareAttachment = async ({
       tools: [],
     };
   }
+};
+
+const withByReferenceNote = ({
+  representation,
+  attachment,
+}: {
+  representation: AttachmentRepresentation;
+  attachment: Attachment;
+}): AttachmentRepresentation => {
+  if (representation.type !== 'text') {
+    return representation;
+  }
+
+  const parts: string[] = [];
+  const note =
+    'Note: this attachment is by-reference. Use attachment_read to resolve the full content.';
+
+  const trimmedValue = representation.value?.trim();
+  if (trimmedValue) {
+    parts.push(trimmedValue);
+  }
+
+  try {
+    parts.push(`Attachment data:\n${JSON.stringify(attachment.data, null, 2)}`);
+  } catch (e) {
+    // ignore stringify errors; fallback to whatever was already present
+  }
+
+  // Avoid duplicating the note if the formatter already mentioned attachment_read.
+  if (!representation.value?.includes('attachment_read')) {
+    parts.push(note);
+  }
+
+  return {
+    ...representation,
+    value: parts.filter(Boolean).join('\n\n'),
+  };
 };
 
 const inputToFinal = (input: AttachmentInput): Attachment => {

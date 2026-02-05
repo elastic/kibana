@@ -26,7 +26,7 @@ import type {
   LensApiFieldMetricOrFormulaOperation,
 } from '../../schema';
 import type { LensAttributes } from '../../types';
-import { DEFAULT_LAYER_ID } from '../../types';
+import { DEFAULT_LAYER_ID } from '../../constants';
 import {
   addLayerColumn,
   buildDatasetState,

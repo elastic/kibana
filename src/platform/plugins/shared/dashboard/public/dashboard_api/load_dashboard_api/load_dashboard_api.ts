@@ -116,5 +116,6 @@ export async function loadDashboardApi({
       performanceSubscription.unsubscribe();
     },
     internalApi,
+    useControlsIntegration: creationOptions?.useControlsIntegration,
   };
 }
