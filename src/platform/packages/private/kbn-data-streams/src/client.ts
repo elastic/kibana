@@ -26,6 +26,8 @@ import {
   buildSpaceAgnosticFilter,
 } from './space_utils';
 
+export const DEFAULT_SPACE = 'default';
+
 export class DataStreamClient<
   MappingsInDefinition extends MappingsDefinition,
   FullDocumentType extends GetFieldsOf<MappingsInDefinition> = GetFieldsOf<MappingsInDefinition>,
@@ -95,7 +97,7 @@ export class DataStreamClient<
       let processedId: string | undefined = _id;
       let processedDocument: FullDocumentType;
 
-      if (typeof space !== 'undefined') {
+      if (this.isNonDefaultSpace(space)) {
         // Space-aware mode: prefix ID and decorate document
         processedId = generateSpacePrefixedId(space, _id);
         processedDocument = decorateDocumentWithSpace(documentWithoutId as FullDocumentType, space);
@@ -146,7 +148,7 @@ export class DataStreamClient<
     );
 
     // Strip kibana.space_ids from all hits if space was provided
-    if (space && response.hits?.hits) {
+    if (this.isNonDefaultSpace(space) && response.hits?.hits) {
       return {
         ...response,
         hits: {
@@ -162,6 +164,10 @@ export class DataStreamClient<
     return response;
   }
 
+  private isNonDefaultSpace(space?: string): space is string {
+    return typeof space !== 'undefined' && space !== DEFAULT_SPACE;
+  }
+
   /**
    * Build a space-aware query by wrapping the original query with space filtering.
    */
@@ -169,7 +175,7 @@ export class DataStreamClient<
     originalQuery?: api.QueryDslQueryContainer,
     space?: string
   ): api.QueryDslQueryContainer {
-    if (space) {
+    if (this.isNonDefaultSpace(space)) {
       // Space-aware mode: filter to only documents in this space
       const spaceFilter = buildSpaceFilter(space);
       if (originalQuery) {
