@@ -143,7 +143,12 @@ export function TestStepModal({
   }
 
   return (
-    <EuiModal aria-labelledby={modalTitleId} maxWidth={false} onClose={onClose}>
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      maxWidth={false}
+      onClose={onClose}
+      data-test-subj="testStepModal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           <EuiFlexGroup direction="column" gutterSize="xs">
