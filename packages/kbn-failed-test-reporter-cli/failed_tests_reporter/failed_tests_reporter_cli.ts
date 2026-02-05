@@ -98,9 +98,6 @@ run(
         return;
       }
 
-      // Scout test failures reporting
-      await generateScoutTestFailureArtifacts({ log, bkMeta });
-
       if (reportPaths.length) {
         log.info('found', reportPaths.length, 'reports', reportPaths);
 
@@ -137,6 +134,9 @@ run(
 
         // Process Scout reports
         await processScoutReports(scoutReports, processParams);
+
+        // Generate Scout test failure artifacts after reports are updated (GH issue info, html reports, etc.)
+        await generateScoutTestFailureArtifacts({ log, bkMeta });
       }
     } finally {
       await CiStatsReporter.fromEnv(log).metrics([
