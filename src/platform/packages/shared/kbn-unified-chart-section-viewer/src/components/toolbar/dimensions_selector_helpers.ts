@@ -49,17 +49,14 @@ export const sortDimensionOptions = (
   options: SelectableEntry[],
   selectedDimensions: Dimension[]
 ): SelectableEntry[] => {
-  // Pre-compute selection order for O(1) lookup instead of O(m) findIndex
   const selectionOrderMap = new Map(selectedDimensions.map((dim, index) => [dim.name, index]));
 
   return sortBy(options, [
-    // Primary sort: selected > available > disabled
     (option) => {
       if (option.checked === 'on') return SORT_PRIORITY.SELECTED;
       if (option.disabled) return SORT_PRIORITY.DISABLED;
       return SORT_PRIORITY.AVAILABLE;
     },
-    // Secondary sort: selection order for selected, alphabetical for others
     (option) => {
       if (option.checked === 'on') {
         return selectionOrderMap.get(option.value) ?? Infinity;
