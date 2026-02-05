@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiButton,
   euiContainerCSS,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -20,7 +21,6 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiMarkdownFormat,
-  EuiSelect,
   EuiTab,
   EuiTabs,
   EuiTitle,
@@ -177,22 +177,20 @@ export default function SLODetailsFlyout({
                 <EuiHorizontalRule margin="none" />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiSelect
+                <EuiFieldText
+                  compressed
+                  fullWidth
+                  readOnly
                   data-test-subj="sloDetailsFlyoutTransactionNameSelect"
                   value={slo.indicator.params.transactionName}
-                  options={[
-                    {
-                      value: slo.indicator.params.transactionName,
-                      text: slo.indicator.params.transactionName,
-                    },
-                  ]}
-                  prepend="Transaction name"
+                  prepend={i18n.translate(
+                    'xpack.slo.sloDetailsFlyout.header.select.transactionNameLabel',
+                    { defaultMessage: 'Transaction name' }
+                  )}
                   aria-label={i18n.translate(
                     'xpack.slo.sloDetailsFlyout.header.select.transactionNameLabel',
                     { defaultMessage: 'Transaction name' }
                   )}
-                  compressed
-                  fullWidth
                 />
               </EuiFlexItem>
               <EuiFlexItem>
