@@ -162,7 +162,8 @@ const existsConditionSchema = baseConditionSchema.extends({
 /**
  * Discriminated union schema for filter conditions
  */
-const conditionSchema = schema.oneOf(
+const conditionSchema = schema.discriminatedUnion(
+  'operator',
   [singleConditionSchema, oneOfConditionSchema, rangeConditionSchema, existsConditionSchema],
   { meta: { description: 'A filter condition with strict operator/value type matching' } }
 );
@@ -173,7 +174,7 @@ const conditionSchema = schema.oneOf(
 
 interface RecursiveType {
   group: {
-    type: typeof ASCODE_GROUPED_CONDITION_TYPE.AND | typeof ASCODE_GROUPED_CONDITION_TYPE.OR;
+    operator: typeof ASCODE_GROUPED_CONDITION_TYPE.AND | typeof ASCODE_GROUPED_CONDITION_TYPE.OR;
     conditions: Array<TypeOf<typeof conditionSchema> | RecursiveType>;
   };
 }
@@ -199,7 +200,7 @@ export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
     type: schema.literal(ASCODE_FILTER_TYPE.GROUP),
     group: schema.object(
       {
-        type: schema.oneOf([
+        operator: schema.oneOf([
           schema.literal(ASCODE_GROUPED_CONDITION_TYPE.AND),
           schema.literal(ASCODE_GROUPED_CONDITION_TYPE.OR),
         ]),

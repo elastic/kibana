@@ -33,7 +33,7 @@ import { useBoolean } from '@kbn/react-hooks';
 import React from 'react';
 import { InfoPanel } from '../../info_panel';
 import { DeleteFeatureModal } from './delete_feature_modal';
-import { getConfidenceColor, getStatusColor } from './use_stream_features_table';
+import { getConfidenceColor } from './use_stream_features_table';
 
 interface FeatureDetailsFlyoutProps {
   feature: Feature;
@@ -63,30 +63,39 @@ export function FeatureDetailsFlyout({
     showDeleteModal();
   };
 
-  const displayTitle = feature.title ?? Object.values(feature.value).join(', ');
-  const formattedValue = Object.values(feature.value).join(', ');
+  const displayTitle = feature.title ?? feature.id;
+  const evidence = feature.evidence?.length ? feature.evidence : [];
+  const tags = feature.tags?.length && feature.tags.length > 0 ? feature.tags : [];
 
   const generalInfoItems = [
     {
-      title: NAME_LABEL,
-      description: <EuiText size="s">{feature.name || noDataPlaceholder}</EuiText>,
-    },
-    {
-      title: VALUE_LABEL,
-      description: <EuiText size="s">{formattedValue || noDataPlaceholder}</EuiText>,
+      title: ID_LABEL,
+      description: (
+        <EuiText size="s" data-test-subj="streamsAppFeatureDetailsFlyoutId">
+          {feature.id}
+        </EuiText>
+      ),
     },
     {
       title: TYPE_LABEL,
       description: <EuiBadge color="hollow">{upperFirst(feature.type)}</EuiBadge>,
     },
     {
-      title: CREATED_BY_LABEL,
-      description: <EuiBadge color="hollow">{CREATED_BY_LLM}</EuiBadge>,
+      title: SUBTYPE_LABEL,
+      description: <EuiBadge color="hollow">{feature.subtype ?? noDataPlaceholder}</EuiBadge>,
     },
     {
-      title: STATUS_LABEL,
+      title: PROPERTIES_LABEL,
       description: (
-        <EuiHealth color={getStatusColor(feature.status)}>{upperFirst(feature.status)}</EuiHealth>
+        <EuiText size="s">
+          {Object.entries(feature.properties)
+            .filter(([, value]) => typeof value === 'string')
+            .map(([key, value]) => (
+              <EuiText size="s" key={key}>
+                <strong>{key}</strong> {value as string}
+              </EuiText>
+            ))}
+        </EuiText>
       ),
     },
     {
@@ -98,9 +107,9 @@ export function FeatureDetailsFlyout({
     {
       title: TAGS_LABEL,
       description:
-        feature.tags.length > 0 ? (
+        tags.length > 0 ? (
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            {feature.tags.map((tag) => (
+            {tags.map((tag: string) => (
               <EuiFlexItem key={tag} grow={false}>
                 <EuiBadge color="hollow">{tag}</EuiBadge>
               </EuiFlexItem>
@@ -109,21 +118,6 @@ export function FeatureDetailsFlyout({
         ) : (
           <EuiText size="s">{noDataPlaceholder}</EuiText>
         ),
-    },
-    {
-      title: ID_LABEL,
-      description: (
-        <EuiText size="s" data-test-subj="streamsAppFeatureDetailsFlyoutId">
-          <code
-            css={css`
-              font-family: ${euiTheme.font.familyCode};
-              font-size: ${euiTheme.font.scale.s};
-            `}
-          >
-            {feature.id}
-          </code>
-        </EuiText>
-      ),
     },
     {
       title: LAST_SEEN_LABEL,
@@ -207,6 +201,7 @@ export function FeatureDetailsFlyout({
               {generalInfoItems.map((item, index) => (
                 <React.Fragment key={index}>
                   <EuiDescriptionList
+                    titleProps={{ css: { alignSelf: 'center' } }}
                     type="column"
                     columnWidths={[1, 2]}
                     compressed
@@ -224,8 +219,8 @@ export function FeatureDetailsFlyout({
           </EuiFlexItem>
           <EuiFlexItem>
             <InfoPanel title={EVIDENCE_LABEL}>
-              {feature.evidence.length > 0 ? (
-                feature.evidence.map((item, index) => (
+              {evidence.length > 0 ? (
+                evidence.map((item: string, index: number) => (
                   <React.Fragment key={index}>
                     <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
                       <EuiFlexItem grow={false}>
@@ -235,7 +230,7 @@ export function FeatureDetailsFlyout({
                         <EuiText size="s">{item}</EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                    {index < feature.evidence.length - 1 && <EuiHorizontalRule margin="m" />}
+                    {index < evidence.length - 1 && <EuiHorizontalRule margin="m" />}
                   </React.Fragment>
                 ))
               ) : (
@@ -245,11 +240,11 @@ export function FeatureDetailsFlyout({
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="streamsAppFeatureDetailsFlyoutMeta">
             <InfoPanel title={META_LABEL}>
-              {Object.keys(feature.meta).length === 0 ? (
+              {Object.keys(feature.meta ?? {}).length === 0 ? (
                 <EuiText size="s">{NO_META_AVAILABLE}</EuiText>
               ) : (
                 <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
-                  {JSON.stringify(feature.meta, null, 2)}
+                  {JSON.stringify(feature.meta ?? {}, null, 2)}
                 </EuiCodeBlock>
               )}
             </InfoPanel>
@@ -274,28 +269,16 @@ const ID_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.idLabel', {
   defaultMessage: 'ID',
 });
 
-const NAME_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.nameLabel', {
-  defaultMessage: 'Name',
+const SUBTYPE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.subtypeLabel', {
+  defaultMessage: 'Subtype',
 });
 
-const VALUE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.valueLabel', {
-  defaultMessage: 'Value',
+const PROPERTIES_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.propertiesLabel', {
+  defaultMessage: 'Properties',
 });
 
 const TYPE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.typeLabel', {
   defaultMessage: 'Type',
-});
-
-const CREATED_BY_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.createdByLabel', {
-  defaultMessage: 'Created by',
-});
-
-const CREATED_BY_LLM = i18n.translate('xpack.streams.featureDetailsFlyout.createdByLLM', {
-  defaultMessage: 'LLM',
-});
-
-const STATUS_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.statusLabel', {
-  defaultMessage: 'Status',
 });
 
 const CONFIDENCE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.confidenceLabel', {

@@ -55,7 +55,7 @@ import { asCodeGroupFilterSchema, type AsCodeGroupFilter } from '@kbn/as-code-fi
 
 const groupFilter: AsCodeGroupFilter = {
   group: {
-    type: 'and',
+    operator: 'and',
     conditions: [
       { field: 'status', operator: 'is', value: 'active' },
       { field: 'priority', operator: 'range', value: { gte: 5 } },
@@ -70,12 +70,12 @@ Groups support nesting for complex logic:
 ```typescript
 const nestedGroup: AsCodeGroupFilter = {
   group: {
-    type: 'or',
+    operator: 'or',
     conditions: [
       { field: 'region', operator: 'is', value: 'US' },
       {
         group: {
-          type: 'and',
+          operator: 'and',
           conditions: [
             { field: 'region', operator: 'is', value: 'EU' },
             { field: 'vip', operator: 'is', value: true },

@@ -12,7 +12,7 @@ import type {
   AsCodeGroupFilter,
   AsCodeDSLFilter,
 } from '@kbn/as-code-filters-schema';
-import { isConditionFilter, isGroupFilter, isDSLFilter, isNestedFilterGroup } from './type_guards';
+import { isConditionFilter, isGroupFilter, isDSLFilter, isGroupCondition } from './type_guards';
 
 describe('Type Guards', () => {
   describe('SimpleFilter type guards', () => {
@@ -28,7 +28,7 @@ describe('Type Guards', () => {
       it('should reject non-condition filters', () => {
         const filter: AsCodeGroupFilter = {
           type: 'group',
-          group: { type: 'and', conditions: [] },
+          group: { operator: 'and', conditions: [] },
         };
         expect(isConditionFilter(filter)).toBe(false);
       });
@@ -38,7 +38,7 @@ describe('Type Guards', () => {
       it('should detect group filters', () => {
         const filter: AsCodeGroupFilter = {
           type: 'group',
-          group: { type: 'and', conditions: [] },
+          group: { operator: 'and', conditions: [] },
         };
         expect(isGroupFilter(filter)).toBe(true);
       });
@@ -72,13 +72,13 @@ describe('Type Guards', () => {
   });
 
   describe('Condition type guards', () => {
-    describe('isNestedFilterGroup', () => {
+    describe('isGroupCondition', () => {
       it('should detect nested filter groups', () => {
         const group: AsCodeGroupFilter['group'] = {
-          type: 'and',
+          operator: 'and',
           conditions: [{ field: 'test', operator: 'is', value: 'test' }],
         };
-        expect(isNestedFilterGroup(group)).toBe(true);
+        expect(isGroupCondition(group)).toBe(true);
       });
 
       it('should reject simple conditions', () => {
@@ -87,7 +87,7 @@ describe('Type Guards', () => {
           operator: 'is',
           value: 'test',
         };
-        expect(isNestedFilterGroup(condition)).toBe(false);
+        expect(isGroupCondition(condition)).toBe(false);
       });
     });
   });

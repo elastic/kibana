@@ -52,7 +52,7 @@ describe('toStoredFilter', () => {
       const simplified: AsCodeFilter = {
         type: 'group',
         group: {
-          type: 'and',
+          operator: 'and',
           conditions: [
             { field: 'status', operator: 'is', value: 'active' },
             { field: 'type', operator: 'is', value: 'user' },
@@ -178,7 +178,7 @@ describe('toStoredFilter', () => {
         type: 'group',
         negate: true, // Top-level negate on the group
         group: {
-          type: 'and',
+          operator: 'and',
           conditions: [
             {
               field: 'status',
@@ -663,7 +663,7 @@ describe('toStoredFilter', () => {
       const asCodeFilter: AsCodeFilter = {
         type: 'group',
         group: {
-          type: 'or',
+          operator: 'or',
           conditions: [
             {
               field: 'Carrier',
