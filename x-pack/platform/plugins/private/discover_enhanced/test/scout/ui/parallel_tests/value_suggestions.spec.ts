@@ -34,13 +34,9 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest('dont show up if outside of range', async ({ page, pageObjects, config }) => {
+    spaceTest('dont show up if outside of range', async ({ page, pageObjects }) => {
       await pageObjects.datePicker.setAbsoluteRange(testData.LOGSTASH_OUT_OF_RANGE_DATES);
-      if (config.serverless) {
-        await page.testSubj.fill('queryInput', 'extension.raw : ');
-      } else {
-        await page.testSubj.fill('queryxyzInput', 'extension.raw : ');
-      }
+      await page.testSubj.fill('queryInput', 'extension.raw : ');
       await expect(page.testSubj.locator('autoCompleteSuggestionText')).toHaveCount(0);
     });
 
