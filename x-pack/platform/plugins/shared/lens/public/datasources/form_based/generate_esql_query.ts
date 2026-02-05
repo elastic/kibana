@@ -449,18 +449,20 @@ export function generateEsqlQuery(
       queryParts.push(`STATS ${statsBody}`);
     }
 
-    const sortFields = bucketEsAggsEntries.map(([colId, col], index) => {
-      const aggId = String(index);
-      let esAggsId = `col_${index}_${aggId}`;
+    // Build sort fields, excluding date fields (date_histogram columns)
+    // The first .map() attaches the original index so we can reference
+    // the correct esAggsId in the final string.
+    const sortFields = bucketEsAggsEntries
+      .map(([, col], index) => ({ col, index }))
+      .filter(({ col }) => col.dataType !== 'date')
+      // Applying the index twice to match the correct esAggsId
+      // TODO: revisit this once we want to improve column names
+      .map(({ index }) => `col_${index}_${index} ASC`);
 
-      if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
-        esAggsId = col.sourceField;
-      }
-
-      return `${esAggsId} ASC`;
-    });
-
-    queryParts.push(`SORT ${sortFields.join(', ')}`);
+    // Only add SORT clause if there are non-date fields to sort by
+    if (sortFields.length > 0) {
+      queryParts.push(`SORT ${sortFields.join(', ')}`);
+    }
   } else {
     if (validMetrics.length > 0) {
       const statsBody = validMetrics.join(', ');
