@@ -132,6 +132,7 @@ export const DownsampleIntervalField = ({
                   <EuiFlexItem>
                     <EuiFieldNumber
                       compressed
+                      min={0}
                       fullWidth
                       value={currentValue}
                       disabled={!isEnabled}

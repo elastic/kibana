@@ -128,6 +128,7 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
                       <EuiFlexItem>
                         <EuiFieldNumber
                           compressed
+                          min={0}
                           fullWidth
                           value={currentValue}
                           isInvalid={isInvalid}
