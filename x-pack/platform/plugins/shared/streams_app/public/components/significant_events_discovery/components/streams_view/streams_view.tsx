@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { TaskStatus } from '@kbn/streams-schema';
 import pMap from 'p-map';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { TableRow } from './utils';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -47,6 +47,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
       notifications: { toasts },
     },
   } = useKibana();
+  const isInitialStatusUpdateDone = useRef(false);
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
   const streamsListFetch = useDiscoveryStreams();
   const [selectedStreams, setSelectedStreams] = useState<TableRow[]>([]);
@@ -64,8 +65,17 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
         [streamName]: taskResult,
       }));
 
+      /**
+       * Preventing showing error toasts and doing extra work
+       * for the initial status update when the page loads for
+       * the first time
+       */
+      if (!isInitialStatusUpdateDone.current) {
+        return;
+      }
+
       if (taskResult.status === TaskStatus.Failed) {
-        toasts.addDanger(taskResult.error, {
+        toasts.addError(getFormattedError(new Error(taskResult.error)), {
           title: ONBOARDING_FAILURE_TITLE,
         });
       }
@@ -91,7 +101,9 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     streamsListFetch.value.streams.forEach((item) => {
       onboardingStatusUpdateQueue.add(item.stream.name);
     });
-    processStatusUpdateQueue();
+    processStatusUpdateQueue().finally(() => {
+      isInitialStatusUpdateDone.current = true;
+    });
   }, [onboardingStatusUpdateQueue, processStatusUpdateQueue, streamsListFetch.value]);
 
   const bulkScheduleOnboardingTask = async (streamList: string[]) => {

@@ -56,9 +56,9 @@ export function useOnboardingStatusUpdateQueue(
 
     isProcessing.current = true;
 
-    await updateStatuses();
-
-    isProcessing.current = false;
+    return await updateStatuses().finally(() => {
+      isProcessing.current = false;
+    });
   }, [updateStatuses]);
 
   return { onboardingStatusUpdateQueue: queue.current, processStatusUpdateQueue };
