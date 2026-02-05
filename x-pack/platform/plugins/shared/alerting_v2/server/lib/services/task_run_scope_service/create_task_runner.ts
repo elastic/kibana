@@ -7,8 +7,8 @@
 
 import type { ObjectType } from '@kbn/config-schema';
 import type { CoreDiServiceStart } from '@kbn/core-di';
-import { Request } from '@kbn/core-di-server';
 import { Global } from '@kbn/core-di-internal';
+import { Request } from '@kbn/core-di-server';
 import type {
   RunContext,
   RunResult,
@@ -35,6 +35,7 @@ export interface AlertingTaskDefinition<TRunner extends AlertingTaskRunner = Ale
   title: string;
   timeout: string;
   paramsSchema: ObjectType;
+  maxAttempts?: number;
   taskRunnerClass: TaskRunnerConstructor<TRunner>;
   /**
    * Whether this task requires a fakeRequest from Task Manager.

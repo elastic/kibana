@@ -7,28 +7,28 @@
 
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { AlertActionsClient } from '../lib/alert_actions_client';
+import { DirectorService } from '../lib/director/director';
+import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
+import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
+import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { RulesClient } from '../lib/rules_client';
+import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { QueryService } from '../lib/services/query_service/query_service';
 import {
   QueryServiceInternalToken,
   QueryServiceScopedToken,
 } from '../lib/services/query_service/tokens';
+import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { AlertingRetryService } from '../lib/services/retry_service';
+import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
 import { StorageService } from '../lib/services/storage_service/storage_service';
 import {
   StorageServiceInternalToken,
   StorageServiceScopedToken,
 } from '../lib/services/storage_service/tokens';
-import { RetryServiceToken } from '../lib/services/retry_service/tokens';
-import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
-import { DirectorService } from '../lib/director/director';
-import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
-import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
-import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import {
   createTaskRunnerFactory,
   TaskRunnerFactoryToken,
@@ -43,7 +43,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
   bind(ResourceManager).toSelf().inSingletonScope();
-  bind(DispatcherService).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
     .toDynamicValue(({ get }) => {
@@ -65,6 +64,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       getInjection: () => context.get(CoreStart('injection')),
     })
   );
+
   bind(RulesSavedObjectService).toSelf().inRequestScope();
 
   bind(QueryServiceScopedToken)
@@ -98,6 +98,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return new StorageService(esClient, loggerService);
     })
     .inSingletonScope();
+
+  bind(DispatcherService).toSelf().inSingletonScope();
 
   bind(DirectorService).toSelf().inSingletonScope();
   bind(TransitionStrategyFactory).toSelf().inSingletonScope();

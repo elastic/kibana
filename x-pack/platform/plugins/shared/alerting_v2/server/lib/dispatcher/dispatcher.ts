@@ -19,10 +19,10 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
 import { getDispatchableAlertEventsQuery } from './queries';
-import type { AlertEpisode } from './types';
+import type { AlertEpisode, DispatcherExecutionParams, DispatcherExecutionResult } from './types';
 
 export interface DispatcherServiceContract {
-  run({ previousStartedAt }: { previousStartedAt?: Date }): Promise<{ startedAt: Date }>;
+  run(params: DispatcherExecutionParams): Promise<DispatcherExecutionResult>;
 }
 
 @injectable()
@@ -33,8 +33,19 @@ export class DispatcherService implements DispatcherServiceContract {
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
   ) {}
 
-  public async run({ previousStartedAt = new Date() }: { previousStartedAt?: Date } = {}) {
+  public async run({
+    previousStartedAt = new Date(),
+    abortController,
+  }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
+    const lookback = moment(previousStartedAt)
+      .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
+      .toISOString();
+
+    this.logger.debug({
+      message: () => `Dispatcher started. Looking for alert episodes since ${lookback}`,
+    });
+
     const { query } = getDispatchableAlertEventsQuery();
 
     const result = await this.queryService.executeQuery({
