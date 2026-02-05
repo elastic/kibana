@@ -15,6 +15,8 @@ exports[`Error AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Error APP_LAUNCH_TIME 1`] = `undefined`;
 
+exports[`Error ATTRIBUTE_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
+
 exports[`Error CHILD_ID 1`] = `undefined`;
 
 exports[`Error CLIENT_GEO_CITY_NAME 1`] = `undefined`;
@@ -189,8 +191,6 @@ exports[`Error LABEL_LIFECYCLE_STATE 1`] = `undefined`;
 exports[`Error LABEL_NAME 1`] = `undefined`;
 
 exports[`Error LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
-
-exports[`Error LABEL_TYPE 1`] = `undefined`;
 
 exports[`Error LINKS_SPAN_ID 1`] = `undefined`;
 
@@ -433,6 +433,8 @@ exports[`Span AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Span APP_LAUNCH_TIME 1`] = `undefined`;
 
+exports[`Span ATTRIBUTE_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
+
 exports[`Span CHILD_ID 1`] = `undefined`;
 
 exports[`Span CLIENT_GEO_CITY_NAME 1`] = `undefined`;
@@ -594,8 +596,6 @@ exports[`Span LABEL_LIFECYCLE_STATE 1`] = `undefined`;
 exports[`Span LABEL_NAME 1`] = `undefined`;
 
 exports[`Span LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
-
-exports[`Span LABEL_TYPE 1`] = `undefined`;
 
 exports[`Span LINKS_SPAN_ID 1`] = `undefined`;
 
@@ -834,6 +834,8 @@ exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Transaction APP_LAUNCH_TIME 1`] = `undefined`;
 
+exports[`Transaction ATTRIBUTE_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
+
 exports[`Transaction CHILD_ID 1`] = `undefined`;
 
 exports[`Transaction CLIENT_GEO_CITY_NAME 1`] = `undefined`;
@@ -1009,8 +1011,6 @@ exports[`Transaction LABEL_LIFECYCLE_STATE 1`] = `undefined`;
 exports[`Transaction LABEL_NAME 1`] = `undefined`;
 
 exports[`Transaction LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
-
-exports[`Transaction LABEL_TYPE 1`] = `undefined`;
 
 exports[`Transaction LINKS_SPAN_ID 1`] = `undefined`;
 
