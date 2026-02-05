@@ -106,6 +106,8 @@ dependsOn:
   - '@kbn/presentation-util'
   - '@kbn/background-search'
   - '@kbn/react-query'
+  - '@kbn/scout'
+  - '@kbn/test'
 tags:
   - plugin
   - prod
@@ -119,6 +121,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:
