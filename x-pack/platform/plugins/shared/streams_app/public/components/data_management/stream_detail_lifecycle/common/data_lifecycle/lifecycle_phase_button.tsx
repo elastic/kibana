@@ -16,6 +16,7 @@ interface LifecyclePhaseButtonProps {
   euiTheme: EuiThemeComputed;
   isDelete: boolean;
   isPopoverOpen: boolean;
+  isBeingEdited?: boolean;
   label: string;
   onClick: () => void;
   phaseColor?: string;
@@ -26,6 +27,7 @@ export const LifecyclePhaseButton = ({
   euiTheme,
   isDelete,
   isPopoverOpen,
+  isBeingEdited = false,
   label,
   onClick,
   phaseColor,
@@ -51,7 +53,7 @@ export const LifecyclePhaseButton = ({
     css={getInteractivePanelStyles({
       euiTheme,
       backgroundColor: phaseColor ?? euiTheme.colors.backgroundBaseSubdued,
-      isPopoverOpen,
+      isPopoverOpen: isPopoverOpen || isBeingEdited,
       minHeight: '48px',
       ...(isDelete
         ? {

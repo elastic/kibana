@@ -8,6 +8,7 @@
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import type { PhaseName } from '@kbn/streams-schema';
 import type { DataStreamStats } from '../hooks/use_data_stream_stats';
 import { DataLifecycleSummary } from '../common/data_lifecycle/data_lifecycle_summary';
 import { useUpdateStreamLifecycle } from '../hooks/use_update_stream_lifecycle';
@@ -49,6 +50,18 @@ export const LifecycleSummary = ({
         isIlm={isIlm}
         onRemovePhase={isIlm ? ilmSummary.onRemovePhase : undefined}
         onRemoveDownsampleStep={isIlm ? ilmSummary.onRemoveDownsampleStep : undefined}
+        onEditPhase={
+          isIlm ? (phaseName) => ilmSummary.onEditPhase?.(phaseName as PhaseName) : undefined
+        }
+        onEditDownsampleStep={
+          isIlm
+            ? (stepNumber, phaseName) =>
+                ilmSummary.onEditDownsampleStep?.(stepNumber, phaseName as PhaseName | undefined)
+            : undefined
+        }
+        editedPhaseName={isIlm ? ilmSummary.editingPhase : undefined}
+        ilmSelectedPhases={isIlm ? (ilmSummary.ilmSelectedPhasesForAdd as any) : undefined}
+        onAddIlmPhase={isIlm ? (ilmSummary.onAddIlmPhase as any) : undefined}
         canManageLifecycle={definition.privileges.lifecycle}
       />
 

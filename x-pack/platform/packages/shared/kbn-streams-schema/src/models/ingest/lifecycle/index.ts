@@ -125,7 +125,6 @@ export interface DownsampleStep {
 
 export interface IlmPolicyPhase {
   name: PhaseName;
-  size_in_bytes: number;
   min_age?: string;
   downsample?: DownsampleStep;
   readonly?: boolean;
@@ -146,6 +145,7 @@ export interface IlmPolicyHotPhase extends IlmPolicyPhase {
 export interface IlmPolicyDeletePhase {
   name: 'delete';
   min_age: string;
+  delete_searchable_snapshot?: boolean;
 }
 
 export interface IlmPolicyPhases {

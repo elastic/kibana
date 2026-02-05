@@ -6,6 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { IlmPolicyPhases } from '@kbn/streams-schema';
 import { Streams, isIlmLifecycle, type IlmPolicyWithUsage } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -15,6 +16,7 @@ import { getEffectiveLifecycle } from '../../../../lib/streams/lifecycle/get_eff
 import {
   buildPolicyUsage,
   normalizeIlmPhases,
+  denormalizeIlmPhases,
   type IlmPoliciesResponse,
 } from '../../../../lib/streams/lifecycle/ilm_policies';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
@@ -184,10 +186,11 @@ const lifecycleIlmPoliciesUpdateRoute = createServerRoute({
       );
     }
     const basePolicy = existingPolicy?.policy ?? {};
+    const phases = denormalizeIlmPhases(policy.phases as IlmPolicyPhases);
     const mergedPolicy = {
       ...basePolicy,
       ...policy,
-      phases: policy.phases ?? basePolicy.phases,
+      phases,
       _meta: policy._meta ?? basePolicy._meta,
       deprecated: policy.deprecated ?? basePolicy.deprecated,
     };

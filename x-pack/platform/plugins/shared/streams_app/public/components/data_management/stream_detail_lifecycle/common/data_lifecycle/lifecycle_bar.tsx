@@ -11,13 +11,15 @@ import { i18n } from '@kbn/i18n';
 import type { LifecyclePhase } from './lifecycle_types';
 import { LifecyclePhase as LifecyclePhaseComponent } from './lifecycle_phase';
 
-interface LifecycleBarProps {
+export interface LifecycleBarProps {
   phases: LifecyclePhase[];
   gridTemplateColumns: string;
   phaseColumnSpans: number[];
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
   isIlm?: boolean;
   onRemovePhase?: (phaseName: string) => void;
+  onEditPhase?: (phaseName: string) => void;
+  editedPhaseName?: string;
   canManageLifecycle: boolean;
 }
 
@@ -27,6 +29,8 @@ const renderLifecyclePhase = (
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void,
   isIlm?: boolean,
   onRemovePhase?: (phaseName: string) => void,
+  onEditPhase?: (phaseName: string) => void,
+  editedPhaseName?: string,
   canManageLifecycle?: boolean
 ) => {
   const commonProps = {
@@ -41,6 +45,8 @@ const renderLifecyclePhase = (
     isIlm,
     minAge: phase.min_age,
     onRemovePhase,
+    onEditPhase,
+    isBeingEdited: Boolean(editedPhaseName && editedPhaseName === phase.label),
     canManageLifecycle: canManageLifecycle ?? false,
   };
 
@@ -58,15 +64,17 @@ const renderLifecyclePhase = (
   );
 };
 
-export const LifecycleBar = ({
+export const LifecycleBar: React.FC<LifecycleBarProps> = ({
   phases,
   gridTemplateColumns,
   phaseColumnSpans,
   onPhaseClick,
   isIlm,
   onRemovePhase,
+  onEditPhase,
+  editedPhaseName,
   canManageLifecycle,
-}: LifecycleBarProps) => {
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -117,6 +125,8 @@ export const LifecycleBar = ({
                 onPhaseClick,
                 isIlm,
                 onRemovePhase,
+                onEditPhase,
+                editedPhaseName,
                 canManageLifecycle
               )}
             </EuiFlexItem>

@@ -77,6 +77,8 @@ export interface DownsamplingBarProps {
   segments?: DownsamplingSegment[] | null;
   gridTemplateColumns: string;
   onRemoveStep?: (stepNumber: number) => void;
+  onEditStep?: (stepNumber: number, phaseName?: string) => void;
+  editedPhaseName?: string;
   canManageLifecycle: boolean;
 }
 
@@ -84,6 +86,8 @@ export const DownsamplingBar = ({
   segments,
   gridTemplateColumns,
   onRemoveStep,
+  onEditStep,
+  editedPhaseName,
   canManageLifecycle,
 }: DownsamplingBarProps) => {
   const { euiTheme } = useEuiTheme();
@@ -147,6 +151,10 @@ export const DownsamplingBar = ({
                     phaseName={segment.phaseName}
                     color={getDownsamplingColor(segment.stepIndex ?? index)}
                     onRemoveStep={onRemoveStep}
+                    onEditStep={onEditStep}
+                    isBeingEdited={Boolean(
+                      editedPhaseName && segment.phaseName && segment.phaseName === editedPhaseName
+                    )}
                     canManageLifecycle={canManageLifecycle}
                   />
                 ) : segment.isDelete ? (

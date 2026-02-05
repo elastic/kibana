@@ -38,6 +38,8 @@ interface BaseLifecyclePhaseProps {
   sizeInBytes?: number;
   isIlm?: boolean;
   onRemovePhase?: (phaseName: string) => void;
+  onEditPhase?: (phaseName: string) => void;
+  isBeingEdited?: boolean;
   canManageLifecycle: boolean;
   isRemoveDisabled?: boolean;
   removeDisabledReason?: string;
@@ -71,6 +73,8 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
     sizeInBytes,
     isIlm = false,
     onRemovePhase,
+    onEditPhase,
+    isBeingEdited = false,
     canManageLifecycle,
     isRemoveDisabled = false,
     removeDisabledReason,
@@ -100,6 +104,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
           euiTheme={euiTheme}
           isDelete={isDelete}
           isPopoverOpen={isPopoverOpen}
+          isBeingEdited={isBeingEdited}
           label={label}
           onClick={handleClick}
           phaseColor={phaseColor}
@@ -139,46 +144,74 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
-          {isIlm && label !== 'hot' && onRemovePhase && canManageLifecycle && (
+          {isIlm && canManageLifecycle && (onEditPhase || onRemovePhase) && (
             <EuiFlexItem grow={false}>
-              {isRemoveDisabled && removeDisabledReason ? (
-                <EuiToolTip content={removeDisabledReason}>
-                  <EuiButtonIcon
-                    iconType="trash"
-                    size="s"
-                    display="base"
-                    color="danger"
-                    isDisabled
-                    aria-label={i18n.translate(
-                      'xpack.streams.streamDetailLifecycle.removePhaseButton.ariaLabel',
-                      {
-                        defaultMessage: 'Remove {phase} phase',
-                        values: { phase: label ?? '' },
-                      }
+              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                {onEditPhase && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="pencil"
+                      size="s"
+                      display="base"
+                      aria-label={i18n.translate(
+                        'xpack.streams.streamDetailLifecycle.editPhaseButton.ariaLabel',
+                        {
+                          defaultMessage: 'Edit {phase} phase',
+                          values: { phase: label ?? '' },
+                        }
+                      )}
+                      data-test-subj={`lifecyclePhase-${label}-editButton`}
+                      onClick={() => {
+                        closePopover();
+                        onEditPhase(label ?? '');
+                      }}
+                    />
+                  </EuiFlexItem>
+                )}
+
+                {label !== 'hot' && onRemovePhase && (
+                  <EuiFlexItem grow={false}>
+                    {isRemoveDisabled && removeDisabledReason ? (
+                      <EuiToolTip content={removeDisabledReason}>
+                        <EuiButtonIcon
+                          iconType="trash"
+                          size="s"
+                          display="base"
+                          color="danger"
+                          isDisabled
+                          aria-label={i18n.translate(
+                            'xpack.streams.streamDetailLifecycle.removePhaseButton.ariaLabel',
+                            {
+                              defaultMessage: 'Remove {phase} phase',
+                              values: { phase: label ?? '' },
+                            }
+                          )}
+                          data-test-subj={`lifecyclePhase-${label}-removeButton`}
+                        />
+                      </EuiToolTip>
+                    ) : (
+                      <EuiButtonIcon
+                        iconType="trash"
+                        size="s"
+                        display="base"
+                        color="danger"
+                        aria-label={i18n.translate(
+                          'xpack.streams.streamDetailLifecycle.removePhaseButton.ariaLabel',
+                          {
+                            defaultMessage: 'Remove {phase} phase',
+                            values: { phase: label ?? '' },
+                          }
+                        )}
+                        data-test-subj={`lifecyclePhase-${label}-removeButton`}
+                        onClick={() => {
+                          closePopover();
+                          onRemovePhase(label ?? '');
+                        }}
+                      />
                     )}
-                    data-test-subj={`lifecyclePhase-${label}-removeButton`}
-                  />
-                </EuiToolTip>
-              ) : (
-                <EuiButtonIcon
-                  iconType="trash"
-                  size="s"
-                  display="base"
-                  color="danger"
-                  aria-label={i18n.translate(
-                    'xpack.streams.streamDetailLifecycle.removePhaseButton.ariaLabel',
-                    {
-                      defaultMessage: 'Remove {phase} phase',
-                      values: { phase: label ?? '' },
-                    }
-                  )}
-                  data-test-subj={`lifecyclePhase-${label}-removeButton`}
-                  onClick={() => {
-                    closePopover();
-                    onRemovePhase(label ?? '');
-                  }}
-                />
-              )}
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
