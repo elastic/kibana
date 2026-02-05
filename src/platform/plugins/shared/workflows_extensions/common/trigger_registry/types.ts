@@ -26,5 +26,5 @@ export interface TriggerDefinition<EventSchema extends z.ZodType = z.ZodType> {
   /** Payload contract (Zod object schema; must reject unknown fields by default) */
   eventSchema: EventSchema;
   /** Optional example event payloads for authoring help; each must validate against eventSchema */
-  examples?: Record<string, unknown>[];
+  examples?: z.infer<EventSchema>[];
 }

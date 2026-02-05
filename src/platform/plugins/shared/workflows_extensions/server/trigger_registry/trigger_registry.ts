@@ -51,8 +51,7 @@ function validateDefinition(definition: TriggerDefinition): void {
       }
       const result = eventSchema.safeParse(ex);
       if (!result.success) {
-        const msg =
-          result.error.issues?.map((e) => e.message).join('; ') ?? result.error.message;
+        const msg = result.error.issues?.map((e) => e.message).join('; ') ?? result.error.message;
         throw new Error(
           `Trigger "${id}": example at index ${i} does not match eventSchema: ${msg}`
         );
