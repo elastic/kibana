@@ -82,7 +82,13 @@ export const validateRuleResponseActions = async <
 
   const responseActionsToValidate = xorWith<ResponseAction | RuleResponseAction>(
     ruleResponseActions,
-    existingRuleResponseActions,
+    // Existing rule store the action type ID in a property that is CamelCase, while the rule update/create payload
+    // stores the action type ID in a snake_case property, so we just normalize that here so that the comparison
+    // focuses only on the `params`
+    (existingRuleResponseActions ?? []).map(({ actionTypeId, ...rest }) => ({
+      ...rest,
+      action_type_id: actionTypeId,
+    })) as unknown as Array<RuleResponseAction>,
     isEqual
   );
 

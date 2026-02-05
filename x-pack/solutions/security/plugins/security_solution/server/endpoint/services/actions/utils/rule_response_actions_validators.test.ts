@@ -88,13 +88,6 @@ describe('Rules Endpoint response actions validators', () => {
       await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
     });
 
-    it('should succeed if response actions have not been changed between payload and existing rule', async () => {
-      options.existingRule = existingRule;
-      existingRule.params.responseActions = [createExistingRuleResponseActionMock()];
-
-      await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
-    });
-
     it('should only validate .endpoint response actions', async () => {
       rulePayload.response_actions!.push({ action_type_id: '.osquery', params: {} });
 
@@ -149,6 +142,14 @@ describe('Rules Endpoint response actions validators', () => {
         await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
       }
     );
+
+    it('should succeed if response actions have not been changed between payload and existing rule and use has no Authz', async () => {
+      endpointAuthz.canIsolateHost = false;
+      options.existingRule = existingRule;
+      existingRule.params.responseActions = [createExistingRuleResponseActionMock()];
+
+      await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+    });
 
     it('should error if user has no authz and is updating existing rule', async () => {
       rulePayload.response_actions = [];
