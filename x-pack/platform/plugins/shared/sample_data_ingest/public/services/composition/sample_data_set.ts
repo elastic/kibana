@@ -12,7 +12,7 @@ import {
   type StatusResponse,
   InstallationStatus,
   SAMPLE_DATA_INGEST_PLUGIN_ID,
-} from '../../common';
+} from '../../../common';
 
 /**
  * Default IDs from the saved objects definition.
