@@ -10,6 +10,7 @@
     "@kbn/core-security-common",
     "@kbn/core-http-server",
     "@kbn/logging",
-    "@kbn/core-elasticsearch-server"
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core"
   ]
 }

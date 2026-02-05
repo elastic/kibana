@@ -6,6 +6,7 @@
  */
 
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type {
   GrantAPIKeyResult,
   GrantUiamAPIKeyParams,
@@ -15,10 +16,9 @@ import type {
 } from '@kbn/security-plugin-types-server';
 
 import type { SecurityLicense } from '../../../../common';
+import { getScopedClient } from '../../../elasticsearch';
 import { getDetailedErrorMessage } from '../../../errors';
 import type { UiamServicePublic } from '../../../uiam';
-import { isUiamCredential } from '../../../uiam';
-import { HTTPAuthorizationHeader } from '../../http_authentication';
 
 /**
  * Options required to construct a UiamAPIKeys instance.
@@ -76,21 +76,21 @@ export class UiamAPIKeys implements UiamAPIKeysType {
         'Cannot grant API key: provided credential is not compatible with UIAM';
       this.logger.error(nonUiamCredentialError);
       throw new Error(nonUiamCredentialError);
-    } else {
-      try {
-        const { id, key, description } = await this.uiam?.grantApiKey(authorization, params);
+    }
 
-        result = {
-          id,
-          name: description,
-          api_key: key,
-        };
+    try {
+      const { id, key, description } = await this.uiam?.grantApiKey(authorization, params);
 
-        this.logger.debug('API key was granted successfully');
-      } catch (e) {
-        this.logger.error(`Failed to grant API key: ${getDetailedErrorMessage(e)}`);
-        throw e;
-      }
+      result = {
+        id,
+        name: description,
+        api_key: key,
+      };
+
+      this.logger.debug('API key was granted successfully');
+    } catch (e) {
+      this.logger.error(`Failed to grant API key: ${getDetailedErrorMessage(e)}`);
+      throw e;
     }
 
     return result;
@@ -162,13 +162,11 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    * @returns A scoped cluster client configured with API key authentication
    */
   getScopedClusterClientWithApiKey(apiKey: string) {
-    const authorization = new HTTPAuthorizationHeader('ApiKey', apiKey);
-    return this.clusterClient.asScoped({
-      headers: {
-        authorization: authorization.toString(),
-        ...(isUiamCredential(authorization) ? this.uiam.getEsClientAuthenticationHeader() : {}),
-      },
-    });
+    return getScopedClient(
+      { headers: { authorization: `ApiKey ${apiKey}` } },
+      this.clusterClient,
+      this.uiam
+    );
   }
 
   /**

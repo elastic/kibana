@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
+import type { IClusterClient, ScopeableRequest } from '@kbn/core/server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 
-import { HTTPAuthorizationHeader } from '../authentication/http_authentication';
-import { isUiamCredential, type UiamServicePublic } from '../uiam';
+import { type UiamServicePublic } from '../uiam';
 
 /**
  * Gets a scoped Elasticsearch client for the given request, handling UIAM credentials appropriately.
@@ -19,18 +19,17 @@ import { isUiamCredential, type UiamServicePublic } from '../uiam';
  * @returns A scoped Elasticsearch client.
  */
 export function getScopedClient(
-  request: KibanaRequest,
+  request: ScopeableRequest,
   clusterClient: IClusterClient,
   uiam?: UiamServicePublic
 ) {
   // If we're not in UIAM mode or if the request is not a fake request, use request scope directly.
-  if (!uiam || !request.isFakeRequest) {
+  if (!uiam || ('isFakeRequest' in request && !request.isFakeRequest)) {
     return clusterClient.asScoped(request);
   }
 
   // In UIAM mode and for fake requests, it's still possible that the request is authenticated with non-UIAM credentials.
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-
   if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
     return clusterClient.asScoped(request);
   }

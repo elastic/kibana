@@ -22,9 +22,15 @@ import type {
   ICustomClusterClient,
 } from '@kbn/core-elasticsearch-server';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { configureClient } from './configure_client';
 import { ScopedClusterClient } from './scoped_cluster_client';
-import { getDefaultHeaders, AUTHORIZATION_HEADER, ES_SECONDARY_AUTH_HEADER } from './headers';
+import {
+  getDefaultHeaders,
+  ES_SECONDARY_AUTH_HEADER,
+  ES_SECONDARY_CLIENT_AUTH_HEADER,
+} from './headers';
 import {
   createInternalErrorHandler,
   type InternalUnauthorizedErrorHandler,
@@ -38,6 +44,7 @@ const noop = () => undefined;
 export class ClusterClient implements ICustomClusterClient {
   private readonly config: ElasticsearchClientConfig;
   private readonly authHeaders?: IAuthHeadersStorage;
+  private readonly security?: InternalSecurityServiceSetup;
   private readonly rootScopedClient: Client;
   private readonly kibanaVersion: string;
   private readonly getUnauthorizedErrorHandler: () => UnauthorizedErrorHandler | undefined;
@@ -52,6 +59,7 @@ export class ClusterClient implements ICustomClusterClient {
     logger,
     type,
     authHeaders,
+    security,
     getExecutionContext = noop,
     getUnauthorizedErrorHandler = noop,
     agentFactoryProvider,
@@ -62,6 +70,7 @@ export class ClusterClient implements ICustomClusterClient {
     logger: Logger;
     type: string;
     authHeaders?: IAuthHeadersStorage;
+    security?: InternalSecurityServiceSetup;
     getExecutionContext?: () => string | undefined;
     getUnauthorizedErrorHandler?: () => UnauthorizedErrorHandler | undefined;
     agentFactoryProvider: AgentFactoryProvider;
@@ -70,6 +79,7 @@ export class ClusterClient implements ICustomClusterClient {
   }) {
     this.config = config;
     this.authHeaders = authHeaders;
+    this.security = security;
     this.kibanaVersion = kibanaVersion;
     this.getExecutionContext = getExecutionContext;
     this.getUnauthorizedErrorHandler = getUnauthorizedErrorHandler;
@@ -171,14 +181,12 @@ export class ClusterClient implements ICustomClusterClient {
   }
 
   private getSecondaryAuthHeaders(request: ScopeableRequest): Headers {
-    const headerSource =
-      isRealRequest(request) && !request.isFakeRequest
-        ? this.authHeaders?.get(request) ?? {}
-        : request.headers;
-    const authorizationHeader = Object.entries(headerSource).find(([key, value]) => {
-      return key.toLowerCase() === AUTHORIZATION_HEADER && value !== undefined;
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest({
+      headers:
+        isRealRequest(request) && !request.isFakeRequest
+          ? this.authHeaders?.get(request) ?? {}
+          : request.headers,
     });
-
     if (!authorizationHeader) {
       throw new Error(
         `asSecondaryAuthUser called from a client scoped to a request without 'authorization' header.`
@@ -188,7 +196,12 @@ export class ClusterClient implements ICustomClusterClient {
     return {
       ...getDefaultHeaders(this.kibanaVersion),
       ...this.config.customHeaders,
-      [ES_SECONDARY_AUTH_HEADER]: authorizationHeader[1],
+      [ES_SECONDARY_AUTH_HEADER]: authorizationHeader.toString(),
+      // If the credentials in the authorization header are UIAM credentials, we need to pass the
+      // shared secret to ES as well, so that ES can forward it to UIAM service for validation.
+      ...(this.security?.uiam && isUiamCredential(authorizationHeader)
+        ? { [ES_SECONDARY_CLIENT_AUTH_HEADER]: this.security.uiam.sharedSecret }
+        : {}),
     };
   }
 }

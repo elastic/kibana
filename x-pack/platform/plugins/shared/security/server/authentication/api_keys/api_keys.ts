@@ -9,6 +9,7 @@
 
 import type { BuildFlavor } from '@kbn/config';
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type {
   ClientAuthentication,
@@ -29,11 +30,8 @@ import type { SecurityLicense } from '../../../common';
 import { getScopedClient } from '../../elasticsearch';
 import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../routes/api_keys';
-import { isUiamCredential, type UiamServicePublic } from '../../uiam';
-import {
-  BasicHTTPAuthorizationHeaderCredentials,
-  HTTPAuthorizationHeader,
-} from '../http_authentication';
+import { type UiamServicePublic } from '../../uiam';
+import { BasicHTTPAuthorizationHeaderCredentials } from '../http_authentication';
 
 export type { UpdateAPIKeyParams, UpdateAPIKeyResult };
 
