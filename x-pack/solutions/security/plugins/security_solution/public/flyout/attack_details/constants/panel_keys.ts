@@ -6,3 +6,4 @@
  */
 
 export const AttackDetailsRightPanelKey = 'attack-details-right' as const;
+export const AttackDetailsLeftPanelKey = 'attack-details-left' as const;
