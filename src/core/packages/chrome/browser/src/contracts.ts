@@ -23,6 +23,14 @@ import type {
 import type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type { SolutionId } from './project_navigation';
+import type { SidebarStart, SidebarSetup } from './sidebar';
+
+export interface ChromeSetup {
+  /**
+   * {@link SidebarSetup}
+   */
+  sidebar: SidebarSetup;
+}
 
 /**
  * ChromeSetup exposes APIs available during the setup phase.
@@ -269,7 +277,17 @@ export interface ChromeStart {
   };
 
   /**
+   * {@link SidebarStart}
+   */
+  sidebar: SidebarStart;
+
+  /**
    * Get the id of the currently active project navigation or `null` otherwise.
    */
   getActiveSolutionNavId$(): Observable<SolutionId | null>;
+
+  /**
+   * Used only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers
+   */
+  withProvider(component: ReactNode): ReactNode;
 }

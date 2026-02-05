@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } f
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef } from 'react';
 import { Subscription } from 'rxjs';
-import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
@@ -36,7 +35,7 @@ import {
   isReactFlowServiceMapState,
   isCytoscapeServiceMapState,
 } from './use_service_map';
-import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
+import { APM_SERVICE_MAP_USE_REACT_FLOW_FEATURE_FLAG_KEY } from '../../../../common/apm_feature_flags';
 import { ReactFlowServiceMap } from './react_flow_service_map';
 
 function PromptContainer({ children }: { children: ReactNode }) {
@@ -106,9 +105,15 @@ export function ServiceMap({
   const license = useLicenseContext();
   const serviceName = useServiceName();
 
-  const { config } = useApmPluginContext();
+  const {
+    config,
+    core: { featureFlags },
+  } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
-  const showReactFlowServiceMap = useApmFeatureFlag(ApmFeatureFlagName.ServiceMapUseReactFlow);
+  const showReactFlowServiceMap = featureFlags.getBooleanValue(
+    APM_SERVICE_MAP_USE_REACT_FLOW_FEATURE_FLAG_KEY,
+    false
+  );
 
   const subscriptions = useRef<Subscription>(new Subscription());
 
