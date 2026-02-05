@@ -89,7 +89,7 @@ describe('updateMaintenanceWindowRoute', () => {
       data: transformUpdateBody(updateParams),
     });
 
-    const { schedule, ...mwWithoutSchedule } = mockMaintenanceWindow; // internal api response doesn't have schedul
+    const { schedule, ...mwWithoutSchedule } = mockMaintenanceWindow; // internal api response doesn't have schedule
     expect(res.ok).toHaveBeenLastCalledWith({
       body: rewritePartialMaintenanceBodyRes(mwWithoutSchedule),
     });
