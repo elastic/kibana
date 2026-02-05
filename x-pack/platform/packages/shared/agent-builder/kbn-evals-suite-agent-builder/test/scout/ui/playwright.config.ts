@@ -9,6 +9,8 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, '../../../evals'),
-  repetitions: 3,
+  // CI job timeout is ~1h; keep default low and use EVALUATION_REPETITIONS
+  // for longer/higher-confidence runs.
+  repetitions: 1,
   timeout: 30 * 60_000, // 30 minutes timeout given large datasets in use
 });
