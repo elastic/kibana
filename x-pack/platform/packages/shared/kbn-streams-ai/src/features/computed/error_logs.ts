@@ -10,7 +10,7 @@ import { getSampleDocuments } from '@kbn/ai-tools';
 import { ERROR_LOGS_FEATURE_TYPE } from '@kbn/streams-schema';
 import type { ComputedFeatureGenerator } from './types';
 
-const SAMPLE_SIZE = 100;
+const SAMPLE_SIZE = 5;
 const LOG_MESSAGE_FIELDS = ['message', 'body.text'];
 const ERROR_KEYWORDS = ['error', 'exception'];
 

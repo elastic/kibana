@@ -21,7 +21,7 @@ const COMPUTED_FEATURE_TYPES = [
   LOG_SAMPLES_FEATURE_TYPE,
   LOG_PATTERNS_FEATURE_TYPE,
   ERROR_LOGS_FEATURE_TYPE,
-];
+] as const;
 
 export const baseFeatureSchema = z.object({
   id: z.string(),
@@ -54,5 +54,5 @@ export function isFeature(feature: unknown): feature is Feature {
 }
 
 export function isComputedFeature(feature: BaseFeature): boolean {
-  return (COMPUTED_FEATURE_TYPES as string[]).includes(feature.type);
+  return (COMPUTED_FEATURE_TYPES as unknown as string[]).includes(feature.type);
 }

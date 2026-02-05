@@ -9,7 +9,7 @@ import { getSampleDocuments } from '@kbn/ai-tools';
 import { LOG_SAMPLES_FEATURE_TYPE } from '@kbn/streams-schema';
 import type { ComputedFeatureGenerator } from './types';
 
-const SAMPLE_SIZE = 100;
+const SAMPLE_SIZE = 5;
 
 export const logSamplesGenerator: ComputedFeatureGenerator = {
   type: LOG_SAMPLES_FEATURE_TYPE,

@@ -11,7 +11,7 @@ import { createTracedEsClient } from '@kbn/traced-es-client';
 import type { ComputedFeatureGenerator } from './types';
 
 const LOG_MESSAGE_FIELDS = ['message', 'body.text'];
-const MAX_PATTERNS = 100;
+const MAX_PATTERNS = 5;
 
 export const logPatternsGenerator: ComputedFeatureGenerator = {
   type: LOG_PATTERNS_FEATURE_TYPE,
