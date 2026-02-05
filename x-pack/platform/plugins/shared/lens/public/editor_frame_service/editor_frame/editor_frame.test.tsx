@@ -100,7 +100,7 @@ describe('editor_frame', () => {
     mockVisualization2 = createMockVisualization('testVis2', ['second']);
 
     mockDatasource = createMockDatasource();
-    mockDatasource2 = createMockDatasource('testDatasource2');
+    mockDatasource2 = createMockDatasource('textBased');
     mockDatasource.getLayers.mockReturnValue(['first']);
     mockDatasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       {
@@ -121,8 +121,8 @@ describe('editor_frame', () => {
     };
 
     datasourceMap = {
-      testDatasource: mockDatasource,
-      testDatasource2: mockDatasource2,
+      formBased: mockDatasource,
+      textBased: mockDatasource2,
     };
   });
 
@@ -140,14 +140,14 @@ describe('editor_frame', () => {
       {},
       {
         preloadedState: {
-          activeDatasourceId: 'testDatasource',
+          activeDatasourceId: 'formBased',
           visualization: {
             activeId: mockVisualization.id,
             state: 'initialState',
             selectedLayerId: 'layer1',
           },
           datasourceStates: {
-            testDatasource: {
+            formBased: {
               isLoading: false,
               state: {
                 internalState: 'datasourceState',
@@ -177,7 +177,7 @@ describe('editor_frame', () => {
         store.dispatch(
           setState({
             datasourceStates: {
-              testDatasource: {
+              formBased: {
                 isLoading: false,
                 state: {
                   internalState: 'datasourceState',
@@ -200,7 +200,7 @@ describe('editor_frame', () => {
       } = renderEditorFrame(undefined, {
         preloadedStateOverrides: {
           datasourceStates: {
-            testDatasource: {
+            formBased: {
               isLoading: true,
               state: {
                 internalState: 'datasourceState',
@@ -292,7 +292,7 @@ describe('editor_frame', () => {
       renderEditorFrame();
 
       const updatedPublicAPI: DatasourcePublicAPI = {
-        datasourceId: 'testDatasource',
+        datasourceId: 'formBased',
         getOperationForColumnId: jest.fn(),
         getTableSpec: jest.fn(),
         getVisualDefaults: jest.fn(),
