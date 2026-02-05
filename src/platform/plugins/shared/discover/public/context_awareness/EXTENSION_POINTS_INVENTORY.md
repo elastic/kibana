@@ -184,11 +184,11 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 ### Doc viewer — `getDocViewer`
 
-**Changes:** Flyout title and tabs (add/modify).
+**Changes:** Flyout title, custom header, and tabs (add/modify).
 
-**Use when:** Add "Related events", "Stack trace", "Analysis".
+**Use when:** Add "Related events", "Stack trace", "Analysis", or custom header section.
 
-**Returns:** `{ title?, docViewsRegistry(prev) => DocViewsRegistry }`
+**Returns:** `{ title?, docViewsRegistry(prev) => DocViewsRegistry, renderCustomHeader?(props) => ReactElement }`
 
 **Screenshot:**
 ![Doc viewer example](./docs/extension_points/get_doc_viewer.png)
@@ -198,6 +198,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 - [Traces document profile](profile_providers/observability/traces_document_profile/document_profile/accessors/doc_viewer.tsx)
 - [Observability document profile](profile_providers/observability/observability_document_profile/document_profile/accessors/doc_viewer.tsx)
 - [Observability root profile](profile_providers/observability/observability_root_profile/accessors/get_doc_viewer.tsx)
+- [Example data source profile with custom header](profile_providers/example/example_data_source_profile/profile.tsx)
 
 ---
 
