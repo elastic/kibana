@@ -50,13 +50,16 @@ export const CsatButtons = ({
   return (
     <EuiFormRow
       label={
-        <EuiText size="s">
-          <FormattedMessage
-            id="feedback.body.csatButtons.titleText"
-            defaultMessage="How satisfied are you with {appTitle}?"
-            values={{ appTitle }}
-          />
-        </EuiText>
+        <>
+          <EuiText size="s">
+            <FormattedMessage
+              id="feedback.body.csatButtons.titleText"
+              defaultMessage="How satisfied are you with {appTitle}?"
+              values={{ appTitle }}
+            />
+          </EuiText>
+          <EuiSpacer size="xs" />
+        </>
       }
     >
       <>
@@ -72,7 +75,7 @@ export const CsatButtons = ({
           isFullWidth={true}
           buttonSize="compressed"
         />
-        <EuiSpacer size="s" />
+        <EuiSpacer size="xs" />
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" css={labelsCss}>
           <EuiFlexItem>
             <EuiText size="xs">

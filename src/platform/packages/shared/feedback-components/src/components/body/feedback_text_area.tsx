@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { ChangeEvent } from 'react';
-import { EuiFormRow, EuiText, EuiTextArea } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiText, EuiTextArea } from '@elastic/eui';
 
 interface Props {
   value: string;
@@ -33,7 +33,14 @@ export const FeedbackTextArea = ({
   };
 
   return (
-    <EuiFormRow label={<EuiText size="s">{label}</EuiText>}>
+    <EuiFormRow
+      label={
+        <>
+          <EuiText size="s">{label}</EuiText>
+          <EuiSpacer size="xs" />
+        </>
+      }
+    >
       <EuiTextArea
         fullWidth
         rows={4}
