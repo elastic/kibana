@@ -83,3 +83,12 @@ responses:
                   - nlQuery
                 additionalProperties: false
                 "$schema": http://json-schema.org/draft-07/schema#
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X GET "https://${KIBANA_URL}/api/agent_builder/tools/{toolId}" \
+      -H "Authorization: ApiKey ${API_KEY}"
+- lang: Console
+  source: |
+    GET kbn:/api/agent_builder/tools/{toolId}
