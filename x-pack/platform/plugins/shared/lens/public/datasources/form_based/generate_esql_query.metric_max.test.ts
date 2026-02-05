@@ -77,7 +77,6 @@ describe('generateEsqlQuery metric max (static_value)', () => {
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*)
         BY order_date = BUCKET(order_date, 30 minutes)
-  | SORT order_date ASC
   | EVAL static_value = 100`,
       })
     );
