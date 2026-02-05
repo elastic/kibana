@@ -65,7 +65,7 @@ export const DashboardGrid = () => {
       const updatedLayout: DashboardLayout = {
         sections: {},
         panels: {},
-        controls: currLayout.controls,
+        pinnedPanels: currLayout.pinnedPanels,
       };
       Object.values(newLayout).forEach((widget) => {
         if (widget.type === 'section') {

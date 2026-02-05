@@ -21,6 +21,13 @@ const LazyDashboardTopNav = React.lazy(async () => {
   };
 });
 
+/**
+ * A lazy-loaded component that renders the dashboard top navigation bar.
+ * This component provides controls for dashboard editing, saving, and other actions.
+ *
+ * @param props - The {@link DashboardTopNavProps} for configuring the top navigation.
+ * @returns A React element containing the dashboard top navigation bar.
+ */
 export const DashboardTopNav = (props: DashboardTopNavProps) => {
   return (
     <Suspense fallback={<div />}>

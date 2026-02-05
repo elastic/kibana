@@ -241,6 +241,7 @@ Object {
   ],
   "supports_agentless": undefined,
   "supports_cloud_connector": undefined,
+  "var_group_selections": undefined,
   "vars": undefined,
 }
 `;

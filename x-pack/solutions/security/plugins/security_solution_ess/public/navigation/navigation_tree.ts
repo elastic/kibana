@@ -8,7 +8,7 @@
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
-  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
@@ -17,7 +17,6 @@ import {
   LazyIconAgentBuilder,
   LazyIconFindings,
   LazyIconIntelligence,
-  LazyIconWorkflow,
 } from '@kbn/security-solution-navigation/navigation_tree';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { type Services } from '../common/services';
@@ -41,7 +40,7 @@ export const createNavigationTree = (
     },
     defaultNavigationTree.dashboards(),
     defaultNavigationTree.rules(),
-    services.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
+    services.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
       ? defaultNavigationTree.alertDetections()
       : {
           id: SecurityPageName.alerts,
@@ -49,10 +48,7 @@ export const createNavigationTree = (
           link: securityLink(SecurityPageName.alerts),
         },
     {
-      // TODO: update icon from EUI
-      icon: LazyIconWorkflow,
       link: 'workflows',
-      badgeType: 'techPreview' as const,
     },
     ...(chatExperience === AIChatExperience.Agent
       ? [
@@ -265,7 +261,6 @@ export const createNavigationTree = (
             { link: 'management:search_sessions' },
             { link: 'management:spaces' },
             { link: 'maps' },
-            { link: 'visualize' },
             { link: 'graph' },
             { link: 'canvas' },
             { link: 'management:settings' },

@@ -160,7 +160,11 @@ describe('stripUnmappedKeys', () => {
         {
           config: {
             title: 'panel',
-            enhancements: {},
+            enhancements: {
+              dynamicActions: {
+                events: [],
+              },
+            },
           },
           grid: {
             h: 15,
@@ -177,7 +181,11 @@ describe('stripUnmappedKeys', () => {
             {
               config: {
                 title: 'panel in section',
-                enhancements: {},
+                enhancements: {
+                  dynamicActions: {
+                    events: [{}],
+                  },
+                },
               },
               grid: {
                 h: 15,
@@ -235,16 +243,15 @@ describe('stripUnmappedKeys', () => {
           "title": "my dashboard",
         },
         "warnings": Array [
-          "Dropped unmapped panel config key 'enhancements' from panel panel1",
           "Dropped unmapped panel config key 'enhancements' from panel panelInSection1",
         ],
       }
     `);
   });
 
-  it('should drop controlGroupInput', () => {
+  it('should drop pinned_panels', () => {
     const dashboardState = {
-      controlGroupInput: {} as unknown as DashboardState['controlGroupInput'],
+      pinned_panels: {} as unknown as DashboardState['pinned_panels'],
       title: 'my dashboard',
     };
     expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
@@ -254,7 +261,7 @@ describe('stripUnmappedKeys', () => {
           "title": "my dashboard",
         },
         "warnings": Array [
-          "Dropped unmapped key 'controlGroupInput' from dashboard",
+          "Dropped unmapped key 'pinned_panels' from dashboard",
         ],
       }
     `);
@@ -337,9 +344,9 @@ describe('throwOnUnmappedKeys', () => {
     expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
   });
 
-  it('should throw when dashboard contains controlGroupInput', () => {
+  it('should throw when dashboard contains pinned_panels', () => {
     const dashboardState = {
-      controlGroupInput: {} as unknown as DashboardState['controlGroupInput'],
+      pinned_panels: {} as unknown as DashboardState['pinned_panels'],
       title: 'my dashboard',
     };
     expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();

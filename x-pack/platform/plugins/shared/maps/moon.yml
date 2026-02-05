@@ -107,6 +107,7 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/crypto-browser'
   - '@kbn/cps'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

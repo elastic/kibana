@@ -40,5 +40,6 @@ export const forkContextForAgentRun = ({
   return {
     ...parentContext,
     stack: [...parentContext.stack, { type: 'agent', agentId }],
+    // TODO check if conversationId is set here or get it from agentParams.conversation
   };
 };

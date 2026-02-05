@@ -9,13 +9,13 @@
 
 import { merge } from 'lodash';
 import type { Logger } from '@kbn/core/server';
+import { ExecutionError } from '@kbn/workflows/server';
 import type {
   IWorkflowEventLogger,
   WorkflowEventLoggerContext,
   WorkflowEventLoggerOptions,
 } from './types';
 import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
-import { ExecutionError } from '../utils';
 
 export class WorkflowEventLogger implements IWorkflowEventLogger {
   private eventQueue: WorkflowLogEvent[] = [];

@@ -64,6 +64,7 @@ export const SourceSection = () => {
       connectors.map((connector) => ({
         label: connector.name,
         value: connector.id,
+        'data-test-subj': `bulkImportMcpConnectorOption-${connector.id}`,
       })),
     [connectors]
   );
@@ -109,6 +110,7 @@ export const SourceSection = () => {
                 inputRef={ref}
                 isClearable={false}
                 onBlur={onBlur}
+                data-test-subj="bulkImportMcpConnectorSelect"
                 {...field}
               />
             )}

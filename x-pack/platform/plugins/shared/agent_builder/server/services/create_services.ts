@@ -19,12 +19,14 @@ import { ConversationServiceImpl } from './conversation';
 import { createChatService } from './chat';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { HooksService } from './hooks';
+import { type SkillService, createSkillService } from './skills';
 
 interface ServiceInstances {
   tools: ToolsService;
   agents: AgentsService;
   attachments: AttachmentService;
   hooks: HooksService;
+  skills: SkillService;
 }
 
 export class ServiceManager {
@@ -38,6 +40,7 @@ export class ServiceManager {
       agents: new AgentsService(),
       attachments: createAttachmentService(),
       hooks: new HooksService(),
+      skills: createSkillService(),
     };
 
     this.internalSetup = {
@@ -45,6 +48,7 @@ export class ServiceManager {
       agents: this.services.agents.setup({ logger }),
       attachments: this.services.attachments.setup(),
       hooks: this.services.hooks.setup({ logger }),
+      skills: this.services.skills.setup(),
     };
 
     return this.internalSetup;
@@ -76,6 +80,7 @@ export class ServiceManager {
     };
 
     const attachments = this.services.attachments.start();
+    const skillsServiceStart = this.services.skills.start();
 
     const tools = this.services.tools.start({
       getRunner,
@@ -102,12 +107,15 @@ export class ServiceManager {
       logger: logger.get('runnerFactory'),
       security,
       elasticsearch,
+      uiSettings,
+      savedObjects,
       inference,
       spaces,
       actions,
       toolsService: tools,
       agentsService: agents,
       attachmentsService: attachments,
+      skillServiceStart: skillsServiceStart,
       trackingService,
       hooks,
     });
@@ -136,6 +144,7 @@ export class ServiceManager {
       tools,
       agents,
       attachments,
+      skills: skillsServiceStart,
       conversations,
       runnerFactory,
       chat,

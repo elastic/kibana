@@ -113,13 +113,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Clicks a visualize list item's title (in the visualize app).
+     * Clicks a visualize list item's title (visualize app or dashboard Visualizations tab).
      *
      * @param title - the title of the list item to be clicked
      */
     clickVisualizeListItemTitle(title: string) {
       return retry.try(async () => {
-        await testSubjects.click(`visListingTitleLink-${title}`);
+        const link = (await testSubjects.exists(`visualizationListingListingTitleLink-${title}`))
+          ? `visualizationListingListingTitleLink-${title}`
+          : (await testSubjects.exists(`visListingTitleLink-${title}`))
+          ? `visListingTitleLink-${title}`
+          : `visualizationListingTitleLink-${title}`;
+        await testSubjects.click(link);
         await this.isLensPageOrFail();
       });
     },
@@ -1245,9 +1250,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Gets text of the specified datatable header cell
      *
      * @param index - index of th element in datatable
+     * @param addRowNumberColumn - when true, increments the column number to ignore row number column
      */
-    async getDatatableHeaderText(index = 0) {
-      const el = await this.getDatatableHeader(index);
+    async getDatatableHeaderText(index = 0, addRowNumberColumn?: boolean) {
+      const el = await this.getDatatableHeader(index, addRowNumberColumn);
       return el.getVisibleText();
     },
 
@@ -1261,9 +1267,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      *
      * @param rowIndex - index of row of the cell
      * @param colIndex - index of column of the cell
+     * @param addRowNumberColumn - when true, increments the column number to ignore row number column
      */
-    async getDatatableCellText(rowIndex = 0, colIndex = 0) {
-      const el = await this.getDatatableCell(rowIndex, colIndex);
+    async getDatatableCellText(rowIndex = 0, colIndex = 0, addRowNumberColumn?: boolean) {
+      const el = await this.getDatatableCell(rowIndex, colIndex, addRowNumberColumn);
       return el.getVisibleText();
     },
 
@@ -1301,28 +1308,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return (await $('.euiDataGridHeaderCell__content')).length;
     },
 
-    async getDatatableHeader(index = 0) {
+    async getDatatableHeader(index = 0, addRowNumberColumn: boolean = true) {
       log.debug(`All headers ${await testSubjects.getVisibleText('dataGridHeader')}`);
       return find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
-          index + 1
+          index + 1 + (addRowNumberColumn ? 1 : 0)
         })`
       );
     },
 
-    async getDatatableCell(rowIndex = 0, colIndex = 0) {
+    async getDatatableCell(rowIndex = 0, colIndex = 0, addRowNumberColumn: boolean = true) {
       return await find.byCssSelector(
-        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"][data-gridcell-visible-row-index="${rowIndex}"]`
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${
+          colIndex + (addRowNumberColumn ? 1 : 0)
+        }"][data-gridcell-visible-row-index="${rowIndex}"]`
       );
     },
 
-    async getDatatableCellsByColumn(colIndex = 0) {
+    async getDatatableCellsByColumn(colIndex = 1) {
       return await find.allByCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"]`
       );
     },
 
-    async isDatatableHeaderSorted(index = 0) {
+    async isDatatableHeaderSorted(index = 1) {
       return find.existsByCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
           index + 1
@@ -1882,7 +1891,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           await testSubjects.exists('confirmModalConfirmButton');
           await testSubjects.click('confirmModalConfirmButton');
         }
-        await testSubjects.existOrFail('visualizationLandingPage', { timeout: 3000 });
+        await retry.waitFor('dashboard visualizations list to load', async () => {
+          const url = await browser.getCurrentUrl();
+          return url.includes('#/list/visualizations');
+        });
       });
     },
 
@@ -2228,6 +2240,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const settings = await testSubjects.find('lnsDensitySettings');
       const option = await settings.findByTestSubject(value);
       await option.click();
+    },
+
+    async toggleShowRowNumbers() {
+      const rowNumberSwitch = await testSubjects.find('lens-table-row-numbers-switch');
+      await rowNumberSwitch.click();
+    },
+
+    async findRowNumberColumn() {
+      return await testSubjects.exists('lnsDataTable-rowNumber');
     },
 
     async checkDataTableDensity(size: 'l' | 'm' | 's') {

@@ -48,7 +48,7 @@ viewer:
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
         - feature_siemV5.endpoint_exceptions_read
-        - feature_securitySolutionRulesV1.read
+        - feature_securitySolutionRulesV2.read
         - feature_securitySolutionCasesV2.read
         - feature_securitySolutionAssistant.minimal_all
         - feature_securitySolutionAttackDiscovery.minimal_all
@@ -64,6 +64,7 @@ viewer:
         - feature_savedQueryManagement.all
         - feature_dataQuality.all
         - feature_agentBuilder.read
+        - feature_workflowsManagement.read
       resources: '*'
   run_as: []
 
@@ -144,7 +145,7 @@ editor:
         - feature_siemV5.process_operations_all
         - feature_siemV5.actions_log_management_all # Response actions history
         - feature_siemV5.file_operations_all
-        - feature_securitySolutionRulesV1.all
+        - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -160,6 +161,7 @@ editor:
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
+        - feature_workflowsManagement.all
       resources: '*'
   run_as: []
 
@@ -204,7 +206,7 @@ t1_analyst:
         - feature_ml.read
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
-        - feature_securitySolutionRulesV1.read
+        - feature_securitySolutionRulesV2.read
         - feature_securitySolutionCasesV2.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -220,6 +222,7 @@ t1_analyst:
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
+        - feature_workflowsManagement.all
       resources: '*'
 
 t2_analyst:
@@ -267,7 +270,7 @@ t2_analyst:
         - feature_ml.read
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
-        - feature_securitySolutionRulesV1.read
+        - feature_securitySolutionRulesV2.read
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -283,6 +286,7 @@ t2_analyst:
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
+        - feature_workflowsManagement.all
       resources: '*'
 
 t3_analyst:
@@ -349,7 +353,7 @@ t3_analyst:
         - feature_siemV5.file_operations_all
         - feature_siemV5.scan_operations_all
         - feature_siemV5.workflow_insights_all
-        - feature_securitySolutionRulesV1.all
+        - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -365,6 +369,7 @@ t3_analyst:
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
+        - feature_workflowsManagement.all
       resources: '*'
 
 threat_intelligence_analyst:
@@ -422,7 +427,7 @@ threat_intelligence_analyst:
         - feature_siemV5.global_artifact_management_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
-        - feature_securitySolutionRulesV1.all
+        - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -437,6 +442,7 @@ threat_intelligence_analyst:
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
+        - feature_workflowsManagement.all
       resources: '*'
 
 rule_author:
@@ -503,7 +509,7 @@ rule_author:
         - feature_siemV5.endpoint_exceptions_all
         - feature_siemV5.actions_log_management_read
         - feature_siemV5.workflow_insights_all
-        - feature_securitySolutionRulesV1.all
+        - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -518,6 +524,7 @@ rule_author:
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
+        - feature_workflowsManagement.all
       resources: '*'
 
 soc_manager:
@@ -598,7 +605,7 @@ soc_manager:
         - feature_siemV5.scan_operations_all
         - feature_siemV5.workflow_insights_all
         - feature_siemV5.soc_management_all
-        - feature_securitySolutionRulesV1.all
+        - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -615,6 +622,7 @@ soc_manager:
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
+        - feature_workflowsManagement.all
       resources: '*'
 
 detections_admin:
@@ -674,7 +682,7 @@ detections_admin:
         - feature_siemV5.all
         - feature_siemV5.global_artifact_management_all
         - feature_siemV5.endpoint_exceptions_all
-        - feature_securitySolutionRulesV1.all
+        - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -689,6 +697,7 @@ detections_admin:
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
+        - feature_workflowsManagement.all
       resources: '*'
 
 platform_engineer:
@@ -751,7 +760,7 @@ platform_engineer:
         - feature_siemV5.endpoint_exceptions_all
         - feature_siemV5.actions_log_management_read
         - feature_siemV5.workflow_insights_all
-        - feature_securitySolutionRulesV1.all
+        - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -769,6 +778,7 @@ platform_engineer:
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
+        - feature_workflowsManagement.all
       resources: '*'
 
 endpoint_operations_analyst:
@@ -837,7 +847,7 @@ endpoint_operations_analyst:
         - feature_siemV5.execute_operations_all
         - feature_siemV5.scan_operations_all
         - feature_siemV5.workflow_insights_all
-        - feature_securitySolutionRulesV1.all
+        - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -855,6 +865,7 @@ endpoint_operations_analyst:
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
+        - feature_workflowsManagement.all
       resources: '*'
 
 endpoint_policy_manager:
@@ -925,7 +936,7 @@ endpoint_policy_manager:
         - feature_siemV5.blocklist_all # Elastic Defend Policy Management
         - feature_siemV5.endpoint_exceptions_all
         - feature_siemV5.workflow_insights_all
-        - feature_securitySolutionRulesV1.all
+        - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -942,6 +953,7 @@ endpoint_policy_manager:
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
+        - feature_workflowsManagement.all
       resources: '*'
 
 # admin role defined in elasticsearch controller

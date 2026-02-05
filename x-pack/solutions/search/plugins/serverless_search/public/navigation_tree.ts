@@ -6,10 +6,25 @@
  */
 
 import { lazy } from 'react';
+import type { Location } from 'history';
+
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { i18n } from '@kbn/i18n';
+
+function isEditingFromDashboard(
+  location: Location,
+  pathNameSerialized: string,
+  prepend: (path: string) => string
+): boolean {
+  const vizApps = ['/app/visualize', '/app/maps', '/app/lens'];
+  const isVizApp = vizApps.some((app) => pathNameSerialized.startsWith(prepend(app)));
+  const hasOriginatingApp =
+    location.search.includes('originatingApp=dashboards') ||
+    location.hash.includes('originatingApp=dashboards');
+  return isVizApp && hasOriginatingApp;
+}
 
 const LazyIconAgents = lazy(() =>
   import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
@@ -59,9 +74,9 @@ export function createNavigationTree({
       },
       {
         link: 'dashboards',
-        getIsActive: ({ pathNameSerialized, prepend }) => {
-          return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-        },
+        getIsActive: ({ pathNameSerialized, prepend, location }) =>
+          pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
+          isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
       {
         icon: LazyIconAgents, // Temp svg until we have icon in EUI
@@ -69,14 +84,21 @@ export function createNavigationTree({
       },
       {
         link: 'workflows',
-        badgeType: 'techPreview' as const,
       },
       {
         children: [
           {
             id: 'ml_overview',
             title: '',
-            children: [{ link: 'ml:overview' }, { link: 'ml:dataVisualizer' }],
+            children: [
+              { link: 'ml:overview' },
+              { link: 'ml:dataVisualizer' },
+              { link: 'ml:dataDrift', sideNavStatus: 'hidden' },
+              { link: 'ml:dataDriftPage', sideNavStatus: 'hidden' },
+              { link: 'ml:fileUpload', sideNavStatus: 'hidden' },
+              { link: 'ml:indexDataVisualizer', sideNavStatus: 'hidden' },
+              { link: 'ml:indexDataVisualizerPage', sideNavStatus: 'hidden' },
+            ],
           },
           {
             id: 'category-anomaly_detection',
@@ -102,8 +124,11 @@ export function createNavigationTree({
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'ml:logRateAnalysis' },
+              { link: 'ml:logRateAnalysisPage', sideNavStatus: 'hidden' },
               { link: 'ml:logPatternAnalysis' },
+              { link: 'ml:logPatternAnalysisPage', sideNavStatus: 'hidden' },
               { link: 'ml:changePointDetections' },
+              { link: 'ml:changePointDetectionsPage', sideNavStatus: 'hidden' },
             ],
           },
         ],
@@ -268,7 +293,6 @@ export function createNavigationTree({
             children: [
               { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
               { link: 'management:spaces', breadcrumbStatus: 'hidden' },
-              { link: 'visualize' },
               { link: 'management:objects', breadcrumbStatus: 'hidden' },
               { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
               { link: 'management:reporting', breadcrumbStatus: 'hidden' },

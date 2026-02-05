@@ -31,7 +31,7 @@ export const transformDashboardIn = (
     } => {
   try {
     const {
-      controlGroupInput,
+      pinned_panels,
       options,
       filters,
       panels,
@@ -63,7 +63,7 @@ export const transformDashboardIn = (
     );
 
     const { controlsJSON, references: controlGroupReferences } =
-      transformControlGroupIn(controlGroupInput);
+      transformControlGroupIn(pinned_panels);
 
     const attributes = {
       description: '',

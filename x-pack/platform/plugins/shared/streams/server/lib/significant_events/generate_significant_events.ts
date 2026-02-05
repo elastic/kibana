@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
-import type { GeneratedSignificantEventQuery, Streams, System } from '@kbn/streams-schema';
+import type { Feature, GeneratedSignificantEventQuery, Streams, System } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 
 interface Params {
@@ -17,8 +17,8 @@ interface Params {
   end: number;
   system?: System;
   sampleDocsSize?: number;
-  // optional overrides for templates
-  systemPromptOverride?: string;
+  systemPrompt: string;
+  features: Feature[];
 }
 
 interface Dependencies {
@@ -32,7 +32,7 @@ export async function generateSignificantEventDefinitions(
   params: Params,
   dependencies: Dependencies
 ): Promise<{ queries: GeneratedSignificantEventQuery[]; tokensUsed: ChatCompletionTokenCount }> {
-  const { definition, connectorId, start, end, system, sampleDocsSize, systemPromptOverride } =
+  const { definition, connectorId, start, end, system, sampleDocsSize, systemPrompt, features } =
     params;
   const { inferenceClient, esClient, logger, signal } = dependencies;
 
@@ -50,7 +50,8 @@ export async function generateSignificantEventDefinitions(
     system,
     signal,
     sampleDocsSize,
-    systemPromptOverride,
+    systemPrompt,
+    features,
   });
 
   return {

@@ -24,6 +24,8 @@
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/content_framework/lazy_content_framework_section.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -39,6 +41,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -66,6 +70,8 @@
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/index.tsx",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -81,6 +87,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -95,9 +103,39 @@
         "label": "UnifiedDocViewer",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<",
-          "DocViewRenderProps",
-          " & ",
+          "React.ForwardRefExoticComponent<Omit<Omit<Omit<Omit<",
+          {
+            "pluginId": "@kbn/unified-doc-viewer",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDocViewerPluginApi",
+            "section": "def-public.DocViewerProps",
+            "text": "DocViewerProps"
+          },
+          ", \"docViews\">, \"ref\"> & React.RefAttributes<",
+          {
+            "pluginId": "@kbn/unified-doc-viewer",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDocViewerPluginApi",
+            "section": "def-public.DocViewerApi",
+            "text": "DocViewerApi"
+          },
+          ">, \"ref\"> & { ref?: ((instance: ",
+          {
+            "pluginId": "@kbn/unified-doc-viewer",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDocViewerPluginApi",
+            "section": "def-public.DocViewerApi",
+            "text": "DocViewerApi"
+          },
+          " | null) => void) | React.RefObject<",
+          {
+            "pluginId": "@kbn/unified-doc-viewer",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDocViewerPluginApi",
+            "section": "def-public.DocViewerApi",
+            "text": "DocViewerApi"
+          },
+          "> | null | undefined; } & ",
           {
             "pluginId": "@kbn/shared-ux-utility",
             "scope": "common",
@@ -105,9 +143,11 @@
             "section": "def-common.WithSuspenseExtendedDeps",
             "text": "WithSuspenseExtendedDeps"
           },
-          " & React.RefAttributes<{}>>"
+          ", \"ref\"> & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/lazy_doc_viewer.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -123,6 +163,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -150,6 +192,8 @@
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/lazy_doc_viewer_flyout.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -165,6 +209,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -250,6 +296,8 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/lazy_doc_viewer_logs_overview.tsx",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -265,6 +313,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -284,6 +334,8 @@
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/attributes/doc_viewer_attributes_overview/lazy_doc_viewer_obs_attributes_overview.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -299,6 +351,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -320,6 +374,8 @@
           "; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; } & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/generic/doc_viewer_overview/lazy_doc_viewer_obs_generic_overview.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -335,6 +391,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -362,6 +420,8 @@
           "> | null | undefined; }, \"ref\"> & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/doc_viewer_overview/lazy_doc_viewer_obs_traces_overview.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -377,6 +437,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -414,6 +476,8 @@
           " | null, () => void]"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_es_doc_search.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -428,6 +492,8 @@
               "EsDocSearchProps"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_es_doc_search.ts",
+            "lineNumber": 53,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -446,6 +512,8 @@
         "label": "LogsOverviewApi",
         "description": [],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -460,6 +528,8 @@
               "(section: \"stacktrace\" | \"quality_issues\") => void"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -474,6 +544,8 @@
                   "\"stacktrace\" | \"quality_issues\""
                 ],
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
+                "lineNumber": 53,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -533,6 +605,8 @@
           "; showTraceWaterfall?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -547,6 +621,8 @@
       "label": "UnifiedDocViewerSetup",
       "description": [],
       "path": "src/platform/plugins/shared/unified_doc_viewer/public/plugin.tsx",
+      "lineNumber": 37,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -567,6 +643,8 @@
             }
           ],
           "path": "src/platform/plugins/shared/unified_doc_viewer/public/plugin.tsx",
+          "lineNumber": 38,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -582,6 +660,8 @@
       "label": "UnifiedDocViewerStart",
       "description": [],
       "path": "src/platform/plugins/shared/unified_doc_viewer/public/plugin.tsx",
+      "lineNumber": 41,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -602,6 +682,8 @@
             }
           ],
           "path": "src/platform/plugins/shared/unified_doc_viewer/public/plugin.tsx",
+          "lineNumber": 42,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }

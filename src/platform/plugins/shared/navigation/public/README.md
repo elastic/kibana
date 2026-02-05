@@ -11,8 +11,17 @@ The Navigation plugin's start contract provides the following:
 ```typescript
 interface NavigationPublicStart {
   ui: {
+    /**
+    * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+    */
     TopNavMenu: (props: TopNavMenuProps<Query>) => React.ReactElement;
+    /**
+    * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+    */
     AggregateQueryTopNavMenu: (props: TopNavMenuProps<AggregateQuery>) => React.ReactElement;
+    /**
+    * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+    */
     createTopNavWithCustomContext: (
       customUnifiedSearch?: UnifiedSearchPublicPluginStart,
       customExtensions?: RegisteredTopNavMenuData[]
@@ -26,15 +35,6 @@ interface NavigationPublicStart {
 ```
 
 ## Key Components
-
-### TopNavMenu
-
-The `TopNavMenu` component provides a standardized way to render navigation controls at the top of Kibana pages. It supports:
-
-- Configurable menu items with icons
-- Badge notifications
-- Extension points for plugins to contribute additional items
-- Consistent styling and behavior across Kibana
 
 ## Integration with Core Services
 
@@ -53,45 +53,9 @@ The plugin supports "Solution Navigation" - a feature that allows different Kiba
 
 ## Usage
 
-### Using TopNavMenu
-
-The `TopNavMenu` component can be accessed in two ways:
-
-1. **Via the start contract (recommended):**
-
-```typescript
-// In your plugin's start method
-public start(core: CoreStart, plugins: PluginsStart) {
-  const { ui } = plugins.navigation;
-  return {
-    renderTopNav: (props) => <ui.TopNavMenu {...props} />
-  };
-}
-```
-
-2. **Direct import (for advanced use cases):**
-
-```typescript
-import { TopNavMenu, TopNavMenuData } from '@kbn/shared-navigation-plugin/public';
-```
-
-#### Specialized TopNavMenu Components
-
-The start contract also provides specialized versions:
-
-```typescript
-// For aggregate queries
-const { ui } = plugins.navigation;
-return <ui.AggregateQueryTopNavMenu {...props} />;
-
-// For custom contexts
-const { createTopNavWithCustomContext } = plugins.navigation.ui;
-const CustomTopNav = createTopNavWithCustomContext(customUnifiedSearch, customExtensions);
-```
-
 ### Using SideNavComponent
 
-Unlike TopNavMenu, you don't typically import and use SideNavComponent directly. Instead, you define a navigation tree and register it with the navigation plugin using the `addSolutionNavigation` service.
+You don't typically import and use SideNavComponent directly. Instead, you define a navigation tree and register it with the navigation plugin using the `addSolutionNavigation` service.
 
 Example from Enterprise Search plugin:
 

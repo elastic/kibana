@@ -8,6 +8,8 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { MaybePromise } from '@kbn/utility-types';
 import type { AgentBuilderConfig } from './config';
 import { ServiceManager } from './services';
 import type {
@@ -27,6 +29,7 @@ import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
 import { registerAgentBuilderHooksExample } from './examples/register_hooks_example';
+import { registerSampleData } from './register_sample_data';
 
 export class AgentBuilderPlugin
   implements
@@ -44,7 +47,7 @@ export class AgentBuilderPlugin
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
-
+  private home: HomeServerPluginSetup | null = null;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -54,6 +57,7 @@ export class AgentBuilderPlugin
     coreSetup: CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart>,
     setupDeps: AgentBuilderSetupDependencies
   ): AgentBuilderPluginSetup {
+    this.home = setupDeps.home;
     // Create usage counter for telemetry (if usageCollection is available)
     if (setupDeps.usageCollection) {
       this.usageCounter = createAgentBuilderUsageCounter(setupDeps.usageCollection);
@@ -120,6 +124,9 @@ export class AgentBuilderPlugin
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
       },
+      skill: {
+        registerSkill: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
+      },
     };
 
     registerAgentBuilderHooksExample(setupContract);
@@ -147,6 +154,9 @@ export class AgentBuilderPlugin
     const { tools, agents, runnerFactory } = startServices;
     const runner = runnerFactory.getRunner();
 
+    if (this.home) {
+      registerSampleData(this.home, this.logger);
+    }
     return {
       agents: {
         runAgent: agents.execute.bind(agents),

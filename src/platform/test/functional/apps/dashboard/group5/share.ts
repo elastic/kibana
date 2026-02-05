@@ -39,7 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const kibanaServer = getService('kibanaServer');
-  const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardCustomizePanel = getService('dashboardCustomizePanel');
 
@@ -114,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('snapshot share', () => {
       describe('test local state', () => {
         it('should not have "panels" state when not in unsaved changes state', async () => {
-          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+          await dashboard.ensureMissingUnsavedChangesNotification();
           expect(await getSharedUrl('snapshot')).to.not.contain('panels');
         });
 
@@ -123,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardCustomizePanel.setCustomPanelTitle('Test New Title');
           await dashboardCustomizePanel.clickSaveButton();
           await dashboard.waitForRenderComplete();
-          await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+          await dashboard.ensureHasUnsavedChangesNotification();
 
           const sharedUrl = await getSharedUrl('snapshot');
           const { appState } = getStateFromUrl(sharedUrl);
@@ -133,7 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should once again not have "panels" state when save is clicked', async () => {
           await dashboard.clickQuickSave();
           await dashboard.waitForRenderComplete();
-          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+          await dashboard.ensureMissingUnsavedChangesNotification();
           expect(await getSharedUrl('snapshot')).to.not.contain('panels');
         });
       });

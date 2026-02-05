@@ -53,7 +53,6 @@ export const App = ({ core, plugins }: { core: CoreStart; plugins: StartDependen
                 setQuerySubmitted(true);
               }}
               hideRunQueryText={true}
-              hideTimeFilterInfo={true}
               hasOutline
             />
           </EuiPanel>

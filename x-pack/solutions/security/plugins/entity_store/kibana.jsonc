@@ -9,7 +9,14 @@
     "id": "entityStore",
     "server": true,
     "browser": true,
-    "requiredPlugins": [],
-    "optionalPlugins": []
+    "requiredPlugins": [
+      "spaces",
+      "taskManager",
+      "dataViews"
+    ],
+    "optionalPlugins": [
+      "security",
+      "encryptedSavedObjects"
+    ]
   }
 }

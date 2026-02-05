@@ -125,6 +125,7 @@ export const RoleSwitcher = () => {
                   full_name: currentUserState.value!.full_name,
                   email: currentUserState.value!.email,
                   roles: [role],
+                  url: window.location.href,
                 });
                 setIsOpen(false);
               },

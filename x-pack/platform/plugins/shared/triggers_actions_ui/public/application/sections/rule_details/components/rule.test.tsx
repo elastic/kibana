@@ -14,7 +14,6 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { Capabilities } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { RuleComponent, alertToListItem } from './rule';
-import type { AlertListItem } from './types';
 import type { RuleSummary, AlertStatus, RuleType, RuleTypeModel } from '../../../../types';
 import type { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { mockRule, mockLogResponse } from './test_helpers';
@@ -64,15 +63,6 @@ jest.mock('@kbn/response-ops-alerts-table/components/alerts_table', () => ({
   __esModule: true,
   AlertsTable: mockAlertsTable,
   default: mockAlertsTable,
-}));
-
-const mockRuleAlertList = jest.fn(() => {
-  return <div data-test-subj="ruleAlertList" />;
-});
-jest.mock('./rule_alert_list', () => ({
-  __esModule: true,
-  RuleAlertList: mockRuleAlertList,
-  default: mockRuleAlertList,
 }));
 
 const { loadExecutionLogAggregations } = jest.requireMock(
@@ -166,7 +156,9 @@ const renderWithProviders = (ui: React.ReactElement) => {
 describe('rules', () => {
   it('render a list of rules', async () => {
     const rule = mockRule();
-    const ruleType = mockRuleType();
+    const ruleType = mockRuleType({
+      hasAlertsMappings: true,
+    });
     const ruleSummary = mockRuleSummary({
       alerts: {
         first_rule: {
@@ -186,11 +178,6 @@ describe('rules', () => {
       },
     });
 
-    const expectedItems: AlertListItem[] = [
-      alertToListItem(fakeNow.getTime(), 'second_rule', ruleSummary.alerts.second_rule),
-      alertToListItem(fakeNow.getTime(), 'first_rule', ruleSummary.alerts.first_rule),
-    ];
-
     renderWithProviders(
       <RuleComponent
         {...mockAPIs}
@@ -202,11 +189,14 @@ describe('rules', () => {
     );
 
     expect(await screen.findByTestId('ruleStatusPanel')).toBeInTheDocument();
-    expect(mockRuleAlertList).toHaveBeenCalledWith(
+    expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
+
+    expect(mockAlertsTable).toHaveBeenCalledWith(
       expect.objectContaining({
-        items: expectedItems,
-        readOnly: false,
-        onMuteAction: expect.any(Function),
+        id: 'rule-detail-alerts-table',
+        ruleTypeIds: [ruleType.id],
+        showAlertStatusWithFlapping: true,
+        query: expect.any(Object),
       }),
       expect.anything()
     );
@@ -234,7 +224,9 @@ describe('rules', () => {
 
   it('render all active rules', async () => {
     const rule = mockRule();
-    const ruleType = mockRuleType();
+    const ruleType = mockRuleType({
+      hasAlertsMappings: true,
+    });
     const alerts: Record<string, AlertStatus> = {
       ['us-central']: {
         status: 'OK',
@@ -250,11 +242,6 @@ describe('rules', () => {
       },
     };
 
-    const expectedItems: AlertListItem[] = [
-      alertToListItem(fakeNow.getTime(), 'us-central', alerts['us-central']),
-      alertToListItem(fakeNow.getTime(), 'us-east', alerts['us-east']),
-    ];
-
     renderWithProviders(
       <RuleComponent
         {...mockAPIs}
@@ -268,11 +255,14 @@ describe('rules', () => {
     );
 
     expect(await screen.findByTestId('ruleStatusPanel')).toBeInTheDocument();
-    expect(mockRuleAlertList).toHaveBeenCalledWith(
+    expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
+
+    expect(mockAlertsTable).toHaveBeenCalledWith(
       expect.objectContaining({
-        items: expectedItems,
-        readOnly: false,
-        onMuteAction: expect.any(Function),
+        id: 'rule-detail-alerts-table',
+        ruleTypeIds: [ruleType.id],
+        showAlertStatusWithFlapping: true,
+        query: expect.any(Object),
       }),
       expect.anything()
     );
@@ -282,7 +272,9 @@ describe('rules', () => {
     const rule = mockRule({
       mutedInstanceIds: ['us-west', 'us-east'],
     });
-    const ruleType = mockRuleType();
+    const ruleType = mockRuleType({
+      hasAlertsMappings: true,
+    });
     const alerts: Record<string, AlertStatus> = {
       'us-west': {
         status: 'OK' as AlertStatusValues,
@@ -298,11 +290,6 @@ describe('rules', () => {
       },
     };
 
-    const expectedItems: AlertListItem[] = [
-      alertToListItem(fakeNow.getTime(), 'us-west', alerts['us-west']),
-      alertToListItem(fakeNow.getTime(), 'us-east', alerts['us-east']),
-    ];
-
     renderWithProviders(
       <RuleComponent
         {...mockAPIs}
@@ -316,11 +303,14 @@ describe('rules', () => {
     );
 
     expect(await screen.findByTestId('ruleStatusPanel')).toBeInTheDocument();
-    expect(mockRuleAlertList).toHaveBeenCalledWith(
+    expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
+
+    expect(mockAlertsTable).toHaveBeenCalledWith(
       expect.objectContaining({
-        items: expectedItems,
-        readOnly: false,
-        onMuteAction: expect.any(Function),
+        id: 'rule-detail-alerts-table',
+        ruleTypeIds: [ruleType.id],
+        showAlertStatusWithFlapping: true,
+        query: expect.any(Object),
       }),
       expect.anything()
     );

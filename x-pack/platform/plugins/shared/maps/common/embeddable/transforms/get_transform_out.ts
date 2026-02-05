@@ -6,22 +6,26 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
-import type { StoredMapEmbeddableState } from './types';
-import { MAP_SAVED_OBJECT_REF_NAME } from './get_transform_in';
-import type { MapByValueState } from '../types';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
+import { flow } from 'lodash';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
 import { transformMapAttributesOut } from '../../content_management/transform_map_attributes_out';
+import type { MapByValueState } from '../types';
+import { MAP_SAVED_OBJECT_REF_NAME } from './get_transform_in';
+import type { StoredMapEmbeddableState } from './types';
 
-export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['transformOut']) {
+export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
   function transformOut(
-    state: StoredMapEmbeddableState,
+    storedState: StoredMapEmbeddableState,
     panelReferences?: Reference[],
     containerReferences?: Reference[]
   ) {
-    const enhancementsState = state.enhancements
-      ? transformEnhancementsOut(state.enhancements, panelReferences ?? [])
-      : undefined;
+    const transformsFlow = flow(
+      transformTitlesOut<StoredMapEmbeddableState>,
+      (state: StoredMapEmbeddableState) => transformDrilldownsOut(state, panelReferences)
+    );
+    const state = transformsFlow(storedState);
 
     // by ref
     const savedObjectRef = (panelReferences ?? []).find(
@@ -30,7 +34,6 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
     if (savedObjectRef) {
       return {
         ...state,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         savedObjectId: savedObjectRef.id,
       };
     }
@@ -39,7 +42,6 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
     if ((state as MapByValueState).attributes) {
       return {
         ...state,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         attributes: transformMapAttributesOut(
           (state as MapByValueState).attributes,
           (targetName: string) => {
@@ -52,10 +54,7 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
       };
     }
 
-    return {
-      ...state,
-      ...(enhancementsState ? { enhancements: enhancementsState } : {}),
-    };
+    return state;
   }
   return transformOut;
 }

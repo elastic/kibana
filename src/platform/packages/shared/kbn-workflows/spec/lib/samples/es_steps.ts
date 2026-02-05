@@ -11,6 +11,7 @@
 // Document Operations: Create, read, update, delete documents
 // Search and Query: Execute searches and retrieve data
 // Index Operations: Create, list, delete indices
+// These sample steps are used to test validation in generateYamlSchemaFromConnectors.es.test.ts and getWorkflowJsonSchema.es.test.ts
 export const ES_VALID_SAMPLE_STEPS = [
   // Search operations
   {

@@ -146,6 +146,8 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
                 left={leftPercent}
                 color={displayedColor}
                 segments={segments}
+                duration={item.duration}
+                composite={item.composite}
               />
               <BarDetails item={item} left={leftPercent} />
             </div>

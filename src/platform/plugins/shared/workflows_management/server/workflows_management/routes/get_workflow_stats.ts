@@ -11,6 +11,7 @@ import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
+import { withLicenseCheck } from '../lib/with_license_check';
 
 export function registerGetWorkflowStatsRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.get(
@@ -20,7 +21,7 @@ export function registerGetWorkflowStatsRoute({ router, api, logger, spaces }: R
       security: WORKFLOW_READ_SECURITY,
       validate: false,
     },
-    async (context, request, response) => {
+    withLicenseCheck(async (context, request, response) => {
       try {
         const spaceId = spaces.getSpaceId(request);
         const stats = await api.getWorkflowStats(spaceId);
@@ -29,6 +30,6 @@ export function registerGetWorkflowStatsRoute({ router, api, logger, spaces }: R
       } catch (error) {
         return handleRouteError(response, error);
       }
-    }
+    })
   );
 }

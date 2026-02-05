@@ -18,13 +18,15 @@
       "presentationUtil",
       "visualizations",
       "dataViews",
-      "unifiedSearch",
+      "kql",
       "kibanaUtils",
-      "contentManagement"
+      "contentManagement",
+      "embeddable"
     ],
     "optionalPlugins": [
       "savedObjectsTagging",
-      "lens"
+      "lens",
+      "dashboard"
     ],
     "requiredBundles": [],
     "extraPublicDirs": []

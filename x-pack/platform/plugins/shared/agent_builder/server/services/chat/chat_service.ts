@@ -12,7 +12,6 @@ import type { Logger } from '@kbn/logging';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { InferenceChatModel } from '@kbn/inference-langchain';
 import {
   type ChatEvent,
   type ConverseInput,
@@ -69,11 +68,15 @@ class ChatServiceImpl implements ChatService {
     conversationId,
     connectorId,
     capabilities,
+    structuredOutput,
+    outputSchema,
+    storeConversation = true,
     request,
     abortSignal,
     nextInput: initialNextInput,
     autoCreateConversationWithId = false,
     browserApiTools,
+    configurationOverrides,
   }: ChatConverseParams): Observable<ChatEvent> {
     const { trackingService, analyticsService } = this.dependencies;
     const requestId = trackingService?.trackQueryStart();
@@ -116,9 +119,9 @@ class ChatServiceImpl implements ChatService {
         };
       }).pipe(
         switchMap((context) => {
-          // Emit conversation ID for new conversations
+          // Emit conversation ID for new conversations (only when persisting)
           const conversationIdEvent$ =
-            context.conversation.operation === 'CREATE'
+            storeConversation && context.conversation.operation === 'CREATE'
               ? of(createConversationIdSetEvent(context.conversation.id))
               : EMPTY;
 
@@ -128,11 +131,14 @@ class ChatServiceImpl implements ChatService {
             request,
             nextInput: context.effectiveNextInput,
             capabilities,
+            structuredOutput,
+            outputSchema,
             abortSignal,
             conversation: context.conversation,
             defaultConnectorId: context.selectedConnectorId,
             agentService: this.dependencies.agentService,
             browserApiTools,
+            configurationOverrides,
           }).pipe(
             mergeMap(
               runAfterConversationRoundHook({
@@ -155,15 +161,17 @@ class ChatServiceImpl implements ChatService {
                 })
               : of(context.conversation.title);
 
-          // Persist conversation
-          const persistenceEvents$ = persistConversation({
-            agentId,
-            conversation: context.conversation,
-            conversationClient: context.conversationClient,
-            conversationId,
-            title$,
-            agentEvents$,
-          });
+          // Persist conversation (optional)
+          const persistenceEvents$ = storeConversation
+            ? persistConversation({
+                agentId,
+                conversation: context.conversation,
+                conversationClient: context.conversationClient,
+                conversationId,
+                title$,
+                agentEvents$,
+              })
+            : EMPTY;
 
           // Merge all event streams
           const effectiveConversationId =

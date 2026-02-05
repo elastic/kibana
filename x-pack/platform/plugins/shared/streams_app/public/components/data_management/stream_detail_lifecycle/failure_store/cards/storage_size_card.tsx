@@ -24,7 +24,7 @@ export const StorageSizeCard = ({
   const title = i18n.translate(
     'xpack.streams.streamDetailView.failureStoreEnabled.failureStorageCard.title',
     {
-      defaultMessage: 'Failure storage size',
+      defaultMessage: 'Storage size',
     }
   );
 

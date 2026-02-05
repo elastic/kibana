@@ -74,10 +74,7 @@ describe('catchRetryableEsClientErrors', () => {
         expect(
           ((await Promise.reject(error).catch(catchRetryableEsClientErrors)) as any).left
         ).toMatchObject({
-          message:
-            status === 410
-              ? 'This API is unavailable in the version of Elasticsearch you are using.'
-              : 'reason',
+          message: 'reason',
           type: 'retryable_es_client_error',
         });
       }

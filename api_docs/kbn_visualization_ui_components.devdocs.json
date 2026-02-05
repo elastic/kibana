@@ -16,6 +16,8 @@
           " | undefined; onClick: () => void; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/chart_switch_trigger.tsx",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -33,6 +35,8 @@
               " | undefined; onClick: () => void; dataTestSubj?: string | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/chart_switch_trigger.tsx",
+            "lineNumber": 17,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -58,6 +62,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/color_picker.tsx",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -78,6 +84,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/color_picker.tsx",
+            "lineNumber": 38,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -99,6 +107,8 @@
           "(props: Props) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/debounced_input.tsx",
+        "lineNumber": 53,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -113,6 +123,8 @@
               "Props"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/debounced_input.tsx",
+            "lineNumber": 53,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -136,6 +148,8 @@
           ") => React.JSX.Element; }"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/dimension_button.tsx",
+        "lineNumber": 143,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -151,6 +165,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -168,6 +184,8 @@
           "({ children, title, }: { title?: string | undefined; children?: React.ReactNode | React.ReactNode[]; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_editor_section.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -179,6 +197,8 @@
             "label": "{\n  children,\n  title,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_editor_section.tsx",
+            "lineNumber": 17,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -193,6 +213,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_editor_section.tsx",
+                "lineNumber": 18,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -207,6 +229,8 @@
                   "React.ReactNode | React.ReactNode[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_editor_section.tsx",
+                "lineNumber": 19,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -229,6 +253,8 @@
           ".Color | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -240,6 +266,8 @@
             "label": "{\n  id,\n  label,\n  color,\n  dataTestSubj,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
+            "lineNumber": 35,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -254,6 +282,8 @@
                   "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
+                "lineNumber": 36,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -268,6 +298,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
+                "lineNumber": 37,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -284,6 +316,8 @@
                   ".Color | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
+                "lineNumber": 38,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -298,6 +332,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
+                "lineNumber": 39,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -320,6 +356,8 @@
           " | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -331,6 +369,8 @@
             "label": "{\n  items,\n  onDragStart,\n  onDragEnd,\n  droppableId,\n  children,\n  bgColor,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+            "lineNumber": 72,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -345,6 +385,8 @@
                   "T[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+                "lineNumber": 73,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -356,6 +398,8 @@
                 "label": "droppableId",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+                "lineNumber": 74,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -370,6 +414,8 @@
                   "React.ReactElement<any, string | React.JSXElementConstructor<any>>[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+                "lineNumber": 75,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -384,6 +430,8 @@
                   "(() => void) | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+                "lineNumber": 76,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -400,6 +448,8 @@
                   "((items: T[]) => void) | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+                "lineNumber": 77,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -414,6 +464,8 @@
                       "T[]"
                     ],
                     "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+                    "lineNumber": 77,
+                    "columnNumber": 16,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -433,6 +485,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+                "lineNumber": 78,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -477,6 +531,8 @@
           ", \"draggableProvided\">>>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -514,6 +570,8 @@
               ", \"draggableProvided\">>>"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+            "lineNumber": 24,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -533,6 +591,8 @@
           "({ label, ariaLabel, onClick, dataTestSubj, iconType, ...otherProps }: { label: React.ReactNode; ariaLabel: string; onClick: () => void; dataTestSubj?: string | undefined; iconType?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -544,6 +604,8 @@
             "label": "{\n  label,\n  ariaLabel,\n  onClick,\n  dataTestSubj,\n  iconType,\n  ...otherProps // from Drag&Drop integration\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
+            "lineNumber": 23,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -558,6 +620,8 @@
                   "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
+                "lineNumber": 24,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -569,6 +633,8 @@
                 "label": "ariaLabel",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
+                "lineNumber": 25,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -583,6 +649,8 @@
                   "() => void"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
+                "lineNumber": 26,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -599,6 +667,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
+                "lineNumber": 27,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -613,6 +683,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
+                "lineNumber": 28,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -635,6 +707,8 @@
           "<T>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/field_picker/field_picker.tsx",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -650,6 +724,8 @@
               "<T>"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/field_picker/field_picker.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -671,6 +747,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/fields_bucket_container.tsx",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -685,6 +763,8 @@
               "BucketContainerProps"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/fields_bucket_container.tsx",
+            "lineNumber": 23,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -706,6 +786,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -720,6 +802,8 @@
               "FilterQueryInputProps"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
+            "lineNumber": 58,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -741,6 +825,8 @@
           "(icon: string | undefined) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -755,6 +841,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
+            "lineNumber": 22,
+            "columnNumber": 25,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -782,6 +870,8 @@
           "<Icon>; defaultIcon?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -793,6 +883,8 @@
             "label": "{\n  value,\n  onChange,\n  customIconSet,\n  defaultIcon = 'empty',\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
+            "lineNumber": 47,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -807,6 +899,8 @@
                   "Icon | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
+                "lineNumber": 48,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -821,6 +915,8 @@
                   "(newIcon: Icon) => void"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
+                "lineNumber": 49,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -835,6 +931,8 @@
                       "Icon"
                     ],
                     "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
+                    "lineNumber": 49,
+                    "columnNumber": 14,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -855,6 +953,8 @@
                   " | Icon | undefined; shouldRotate?: boolean | undefined; }[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
+                "lineNumber": 50,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -869,6 +969,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
+                "lineNumber": 51,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -897,6 +999,8 @@
           "<Icon>; defaultIcon?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
+        "lineNumber": 85,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -908,6 +1012,8 @@
             "label": "{\n  currentIcon,\n  setIcon,\n  customIconSet,\n  defaultIcon = 'empty',\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
+            "lineNumber": 90,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -922,6 +1028,8 @@
                   "Icon | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
+                "lineNumber": 91,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -936,6 +1044,8 @@
                   "(icon: Icon) => void"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
+                "lineNumber": 92,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -950,6 +1060,8 @@
                       "Icon"
                     ],
                     "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
+                    "lineNumber": 92,
+                    "columnNumber": 13,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -970,6 +1082,8 @@
                   " | Icon | undefined; shouldRotate?: boolean | undefined; }[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
+                "lineNumber": 93,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -984,6 +1098,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
+                "lineNumber": 94,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1010,6 +1126,8 @@
           " | T | undefined; shouldRotate?: boolean | undefined; }) => number"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1026,6 +1144,8 @@
               " | T | undefined; shouldRotate?: boolean | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
+            "lineNumber": 29,
+            "columnNumber": 52,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1043,6 +1163,8 @@
               " | T | undefined; shouldRotate?: boolean | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
+            "lineNumber": 29,
+            "columnNumber": 75,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1070,6 +1192,8 @@
           ") => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1090,6 +1214,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
+            "lineNumber": 16,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1125,6 +1251,8 @@
           ") => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/helpers.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1145,6 +1273,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/helpers.ts",
+            "lineNumber": 33,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1166,6 +1296,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/helpers.ts",
+            "lineNumber": 33,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1185,6 +1317,8 @@
           "({ currentConfig, setConfig, idPrefix, }: { currentConfig?: LineStyleConfig | undefined; setConfig: (config: LineStyleConfig) => void; idPrefix: string; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/line_style_settings.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1196,6 +1330,8 @@
             "label": "{\n  currentConfig,\n  setConfig,\n  idPrefix,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/line_style_settings.tsx",
+            "lineNumber": 30,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1210,6 +1346,8 @@
                   "LineStyleConfig | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/line_style_settings.tsx",
+                "lineNumber": 31,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1224,6 +1362,8 @@
                   "(config: LineStyleConfig) => void"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/line_style_settings.tsx",
+                "lineNumber": 32,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1238,6 +1378,8 @@
                       "LineStyleConfig"
                     ],
                     "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/line_style_settings.tsx",
+                    "lineNumber": 32,
+                    "columnNumber": 15,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -1253,6 +1395,8 @@
                 "label": "idPrefix",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/line_style_settings.tsx",
+                "lineNumber": 33,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1273,6 +1417,8 @@
           "({ value, onChange, defaultValue, }: { value: string; onChange: (value: string) => void; defaultValue?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/name_input.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1284,6 +1430,8 @@
             "label": "{\n  value,\n  onChange,\n  defaultValue,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/name_input.tsx",
+            "lineNumber": 19,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1295,6 +1443,8 @@
                 "label": "value",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/name_input.tsx",
+                "lineNumber": 20,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1309,6 +1459,8 @@
                   "(value: string) => void"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/name_input.tsx",
+                "lineNumber": 21,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1323,6 +1475,8 @@
                       "string"
                     ],
                     "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/name_input.tsx",
+                    "lineNumber": 21,
+                    "columnNumber": 14,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -1341,6 +1495,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/name_input.tsx",
+                "lineNumber": 22,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1361,6 +1517,8 @@
           "({ label, onClick, isDisabled, \"data-test-subj\": dataTestSubj, }: NewBucketButtonProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/new_bucket_button.tsx",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1375,6 +1533,8 @@
               "NewBucketButtonProps"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/new_bucket_button.tsx",
+            "lineNumber": 20,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1391,7 +1551,7 @@
         "label": "QueryInput",
         "description": [],
         "signature": [
-          "({ value, onChange, dataView, isInvalid, onSubmit, disableAutoFocus, [\"data-test-subj\"]: dataTestSubj, placeholder, appName, services: { data, uiSettings, http, notifications, docLinks, storage, unifiedSearch, dataViews }, }: { value: ",
+          "({ value, onChange, dataView, isInvalid, onSubmit, disableAutoFocus, [\"data-test-subj\"]: dataTestSubj, placeholder, appName, services: { data, uiSettings, http, notifications, docLinks, storage, kql, dataViews }, }: { value: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1418,6 +1578,8 @@
           "; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1426,9 +1588,11 @@
             "id": "def-public.QueryInput.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  value,\n  onChange,\n  dataView,\n  isInvalid,\n  onSubmit,\n  disableAutoFocus,\n  ['data-test-subj']: dataTestSubj,\n  placeholder,\n  appName,\n  services: { data, uiSettings, http, notifications, docLinks, storage, unifiedSearch, dataViews },\n}",
+            "label": "{\n  value,\n  onChange,\n  dataView,\n  isInvalid,\n  onSubmit,\n  disableAutoFocus,\n  ['data-test-subj']: dataTestSubj,\n  placeholder,\n  appName,\n  services: { data, uiSettings, http, notifications, docLinks, storage, kql, dataViews },\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "lineNumber": 47,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1443,6 +1607,8 @@
                   "{ query: string | { [key: string]: any; }; language: string; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "lineNumber": 48,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1465,6 +1631,8 @@
                   ") => void"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "lineNumber": 49,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1485,6 +1653,8 @@
                       }
                     ],
                     "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                    "lineNumber": 49,
+                    "columnNumber": 14,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -1503,6 +1673,8 @@
                   "string | { type: \"id\" | \"title\"; value: string; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "lineNumber": 50,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1514,6 +1686,8 @@
                 "label": "isInvalid",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "lineNumber": 51,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1528,6 +1702,8 @@
                   "() => void"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "lineNumber": 52,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -1544,6 +1720,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "lineNumber": 53,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1558,6 +1736,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "lineNumber": 54,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1572,6 +1752,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "lineNumber": 55,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1583,6 +1765,8 @@
                 "label": "appName",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "lineNumber": 56,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1603,6 +1787,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "lineNumber": 57,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1623,6 +1809,8 @@
           "({\n  idPrefix,\n  currentConfig,\n  setConfig,\n  isQueryBased,\n  children,\n}: { idPrefix: string; currentConfig?: TextDecorationConfig | undefined; setConfig: (config: TextDecorationConfig) => void; isQueryBased?: boolean | undefined; children?: ((textDecoration: \"name\" | \"none\" | \"field\") => JSX.Element | null) | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1634,6 +1822,8 @@
             "label": "{\n  idPrefix,\n  currentConfig,\n  setConfig,\n  isQueryBased,\n  children,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+            "lineNumber": 38,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1645,6 +1835,8 @@
                 "label": "idPrefix",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+                "lineNumber": 39,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1659,6 +1851,8 @@
                   "TextDecorationConfig | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+                "lineNumber": 40,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1673,6 +1867,8 @@
                   "(config: TextDecorationConfig) => void"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+                "lineNumber": 41,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1687,6 +1883,8 @@
                       "TextDecorationConfig"
                     ],
                     "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+                    "lineNumber": 41,
+                    "columnNumber": 15,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -1705,6 +1903,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+                "lineNumber": 42,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1721,6 +1921,8 @@
                   "((textDecoration: \"name\" | \"none\" | \"field\") => JSX.Element | null) | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+                "lineNumber": 43,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1735,6 +1937,8 @@
                       "\"name\" | \"none\" | \"field\""
                     ],
                     "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+                    "lineNumber": 44,
+                    "columnNumber": 15,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -1775,6 +1979,8 @@
           ") => { isValid: boolean; error: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/helpers.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1796,6 +2002,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/helpers.ts",
+            "lineNumber": 13,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1817,6 +2025,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/helpers.ts",
+            "lineNumber": 13,
+            "columnNumber": 57,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1835,6 +2045,8 @@
         "label": "AccessorConfig",
         "description": [],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1846,6 +2058,8 @@
             "label": "columnId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1860,6 +2074,8 @@
               "\"none\" | \"color\" | \"disabled\" | \"aggregate\" | \"custom\" | \"colorBy\" | \"invisible\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1875,6 +2091,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1889,6 +2107,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1903,6 +2123,8 @@
               "string[] | { color: string; stop: number; }[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1917,6 +2139,8 @@
         "label": "ColorPickerProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/color_picker.tsx",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1931,6 +2155,8 @@
               "string | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/color_picker.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1945,6 +2171,8 @@
               "string | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/color_picker.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1959,6 +2187,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/color_picker.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1973,6 +2203,8 @@
               "(config: { color?: string | undefined; }) => void"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/color_picker.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1984,6 +2216,8 @@
                 "label": "config",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/color_picker.tsx",
+                "lineNumber": 30,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1998,6 +2232,8 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/color_picker.tsx",
+                    "lineNumber": 30,
+                    "columnNumber": 25,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2017,6 +2253,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/color_picker.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2031,6 +2269,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/color_picker.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2045,6 +2285,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/color_picker.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2059,6 +2301,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/color_picker.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2073,6 +2317,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/color_picker.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2087,6 +2333,8 @@
         "label": "FieldOptionValue",
         "description": [],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/field_picker/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2101,6 +2349,8 @@
               "\"field\""
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/field_picker/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2112,6 +2362,8 @@
             "label": "field",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/field_picker/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2133,6 +2385,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/field_picker/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2147,6 +2401,8 @@
         "label": "QueryInputServices",
         "description": [],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2161,6 +2417,8 @@
               "HttpSetup"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2182,6 +2440,8 @@
               "<any, void>"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2202,6 +2462,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2222,6 +2484,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2236,6 +2500,8 @@
               "IUiSettingsClient"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2250,26 +2516,30 @@
               "NotificationsStart"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/visualization-ui-components",
-            "id": "def-public.QueryInputServices.unifiedSearch",
+            "id": "def-public.QueryInputServices.kql",
             "type": "Object",
             "tags": [],
-            "label": "unifiedSearch",
+            "label": "kql",
             "description": [],
             "signature": [
               {
-                "pluginId": "unifiedSearch",
+                "pluginId": "kql",
                 "scope": "public",
-                "docId": "kibUnifiedSearchPluginApi",
-                "section": "def-public.UnifiedSearchPublicPluginStart",
-                "text": "UnifiedSearchPublicPluginStart"
+                "docId": "kibKqlPluginApi",
+                "section": "def-public.KqlPluginStart",
+                "text": "KqlPluginStart"
               }
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2284,6 +2554,8 @@
               "DocLinksStart"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2304,6 +2576,8 @@
           "\"string\" | \"number\" | \"boolean\" | \"date\" | FieldOnlyDataType"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/field_picker/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2316,6 +2590,8 @@
         "label": "emptyTitleText",
         "description": [],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2333,6 +2609,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/field_picker/types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2371,6 +2649,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2401,6 +2681,8 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2420,6 +2702,8 @@
           " | T | undefined; shouldRotate?: boolean | undefined; }[]"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2435,6 +2719,8 @@
           "\"dashed\" | \"solid\" | \"dotted\""
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2460,6 +2746,8 @@
           "; label: string; icon?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; shouldRotate?: boolean | undefined; }[]"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2475,6 +2763,8 @@
           "\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"empty\" | \"flag\" | \"heart\" | \"mapMarker\" | \"starEmpty\""
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

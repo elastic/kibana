@@ -287,7 +287,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('dashboard does not load with unsaved changes when changes are discarded', async () => {
           await dashboard.switchToEditMode();
-          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+          await dashboard.ensureMissingUnsavedChangesNotification();
         });
       });
     });

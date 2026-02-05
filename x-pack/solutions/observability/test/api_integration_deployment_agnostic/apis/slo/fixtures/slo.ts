@@ -39,15 +39,21 @@ export function createDummySummaryDoc(
   sloId: string,
   instanceId: string,
   summaryUpdatedAt: string,
-  spaceId: string = TEST_SPACE_ID
+  spaceId: string = TEST_SPACE_ID,
+  overrides?: {
+    name?: string;
+    description?: string;
+    tags?: string[];
+    groupBy?: string | string[];
+  }
 ): EsSummaryDocument {
   return {
     slo: {
       id: sloId,
       instanceId,
       revision: 1,
-      name: `Test SLO ${sloId}`,
-      description: 'Test description',
+      name: overrides?.name ?? `Test SLO ${sloId}`,
+      description: overrides?.description ?? 'Test description',
       indicator: {
         type: 'sli.kql.custom',
         params: {
@@ -66,8 +72,8 @@ export function createDummySummaryDoc(
       objective: {
         target: 0.99,
       },
-      tags: ['test'],
-      groupBy: '*',
+      tags: overrides?.tags ?? ['test'],
+      groupBy: overrides?.groupBy ?? '*',
       groupings: {},
     },
     service: {
@@ -119,14 +125,52 @@ export function createDummySummaryDoc(
   };
 }
 
+interface GroupedSummaryDocOptions {
+  spaceId?: string;
+  status?: 'HEALTHY' | 'DEGRADING' | 'VIOLATED' | 'NO_DATA';
+  indicator?: {
+    type: string;
+    params: Record<string, unknown>;
+  };
+  service?: {
+    name: string | null;
+    environment: string | null;
+  };
+}
+
+const STATUS_CODE_MAP = { HEALTHY: 1, DEGRADING: 2, VIOLATED: 3, NO_DATA: 0 };
+
+const DEFAULT_INDICATOR = {
+  type: 'sli.kql.custom',
+  params: {
+    index: 'test-index',
+    filter: '',
+    good: 'test: good',
+    total: 'test: *',
+    timestampField: '@timestamp',
+  },
+};
+
 export function createGroupedSummaryDoc(
   sloId: string,
   groupBy: string[],
   groupingValues: Record<string, string>,
   summaryUpdatedAt: string,
-  spaceId: string = TEST_SPACE_ID
+  optionsOrSpaceId: GroupedSummaryDocOptions | string = {}
 ): EsSummaryDocument {
+  // Support legacy signature where 5th param was spaceId string
+  const options: GroupedSummaryDocOptions =
+    typeof optionsOrSpaceId === 'string' ? { spaceId: optionsOrSpaceId } : optionsOrSpaceId;
+
+  const {
+    spaceId = TEST_SPACE_ID,
+    status = 'HEALTHY',
+    indicator = DEFAULT_INDICATOR,
+    service = { name: null, environment: null },
+  } = options;
+
   const instanceId = groupBy.map((key) => groupingValues[key]).join(',');
+
   return {
     slo: {
       id: sloId,
@@ -134,16 +178,7 @@ export function createGroupedSummaryDoc(
       revision: 1,
       name: `Test SLO ${sloId}`,
       description: 'Test description',
-      indicator: {
-        type: 'sli.kql.custom',
-        params: {
-          index: 'test-index',
-          filter: '',
-          good: 'test: good',
-          total: 'test: *',
-          timestampField: '@timestamp',
-        },
-      },
+      indicator: indicator as EsSummaryDocument['slo']['indicator'],
       timeWindow: {
         duration: '7d',
         type: 'rolling',
@@ -156,10 +191,7 @@ export function createGroupedSummaryDoc(
       groupBy,
       groupings: groupingValues,
     },
-    service: {
-      environment: null,
-      name: null,
-    },
+    service,
     transaction: {
       name: null,
       type: null,
@@ -174,15 +206,15 @@ export function createGroupedSummaryDoc(
       },
       name: null,
     },
-    goodEvents: 100,
+    goodEvents: status === 'HEALTHY' ? 100 : status === 'DEGRADING' ? 95 : 80,
     totalEvents: 100,
-    sliValue: 1,
+    sliValue: status === 'HEALTHY' ? 1 : status === 'DEGRADING' ? 0.95 : 0.8,
     errorBudgetInitial: 0.01,
-    errorBudgetConsumed: 0,
-    errorBudgetRemaining: 1,
+    errorBudgetConsumed: status === 'HEALTHY' ? 0 : status === 'DEGRADING' ? 0.5 : 1,
+    errorBudgetRemaining: status === 'HEALTHY' ? 1 : status === 'DEGRADING' ? 0.5 : 0,
     errorBudgetEstimated: false,
-    statusCode: 1,
-    status: 'HEALTHY',
+    statusCode: STATUS_CODE_MAP[status],
+    status,
     isTempDoc: false,
     spaceId,
     summaryUpdatedAt,
@@ -203,4 +235,49 @@ export function createGroupedSummaryDoc(
       value: 0,
     },
   };
+}
+
+/** Helper to create APM SLO summary docs with sensible defaults */
+export function createApmSummaryDoc(
+  sloId: string,
+  serviceName: string,
+  status: 'HEALTHY' | 'DEGRADING' | 'VIOLATED' | 'NO_DATA',
+  summaryUpdatedAt: string,
+  options: {
+    environment?: string;
+    indicatorType?: 'sli.apm.transactionDuration' | 'sli.apm.transactionErrorRate';
+    spaceId?: string;
+  } = {}
+): EsSummaryDocument {
+  const {
+    environment = 'production',
+    indicatorType = 'sli.apm.transactionDuration',
+    spaceId,
+  } = options;
+
+  return createGroupedSummaryDoc(
+    sloId,
+    ['service.name'],
+    { 'service.name': serviceName },
+    summaryUpdatedAt,
+    {
+      spaceId,
+      status,
+      indicator: {
+        type: indicatorType,
+        params: {
+          service: serviceName,
+          environment,
+          transactionType: 'request',
+          transactionName: '',
+          threshold: 500,
+          index: 'metrics-apm*',
+        },
+      },
+      service: {
+        name: serviceName,
+        environment,
+      },
+    }
+  );
 }

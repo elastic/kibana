@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { Streams, System } from '@kbn/streams-schema';
+import { omit } from 'lodash';
+import type { Feature, Streams, System } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
+import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
@@ -17,6 +19,7 @@ import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
 import { sumTokens } from '../helpers/sum_tokens';
+import { getComputedFeatureInstructions } from '../features/computed';
 
 interface Query {
   kql: string;
@@ -35,18 +38,19 @@ interface Query {
 export async function generateSignificantEvents({
   stream,
   system,
+  features,
   start,
   end,
   esClient,
   inferenceClient,
   signal,
   sampleDocsSize,
-  // optional overrides for templates
-  systemPromptOverride,
+  systemPrompt,
   logger,
 }: {
   stream: Streams.all.Definition;
   system?: System;
+  features: Feature[];
   start: number;
   end: number;
   esClient: ElasticsearchClient;
@@ -54,37 +58,43 @@ export async function generateSignificantEvents({
   signal: AbortSignal;
   logger: Logger;
   sampleDocsSize?: number;
-  systemPromptOverride?: string;
+  systemPrompt: string;
 }): Promise<{
   queries: Query[];
   tokensUsed: ChatCompletionTokenCount;
 }> {
   logger.debug('Starting significant event generation');
 
-  logger.trace('Describing dataset for significant event generation');
-  const analysis = await withSpan('describe_dataset_for_significant_event_generation', () =>
-    describeDataset({
-      sampleDocsSize,
-      start,
-      end,
-      esClient,
-      index: stream.name,
-      filter: system?.filter ? conditionToQueryDsl(system.filter) : undefined,
-    })
-  );
+  let formattedAnalysis: FormattedDocumentAnalysis | undefined;
 
-  // create the prompt instance using provided overrides (if any)
-  const prompt = createGenerateSignificantEventsPrompt({
-    systemPromptOverride,
-  });
+  if (system?.filter) {
+    logger.trace('Describing dataset for significant event generation (with filter)');
+    const analysis = await withSpan('describe_dataset_for_significant_event_generation', () =>
+      describeDataset({
+        sampleDocsSize,
+        start,
+        end,
+        esClient,
+        index: stream.name,
+        filter: conditionToQueryDsl(system.filter),
+      })
+    );
+    formattedAnalysis = formatDocumentAnalysis(analysis, { dropEmpty: true });
+  }
+
+  const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
 
   logger.trace('Generating significant events via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
     executeAsReasoningAgent({
       input: {
         name: system?.name || stream.name,
-        dataset_analysis: JSON.stringify(formatDocumentAnalysis(analysis, { dropEmpty: true })),
+        dataset_analysis: formattedAnalysis ? JSON.stringify(formattedAnalysis) : '',
         description: system?.description || stream.description,
+        features: JSON.stringify(
+          features.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
+        ),
+        computed_feature_instructions: getComputedFeatureInstructions(),
       },
       maxSteps: 4,
       prompt,

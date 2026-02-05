@@ -7,27 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiBadge,
-  EuiLink,
-  EuiFlyout,
-  EuiFlexGroup,
-  EuiSpacer,
-  EuiCodeBlock,
-  EuiTitle,
-  EuiButton,
-  EuiFlexItem,
-} from '@elastic/eui';
-import type { RowControlColumn } from '@kbn/discover-utils';
-import { AppMenuActionId, AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
+import { EuiBadge, EuiFlyout, EuiLink } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { RowControlColumn } from '@kbn/discover-utils';
+import { AppMenuActionId, getFieldValue } from '@kbn/discover-utils';
 import { capitalize } from 'lodash';
 import React from 'react';
 import type { DataSourceProfileProvider } from '../../../profiles';
-import { ChartWithCustomButtons } from './components';
 import { DataSourceCategory } from '../../../profiles';
-import { useExampleContext } from '../example_context';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
+import { useExampleContext } from '../example_context';
+import { ChartWithCustomButtons } from './components';
+import { CustomDocView } from './components/custom_doc_view';
+import { RestorableStateDocView } from './components/restorable_state_doc_view';
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
@@ -98,63 +90,20 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               id: 'doc_view_example',
               title: 'Example',
               order: 0,
-              component: () => (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-                    <EuiFlexGroup
-                      direction="row"
-                      gutterSize="s"
-                      justifyContent="spaceBetween"
-                      alignItems="flexEnd"
-                      responsive={false}
-                    >
-                      <EuiTitle size="xs">
-                        <h3 data-test-subj="exampleDataSourceProfileDocView">Example doc view</h3>
-                      </EuiTitle>
-                      {(openInNewTab || updateESQLQuery) && (
-                        <EuiFlexItem grow={false}>
-                          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-                            {updateESQLQuery && (
-                              <EuiButton
-                                color="text"
-                                size="s"
-                                onClick={() => {
-                                  updateESQLQuery('FROM my-example-logs | LIMIT 5');
-                                }}
-                                data-test-subj="exampleDataSourceProfileDocViewUpdateEsqlQuery"
-                              >
-                                Update ES|QL query
-                              </EuiButton>
-                            )}
-                            {openInNewTab && (
-                              <EuiButton
-                                color="text"
-                                size="s"
-                                onClick={() => {
-                                  openInNewTab({
-                                    tabLabel: 'My new tab',
-                                    query: { esql: 'FROM my-example-logs | LIMIT 5' },
-                                  });
-                                }}
-                                data-test-subj="exampleDataSourceProfileDocViewOpenNewTab"
-                              >
-                                Open new tab
-                              </EuiButton>
-                            )}
-                          </EuiFlexGroup>
-                        </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
-                    <EuiCodeBlock
-                      language="json"
-                      data-test-subj="exampleDataSourceProfileDocViewRecord"
-                    >
-                      {context.formatRecord(params.record.flattened)}
-                    </EuiCodeBlock>
-                  </EuiFlexGroup>
-                </>
+              render: () => (
+                <CustomDocView
+                  formattedRecord={context.formatRecord(params.record.flattened)}
+                  openInNewTab={openInNewTab}
+                  updateESQLQuery={updateESQLQuery}
+                />
               ),
+            });
+
+            registry.add({
+              id: 'doc_view_restorable_state_example',
+              title: 'Restorable State Example',
+              order: 1,
+              render: (props) => <RestorableStateDocView {...props} />,
             });
 
             return prevValue.docViewsRegistry(registry);
@@ -162,7 +111,8 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
         };
       },
     /**
-     * The `getAppMenu` extension point gives access to AppMenuRegistry with methods registerCustomAction and registerCustomActionUnderSubmenu.
+     * The `getAppMenu` extension point gives access to AppMenuRegistry with methods `registerCustomItem` and
+     * `registerCustomPopoverItem`.
      * The extension also provides the essential params like current dataView, adHocDataViews etc when defining a custom action implementation.
      * And it supports opening custom flyouts and any other modals on the click.
      * `getAppMenu` can be configured in both root and data source profiles.
@@ -179,17 +129,17 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           // Note: Only 2 custom actions are allowed to be rendered in the app menu. The rest will be ignored.
 
           // Can be a on-click action, link or a submenu with an array of actions and horizontal rules
-          registry.registerCustomAction({
+          registry.registerCustomItem({
             id: 'example-custom-action',
-            type: AppMenuActionType.custom,
-            controlProps: {
-              label: 'Custom action',
-              testId: 'example-custom-action',
-              onClick: ({ onFinishAction }) => {
-                alert('Example Custom action clicked');
-                onFinishAction(); // This allows to return focus back to the app menu DOM node
-              },
+            order: 1,
+            label: 'Custom action',
+            testId: 'example-custom-action',
+            iconType: 'logoElasticsearch',
+            run: ({ context: { onFinishAction } }) => {
+              alert('Example Custom action clicked');
+              onFinishAction(); // This allows to return focus back to the app menu DOM node
             },
+
             // In case of a submenu, you can add actions to it under `actions`
             // actions: [
             //   {
@@ -212,39 +162,34 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           });
 
           // This example shows how to add a custom action under the Alerts submenu
-          registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
+          registry.registerCustomPopoverItem(AppMenuActionId.alerts, {
             // It's also possible to override the submenu actions by using the same id
             // as `AppMenuActionId.createRule` or `AppMenuActionId.manageRulesAndConnectors`
             id: 'example-custom-action4',
-            type: AppMenuActionType.custom,
             order: 101,
-            controlProps: {
-              label: 'Create SLO (Custom action)',
-              iconType: 'visGauge',
-              testId: 'example-custom-action-under-alerts',
-              onClick: ({ onFinishAction }) => {
-                // This is an example of a custom action that opens a flyout or any other custom modal.
-                // To do so, simply return a React element and call onFinishAction when you're done.
-                return (
-                  <EuiFlyout onClose={onFinishAction}>
-                    <div>Example custom action clicked</div>
-                  </EuiFlyout>
-                );
-              },
+            label: 'Create SLO (Custom action)',
+            iconType: 'visGauge',
+            testId: 'example-custom-action-under-alerts',
+            run: ({ context: { onFinishAction } }) => {
+              // This is an example of a custom action that opens a flyout or any other custom modal.
+              // To do so, simply return a React element and call onFinishAction when you're done.
+              return (
+                <EuiFlyout onClose={onFinishAction}>
+                  <div>Example custom action clicked</div>
+                </EuiFlyout>
+              );
             },
           });
 
           // This submenu was defined in the root profile example_root_pofile/profile.tsx
           // And we can still add actions to it from the data source profile here.
-          registry.registerCustomActionUnderSubmenu('example-custom-root-submenu', {
+          registry.registerCustomPopoverItem('example-custom-root-submenu', {
             id: 'example-custom-action5',
-            type: AppMenuActionType.custom,
-            controlProps: {
-              label: 'Custom action (from Data Source profile)',
-              onClick: ({ onFinishAction }) => {
-                alert('Example Data source action under root submenu clicked');
-                onFinishAction();
-              },
+            order: 1,
+            label: 'Custom action (from Data Source profile)',
+            run: ({ context: { onFinishAction } }) => {
+              alert('Example Data source action under root submenu clicked');
+              onFinishAction();
             },
           });
 
@@ -294,9 +239,9 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       ],
       rowHeight: 5,
     }),
-    getAdditionalCellActions: (prev) => () =>
+    getAdditionalCellActions: (prev) => (params) =>
       [
-        ...prev(),
+        ...prev(params),
         {
           id: 'example-data-source-action',
           getDisplayName: () => 'Example data source action',

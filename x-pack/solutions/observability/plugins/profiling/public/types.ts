@@ -28,6 +28,7 @@ import type {
   UnifiedSearchPublicPluginStart,
   UnifiedSearchPluginSetup,
 } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginSetup, KqlPluginStart } from '@kbn/kql/public';
 
 export interface ProfilingPluginPublicSetupDeps {
   observability: ObservabilityPublicSetup;
@@ -38,6 +39,7 @@ export interface ProfilingPluginPublicSetupDeps {
   charts: ChartsPluginSetup;
   share: SharePluginSetup;
   unifiedSearch: UnifiedSearchPluginSetup;
+  kql: KqlPluginSetup;
 }
 
 export interface ProfilingPluginPublicStartDeps {
@@ -49,5 +51,6 @@ export interface ProfilingPluginPublicStartDeps {
   charts: ChartsPluginStart;
   share: SharePluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   licensing: LicensingPluginStart;
 }

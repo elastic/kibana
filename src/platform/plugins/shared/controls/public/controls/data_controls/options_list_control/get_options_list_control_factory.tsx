@@ -21,7 +21,11 @@ import {
   skip,
 } from 'rxjs';
 
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import {
+  DEFAULT_SEARCH_TECHNIQUE,
+  OPTIONS_LIST_CONTROL,
+  OPTIONS_LIST_DEFAULT_SORT,
+} from '@kbn/controls-constants';
 import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
@@ -36,11 +40,7 @@ import {
   type DataControlStateManager,
 } from '../data_control_manager';
 import { OptionsListControl } from './components/options_list_control';
-import {
-  DEFAULT_SEARCH_TECHNIQUE,
-  MIN_OPTIONS_LIST_REQUEST_SIZE,
-  OPTIONS_LIST_DEFAULT_SORT,
-} from './constants';
+import { MIN_OPTIONS_LIST_REQUEST_SIZE } from './constants';
 import {
   editorComparators,
   initializeEditorStateManager,
@@ -226,9 +226,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         });
 
       /** Output filters when selections and/or filter meta data changes */
-      const sectionId$ = apiHasSections(parentApi)
-        ? parentApi.getPanelSection$(uuid)
-        : of(undefined);
+      const sectionId$ = apiHasSections(parentApi) ? parentApi.panelSection$(uuid) : of(undefined);
 
       const outputFilterSubscription = combineLatest([
         dataControlManager.api.dataViews$,

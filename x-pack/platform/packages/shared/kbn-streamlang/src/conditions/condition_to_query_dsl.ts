@@ -70,6 +70,8 @@ function conditionToClause(condition: FilterCondition) {
 
       return { range: { [condition.field]: rangeQuery } };
     }
+    case 'includes':
+      return { terms: { [condition.field]: [value] } };
     default:
       return { match_none: {} };
   }

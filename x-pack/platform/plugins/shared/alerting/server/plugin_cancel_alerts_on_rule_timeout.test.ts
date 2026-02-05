@@ -21,7 +21,7 @@ import type { AlertingConfig } from './config';
 import type { RuleType } from './types';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { dataPluginMock as autocompletePluginMock } from '@kbn/unified-search-plugin/server/mocks';
+import { dataPluginMock as autocompletePluginMock } from '@kbn/kql/server/mocks';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
 import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
@@ -64,7 +64,7 @@ describe('Alerting Plugin - cancelAlertsOnRuleTimeout', () => {
       monitoringCollection: monitoringCollectionMock.createSetup(),
       data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
       features: featuresPluginMock.createSetup(),
-      unifiedSearch: autocompletePluginMock.createSetupContract(),
+      kql: autocompletePluginMock.createSetupContract(),
     };
 
     let context: PluginInitializerContextMock<AlertingConfig>;

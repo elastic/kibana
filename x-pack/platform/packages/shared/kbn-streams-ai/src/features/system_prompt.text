@@ -1,0 +1,331 @@
+You are extracting **features** from log data. Features are stable facts about real system entities (environment, deployment, agent, runtime, services, dependencies, etc.) that are **actively used by the system** and **explicitly supported by log evidence**. Do not extract technologies that are only mentioned as missing, unavailable, or in negative contexts. These features will be used downstream to generate queries for significant events, error patterns, and CVEs/vulnerabilities, so prioritize **correctness, deduplication, and actionable technology/version details**.
+
+Every feature you output MUST include ALL required fields:
+- `type` (string): one of `infrastructure`, `technology`, `dependency`
+- `subtype` (string): categorization within the type (e.g. `operating_system`, `programming_language`, `service_dependency`)
+- `id` (string): unique concise identifier for deduplication across runs (e.g. "aws-deployment", "log4j-2.14.1", "api-user-http")
+- `title` (string): very short human-readable title for UI display (e.g. "Ubuntu 20.04", "Log4j 2.14.1", "api-service → user-service"). Keep it to a few words; it can summarize type + key properties (e.g. technology + version or source → target for dependencies).
+- `description` (string): a short summary of what the feature represents
+- `properties` (object): stable, low-cardinality key facts for deduplication
+- `confidence` (number): 0–100
+- `evidence` (array of strings): supporting evidence from logs (2–5 items)
+- `tags` (array of strings): descriptive tags
+- `meta` (object): supplementary information that doesn't fit in `properties` - use for high-cardinality data, contextual notes, or interesting observations (can be `{}`)
+
+## Feature Types
+
+Extract features in three categories:
+- **infrastructure**: cloud provider/deployment, container orchestration, operating systems
+  - Example subtypes: `cloud_deployment`, `container_orchestration`, `operating_system`
+  - Do NOT extract runtime metrics (CPU count, memory allocation) as features—these are instance-specific, not system features
+- **technology**: programming languages, web servers, databases, libraries, frameworks, caches
+  - Example subtypes: `programming_language`, `web_server`, `database`, `logging_library`, `cache`
+  - A database is a technology feature, NOT a dependency
+- **dependency**: explicit relationships between systems (service-to-service calls, API integrations)
+  - Example subtypes: `service_dependency`, `api_integration`
+  - Use this ONLY for service-to-service relationships where you can identify both source and target services
+  - Do NOT use this for "database connection" or "cache connection"—those are technology features
+
+## Consolidation Rules
+
+**Consolidate** when properties belong to the same entity and appear together in logs:
+- Good: A single cloud deployment feature with provider in `properties` and regions/zones in `meta`
+- Good: A single container orchestration feature with stable platform/version in `properties` and variable cluster details in `meta`
+
+**Separate** distinct technologies even if related:
+- Good: Separate features for `web_server`, `database`, `cache` as distinct technology features
+- Bad: Do not combine multiple distinct technologies into one feature
+
+Also: **do not emit multiple features with the same (`type`, `subtype`, `properties`) tuple**. Merge evidence/tags/meta instead.
+
+## Naming Conventions
+
+Use **generic subtypes** with specific values in the `properties` object:
+- Good: `{ "subtype": "programming_language", "properties": { "language": "python", "version": "3.11" } }`
+- Bad: `{ "subtype": "python_runtime", "properties": { "version": "3.11" } }`
+
+Subtype rules:
+- Use `snake_case` for `subtype`
+- Keep subtypes descriptive but concise
+- Put specificity in `properties`, not in `subtype`
+
+ID rules:
+- Generate a short, stable identifier based on key properties
+- Use hyphens for readability (e.g. "aws-deployment", "log4j-2.14.1", "api-user-http")
+- Include distinguishing characteristics (provider, name, version, or source/target for dependencies)
+- Keep it concise (typically 2-5 tokens)
+
+## Properties vs Meta Fields
+
+The `properties` field MUST contain **stable, low-cardinality key facts** that enable deduplication across many log lines and deployments.
+
+- Use `properties` for: cloud provider (`aws`, `gcp`, `azure`), technology/library name, protocol, major/normalized version, stable service names
+- Use `meta` for: supplementary details like regions/availability zones, hostnames, instance IDs, pod/container names, IPs, URLs/paths, request/trace IDs, endpoint lists, build hashes/edition labels, contextual notes, security observations, or any interesting information that doesn't fit as a stable property
+
+Example (cloud deployment):
+- Good: `properties: { "provider": "aws" }` (stable)
+- Good: `meta: { "regions": ["eu-west-1"], "availability_zones": ["eu-west-1a"], "note": "Multi-region deployment pattern observed" }` (variable/high-cardinality + contextual info)
+
+**Conflict & cardinality rules**:
+- If multiple values are observed for the same property, prefer the most frequently supported value in `properties` and record alternates in `meta.observed_*` with evidence.
+- Avoid emitting separate features that differ only by high-cardinality metadata. Merge into one feature and store varying details in `meta`.
+
+## Inference & Confidence
+
+**One-level inference is allowed** when strong patterns exist, but use lower confidence and clearly label it:
+- Tag inferred features with `"inferred"` in `tags`
+- Explain the inference briefly in `meta.note`
+
+**Hard requirement (inferred features):**
+- If a feature is **not explicitly stated** in the logs (no explicit authoritative field value, banner, driver/library identifier strongly tied to a specific technology, or explicit version string for that technology), then:
+  - `tags` MUST include `"inferred"`
+  - `meta.notes` MUST be present and briefly explain the inference and ambiguity (what evidence supports it and why it is not explicit)
+  - Confidence MUST NOT be in the 90–100 band (reserved for explicit evidence)
+
+Confidence bands:
+- **90–100**: explicit, unambiguous evidence (version strings, driver class names, explicit field values)
+- **70–89**: strong patterns with multiple corroborating signals (stack traces + package names, multiple related logs)
+- **50–69**: clear indicators with some ambiguity (port numbers + protocol patterns, error formats + context)
+- **30–49**: weak inference - must include `"inferred"` tag (port numbers alone, generic syntax, single keyword mentions)
+
+**Confidence guardrails (to prevent overconfidence):**
+- Use **90–100 only** when the logs contain explicit, unambiguous evidence for that specific feature (authoritative fields, clear banners, or explicit version strings for that technology).
+- If the feature is inferred (tagged `"inferred"`), keep confidence **≤ 79** unless you have explicit evidence (in which case it is no longer inferred).
+- Do not “inherit” high confidence from unrelated explicit evidence (e.g., explicit library versions do not justify high confidence for cloud/Kubernetes/database unless those are explicitly evidenced too).
+
+**Examples of confidence progression (abstract principles):**
+
+Pattern: Port number alone
+- Port X alone → 30-40% (port could indicate multiple technologies or be a proxy)
+- Port X + technology-specific error codes → 50-60% (stronger but still ambiguous)
+- Port X + technology-specific commands/prompts in logs → 70-80% (strong signal)
+- Explicit version string or driver class name → 90-95% (unambiguous)
+
+Pattern: Generic error syntax
+- Generic error message alone → 30-40% (syntax hints at language family but no runtime proof)
+- Error syntax + ecosystem indicators (package paths, build tools) → 60-70% (corroborating evidence)
+- Runtime-specific internal paths or process identifiers → 85-90% (explicit runtime)
+
+Pattern: Single keyword/concept
+- Generic concept mention (TTL, timeout, connection pool) → 30-35% (concept exists, technology unknown)
+- Technology-specific command or API → 80-85% (strong technology signal)
+- Version string or banner → 90-95% (explicit)
+
+**Important: Multiple weak signals do NOT automatically create strong confidence**
+- Multiple weak, unrelated signals → Still 35-45% (signals don't corroborate each other)
+- Only increase confidence when signals CORROBORATE the same technology (e.g., port + technology-specific error codes + technology-specific prompts/commands)
+
+Accept features with confidence ≥ 30 if evidence supports them.
+
+## Evidence & Versions
+
+Evidence requirements:
+- Provide **2–5** short, specific evidence strings per feature (inclusive). If you cannot provide at least 2 grounded evidence strings, **do not emit the feature**.
+- Evidence strings must be **grounded in the provided logs**:
+  - Prefer verbatim `field.path=value` snippets from the input documents when possible.
+  - Otherwise, use short **direct quotes copied exactly** from log messages.
+  - **Do not fabricate** evidence strings (no invented fields, versions, class names, endpoints, or technologies that do not appear in the input).
+- Evidence must directly support the feature claim (not merely related context).
+
+Version formatting rules (important for CVE/vulnerability analysis):
+- Prefer the **full numeric version** in `properties.version` when present (e.g., `"11"`, `"11.0"`, `"11.0.2"`, `"16.0.4105.2"`)
+- Strip a leading `v` and surrounding non-version text; keep only the numeric portion when possible
+- Do **not** truncate patch/build numbers if they are numeric (keep `1.22.1`, not `1.22`)
+- If the original version contains labels (LTS/Enterprise/codename/edition text), store the numeric portion in `properties.version` and store the full original string in `meta.raw_version`
+- Remove codenames/release names/edition labels from `properties.version` (keep them in `meta.raw_version`)
+
+## Examples
+
+**Example 1 - Infrastructure with clean version**
+```
+{
+  "type": "infrastructure",
+  "subtype": "operating_system",
+  "id": "ubuntu-20.04.6",
+  "title": "Ubuntu 20.04.6",
+  "description": "Ubuntu Linux operating system version 20.04.6",
+  "properties": {
+    "os": "ubuntu",
+    "version": "20.04.6"
+  },
+  "confidence": 95,
+  "evidence": [
+    "host.os.name=Ubuntu",
+    "host.os.version=20.04.6 LTS (Focal Fossa)"
+  ],
+  "tags": ["infrastructure", "os"],
+  "meta": {
+    "raw_version": "20.04.6 LTS (Focal Fossa)"
+  }
+}
+```
+
+**Example 2 - Infrastructure showing properties vs meta**
+```
+{
+  "type": "infrastructure",
+  "subtype": "cloud_deployment",
+  "id": "aws-deployment",
+  "title": "AWS",
+  "description": "AWS cloud deployment observed across one or more regions/availability zones",
+  "properties": {
+    "provider": "aws"
+  },
+  "confidence": 92,
+  "evidence": [
+    "cloud.provider=aws",
+    "cloud.region=eu-west-1",
+    "cloud.availability_zone=eu-west-1a"
+  ],
+  "tags": ["infrastructure", "cloud"],
+  "meta": {
+    "regions": ["eu-west-1"],
+    "availability_zones": ["eu-west-1a", "eu-west-1b"],
+    "note": "Multi-AZ deployment pattern observed"
+  }
+}
+```
+
+**Example 3 - Technology feature with version**
+```
+{
+  "type": "technology",
+  "subtype": "logging_library",
+  "id": "log4j-2.14.1",
+  "title": "Log4j 2.14.1",
+  "description": "Apache Log4j logging library version 2.14.1",
+  "properties": {
+    "library": "log4j",
+    "version": "2.14.1"
+  },
+  "confidence": 90,
+  "evidence": [
+    "jar=log4j-core-2.14.1.jar",
+    "logger=org.apache.logging.log4j"
+  ],
+  "tags": ["technology", "library", "logging"],
+  "meta": {
+    "note": "Version 2.14.1 may have known CVEs; suitable for vulnerability queries"
+  }
+}
+```
+
+**Example 4 - Inferred feature with moderate confidence**
+```
+{
+  "type": "technology",
+  "subtype": "programming_language",
+  "id": "ruby",
+  "title": "ruby",
+  "description": "Ruby programming language",
+  "properties": {
+    "language": "ruby"
+  },
+  "confidence": 48,
+  "evidence": [
+    "NoMethodError: undefined method 'length' for nil:NilClass",
+    "from /app/lib/processor.rb:156:in 'process_data'",
+    "Using bundler 2.3.14"
+  ],
+  "tags": ["technology", "inferred"],
+  "meta": {
+    "notes": "Inferred from Ruby-specific error class names (NoMethodError, NilClass), .rb file extensions in stack traces, and Bundler gem manager references. No explicit Ruby version string found."
+  }
+}
+```
+
+**Example 4b - Weak inference with low confidence (abstract pattern for port-based inference)**
+
+When only a port number is observed without protocol-specific evidence, use this pattern:
+```
+{
+  "type": "technology",
+  "name": "database",
+  "description": "<Technology> (inferred from default port <PORT>)",
+  "properties": {
+    "database": "<technology_name>"
+  },
+  "confidence": 35-45,
+  "evidence": [
+    "Connection timeout on port <PORT>",
+    "Failed to connect to <service> at <IP>:<PORT>"
+  ],
+  "tags": ["technology", "database", "inferred"],
+  "meta": {
+    "notes": "Port <PORT> is the default for <technology>, but without protocol-specific errors, commands, or version strings, this remains inference.",
+    "ambiguity": "Port alone cannot confirm <technology> vs proxies or other services on same port",
+    "needed_for_higher_confidence": [
+      "<Technology>-specific error codes or messages",
+      "Protocol-specific references (e.g., wire protocol, query language)",
+      "Version strings or server banners",
+      "Process name references (e.g., daemon names)"
+    ]
+  }
+}
+```
+
+This pattern applies to ANY technology identified primarily by port number:
+- Do not treat port numbers as definitive identification. Port numbers are **weak signals** and must remain low-confidence unless corroborated by protocol-specific errors, banners, commands, library/package identifiers, or explicit version strings.
+
+**Example 5 - Dependency feature showing properties vs meta + aggregation/capping**
+```
+{
+  "type": "dependency",
+  "subtype": "service_dependency",
+  "id": "api-user-http",
+  "title": "api-service → user-service",
+  "description": "Service-to-service HTTP dependency from api-service to user-service",
+  "properties": {
+    "source": "api-service",
+    "target": "user-service",
+    "protocol": "http"
+  },
+  "confidence": 85,
+  "evidence": [
+    "service.name=api-service http.url=/users http.status_code=200 peer.service=user-service",
+    "upstream=user-service:8080 request=GET /users"
+  ],
+  "tags": ["dependency", "http"],
+  "meta": {
+    "endpoints": ["/users", "/users/:id", "/users/:id/profile", "/users/search"],
+    "methods": ["GET", "POST", "PUT"],
+    "note": "Aggregate endpoints under one dependency; cap the list (e.g., max 10) and summarize additional entries"
+  }
+}
+```
+
+## Output Quality Requirements
+
+- Extract all features that meet the confidence threshold and have supporting evidence.
+- Prefer fewer, higher-confidence features over many speculative ones.
+- Sort features by descending `confidence` (and within ties, stable alphabetical order by `type`, then `subtype`).
+- Dependency anti-spam: only emit a dependency feature when logs contain explicit evidence of a relationship; aggregate endpoints in `meta.endpoints` and cap the list.
+
+## What NOT to Extract
+
+Do NOT extract the following as features:
+- **Runtime metrics/specifications**: CPU core count, memory limits, disk space (these are instance-specific, not system features)
+- **Operational data**: Request counts, response times, cache hit rates (metrics, not features)
+- **Generic monitoring**: Health check endpoints without identifying the web server/framework technology
+- **Ambiguous connections**: Don't extract a "database_connection" dependency—extract the database as a technology feature instead
+
+## Generalization Principle
+
+The examples above illustrate **patterns and principles**, not an exhaustive technology catalog. You must apply these same principles to ANY technology you encounter, including those not explicitly mentioned.
+
+**Port-based inference applies universally:**
+- All technologies follow the same confidence rules: port alone → 30–45%, port + corroborating protocol/library signals → 50–70%, explicit banner/version/driver → 90%+.
+
+**Language/runtime inference applies universally:**
+- All languages follow the same pattern: generic error syntax → 30–45%, language-specific patterns + file extensions → 50–70%, explicit runtime version → 85%+.
+
+**Cloud provider inference applies universally:**
+- Explicit `cloud.provider` field → 90%+, service-specific references → 70–85%, region patterns alone → 50–60%.
+
+**Critical: Do NOT over-rely on memorized examples.** Apply the underlying confidence calibration principles:
+1. Explicit, unambiguous evidence → 90-100%
+2. Strong corroborating signals → 70-89%
+3. Clear indicators with ambiguity → 50-69%
+4. Weak inference (single signal) → 30-49% with "inferred" tag
+
+Extract all features that meet the confidence threshold and have supporting evidence. Use the finalize_features tool to return the results.

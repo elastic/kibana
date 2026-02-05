@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import type { PopoverAnchorPosition } from '@elastic/eui/src/components/popover/popover';
 import { storageKeys } from '../storage_keys';
 import { useConversationContext } from './conversation/conversation_context';
+import { useKibana } from '../hooks/use_kibana';
 
 export enum TourStep {
   AgentSelector = 'agent-selector',
@@ -120,6 +121,8 @@ interface TourStepConfig {
 
 export const AgentBuilderTourProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
   const { isEmbeddedContext } = useConversationContext();
+  const { notifications } = useKibana().services;
+  const isTourEnabled = notifications.tours.isEnabled();
 
   const [currentStep, setCurrentStep] = useState(DEFAULT_STEP);
 
@@ -129,7 +132,7 @@ export const AgentBuilderTourProvider: React.FC<PropsWithChildren<{}>> = ({ chil
     const hasSeenTour = localStorage.getItem(storageKeys.hasSeenAgentBuilderTour);
     let timer: NodeJS.Timeout | undefined;
 
-    if (!isEmbeddedContext && !hasSeenTour) {
+    if (!isEmbeddedContext && !hasSeenTour && isTourEnabled) {
       // We use a delay to ensure the tour is not triggered immediately when the page loads to ensure correct anchor positioning.
       timer = setTimeout(() => {
         setIsTourActive(true);
@@ -141,7 +144,7 @@ export const AgentBuilderTourProvider: React.FC<PropsWithChildren<{}>> = ({ chil
         clearTimeout(timer);
       }
     };
-  }, [isEmbeddedContext]);
+  }, [isEmbeddedContext, isTourEnabled]);
 
   const handleMoveToNextStep = () => {
     setCurrentStep((prev) => prev + 1);

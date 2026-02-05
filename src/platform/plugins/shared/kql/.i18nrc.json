@@ -1,0 +1,6 @@
+{
+  "prefix": "kql",
+  "paths": {
+    "kql": "."
+  }
+}

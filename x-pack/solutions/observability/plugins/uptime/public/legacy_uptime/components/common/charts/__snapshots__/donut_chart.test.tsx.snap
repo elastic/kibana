@@ -683,7 +683,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
 }
 
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-center-row"
+  class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-center-row"
 >
   <div
     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -839,7 +839,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
 }
 
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-center-row"
+  class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-center-row"
 >
   <div
     class="euiFlexItem emotion-euiFlexItem-growZero"

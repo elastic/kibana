@@ -37,7 +37,11 @@ export const createConversation$ = ({
         id: conversationId,
         title,
         agent_id: agentId,
+        state: roundCompletedEvent.data.conversation_state,
         rounds: [roundCompletedEvent.data.round],
+        ...(roundCompletedEvent.data.attachments
+          ? { attachments: roundCompletedEvent.data.attachments }
+          : {}),
       });
     }),
     switchMap((createdConversation) => {
@@ -75,6 +79,9 @@ export const updateConversation$ = ({
         title,
         rounds: updatedRound,
         state: conversation_state,
+        ...(roundCompletedEvent.data.attachments !== undefined
+          ? { attachments: roundCompletedEvent.data.attachments }
+          : {}),
       });
     }),
     switchMap((updatedConversation) => {

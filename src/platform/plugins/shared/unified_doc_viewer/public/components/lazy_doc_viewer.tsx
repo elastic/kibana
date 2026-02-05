@@ -9,11 +9,10 @@
 
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 
 const LazyUnifiedDocViewer = React.lazy(() => import('./doc_viewer'));
-export const UnifiedDocViewer = withSuspense<DocViewRenderProps>(
+export const UnifiedDocViewer = withSuspense(
   LazyUnifiedDocViewer,
   <EuiDelayRender delay={300}>
     <EuiSkeletonText />

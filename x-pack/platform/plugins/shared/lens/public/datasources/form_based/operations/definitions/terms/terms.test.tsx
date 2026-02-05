@@ -12,10 +12,10 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButtonGroup, EuiComboBox, EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
@@ -92,7 +92,7 @@ const defaultProps = {
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
-  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  kql: kqlPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),

@@ -12,6 +12,7 @@ import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_CREATE_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
+import { withLicenseCheck } from '../lib/with_license_check';
 
 export function registerPostCreateWorkflowRoute({
   router,
@@ -28,7 +29,7 @@ export function registerPostCreateWorkflowRoute({
         body: CreateWorkflowCommandSchema,
       },
     },
-    async (context, request, response) => {
+    withLicenseCheck(async (context, request, response) => {
       try {
         const spaceId = spaces.getSpaceId(request);
         const createdWorkflow = await api.createWorkflow(request.body, spaceId, request);
@@ -36,6 +37,6 @@ export function registerPostCreateWorkflowRoute({
       } catch (error) {
         return handleRouteError(response, error);
       }
-    }
+    })
   );
 }

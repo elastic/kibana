@@ -96,7 +96,7 @@ export const getSearchEmbeddableFactory = ({
       const titleManager = initializeTitleManager(initialState);
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const dynamicActionsManager =
-        discoverServices.embeddableEnhanced?.initializeEmbeddableDynamicActions(
+        await discoverServices.embeddableEnhanced?.initializeEmbeddableDynamicActions(
           uuid,
           () => titleManager.api.title$.getValue(),
           initialState
@@ -129,7 +129,7 @@ export const getSearchEmbeddableFactory = ({
         ),
         getComparators: () => {
           return {
-            ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+            ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
             ...titleComparators,
             ...timeRangeComparators,
             ...searchEmbeddable.comparators,
@@ -175,6 +175,7 @@ export const getSearchEmbeddableFactory = ({
           partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$ },
           discoverServices,
           isEditable: startServices.isEditable,
+          getTitle: () => titleManager.api.title$.getValue(),
         }),
         dataLoading$,
         blockingError$,
@@ -336,7 +337,6 @@ export const getSearchEmbeddableFactory = ({
                           api={{ ...api, fetchWarnings$, fetchContext$ }}
                           dataView={dataView!}
                           onAddFilter={
-                            isEsqlMode(savedSearch) ||
                             runtimeState.nonPersistedDisplayOptions?.enableFilters === false
                               ? undefined
                               : onAddFilter

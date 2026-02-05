@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import type { AppMenuActionPrimary } from '@kbn/discover-utils';
-import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
+import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
+import { AppMenuActionId } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { OpenSearchPanel } from '../open_search_panel';
 
@@ -17,19 +17,17 @@ export const getOpenSearchAppMenuItem = ({
   onOpenSavedSearch,
 }: {
   onOpenSavedSearch: (savedSearchId: string) => void;
-}): AppMenuActionPrimary => {
+}): DiscoverAppMenuItemType => {
   return {
     id: AppMenuActionId.open,
-    type: AppMenuActionType.primary,
-    controlProps: {
-      label: i18n.translate('discover.localMenu.openDiscoverSessionTitle', {
-        defaultMessage: 'Open session',
-      }),
-      iconType: 'folderOpen',
-      testId: 'discoverOpenButton',
-      onClick: ({ onFinishAction }) => {
-        return <OpenSearchPanel onClose={onFinishAction} onOpenSavedSearch={onOpenSavedSearch} />;
-      },
+    order: 2,
+    label: i18n.translate('discover.localMenu.openDiscoverSessionTitle', {
+      defaultMessage: 'Open',
+    }),
+    iconType: 'folderOpen',
+    testId: 'discoverOpenButton',
+    run: ({ context: { onFinishAction } }) => {
+      return <OpenSearchPanel onClose={onFinishAction} onOpenSavedSearch={onOpenSavedSearch} />;
     },
   };
 };

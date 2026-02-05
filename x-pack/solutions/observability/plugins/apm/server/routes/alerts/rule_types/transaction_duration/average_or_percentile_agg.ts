@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { getDurationFieldForTransactions } from '@kbn/apm-data-access-plugin/server/utils';
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
-import type { getDurationFieldForTransactions } from '../../../../lib/helpers/transactions';
 
 type TransactionDurationField = ReturnType<typeof getDurationFieldForTransactions>;
 

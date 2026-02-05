@@ -14,16 +14,18 @@ import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugi
 import type { ActionDetails } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { getFileDownloadId } from '@kbn/security-solution-plugin/common/endpoint/service/response_actions/get_file_download_id';
 import type TestAgent from 'supertest/lib/agent';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
+import type { CustomRole } from '../../../../config/services/types';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 
 export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
-  const rolesUsersProvider = getService('rolesUsersProvider');
   const utils = getService('securitySolutionUtils');
 
   // @skipInServerlessMKI - this test uses internal index manipulation in before/after hooks
-  describe('@ess @serverless @skipInServerlessMKI Endpoint `execute` response action', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/248913
+  describe.skip('@ess @serverless @skipInServerlessMKI Endpoint `execute` response action', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let agentId = '';
     let t1AnalystSupertest: TestAgent;
@@ -166,22 +168,29 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // Test checks to ensure API works with a custom role
-    describe('@skipInServerless @skipInServerlessMKI and with minimal authz', () => {
+    describe('@skipInServerlessMKI and with minimal authz', () => {
       const username = 'execute_limited';
-      const password = 'changeme';
       let fileInfoApiRoutePath: string = '';
       let customUsernameSupertest: TestAgent;
 
       before(async () => {
-        await rolesUsersProvider.createRole({
-          customRole: {
-            roleName: username,
-            extraPrivileges: ['minimal_all', 'execute_operations_all'],
+        const role: CustomRole = {
+          name: username,
+          privileges: {
+            kibana: [
+              {
+                base: [],
+                feature: {
+                  [SECURITY_FEATURE_ID]: ['minimal_all', 'execute_operations_all'],
+                },
+                spaces: ['*'],
+              },
+            ],
+            elasticsearch: { cluster: [], indices: [] },
           },
-        });
-        await rolesUsersProvider.createUser({ name: username, password, roles: [username] });
+        };
 
-        customUsernameSupertest = await utils.createSuperTest(username);
+        customUsernameSupertest = await utils.createSuperTestWithCustomRole(role);
 
         const {
           body: { data },
@@ -201,8 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await rolesUsersProvider.deleteRoles([username]);
-        await rolesUsersProvider.deleteUsers([username]);
+        await utils.cleanUpCustomRoles();
       });
 
       it('should have access to file info api', async () => {

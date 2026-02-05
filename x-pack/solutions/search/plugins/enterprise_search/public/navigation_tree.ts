@@ -7,6 +7,7 @@
 
 import { lazy } from 'react';
 
+import type { Location } from 'history';
 import { type Observable, debounceTime, map } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
@@ -35,6 +36,24 @@ const title = i18n.translate(
 );
 const icon = 'logoElasticsearch';
 
+/**
+ * CONTEXT: After restructuring Dashboards to integrate the Visualize library,
+ * we need to maintain proper navigation state when users edit visualizations accessed
+ * from the Dashboards' Visualizations tab. This keeps the Dashboards nav item active during editing.
+ */
+function isEditingFromDashboard(
+  location: Location,
+  pathNameSerialized: string,
+  prepend: (path: string) => string
+): boolean {
+  const vizApps = ['/app/visualize', '/app/maps', '/app/lens'];
+  const isVizApp = vizApps.some((app) => pathNameSerialized.startsWith(prepend(app)));
+  const hasOriginatingApp =
+    location.search.includes('originatingApp=dashboards') ||
+    location.hash.includes('originatingApp=dashboards');
+  return isVizApp && hasOriginatingApp;
+}
+
 export const getNavigationTreeDefinition = ({
   dynamicItems$,
   isCloudEnabled,
@@ -62,9 +81,9 @@ export const getNavigationTreeDefinition = ({
               link: 'discover',
             },
             {
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-              },
+              getIsActive: ({ pathNameSerialized, prepend, location }) =>
+                pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
+                isEditingFromDashboard(location, pathNameSerialized, prepend),
               link: 'dashboards',
             },
             {
@@ -72,13 +91,20 @@ export const getNavigationTreeDefinition = ({
               link: 'agent_builder',
             },
             {
-              badgeType: 'techPreview' as const,
               link: 'workflows',
             },
             {
               children: [
                 {
-                  children: [{ link: 'ml:overview' }, { link: 'ml:dataVisualizer' }],
+                  children: [
+                    { link: 'ml:overview' },
+                    { link: 'ml:dataVisualizer' },
+                    { link: 'ml:dataDrift', sideNavStatus: 'hidden' },
+                    { link: 'ml:dataDriftPage', sideNavStatus: 'hidden' },
+                    { link: 'ml:fileUpload', sideNavStatus: 'hidden' },
+                    { link: 'ml:indexDataVisualizer', sideNavStatus: 'hidden' },
+                    { link: 'ml:indexDataVisualizerPage', sideNavStatus: 'hidden' },
+                  ],
                   id: 'ml_overview',
                   title: '',
                 },
@@ -108,8 +134,11 @@ export const getNavigationTreeDefinition = ({
                   breadcrumbStatus: 'hidden',
                   children: [
                     { link: 'ml:logRateAnalysis' },
+                    { link: 'ml:logRateAnalysisPage', sideNavStatus: 'hidden' },
                     { link: 'ml:logPatternAnalysis' },
+                    { link: 'ml:logPatternAnalysisPage', sideNavStatus: 'hidden' },
                     { link: 'ml:changePointDetections' },
+                    { link: 'ml:changePointDetectionsPage', sideNavStatus: 'hidden' },
                   ],
                   id: 'category-aiops_labs',
                   title: i18n.translate(
@@ -295,7 +324,6 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:dataViews' },
                     { link: 'management:filesManagement' },
-                    { link: 'visualize' },
                     { link: 'management:objects' },
                     { link: 'management:tags' },
                     { link: 'management:search_sessions' },

@@ -69,17 +69,20 @@ export const apiIsPresentationContainer = (api: unknown | null): api is Presenta
     apiCanAddNewPanel(api) &&
       typeof (api as PresentationContainer)?.removePanel === 'function' &&
       typeof (api as PresentationContainer)?.replacePanel === 'function' &&
-      typeof (api as PresentationContainer)?.addNewPanel === 'function' &&
       apiPublishesChildren(api)
   );
 };
 
 export interface HasSections extends CanAddNewSection {
-  getPanelSection$: (uuid: string) => Observable<string | undefined>;
+  getPanelSection: (uuid: string) => string | undefined;
+  panelSection$: (uuid: string) => Observable<string | undefined>;
 }
 
 export const apiHasSections = (api: unknown): api is HasSections => {
-  return typeof (api as HasSections)?.getPanelSection$ === 'function';
+  return (
+    typeof (api as HasSections)?.getPanelSection === 'function' &&
+    typeof (api as HasSections)?.panelSection$ === 'function'
+  );
 };
 
 export const apiPublishesChildren = (

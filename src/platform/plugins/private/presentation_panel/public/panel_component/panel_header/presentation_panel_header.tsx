@@ -23,7 +23,10 @@ export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPane
   panelTitle?: string;
   panelDescription?: string;
   setDragHandle: (id: string, ref: HTMLDivElement | null) => void;
-} & Pick<PresentationPanelInternalProps, 'showBadges' | 'getActions' | 'showNotifications'>;
+} & Pick<
+  PresentationPanelInternalProps,
+  'showBadges' | 'getActions' | 'showNotifications' | 'titleHighlight'
+>;
 
 export const PresentationPanelHeader = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
@@ -38,6 +41,7 @@ export const PresentationPanelHeader = <
   setDragHandle,
   showBadges = true,
   showNotifications = true,
+  titleHighlight,
 }: PresentationPanelHeaderProps<ApiType>) => {
   const { euiTheme } = useEuiTheme();
 
@@ -108,6 +112,7 @@ export const PresentationPanelHeader = <
           hideTitle={hideTitle}
           panelTitle={panelTitle}
           panelDescription={panelDescription}
+          titleHighlight={titleHighlight}
         />
         {showBadges && badgeElements}
       </div>

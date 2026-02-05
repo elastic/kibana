@@ -291,7 +291,7 @@ export function initializeUnifiedSearchManager(
     },
     internalApi: {
       unifiedSearchFilters$,
-      startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
+      startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return combineLatest([
           unifiedSearchFilters$,
           query$,

@@ -15,6 +15,7 @@ import { useFetchErrorToast } from './use_fetch_error_toast';
 
 export interface SignificantEventItem {
   query: StreamQuery;
+  stream_name: string;
   occurrences: Array<{ x: number; y: number }>;
   change_points: SignificantEventsResponse['change_points'];
 }
@@ -65,29 +66,21 @@ export const useFetchSignificantEvents = (
 
     const intervalString = `${bucketSize.asSeconds()}s`;
 
-    const requestPromise = name
-      ? streamsRepositoryClient.fetch('GET /api/streams/{name}/significant_events 2023-10-31', {
-          params: {
-            path: { name },
-            query: {
-              from: isoFrom,
-              to: isoTo,
-              bucketSize: intervalString,
-              query: query?.trim() ?? '',
-            },
+    const requestPromise = streamsRepositoryClient.fetch(
+      'GET /internal/streams/_significant_events',
+      {
+        params: {
+          query: {
+            from: isoFrom,
+            to: isoTo,
+            bucketSize: intervalString,
+            query: query?.trim() ?? '',
+            streamNames: name ? [name] : undefined,
           },
-          signal: signal ?? null,
-        })
-      : streamsRepositoryClient.fetch('GET /internal/streams/_significant_events 2023-10-31', {
-          params: {
-            query: {
-              from: isoFrom,
-              to: isoTo,
-              bucketSize: intervalString,
-            },
-          },
-          signal: signal ?? null,
-        });
+        },
+        signal: signal ?? null,
+      }
+    );
 
     return await requestPromise.then(
       ({
@@ -96,10 +89,10 @@ export const useFetchSignificantEvents = (
       }) => {
         return {
           significant_events: significantEvents.map((series) => {
-            const { occurrences, change_points: changePoints, ...rest } = series;
+            const { occurrences, change_points: changePoints, stream_name, ...rest } = series;
             return {
-              title: rest.title,
               query: rest,
+              stream_name,
               change_points: changePoints,
               occurrences: occurrences.map((occurrence) => ({
                 x: new Date(occurrence.date).getTime(),

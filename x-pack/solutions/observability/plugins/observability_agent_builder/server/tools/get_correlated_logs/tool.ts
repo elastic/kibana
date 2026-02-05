@@ -9,16 +9,16 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
+import type { Logger } from '@kbn/core/server';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { indexDescription, timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import {
   DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
   DEFAULT_TIME_RANGE,
   DEFAULT_LOG_SOURCE_FIELDS,
+  DEFAULT_ERROR_LOGS_ONLY,
+  DEFAULT_MAX_SEQUENCES,
+  DEFAULT_MAX_LOGS_PER_SEQUENCE,
 } from './constants';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getNoResultsMessage, getToolHandler } from './handler';
@@ -32,41 +32,41 @@ const getCorrelatedLogsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Optional ID of a specific log entry. If provided, the tool will fetch this log and find correlated logs based on its correlation identifier (e.g., trace.id). NOTE: When logId is provided, other filter parameters are ignored.'
+      'ID of a specific log entry to use as an anchor. When provided, other filter parameters are ignored.'
     ),
   kqlFilter: z
     .string()
     .optional()
     .describe(
-      'Optional KQL filter to narrow down logs. Example: "service.name: payment AND host.name: web-server-01". Ignored if logId is provided.'
+      'KQL filter to narrow down logs. Examples: \'service.name: "payment"\', \'host.name: "web-server-01"\'. Ignored if logId is provided.'
     ),
   errorLogsOnly: z
     .boolean()
-    .optional()
+    .default(DEFAULT_ERROR_LOGS_ONLY)
     .describe(
-      'When true (default), only anchors on error logs (ERROR, WARN, FATAL, HTTP 5xx). Set to false to anchor on any log. For slow requests: kqlFilter="event.duration > 1000000", errorLogsOnly=false.'
+      'When true, only sequences containing error logs (ERROR, WARN, FATAL, HTTP 5xx) are returned. Set to false to return any sequence. You can use `kqlFilter` to apply another filter (e.g., slow requests).'
     ),
   correlationFields: z
     .array(z.string())
     .optional()
     .describe(
-      'Optional list of field names to use for correlating logs. Use this when the user mentions a specific identifier (e.g., "group by session_id"). Overrides the default list of standard trace/request IDs. The first field in this list found with a value in an error log will be used to fetch the surrounding context.'
+      'Field names to correlate logs by. Example: ["session_id"]. Overrides the default trace/request ID fields.'
     ),
   logSourceFields: z
     .array(z.string())
     .optional()
     .describe(
-      'Optional list of fields to return for each log entry. If not provided, a default set of common Observability fields is returned. For a high-level overview, ["@timestamp", "message", "log.level"] is recommended.'
+      'Fields to return for each log entry. For a minimal view: ["@timestamp", "message", "log.level"].'
     ),
   maxSequences: z
     .number()
-    .optional()
-    .describe('Optional maximum number of unique log sequences to return. Defaults to 10.'),
+    .default(DEFAULT_MAX_SEQUENCES)
+    .describe('Maximum number of unique log sequences to return.'),
   maxLogsPerSequence: z
     .number()
-    .optional()
+    .default(DEFAULT_MAX_LOGS_PER_SEQUENCE)
     .describe(
-      'Optional maximum number of logs per sequence. Defaults to 200. Increase this to see a longer history of events surrounding the anchor.'
+      'Maximum number of logs per sequence. Increase this to see a longer sequence of logs surrounding the anchor log.'
     ),
 });
 
@@ -74,10 +74,7 @@ export function createGetCorrelatedLogsTool({
   core,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
 }): StaticToolRegistration<typeof getCorrelatedLogsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getCorrelatedLogsSchema> = {
@@ -96,7 +93,7 @@ How it works:
 3. Returns chronologically sorted sequences showing context before and after each anchor
 
 Do NOT use for:
-- High-level overview of log patterns (use get_log_categories)
+- High-level overview of log patterns (use get_log_groups)
 - Analyzing log volume changes (use run_log_rate_analysis)`,
     schema: getCorrelatedLogsSchema,
     tags: ['observability', 'logs'],
@@ -108,16 +105,16 @@ Do NOT use for:
     },
     handler: async (toolParams, { esClient }) => {
       const {
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
+        start,
+        end,
         kqlFilter,
-        errorLogsOnly = true,
+        errorLogsOnly,
         index,
         correlationFields = DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
         logId,
         logSourceFields = DEFAULT_LOG_SOURCE_FIELDS,
-        maxSequences = 10,
-        maxLogsPerSequence = 200,
+        maxSequences,
+        maxLogsPerSequence,
       } = toolParams;
 
       try {

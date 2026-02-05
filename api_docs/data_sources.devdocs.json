@@ -1,0 +1,73 @@
+{
+  "id": "dataSources",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "dataSources",
+        "id": "def-common.DATA_SOURCES_FULL_TITLE",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_SOURCES_FULL_TITLE",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/data_sources/common/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataSources",
+        "id": "def-common.DATA_SOURCES_ROUTE",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_SOURCES_ROUTE",
+        "description": [],
+        "signature": [
+          "\"/app/data_sources\""
+        ],
+        "path": "x-pack/platform/plugins/shared/data_sources/common/routes.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataSources",
+        "id": "def-common.DATA_SOURCES_SHORT_TITLE",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_SOURCES_SHORT_TITLE",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/data_sources/common/constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

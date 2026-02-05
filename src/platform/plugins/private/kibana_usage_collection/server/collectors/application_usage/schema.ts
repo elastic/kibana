@@ -170,6 +170,7 @@ export const applicationUsageSchema = {
   slo: commonSchema,
   security_account: commonSchema,
   reportingRedirect: commonSchema,
+  rules: commonSchema,
   security_access_agreement: commonSchema,
   security_capture_url: commonSchema, // It's a forward app so we'll likely never report it
   security_logged_out: commonSchema,

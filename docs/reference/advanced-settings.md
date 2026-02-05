@@ -45,8 +45,12 @@ Change the settings that apply only to a specific {{product.kibana}} space.
 
 ### General [kibana-general-settings]
 
-$$$hideAnnouncements$$$`hideAnnouncements` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
-:   Stops showing messages and tours that highlight new features. `false` by default.
+$$$hideAnnouncements$$$`hideAnnouncements` {applies_to}`stack: ga 9.0-9.3, deprecated 9.4+` {applies_to}`serverless: unavailable`
+:   Stops showing messages and tours that highlight new features. `false` by default. 
+    :::{note}
+    :applies_to: stack: ga 9.4+
+    If this setting is set to `false` but the `hideAnnouncements` setting located in the **Global Settings** tab is set to `true`, then messages and tours that highlight new features won't show for the current space.
+    :::
 
 $$$dateformat$$$`dateFormat` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   The format to use for displaying [pretty formatted dates](https://momentjs.com/docs/#/displaying/format/).
@@ -66,7 +70,7 @@ $$$datenanosformat$$$`dateNanosFormat` {applies_to}`stack: ga` {applies_to}`serv
 $$$theme-darkmode$$$`theme:darkMode` {applies_to}`stack: deprecated 9.0` {applies_to}`serverless: unavailable`
 :   The UI theme that the {{product.kibana}} UI should use. Set to `enabled` or `disabled` to enable or disable the dark theme. Set to `system` to have the {{product.kibana}} UI theme follow the system theme. You must refresh the page to apply the setting.
 
-$$$state-storeinsessionstorage$$$`state:storeInSessionStorage` {applies_to}`stack: preview` {applies_to}`serverless: unavailable`
+$$$state-storeinsessionstorage$$$`state:storeInSessionStorage` {applies_to}`stack: preview 9.0-9.3, deprecated 9.4+` {applies_to}`serverless: unavailable`
 :   {{product.kibana}} tracks UI state in the URL, which can lead to problems when there is a lot of state information, and the URL gets long. Enabling this setting stores part of the URL in your browser session to keep the URL short.
 
 $$$savedobjects-perpage$$$`savedObjects:perPage` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
@@ -166,6 +170,9 @@ $$$metrics-maxbuckets$$$`metrics:max_buckets` {applies_to}`stack: ga` {applies_t
 
 $$$metrics:allowStringIndices$$$`metrics:allowStringIndices` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   Enables you to use {{es}} indices in **TSVB** visualizations. `false` by default.
+
+$$$workflows:ui:enabled$$$`workflows:ui:enabled` {applies_to}`stack: preview 9.3` {applies_to}`serverless: preview`
+:   Enables Elastic Workflows and related experiences. `false` by default.
 
 $$$fields-popularlimit$$$`fields:popularLimit` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   The top N most popular fields to show. `10` by default.
@@ -385,7 +392,7 @@ $$$observability-apm-labs$$$`observability:apmLabsButton` {applies_to}`stack: re
 $$$observability-infrastructure-profiling-integration$$$`observability:enableInfrastructureProfilingIntegration` {applies_to}`stack: preview 9.0, removed 9.1`
 :   Enables the Profiling view in Host details within Infrastructure. `true` by default.
 
-$$$observability-infrastructure-asset-custom-dashboard$$$`observability:enableInfrastructureAssetCustomDashboards` {applies_to}`stack: preview 9.0, removed 9.1`
+$$$observability-infrastructure-asset-custom-dashboard$$$`observability:enableInfrastructureAssetCustomDashboards` {applies_to}`stack: preview 9.0`
 :   Enables the option to link custom dashboards in the Asset Details view. `false` by default.
 
 $$$observability-enable-aws-lambda-metrics$$$`observability:enableAwsLambdaMetrics` {applies_to}`stack: preview 9.0, removed 9.1`
@@ -505,7 +512,7 @@ $$$courier-maxconcurrentshardrequests$$$`courier:maxConcurrentShardRequests` {ap
 :   Controls the [max_concurrent_shard_requests](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-msearch) setting used for `_msearch` requests sent by {{product.kibana}}. Set to 0 to disable this config and use the {{product.elasticsearch}} default. `0` by default.
 
 $$$search-includefrozen$$$`search:includeFrozen` {applies_to}`stack: deprecated 7.16` {applies_to}`serverless: unavailable`
-:    Includes [frozen indices](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-unfreeze) in results. Searching through frozen indices might increase the search time. `false` by default.
+:    Includes [frozen indices](docs-content://manage-data/lifecycle/data-tiers.md#frozen-tier) in results. Searching through frozen indices might increase the search time. `false` by default.
 
 $$$search-timeout$$$`search:timeout` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   The maximum timeout, in milliseconds, for search requests. To deactivate the timeout and allow queries to run to completion, set to `0`. `600000` (10 minutes) by default.
@@ -647,6 +654,11 @@ Change the settings that apply to all of {{product.kibana}}.
 2. Click **Global Settings**.
 3. Scroll or search for the setting.
 4. Make your change, then click **Save changes**.
+
+### General [kibana-general-global-settings]
+
+$$$hideAnnouncements-global$$$`hideAnnouncements` {applies_to}`stack: ga 9.4+` {applies_to}`serverless: unavailable`
+:   Stops showing messages and tours that highlight new features. `false` by default.
 
 
 ### Custom branding [kibana-custom-branding-settings]

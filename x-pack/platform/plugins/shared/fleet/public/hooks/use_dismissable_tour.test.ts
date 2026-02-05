@@ -41,8 +41,8 @@ describe('useDismissableTour', () => {
     expect(storageValue.active).toEqual(false);
   });
 
-  it('should not display the tour if hideAnnouncements:true', () => {
-    jest.mocked(startServices.uiSettings.get).mockReturnValue(true);
+  it('should not display the tour if tours are disabled', () => {
+    jest.mocked(startServices.notifications.tours.isEnabled).mockReturnValue(false);
     const res = renderHook(() => useDismissableTour('GRANULAR_PRIVILEGES'));
 
     expect(res.result.current.isHidden).toBe(true);

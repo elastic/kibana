@@ -72,8 +72,8 @@ export const GcpCredentialsFormAgentless = ({
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_SHELL_URL
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
-  const commandText = `gcloud config set project ${
-    isOrganization ? `<PROJECT_ID> && ORG_ID=<ORG_ID_VALUE> && ` : `<PROJECT_ID> && `
+  const commandText = `gcloud config set project <PROJECT_ID> && ${
+    isOrganization ? `ORG_ID=<ORG_ID_VALUE> ` : ``
   }./deploy_service_account.sh`;
 
   return (
