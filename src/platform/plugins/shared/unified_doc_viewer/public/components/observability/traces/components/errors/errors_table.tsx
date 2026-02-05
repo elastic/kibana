@@ -40,6 +40,11 @@ const sectionTitle = i18n.translate(
   }
 );
 
+const sectionDescription = i18n.translate(
+  'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.description',
+  { defaultMessage: 'Errors that occurred during this span and their causes' }
+);
+
 export interface Props {
   traceId: string;
   docId?: string;
@@ -94,10 +99,7 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
             data-test-subj="unifiedDocViewerErrorsAccordion"
             id="errorsSection"
             title={sectionTitle}
-            description={i18n.translate(
-              'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.description',
-              { defaultMessage: 'Errors that occurred during this span and their causes' }
-            )}
+            description={sectionDescription}
             actions={actions}
           >
             <EuiSpacer size="s" />
@@ -114,6 +116,7 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
               <EuiFlexGroup direction="column" gutterSize="s">
                 <EuiFlexItem>
                   <EuiInMemoryTable
+                    tableCaption={sectionDescription}
                     responsiveBreakpoint={false}
                     items={response.traceErrors}
                     columns={columns}
