@@ -19,6 +19,7 @@ export {
   isRowClickTriggerContext,
   isValueClickTriggerContext,
 } from './ui_actions/triggers';
+export { CONTEXT_MENU_TRIGGER, SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '../common';
 export type {
   CellValueContext,
   ChartActionContext,

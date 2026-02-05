@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -449,12 +450,13 @@ export class DiscoverPlugin
       });
     });
 
-    plugins.embeddable.registerLegacyURLTransform(SEARCH_EMBEDDABLE_TYPE, async () => {
-      const { getSearchEmbeddableTransforms } = await getEmbeddableServices();
-      const { transformEnhancementsIn, transformEnhancementsOut } = plugins.embeddable;
-      return getSearchEmbeddableTransforms(transformEnhancementsIn, transformEnhancementsOut)
-        .transformOut;
-    });
+    plugins.embeddable.registerLegacyURLTransform(
+      SEARCH_EMBEDDABLE_TYPE,
+      async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+        const { getTransformOut } = await getEmbeddableServices();
+        return getTransformOut(transformDrilldownsOut);
+      }
+    );
   }
 }
 

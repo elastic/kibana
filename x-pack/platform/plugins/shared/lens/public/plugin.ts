@@ -73,6 +73,7 @@ import {
   LENS_CONTENT_TYPE,
   LENS_ITEM_LATEST_VERSION,
 } from '@kbn/lens-common/content_management/constants';
+<<<<<<< HEAD
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
@@ -83,6 +84,10 @@ import {
   VISUALIZE_EDITOR_TRIGGER,
   VISUALIZE_FIELD_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
+||||||| 636b7747b619
+=======
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+>>>>>>> upstream/main
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -403,17 +408,16 @@ export class LensPlugin {
           // This loads the builder async to allow synchronous access to builder via getLensBuilder
           await setLensBuilder(flags.apiFormat);
 
-          embeddable.registerLegacyURLTransform(LENS_EMBEDDABLE_TYPE, async () => {
-            const { getLensTransforms } = await import('./async_services');
-            const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
-            const builder = new LensConfigBuilder(undefined, flags.apiFormat);
+          embeddable.registerLegacyURLTransform(
+            LENS_EMBEDDABLE_TYPE,
+            async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+              const { getTransformOut } = await import('./async_services');
+              const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
+              const builder = new LensConfigBuilder(undefined, flags.apiFormat);
 
-            return getLensTransforms({
-              builder,
-              transformEnhancementsIn: embeddable.transformEnhancementsIn,
-              transformEnhancementsOut: embeddable.transformEnhancementsOut,
-            }).transformOut;
-          });
+              return getTransformOut(builder, transformDrilldownsOut);
+            }
+          );
         })
       );
 
