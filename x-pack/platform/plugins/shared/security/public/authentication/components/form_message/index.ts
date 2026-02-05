@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export type { LoginFormProps } from './login_form';
-export { LoginForm } from './login_form';
-export { DisabledLoginForm } from './disabled_login_form';
+export { MessageType, type FormMessage, formMessages, renderMessage } from './form_message';
