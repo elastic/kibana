@@ -7,7 +7,7 @@
 
 import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
 
-import { HTTPAuthorizationHeader } from '..';
+import { HTTPAuthorizationHeader } from '../authentication/http_authentication';
 import { isUiamCredential, type UiamServicePublic } from '../uiam';
 
 /**

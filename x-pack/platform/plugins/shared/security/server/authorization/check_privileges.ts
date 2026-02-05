@@ -24,7 +24,7 @@ import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 
 import { ResourceSerializer } from './resource_serializer';
 import { validateEsPrivilegeResponse } from './validate_es_response';
-import { getScopedClient } from '../lib';
+import { getScopedClient } from '../elasticsearch';
 import type { UiamServicePublic } from '../uiam';
 
 interface CheckPrivilegesActions {

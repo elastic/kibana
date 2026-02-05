@@ -26,11 +26,8 @@ import { isCreateRestAPIKeyParams } from '@kbn/security-plugin-types-server';
 
 import { getFakeKibanaRequest } from './fake_kibana_request';
 import type { SecurityLicense } from '../../../common';
-import {
-  getScopedClient,
-  transformPrivilegesToElasticsearchPrivileges,
-  validateKibanaPrivileges,
-} from '../../lib';
+import { getScopedClient } from '../../elasticsearch';
+import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../routes/api_keys';
 import { isUiamCredential, type UiamServicePublic } from '../../uiam';
 import {

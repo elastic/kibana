@@ -10,4 +10,3 @@ export {
   transformPrivilegesToElasticsearchPrivileges,
 } from './role_utils';
 export { flattenObject } from './flatten_object';
-export { getScopedClient } from './get_scoped_client';
