@@ -13,7 +13,7 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { colorByValueSchema } from '../color';
-import { esqlColumnSchema } from '../metric_ops';
+import { esqlColumnSchema, esqlColumnOperationWithLabelAndFormatSchema } from '../metric_ops';
 import {
   sharedPanelInfoSchema,
   layerSettingsSchema,
@@ -132,7 +132,7 @@ export const heatmapStateSchemaESQL = schema.object(
     ...heatmapSharedStateSchema,
     ...heatmapAxesStateESQLSchemaProps,
     ...datasetEsqlTableSchema,
-    metric: esqlColumnSchema.extends(heatmapStateMetricOptionsSchemaProps),
+    metric: esqlColumnOperationWithLabelAndFormatSchema.extends(heatmapStateMetricOptionsSchemaProps),
   },
   { meta: { id: 'heatmapESQL' } }
 );

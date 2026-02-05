@@ -24,7 +24,7 @@ import {
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
   mergeAllMetricsWithChartDimensionSchemaWithStaticOps,
 } from './shared';
-import { esqlColumnSchema } from '../metric_ops';
+import { esqlColumnSchema, esqlColumnOperationWithLabelAndFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
 import { filterSchema } from '../filter';
 import { builderEnums } from '../enums';
@@ -412,7 +412,7 @@ const xyDataLayerSchemaESQL = schema.object(
     ...xyDataLayerSharedSchema,
     breakdown_by: schema.maybe(esqlColumnSchema),
     y: schema.arrayOf(
-      esqlColumnSchema.extends(
+      esqlColumnOperationWithLabelAndFormatSchema.extends(
         {
           axis: schema.maybe(schema.oneOf([schema.literal('left'), schema.literal('right')])),
           color: schema.maybe(staticColorSchema),

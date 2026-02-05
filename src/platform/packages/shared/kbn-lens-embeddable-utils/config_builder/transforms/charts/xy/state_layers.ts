@@ -51,17 +51,17 @@ export function getValueColumns(layer: unknown, i: number) {
   if (isAPIReferenceLineLayer(layer)) {
     return [
       ...layer.thresholds.map((t, index) =>
-        getValueColumn(`referenceLine${index}`, t.column, 'number')
+        getValueColumn(`referenceLine${index}`, t, 'number')
       ),
     ];
   }
   return [
-    ...(layer.x ? [getValueColumn(getAccessorNameForXY(layer, X_ACCESSOR), layer.x.column)] : []),
+    ...(layer.x ? [getValueColumn(getAccessorNameForXY(layer, X_ACCESSOR), layer.x)] : []),
     ...layer.y.map((y, index) =>
-      getValueColumn(getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index), y.column, 'number')
+      getValueColumn(getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index), y, 'number')
     ),
     ...(layer.breakdown_by
-      ? [getValueColumn(getAccessorNameForXY(layer, BREAKDOWN_ACCESSOR), layer.breakdown_by.column)]
+      ? [getValueColumn(getAccessorNameForXY(layer, BREAKDOWN_ACCESSOR), layer.breakdown_by)]
       : []),
   ];
 }

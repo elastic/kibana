@@ -9,22 +9,46 @@
 
 import type { TextBasedLayer, TextBasedLayerColumn } from '@kbn/lens-common';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { LensApiMetricOperation } from '../../schema/metric_ops';
+import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 
+/**
+ * An ESQL column operation object that may include label and format metadata.
+ * Accepts any object with a `column` field (e.g. esqlColumnSchema or
+ * esqlColumnOperationWithLabelAndFormatSchema instances).
+ */
+interface EsqlColumnInput {
+  column: string;
+  label?: string;
+  format?: LensApiMetricOperation['format'];
+}
+
+/**
+ * Creates a TextBasedLayerColumn from an ESQL column operation object.
+ * Label and format are automatically extracted when present.
+ */
 export const getValueColumn = (
   id: string,
-  fieldName?: string,
+  { column: fieldName, label, format: apiFormat }: EsqlColumnInput,
   fieldType: DatatableColumnType = 'string'
 ): TextBasedLayerColumn => {
+  const format = apiFormat ? fromFormatAPIToLensState(apiFormat) : undefined;
   return {
     columnId: id,
     fieldName: fieldName || id,
     ...(fieldType ? { meta: { type: fieldType } } : {}),
+    ...(label ? { label, customLabel: true } : {}),
+    ...(format ? { params: { format } } : {}),
   };
 };
 
 export const getValueApiColumn = (accessor: string, layer: TextBasedLayer) => {
+  const column = layer.columns.find((c) => c.columnId === accessor)!;
+  const format = fromFormatLensStateToAPI(column.params?.format);
   return {
     operation: 'value' as const,
-    column: layer.columns.find((c) => c.columnId === accessor)!.fieldName,
+    column: column.fieldName,
+    ...(column.customLabel && column.label ? { label: column.label } : {}),
+    ...(format ? { format } : {}),
   };
 };

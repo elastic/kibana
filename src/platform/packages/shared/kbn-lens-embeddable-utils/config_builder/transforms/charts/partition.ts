@@ -148,12 +148,12 @@ export function getValueColumns(layer: unknown) {
 
   const esqlMetricColumns =
     layer.metrics?.map((metric, index) =>
-      getValueColumn(getAccessorName('metric', index), metric.column, 'number')
+      getValueColumn(getAccessorName('metric', index), metric, 'number')
     ) ?? [];
 
   const esqlBucketColumns =
     layer.group_by?.map((bucket, index) =>
-      getValueColumn(getAccessorName('group_by', index), bucket.column)
+      getValueColumn(getAccessorName('group_by', index), bucket)
     ) ?? [];
   return esqlMetricColumns.concat(esqlBucketColumns);
 }
