@@ -6,7 +6,7 @@
  */
 
 import type { AbortableAsyncState } from '@kbn/react-hooks';
-import type { SignificantEventsPreviewResponse, StreamQueryKql } from '@kbn/streams-schema';
+import type { SignificantEventsPreviewResponse, StreamQuery } from '@kbn/streams-schema';
 import { useEuiTheme } from '@elastic/eui';
 import type { TickFormatter } from '@elastic/charts';
 import { useMemo } from 'react';
@@ -19,7 +19,7 @@ export function useSparkplotDataFromSigEvents({
   xFormatter,
 }: {
   previewFetch: AbortableAsyncState<Promise<SignificantEventsPreviewResponse>>;
-  query: StreamQueryKql;
+  query: StreamQuery;
   xFormatter: TickFormatter;
 }) {
   const theme = useEuiTheme().euiTheme;

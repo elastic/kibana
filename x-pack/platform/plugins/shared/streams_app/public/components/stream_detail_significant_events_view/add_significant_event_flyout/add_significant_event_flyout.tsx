@@ -21,7 +21,12 @@ import {
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { type StreamQueryKql, type Streams, type System } from '@kbn/streams-schema';
+import {
+  buildEsqlWhereCondition,
+  type StreamQuery,
+  type Streams,
+  type System,
+} from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
@@ -45,7 +50,7 @@ interface Props {
   definition: Streams.all.GetResponse;
   onSave: (data: SaveData) => Promise<void>;
   systems: System[];
-  query?: StreamQueryKql;
+  query?: StreamQuery;
   initialFlow?: Flow;
   initialSelectedSystems: System[];
   refreshSystems: () => void;
@@ -86,13 +91,13 @@ export function AddSignificantEventFlyout({
     isEditMode ? 'manual' : initialFlow
   );
   const flowRef = useRef<Flow | undefined>(selectedFlow);
-  const [queries, setQueries] = useState<StreamQueryKql[]>([{ ...defaultQuery(), ...query }]);
+  const [queries, setQueries] = useState<StreamQuery[]>([{ ...defaultQuery(), ...query }]);
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [selectedSystems, setSelectedSystems] = useState<System[]>(initialSelectedSystems);
 
-  const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
+  const [generatedQueries, setGeneratedQueries] = useState<StreamQuery[]>([]);
   const [{ loading: isGettingTask, value: task }, getTask] = useAsyncFn(getGenerationTask);
   const [{ loading: isSchedulingGenerationTask }, doScheduleGenerationTask] =
     useAsyncFn(scheduleGenerationTask);
@@ -138,6 +143,12 @@ export function AddSignificantEventFlyout({
           .map((nextQuery) => ({
             id: v4(),
             kql: { query: nextQuery.kql },
+            esql: {
+              where: buildEsqlWhereCondition({
+                kql: { query: nextQuery.kql },
+                feature: nextQuery.feature,
+              }),
+            },
             title: nextQuery.title,
             feature: nextQuery.feature,
             severity_score: nextQuery.severity_score,
@@ -289,7 +300,7 @@ export function AddSignificantEventFlyout({
                       <ManualFlowForm
                         isSubmitting={isSubmitting}
                         isEditMode={isEditMode}
-                        setQuery={(next: StreamQueryKql) => setQueries([next])}
+                        setQuery={(next: StreamQuery) => setQueries([next])}
                         query={queries[0]}
                         setCanSave={(next: boolean) => {
                           setCanSave(next);
@@ -314,7 +325,7 @@ export function AddSignificantEventFlyout({
                       }}
                       stopGeneration={stopGeneration}
                       definition={definition.stream}
-                      setQueries={(next: StreamQueryKql[]) => {
+                      setQueries={(next: StreamQuery[]) => {
                         setQueries(next);
                       }}
                       setCanSave={(next: boolean) => {

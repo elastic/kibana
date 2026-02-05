@@ -18,28 +18,39 @@ interface StreamQueryBase {
   title: string;
 }
 
-export interface StreamQueryKql extends StreamQueryBase {
+export interface StreamQuery extends StreamQueryBase {
+  /**
+   * @deprecated Use esql.where instead. Will be removed in a future version.
+   */
   feature?: {
     name: string;
     filter: Condition;
     type: 'system';
   };
+  /**
+   * @deprecated Use esql.where instead. Will be removed in a future version.
+   */
   kql: {
     query: string;
+  };
+  /**
+   * ESQL-based query condition. Contains the WHERE clause condition
+   * that combines the KQL query with the feature filter.
+   */
+  esql: {
+    where: string;
   };
   // from 0 to 100. aligned with anomaly detection scoring
   severity_score?: number;
   evidence?: string[];
 }
 
-export type StreamQuery = StreamQueryKql;
-
 const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
   id: NonEmptyString,
   title: NonEmptyString,
 });
 
-export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
+export const streamQueryKqlSchema: z.Schema<StreamQuery> = z.intersection(
   streamQueryBaseSchema,
   z.object({
     feature: z
@@ -51,6 +62,13 @@ export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
       .optional(),
     kql: z.object({
       query: z.string(),
+    }),
+    esql: z.object({
+      where: z
+        .string()
+        .describe(
+          'ES|QL WHERE clause condition that combines the KQL query with the feature filter.'
+        ),
     }),
     severity_score: z.number().optional(),
     evidence: z.array(z.string()).optional(),
@@ -75,8 +93,15 @@ export const upsertStreamQueryRequestSchema = z.object({
   kql: z.object({
     query: z.string(),
   }),
+  esql: z.object({
+    where: z
+      .string()
+      .describe(
+        'ES|QL WHERE clause condition that combines the KQL query with the feature filter.'
+      ),
+  }),
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
 });
 
-export const isStreamQueryKql = createIsNarrowSchema(streamQuerySchema, streamQueryKqlSchema);
+export const isStreamQuery = createIsNarrowSchema(streamQuerySchema, streamQueryKqlSchema);

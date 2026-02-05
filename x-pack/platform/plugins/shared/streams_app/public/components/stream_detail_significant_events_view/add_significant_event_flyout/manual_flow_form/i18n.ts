@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
 
-export function getSigEventFlyoutTitle(query?: StreamQueryKql): string {
+export function getSigEventFlyoutTitle(query?: StreamQuery): string {
   if (!query) {
     return i18n.translate('xpack.streams.significantEventFlyout.addNewQueryFlyoutTitle', {
       defaultMessage: 'Add significant event',
@@ -23,7 +23,7 @@ export function getSigEventFlyoutTitle(query?: StreamQueryKql): string {
   });
 }
 
-export function getSigEventSubmitTitle(query?: StreamQueryKql): string {
+export function getSigEventSubmitTitle(query?: StreamQuery): string {
   if (!query) {
     return i18n.translate('xpack.streams.significantEventFlyout.addButtonLabel', {
       defaultMessage: 'Add',

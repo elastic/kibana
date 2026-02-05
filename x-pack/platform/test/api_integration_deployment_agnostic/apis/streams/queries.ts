@@ -88,11 +88,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('lists queries when defined on the stream', async () => {
       const queries = [
-        { id: v4(), title: 'OutOfMemoryError', kql: { query: "message:'OutOfMemoryError'" } },
+        {
+          id: v4(),
+          title: 'OutOfMemoryError',
+          kql: { query: "message:'OutOfMemoryError'" },
+          esql: { where: 'KQL("message:\'OutOfMemoryError\'")' },
+        },
         {
           id: v4(),
           title: 'cluster_block_exception',
           kql: { query: "message:'cluster_block_exception'" },
+          esql: { where: 'KQL("message:\'cluster_block_exception\'")' },
         },
       ];
 
@@ -123,6 +129,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: v4(),
           title: 'initial title',
           kql: { query: "message:'initial query'" },
+          esql: { where: 'KQL("message:\'initial query\'")' },
         };
         const upsertQueryResponse = await apiClient
           .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
@@ -131,6 +138,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 title: query.title,
                 kql: query.kql,
+                esql: { where: 'KQL("message:\'initial query\'")' },
               },
             },
           })
@@ -151,6 +159,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: 'first',
           title: 'initial title',
           kql: { query: 'initial query' },
+          esql: { where: 'KQL("initial query")' },
         };
         await putStream(apiClient, STREAM_NAME, {
           stream,
@@ -166,6 +175,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 title: query.title,
                 kql: { query: 'updated query' },
+                esql: { where: 'KQL("updated query")' },
               },
             },
           })
@@ -179,6 +189,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             id: query.id,
             title: query.title,
             kql: { query: 'updated query' },
+            esql: { where: 'KQL("updated query")' },
           },
         ]);
 
@@ -193,6 +204,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: 'first',
           title: 'initial title',
           kql: { query: 'initial query' },
+          esql: { where: 'KQL("initial query")' },
         };
         await putStream(apiClient, STREAM_NAME, {
           stream,
@@ -208,6 +220,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 title: 'updated title',
                 kql: { query: query.kql.query },
+                esql: { where: 'KQL("initial query")' },
               },
             },
           })
@@ -221,6 +234,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             id: query.id,
             title: 'updated title',
             kql: { query: query.kql.query },
+            esql: { where: 'KQL("initial query")' },
           },
         ]);
 
@@ -240,6 +254,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: 'feature-query',
           title: 'query with feature',
           kql: { query: 'test query' },
+          esql: { where: 'KQL("test query") AND `host.name` == "host1"' },
           feature: initialFeature,
         };
 
@@ -250,6 +265,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 title: query.title,
                 kql: query.kql,
+                esql: { where: 'KQL("test query") AND `host.name` == "host1"' },
                 feature: initialFeature,
               },
             },
@@ -270,6 +286,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 title: query.title,
                 kql: query.kql,
+                esql: { where: 'KQL("test query") AND `host.name` == "host2"' },
                 feature: updatedFeature,
               },
             },
@@ -291,6 +308,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: 'feature-query-unchanged',
           title: 'initial title',
           kql: { query: 'initial query' },
+          esql: { where: 'KQL("initial query") AND `host.name` == "host1"' },
           feature,
         };
 
@@ -301,6 +319,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 title: query.title,
                 kql: query.kql,
+                esql: { where: 'KQL("initial query") AND `host.name` == "host1"' },
                 feature,
               },
             },
@@ -314,6 +333,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 title: 'updated title',
                 kql: { query: 'updated query' },
+                esql: { where: 'KQL("updated query") AND `host.name` == "host1"' },
                 feature,
               },
             },
@@ -328,6 +348,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             id: query.id,
             title: 'updated title',
             kql: { query: 'updated query' },
+            esql: { where: 'KQL("updated query") AND `host.name` == "host1"' },
             feature,
           },
         ]);
@@ -344,6 +365,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             id: queryId,
             title: 'Significant Query',
             kql: { query: "message:'query'" },
+            esql: { where: 'KQL("message:\'query\'")' },
           },
         ],
       });
@@ -377,16 +399,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         id: 'first',
         title: 'first query',
         kql: { query: 'query 1' },
+        esql: { where: 'KQL("query 1")' },
       };
       const secondQuery = {
         id: 'second',
         title: 'second query',
         kql: { query: 'query 2' },
+        esql: { where: 'KQL("query 2")' },
       };
       const thirdQuery = {
         id: 'third',
         title: 'third query',
         kql: { query: 'query 3' },
+        esql: { where: 'KQL("query 3")' },
       };
       await putStream(apiClient, STREAM_NAME, {
         stream,
@@ -399,11 +424,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         id: 'fourth',
         title: 'fourth query',
         kql: { query: 'query 4' },
+        esql: { where: 'KQL("query 4")' },
       };
       const updateThirdQuery = {
         id: 'third',
         title: 'third query',
         kql: { query: 'query 3 updated' },
+        esql: { where: 'KQL("query 3 updated")' },
       };
 
       const bulkResponse = await apiClient
@@ -464,6 +491,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         id: 'feature-query-bulk',
         title: 'query with feature',
         kql: { query: 'test query' },
+        esql: { where: 'KQL("test query") AND `host.name` == "host1"' },
         feature: initialFeature,
       };
 
@@ -474,6 +502,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               title: queryWithFeature.title,
               kql: queryWithFeature.kql,
+              esql: { where: 'KQL("test query") AND `host.name` == "host1"' },
               feature: initialFeature,
             },
           },

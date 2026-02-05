@@ -39,7 +39,7 @@ export {
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
 export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fields_from_ancestors';
 export { getInheritedSettings } from './src/helpers/get_inherited_settings';
-export { buildEsqlQuery } from './src/helpers/query';
+export { buildEsqlQuery, buildEsqlWhereCondition } from './src/helpers/query';
 
 export * from './src/ingest_pipeline_processors';
 
@@ -75,7 +75,6 @@ export {
 
 export {
   type StreamQuery,
-  type StreamQueryKql,
   upsertStreamQueryRequestSchema,
   streamQueryKqlSchema,
   streamQuerySchema,

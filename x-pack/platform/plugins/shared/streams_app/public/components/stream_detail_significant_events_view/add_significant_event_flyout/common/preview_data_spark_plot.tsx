@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import {
   buildEsqlQuery,
   getIndexPatternsForStream,
-  type StreamQueryKql,
+  type StreamQuery,
   type Streams,
 } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
@@ -45,7 +45,7 @@ export function PreviewDataSparkPlot({
   timeRange,
 }: {
   definition: Streams.all.Definition;
-  query: StreamQueryKql;
+  query: StreamQuery;
   isQueryValid: boolean;
   showTitle?: boolean;
   compressed?: boolean;
