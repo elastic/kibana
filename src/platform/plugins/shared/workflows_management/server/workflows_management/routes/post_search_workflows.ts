@@ -32,7 +32,7 @@ export function registerPostSearchWorkflowsRoute({
     },
     withLicenseCheck(async (context, request, response) => {
       try {
-        const { size, page, enabled, createdBy, query } =
+        const { size, page, enabled, createdBy, tags, query } =
           request.body as unknown as GetWorkflowsParams;
 
         const spaceId = spaces.getSpaceId(request);
@@ -43,6 +43,7 @@ export function registerPostSearchWorkflowsRoute({
               page,
               enabled,
               createdBy,
+              tags,
               query,
             },
             spaceId
