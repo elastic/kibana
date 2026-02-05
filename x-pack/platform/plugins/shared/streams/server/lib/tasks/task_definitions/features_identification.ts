@@ -79,6 +79,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 const [{ features: inferredBaseFeatures }, computedFeatures] = await Promise.all([
                   identifyFeatures({
+                    streamName,
                     sampleDocuments,
                     inferenceClient: boundInferenceClient,
                     logger: taskContext.logger.get('features_identification'),
@@ -151,7 +152,8 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 }
 
                 taskContext.logger.error(
-                  `Task ${runContext.taskInstance.id} failed: ${errorMessage}`
+                  `Task ${runContext.taskInstance.id} failed: ${errorMessage}`,
+                  { error }
                 );
 
                 await taskClient.fail<FeaturesIdentificationTaskParams>(

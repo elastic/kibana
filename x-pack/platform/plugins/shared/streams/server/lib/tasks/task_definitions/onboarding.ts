@@ -192,7 +192,7 @@ async function waitForSubtask<TParams extends {} = {}, TPayload extends {} = {}>
       const result = await taskClient.getStatus<TParams, TPayload>(subtaskId);
 
       if (result.status === TaskStatus.Failed) {
-        reject(`Subtask with ID ${subtaskId} has failed`);
+        reject(new Error(`Subtask with ID ${subtaskId} has failed`));
       }
 
       if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)) {

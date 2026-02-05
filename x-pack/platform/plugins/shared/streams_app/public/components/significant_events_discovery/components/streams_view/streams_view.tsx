@@ -178,6 +178,14 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
           >
             {RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL}
           </EuiButtonEmpty>
+
+          <EuiButtonEmpty
+            onClick={() => {}}
+            iconType="crosshairs"
+            disabled={selectedStreams.length === 0}
+          >
+            Discover insights
+          </EuiButtonEmpty>
         </EuiFlexGroup>
       </EuiFlexItem>
 
