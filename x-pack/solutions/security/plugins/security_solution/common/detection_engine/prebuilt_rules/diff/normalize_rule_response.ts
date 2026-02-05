@@ -72,6 +72,7 @@ const normalizeCommonResponseFields = (rule: RuleResponse): SharedResponseProps 
     updated_at: rule.updated_at,
     updated_by: rule.updated_by,
     revision: rule.revision,
+    meta: rule.meta ?? {},
   };
 };
 

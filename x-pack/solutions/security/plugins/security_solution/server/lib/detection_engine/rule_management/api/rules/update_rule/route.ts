@@ -8,7 +8,12 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
+import {
+  CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
+  EXCEPTIONS_API_ALL,
+  INVESTIGATION_GUIDE_API_EDIT,
+  RULES_API_ALL,
+} from '@kbn/security-solution-features/constants';
 import type { UpdateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   UpdateRuleRequestBody,
@@ -30,7 +35,16 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
       path: DETECTION_ENGINE_RULES_URL,
       security: {
         authz: {
-          requiredPrivileges: [RULES_API_ALL],
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                RULES_API_ALL,
+                EXCEPTIONS_API_ALL,
+                CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
+                INVESTIGATION_GUIDE_API_EDIT,
+              ],
+            },
+          ],
         },
       },
     })

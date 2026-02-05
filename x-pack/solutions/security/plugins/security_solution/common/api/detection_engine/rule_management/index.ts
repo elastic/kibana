@@ -17,6 +17,7 @@ export type * from './crud/patch_rule/patch_rule_with_read_privileges';
 export * from './crud/read_rule/read_rule_route.gen';
 export * from './crud/update_rule/request_schema_validation';
 export * from './crud/update_rule/update_rule_route.gen';
+export * from './crud/update_rule/update_rule_with_read_privileges';
 export * from './export_rules/export_rules_details_schema';
 export * from './export_rules/export_rules_route.gen';
 export * from './find_rules/find_rules_route.gen';

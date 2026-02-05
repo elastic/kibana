@@ -24,6 +24,13 @@ interface CalculateRulesAuthzProps {
   request: KibanaRequest;
 }
 
+/**
+ * Calculates the detection rules authorization context for the current user.
+ * Resolves the user's capabilities from Kibana's capability service and maps them
+ * to the DetectionRulesAuthz interface.
+ *
+ * @returns A DetectionRulesAuthz object containing the user's permissions
+ */
 export const calculateRulesAuthz = async ({
   coreStart,
   request,

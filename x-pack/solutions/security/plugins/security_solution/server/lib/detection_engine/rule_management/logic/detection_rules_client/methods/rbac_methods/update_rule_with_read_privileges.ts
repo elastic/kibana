@@ -10,49 +10,39 @@ import { camelCase } from 'lodash';
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
 import type { ValidReadAuthEditFields } from '@kbn/alerting-plugin/common/constants';
 import type { DetectionRulesAuthz } from '../../../../../../../../common/detection_engine/rule_management/authz';
-import type { ReadAuthRulePatchProps } from '../../../../../../../../common/api/detection_engine';
+import type { ReadAuthRuleUpdateWithRuleSource } from '../../../../../../../../common/api/detection_engine';
 import type { RuleParams } from '../../../../../rule_schema';
-import type { IPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { RuleResponse } from '../../../../../../../../common/api/detection_engine/model/rule_schema';
-import { applyRulePatch } from '../../mergers/apply_rule_patch';
 import { getReadAuthFieldValue, validateFieldWritePermissions } from '../../utils';
 
 /**
- * Applies the `bulkEditRuleParamsWithReadAuth` function to patch rule field values
+ * Applies the `bulkEditRuleParamsWithReadAuth` function to update rule field values
  *
  * Will throw errors if patch request contains fields not defined as a `ValidReadAuthEditFields` in the alerting plugin
  */
-export const patchReadAuthEditRuleFields = async ({
+export const updateReadAuthEditRuleFields = async ({
   rulesClient,
-  rulePatch,
+  ruleUpdate,
   existingRule,
-  prebuiltRuleAssetClient,
   rulesAuthz,
 }: {
   rulesClient: RulesClient;
-  rulePatch: ReadAuthRulePatchProps;
+  ruleUpdate: ReadAuthRuleUpdateWithRuleSource;
   existingRule: RuleResponse;
-  prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   rulesAuthz: DetectionRulesAuthz;
 }): Promise<BulkEditResult<RuleParams>> => {
-  validateFieldWritePermissions(rulePatch, rulesAuthz);
+  validateFieldWritePermissions(ruleUpdate, rulesAuthz);
 
-  const { rule_source } = await applyRulePatch({
-    prebuiltRuleAssetClient,
-    existingRule,
-    rulePatch,
-  });
-
-  const nextRule = { ...rulePatch, rule_source };
-
-  const operations = Object.keys(nextRule).map((field) => {
-    const camelCasedField = camelCase(field) as ValidReadAuthEditFields; // RuleParams schema is camel cased
-    return {
-      field: camelCasedField,
-      operation: 'set' as const,
-      value: getReadAuthFieldValue(field, nextRule),
-    };
-  });
+  const operations = Object.keys(ruleUpdate)
+    .filter((field) => ruleUpdate[field as keyof typeof ruleUpdate] != null)
+    .map((field) => {
+      const camelCasedField = camelCase(field) as ValidReadAuthEditFields; // RuleParams schema is camel cased
+      return {
+        field: camelCasedField,
+        operation: 'set' as const,
+        value: getReadAuthFieldValue(field, ruleUpdate),
+      };
+    });
 
   return rulesClient.bulkEditRuleParamsWithReadAuth<RuleParams>({
     ids: [existingRule.id],

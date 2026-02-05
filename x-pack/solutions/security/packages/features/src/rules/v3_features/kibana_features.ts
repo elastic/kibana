@@ -120,7 +120,7 @@ export const getRulesV3BaseKibanaFeature = (
       management: {
         insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
       },
-      ui: [RULES_UI_READ, RULES_UI_EDIT],
+      ui: [RULES_UI_READ, RULES_UI_EDIT, EXCEPTIONS_UI_READ],
       api: [
         RULES_API_ALL,
         RULES_API_READ,
@@ -128,6 +128,7 @@ export const getRulesV3BaseKibanaFeature = (
         LISTS_API_READ,
         LISTS_API_SUMMARY,
         USERS_API_READ,
+        EXCEPTIONS_API_READ,
         INITIALIZE_SECURITY_SOLUTION,
         'rac',
       ],

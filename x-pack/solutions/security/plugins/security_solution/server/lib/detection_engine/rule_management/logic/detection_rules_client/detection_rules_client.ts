@@ -119,6 +119,7 @@ export const createDetectionRulesClient = ({
           rulesClient,
           prebuiltRuleAssetClient,
           mlAuthz,
+          rulesAuthz,
           ruleUpdate,
         });
       });

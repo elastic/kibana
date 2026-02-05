@@ -5,13 +5,32 @@
  * 2.0.
  */
 
-// TODO: document this file, maybe rename?
+/**
+ * Authorization context for detection rule operations.
+ * Contains boolean flags indicating what actions the current user is permitted to perform.
+ *
+ * Some fields (e.g. exceptions_list, investigation_fields, note) can be edited with just read
+ * rule permissions if the user has the corresponding field-specific permission.
+ */
 export interface DetectionRulesAuthz {
+  /** Whether the user can view detection rules */
   canReadRules: boolean;
+
+  /** Whether the user can create, update, or delete detection rules */
   canEditRules: boolean;
+
+  /** Whether the user can view exception lists */
   canReadExceptions: boolean;
+
+  /** Whether the user can modify exception lists on rules */
   canEditExceptions: boolean;
+
+  /** Whether the user can enable or disable detection rules */
   canEnableDisableRules: boolean;
+
+  /** Whether the user can modify investigation_fields on rules */
   canEditCustomHighlightedFields: boolean;
+
+  /** Whether the user can modify the investigation guide (note) on rules */
   canEditInvestigationGuides: boolean;
 }

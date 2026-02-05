@@ -28,10 +28,10 @@ import {
   formatBulkEditResultErrors,
 } from '../utils';
 import { getRuleByIdOrRuleId } from './get_rule_by_id_or_rule_id';
-import { patchReadAuthEditRuleFields } from './rbac_methods/patch_rule_with_read_privileges';
 import type { RuleParams } from '../../../../rule_schema';
 import { applyRulePatch } from '../mergers/apply_rule_patch';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
+import { patchReadAuthEditRuleFields } from './rbac_methods/patch_rule_with_read_privileges';
 
 interface PatchRuleOptions {
   actionsClient: ActionsClient;
