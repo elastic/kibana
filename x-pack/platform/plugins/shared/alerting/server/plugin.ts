@@ -114,6 +114,7 @@ import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
 import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_fill_scheduler_task';
+import { MigrateApiKeysTask } from './migration/api_key_migration_task';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -248,6 +249,7 @@ export class AlertingPlugin {
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
+  private migrateApiKeysTask?: MigrateApiKeysTask;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -412,6 +414,14 @@ export class AlertingPlugin {
       plugins.taskManager,
       this.config
     );
+
+    this.migrateApiKeysTask = new MigrateApiKeysTask({
+      logger: this.logger,
+      core,
+      taskManager: plugins.taskManager,
+      isServerless: true,
+      config: this.config,
+    });
 
     const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
       level: ServiceStatusLevels.available,
@@ -762,6 +772,8 @@ export class AlertingPlugin {
     scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager).catch(
       () => {}
     ); // it shouldn't reject, but just in case
+
+    this.migrateApiKeysTask?.start(plugins.taskManager).catch(() => {});
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
