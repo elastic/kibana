@@ -9,6 +9,7 @@ import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 import { times } from 'lodash';
 import type { Locator, Page } from 'playwright';
+import '@kbn/monaco/src/register_globals';
 
 export const journey = new Journey({
   kbnArchives: ['src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view'],
