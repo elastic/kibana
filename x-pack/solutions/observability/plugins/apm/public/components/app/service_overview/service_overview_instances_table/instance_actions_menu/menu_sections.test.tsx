@@ -30,7 +30,10 @@ describe('getMenuSections', () => {
   } as unknown as AssetDetailsLocator;
 
   const mockDiscoverLocator = {
-    getRedirectUrl: jest.fn().mockReturnValue('/app/discover#/?kubernetes.pod.uid'),
+    getRedirectUrl: jest.fn((params: SerializableRecord) => {
+      const query = (params.query as { query?: string })?.query || '';
+      return `/app/discover#/?_a=(query:(language:kuery,query:'${query}'))`;
+    }),
   } as unknown as LocatorPublic<SerializableRecord>;
 
   const mockOnFilterByInstanceClick = jest.fn();
@@ -51,6 +54,7 @@ describe('getMenuSections', () => {
       metricsHref: '/metrics-href',
       logsLocator: mockLogsLocator,
       assetDetailsLocator: mockAssetDetailsLocator,
+      infraLinksAvailable: true,
     });
 
     // Should have at least the APM section
@@ -91,6 +95,7 @@ describe('getMenuSections', () => {
       metricsHref: '/metrics-href',
       logsLocator: mockLogsLocator,
       assetDetailsLocator: mockAssetDetailsLocator,
+      infraLinksAvailable: true,
     });
 
     const allActions = sections.flat().flatMap((section) => section.actions);
@@ -120,6 +125,7 @@ describe('getMenuSections', () => {
       metricsHref: '/metrics-href',
       logsLocator: mockLogsLocator,
       assetDetailsLocator: mockAssetDetailsLocator,
+      infraLinksAvailable: true,
     });
 
     const allActions = sections.flat().flatMap((section) => section.actions);
@@ -155,6 +161,7 @@ describe('getMenuSections', () => {
       metricsHref: '/metrics-href',
       logsLocator: mockLogsLocator,
       assetDetailsLocator: mockAssetDetailsLocator,
+      infraLinksAvailable: true,
     });
 
     const allActions = sections.flat().flatMap((section) => section.actions);
@@ -186,6 +193,7 @@ describe('getMenuSections', () => {
       metricsHref: '/metrics-href',
       logsLocator: mockLogsLocator,
       assetDetailsLocator: undefined,
+      infraLinksAvailable: true,
     });
 
     const allActions = sections.flat().flatMap((section) => section.actions);
@@ -212,6 +220,7 @@ describe('getMenuSections', () => {
       metricsHref: '/metrics-href',
       logsLocator: mockLogsLocator,
       assetDetailsLocator: undefined,
+      infraLinksAvailable: true,
     });
 
     const allActions = sections.flat().flatMap((section) => section.actions);
@@ -240,6 +249,7 @@ describe('getMenuSections', () => {
       metricsHref: '/metrics-href',
       logsLocator: mockLogsLocator,
       assetDetailsLocator: mockAssetDetailsLocator,
+      infraLinksAvailable: true,
     });
 
     const podSection = sections.flat().find((section) => section.key === 'podDetails');
@@ -263,6 +273,7 @@ describe('getMenuSections', () => {
       metricsHref: '/metrics-href',
       logsLocator: mockLogsLocator,
       assetDetailsLocator: mockAssetDetailsLocator,
+      infraLinksAvailable: true,
     });
 
     const containerSection = sections.flat().find((section) => section.key === 'containerDetails');
@@ -294,6 +305,7 @@ describe('getMenuSections', () => {
       logsLocator: mockLogsLocator,
       assetDetailsLocator: mockAssetDetailsLocator,
       discoverLocator: mockDiscoverLocator,
+      infraLinksAvailable: true,
     });
 
     const allActions = sections.flat().flatMap((section) => section.actions);
@@ -301,9 +313,17 @@ describe('getMenuSections', () => {
 
     expect(podMetricsAction?.condition).toBe(true);
     // Should use Discover link, not Infra UI link
-    expect(podMetricsAction?.href).toContain('/app/discover');
-    expect(podMetricsAction?.href).toContain('kubernetes.pod.uid');
     expect(mockAssetDetailsLocator.getRedirectUrl).not.toHaveBeenCalled();
-    expect(mockDiscoverLocator.getRedirectUrl).toHaveBeenCalled();
+    expect(mockDiscoverLocator.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          language: 'kuery',
+          query: 'kubernetes.pod.uid: "pod-123"',
+        }),
+      })
+    );
+    // Verify the generated URL contains the correct query
+    expect(podMetricsAction?.href).toContain('/app/discover');
+    expect(podMetricsAction?.href).toContain('kubernetes.pod.uid: "pod-123"');
   });
 });
