@@ -41,7 +41,6 @@ describe('use cases add to new case flyout hook', () => {
               metrics: [],
               observables: { enabled: true, autoExtract: true },
               events: { enabled: true },
-              templates: { enabled: true },
             },
             releasePhase: 'ga',
           }}
