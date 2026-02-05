@@ -58,7 +58,6 @@ export type {
   SelectionOption,
   SelectionDetails,
   SelectionContext,
-  PropertyValidationContext,
   RequestOptions,
 } from './v1';
 

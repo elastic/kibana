@@ -9,12 +9,8 @@
 
 import { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
-
-// We need to come up with a better way for suggestions due to custom steps support
-// We use this workaround until that happens.
-// Ideally, it should be managed on custom step level.
-const aiSteps = ['ai.prompt', 'ai.summarize', 'ai.classify'];
-const aiConnectors = ['gen-ai.run', 'inference.chatCompletion'];
+import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { stepSchemas } from '../../../../../../../common/step_schemas';
 
 /**
  * Generate connector-id suggestions for a specific connector type
@@ -80,7 +76,7 @@ export function getConnectorIdSuggestionsItems(
  * Get connector instances for a specific connector type
  */
 export function getConnectorInstancesForType(
-  connectorType: string,
+  stepType: string,
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): Array<{
   id: string;
@@ -89,18 +85,28 @@ export function getConnectorInstancesForType(
   isDeprecated: boolean;
   connectorType: string;
 }> {
-  let resolvedConnectorTypes = [connectorType];
-
-  if (aiSteps.includes(connectorType)) {
-    resolvedConnectorTypes = aiConnectors;
+  if (!dynamicConnectorTypes) {
+    return [];
   }
 
-  return resolvedConnectorTypes
-    .map((resolvedConnectorType) => {
-      if (!dynamicConnectorTypes) {
-        return [];
-      }
+  const resolvedStepTypes: string[] = [];
 
+  // Check if the step type is a custom step
+  const customStepDefinition = stepSchemas.getStepDefinition(stepType);
+  if (customStepDefinition) {
+    const editorHandlers = (customStepDefinition as PublicStepDefinition).editorHandlers;
+    // Has connector ID selection handler
+    if (editorHandlers?.config?.['connector-id']?.connectorIdSelection) {
+      resolvedStepTypes.push(
+        ...editorHandlers.config['connector-id'].connectorIdSelection.actionTypeIds
+      );
+    }
+  } else {
+    resolvedStepTypes.push(stepType);
+  }
+
+  return resolvedStepTypes
+    .map((resolvedConnectorType) => {
       // For sub-action connectors (e.g., "inference.completion"), get the base type
       const baseConnectorType = resolvedConnectorType.includes('.')
         ? resolvedConnectorType.split('.')[0]

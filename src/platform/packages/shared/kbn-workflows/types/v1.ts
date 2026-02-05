@@ -404,8 +404,7 @@ export type CompletionFn = () => Promise<
 export interface BaseConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
-  connectorIdRequired?: boolean;
-  connectorId?: z.ZodType;
+  hasConnectorId?: 'required' | 'optional' | false;
   outputSchema: z.ZodType;
   configSchema?: z.ZodObject;
   summary: string | null;
@@ -467,6 +466,11 @@ export interface StepPropertyHandler<T = unknown> {
    * Provides a unified interface for search, resolution, and decoration of entity references.
    */
   selection?: PropertySelectionHandler<Exclude<T, undefined>>;
+  /**
+   * Connector ID selection configuration for the property.
+   * Used to resolve connector IDs for custom steps.
+   */
+  connectorIdSelection?: ConnectorIdSelectionHandler;
 }
 
 export interface PropertySelectionHandler<T = unknown> {
@@ -518,7 +522,7 @@ export interface SelectionDetails {
   }>;
 }
 
-export interface PropertyValidationContext {
+export interface SelectionContext {
   /** The step type ID (e.g., "onechat.runAgent") */
   stepType: string;
   /** The property path ("config" or "input") */
@@ -527,7 +531,18 @@ export interface PropertyValidationContext {
   propertyKey: string;
 }
 
-export type SelectionContext = PropertyValidationContext;
+export interface ConnectorIdSelectionHandler {
+  /**
+   * The action type IDs to search for.
+   */
+  actionTypeIds: string[];
+  /**
+   * Whether to disable creation of a new connector from the connector ID selection.
+   * If false (default), the first entry in the `actionTypeIds` list will be used to create new connectors.
+   * If true, creation from the connector ID selection will be disabled.
+   */
+  disableCreation?: boolean;
+}
 
 export interface ConnectorExamples {
   params?: Record<string, string>;
