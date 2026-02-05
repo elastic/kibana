@@ -2,8 +2,6 @@
 
 This guide covers best practices for writing Scout UI and API tests that are reliable, maintainable, and fast. Since Scout is built on Playwright, we also recommend reading the official [Playwright Best Practices](https://playwright.dev/docs/best-practices).
 
-> **New to Scout?** Start with [What is Scout?](introduction.md)
-
 ## Quick reference
 
 **UI and API tests**
@@ -53,7 +51,7 @@ Each test file must contain **one test suite** (`test.describe`) with a **flat h
 
 > **Need different setup for different tests?** Split them into separate files. Need granular reporting? Use [`test.step`](#use-teststep-for-multi-step-flows) within a test.
 
-> **Test file execution order is [not guaranteed](https://playwright.dev/docs/test-parallel#control-test-order).** Don't rely on one file running before another. Use a [global setup hook](global-setup-hook.md) for any shared setup that all tests depend on.
+> **Test file execution order is [not guaranteed](https://playwright.dev/docs/test-parallel#control-test-order).** Don't rely on one file running before another. Use a global setup hook for any shared setup that all tests depend on.
 
 ### Organize test suites by role and user flow
 
@@ -114,7 +112,7 @@ Each file focuses on a single role. Login and navigation happen once per test in
 
 ### Move repeated one-time setup operations to a global setup hook
 
-Move one-time repeated setup steps (e.g. data ingestion, API calls) across both sequential and parallel test files to a [global setup hook](global-setup-hook.md). This is a great way to reduce test execution time and avoid redundant code.
+Move one-time repeated setup steps (e.g. data ingestion, API calls) across both sequential and parallel test files to a global setup hook. This is a great way to reduce test execution time and avoid redundant code.
 
 **❌ Repeated operations across multiple test suites**
 
@@ -130,7 +128,7 @@ test.beforeAll(async ({ esArchiver }) => {
 });
 ```
 
-While `esArchiver.loadIfNeeded` safeguards against re-ingesting the archive, it does not eliminate the cost of the check itself. Running this operation per file results in redundant operations and slower tests. Check if there is logic that can be moved to a [global setup hook](global-setup-hook.md) instead.
+While `esArchiver.loadIfNeeded` safeguards against re-ingesting the archive, it does not eliminate the cost of the check itself. Running this operation per file results in redundant operations and slower tests. Check if there is logic that can be moved to a global setup hook instead.
 
 **✅ Run one-time setup operations once in the global setup**
 
@@ -181,7 +179,7 @@ test('creates an index', async ({ esClient }) => {
 
 ### Test with minimal permissions (avoid `admin` when possible)
 
-Generally, **avoid** using `admin` privileges unless absolutely necessary as that can mask permission-related bugs and lead to less realistic test scenarios. See our [API](write-api-tests.md) and [UI](write-ui-tests.md) authentication guides for more details.
+Generally, **avoid** using `admin` privileges unless absolutely necessary as that can mask permission-related bugs and lead to less realistic test scenarios.
 
 **❌ Don't use admin unless absolutely necessary**
 
@@ -213,7 +211,7 @@ await browserAuth.loginWithCustomRole('logs_analyst', {
 });
 ```
 
-**Note**: `browserAuth` is a [core Scout fixture](fixtures.md#core-scout-fixtures). See [browser authentication](browser-auth.md) and [API authentication](api-auth.md) for more details.
+**Note**: `browserAuth` is a core Scout fixture. See [browser authentication](scout-browser-auth.md) for more details.
 
 ### Use the Flaky Test Runner to catch flaky tests early
 
@@ -243,12 +241,12 @@ Best practices specific to UI tests.
 
 ### Run tests in parallel whenever possible
 
-Whenever possible, default to [running tests in parallel](parallelism.md). This leads to **faster test execution** and best simulates real-world usage where multiple users interact with the application simultaneously. Parallel workers **share the same ES and Kibana instance** but each operates in its own **Kibana Space** for isolation.
+Whenever possible, default to running tests in parallel. This leads to **faster test execution** and best simulates real-world usage where multiple users interact with the application simultaneously. Parallel workers **share the same ES and Kibana instance** but each operates in its own **Kibana Space** for isolation.
 
-| Run in **parallel**                                                                                   | Run **sequentially**                          |
-| ----------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| UI tests (most test suites)                                                                           | API tests                                     |
-| Tests that can share pre-ingested ES data (usually via the [global setup hook](global-setup-hook.md)) | Tests requiring a "clean" Elasticsearch state |
+| Run in **parallel**                                                           | Run **sequentially**                          |
+| ----------------------------------------------------------------------------- | --------------------------------------------- |
+| UI tests (most test suites)                                                   | API tests                                     |
+| Tests that can share pre-ingested ES data (usually via the global setup hook) | Tests requiring a "clean" Elasticsearch state |
 
 > **Why sequential for clean state?** The global setup hook ingests data _before_ parallel workers start. Tests verifying "no data" UI states must run in a sequential test suite with no pre-ingested data.
 
@@ -988,11 +986,11 @@ Use the right fixture for the right purpose:
 
 | Fixture                       | Use for                                                                                                                                                                                                                                                                                             |
 | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apiClient`                   | Testing the endpoint under test (with [scoped credentials](api-auth.md))                                                                                                                                                                                                                            |
+| `apiClient`                   | Testing the endpoint under test (with scoped credentials)                                                                                                                                                                                                                                           |
 | `apiServices`                 | Setup, teardown, verifying side effects                                                                                                                                                                                                                                                             |
 | `kbnClient`, `esClient`, etc. | Lower-level setup when `apiServices` doesn't have a suitable helper. <br/><br/>Use one of the existing fixtures (e.g., `kbnClient`, `esClient`, etc.) directly or [contribute a new API helper](#contribute-to-scout-when-possible) (recommended if you think it will be useful for other plugins). |
 
-> See [Write Scout API tests](write-api-tests.md) for a complete walkthrough and [API authentication](api-auth.md) for credential options.
+> See [API services](scout-api-services.md) for more details on API helpers.
 
 **❌ Don't use `apiServices` for the endpoint under test**
 
@@ -1075,11 +1073,9 @@ This catches issues like missing fields, wrong types, or empty collections that 
 
 ## Contribute to Scout when possible
 
-We welcome contributions to one of the [Scout packages](introduction.md#modular-and-extensible-by-design). This includes page objects, EUI wrappers, API helpers, and more.
+We welcome contributions to one of the Scout packages. This includes page objects, EUI wrappers, API helpers, and more.
 
 | If your code...                               | Then...                                                                                                                                                                                                             |
 | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Could be useful to **reuse in other plugins** | **Platform-wide** functionality should be contributed to `@kbn/scout`.<br/><br/>**Solution-specific** functionality should go to a solution-specific Scout package (e.g. `@kbn/scout-security`, `@kbn/scout-oblt`). |
 | Is **specific to your plugin**                | Keep it in your plugin's test directory                                                                                                                                                                             |
-
-Reach out to the AppEx QA team in the [#kibana-scout](https://elastic.slack.com/archives/C082TSQ672B) channel for guidance.
