@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
-import { colorByValueSchema, colorMappingSchema, staticColorSchema } from '../color';
+import { colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
   collapseBySchema,
@@ -25,6 +25,7 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { groupIsNotCollapsed } from '../../utils';
 
 const mosaicStateSharedSchema = {
   legend: schema.maybe(
@@ -46,24 +47,13 @@ const mosaicStateSharedSchema = {
   value_display: valueDisplaySchema,
 };
 
-const partitionStatePrimaryMetricOptionsSchema = {
-  /**
-   * Color configuration
-   */
-  color: schema.maybe(staticColorSchema),
-};
+const partitionStatePrimaryMetricOptionsSchema = {};
 
 const partitionStateBreakdownByOptionsSchema = {
   /**
-   * Color configuration: static color, color by value, or color mapping
+   * Color configuration: color mapping
    */
-  color: schema.maybe(
-    schema.oneOf([colorByValueSchema, colorMappingSchema], {
-      meta: {
-        description: 'Color configuration: by value (palette-based) or mapping (custom rules)',
-      },
-    })
-  ),
+  color: schema.maybe(colorMappingSchema),
   /**
    * Collapse by function. This parameter is used to collapse the
    * metric chart when the number of columns is bigger than the
@@ -78,16 +68,26 @@ const partitionStateBreakdownByOptionsSchema = {
   collapse_by: schema.maybe(collapseBySchema),
 };
 
-function validateMosaicGroupings(obj: {
-  outer_grouping: Array<{ collapse_by?: string }>;
-  inner_grouping?: Array<{ collapse_by?: string }>;
-}) {
-  if (obj.outer_grouping.filter((def) => def.collapse_by == null).length > 1) {
-    return 'In outer grouping, only a single non-collapsed dimension is allowed when using multiple dimensions.';
+function validateMosaicGroupings({
+  group_by,
+  group_breakdown_by,
+}: {
+  group_by?: Array<{ collapse_by?: string }>;
+  group_breakdown_by?: Array<{ collapse_by?: string }>;
+}): string | void {
+  if (
+    (!group_by || group_by.length === 0) &&
+    (!group_breakdown_by || group_breakdown_by.length === 0)
+  ) {
+    return 'Either a group_by or a group_breakdown_by dimension must be specified';
   }
-  if ((obj.inner_grouping?.filter((def) => def.collapse_by == null).length ?? 0) > 1) {
-    return 'In inner grouping, only a single non-collapsed dimension is allowed when using multiple dimensions.';
+  if (group_by && group_by?.filter(groupIsNotCollapsed).length > 1) {
+    return 'Only a single non-collapsed dimension is allowed for group_by';
   }
+  if (group_breakdown_by && group_breakdown_by?.filter(groupIsNotCollapsed).length > 1) {
+    return 'Only a single non-collapsed dimension is allowed for group_breakdown_by';
+  }
+  return;
 }
 
 export const mosaicStateSchemaNoESQL = schema.object(
@@ -98,33 +98,42 @@ export const mosaicStateSchemaNoESQL = schema.object(
     ...datasetSchema,
     ...dslOnlyPanelInfoSchema,
     ...mosaicStateSharedSchema,
+    ...dslOnlyPanelInfoSchema,
     /**
      * Primary value configuration, must define operation. Supports field-based operations (count, unique count, metrics, sum, last value, percentile, percentile ranks), reference-based operations (differences, moving average, cumulative sum, counter rate), and formula-like operations (static value, formula).
      */
-    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-      partitionStatePrimaryMetricOptionsSchema
-    ),
-    outer_grouping: schema.arrayOf(
-      mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
+    metrics: schema.arrayOf(
+      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+        partitionStatePrimaryMetricOptionsSchema
+      ),
       {
         minSize: 1,
-        maxSize: 100,
-        meta: {
-          description:
-            'Array of vertical grouping dimensions: it can contains multiple collapsed by dimensions, but only a single non-collapsed one',
-        },
+        maxSize: 1,
+        meta: { description: 'Array of metric configurations (only 1 allowed)' },
       }
     ),
-    inner_grouping: schema.maybe(
+    group_by: schema.maybe(
       schema.arrayOf(
         mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
         {
           minSize: 1,
           maxSize: 100,
-          meta: {
-            description:
-              'Array of horizontal breakdown dimensions: it can contains multiple collapsed by dimensions, but only a single non-collapsed one',
-          },
+          meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+        }
+      )
+    ),
+    /**
+     * Unfortunately due to the collapsed feature, it is necessary to distinct between primary and secondary groups
+     * at the api level as well.  Secondary groups are rendered inside the primary groups.
+     * If no primary group is defined then the entire set is the primary group.
+     */
+    group_breakdown_by: schema.maybe(
+      schema.arrayOf(
+        mergeAllBucketsWithChartDimensionSchema({ collapse_by: schema.maybe(collapseBySchema) }),
+        {
+          minSize: 1,
+          maxSize: 100,
+          meta: { description: 'Array of group breakdown dimensions (minimum 1)' },
         }
       )
     ),
@@ -149,34 +158,37 @@ const mosaicStateSchemaESQL = schema.object(
     /**
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
      */
-    metric: esqlColumnOperationWithLabelAndFormatSchema.extends(
-      partitionStatePrimaryMetricOptionsSchema,
-      {
-        meta: {
-          description:
-            'Metric configuration for ES|QL mode, combining generic options, primary metric options, and column selection',
-        },
-      }
-    ),
-    outer_grouping: schema.arrayOf(
-      esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema),
+    metrics: schema.arrayOf(
+      esqlColumnOperationWithLabelAndFormatSchema.extends(
+        partitionStatePrimaryMetricOptionsSchema,
+        {
+          meta: {
+            description:
+              'Metric configuration for ES|QL mode, combining generic options, primary metric options, and column selection',
+          },
+        }
+      ),
       {
         minSize: 1,
-        maxSize: 100,
-        meta: {
-          description:
-            'Array of vertical grouping dimensions: it can contains multiple collapsed by dimensions, but only a single non-collapsed one',
-        },
+        maxSize: 1,
+        meta: { description: 'Array of metric configurations (only 1 allowed)' },
       }
     ),
-    inner_grouping: schema.maybe(
+    /**
+     * Configure how to break down the metric (e.g. show one metric per term). In ES|QL mode, uses column-based configuration.
+     */
+    group_by: schema.maybe(
       schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
         minSize: 1,
         maxSize: 100,
-        meta: {
-          description:
-            'Array of vertical grouping dimensions: it can contains multiple collapsed by dimensions, but only a single non-collapsed one',
-        },
+        meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+      })
+    ),
+    group_breakdown_by: schema.maybe(
+      schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of group breakdown dimensions (minimum 1)' },
       })
     ),
   },
