@@ -7,13 +7,17 @@
 
 import { renderHook } from '@testing-library/react';
 import { getMockAttackDiscoveryAlerts } from '../../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
+import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 
 jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
-jest.mock('../../../../../attack_discovery/pages/results/take_action/use_add_to_existing_case', () => ({
-  useAddToExistingCase: jest.fn(),
-}));
+jest.mock(
+  '../../../../../attack_discovery/pages/results/take_action/use_add_to_existing_case',
+  () => ({
+    useAddToExistingCase: jest.fn(),
+  })
+);
 jest.mock('../../../../../attack_discovery/pages/results/take_action/use_add_to_case', () => ({
   useAddToNewCase: jest.fn(),
 }));
@@ -23,10 +27,9 @@ jest.mock('@kbn/elastic-assistant-common', () => ({
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { useAttackCaseContextMenuItems } = require('./use_attack_case_context_menu_items') as {
-  useAttackCaseContextMenuItems: (props: {
-    attack: unknown;
-    closePopover?: () => void;
-  }) => { items: Array<Record<string, unknown>> };
+  useAttackCaseContextMenuItems: (props: { attack: unknown; closePopover?: () => void }) => {
+    items: EuiContextMenuPanelItemDescriptorEntry[];
+  };
 };
 
 const { useKibana } = jest.requireMock('../../../../../common/lib/kibana') as {
@@ -177,4 +180,3 @@ describe('useAttackCaseContextMenuItems', () => {
     });
   });
 });
-

@@ -36,7 +36,10 @@ export const useAttackCaseContextMenuItems = ({
   } = useKibana();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canCreateAndReadCases = userCasesPermissions.createComment && userCasesPermissions.read;
-  const canUserCreateAndReadCases = useCallback(() => canCreateAndReadCases, [canCreateAndReadCases]);
+  const canUserCreateAndReadCases = useCallback(
+    () => canCreateAndReadCases,
+    [canCreateAndReadCases]
+  );
 
   const { onAddToNewCase, disabled: isAddToNewCaseDisabled } = useAddToNewCase({
     canUserCreateAndReadCases,
