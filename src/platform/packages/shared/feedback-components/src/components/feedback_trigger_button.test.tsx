@@ -13,6 +13,10 @@ import { FeedbackTriggerButton } from './feedback_trigger_button';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import userEvent from '@testing-library/user-event';
 
+jest.mock('./feedback_container', () => ({
+  FeedbackContainer: () => <div data-test-subj="feedbackContainer">Feedback Container</div>,
+}));
+
 const createMockProps = ({
   isTelemetryGlobalSettingEnabled,
 }: {
