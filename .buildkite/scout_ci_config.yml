@@ -16,6 +16,7 @@ plugins:
     - slo
     - spaces
     - streams_app
+    - dashboard
     - workflows_extensions
     - transform
   disabled:
