@@ -8,18 +8,3 @@
  */
 
 export { FeedbackTriggerButton } from './src';
-
-export { FeedbackHeader } from './src';
-
-export { EmailInput } from './src';
-export { EmailConsentCheck } from './src';
-export { EmailSection } from './src';
-export { CsatButtons } from './src';
-export { FeedbackTextArea } from './src';
-export { PrivacyAndSessionDisclaimer } from './src';
-export { FeedbackBody } from './src';
-
-export { SendFeedbackButton } from './src';
-export { FeedbackFooter } from './src';
-
-export { FeedbackContainer } from './src';

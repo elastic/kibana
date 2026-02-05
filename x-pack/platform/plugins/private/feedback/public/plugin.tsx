@@ -13,6 +13,7 @@ import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
 import { getFeedbackQuestionsForApp } from '@kbn/feedback-registry';
+import type { FeedbackFormData } from '../common';
 import { getAppDetails } from './src/utils';
 
 interface FeedbackPluginSetupDependencies {
@@ -76,7 +77,7 @@ export class FeedbackPlugin implements Plugin {
               }
             };
 
-            const sendFeedback = async (data: Record<string, unknown>) => {
+            const sendFeedback = async (data: FeedbackFormData) => {
               const solution = await getSolution();
               await core.http.post('/internal/feedback/send', {
                 body: JSON.stringify({ ...data, solution, organization_id: this.organizationId }),

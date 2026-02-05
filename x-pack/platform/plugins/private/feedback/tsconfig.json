@@ -6,6 +6,7 @@
   "include": [
     "public/**/*",
     "server/**/*",
+    "common/**/*"
   ],
   "kbn_references": [
     "@kbn/core",

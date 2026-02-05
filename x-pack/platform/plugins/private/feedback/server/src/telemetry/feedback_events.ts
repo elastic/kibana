@@ -6,23 +6,10 @@
  */
 
 import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
+import type { FeedbackSubmittedData } from '../../../common';
 
-interface FeedbackQuestion {
-  id: string;
-  question: string;
-  answer: string;
-}
-
-interface FeedbackSubmittedEventData {
-  app_id: string;
-  solution: string;
-  allow_email_contact: boolean;
-  url: string;
+interface FeedbackSubmittedEventData extends FeedbackSubmittedData {
   user_id?: string;
-  user_email?: string;
-  csat_score?: number;
-  questions?: FeedbackQuestion[];
-  organization_id?: string;
 }
 
 export const FEEDBACK_SUBMITTED_EVENT_TYPE = 'feedback_submitted';

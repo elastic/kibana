@@ -12,6 +12,7 @@ import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
+import type { FeedbackFormData } from '../types';
 import { FeedbackHeader } from './header';
 import { FeedbackBody } from './body/feedback_body';
 import { FeedbackFooter } from './footer/feedback_footer';
@@ -20,7 +21,7 @@ interface Props {
   getQuestions: (appId: string) => FeedbackRegistryEntry[];
   getAppDetails: () => { title: string; id: string; url: string };
   getCurrentUserEmail: () => Promise<string | undefined>;
-  sendFeedback: (data: Record<string, unknown>) => Promise<void>;
+  sendFeedback: (data: FeedbackFormData) => Promise<void>;
   showToast: (title: string, type: 'success' | 'error') => void;
   hideFeedbackContainer: () => void;
 }

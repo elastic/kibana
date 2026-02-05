@@ -7,4 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FeedbackTriggerButton } from './components';
+export interface FeedbackQuestion {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+export interface FeedbackSubmittedData {
+  app_id: string;
+  solution: string;
+  allow_email_contact: boolean;
+  url: string;
+  user_email?: string;
+  csat_score?: number;
+  questions?: FeedbackQuestion[];
+  organization_id?: string;
+}
+
+export type FeedbackFormData = Omit<FeedbackSubmittedData, 'solution' | 'organization_id'>;
