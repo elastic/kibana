@@ -57,6 +57,38 @@ capture_html_report() {
   fi
 }
 
+run_failed_test_reporter_and_annotate() {
+  if ! ls .scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson >/dev/null 2>&1; then
+    return
+  fi
+
+  local build_url="${BUILDKITE_BUILD_URL:-${BUILD_URL:-}}"
+  if [[ -z "$build_url" ]]; then
+    echo "⚠️ Missing BUILDKITE_BUILD_URL/BUILD_URL; skipping failed test reporter"
+    return
+  fi
+
+  echo "--- Run Failed Test Reporter"
+  # prevent failures from breaking the script
+  set +e;
+  node scripts/report_failed_tests --build-url="${build_url}#${BUILDKITE_JOB_ID}" \
+    '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson' \
+    --no-github-update --no-index-errors
+  local report_exit_code=$?
+  set -e;
+
+  if [[ $report_exit_code -ne 0 ]]; then
+    echo "⚠️ Failed Test Reporter exited with code ${report_exit_code}"
+  fi
+
+  if [[ ! -d 'target/test_failures' ]]; then
+    return
+  fi
+
+  buildkite-agent artifact upload 'target/test_failures/**/*'
+  ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
+}
+
 echo "--- Config: $config_path"
 echo "   Modes: $(echo "$config_run_modes" | tr '\n' ' ')"
 
@@ -107,6 +139,10 @@ if [[ ${#htmlReportLines[@]} -gt 0 ]]; then
     echo ""
     printf '%s\n' "${htmlReportLines[@]}"
   } | buildkite-agent annotate --style "info" --context "scout-html-report"
+fi
+
+if [[ ${#failedModes[@]} -gt 0 ]]; then
+  run_failed_test_reporter_and_annotate
 fi
 
 echo "--- Scout Test Run Complete: passed=${passed_count} no-tests=${#noTestModes[@]} failed=${#failedModes[@]}"
