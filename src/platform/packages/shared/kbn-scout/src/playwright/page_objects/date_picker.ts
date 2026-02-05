@@ -18,7 +18,19 @@ export enum DateUnitSelector {
 }
 
 export class DatePicker {
-  constructor(private readonly page: ScoutPage) {}
+  private readonly quickMenuButton;
+  private readonly toggleRefreshButton;
+  private readonly refreshIntervalInput;
+  private readonly refreshIntervalUnitSelect;
+
+  constructor(private readonly page: ScoutPage) {
+    this.quickMenuButton = this.page.testSubj.locator('superDatePickerToggleQuickMenuButton');
+    this.toggleRefreshButton = this.page.testSubj.locator('superDatePickerToggleRefreshButton');
+    this.refreshIntervalInput = this.page.testSubj.locator('superDatePickerRefreshIntervalInput');
+    this.refreshIntervalUnitSelect = this.page.testSubj.locator(
+      'superDatePickerRefreshIntervalUnitsSelect'
+    );
+  }
 
   private async showStartEndTimes(containerLocator?: Locator) {
     const getTestSubjLocator = (selector: string) =>
@@ -117,6 +129,13 @@ export class DatePicker {
     await getTestSubjLocator('querySubmitButton').click();
   }
 
+  async setCommonlyUsedTime(option: string) {
+    await this.quickMenuButton.click();
+    const commonlyUsedOption = this.page.testSubj.locator(`superDatePickerCommonlyUsed_${option}`);
+    await expect(commonlyUsedOption).toBeVisible();
+    await commonlyUsedOption.click();
+  }
+
   async setAbsoluteRange({ from, to }: { from: string; to: string }) {
     await this.showStartEndTimes();
     await this.typeAbsoluteRange({ from, to, validateDates: true });
@@ -152,22 +171,19 @@ export class DatePicker {
   }
 
   async startAutoRefresh(interval: number, dateUnit: DateUnitSelector = DateUnitSelector.Seconds) {
-    await this.page.testSubj.click('superDatePickerToggleQuickMenuButton');
+    await this.quickMenuButton.click();
     // Check if refresh is already running
-    const toggleButton = this.page.testSubj.locator('superDatePickerToggleRefreshButton');
-    const isPaused = (await toggleButton.getAttribute('aria-checked')) === 'false';
+    const isPaused = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'false';
     if (isPaused) {
-      await toggleButton.click();
+      await this.toggleRefreshButton.click();
     }
     // Set interval
-    const intervalInput = this.page.testSubj.locator('superDatePickerRefreshIntervalInput');
-    await intervalInput.clear();
-    await intervalInput.fill(interval.toString());
-    const timeUnit = this.page.testSubj.locator('superDatePickerRefreshIntervalUnitsSelect');
-    await timeUnit.selectOption({ value: dateUnit });
-    await intervalInput.press('Enter');
+    await this.refreshIntervalInput.clear();
+    await this.refreshIntervalInput.fill(interval.toString());
+    await this.refreshIntervalUnitSelect.selectOption({ value: dateUnit });
+    await this.refreshIntervalInput.press('Enter');
 
-    await this.page.testSubj.click('superDatePickerToggleQuickMenuButton');
+    await this.quickMenuButton.click();
   }
 
   async waitToBeHidden() {
