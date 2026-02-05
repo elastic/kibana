@@ -27,7 +27,7 @@ import { EndpointScriptDeleteModal } from './script_delete_modal';
 
 export const ScriptsLibrary = memo(() => {
   const history = useHistory();
-  const { addDanger } = useToasts();
+  const toasts = useToasts();
   const { pagination: paginationFromUrlParams } = useUrlPagination();
   const {
     kuery: kueryFromUrl,
@@ -187,9 +187,13 @@ export const ScriptsLibrary = memo(() => {
 
   useEffect(() => {
     if (!isFetching && scriptsLibraryFetchError) {
-      addDanger(scriptsLibraryFetchError?.body?.message || scriptsLibraryFetchError.message);
+      toasts.addDanger(
+        pageLabels.fetchListErrorMessage(
+          scriptsLibraryFetchError?.body?.message || scriptsLibraryFetchError.message
+        )
+      );
     }
-  }, [scriptsLibraryFetchError, addDanger, isFetching]);
+  }, [scriptsLibraryFetchError, toasts, isFetching]);
 
   return (
     <AdministrationListPage

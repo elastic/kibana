@@ -18,6 +18,13 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.scriptsLibrary.pageAddButtonTitle', {
     defaultMessage: 'Add script',
   }),
+  fetchListErrorMessage: (errorMessage: string) =>
+    i18n.translate('xpack.securitySolution.scriptsLibrary.fetchListErrorMessage', {
+      defaultMessage: 'There was an error fetching the scripts list: {errorMessage}',
+      values: {
+        errorMessage,
+      },
+    }),
 
   // table labels
   table: {
