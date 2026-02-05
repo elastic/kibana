@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 
+import type { CoreStart } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type {
   SavedObject,
@@ -16,6 +17,7 @@ import type {
 import type { StorageContext } from '@kbn/content-management-plugin/server';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
 import { SOContentStorage, tagsToFindOptions } from '@kbn/content-management-utils';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
@@ -58,7 +60,15 @@ const searchArgsToSOFindOptions = (args: LensSearchIn): SavedObjectsFindOptions 
 };
 
 export class LensStorage extends SOContentStorage<LensCrud> {
-  constructor(params: { logger: Logger; throwOnResultValidationError: boolean }) {
+  private readonly getStartServices?: () => Promise<
+    [CoreStart, { agentBuilder?: AgentBuilderPluginStart }]
+  >;
+
+  constructor(params: {
+    logger: Logger;
+    throwOnResultValidationError: boolean;
+    getStartServices?: () => Promise<[CoreStart, { agentBuilder?: AgentBuilderPluginStart }]>;
+  }) {
     super({
       savedObjectType: LENS_CONTENT_TYPE,
       cmServicesDefinition: servicesDefinitions,
@@ -74,6 +84,8 @@ export class LensStorage extends SOContentStorage<LensCrud> {
       logger: params.logger,
       throwOnResultValidationError: params.throwOnResultValidationError,
     });
+
+    this.getStartServices = params.getStartServices;
 
     this.mSearch!.toItemResult = (ctx: StorageContext, savedObject: SavedObjectsFindResult) => {
       const transforms = ctx.utils.getTransforms(servicesDefinitions);
@@ -220,6 +232,12 @@ export class LensStorage extends SOContentStorage<LensCrud> {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
 
+    await this.maybeIndexSmlVisualization({
+      request: ctx.request,
+      action: 'create',
+      id: savedObject.id,
+    });
+
     return value;
   }
 
@@ -299,7 +317,61 @@ export class LensStorage extends SOContentStorage<LensCrud> {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
 
+    await this.maybeIndexSmlVisualization({
+      request: ctx.request,
+      action: 'update',
+      id,
+    });
+
     return value;
+  }
+
+  async delete(
+    ctx: StorageContext,
+    id: string,
+    options?: { force: boolean }
+  ): Promise<LensCrud['DeleteOut']> {
+    const result = await super.delete(ctx, id, options);
+    await this.maybeIndexSmlVisualization({
+      request: ctx.request,
+      action: 'delete',
+      id,
+    });
+    return result;
+  }
+
+  private async maybeIndexSmlVisualization({
+    request,
+    action,
+    id,
+  }: {
+    request: StorageContext['request'];
+    action: 'create' | 'update' | 'delete';
+    id: string;
+  }): Promise<void> {
+    if (!this.getStartServices) {
+      return;
+    }
+
+    try {
+      const [, { agentBuilder }] = await this.getStartServices();
+      if (!agentBuilder?.sml?.indexAttachment) {
+        return;
+      }
+
+      await agentBuilder.sml.indexAttachment({
+        request,
+        attachmentId: id,
+        attachmentType: 'visualization_ref',
+        action,
+      });
+    } catch (error) {
+      this.logger.debug(
+        `Failed to trigger SML index update for visualization "${id}": ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
 
   async search(

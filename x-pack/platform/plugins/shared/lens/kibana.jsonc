@@ -38,6 +38,7 @@
       "contentManagement"
     ],
     "optionalPlugins": [
+      "agentBuilder",
       "expressionLegacyMetricVis",
       "expressionPartitionVis",
       "usageCollection",

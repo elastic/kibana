@@ -6,6 +6,7 @@
   "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
     "@kbn/spaces-plugin",
+    "@kbn/agent-builder-plugin",
     "@kbn/core",
     "@kbn/task-manager-plugin",
     "@kbn/global-search-plugin",

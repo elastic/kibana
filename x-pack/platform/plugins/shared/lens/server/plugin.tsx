@@ -21,6 +21,7 @@ import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
 
 import type {
   TaskManagerSetupContract,
@@ -59,6 +60,7 @@ export interface PluginStartContract {
   fieldFormats: FieldFormatsStart;
   data: DataPluginStart;
   dataViews: DataViewsServerPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export interface LensServerPluginSetup {
@@ -101,6 +103,7 @@ export class LensServerPlugin
       storage: new LensStorage({
         throwOnResultValidationError: this.initializerContext.env.mode.dev,
         logger: this.initializerContext.logger.get('storage'),
+        getStartServices: core.getStartServices,
       }),
       version: {
         latest: LENS_ITEM_LATEST_VERSION,
@@ -123,6 +126,7 @@ export class LensServerPlugin
       contentManagement: plugins.contentManagement,
       builder,
       logger: this.logger,
+      getStartServices: core.getStartServices,
     });
 
     core
