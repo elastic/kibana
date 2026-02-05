@@ -23,6 +23,7 @@ import { registerUISettings } from './ui_settings';
 import { getRunAgentStepDefinition } from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
 import { registerAgentBuilderHandlerContext } from './request_handler_context';
+import { getCurrentSpaceId } from './utils/spaces';
 import { createSmlSearchTool } from './services/tools/builtin/sml/sml_search';
 import { createSmlAttachTool } from './services/tools/builtin/sml/sml_attach';
 import { registerSmlCrawlerTask } from './services/sml/task';
@@ -173,6 +174,17 @@ export class AgentBuilderPlugin
       tools: {
         getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),
+      },
+      sml: {
+        indexAttachment: async ({ request, attachmentId, attachmentType, action, spaceId }) => {
+          const resolvedSpaceId = spaceId ?? getCurrentSpaceId({ request, spaces });
+          await startServices.sml.indexAttachment({
+            attachmentId,
+            attachmentType,
+            action,
+            spaceId: resolvedSpaceId,
+          });
+        },
       },
     };
   }

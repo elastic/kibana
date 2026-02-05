@@ -120,4 +120,16 @@ export interface AgentBuilderPluginStart {
    * Tools service, to manage or execute tools.
    */
   tools: ToolsStart;
+  /**
+   * SML service helpers for producers to trigger updates.
+   */
+  sml: {
+    indexAttachment: (params: {
+      request: KibanaRequest;
+      attachmentId: string;
+      attachmentType: string;
+      action: 'create' | 'update' | 'delete';
+      spaceId?: string;
+    }) => Promise<void>;
+  };
 }

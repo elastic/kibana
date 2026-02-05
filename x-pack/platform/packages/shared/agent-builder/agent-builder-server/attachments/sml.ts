@@ -48,6 +48,13 @@ export interface SmlAttachmentPermissions {
   spaces: string[];
 }
 
+export interface SmlAttachmentFromIdContext {
+  esClient: ElasticsearchClient;
+  savedObjectsClient: SavedObjectsClientContract;
+  spaceId: string;
+  request?: KibanaRequest;
+}
+
 export interface SmlAttachmentSearchItem {
   chunkId?: string;
   attachmentId: string;
@@ -72,6 +79,10 @@ export interface SmlAttachmentToAttachmentContext {
 export interface SmlAttachmentTypeDefinition<TType extends string = string, TContent = unknown> {
   list: (context: SmlAttachmentListContext) => MaybePromise<SmlAttachmentListItem[]>;
   fetchFrequency?: () => string;
+  toAttachmentFromId?: (
+    attachmentId: string,
+    context: SmlAttachmentFromIdContext
+  ) => MaybePromise<Attachment<TType, TContent> | null>;
   getSmlData: (
     attachment: Attachment<TType, TContent>,
     context: SmlAttachmentDataContext

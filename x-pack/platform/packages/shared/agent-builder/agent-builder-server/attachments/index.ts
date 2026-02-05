@@ -20,6 +20,7 @@ export type {
   SmlAttachmentChunk,
   SmlAttachmentData,
   SmlAttachmentDataContext,
+  SmlAttachmentFromIdContext,
   SmlAttachmentListContext,
   SmlAttachmentListItem,
   SmlAttachmentPermissions,

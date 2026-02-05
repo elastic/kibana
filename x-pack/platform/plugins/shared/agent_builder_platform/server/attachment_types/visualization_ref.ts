@@ -13,6 +13,7 @@ import {
 import type {
   AttachmentResolveContext,
   AttachmentTypeDefinition,
+  SmlAttachmentFromIdContext,
   SmlAttachmentListItem,
   SmlAttachmentSearchItem,
 } from '@kbn/agent-builder-server/attachments';
@@ -131,6 +132,15 @@ export const createVisualizationRefAttachmentType = (): AttachmentTypeDefinition
         return results;
       },
       fetchFrequency: () => '1m',
+      toAttachmentFromId: async (attachmentId: string, context: SmlAttachmentFromIdContext) => {
+        return {
+          id: attachmentId,
+          type: AttachmentType.visualizationRef,
+          data: {
+            saved_object_id: attachmentId,
+          },
+        };
+      },
       getSmlData: (attachment) => {
         const now = new Date().toISOString();
         return {

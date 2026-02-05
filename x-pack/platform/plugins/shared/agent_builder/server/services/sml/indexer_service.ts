@@ -9,7 +9,11 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { SmlAttachmentChunk, SmlUpdateAction } from '@kbn/agent-builder-server/attachments';
+import type {
+  SmlAttachmentChunk,
+  SmlUpdateAction,
+  SmlAttachmentTypeDefinition,
+} from '@kbn/agent-builder-server/attachments';
 import { smlIndexAlias, smlWriteAlias } from './constants';
 import type { AttachmentServiceStart } from '../attachments';
 import { resolveAttachmentForSpace } from './attachment_lookup';
@@ -40,9 +44,7 @@ export class SmlIndexerService {
       return;
     }
 
-    const attachment = await resolveAttachmentForSpace({
-      esClient: this.deps.esClient,
-      savedObjectsClient: this.deps.savedObjectsClient,
+    const attachment = await this.resolveAttachment({
       attachmentId,
       attachmentType,
       spaceId,
@@ -75,7 +77,7 @@ export class SmlIndexerService {
     });
   }
 
-  private getDefaultSmlData(attachment: Attachment, attachmentType: string) {
+  private getDefaultSmlData(attachment: Attachment<string, unknown>, attachmentType: string) {
     const now = new Date().toISOString();
     return {
       chunks: [
@@ -172,6 +174,37 @@ export class SmlIndexerService {
           ],
         },
       },
+    });
+  }
+
+  private async resolveAttachment({
+    attachmentId,
+    attachmentType,
+    spaceId,
+  }: {
+    attachmentId: string;
+    attachmentType: string;
+    spaceId: string;
+  }) {
+    const definition = this.deps.attachmentsService.getTypeDefinition(attachmentType);
+    if (!definition) {
+      return undefined;
+    }
+
+    const smlDefinition = definition.sml as SmlAttachmentTypeDefinition | undefined;
+    if (smlDefinition?.toAttachmentFromId) {
+      return smlDefinition.toAttachmentFromId(attachmentId, {
+        esClient: this.deps.esClient,
+        savedObjectsClient: this.deps.savedObjectsClient,
+        spaceId,
+      });
+    }
+
+    return resolveAttachmentForSpace({
+      esClient: this.deps.esClient,
+      attachmentId,
+      attachmentType,
+      spaceId,
     });
   }
 }
