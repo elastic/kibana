@@ -91,7 +91,7 @@ export function SignificantEventsDiscoveryPage() {
       previousStatus === TaskStatus.InProgress
     ) {
       const insightsCount = insightsTask.insights?.length ?? 0;
-      core.notifications.toasts.addSuccess(
+      const toast = core.notifications.toasts.addSuccess(
         {
           title:
             insightsCount > 0
@@ -106,6 +106,7 @@ export function SignificantEventsDiscoveryPage() {
             <EuiButton
               size="s"
               onClick={() => {
+                core.notifications.toasts.remove(toast);
                 router.push('/_discovery/{tab}', { ...currentParams, path: { tab: 'insights' } });
               }}
             >

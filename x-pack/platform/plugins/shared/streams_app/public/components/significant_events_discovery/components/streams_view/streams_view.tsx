@@ -6,7 +6,14 @@
  */
 
 import type { EuiSearchBarProps, Query } from '@elastic/eui';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSearchBar,
+  EuiText,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
@@ -18,12 +25,15 @@ import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useInsightsDiscoveryApi } from '../../../../hooks/use_insights_discovery_api';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
+import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { getFormattedError } from '../../../../util/errors';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 import { useDiscoveryStreams } from '../../hooks/use_discovery_streams_fetch';
 import { useOnboardingStatusUpdateQueue } from '../../hooks/use_onboarding_status_update_queue';
 import {
   DISCOVER_INSIGHTS_BUTTON_LABEL,
+  DISCOVER_INSIGHTS_DISABLED_NO_EVENTS_DESCRIPTION,
+  DISCOVER_INSIGHTS_DISABLED_NO_EVENTS_TITLE,
   ONBOARDING_FAILURE_TITLE,
   ONBOARDING_SCHEDULING_FAILURE_TITLE,
   RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL,
@@ -54,9 +64,35 @@ export function StreamsView({
     core: {
       notifications: { toasts },
     },
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
   } = useKibana();
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
+  const [discoverInsightsPopoverOpen, setDiscoverInsightsPopoverOpen] = useState(false);
   const streamsListFetch = useDiscoveryStreams();
+  const significantEventsFetch = useStreamsAppFetch(
+    async ({ signal }) =>
+      streamsRepositoryClient.fetch('GET /internal/streams/_significant_events', {
+        params: {
+          query: {
+            from: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+            to: new Date().toISOString(),
+            bucketSize: '30s',
+          },
+        },
+        signal,
+      }),
+    [streamsRepositoryClient]
+  );
+  const totalSignificantEvents =
+    significantEventsFetch.value?.aggregated_occurrences.reduce(
+      (acc, current) => acc + current.count,
+      0
+    ) ?? 0;
+  const hasSignificantEvents = totalSignificantEvents > 0;
   const [selectedStreams, setSelectedStreams] = useState<TableRow[]>([]);
   const [streamOnboardingResultMap, setStreamOnboardingResultMap] = useState<
     Record<string, TaskResult<OnboardingResult>>
@@ -150,6 +186,17 @@ export function StreamsView({
     cancelOnboardingTask(streamName);
   };
 
+  const isDiscoverInsightsDisabled =
+    !hasSignificantEvents || selectedStreams.length === 0 || isInsightsTaskRunning;
+
+  const onBulkDiscoverInsightsClick = async () => {
+    if (isDiscoverInsightsDisabled) return;
+    const streamNames = selectedStreams.map((row) => row.stream.name);
+    await scheduleInsightsDiscoveryTask(streamNames);
+    setSelectedStreams([]);
+    onInsightsTaskScheduled?.();
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
@@ -190,18 +237,52 @@ export function StreamsView({
             {RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL}
           </EuiButtonEmpty>
 
-          <EuiButtonEmpty
-            onClick={async () => {
-              const streamNames = selectedStreams.map((row) => row.stream.name);
-              await scheduleInsightsDiscoveryTask(streamNames);
-              onInsightsTaskScheduled?.();
-            }}
-            iconType="crosshairs"
-            disabled={selectedStreams.length === 0 || isInsightsTaskRunning}
-            isLoading={isInsightsTaskRunning}
-          >
-            {DISCOVER_INSIGHTS_BUTTON_LABEL}
-          </EuiButtonEmpty>
+          {hasSignificantEvents ? (
+            <EuiButtonEmpty
+              iconType="crosshairs"
+              disabled={selectedStreams.length === 0 || isInsightsTaskRunning}
+              isLoading={isInsightsTaskRunning}
+              onClick={onBulkDiscoverInsightsClick}
+            >
+              {DISCOVER_INSIGHTS_BUTTON_LABEL}
+            </EuiButtonEmpty>
+          ) : (
+            <EuiPopover
+              isOpen={discoverInsightsPopoverOpen}
+              closePopover={() => setDiscoverInsightsPopoverOpen(false)}
+              anchorPosition="downCenter"
+              button={
+                <span
+                  css={{ display: 'inline-block', cursor: 'pointer' }}
+                  onClick={() => setDiscoverInsightsPopoverOpen((open) => !open)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setDiscoverInsightsPopoverOpen((open) => !open);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={DISCOVER_INSIGHTS_DISABLED_NO_EVENTS_TITLE}
+                >
+                  <EuiButtonEmpty iconType="crosshairs" disabled css={{ pointerEvents: 'none' }}>
+                    {DISCOVER_INSIGHTS_BUTTON_LABEL}
+                  </EuiButtonEmpty>
+                </span>
+              }
+            >
+              <EuiFlexGroup direction="column" gutterSize="s" css={{ maxWidth: 320 }}>
+                <EuiFlexItem>
+                  <EuiText size="s" css={{ fontWeight: 600 }}>
+                    {DISCOVER_INSIGHTS_DISABLED_NO_EVENTS_TITLE}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">{DISCOVER_INSIGHTS_DISABLED_NO_EVENTS_DESCRIPTION}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPopover>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
 
