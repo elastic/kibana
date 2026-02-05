@@ -262,6 +262,7 @@ export const SearchWorkflowCommandSchema = z.object({
   createdBy: z.array(z.string()).optional(),
   // bool or number transformed to boolean
   enabled: z.array(z.union([z.boolean(), z.number().transform((val) => val === 1)])).optional(),
+  tags: z.array(z.string()).optional(),
   query: z.string().optional(),
   _full: z.boolean().default(false),
 });
@@ -547,6 +548,7 @@ export interface WorkflowsSearchParams {
   query?: string;
   createdBy?: string[];
   enabled?: boolean[];
+  tags?: string[];
 }
 
 export interface RequestOptions {
