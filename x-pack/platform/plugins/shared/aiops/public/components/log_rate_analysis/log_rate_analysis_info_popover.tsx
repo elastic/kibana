@@ -29,7 +29,6 @@ export const LogRateAnalysisInfoPopoverButton: FC<{
       iconType="question"
       iconSide="right"
       color="hollow"
-      // Defining both iconOnClick and onClick so the mouse cursor changes for cases.
 
       onClick={onClick}
       onClickAriaLabel='Click to open "Log rate analysis info" popover'
