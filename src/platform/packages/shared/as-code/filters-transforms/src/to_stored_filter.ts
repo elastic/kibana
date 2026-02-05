@@ -112,10 +112,6 @@ export function toStoredFilter(filter: AsCodeFilter, logger?: Logger): StoredFil
     if (isSpatialFilter(filter)) {
       return convertFromSpatialFilter(filter, storedFilter);
     }
-
-    throw new FilterConversionError(
-      'AsCodeFilter must have exactly one of: condition, group, dsl, or spatial'
-    );
   } catch (error) {
     logger?.warn(`Failed to convert AsCodeFilter to stored filter: ${error.message}`);
     return;
