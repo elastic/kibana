@@ -12,6 +12,8 @@ import {
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import { DirectorService } from '../../director/director';
+import type { StateWith } from '../type_guards';
+import { hasState } from '../type_guards';
 
 @injectable()
 export class DirectorStep implements RuleExecutionStep {
@@ -22,12 +24,35 @@ export class DirectorStep implements RuleExecutionStep {
     @inject(DirectorService) private readonly director: DirectorService
   ) {}
 
+  private isStepReady(state: Readonly<RulePipelineState>): state is StateWith<'rule'> {
+    return hasState(state, ['rule']);
+  }
+
   public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
     const { input, alertEvents = [] } = state;
 
     this.logger.debug({
       message: `[${this.name}] Starting step for rule ${input.ruleId} with ${alertEvents.length} alert events`,
     });
+
+    if (!this.isStepReady(state)) {
+      this.logger.debug({ message: `[${this.name}] State not ready, halting` });
+      return { type: 'halt', reason: 'state_not_ready' };
+    }
+
+    const { rule } = state;
+
+    /**
+     * Only alertable rules can generate episodes.
+     */
+
+    if (rule.kind !== 'alert') {
+      this.logger.debug({
+        message: `[${this.name}] Skipping episode tracking for signal rule ${input.ruleId}`,
+      });
+
+      return { type: 'continue', data: { alertEvents } };
+    }
 
     try {
       const alertsWithNextEpisode = await this.director.run({ ruleId: input.ruleId, alertEvents });
