@@ -7,6 +7,7 @@
 
 import dateMath from '@elastic/datemath';
 import React, { useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn, OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiCallOut,
@@ -453,6 +454,12 @@ export const PrevalenceDetails: React.FC = () => {
           columns={columns}
           loading={loading}
           data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
+          tableCaption={i18n.translate(
+            'xpack.securitySolution.flyout.left.insights.prevalence.prevalenceCaption',
+            {
+              defaultMessage: 'Prevalence insights',
+            }
+          )}
           noItemsMessage={
             <FormattedMessage
               id="xpack.securitySolution.flyout.left.insights.prevalence.noDataDescription"
