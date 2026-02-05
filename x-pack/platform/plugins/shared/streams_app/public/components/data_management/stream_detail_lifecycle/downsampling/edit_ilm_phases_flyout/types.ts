@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { IlmPolicyPhases } from '@kbn/streams-schema';
+import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
 
 export interface EditIlmPhasesFlyoutProps {
   initialPhases: IlmPolicyPhases;
+  selectedPhase: PhaseName | undefined;
+  setSelectedPhase: (phase: PhaseName | undefined) => void;
   onChange: (next: IlmPolicyPhases) => void;
   onSave: (next: IlmPolicyPhases) => void;
   onClose: () => void;

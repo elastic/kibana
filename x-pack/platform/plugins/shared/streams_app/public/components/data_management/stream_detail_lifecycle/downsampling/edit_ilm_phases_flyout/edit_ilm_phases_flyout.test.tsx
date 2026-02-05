@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import type { IlmPolicyPhases } from '@kbn/streams-schema';
+import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
 import { EditIlmPhasesFlyout } from './edit_ilm_phases_flyout';
 
 jest.mock('../../hooks/use_ilm_phases_color_and_description', () => ({
@@ -55,7 +55,10 @@ const getPhaseContainer = (phase: string) => {
 };
 const withinPhase = (phase: string) => within(getPhaseContainer(phase));
 
-const renderFlyout = (props: Partial<React.ComponentProps<typeof EditIlmPhasesFlyout>> = {}) => {
+const renderFlyout = (
+  props: Partial<React.ComponentProps<typeof EditIlmPhasesFlyout>> = {},
+  options: { initialSelectedPhase?: PhaseName } = {}
+) => {
   const onClose = jest.fn();
   const onChange = jest.fn();
   const onSave = jest.fn();
@@ -64,34 +67,59 @@ const renderFlyout = (props: Partial<React.ComponentProps<typeof EditIlmPhasesFl
     hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
   };
 
-  render(
-    <EditIlmPhasesFlyout
-      initialPhases={initialPhases}
-      searchableSnapshotRepositories={[]}
-      onClose={onClose}
-      onChange={onChange}
-      onSave={onSave}
-      {...props}
-    />
-  );
+  const setSelectedPhaseRef: {
+    current: ((phase: PhaseName | undefined) => void) | null;
+  } = { current: null };
 
-  return { onClose, onChange, onSave, initialPhases };
+  const onSelectedPhaseChange = jest.fn();
+
+  const Wrapper = () => {
+    const [selectedPhase, setSelectedPhase] = React.useState<PhaseName | undefined>(
+      options.initialSelectedPhase
+    );
+    const setSelectedPhaseProxy = (phase: PhaseName | undefined) => {
+      onSelectedPhaseChange(phase);
+      setSelectedPhase(phase);
+    };
+    setSelectedPhaseRef.current = setSelectedPhaseProxy;
+    return (
+      <>
+        <div data-test-subj="selectedPhaseValue">{selectedPhase ?? ''}</div>
+        <EditIlmPhasesFlyout
+          initialPhases={initialPhases}
+          selectedPhase={selectedPhase}
+          setSelectedPhase={setSelectedPhaseProxy}
+          searchableSnapshotRepositories={[]}
+          onClose={onClose}
+          onChange={onChange}
+          onSave={onSave}
+          {...props}
+        />
+      </>
+    );
+  };
+
+  render(<Wrapper />);
+
+  return {
+    onClose,
+    onChange,
+    onSave,
+    initialPhases,
+    onSelectedPhaseChange,
+    setSelectedPhase: (phase: PhaseName | undefined) => {
+      act(() => {
+        if (!setSelectedPhaseRef.current) {
+          throw new Error('selected phase setter not initialized');
+        }
+        setSelectedPhaseRef.current(phase);
+      });
+    },
+  };
 };
 
 describe('EditIlmPhasesFlyout', () => {
   describe('rendering and tabs', () => {
-    it('does not emit onChange during initial mount', async () => {
-      const { onChange } = renderFlyout({
-        initialPhases: {
-          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
-          warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
-        },
-      });
-
-      await tick();
-      expect(onChange).not.toHaveBeenCalled();
-    });
-
     it('renders tabs for enabled phases and selects the first enabled phase', async () => {
       renderFlyout({
         initialPhases: {
@@ -128,6 +156,22 @@ describe('EditIlmPhasesFlyout', () => {
 
       await waitFor(() => expect(getTab('cold')).toBeInTheDocument());
       expect(getPanel('cold')).toBeVisible();
+    });
+
+    it('enables and selects a missing phase when selected externally', async () => {
+      const { setSelectedPhase } = renderFlyout({
+        initialPhases: {
+          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+        },
+      });
+
+      await tick();
+      expect(queryTab('warm')).not.toBeInTheDocument();
+
+      setSelectedPhase('warm');
+
+      await waitFor(() => expect(getTab('warm')).toBeInTheDocument());
+      expect(getPanel('warm')).toBeVisible();
     });
   });
 
@@ -415,7 +459,6 @@ describe('EditIlmPhasesFlyout', () => {
       expect(removeButton).toBeDisabled();
 
       fireEvent.click(removeButton);
-      expect(onChange).not.toHaveBeenCalled();
       expect(getTab('warm')).toBeInTheDocument();
     });
 
@@ -434,7 +477,6 @@ describe('EditIlmPhasesFlyout', () => {
       expect(removeButton).toBeDisabled();
 
       fireEvent.click(removeButton);
-      expect(onChange).not.toHaveBeenCalled();
       expect(getTab('delete')).toBeInTheDocument();
     });
   });

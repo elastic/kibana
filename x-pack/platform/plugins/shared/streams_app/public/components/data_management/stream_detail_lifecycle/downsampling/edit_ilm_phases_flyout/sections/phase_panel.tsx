@@ -23,7 +23,7 @@ export interface PhasePanelProps {
   phase: PhaseName;
   selectedPhase: PhaseName | undefined;
   enabledPhases: PhaseName[];
-  setSelectedIlmPhase: React.Dispatch<React.SetStateAction<PhaseName | undefined>>;
+  setSelectedPhase: (phase: PhaseName | undefined) => void;
   form: FormHook<IlmPolicyPhases, IlmPhasesFlyoutFormInternal>;
   dataTestSubj: string;
   sectionStyles: SerializedStyles;
@@ -38,7 +38,7 @@ export const PhasePanel = ({
   phase,
   selectedPhase,
   enabledPhases,
-  setSelectedIlmPhase,
+  setSelectedPhase,
   form,
   dataTestSubj,
   sectionStyles,
@@ -137,7 +137,7 @@ export const PhasePanel = ({
               phaseName={phase}
               enabledPhases={enabledPhases}
               dataTestSubj={dataTestSubj}
-              setSelectedIlmPhase={setSelectedIlmPhase}
+              setSelectedPhase={setSelectedPhase}
             />
           </div>
         </>

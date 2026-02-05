@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
 import { Form, useForm, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -29,14 +29,18 @@ import {
   getIlmPhasesFlyoutFormSchema,
   type IlmPhasesFlyoutFormInternal,
   OnFieldErrorsChangeProvider,
+  toMilliseconds,
+  type TimeUnit,
   useIlmPhasesFlyoutTabErrors,
 } from './form';
-import { ILM_PHASE_ORDER } from './constants';
+import { DEFAULT_NEW_PHASE_MIN_AGE, ILM_PHASE_ORDER } from './constants';
 import { GlobalFieldsMount, PhasePanel, PhaseTabsRow } from './sections';
 import { useStyles } from './use_styles';
 
 export const EditIlmPhasesFlyout = ({
   initialPhases,
+  selectedPhase,
+  setSelectedPhase,
   onChange,
   onSave,
   onClose,
@@ -87,38 +91,27 @@ export const EditIlmPhasesFlyout = ({
     ],
   });
 
+  const meta = (formData as Partial<IlmPhasesFlyoutFormInternal> | undefined)?._meta;
+  const isMetaReady = Boolean(meta);
+
   const enabledPhases = useMemo(
     () =>
-      ILM_PHASE_ORDER.filter((p) => {
-        const enabled = (formData as any)?._meta?.[p]?.enabled;
-        return Boolean(enabled);
-      }),
-    [formData]
+      isMetaReady
+        ? ILM_PHASE_ORDER.filter((p) => {
+            const enabled = meta?.[p]?.enabled;
+            return Boolean(enabled);
+          })
+        : [],
+    [isMetaReady, meta]
   );
 
   const { onFieldErrorsChange, tabHasErrors } = useIlmPhasesFlyoutTabErrors(formData);
 
   const lastEmittedOutputRef = useRef<IlmPolicyPhases>(initialPhasesRef.current);
-  const isInitializingSubscriptionRef = useRef(true);
-  const initDebounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     const sub = form.subscribe(({ data }) => {
       const next = data.format();
-
-      if (isInitializingSubscriptionRef.current) {
-        // During initial mount, hook-form emits many intermediate values as fields mount.
-        // Coalesce those updates and only start emitting once mounting has stabilized.
-        lastEmittedOutputRef.current = next;
-
-        if (initDebounceTimeoutRef.current) {
-          clearTimeout(initDebounceTimeoutRef.current);
-        }
-        initDebounceTimeoutRef.current = setTimeout(() => {
-          isInitializingSubscriptionRef.current = false;
-        }, 0);
-        return;
-      }
 
       if (isEqual(next, lastEmittedOutputRef.current)) return;
       lastEmittedOutputRef.current = next;
@@ -128,43 +121,98 @@ export const EditIlmPhasesFlyout = ({
 
     return () => {
       sub.unsubscribe();
-      if (initDebounceTimeoutRef.current) {
-        clearTimeout(initDebounceTimeoutRef.current);
-        initDebounceTimeoutRef.current = undefined;
-      }
     };
   }, [form, onChange]);
 
-  const [selectedIlmPhase, setSelectedIlmPhase] = useState<PhaseName | undefined>(undefined);
-  const pendingSelectedIlmPhaseRef = useRef<PhaseName | null>(null);
+  const canSelectFrozen = canCreateRepository || searchableSnapshotRepositories.length > 0;
+
+  const getDefaultMinAge = useCallback((): { value: string; unit: TimeUnit } => {
+    const candidates: Array<'warm' | 'cold' | 'frozen' | 'delete'> = [
+      'warm',
+      'cold',
+      'frozen',
+      'delete',
+    ];
+    let last: { value: string; unit: TimeUnit } | undefined;
+
+    candidates.forEach((p) => {
+      const isPhaseEnabled = Boolean(form.getFields()[`_meta.${p}.enabled`]?.value);
+      if (!isPhaseEnabled) return;
+
+      const value = String(form.getFields()[`_meta.${p}.minAgeValue`]?.value ?? '').trim();
+      const unit = (form.getFields()[`_meta.${p}.minAgeUnit`]?.value ?? 'd') as TimeUnit;
+      if (value) {
+        last = { value, unit };
+      }
+    });
+
+    return last ?? DEFAULT_NEW_PHASE_MIN_AGE;
+  }, [form]);
+
+  const ensurePhaseEnabledWithDefaults = useCallback(
+    (phase: PhaseName): boolean => {
+      if (phase === 'frozen' && !canSelectFrozen) {
+        return false;
+      }
+
+      if (enabledPhases.includes(phase)) {
+        return true;
+      }
+
+      form.setFieldValue(`_meta.${phase}.enabled`, true);
+
+      if (phase === 'frozen' && searchableSnapshotRepositories.length === 1) {
+        const repositoryField = form.getFields()['_meta.searchableSnapshot.repository'];
+        const currentValue = String(repositoryField?.value ?? '').trim();
+        if (repositoryField && currentValue === '') {
+          repositoryField.setValue(searchableSnapshotRepositories[0]);
+        }
+      }
+
+      if (phase !== 'hot') {
+        const valuePath = `_meta.${phase}.minAgeValue`;
+        const unitPath = `_meta.${phase}.minAgeUnit`;
+        const millisPath = `_meta.${phase}.minAgeToMilliSeconds`;
+
+        const valueField = form.getFields()[valuePath];
+        const unitField = form.getFields()[unitPath];
+
+        // When enabling a previously-disabled phase, preserve existing values.
+        // Otherwise default to the last configured min_age (or 30d).
+        if (valueField && String(valueField.value ?? '').trim() === '') {
+          const { value, unit } = getDefaultMinAge();
+          valueField.setValue(value);
+          unitField?.setValue(unit);
+        }
+
+        const resolvedValue = String(form.getFields()[valuePath]?.value ?? '');
+        const resolvedUnit = String(form.getFields()[unitPath]?.value ?? 'd') as TimeUnit;
+        const millis =
+          resolvedValue.trim() === '' ? -1 : toMilliseconds(resolvedValue, resolvedUnit);
+        form.setFieldValue(millisPath, millis);
+      }
+
+      return true;
+    },
+    [canSelectFrozen, enabledPhases, form, getDefaultMinAge, searchableSnapshotRepositories]
+  );
 
   useEffect(() => {
-    if (enabledPhases.length === 0) {
-      pendingSelectedIlmPhaseRef.current = null;
-      setSelectedIlmPhase(undefined);
+    // During initial mount, `_meta` can be temporarily missing while fields mount.
+    // Avoid clobbering the controlled `selectedPhase` during that transient state.
+    if (!isMetaReady) return;
+    if (enabledPhases.length === 0) return;
+
+    if (!selectedPhase) {
+      setSelectedPhase(enabledPhases[0]);
       return;
     }
 
-    // If we just added a phase, wait until it appears in enabledPhases before auto-selecting fallback.
-    if (
-      pendingSelectedIlmPhaseRef.current &&
-      enabledPhases.includes(pendingSelectedIlmPhaseRef.current)
-    ) {
-      pendingSelectedIlmPhaseRef.current = null;
+    const ok = ensurePhaseEnabledWithDefaults(selectedPhase);
+    if (!ok) {
+      setSelectedPhase(enabledPhases[0]);
     }
-
-    if (!selectedIlmPhase) {
-      setSelectedIlmPhase(enabledPhases[0]);
-      return;
-    }
-
-    if (!enabledPhases.includes(selectedIlmPhase)) {
-      if (pendingSelectedIlmPhaseRef.current === selectedIlmPhase) {
-        return;
-      }
-      setSelectedIlmPhase(enabledPhases[0]);
-    }
-  }, [enabledPhases, selectedIlmPhase]);
+  }, [enabledPhases, ensurePhaseEnabledWithDefaults, isMetaReady, selectedPhase, setSelectedPhase]);
 
   return (
     <EuiFlyout
@@ -194,13 +242,11 @@ export const EditIlmPhasesFlyout = ({
 
           <EuiFlexItem grow={false}>
             <PhaseTabsRow
-              form={form}
               enabledPhases={enabledPhases}
               searchableSnapshotRepositories={searchableSnapshotRepositories}
               canCreateRepository={canCreateRepository}
-              selectedIlmPhase={selectedIlmPhase}
-              setSelectedIlmPhase={setSelectedIlmPhase}
-              pendingSelectedIlmPhaseRef={pendingSelectedIlmPhaseRef}
+              selectedPhase={selectedPhase}
+              setSelectedPhase={setSelectedPhase}
               tabHasErrors={tabHasErrors}
               dataTestSubj={dataTestSubj}
             />
@@ -217,9 +263,9 @@ export const EditIlmPhasesFlyout = ({
               <PhasePanel
                 key={phase}
                 phase={phase}
-                selectedPhase={selectedIlmPhase}
+                selectedPhase={selectedPhase}
                 enabledPhases={enabledPhases}
-                setSelectedIlmPhase={setSelectedIlmPhase}
+                setSelectedPhase={setSelectedPhase}
                 form={form}
                 dataTestSubj={dataTestSubj}
                 sectionStyles={sectionStyles}

@@ -17,7 +17,7 @@ export interface RemovePhaseButtonProps {
   phaseName: PhaseName | undefined;
   enabledPhases: PhaseName[];
   dataTestSubj: string;
-  setSelectedIlmPhase: React.Dispatch<React.SetStateAction<PhaseName | undefined>>;
+  setSelectedPhase: (phase: PhaseName | undefined) => void;
 }
 
 export const RemovePhaseButton = ({
@@ -25,7 +25,7 @@ export const RemovePhaseButton = ({
   phaseName,
   enabledPhases,
   dataTestSubj,
-  setSelectedIlmPhase,
+  setSelectedPhase,
 }: RemovePhaseButtonProps) => {
   if (!phaseName) return null;
   if (phaseName === 'hot') return null;
@@ -52,7 +52,7 @@ export const RemovePhaseButton = ({
       onClick={() => {
         enabledField.setValue(false);
         const remaining = enabledPhases.filter((p) => p !== phaseName);
-        setSelectedIlmPhase(remaining[0]);
+        setSelectedPhase(remaining[0]);
       }}
     >
       {i18n.translate('xpack.streams.editIlmPhasesFlyout.removePhase', {
