@@ -1,0 +1,980 @@
+{
+  "reference/query-languages/esql/commands/change-point.md": {
+    "hash": "4a7237a13331be19d90acf33178e2241a176bf8068a6b8878d8b250b91cccfd3",
+    "outputFiles": [
+      "esql-change-point.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/completion.md": {
+    "hash": "f152594fbea7017b3a2212e969c7d3d02df580eb1ad9c79393eea8adf3c92310",
+    "outputFiles": [
+      "esql-completion.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/dissect.md": {
+    "hash": "3b5cc29cfd116169c740944e5c99996e070c0bacb70146851905015389acdc9a",
+    "outputFiles": [
+      "esql-dissect.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/drop.md": {
+    "hash": "ff48d8f4922883065da25eb61508e799e44a734565f9662ae1eff9fe84ca41d5",
+    "outputFiles": [
+      "esql-drop.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/enrich.md": {
+    "hash": "c2df5c20077572cb9a7aaedd498da22381d56d7f14e64248cc2f769a1c4f9a4f",
+    "outputFiles": [
+      "esql-enrich.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/eval.md": {
+    "hash": "ad199b0fb20bb4f758c1a96fdf953ef749d6d60be3260e36cf4eeca0e05ce494",
+    "outputFiles": [
+      "esql-eval.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/fork.md": {
+    "hash": "ca0d355e98351581a4254feadc43731ae792993df9f90fd953240aff067e0011",
+    "outputFiles": [
+      "esql-fork.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/from.md": {
+    "hash": "bfb32e1166c447af787bfa817780a2839b2bdb349e9461919a9680d237106555",
+    "outputFiles": [
+      "esql-from.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/fuse.md": {
+    "hash": "13f8ddfdfc8924ed72e23d36ac9e88b33dd3bc9b893a19dae4b0ec389f7640e0",
+    "outputFiles": [
+      "esql-fuse.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/grok.md": {
+    "hash": "6a2437ba920a8fd92d4d02e4b5579016a7365343ff2b6c179327137c2eb1fc18",
+    "outputFiles": [
+      "esql-grok.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/inlinestats-by.md": {
+    "hash": "ec7c4c13f45025b1df65e929f1343f9ae371525bf155f1d5e1459532d1e6210c",
+    "outputFiles": [
+      "esql-inlinestats-by.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/keep.md": {
+    "hash": "3c51a210f2a3b8b5b5343f1c8d7365bfd5f88d4640302169d0cd246d9fc6a973",
+    "outputFiles": [
+      "esql-keep.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/limit.md": {
+    "hash": "b012be5cd7a08bf4f5c71449db2b3b04021854d0d0a60d06cc7e40bfbe2456a0",
+    "outputFiles": [
+      "esql-limit.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/lookup-join.md": {
+    "hash": "27afb8c0fb310ee5fb5fc0bdd82ef7819af1d12bd45dfebe53c15228e715e81a",
+    "outputFiles": [
+      "esql-lookup-join.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/mv_expand.md": {
+    "hash": "2bbd5ab9eda464a6c6f66b4972744d79db665741cb4776ba59a1b5b4031609b1",
+    "outputFiles": [
+      "esql-mv_expand.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/rename.md": {
+    "hash": "b0d8944225b190becb69d54ac4ba99bd557aa4048b68b96e4212083af31c0bc0",
+    "outputFiles": [
+      "esql-rename.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/rerank.md": {
+    "hash": "fdcdcaf21ed4e2d74127d42c03f82abcdf5a7783012322fc24e6d354418f1b4b",
+    "outputFiles": [
+      "esql-rerank.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/row.md": {
+    "hash": "da1989e5ec8fe3926c95100a5d3bea1d206e3a70997171e1a61e3c81918fbab7",
+    "outputFiles": [
+      "esql-row.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/sample.md": {
+    "hash": "f25978957feb4ca18a9e809fe6fade065d224712b79249c0d046a053ecba3e12",
+    "outputFiles": [
+      "esql-sample.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/show.md": {
+    "hash": "7a2537c9889f642e2313f784ac750d64400f41ceff148d15323c9a1e8a172603",
+    "outputFiles": [
+      "esql-show.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/sort.md": {
+    "hash": "727fdc967f247eff3907ecbdb6f8ef0c3e9113a16cbd6d22c6d734386fa440fc",
+    "outputFiles": [
+      "esql-sort.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/stats-by.md": {
+    "hash": "23950849b85e6cfdcd7c033e1824c9d46388c90d84fb4e9096401c54159740eb",
+    "outputFiles": [
+      "esql-stats-by.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/ts.md": {
+    "hash": "12dd414dbc515ca408cc280a73e6e8293fc12c1eb3d86f6728edb0149b18521f",
+    "outputFiles": [
+      "esql-ts.txt"
+    ]
+  },
+  "reference/query-languages/esql/commands/where.md": {
+    "hash": "8c44f37502efcf9819f5dfe7296450da18d03c85c60fb4c99861008e60fc0c20",
+    "outputFiles": [
+      "esql-where.txt"
+    ]
+  },
+  "reference/query-languages/esql/functions-operators/aggregation-functions.md": {
+    "hash": "c091035c363743c049db403e5ec87e9bcf145d8c97e8473a4b172976692f4a74",
+    "outputFiles": [
+      "esql-absent.txt",
+      "esql-avg.txt",
+      "esql-count.txt",
+      "esql-count_distinct.txt",
+      "esql-max.txt",
+      "esql-median.txt",
+      "esql-median_absolute_deviation.txt",
+      "esql-min.txt",
+      "esql-percentile.txt",
+      "esql-present.txt",
+      "esql-sample.txt",
+      "esql-st_centroid_agg.txt",
+      "esql-st_extent_agg.txt",
+      "esql-std_dev.txt",
+      "esql-sum.txt",
+      "esql-top.txt",
+      "esql-values.txt",
+      "esql-variance.txt",
+      "esql-weighted_avg.txt"
+    ],
+    "sections": {
+      "esql-absent.txt": {
+        "hash": "f493b69a41aebb72c2fd4e41eef3e3b1ed3c8ad5b0fc3e290a7805191a1c559e"
+      },
+      "esql-avg.txt": {
+        "hash": "a97be5f6fcf76d1d0cf303d233b369d7b05dc4969c439a21deb23aaafab529f8"
+      },
+      "esql-count.txt": {
+        "hash": "bd993de5844edcb0ef388e5dfd364a90fed2dece90bf8fcb9193540e2b2ac941"
+      },
+      "esql-count_distinct.txt": {
+        "hash": "653801fc855f285d47c0e5d6ca642f8a1dc3f4f682b2c7d998888d72b671dfa7"
+      },
+      "esql-max.txt": {
+        "hash": "88561a5ba33554ca6641f7e38837efdc1080ba255f940e55274b58f5ff46b7a6"
+      },
+      "esql-median.txt": {
+        "hash": "c5c064340a81a70eba0afa3fb48f9fe0a12f42945fee9d5c165b6f19ab770315"
+      },
+      "esql-median_absolute_deviation.txt": {
+        "hash": "7362768123d2803d64521a3cecea20cf86426b5297b99534dad63888aa067b4f"
+      },
+      "esql-min.txt": {
+        "hash": "49be028ee8bbcafcf8cb1ee40b7a269411d7479f90f62914112da3c1f543c430"
+      },
+      "esql-percentile.txt": {
+        "hash": "ea5e7354918dfbef4e4d74c6f8332b6bf3d956c41bb7507883af9b82bf9f56ff"
+      },
+      "esql-present.txt": {
+        "hash": "73d184e1e67b0d11a9475367d1c49e3be854fa648aace2ab8466d7422fcd78a3"
+      },
+      "esql-sample.txt": {
+        "hash": "25be207019af4b352ee26504a7fa33395eabec8e958e3d6ca6d38022d0c15959"
+      },
+      "esql-st_centroid_agg.txt": {
+        "hash": "6429990665fec86f6185787f9738a82784b3acb1ebe3820d8deb10bb7f315bf7"
+      },
+      "esql-st_extent_agg.txt": {
+        "hash": "b71c56324c4527f6fcea7fb9cae5515902754e8b8a3d3ed1bb75b17e193c1782"
+      },
+      "esql-std_dev.txt": {
+        "hash": "99b138bcebe148665a1cd9504c768b9ae7fc2bcdd007d8e7e25611fad74bd596"
+      },
+      "esql-sum.txt": {
+        "hash": "f2be8da83f336fa9a13b70f190d04c416098a498a7eb010c0536d91eef40ed43"
+      },
+      "esql-top.txt": {
+        "hash": "3ced401db4123f63964b7de77dd4c8a3eb6e3d5f9042ab95d1cbef5677921853"
+      },
+      "esql-values.txt": {
+        "hash": "cedd1bdc899331c0a2fdf5393b795a67d77da7cfd8d635f65b1d12701b554ffd"
+      },
+      "esql-variance.txt": {
+        "hash": "66ca2c9770590ad14f107e7b11c653df5ae2c756e745578e9af1c66902a90406"
+      },
+      "esql-weighted_avg.txt": {
+        "hash": "9aae5f18c064b7acd8ffe62c16981082fd233c19659a9ae55cf1115a8cac9d84"
+      }
+    }
+  },
+  "reference/query-languages/esql/functions-operators/conditional-functions-and-expressions.md": {
+    "hash": "19bd6af514722f4cec1dcdb6a63354d2b23e3132ef6579563db29b5aeffd822c",
+    "outputFiles": [
+      "esql-case.txt",
+      "esql-coalesce.txt",
+      "esql-greatest.txt",
+      "esql-least.txt",
+      "esql-clamp.txt",
+      "esql-clamp_min.txt",
+      "esql-clamp_max.txt"
+    ],
+    "sections": {
+      "esql-case.txt": {
+        "hash": "33977c4a5233dd339dc907a0903b3624ea41e96705aa71ca0f86b438d72c1e6f"
+      },
+      "esql-coalesce.txt": {
+        "hash": "17f5551c526ab042827e3e8a24c4c0106dfa9f4ff8269b6ab37a6316f55ed299"
+      },
+      "esql-greatest.txt": {
+        "hash": "cdb82b9b98c633be80fb0dac7ee4f9017372d147102eb2077dbe11e3e8fb19b1"
+      },
+      "esql-least.txt": {
+        "hash": "6b849878503eb1b316393c0659399f5f5d065c8579b748d1dcf714800bcca945"
+      },
+      "esql-clamp.txt": {
+        "hash": "86b2360d33ce7e51628231a21df7b6057a1d96773328648e923c3b879a031b32"
+      },
+      "esql-clamp_min.txt": {
+        "hash": "08ad301cab2e4b55655a057e1f2065aae05464f29701438a68f1637a1aa3409d"
+      },
+      "esql-clamp_max.txt": {
+        "hash": "cd95f0bce8beaa99b09df28d954253d5b868a011e80394107dfe06d113221cd2"
+      }
+    }
+  },
+  "reference/query-languages/esql/functions-operators/date-time-functions.md": {
+    "hash": "38bb8145425f830f17bf20a9d937e9a99c46ae1d00464a34413956533471765b",
+    "outputFiles": [
+      "esql-date_diff.txt",
+      "esql-date_extract.txt",
+      "esql-date_format.txt",
+      "esql-date_parse.txt",
+      "esql-date_trunc.txt",
+      "esql-day_name.txt",
+      "esql-month_name.txt",
+      "esql-now.txt",
+      "esql-trange.txt"
+    ],
+    "sections": {
+      "esql-date_diff.txt": {
+        "hash": "f93b75b24598ebc9a005cdefda2d74b982e06f9f03017b69561a509c20406474"
+      },
+      "esql-date_extract.txt": {
+        "hash": "4ebd8f00949b68f87e7e343ff5199721b35523d7f01ce5d68374fb0e78509266"
+      },
+      "esql-date_format.txt": {
+        "hash": "7a1bc1b98ab36590367be5efd29b4af1ae10bd61a214388a1993ee84568c53ad"
+      },
+      "esql-date_parse.txt": {
+        "hash": "4367c41578dc946f3a9c7049b10c7f56dd306330278826f72fbef47184094d7f"
+      },
+      "esql-date_trunc.txt": {
+        "hash": "222470423ecf866c575b27c7cae31bb4ed75bcb32da5f0fee8cb4f58bb8ad111"
+      },
+      "esql-day_name.txt": {
+        "hash": "cf0bd5063d03dd023c1b5a738ddfb88fdfc817ccbbb9597e850f7dafd2e906eb"
+      },
+      "esql-month_name.txt": {
+        "hash": "286f287fc0258c1dbefb5dc8b5128a9f9452f05697a23069d539eb31a02f9108"
+      },
+      "esql-now.txt": {
+        "hash": "67e3039949e345669007c396a7febd4cf4296461fde5a45abc371f840274e5ad"
+      },
+      "esql-trange.txt": {
+        "hash": "8a18588624772c684411cad67a377c42fc5228a16fc3ac0ceae12a6622e51f86"
+      }
+    }
+  },
+  "reference/query-languages/esql/functions-operators/dense-vector-functions.md": {
+    "hash": "af7d21e4833bdc0d4eddd3f5af84c1671e231b5edf7108a13bc108c19cf2ef15",
+    "outputFiles": [
+      "esql-knn.txt",
+      "esql-text_embedding.txt",
+      "esql-v_cosine.txt",
+      "esql-v_dot_product.txt",
+      "esql-v_hamming.txt",
+      "esql-v_l1_norm.txt",
+      "esql-v_l2_norm.txt"
+    ],
+    "sections": {
+      "esql-knn.txt": {
+        "hash": "cd23ec4706988f72cdb870e47fc06993beb5b5ca6e78092aa1f8a93eac69877f"
+      },
+      "esql-text_embedding.txt": {
+        "hash": "65088e8bec1af79b429f3ededd02efb020886e1e9a7ef1bdcca5af01ab713fdf"
+      },
+      "esql-v_cosine.txt": {
+        "hash": "95250bd1f7a0b022049e2b90e4017cb94b4bc7730c071e6fe4b743e8844dd26e"
+      },
+      "esql-v_dot_product.txt": {
+        "hash": "e90f7da824c6e1c563f75563574e2e9d137811ded4ba8759ad1469f74530e5e1"
+      },
+      "esql-v_hamming.txt": {
+        "hash": "1efb06f4f4aafed89a8cd4502824262edd70d88b48bbd091e1dabc6b4a321ae8"
+      },
+      "esql-v_l1_norm.txt": {
+        "hash": "03e2286f9a435a47eb12f52f2d522048acdfa658f641fdd57610569ab51bc628"
+      },
+      "esql-v_l2_norm.txt": {
+        "hash": "549794558a2b011fccf9bdc17a720cb5e7eafe77f564507372e930214d0e39c3"
+      }
+    }
+  },
+  "reference/query-languages/esql/functions-operators/grouping-functions.md": {
+    "hash": "4de2e8ace30534a6ca337ca3ea321c666a4e7d52ad4e3da59d1a67c69d111045",
+    "outputFiles": [
+      "esql-bucket.txt",
+      "esql-tbucket.txt",
+      "esql-categorize.txt"
+    ],
+    "sections": {
+      "esql-bucket.txt": {
+        "hash": "34299ed11abef141f144e16cc9ecb1e8f20f6da09639a1bb36bab777a1850d09"
+      },
+      "esql-tbucket.txt": {
+        "hash": "bbab734f6b3cbdb1e8db3e84a69a73a637de489e5d3cf6632ef37847afaf73b2"
+      },
+      "esql-categorize.txt": {
+        "hash": "3325503b838e7450b292a85b0c7206ea0c9e148af3b98b49121b75363c576b94"
+      }
+    }
+  },
+  "reference/query-languages/esql/functions-operators/ip-functions.md": {
+    "hash": "b37d1e926e63bc2e5d8494eacb6076092bb0ea453f9011074f65c566247f6544",
+    "outputFiles": [
+      "esql-cidr_match.txt",
+      "esql-ip_prefix.txt"
+    ],
+    "sections": {
+      "esql-cidr_match.txt": {
+        "hash": "1e4186327411bbfd84af5a73ae23627de695262edb41389f252e9db0eb0df659"
+      },
+      "esql-ip_prefix.txt": {
+        "hash": "cde5e107f72df69f32bd85c1bf589c821182a00a9c11c0adbc597f56a93360dc"
+      }
+    }
+  },
+  "reference/query-languages/esql/functions-operators/math-functions.md": {
+    "hash": "b4b5fcb268d59a72996e21eaaaa9c24251a2a4ad3dac7535701e5b11b5133904",
+    "outputFiles": [
+      "esql-abs.txt",
+      "esql-acos.txt",
+      "esql-asin.txt",
+      "esql-atan.txt",
+      "esql-atan2.txt",
+      "esql-cbrt.txt",
+      "esql-ceil.txt",
+      "esql-copy_sign.txt",
+      "esql-cos.txt",
+      "esql-cosh.txt",
+      "esql-e.txt",
+      "esql-exp.txt",
+      "esql-floor.txt",
+      "esql-hypot.txt",
+      "esql-log.txt",
+      "esql-log10.txt",
+      "esql-pi.txt",
+      "esql-pow.txt",
+      "esql-round.txt",
+      "esql-round_to.txt",
+      "esql-scalb.txt",
+      "esql-signum.txt",
+      "esql-sin.txt",
+      "esql-sinh.txt",
+      "esql-sqrt.txt",
+      "esql-tan.txt",
+      "esql-tanh.txt",
+      "esql-tau.txt"
+    ],
+    "sections": {
+      "esql-abs.txt": {
+        "hash": "29781d6ff9f49ebf773a3388e5f69d7c337513b544da2bd42964234f8e2f7865"
+      },
+      "esql-acos.txt": {
+        "hash": "f5e5dc70d565e8f47b78cc4e89bbc98caee0ed7af917c900f8c9f1fe656f5e8f"
+      },
+      "esql-asin.txt": {
+        "hash": "78023c10c8f393c3285c6337a3466a0a710b138eef796f3d495e0266ac4ad605"
+      },
+      "esql-atan.txt": {
+        "hash": "5bd219d9d134a7bc4a1f810ada2abe948ffbba7df924569a7c4bd8952604c21c"
+      },
+      "esql-atan2.txt": {
+        "hash": "b7a0e830a9d3af6ff2a62dd65cf280924eafd4060dff09d08600afad3d1f52f6"
+      },
+      "esql-cbrt.txt": {
+        "hash": "c2e390170b6227cdedce65964ca6bc74d3231141b069758363e93bf0ee79f88a"
+      },
+      "esql-ceil.txt": {
+        "hash": "aa969ab47643f8dc4fa9e5255c02de4abee82422c2563f92031366c284303c97"
+      },
+      "esql-copy_sign.txt": {
+        "hash": "c69ff40c64d2ad1fa4c8b1f8409a20c97c9cb93bf3b71ee0c10ab17161621851"
+      },
+      "esql-cos.txt": {
+        "hash": "b51f7a405715516a807776582454d82e58d596e5d9dac34127341848d480f9e2"
+      },
+      "esql-cosh.txt": {
+        "hash": "41217aeac98421e27a0c511bbbb29ac0db50a1c35d304994ff8d35647f78bd44"
+      },
+      "esql-e.txt": {
+        "hash": "b0442599006fa48b9e013dcaf9c85ff9302f819d4c94a649b715284fa97c7a6f"
+      },
+      "esql-exp.txt": {
+        "hash": "6a6d380f26c2e73f549e09bfd56cd10c6639d4bc873861ef6a23f84fd8e85e35"
+      },
+      "esql-floor.txt": {
+        "hash": "388f02787e0ff093a65a1e2d402e8efc67accf617054aa828f6758c58f54c0af"
+      },
+      "esql-hypot.txt": {
+        "hash": "b4eea62954f286d92b85eab4308284a4beb89e80da5d332590df477739f5fa72"
+      },
+      "esql-log.txt": {
+        "hash": "bdddf74d99c64c3b2bf3864dba06898472f964ef6d9a0f73fc90e64ec10cad3d"
+      },
+      "esql-log10.txt": {
+        "hash": "f84794f5f55c5f1b25e4fc727318c05e8c983b4ef6b57f383e80f148dab56816"
+      },
+      "esql-pi.txt": {
+        "hash": "9aaf90798f2c03522c41cd1f9cfeb9e6eb09f7313589b1bf3324f62be73b3c70"
+      },
+      "esql-pow.txt": {
+        "hash": "db06946a8749862c7b3aaf2f412a047be2babb38e397e1d2502a0f4fa1204095"
+      },
+      "esql-round.txt": {
+        "hash": "ca747148965d71346d4cc76edb93ae265e38a765b6ba6e8c57c9986e7db179a6"
+      },
+      "esql-round_to.txt": {
+        "hash": "cfb4551ccda75ce7f37e25c9a2f0031c20995445248a07b3a944192fc92ea774"
+      },
+      "esql-scalb.txt": {
+        "hash": "a2f46db02236ded94ef714e373b30f25fb673ba14c88f6e25c1d53c029bd907e"
+      },
+      "esql-signum.txt": {
+        "hash": "e608b3e26f11ce0b65c02a5f563aeb3293439553cd391e36d457ac6dbcc26f74"
+      },
+      "esql-sin.txt": {
+        "hash": "4d64d4753b0a42e91c77a42473485e2ec652bc06e4e00d26d6d4f6fd56a2cf86"
+      },
+      "esql-sinh.txt": {
+        "hash": "1fd0a327abb3033e4a3c00512462f2a3ca578a0e5d0fafc30b84b1471b9bb0f4"
+      },
+      "esql-sqrt.txt": {
+        "hash": "d7b1aef782ecdaef6af4a49ba2bdc7153356afb2495c522184c605f879a5b116"
+      },
+      "esql-tan.txt": {
+        "hash": "205959855c114d3116ee425a54467adb2d4d09d0c2e7446388279fe3d9ae08ca"
+      },
+      "esql-tanh.txt": {
+        "hash": "fa7fec6c646b3d7dd79b07b58f0690d8ff389693eb89f24c363974058fff036b"
+      },
+      "esql-tau.txt": {
+        "hash": "68e8ef79f3217475419c60ea1bdacefaab8dec8d86d92d34ac1f980b1954c0ff"
+      }
+    }
+  },
+  "reference/query-languages/esql/functions-operators/mv-functions.md": {
+    "hash": "34a73d5889d14b5b1c2669a3c7eda4f55f017b516ea5d2061e64dd4b25eee00b",
+    "outputFiles": [
+      "esql-mv_append.txt",
+      "esql-mv_avg.txt",
+      "esql-mv_concat.txt",
+      "esql-mv_contains.txt",
+      "esql-mv_count.txt",
+      "esql-mv_dedupe.txt",
+      "esql-mv_first.txt",
+      "esql-mv_intersection.txt",
+      "esql-mv_last.txt",
+      "esql-mv_max.txt",
+      "esql-mv_median.txt",
+      "esql-mv_median_absolute_deviation.txt",
+      "esql-mv_min.txt",
+      "esql-mv_percentile.txt",
+      "esql-mv_pseries_weighted_sum.txt",
+      "esql-mv_slice.txt",
+      "esql-mv_sort.txt",
+      "esql-mv_sum.txt",
+      "esql-mv_union.txt",
+      "esql-mv_zip.txt"
+    ],
+    "sections": {
+      "esql-mv_append.txt": {
+        "hash": "dd29554b45701be06a6929faab6cd66202abea68e271e66aabf1acfb39b2cea6"
+      },
+      "esql-mv_avg.txt": {
+        "hash": "19e2c9fd820e3586f24b7b450d8ecc84479f5f562f9ea7c3071c1582e059bd80"
+      },
+      "esql-mv_concat.txt": {
+        "hash": "eea3fa70c1069c95a4f924baa4b60d14ca2a669595052ffbd21f2b666e63285a"
+      },
+      "esql-mv_contains.txt": {
+        "hash": "7352694bf7d14ade0549b83a9b41893b32552f53073010f7f3c420b7091ef74f"
+      },
+      "esql-mv_count.txt": {
+        "hash": "b5e53a5c80707244aaeed6e5ce734ea8630bb5e389d63f4d94f4e7b57ef7e915"
+      },
+      "esql-mv_dedupe.txt": {
+        "hash": "85e39f656f09f2cc6258591b629b20bebeb54d822f5cef791049ffa6428ce794"
+      },
+      "esql-mv_first.txt": {
+        "hash": "7e69a5d8d9ca25c3ec37e65e8b31768b627f00bfbc9014a3405f9e10cfc186df"
+      },
+      "esql-mv_intersection.txt": {
+        "hash": "13f935f039d45ae9fa22f2452a1c90435bafa554ccf2b849fc3e8c7936f857ac"
+      },
+      "esql-mv_last.txt": {
+        "hash": "b49a1244f297fad384fdaa356da64f9f76ac952ca720d6e8086d16d3c95a7ab8"
+      },
+      "esql-mv_max.txt": {
+        "hash": "96abde8b5f79836bbbbc2b2a4dc35c0983593c79215d087798a5ca8b1d157ab4"
+      },
+      "esql-mv_median.txt": {
+        "hash": "f688e659d1efdfa87ba243287a897b95cb8d978c9c32a065bcf465b1f4b50357"
+      },
+      "esql-mv_median_absolute_deviation.txt": {
+        "hash": "bfa94064134e7fc63796638c5fdf17efc12062898fb085aba32e7770523f218e"
+      },
+      "esql-mv_min.txt": {
+        "hash": "ea1d32adb92ed4356a33ade6c5907af40aaa525b093ec4fb97fcdcf2661dab22"
+      },
+      "esql-mv_percentile.txt": {
+        "hash": "62769285d8b0e0ab3d0adf6d1b96e4eef721f0496401e87740123c6637ba032c"
+      },
+      "esql-mv_pseries_weighted_sum.txt": {
+        "hash": "f607f6a3b2ae78a7e862c5cf4b00232602b43a5854f24035ad8975f3bfd774a2"
+      },
+      "esql-mv_slice.txt": {
+        "hash": "0766987d953d74d12df762160a9c8c17d1aa6ff4a398341e856c39d51794bdab"
+      },
+      "esql-mv_sort.txt": {
+        "hash": "83d1cae3fc826570f24c2f0dafd61bcffb6da5dde254a2615d5541d1de25f45c"
+      },
+      "esql-mv_sum.txt": {
+        "hash": "6818a9e14d74cc76686308ca33b17ac3d19ee57c40ebee9170bc635eda347b5a"
+      },
+      "esql-mv_union.txt": {
+        "hash": "91fbde62b168ead1d1b30c6e11a7da838d2cdc6849b41cdaeab1cd9c252ee45d"
+      },
+      "esql-mv_zip.txt": {
+        "hash": "2f4c4d989efa4409144db034987f24a890dfed489e907a202941cc227a813018"
+      }
+    }
+  },
+  "reference/query-languages/esql/functions-operators/operators.md": {
+    "hash": "1a58fa1f1a2470f5bad0e702683bbf7b7700c98ae444d1cc0537c9e096544d2a",
+    "outputFiles": [
+      "esql-binary operators.txt",
+      "esql-unary operators.txt",
+      "esql-logical operators.txt",
+      "esql-suffix operators.txt",
+      "esql-infix operators.txt"
+    ],
+    "sections": {
+      "esql-binary operators.txt": {
+        "hash": "c24fc594b509b9460b45cd7703b5c33d892b2f25aaa19802bc3227bdeab8deb6"
+      },
+      "esql-unary operators.txt": {
+        "hash": "61fdbf0a7875d3b2ed832566e6d33b2cca6dddaf26745aa19d1fa67d77c61187"
+      },
+      "esql-logical operators.txt": {
+        "hash": "81d675bfb6541de0f5671572dc625d930bd638257dcf3aa5ab960339152fbf68"
+      },
+      "esql-suffix operators.txt": {
+        "hash": "4455744ec0b64c2fc1f3539fdc7946dccbf3a1ed74e1bcf0719183505b4b11da"
+      },
+      "esql-infix operators.txt": {
+        "hash": "c945b4ce944f723066df76b2fe48af0609a9d25fe6649d527f0b634a4e27a582"
+      }
+    }
+  },
+  "reference/query-languages/esql/functions-operators/search-functions.md": {
+    "hash": "f61f2407fcbc454040ff4195334acace3bb0538ea1870795eb6c623234a5b53a",
+    "outputFiles": [
+      "esql-decay.txt",
+      "esql-kql.txt",
+      "esql-match.txt",
+      "esql-match_phrase.txt",
+      "esql-qstr.txt",
+      "esql-score.txt",
+      "esql-top_snippets.txt"
+    ],
+    "sections": {
+      "esql-decay.txt": {
+        "hash": "8b1c1e3448941dfaf2fe5a59a7ca66490651d65ab5439d23ff1780e9dacb7a20"
+      },
+      "esql-kql.txt": {
+        "hash": "30d85b3386b27ab6939b6550a895dd9380eb6de7e36b8bf2425958d1e7d1efa0"
+      },
+      "esql-match.txt": {
+        "hash": "6395f8106cb823f66c94700f5f435e99bb45a978a418c8362a50aef59b53d03d"
+      },
+      "esql-match_phrase.txt": {
+        "hash": "4c6cb5d4b329c44c1b56272c72066fdca40de7ac3d427f073e6d47bf49b671c3"
+      },
+      "esql-qstr.txt": {
+        "hash": "1cecc1c39c3d5f0f946ad85fd8fdd306560c5f73e9c86ba0284e0cecd83f9354"
+      },
+      "esql-score.txt": {
+        "hash": "6f658ac301dacdb04c098e4549e65698b386945c3b5c34907b8527adfa3aefd9"
+      },
+      "esql-top_snippets.txt": {
+        "hash": "c983b08f3bcee678017d495173594e5e1a81d93065122cb6c0fe212f72b58e46"
+      }
+    }
+  },
+  "reference/query-languages/esql/functions-operators/spatial-functions.md": {
+    "hash": "b725cb9f744f4543150b1af31047dce8292e73da371bd2e5eaac8780d15781b7",
+    "outputFiles": [
+      "esql-geospatial predicates.txt",
+      "esql-geometry functions.txt",
+      "esql-st_envelope.txt",
+      "esql-grid encoding functions.txt"
+    ],
+    "sections": {
+      "esql-geospatial predicates.txt": {
+        "hash": "3aabc8308f5b17de478c565ed3d345c1d170e548c340aa8c4fec85f277be8b06"
+      },
+      "esql-geometry functions.txt": {
+        "hash": "76bc7c0f1c4b61144f62080634c4ed753f4540da908101804d571000d45e72ff"
+      },
+      "esql-st_envelope.txt": {
+        "hash": "be74bdb54920647bb8a07c6aa89bab321192be9b86102086b6b05cf23d568ec2"
+      },
+      "esql-grid encoding functions.txt": {
+        "hash": "8b9432b7de4cce29bd0c0a24dfe7219bae602fc16bfe75c7746737c21e883c01"
+      }
+    }
+  },
+  "reference/query-languages/esql/functions-operators/string-functions.md": {
+    "hash": "7e7d40fea043909d3892536e68ae8e4d9bd7ae53f5195fa6998c6894afdd34cd",
+    "outputFiles": [
+      "esql-bit_length.txt",
+      "esql-byte_length.txt",
+      "esql-chunk.txt",
+      "esql-concat.txt",
+      "esql-contains.txt",
+      "esql-ends_with.txt",
+      "esql-from_base64.txt",
+      "esql-hash.txt",
+      "esql-left.txt",
+      "esql-length.txt",
+      "esql-locate.txt",
+      "esql-ltrim.txt",
+      "esql-md5.txt",
+      "esql-repeat.txt",
+      "esql-replace.txt",
+      "esql-reverse.txt",
+      "esql-right.txt",
+      "esql-rtrim.txt",
+      "esql-sha1.txt",
+      "esql-sha256.txt",
+      "esql-space.txt",
+      "esql-split.txt",
+      "esql-starts_with.txt",
+      "esql-substring.txt",
+      "esql-to_base64.txt",
+      "esql-to_lower.txt",
+      "esql-to_upper.txt",
+      "esql-trim.txt",
+      "esql-url_encode.txt",
+      "esql-url_encode_component.txt",
+      "esql-url_decode.txt"
+    ],
+    "sections": {
+      "esql-bit_length.txt": {
+        "hash": "d05c8cdfb645d931fd6fbba73b771091acce13f8b180109f1f0f912180d36393"
+      },
+      "esql-byte_length.txt": {
+        "hash": "354171999a1495331d76d6d38c78ca97a348dffd8ba0023b670b9b61aebe7590"
+      },
+      "esql-chunk.txt": {
+        "hash": "368c44e8121b1fa42204b8af312a42e77bbe736652831b0bb1ba442398020907"
+      },
+      "esql-concat.txt": {
+        "hash": "66695220a739589dd064ee961f5bd8452af560a60d66e965f349931f75a29347"
+      },
+      "esql-contains.txt": {
+        "hash": "618e36d133bb49997b57b69824e3756e3d171756a680efff1bba377baeda51dc"
+      },
+      "esql-ends_with.txt": {
+        "hash": "15cb73a91915a056785c13307cbbf0ae68883d5c6f9c38d94144d93d2306e1e9"
+      },
+      "esql-from_base64.txt": {
+        "hash": "787550ce43b22c93c3b92da0f7e384d67a0be892b2d28343bd793660d74e83fa"
+      },
+      "esql-hash.txt": {
+        "hash": "4e7792c0b205addac7822b91ebb92e8dce5fe967c1374796e51bc33f9cbbaf92"
+      },
+      "esql-left.txt": {
+        "hash": "c4f35f53255fad4b470b986d1071c503a73137f5444eb1f2c39a786ea8e5888e"
+      },
+      "esql-length.txt": {
+        "hash": "6ded6f633686aa0767459605a7f6dfcc00b6610d90c744f6c880ba5d8ed7f264"
+      },
+      "esql-locate.txt": {
+        "hash": "380c141f7c06a1ba3f15f2f3e21d09aa5ed6a12a7a4fdbf0ce535999042a2735"
+      },
+      "esql-ltrim.txt": {
+        "hash": "b266aa59de4d2202818d108bf2758d915e3bce2222fae76b34098640d6894fbe"
+      },
+      "esql-md5.txt": {
+        "hash": "69d4edf2e9e6c65d02561909fe4b084918c9854855485cd787db3795e3e28be7"
+      },
+      "esql-repeat.txt": {
+        "hash": "9ff8cfa3c002eaa91c8872caaee9817863781fdde6cb5cfa31375b5d25a7d50f"
+      },
+      "esql-replace.txt": {
+        "hash": "6fef0972ab6853c4e05e2544959304bba9dc49699c4304efdd7f4864b323bb6f"
+      },
+      "esql-reverse.txt": {
+        "hash": "3245fba02e333783055a481bc59ea66eff86a9d8619021ddd7cf4d3e61bf5efe"
+      },
+      "esql-right.txt": {
+        "hash": "f3a6ce824c06794c1cf413e18d35964aa54a3dfd426091589dedd877ea43e559"
+      },
+      "esql-rtrim.txt": {
+        "hash": "dd1aabbf4cde58cba51a7196c9dffbc21575fdccf2f507ebe913adf60622b233"
+      },
+      "esql-sha1.txt": {
+        "hash": "d018242570a48e83e2363f6655d0ccd785d1b74e6749708504533ced3958f45b"
+      },
+      "esql-sha256.txt": {
+        "hash": "a40cd5fe65d9ee8dc0cf098ebc10d3bcc7e8581c96d070dd1b730a79243a60f1"
+      },
+      "esql-space.txt": {
+        "hash": "372cb139cca2d44927b1be7e69636a15a7cf3e9b9af1f8b965fc2de2d7137f87"
+      },
+      "esql-split.txt": {
+        "hash": "bb2290f5e71dd726a8072db8060936098cc350f8778109aa99aafed7acff5549"
+      },
+      "esql-starts_with.txt": {
+        "hash": "660f9183d852bbbf61a18dd992c4187db49ec0ed91cc4687da12ced85063c64c"
+      },
+      "esql-substring.txt": {
+        "hash": "7a4e0f495ee0257173fc750c584fce8d4ab22c5fdb1bd1d72c62a4c020c16b40"
+      },
+      "esql-to_base64.txt": {
+        "hash": "7d318053f817640eac6fc986f03cb7589f730e3c9355e40031af0deeea47582d"
+      },
+      "esql-to_lower.txt": {
+        "hash": "d0aed8568331ab50bff1fe593b0d32c2b8f26c72783248095e5c6feff25b40da"
+      },
+      "esql-to_upper.txt": {
+        "hash": "ae6b314f8bc0423117b70b173453979d0e4b3a2a86928ff7dbc82e4a24694aeb"
+      },
+      "esql-trim.txt": {
+        "hash": "cad125d14428832c58165fd115e00224c42c055a72becc933bba7df0bf00cf7b"
+      },
+      "esql-url_encode.txt": {
+        "hash": "93ea7e2946f61cbae7c2a151dab2e25a1865a5a121f5a8ced5156cf176be7f59"
+      },
+      "esql-url_encode_component.txt": {
+        "hash": "d9c424c468d26c75193abcca82784e81651cecedf21518a0d135a9aaabacaabb"
+      },
+      "esql-url_decode.txt": {
+        "hash": "9c87a0a2040d7162330e5ad9ad4cb4f2f7afa46cf45633da95563dc58a485929"
+      }
+    }
+  },
+  "reference/query-languages/esql/functions-operators/time-series-aggregation-functions.md": {
+    "hash": "f877604569d7f15010a91aafec8f56a75fb6e690cf02f7731b1ce90d2f029efc",
+    "outputFiles": [
+      "esql-absent_over_time.txt",
+      "esql-avg_over_time.txt",
+      "esql-count_over_time.txt",
+      "esql-count_distinct_over_time.txt",
+      "esql-delta.txt",
+      "esql-deriv.txt",
+      "esql-first_over_time.txt",
+      "esql-idelta.txt",
+      "esql-increase.txt",
+      "esql-irate.txt",
+      "esql-last_over_time.txt",
+      "esql-max_over_time.txt",
+      "esql-min_over_time.txt",
+      "esql-percentile_over_time.txt",
+      "esql-present_over_time.txt",
+      "esql-rate.txt",
+      "esql-stddev_over_time.txt",
+      "esql-variance_over_time.txt",
+      "esql-sum_over_time.txt"
+    ],
+    "sections": {
+      "esql-absent_over_time.txt": {
+        "hash": "ddcbf42c773e5810a25f1fe4a97b083d0254666c9f7b689e615f03f5ab318825"
+      },
+      "esql-avg_over_time.txt": {
+        "hash": "45ac8bb30121d5ae6097b9a3c071ef29412e74509369ffc69ca249d0160996fe"
+      },
+      "esql-count_over_time.txt": {
+        "hash": "595e20c72d00978070adbf38f85e0a16c31cb49dfdaf45bcfe5cec390373a116"
+      },
+      "esql-count_distinct_over_time.txt": {
+        "hash": "68c4ed75111eafcb5ba64895b41b35273b91154385878865ab1baa457b179b3a"
+      },
+      "esql-delta.txt": {
+        "hash": "22f9f7aed90629b63c4ebe31e7b778bd51abb7c746e0d2aa409a71dfba0957b5"
+      },
+      "esql-deriv.txt": {
+        "hash": "7bf3061d65f8f229694fb8af9233e9165c991795e0c1e1ff724d61f56940d925"
+      },
+      "esql-first_over_time.txt": {
+        "hash": "cb5f4af4e6daa317fadb3485fb7cac7e876fed6e57e7982a50e2828b680ecc2a"
+      },
+      "esql-idelta.txt": {
+        "hash": "95be4189c5d7e41e30bad52409a22614ba344fc7004941ca45c42999be79d626"
+      },
+      "esql-increase.txt": {
+        "hash": "6b6182bb75c305233d5ece6a50d71f82edc4d74866b00a0a0f7fe37b07e03c60"
+      },
+      "esql-irate.txt": {
+        "hash": "d2a16bc1e222ad4eabcda9039c13dda34c6663add67348beba5b85462d3f63dc"
+      },
+      "esql-last_over_time.txt": {
+        "hash": "b6d595fbdc5399e9eaa857932e51e78f3027a9e770ce8ae6c217a10cb874cf79"
+      },
+      "esql-max_over_time.txt": {
+        "hash": "38e02c9749985e1f9bff1a6e770f10a3618227c7d99a790d1fbe61bee18a4acb"
+      },
+      "esql-min_over_time.txt": {
+        "hash": "ad9a1bd21d86dccad413e8553fbf1cc8223a3a4789e70e8c138a556bbd6b2704"
+      },
+      "esql-percentile_over_time.txt": {
+        "hash": "2f6b3773e512d3949aba4c59024927f8841250d2ea39105e42df3e3a3bdebd9b"
+      },
+      "esql-present_over_time.txt": {
+        "hash": "eb60c9ac1c1c15038654bd9974e92cdfed020d17847810c2477b69b0c1ec3518"
+      },
+      "esql-rate.txt": {
+        "hash": "89270bb637a66119c7e3a1383b178234d7d398cde8bec3697ceaed84376ce4f7"
+      },
+      "esql-stddev_over_time.txt": {
+        "hash": "a391dac40829a19af8fcbd5e2d301affc4d005fd766b8719a5090909e1272ec0"
+      },
+      "esql-variance_over_time.txt": {
+        "hash": "0814a870f172e3e9cd65b5a4c60b2913d5f0c125056612155b489f3e2894390a"
+      },
+      "esql-sum_over_time.txt": {
+        "hash": "7db08238f5fd83f675fb522c755ab75051d35b8c6626be59887941906be9aff9"
+      }
+    }
+  },
+  "reference/query-languages/esql/functions-operators/type-conversion-functions.md": {
+    "hash": "23092fa787e6d34a4baabecf9d235b71b45a2df3bc0bfbfafe049de0b03a9642",
+    "outputFiles": [
+      "esql-to_aggregate_metric_double.txt",
+      "esql-to_boolean.txt",
+      "esql-to_cartesianpoint.txt",
+      "esql-to_cartesianshape.txt",
+      "esql-to_dateperiod.txt",
+      "esql-to_datetime.txt",
+      "esql-to_date_nanos.txt",
+      "esql-to_degrees.txt",
+      "esql-to_dense_vector.txt",
+      "esql-to_double.txt",
+      "esql-to_geohash.txt",
+      "esql-to_geohex.txt",
+      "esql-to_geopoint.txt",
+      "esql-to_geoshape.txt",
+      "esql-to_geotile.txt",
+      "esql-to_integer.txt",
+      "esql-to_ip.txt",
+      "esql-to_long.txt",
+      "esql-to_radians.txt",
+      "esql-to_string.txt",
+      "esql-to_timeduration.txt",
+      "esql-to_unsigned_long.txt",
+      "esql-to_version.txt"
+    ],
+    "sections": {
+      "esql-to_aggregate_metric_double.txt": {
+        "hash": "bc2108210a230cfbbabf39e101af35fda876d35ea1f792d8171f5e2f86e506c5"
+      },
+      "esql-to_boolean.txt": {
+        "hash": "abe1c6f672c674a9ca175efaf5dc2f7d65cb8d10a759d40b05dd3c551a052762"
+      },
+      "esql-to_cartesianpoint.txt": {
+        "hash": "30007a03ac5c5b70c8ea5fff2810f065d523c8f7ee8c3705bb2df205ec1d5a07"
+      },
+      "esql-to_cartesianshape.txt": {
+        "hash": "6113d9b683ecf606ea3dbbbe032bbd9bb3f1ed2b18613cd3c585cf03d38ba342"
+      },
+      "esql-to_dateperiod.txt": {
+        "hash": "55a97bd8b0f5aa8a618a842c2cb06b5e215c7dffdad3f8b4e3a3258d9c1274dd"
+      },
+      "esql-to_datetime.txt": {
+        "hash": "c402efac7a69f0d5a72207a4de47e033531a5df59301a0345351298324f1bbe1"
+      },
+      "esql-to_date_nanos.txt": {
+        "hash": "af76bc25ca0366c1c4ffaea492cf7d2f74660f173ed3796f5090ddfdd69987c3"
+      },
+      "esql-to_degrees.txt": {
+        "hash": "ad080ebe66593d8dc71ec6a251ed697cca9cdc59b29ed40209d3e2306bb94c1c"
+      },
+      "esql-to_dense_vector.txt": {
+        "hash": "59c0b4e451860efc1e71f63a9fa21c1b188efbc64bb3d575f18f508d2bfb0d94"
+      },
+      "esql-to_double.txt": {
+        "hash": "7acfe5cc9be3d366f544d4b21bbd9f559057e4fe9bb572191e174fa127279703"
+      },
+      "esql-to_geohash.txt": {
+        "hash": "dd7c9b2987f3688858dcc5d58681a23ffac8d1f32a432d495e4974e16c531376"
+      },
+      "esql-to_geohex.txt": {
+        "hash": "161384d606510f634c4b778ab9e258ffaef8d43d9f1a563a739891fb5427496e"
+      },
+      "esql-to_geopoint.txt": {
+        "hash": "2361020141b6b97deae5af8c90a5ecd46a1f9f02ec719f7d9cc620d30a8444d2"
+      },
+      "esql-to_geoshape.txt": {
+        "hash": "cabab13af7fcc63c4403e9ac0d581e280b0c5ad5f0be11f6119838d72f2f2804"
+      },
+      "esql-to_geotile.txt": {
+        "hash": "c351115e2ce92eb2058b2cacd29337942a1a554f05a9397dc88405b2986fe7c8"
+      },
+      "esql-to_integer.txt": {
+        "hash": "2ed923ccabacf64e7f8f327aa02c4242af204c8f61de65c4fdbfa0e070522658"
+      },
+      "esql-to_ip.txt": {
+        "hash": "7117d9c4e3bad583b505be5eb31126a4628190e7ae356eef3099bc48037e3cde"
+      },
+      "esql-to_long.txt": {
+        "hash": "cf6634033c037872454e530b08ce85775e86c1201aa68053c4a38e174ddd8b24"
+      },
+      "esql-to_radians.txt": {
+        "hash": "38ab34e50240dbe0e7033db7d8d32d3e78f50e0736a8356200737272ef50d07e"
+      },
+      "esql-to_string.txt": {
+        "hash": "c2b08bad3244b535370dab6eba16289dd88d286e494dc29d68d0f49a0609ce19"
+      },
+      "esql-to_timeduration.txt": {
+        "hash": "4e06974ec76bf88e5b55b627579c4d70ad49d7aa4344062fc6af222e28f4ece8"
+      },
+      "esql-to_unsigned_long.txt": {
+        "hash": "5d2259f75985e5daf9c9fdac5c879cfe3fdd9d9d748ee9591859c860fa881e56"
+      },
+      "esql-to_version.txt": {
+        "hash": "1837356a110115f060a2899800758305383b3d5765ddeed6194699d4c39b88b9"
+      }
+    }
+  }
+}
