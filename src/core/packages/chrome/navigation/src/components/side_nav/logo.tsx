@@ -52,7 +52,7 @@ export const Logo = ({
   const wrapperStyles = css`
     position: relative;
     padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
-    padding-bottom: ${isCollapsed ? '7px' : euiTheme.size.m};
+    padding-bottom: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
 
     ${getHighContrastSeparator(euiThemeContext)}
 

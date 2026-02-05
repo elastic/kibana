@@ -88,7 +88,7 @@ interface RenderLayerPanelOptions {
 describe('LayerPanel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
 
-  let mockDatasource = createMockDatasource('testDatasource');
+  let mockDatasource = createMockDatasource('formBased');
 
   function getDefaultProps(): LayerPanelProps {
     return {
@@ -143,7 +143,7 @@ describe('LayerPanel', () => {
                 testVis: mockVisualization,
               }}
               datasourceMap={{
-                testDatasource: mockDatasource,
+                formBased: mockDatasource,
               }}
             >
               {children}
@@ -597,7 +597,7 @@ describe('LayerPanel', () => {
       await userEvent.click(screen.getByTestId('lns-indexPattern-dimensionContainerBack'));
 
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
-      expect(updateDatasource).toHaveBeenCalledWith('testDatasource', { newState: {} });
+      expect(updateDatasource).toHaveBeenCalledWith('formBased', { newState: {} });
     });
 
     it('should display the fake final accessor if present in the group config', async () => {
