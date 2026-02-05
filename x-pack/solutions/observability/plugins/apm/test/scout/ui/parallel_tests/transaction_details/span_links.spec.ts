@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 import {
   SERVICE_SPAN_LINKS_PRODUCER_INTERNAL_ONLY,
@@ -96,7 +96,10 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
     });
 
     await test.step('opens span flyout and shows span links details', async () => {
-      await page.locator('button').filter({ hasText: 'Span B100 ms' }).click();
+      await page
+        .getByTestId('waterfall')
+        .getByLabel('View details for Span B', { exact: true })
+        .click();
       await transactionDetailsPage.getSpanLinksTab().click();
 
       const consumerMultipleLink = page.getByRole('link', {
