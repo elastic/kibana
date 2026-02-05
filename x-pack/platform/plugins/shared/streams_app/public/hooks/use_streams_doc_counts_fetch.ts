@@ -7,6 +7,7 @@
 
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { useEffect, useRef } from 'react';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { StreamDocsStat } from '@kbn/streams-plugin/common';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { useKibana } from './use_kibana';
@@ -35,9 +36,15 @@ export function useStreamDocCountsFetch({
 } {
   const { timeState, timeState$ } = useTimefilter();
   const {
-    streams: { streamsRepositoryClient },
-    data,
-  } = useKibana().dependencies.start;
+    dependencies: {
+      start: {
+        data,
+        streams: { streamsRepositoryClient },
+      },
+    },
+    core: { uiSettings },
+  } = useKibana();
+
   const docCountsPromiseCache = useRef<StreamDocCountsFetch | null>(null);
   const histogramPromiseCache = useRef<Partial<Record<string, Promise<UnparsedEsqlResponse>>>>({});
   const abortControllerRef = useRef<AbortController>();
@@ -156,9 +163,11 @@ export function useStreamDocCountsFetch({
 
       const source = canReadFailureStore ? `${streamName},${streamName}::failures` : streamName;
 
+      const timezone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
       const histogramPromise = executeEsqlQuery({
         query: `FROM ${source} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
         search: data.search.search,
+        timezone,
         signal: abortController.signal,
         start: timeState.start,
         end: timeState.end,
