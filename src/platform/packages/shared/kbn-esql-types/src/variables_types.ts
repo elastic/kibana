@@ -50,8 +50,6 @@ export interface PublishesESQLVariable {
   esqlVariable$: PublishingSubject<ESQLControlVariable>;
 }
 
-export type ControlWidthOptions = 'small' | 'medium' | 'large';
-
 export const apiPublishesESQLVariable = (
   unknownApi: unknown
 ): unknownApi is PublishesESQLVariable => {

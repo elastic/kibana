@@ -25,8 +25,8 @@ describe('Options list sorting button', () => {
     overwrite?: Partial<OptionsListControlState>
   ): State => {
     return {
-      data_view_id: 'testdata_view_id',
-      field_name: 'field_name',
+      data_view_id: 'testDataViewId',
+      field_name: 'fieldName',
       ...overwrite,
     } as State;
   };

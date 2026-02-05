@@ -40,7 +40,7 @@ interface ValueControlFormProps {
   search: ISearchGeneric;
   variableType: ESQLVariableType;
   variableName: string;
-  controlFlyoutType: OptionsListESQLControlState['control_type'];
+  controlFlyoutType: EsqlControlType;
   queryString: string;
   setControlState: (state: OptionsListESQLControlState) => void;
   initialState?: OptionsListESQLControlState;

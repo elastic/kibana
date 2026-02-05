@@ -12,12 +12,14 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Writable } from 'utility-types';
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { ControlsGroupState, LegacyStoredPinnedControlState } from '@kbn/controls-schemas';
+import type { LegacyStoredPinnedControlState } from '@kbn/controls-schemas';
 
-import { prefixReferencesFromPanel } from '../../../../common';
+import { type DashboardState, prefixReferencesFromPanel } from '../../../../common';
 import { embeddableService, logger } from '../../../kibana_services';
 
-export function transformPinnedPanelsIn(pinnedPanels?: ControlsGroupState) {
+type PinnedPanelsState = Required<DashboardState>['pinned_panels'];
+
+export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState) {
   if (!pinnedPanels) return { references: [] };
 
   let references: Reference[] = [];

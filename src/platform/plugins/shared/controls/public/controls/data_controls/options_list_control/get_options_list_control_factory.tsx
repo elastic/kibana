@@ -85,13 +85,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           state,
           parentApi,
           willHaveInitialFilter: selectionsManager.internalApi.hasInitialSelections,
-          getInitialFilter: (dataView) =>
-            buildFilter(dataView, uuid, {
-              field_name: state.field_name,
-              exists_selected: state.exists_selected,
-              exclude: state.exclude,
-              selected_options: state.selected_options,
-            }),
+          getInitialFilter: (dataView) => buildFilter(dataView, uuid, state),
           editorStateManager,
         });
 

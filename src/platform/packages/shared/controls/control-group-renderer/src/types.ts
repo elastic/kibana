@@ -109,7 +109,7 @@ export interface ControlPanelsState<ControlState extends {} = {}> {
   [panelId: string]: ControlPanelState<ControlState>;
 }
 
-export type ControlPanelState<ControlState extends object = object> = ControlState &
+export type ControlPanelState<ControlState extends {} = {}> = ControlState &
   FlattenedPinnedControlState & {
     type: string; // prevents having to cast to the literal type
     order: number;

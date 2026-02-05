@@ -124,10 +124,10 @@ describe('Data control editor', () => {
     return controlEditor;
   };
 
-  const selectField = async (controlEditor: RenderResult, field_name: string) => {
-    expect(controlEditor.queryByTestId(`field-picker-select-${field_name}`)).toBeInTheDocument();
+  const selectField = async (controlEditor: RenderResult, fieldName: string) => {
+    expect(controlEditor.queryByTestId(`field-picker-select-${fieldName}`)).toBeInTheDocument();
     await act(async () => {
-      fireEvent.click(controlEditor.getByTestId(`field-picker-select-${field_name}`));
+      fireEvent.click(controlEditor.getByTestId(`field-picker-select-${fieldName}`));
     });
   };
 

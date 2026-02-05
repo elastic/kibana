@@ -58,7 +58,9 @@ export function transformDataControlOut<
     dataViewRef = references.find(({ name }) => name === dataViewRefName);
   }
 
-  /** Pick the state that we care about after ensu */
+  /**
+   * Pre 9.4 the control state was stored in camelCase; these transforms ensure they are converted to snake_case
+   */
   const { title, use_global_filters, ignore_validations, field_name } =
     convertCamelCasedKeysToSnakeCase<LegacyStoredDataControlState>(
       state as LegacyStoredDataControlState

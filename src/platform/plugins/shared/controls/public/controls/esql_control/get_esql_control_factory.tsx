@@ -117,7 +117,6 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         serializeState,
       });
 
-      // TODO: Clean this up
       const componentStaticState = {
         single_select: state.single_select ?? true,
         exclude: false,

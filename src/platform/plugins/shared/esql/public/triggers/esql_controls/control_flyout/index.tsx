@@ -111,13 +111,11 @@ export function ESQLControlsFlyout({
     )}`;
   }, [esqlVariables, initialState, valuesField, variableNamePrefix, initialVariableType]);
 
-  const [controlFlyoutType, setControlFlyoutType] = useState<
-    OptionsListESQLControlState['control_type']
-  >(
-    initialState?.control_type ??
+  const [controlFlyoutType, setControlFlyoutType] = useState<EsqlControlType>(
+    (initialState?.control_type ??
       (initialVariableType === ESQLVariableType.VALUES
         ? EsqlControlType.VALUES_FROM_QUERY
-        : EsqlControlType.STATIC_VALUES)
+        : EsqlControlType.STATIC_VALUES)) as EsqlControlType
   );
   const [variableName, setVariableName] = useState(suggestedVariableName);
   const [variableType, setVariableType] = useState<ESQLVariableType>(initialVariableType);
@@ -170,12 +168,9 @@ export function ESQLControlsFlyout({
     variableType,
   ]);
 
-  const onFlyoutTypeChange = useCallback(
-    (controlType: OptionsListESQLControlState['control_type']) => {
-      setControlFlyoutType(controlType);
-    },
-    []
-  );
+  const onFlyoutTypeChange = useCallback((controlType: EsqlControlType) => {
+    setControlFlyoutType(controlType);
+  }, []);
 
   const onCreateControl = useCallback(async () => {
     if (controlState && controlState.available_options?.length) {

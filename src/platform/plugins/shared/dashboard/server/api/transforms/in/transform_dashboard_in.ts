@@ -69,7 +69,7 @@ export const transformDashboardIn = (
       description: '',
       ...rest,
       ...(pinnedPanels && {
-        pinned_panels: { panels: pinnedPanels as Record<string, any> },
+        pinned_panels: { panels: pinnedPanels },
       }),
       optionsJSON: transformOptionsIn(options),
       panelsJSON,

@@ -8,10 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type {
-  ControlsGroupState as PinnedPanelsState,
-  LegacyIgnoreParentSettings,
-} from '@kbn/controls-schemas';
+import type { LegacyIgnoreParentSettings } from '@kbn/controls-schemas';
 import { flow } from 'lodash';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import type { DashboardState } from '../../types';
@@ -22,6 +19,7 @@ import type {
 } from '../../../../common';
 import { embeddableService, logger } from '../../../kibana_services';
 
+type PinnedPanelsState = Required<DashboardState>['pinned_panels'];
 type StoredPinnedPanels = Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
 
 export function transformPinnedPanelsOut(
