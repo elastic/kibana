@@ -1862,7 +1862,9 @@ const generateId = ({
   spaceId?: string;
   owner?: string;
 }) => {
-  const payload = [ruleId, spaceId, owner, stableStringify(grouping), counter].filter(Boolean).join(':');
+  const payload = [ruleId, spaceId, owner, stableStringify(grouping), counter]
+    .filter(Boolean)
+    .join(':');
   const hash = createHash('sha256');
 
   hash.update(payload);

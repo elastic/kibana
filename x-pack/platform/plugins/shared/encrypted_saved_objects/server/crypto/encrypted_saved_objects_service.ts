@@ -6,11 +6,11 @@
  */
 
 import type { Crypto, EncryptOutput } from '@elastic/node-crypto';
-import { stableStringify } from '@kbn/std';
 import typeDetect from 'type-detect';
 
 import type { Logger } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { stableStringify } from '@kbn/std';
 
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
