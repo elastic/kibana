@@ -93,6 +93,29 @@ apiTest.describe(
       expect(query).toContain('true');
     });
 
+    apiTest('should generate USER_AGENT command with properties option', async () => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'user_agent',
+            from: 'agent_string',
+            to: 'parsed_agent',
+            properties: ['name', 'os', 'version'],
+          } as UserAgentProcessor,
+        ],
+      };
+
+      const { query } = transpile(streamlangDSL);
+
+      // Should contain WITH clause with properties option as a list
+      expect(query).toContain('USER_AGENT');
+      expect(query).toContain('WITH');
+      expect(query).toContain('properties');
+      expect(query).toContain('name');
+      expect(query).toContain('os');
+      expect(query).toContain('version');
+    });
+
     apiTest('should generate USER_AGENT command with all options', async () => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
@@ -101,6 +124,7 @@ apiTest.describe(
             from: 'http.user_agent',
             to: 'parsed_agent',
             regex_file: 'custom.yaml',
+            properties: ['name', 'device'],
             extract_device_type: true,
           } as UserAgentProcessor,
         ],
@@ -114,6 +138,9 @@ apiTest.describe(
       expect(query).toContain('WITH');
       expect(query).toContain('regex_file');
       expect(query).toContain('custom.yaml');
+      expect(query).toContain('properties');
+      expect(query).toContain('name');
+      expect(query).toContain('device');
       expect(query).toContain('extract_device_type');
       expect(query).toContain('true');
     });

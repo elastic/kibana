@@ -175,15 +175,16 @@ export const UserAgentProcessorForm = () => {
       <EuiSpacer size="m" />
       <TargetFieldSelector />
       <EuiSpacer size="m" />
-      <RegexFileField />
-      <EuiSpacer size="m" />
-      <PropertiesField />
-      <EuiSpacer size="m" />
       <FieldsAccordion>
+        <RegexFileField />
+        <EuiSpacer size="m" />
+        <PropertiesField />
+        <EuiSpacer size="m" />
+        <ExtractDeviceTypeToggle />
+        <EuiSpacer size="m" />
         <ProcessorConditionEditor />
       </FieldsAccordion>
       <EuiSpacer size="m" />
-      <ExtractDeviceTypeToggle />
       <IgnoreFailureToggle />
       <IgnoreMissingToggle />
     </>

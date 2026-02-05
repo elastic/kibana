@@ -8,7 +8,7 @@
 import { Builder } from '@kbn/esql-language';
 import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-language';
 import type { ESQLMapEntry } from '@kbn/esql-language/src/types';
-import type { UserAgentProcessor } from '../../../../types/processors';
+import type { UserAgentProcessor, UserAgentProperty } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
 import { buildIgnoreMissingFilter, buildWhereCondition } from './common';
 
@@ -47,6 +47,7 @@ export function convertUserAgentProcessorToESQL(processor: UserAgentProcessor): 
     from,
     to = 'user_agent', // default target field
     regex_file,
+    properties,
     extract_device_type,
     ignore_missing = false,
     where,
@@ -67,7 +68,9 @@ export function convertUserAgentProcessorToESQL(processor: UserAgentProcessor): 
 
   if (!needConditional) {
     // Simple case: just emit the USER_AGENT command
-    commands.push(buildUserAgentCommand(toColumn, fromColumn, regex_file, extract_device_type));
+    commands.push(
+      buildUserAgentCommand(toColumn, fromColumn, regex_file, properties, extract_device_type)
+    );
     return commands;
   }
 
@@ -96,7 +99,9 @@ export function convertUserAgentProcessorToESQL(processor: UserAgentProcessor): 
   );
 
   // Apply USER_AGENT to the temporary field
-  commands.push(buildUserAgentCommand(toColumn, tempColumn, regex_file, extract_device_type));
+  commands.push(
+    buildUserAgentCommand(toColumn, tempColumn, regex_file, properties, extract_device_type)
+  );
 
   // Clean up temporary field
   commands.push(Builder.command({ name: 'drop', args: [tempColumn] }));
@@ -113,6 +118,7 @@ function buildUserAgentCommand(
   toColumn: ESQLAstItem,
   fromColumn: ESQLAstItem,
   regexFile?: string,
+  properties?: UserAgentProperty[],
   extractDeviceType?: boolean
 ): ESQLAstCommand {
   // Build the assignment: target = source
@@ -126,6 +132,17 @@ function buildUserAgentCommand(
   if (regexFile !== undefined) {
     mapEntries.push(
       Builder.expression.entry('regex_file', Builder.expression.literal.string(regexFile))
+    );
+  }
+
+  if (properties !== undefined && properties.length > 0) {
+    mapEntries.push(
+      Builder.expression.entry(
+        'properties',
+        Builder.expression.list.literal({
+          values: properties.map((prop) => Builder.expression.literal.string(prop)),
+        })
+      )
     );
   }
 
