@@ -10,18 +10,23 @@ SCOUT_SERVER_RUN_FLAGS=${SCOUT_SERVER_RUN_FLAGS:-}
 EXTRA_ARGS=${FTR_EXTRA_ARGS:-}
 test -z "$EXTRA_ARGS" || buildkite-agent meta-data set "ftr-extra-args" "$EXTRA_ARGS"
 
+if [[ -z "${SCOUT_REPORTER_ENABLED:-}" ]]; then
+  export SCOUT_REPORTER_ENABLED=true
+  echo "⚠️ SCOUT_REPORTER_ENABLED not set; defaulting to true for flaky runner"
+fi
+
 if [[ -z "$SCOUT_CONFIG" ]]; then
   echo "Missing SCOUT_CONFIG env var"
   exit 1
 fi
 
-if [[ -z "$SCOUT_SERVER_RUN_FLAGS" ]]; then
-  echo "Missing SCOUT_SERVER_RUN_FLAGS env var"
-  exit 1
-fi
-
 config_path="$SCOUT_CONFIG"
-config_run_modes="$SCOUT_SERVER_RUN_FLAGS"
+if [[ -z "$SCOUT_SERVER_RUN_FLAGS" ]]; then
+  echo "⚠️ SCOUT_SERVER_RUN_FLAGS not set; defaulting to --stateful"
+  config_run_modes="--stateful"
+else
+  config_run_modes="$SCOUT_SERVER_RUN_FLAGS"
+fi
 
 passed_count=0
 failedModes=()
@@ -138,6 +143,13 @@ if [[ ${#htmlReportLines[@]} -gt 0 ]]; then
     echo "### Scout HTML report"
     echo ""
     printf '%s\n' "${htmlReportLines[@]}"
+  } | buildkite-agent annotate --style "info" --context "scout-html-report"
+elif [[ -f ".scout/reports/index.html" ]]; then
+  buildkite-agent artifact upload ".scout/reports/**/*"
+  {
+    echo "### Scout HTML report"
+    echo ""
+    echo "- [HTML report](artifact://.scout/reports/index.html)"
   } | buildkite-agent annotate --style "info" --context "scout-html-report"
 fi
 
