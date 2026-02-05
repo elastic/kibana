@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import pRetry from 'p-retry';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -78,6 +80,8 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       expect(response.body.url).match(reportUrlPattern);
+      const jobId = response.body.url.split('/').pop();
+      await validateReportingJob(supertestWithoutAuth, jobId, 2);
     });
 
     it('should work for multiple agents by kuery', async () => {
@@ -89,13 +93,53 @@ export default function (providerContext: FtrProviderContext) {
           testUsers.fleet_generate_report_agents_read_only.password
         )
         .send({
-          agents: 'status:online',
+          agents: 'policy_id:policy1',
           fields: ['agent.id', 'status', 'policy_id'],
           timezone: 'UTC',
         })
         .expect(200);
 
       expect(response.body.url).match(reportUrlPattern);
+
+      const jobId = response.body.url.split('/').pop();
+
+      await validateReportingJob(supertestWithoutAuth, jobId, 4);
     });
   });
+}
+
+async function validateReportingJob(
+  supertestWithoutAuth: any,
+  jobId: string,
+  expectedRowCount: number
+) {
+  const job = await pRetry(
+    async () => {
+      const response = await supertestWithoutAuth
+        .get(`/internal/reporting/jobs/list?ids=${jobId}`)
+        .set('kbn-xsrf', 'xxx')
+        .set('elastic-api-version', '1')
+        .auth(
+          testUsers.fleet_generate_report_agents_read_only.username,
+          testUsers.fleet_generate_report_agents_read_only.password
+        )
+        .expect(200);
+
+      const _job = response.body[0];
+      if (!_job) {
+        throw new Error('Reporting job not found');
+      }
+
+      if (_job.status === 'completed') {
+        return _job;
+      } else if (_job.status === 'failed' || _job.status === 'completed_with_warnings') {
+        throw new pRetry.AbortError('Reporting job failed');
+      } else {
+        throw new Error(`Reporting job not complete: ${_job.status}`);
+      }
+    },
+    { retries: 5, minTimeout: 1000 }
+  );
+
+  expect(job.metrics.csv.rows).to.be(expectedRowCount);
 }
