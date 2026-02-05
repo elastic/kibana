@@ -14,4 +14,5 @@ ajv-formats
 dompurify
 @axe-core/playwright
 magic-bytes.js
+@opentelemetry/exporter-trace-otlp-grpc
 @ai-sdk/langchain

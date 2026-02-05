@@ -157,12 +157,12 @@ export const SharedLists = React.memo(() => {
   const isLoadingExceptions = viewerStatus === ViewerStatus.LOADING;
 
   const handleDeleteSuccess = useCallback(
-    (listId?: string) => () => {
+    (listName: string) => () => {
       notifications.toasts.addSuccess({
-        title: i18n.exceptionDeleteSuccessMessage(listId ?? referenceModalState.listId),
+        title: i18n.exceptionDeleteSuccessMessage(listName),
       });
     },
-    [notifications.toasts, referenceModalState.listId]
+    [notifications.toasts]
   );
 
   const handleDeleteError = useCallback(
@@ -332,7 +332,10 @@ export const SharedLists = React.memo(() => {
   const handleReferenceDelete = useCallback(async (): Promise<void> => {
     const exceptionListId = referenceModalState.listId;
     const exceptionListNamespaceType = referenceModalState.listNamespaceType;
-    const relevantRules = exceptionsListsRef[exceptionListId].rules;
+    const exceptionList = exceptionsListsRef[exceptionListId];
+
+    const relevantRules = exceptionList?.rules ?? [];
+    const listName = exceptionList?.name ?? '';
 
     try {
       await Promise.all(
@@ -356,7 +359,7 @@ export const SharedLists = React.memo(() => {
         id: exceptionListId,
         namespaceType: exceptionListNamespaceType,
         onError: handleDeleteError,
-        onSuccess: handleDeleteSuccess(),
+        onSuccess: handleDeleteSuccess(listName),
       });
     } catch (err) {
       handleDeleteError(err);
