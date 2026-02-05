@@ -10,7 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { MaybePromise } from '@kbn/utility-types';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 
 export type SmlUpdateAction = 'create' | 'update' | 'delete';
 
@@ -48,7 +48,22 @@ export interface SmlAttachmentPermissions {
   spaces: string[];
 }
 
+export interface SmlAttachmentSearchItem {
+  chunkId?: string;
+  attachmentId: string;
+  attachmentType: string;
+  title?: string;
+  content: string;
+  spaces?: string[];
+}
+
 export interface SmlAttachmentDataContext {
+  request?: KibanaRequest;
+  savedObjectsClient: SavedObjectsClientContract;
+  spaceId: string;
+}
+
+export interface SmlAttachmentToAttachmentContext {
   request?: KibanaRequest;
   savedObjectsClient: SavedObjectsClientContract;
   spaceId: string;
@@ -61,4 +76,8 @@ export interface SmlAttachmentTypeDefinition<TType extends string = string, TCon
     attachment: Attachment<TType, TContent>,
     context: SmlAttachmentDataContext
   ) => MaybePromise<SmlAttachmentData>;
+  toAttachment?: (
+    item: SmlAttachmentSearchItem,
+    context: SmlAttachmentToAttachmentContext
+  ) => MaybePromise<AttachmentInput<TType, TContent> | null>;
 }

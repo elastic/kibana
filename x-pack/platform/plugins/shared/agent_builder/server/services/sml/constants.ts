@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-export const smlIndexAlias = '.sml-attachments';
-export const smlWriteAlias = '.sml-attachments-write';
-export const smlIndexPrefix = '.sml-attachments-';
-export const smlCrawlerStateIndex = '.sml-crawler-state';
+import { chatSystemIndex } from '@kbn/agent-builder-server';
+
+export const smlIndexAlias = chatSystemIndex('sml-attachments');
+export const smlWriteAlias = chatSystemIndex('sml-attachments-write');
+export const smlIndexPrefix = chatSystemIndex('sml-attachments-');
+export const smlCrawlerStateIndex = chatSystemIndex('sml-crawler-state');
 
 export const smlDefaultFetchInterval = '10m';
 export const smlSearchDefaultSize = 25;

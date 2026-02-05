@@ -33,12 +33,16 @@ export class SmlIndexerService {
 
   async indexAttachment({ attachmentId, attachmentType, action, spaceId }: IndexerRequest) {
     if (action === 'delete') {
+      this.deps.logger.debug(
+        `SML indexer deleting docs for "${attachmentType}:${attachmentId}" in "${spaceId}"`
+      );
       await this.deleteAttachmentDocs({ attachmentId, attachmentType, spaceId });
       return;
     }
 
     const attachment = await resolveAttachmentForSpace({
       esClient: this.deps.esClient,
+      savedObjectsClient: this.deps.savedObjectsClient,
       attachmentId,
       attachmentType,
       spaceId,
@@ -57,6 +61,10 @@ export class SmlIndexerService {
         savedObjectsClient: this.deps.savedObjectsClient,
         spaceId,
       })) ?? this.getDefaultSmlData(attachment, attachmentType);
+
+    this.deps.logger.error(
+      `SML indexer preparing ${smlData.chunks.length} chunks for "${attachmentType}:${attachmentId}" in "${spaceId}"`
+    );
 
     await this.deleteAttachmentDocs({ attachmentId, attachmentType, spaceId });
     await this.indexChunks({
@@ -93,6 +101,9 @@ export class SmlIndexerService {
     spaceId: string;
   }) {
     if (chunks.length === 0) {
+      this.deps.logger.debug(
+        `SML indexer skipping "${attachmentType}:${attachmentId}" because it has no chunks`
+      );
       return;
     }
 
@@ -134,6 +145,10 @@ export class SmlIndexerService {
       );
       throw new Error('SML indexing failed');
     }
+
+    this.deps.logger.debug(
+      `SML indexer indexed ${chunks.length} chunks for "${attachmentType}:${attachmentId}"`
+    );
   }
 
   private async deleteAttachmentDocs({

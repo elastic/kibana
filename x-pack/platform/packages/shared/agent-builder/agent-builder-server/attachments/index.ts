@@ -23,6 +23,8 @@ export type {
   SmlAttachmentListContext,
   SmlAttachmentListItem,
   SmlAttachmentPermissions,
+  SmlAttachmentSearchItem,
+  SmlAttachmentToAttachmentContext,
   SmlAttachmentTypeDefinition,
   SmlUpdateAction,
 } from './sml';

@@ -175,6 +175,7 @@ export class SmlService {
 
       const attachment = await resolveAttachmentForSpace({
         esClient,
+        savedObjectsClient,
         attachmentId: source.attachment_id,
         attachmentType: source.attachment_type,
         spaceId,
@@ -211,11 +212,6 @@ export class SmlService {
       });
     }
 
-    const total =
-      typeof response.hits.total === 'number'
-        ? response.hits.total
-        : response.hits.total?.value ?? results.length;
-
-    return { results, total };
+    return { results, total: results.length };
   }
 }

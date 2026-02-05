@@ -35,11 +35,15 @@ export class SmlCrawlerService {
 
     await this.deps.crawlerState.ensureIndex();
 
+    this.deps.logger.debug(`SML crawler listing attachments for "${attachmentType}"`);
     const listItems = await smlDefinition.list({
       esClient: this.deps.esClient,
       savedObjectsClient: this.deps.savedObjectsClient,
       logger: this.deps.logger,
     });
+    this.deps.logger.error(
+      `SML crawler found ${listItems.length} attachment candidates for "${attachmentType}"`
+    );
 
     const stateItems = await this.deps.crawlerState.listByType(attachmentType);
     const stateById = new Map(stateItems.map((item) => [item.id, item]));

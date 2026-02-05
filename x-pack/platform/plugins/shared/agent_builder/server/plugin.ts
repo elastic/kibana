@@ -24,6 +24,7 @@ import { getRunAgentStepDefinition } from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
 import { registerAgentBuilderHandlerContext } from './request_handler_context';
 import { createSmlSearchTool } from './services/tools/builtin/sml/sml_search';
+import { createSmlAttachTool } from './services/tools/builtin/sml/sml_attach';
 import { registerSmlCrawlerTask } from './services/sml/task';
 import { createAgentBuilderUsageCounter } from './telemetry/usage_counters';
 import { TrackingService } from './telemetry/tracking_service';
@@ -87,6 +88,11 @@ export class AgentBuilderPlugin
     serviceSetups.tools.register(
       createSmlSearchTool({
         getSmlService: () => this.serviceManager.internalStart?.sml,
+      })
+    );
+    serviceSetups.tools.register(
+      createSmlAttachTool({
+        getAttachmentsService: () => this.serviceManager.internalStart?.attachments,
       })
     );
 

@@ -6,22 +6,48 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Attachment, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { getLatestVersion, isAttachmentActive } from '@kbn/agent-builder-common/attachments';
+import {
+  AttachmentType,
+  getLatestVersion,
+  isAttachmentActive,
+} from '@kbn/agent-builder-common/attachments';
 import { conversationIndexName } from '../conversation/client/storage';
 import { createSpaceDslFilter } from '../../utils/spaces';
 
 export const resolveAttachmentForSpace = async ({
   esClient,
+  savedObjectsClient,
   attachmentId,
   attachmentType,
   spaceId,
 }: {
   esClient: ElasticsearchClient;
+  savedObjectsClient?: SavedObjectsClientContract;
   attachmentId: string;
   attachmentType: string;
   spaceId: string;
 }): Promise<Attachment | undefined> => {
+  if (attachmentType === AttachmentType.visualizationRef && savedObjectsClient) {
+    const scopedClient = savedObjectsClient.asScopedToNamespace(spaceId);
+    const savedObject = await scopedClient.get('lens', attachmentId);
+    const attributes = savedObject.attributes as Record<string, unknown>;
+    const title = typeof attributes.title === 'string' ? attributes.title : undefined;
+    const description =
+      typeof attributes.description === 'string' ? attributes.description : undefined;
+
+    return {
+      id: attachmentId,
+      type: attachmentType,
+      data: {
+        saved_object_id: attachmentId,
+        ...(title ? { title } : {}),
+        ...(description ? { description } : {}),
+      },
+    };
+  }
+
   const response = await esClient.search<{
     attachments?: VersionedAttachment[];
   }>({

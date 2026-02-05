@@ -13,13 +13,15 @@ import {
 import type {
   AttachmentResolveContext,
   AttachmentTypeDefinition,
+  SmlAttachmentListItem,
+  SmlAttachmentSearchItem,
 } from '@kbn/agent-builder-server/attachments';
 import {
   LensConfigBuilder,
   type LensApiSchemaType,
   type LensAttributes,
 } from '@kbn/lens-embeddable-utils/config_builder';
-import { listConversationAttachmentsForType } from './sml_helpers';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 
 /**
  * Creates the definition for the `visualization_ref` attachment type.
@@ -80,12 +82,55 @@ export const createVisualizationRefAttachmentType = (): AttachmentTypeDefinition
     },
     getTools: () => [],
     sml: {
-      list: ({ esClient }) =>
-        listConversationAttachmentsForType({
-          esClient,
-          attachmentType: AttachmentType.visualizationRef,
-        }),
-      fetchFrequency: () => '10m',
+      list: async ({ savedObjectsClient, logger }) => {
+        const results: SmlAttachmentListItem[] = [];
+        const perPage = 200;
+        let page = 1;
+
+        while (true) {
+          const response = await savedObjectsClient.find({
+            type: 'lens',
+            perPage,
+            page,
+            namespaces: ['*'],
+          });
+
+          if (response.saved_objects.length === 0) {
+            break;
+          }
+
+          for (const savedObject of response.saved_objects) {
+            const namespaces =
+              savedObject.namespaces && savedObject.namespaces.length > 0
+                ? savedObject.namespaces
+                : [DEFAULT_SPACE_ID];
+            const updatedAt =
+              savedObject.updated_at ?? savedObject.created_at ?? new Date().toISOString();
+
+            for (const namespace of namespaces) {
+              results.push({
+                attachmentId: savedObject.id,
+                attachmentType: AttachmentType.visualizationRef,
+                createdAt: savedObject.created_at,
+                updatedAt,
+                spaceId: namespace,
+              });
+            }
+          }
+
+          if (response.saved_objects.length < perPage) {
+            break;
+          }
+
+          page += 1;
+        }
+
+        logger.debug(
+          `SML visualization_ref list returned ${results.length} saved object candidate(s)`
+        );
+        return results;
+      },
+      fetchFrequency: () => '1m',
       getSmlData: (attachment) => {
         const now = new Date().toISOString();
         return {
@@ -97,6 +142,17 @@ export const createVisualizationRefAttachmentType = (): AttachmentTypeDefinition
               updatedAt: now,
             },
           ],
+        };
+      },
+      toAttachment: (item: SmlAttachmentSearchItem) => {
+        const parsed = safeParseVisualizationData(item.content);
+        return {
+          type: AttachmentType.visualizationRef,
+          data: {
+            saved_object_id: item.attachmentId,
+            ...(parsed?.title ? { title: parsed.title } : {}),
+            ...(parsed?.description ? { description: parsed.description } : {}),
+          },
         };
       },
     },
@@ -113,3 +169,14 @@ const toLensAttributes = (
 
 const toLensApiConfig = (attributes: LensAttributes): LensApiSchemaType =>
   new LensConfigBuilder().toAPIFormat(attributes);
+
+const safeParseVisualizationData = (
+  content: string
+): { title?: string; description?: string } | undefined => {
+  try {
+    const parsed = JSON.parse(content) as { title?: string; description?: string };
+    return parsed;
+  } catch {
+    return undefined;
+  }
+};

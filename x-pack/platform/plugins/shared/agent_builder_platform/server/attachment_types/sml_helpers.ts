@@ -29,7 +29,10 @@ export const listConversationAttachmentsForType = async ({
       index: chatSystemIndex('conversations'),
       size: 1000,
       _source: ['attachments', 'space'],
-      sort: [{ _id: 'asc' }],
+      sort: [
+        { updated_at: { order: 'asc', missing: '_last' } },
+        { space: { order: 'asc', missing: '_first' } },
+      ],
       search_after: searchAfter,
       query: {
         bool: {
