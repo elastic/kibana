@@ -896,7 +896,7 @@ export const PostBulkAgentRollbackResponseSchema = schema.object({
 export const PostGenerateAgentsReportRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
-      schema.arrayOf(schema.string()),
+      schema.arrayOf(schema.string(), { maxSize: 10000 }),
       schema.string({
         validate: (value: string) => {
           const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
@@ -906,7 +906,7 @@ export const PostGenerateAgentsReportRequestSchema = {
         },
       }),
     ]),
-    fields: schema.arrayOf(schema.string()),
+    fields: schema.arrayOf(schema.string(), { maxSize: 100 }),
     timezone: schema.maybe(schema.string()),
     sort: schema.maybe(
       schema.object({
