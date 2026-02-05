@@ -23,6 +23,7 @@
     "@kbn/dev-utils",
     "@kbn/synthtrace-client",
     "@kbn/test-suites-src",
-    "@kbn/ftr-common-functional-services"
+    "@kbn/ftr-common-functional-services",
+    "@kbn/monaco"
   ]
 }
