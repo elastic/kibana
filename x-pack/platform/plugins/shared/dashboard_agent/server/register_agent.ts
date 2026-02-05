@@ -8,7 +8,7 @@
 import { ToolResultType, platformCoreTools } from '@kbn/agent-builder-common';
 import {
   dashboardElement,
-  visualizationElement,
+  renderAttachmentElement,
 } from '@kbn/agent-builder-common/tools/tool_result';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { dashboardTools } from '../common';
@@ -112,7 +112,7 @@ When updating existing dashboards:
 function renderDashboardResultPrompt() {
   const { dashboard } = ToolResultType;
   const { tagName, attributes } = dashboardElement;
-  const { tagName: visualizationTagName } = visualizationElement;
+  const { tagName: renderAttachmentTagName } = renderAttachmentElement;
 
   return `### RENDERING DASHBOARDS (REQUIRED)
 
@@ -122,8 +122,8 @@ When a tool call returns a result of type "${dashboard}", you MUST render the da
 
 **Critical rules (highest priority)**
 * If one or more "${dashboard}" tool results exist in the conversation, your response MUST include exactly ONE \`<${tagName}>\` element for the MOST RECENT "${dashboard}" tool result.
-* When the user asked to create/update a dashboard, you MUST NOT render intermediate visualizations:
-  - Do NOT emit any \`<${visualizationTagName}>\` elements.
+* When the user asked to create/update a dashboard, you MUST NOT render intermediate attachments:
+  - Do NOT emit any \`<${renderAttachmentTagName}>\` elements.
   - Do NOT paste visualization JSON/configs in your message.
 * Never wrap the \`<${tagName}>\` element in backticks or code blocks. Emit it as plain text on its own line.
 

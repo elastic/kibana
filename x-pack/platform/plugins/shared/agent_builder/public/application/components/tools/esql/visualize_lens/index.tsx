@@ -17,11 +17,15 @@ export function VisualizeLens({
   dataViews,
   uiActions,
   lensConfig,
+  timeRange,
+  searchSessionId,
 }: {
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
   uiActions: UiActionsStart;
   lensConfig: any;
+  timeRange?: { from: string; to: string };
+  searchSessionId?: string;
 }) {
   const { lensInput, setLensInput, isLoading } = useLensInput({
     lens,
@@ -36,6 +40,8 @@ export function VisualizeLens({
       lensInput={lensInput}
       setLensInput={setLensInput}
       isLoading={isLoading}
+      timeRange={timeRange}
+      searchSessionId={searchSessionId}
     />
   );
 }

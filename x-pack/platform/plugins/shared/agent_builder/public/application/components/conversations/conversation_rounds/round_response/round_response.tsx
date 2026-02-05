@@ -9,6 +9,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AssistantResponse, ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import React from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
@@ -19,6 +21,8 @@ export interface RoundResponseProps {
   steps: ConversationRoundStep[];
   isLoading: boolean;
   hasError: boolean;
+  conversationAttachments?: VersionedAttachment[];
+  attachmentRefs?: AttachmentVersionRef[];
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
@@ -26,6 +30,8 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   response: { message },
   steps,
   isLoading,
+  conversationAttachments,
+  attachmentRefs,
 }) => (
   <EuiFlexGroup
     direction="column"
@@ -40,9 +46,19 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   >
     <EuiFlexItem>
       {isLoading ? (
-        <StreamingText content={message} steps={steps} />
+        <StreamingText
+          content={message}
+          steps={steps}
+          conversationAttachments={conversationAttachments}
+          attachmentRefs={attachmentRefs}
+        />
       ) : (
-        <ChatMessageText content={message} steps={steps} />
+        <ChatMessageText
+          content={message}
+          steps={steps}
+          conversationAttachments={conversationAttachments}
+          attachmentRefs={attachmentRefs}
+        />
       )}
     </EuiFlexItem>
     {!isLoading && !hasError && (

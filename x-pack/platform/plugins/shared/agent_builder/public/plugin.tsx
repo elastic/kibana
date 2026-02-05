@@ -34,6 +34,7 @@ import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
 import { createPublicEventsContract } from './services/events';
 import { registerWorkflowSteps } from './step_types';
+import { registerAttachmentUiDefinitions } from './attachment_types';
 import type {
   ConfigSchema,
   AgentBuilderPluginSetup,
@@ -114,6 +115,8 @@ export class AgentBuilderPlugin
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
+
+    registerAttachmentUiDefinitions({ attachmentsService, startDependencies });
 
     if (!this.setupServices) {
       throw new Error('plugin start called before plugin setup');

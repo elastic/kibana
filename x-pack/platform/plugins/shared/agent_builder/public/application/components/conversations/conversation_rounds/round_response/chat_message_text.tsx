@@ -22,7 +22,10 @@ import {
 } from '@elastic/eui';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import {
+  renderAttachmentElement,
   visualizationElement,
   dashboardElement,
 } from '@kbn/agent-builder-common/tools/tool_result';
@@ -30,10 +33,12 @@ import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_ser
 import {
   Cursor,
   esqlLanguagePlugin,
-  createVisualizationRenderer,
   createDashboardRenderer,
   loadingCursorPlugin,
+  renderAttachmentTagParser,
+  createRenderAttachmentRenderer,
   visualizationTagParser,
+  createVisualizationRenderer,
   dashboardTagParser,
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
@@ -41,13 +46,20 @@ import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 interface Props {
   content: string;
   steps: ConversationRoundStep[];
+  conversationAttachments?: VersionedAttachment[];
+  attachmentRefs?: AttachmentVersionRef[];
 }
 
 /**
  * Component handling markdown support to the assistant's responses.
  * Also handles "loading" state by appending the blinking cursor.
  */
-export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props) {
+export function ChatMessageText({
+  content,
+  steps: stepsFromCurrentRound,
+  conversationAttachments,
+  attachmentRefs,
+}: Props) {
   const { euiTheme } = useEuiTheme();
 
   const containerClassName = css`
@@ -63,7 +75,7 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
     }
   `;
 
-  const { startDependencies } = useAgentBuilderServices();
+  const { attachmentsService, startDependencies } = useAgentBuilderServices();
   const stepsFromPrevRounds = useStepsFromPrevRounds();
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
@@ -134,6 +146,11 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         stepsFromCurrentRound,
         stepsFromPrevRounds,
       }),
+      [renderAttachmentElement.tagName]: createRenderAttachmentRenderer({
+        attachmentsService,
+        conversationAttachments,
+        attachmentRefs,
+      }),
     };
 
     return {
@@ -142,11 +159,19 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         esqlLanguagePlugin,
         visualizationTagParser,
         dashboardTagParser,
+        renderAttachmentTagParser,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,
     };
-  }, [startDependencies, stepsFromCurrentRound, stepsFromPrevRounds]);
+  }, [
+    attachmentsService,
+    conversationAttachments,
+    attachmentRefs,
+    startDependencies,
+    stepsFromCurrentRound,
+    stepsFromPrevRounds,
+  ]);
 
   return (
     <EuiText size="m" className={containerClassName}>

@@ -7,16 +7,26 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ChatMessageText } from './chat_message_text';
 
 const TOKEN_DELAY = 17;
 interface StreamingTextProps {
   content: string;
   steps: ConversationRoundStep[];
+  conversationAttachments?: VersionedAttachment[];
+  attachmentRefs?: AttachmentVersionRef[];
   tokenDelay?: number; // ms between tokens. Defaults to 17ms to ensure 60fps.
 }
 
-export const StreamingText = ({ content, steps, tokenDelay = TOKEN_DELAY }: StreamingTextProps) => {
+export const StreamingText = ({
+  content,
+  steps,
+  conversationAttachments,
+  attachmentRefs,
+  tokenDelay = TOKEN_DELAY,
+}: StreamingTextProps) => {
   const [displayedText, setDisplayedText] = useState('');
   const tokenQueueRef = useRef<string[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -56,5 +66,12 @@ export const StreamingText = ({ content, steps, tokenDelay = TOKEN_DELAY }: Stre
     };
   }, [content, tokenDelay]);
 
-  return <ChatMessageText content={displayedText} steps={steps} />;
+  return (
+    <ChatMessageText
+      content={displayedText}
+      steps={steps}
+      conversationAttachments={conversationAttachments}
+      attachmentRefs={attachmentRefs}
+    />
+  );
 };

@@ -11,13 +11,11 @@ import {
   visualizationElement,
   type VisualizationElementAttributes,
   type TabularDataResult,
-  type VisualizationResult,
   ToolResultType,
 } from '@kbn/agent-builder-common/tools/tool_result';
 
 import type { AgentBuilderStartDependencies } from '../../../../../../types';
 import { VisualizeESQL } from '../../../../tools/esql/visualize_esql';
-import { VisualizeLens } from '../../../../tools/esql/visualize_lens';
 import { createTagParser, findToolResult } from './utils';
 
 export const visualizationTagParser = createTagParser({
@@ -66,34 +64,14 @@ export function createVisualizationRenderer({
       </EuiCode>
     );
 
-    // First, look for tabular data results (from execute_esql)
-    let toolResult: TabularDataResult | VisualizationResult | undefined =
-      findToolResult<TabularDataResult>(steps, toolResultId, ToolResultType.tabularData);
-
-    // If not found, look for visualization results (from create_visualization)
-    if (!toolResult) {
-      toolResult = findToolResult<VisualizationResult>(
-        steps,
-        toolResultId,
-        ToolResultType.visualization
-      );
-    }
+    const toolResult = findToolResult<TabularDataResult>(
+      steps,
+      toolResultId,
+      ToolResultType.tabularData
+    );
 
     if (!toolResult) {
       return <EuiText>Unable to find visualization for {ToolResultAttribute}.</EuiText>;
-    }
-
-    // Handle visualization result (pre-built Lens config)
-    if (toolResult.type === 'visualization') {
-      const { visualization } = toolResult.data;
-      return (
-        <VisualizeLens
-          lensConfig={visualization}
-          dataViews={startDependencies.dataViews}
-          lens={startDependencies.lens}
-          uiActions={startDependencies.uiActions}
-        />
-      );
     }
 
     const { columns, query } = toolResult.data;
@@ -101,6 +79,9 @@ export function createVisualizationRenderer({
     if (!query) {
       return <EuiText>Unable to find esql query for {ToolResultAttribute}.</EuiText>;
     }
+
+    const timeRange = startDependencies.data.query.timefilter.timefilter.getTime();
+    const searchSessionId = startDependencies.data.search.session.start();
 
     return (
       <VisualizeESQL
@@ -110,6 +91,8 @@ export function createVisualizationRenderer({
         esqlQuery={query}
         esqlColumns={columns}
         preferredChartType={chartType}
+        timeRange={timeRange}
+        searchSessionId={searchSessionId}
       />
     );
   };
