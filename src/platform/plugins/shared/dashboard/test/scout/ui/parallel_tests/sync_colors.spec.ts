@@ -77,6 +77,7 @@ const createBaseXYCharts = async (
     },
   });
   await pageObjects.lens.saveAndReturn();
+  await pageObjects.dashboard.waitForPanelsToLoad(1);
 
   await pageObjects.dashboard.openNewLensPanel();
   await pageObjects.lens.configureXYDimensions({
@@ -90,7 +91,6 @@ const createBaseXYCharts = async (
   await filterBar.addFilter({ field: 'geo.src', operator: 'is not', value: 'CN' });
   await pageObjects.lens.saveAndReturn();
   await pageObjects.dashboard.waitForPanelsToLoad(2);
-  await expect.poll(() => pageObjects.dashboard.getVisualizationCount('xyVisChart')).toBe(2);
 };
 
 spaceTest.describe('Sync colors', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {

@@ -45,8 +45,15 @@ export class LensApp {
     await expect(this.applyChangesButton).toBeHidden();
   }
 
+  /**
+   * Clicks "Save and return" and waits for Lens to close and the dashboard
+   * viewport to be visible.
+   */
   async saveAndReturn() {
+    await expect(this.saveAndReturnButton).toBeVisible();
     await this.saveAndReturnButton.click();
+    await expect(this.lensApp).toBeHidden();
+    await expect(this.page.testSubj.locator('dshDashboardViewport')).toBeVisible();
   }
 
   async configureXYDimensions(options?: {

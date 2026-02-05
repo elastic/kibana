@@ -73,9 +73,7 @@ spaceTest.describe('Flights dashboard (sample data)', { tag: tags.DEPLOYMENT_AGN
       await expect.poll(async () => await pageObjects.dashboard.getPanelCount()).toBe(16);
 
       // check charts rendered
-      await expect
-        .poll(async () => await pageObjects.dashboard.getVisualizationCount('xyVisChart'))
-        .toBe(5);
+      await expect.poll(async () => await page.testSubj.locator('xyVisChart').count()).toBe(5);
 
       // Checking saved searches rendered
       await expect

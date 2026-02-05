@@ -415,10 +415,6 @@ export class DashboardApp {
     return this.page.testSubj.locator('control-frame').count();
   }
 
-  async getVisualizationCount(testSubj: string): Promise<number> {
-    return this.page.testSubj.locator(testSubj).count();
-  }
-
   async getSavedSearchRowCount(): Promise<number> {
     return this.page.evaluate(() => {
       const docElement = document.querySelector('[data-document-number]');
@@ -665,9 +661,16 @@ export class DashboardApp {
     await panelWrapper.scrollIntoViewIfNeeded();
     await panelWrapper.hover();
 
+    const contextMenuOpen = panelWrapper.locator(
+      '[data-test-subj="embeddablePanelContextMenuOpen"]'
+    );
+    if (await contextMenuOpen.isVisible()) {
+      return;
+    }
+
     const menuIcon = panelWrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]');
     await menuIcon.click();
-    await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeVisible();
+    await expect(contextMenuOpen).toBeVisible();
   }
 
   async navigateToLensEditorFromPanel(title?: string) {
@@ -713,6 +716,8 @@ export class DashboardApp {
       // Open context menu and click action
       await this.openPanelContextMenu(title);
       await this.page.testSubj.click(actionTestSubj);
+      // Wait for context menu to close after clicking the action
+      await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeHidden();
     }
   }
 
@@ -836,14 +841,6 @@ export class DashboardApp {
    */
   async expectNotLinkedToLibrary(title?: string) {
     await this.expectExistsPanelAction('embeddablePanelAction-saveToLibrary', title);
-  }
-
-  async switchToEditMode() {
-    const isInEditMode = await this.page.testSubj.isVisible('dashboardViewOnlyMode');
-    if (!isInEditMode) {
-      await this.page.testSubj.click('dashboardEditMode');
-      await this.page.testSubj.waitForSelector('embeddablePanelDragHandle', { state: 'visible' });
-    }
   }
 
   async openInlineEditor(id: string) {
