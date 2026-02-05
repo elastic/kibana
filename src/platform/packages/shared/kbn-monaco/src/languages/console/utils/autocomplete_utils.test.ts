@@ -74,22 +74,17 @@ describe('autocomplete_utils', () => {
       });
     });
 
-    it('does not treat longer words as request methods (e.g. GETS)', () => {
-      const request = `GETS _query\n{\n  "query": "SELECT * FROM logs `;
-      expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
-        insideTripleQuotes: false,
-        insideEsqlQuery: false,
-        esqlQueryIndex: -1,
-      });
-    });
-
-    it('does not treat longer words as request methods (e.g. POSTER)', () => {
-      const request = `POSTER _query\n{\n  "query": "SELECT * FROM logs `;
-      expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
-        insideTripleQuotes: false,
-        insideEsqlQuery: false,
-        esqlQueryIndex: -1,
-      });
+    it('does not treat longer words as request methods (e.g. GETS, POSTER)', () => {
+      const methods = ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH'] as const;
+      for (const method of methods) {
+        const requestMethod = `${method}A`;
+        const request = `${requestMethod} _query\n{\n  "query": "SELECT * FROM logs `;
+        expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
+          insideTripleQuotes: false,
+          insideEsqlQuery: false,
+          esqlQueryIndex: -1,
+        });
+      }
     });
   });
 
