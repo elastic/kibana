@@ -5449,6 +5449,26 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-sidebar-components@link:src/core/packages/chrome/sidebar/sidebar-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-sidebar-context@link:src/core/packages/chrome/sidebar/sidebar-context":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-sidebar-internal@link:src/core/packages/chrome/sidebar/sidebar-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-sidebar-mocks@link:src/core/packages/chrome/sidebar/sidebar-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-sidebar@link:src/core/packages/chrome/sidebar/sidebar":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-config-server-internal@link:src/core/packages/config/server-internal":
   version "0.0.0"
   uid ""
@@ -9054,6 +9074,10 @@
   uid ""
 
 "@kbn/shared-ux-utility@link:src/platform/packages/shared/kbn-shared-ux-utility":
+  version "0.0.0"
+  uid ""
+
+"@kbn/sidebar-examples-plugin@link:examples/sidebar_examples":
   version "0.0.0"
   uid ""
 
