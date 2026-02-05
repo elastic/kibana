@@ -297,7 +297,7 @@ async function getSuggestionsWithinCommandExpression(
     const insertText = rangeToReplace
       ? fullText.substring(rangeToReplace.start, rangeToReplace.end)
       : '';
-    suggestions.unshift(createIndicesBrowserSuggestion(rangeToReplace, insertText, filterText));
+    suggestions.unshift(createIndicesBrowserSuggestion(rangeToReplace, filterText, insertText));
   }
 
   // Apply context-aware ordering
