@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/css-utils'
+  - '@kbn/sample-data-ingest'
 tags:
   - plugin
   - prod
