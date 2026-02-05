@@ -367,9 +367,8 @@ export class SearchInterceptor {
           isSavedToBackground = true;
         });
 
-    const strategyString = strategy ? strategyToString(strategy) : strategy;
     const sendCancelRequest = once(() =>
-      this.deps.http.delete(`/internal/search/${strategyString}/${id}`, {
+      this.deps.http.delete(`/internal/search/${strategyToString(strategy)}/${id}`, {
         version: '1',
       })
     );
@@ -491,10 +490,9 @@ export class SearchInterceptor {
     // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
     // at that point, exclude all params when request.id is defined (polling phase)
     const paramsToUse = request.id ? { dropNullColumns: params?.dropNullColumns } : params || {};
-    const strategyString = strategy ? strategyToString(strategy) : strategy;
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
-        `/internal/search/${strategyString}${request.id ? `/${request.id}` : ''}`,
+        `/internal/search/${strategyToString(strategy)}${request.id ? `/${request.id}` : ''}`,
         {
           version: '1',
           signal: abortSignal,
