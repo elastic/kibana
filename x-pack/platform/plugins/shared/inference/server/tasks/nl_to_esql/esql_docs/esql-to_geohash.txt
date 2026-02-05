@@ -1,0 +1,23 @@
+# TO_GEOHASH
+
+The TO_GEOHASH function converts an input value to a geohash value. The conversion is successful only if the input string follows the geohash format.
+
+## Syntax
+
+`TO_GEOHASH(field)`
+
+### Parameters
+
+#### field
+
+The input value to be converted. This can be a single- or multi-valued column, or an expression.
+
+## Examples
+
+Converts the string "u3bu" into a geohash value and stores it in a new column.
+
+```esql
+ROW string = "u3bu"
+| EVAL geohash = TO_GEOHASH(string)
+```
+This example converts the string "u3bu" into a geohash value.
