@@ -3,13 +3,13 @@
 exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Breadcrumb button content correctly 1`] = `
 <div>
   <div
-    class="css-1k5fyt8"
+    class="css-ned1bf-Breadcrumb"
   >
     <div
       class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
+        class="euiFlexItem emotion-euiFlexItem-grow-1-Breadcrumb"
       >
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -123,13 +123,13 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
 exports[`Tree view Breadcrumb component When Breadcrumb is mounted should display cluster icon button when no cluster name is provided 1`] = `
 <div>
   <div
-    class="css-1k5fyt8"
+    class="css-ned1bf-Breadcrumb"
   >
     <div
       class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
+        class="euiFlexItem emotion-euiFlexItem-grow-1-Breadcrumb"
       >
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -243,13 +243,13 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
 exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render breadcrumb icons 1`] = `
 <div>
   <div
-    class="css-1k5fyt8"
+    class="css-ned1bf-Breadcrumb"
   >
     <div
       class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
+        class="euiFlexItem emotion-euiFlexItem-grow-1-Breadcrumb"
       >
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -385,13 +385,13 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
 exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render last  breadcrumb content only 1`] = `
 <div>
   <div
-    class="css-1k5fyt8"
+    class="css-ned1bf-Breadcrumb"
   >
     <div
       class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
+        class="euiFlexItem emotion-euiFlexItem-grow-1-Breadcrumb"
       >
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
