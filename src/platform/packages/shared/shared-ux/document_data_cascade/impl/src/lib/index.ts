@@ -15,6 +15,6 @@ export {
 } from './utils';
 
 export {
-  useStickyHeaderPortal,
-  type StickyHeaderPortalContextValue,
-} from '../components/helpers/sticky_header_portal';
+  useStickyHeaderExtensionPoint,
+  type StickyHeaderExtensionPointContextValue,
+} from '../components/helpers/sticky_header_extension_point';

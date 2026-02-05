@@ -9,7 +9,7 @@
 
 import React, { createContext, useContext, useMemo, type PropsWithChildren } from 'react';
 
-export interface StickyHeaderPortalContextValue {
+export interface StickyHeaderExtensionPointContextValue {
   /**
    * Ref to the portal container element in the sticky header.
    */
@@ -20,18 +20,20 @@ export interface StickyHeaderPortalContextValue {
   isActiveSticky: boolean;
 }
 
-const StickyHeaderPortalContext = createContext<StickyHeaderPortalContextValue | null>(null);
+const StickyHeaderExtensionPointContext =
+  createContext<StickyHeaderExtensionPointContextValue | null>(null);
 
 /**
  * @internal
- * @description Provider component that makes the sticky header portal ref available to descendant cells.
+ * @description Provider component that provides an extension point for the sticky header
+ * available to descendant cells.
  */
-export function StickyHeaderPortalProvider({
+export function StickyHeaderExtensionPointProvider({
   extensionPointRef,
   isActiveSticky,
   children,
-}: PropsWithChildren<StickyHeaderPortalContextValue>) {
-  const value = useMemo<StickyHeaderPortalContextValue>(
+}: PropsWithChildren<StickyHeaderExtensionPointContextValue>) {
+  const value = useMemo<StickyHeaderExtensionPointContextValue>(
     () => ({
       extensionPointRef,
       isActiveSticky,
@@ -40,43 +42,45 @@ export function StickyHeaderPortalProvider({
   );
 
   return (
-    <StickyHeaderPortalContext.Provider value={value}>
+    <StickyHeaderExtensionPointContext.Provider value={value}>
       {children}
-    </StickyHeaderPortalContext.Provider>
+    </StickyHeaderExtensionPointContext.Provider>
   );
 }
 
 /**
- * Hook to access the sticky header portal context.
+ * Hook to access the sticky header extension point context.
  * Returns the portal ref and active sticky state, allowing cells to portal content
  * to the sticky header when the row is scrolled.
  *
- * @returns The sticky header portal context value, or null if not within a provider.
+ * @returns The sticky header extension point context value, or null if not within a provider.
  *
  * @example
  * ```tsx
- * import { useStickyHeaderPortal } from '@kbn/shared-ux-document-data-cascade';
+ * import { useStickyHeaderExtensionPoint } from '@kbn/shared-ux-document-data-cascade';
  * import { createPortal } from 'react-dom';
  *
  * const MyCell = () => {
- *   const stickyPortal = useStickyHeaderPortal();
+ *   const stickyHeaderExtensionPoint = useStickyHeaderExtensionPoint();
  *
  *   return (
  *     <>
  *       <div>Cell content</div>
- *       {stickyPortal?.isActiveSticky && stickyPortal.portalRef.current && createPortal(
+ *       {stickyHeaderExtensionPoint?.isActiveSticky && stickyHeaderExtensionPoint.extensionPointRef.current && createPortal(
  *         <div>Content shown in sticky header</div>,
- *         stickyPortal.portalRef.current
+ *         stickyHeaderExtensionPoint.extensionPointRef.current
  *       )}
  *     </>
  *   );
  * };
  * ```
  */
-export function useStickyHeaderPortal(): StickyHeaderPortalContextValue {
-  const ctx = useContext(StickyHeaderPortalContext);
+export function useStickyHeaderExtensionPoint(): StickyHeaderExtensionPointContextValue {
+  const ctx = useContext(StickyHeaderExtensionPointContext);
   if (!ctx) {
-    throw new Error('useStickyHeaderPortal must be used within a StickyHeaderPortalProvider');
+    throw new Error(
+      'useStickyHeaderExtensionPoint must be used within a StickyHeaderExtensionPointProvider'
+    );
   }
   return ctx;
 }

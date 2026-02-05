@@ -78,7 +78,7 @@ export interface CascadeRowCellRendererProps<G extends GroupNode, L extends Leaf
    * This allows the child to maintain its React tree relationship with the portaled content,
    * ensuring state updates trigger proper re-renders.
    */
-  stickyHeaderPortal: {
+  stickyHeaderExtensionPoint: {
     extensionPointRef: React.RefObject<HTMLDivElement | null>;
     isActiveSticky: boolean;
   } | null;

@@ -14,7 +14,7 @@ import type { CascadeRowPrimitiveProps } from '../types';
 import { type LeafNode, type GroupNode, useDataCascadeState } from '../../../store_provider';
 import { TableCellRender, useAdaptedTableRows } from '../../../lib/core/table';
 import { useTreeGridRowARIAAttributes } from '../../../lib/core/accessibility';
-import { StickyHeaderPortalProvider } from '../../helpers/sticky_header_portal';
+import { StickyHeaderExtensionPointProvider } from '../../helpers/sticky_header_extension_point';
 import { isCascadeGroupRowNode } from '../../../lib/utils';
 import {
   styles as cascadeRowStyles,
@@ -55,10 +55,10 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   });
 
   // Ref for the cell portal target - always available since we always render the portal
-  const headerPortalRenderRef = useRef<HTMLDivElement | null>(null);
+  const stickyHeaderExtensionRenderRef = useRef<HTMLDivElement | null>(null);
 
-  const setHeaderPortalRenderRef = useCallback((ref: HTMLDivElement | null) => {
-    headerPortalRenderRef.current = ref;
+  const setStickyHeaderExtensionRenderRef = useCallback((ref: HTMLDivElement | null) => {
+    stickyHeaderExtensionRenderRef.current = ref;
   }, []);
 
   const isGroupNode = isCascadeGroupRowNode(currentGroupByColumns, rowInstance);
@@ -116,18 +116,25 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
         {activeStickyRenderSlotRef.current &&
           createPortal(
             <div
-              css={isActiveSticky ? styles.rowStickyHeaderInner : styles.rowStickyHeaderInnerHidden}
+              css={[
+                styles.rowStickyHeaderInner,
+                isActiveSticky ? null : styles.rowStickyHeaderInnerHidden,
+              ]}
             >
               <>{rowHeader}</>
-              <div ref={setHeaderPortalRenderRef} />
+              <div
+                data-test-subj="sticky-header-extension-point"
+                ref={setStickyHeaderExtensionRenderRef}
+                css={styles.rowStickyHeaderExtensionPointWrapper}
+              />
             </div>,
             activeStickyRenderSlotRef.current,
             `${rowId}-sticky-header`
           )}
         <EuiFlexItem>{rowHeader}</EuiFlexItem>
         <React.Fragment>
-          <StickyHeaderPortalProvider
-            extensionPointRef={headerPortalRenderRef}
+          <StickyHeaderExtensionPointProvider
+            extensionPointRef={stickyHeaderExtensionRenderRef}
             isActiveSticky={isActiveSticky}
           >
             {!isGroupNode && rowIsExpanded && hasAllParentsExpanded && (
@@ -137,7 +144,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
                 ))}
               </EuiFlexItem>
             )}
-          </StickyHeaderPortalProvider>
+          </StickyHeaderExtensionPointProvider>
         </React.Fragment>
       </EuiFlexGroup>
     </div>

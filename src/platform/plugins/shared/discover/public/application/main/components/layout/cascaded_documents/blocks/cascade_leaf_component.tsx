@@ -9,13 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  EuiPanel,
-  EuiText,
-  type EuiDataGridCustomBodyProps,
-  useEuiTheme,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import { EuiText, type EuiDataGridCustomBodyProps, useEuiTheme, EuiButtonIcon } from '@elastic/eui';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   getRenderCustomToolbarWithElements,
@@ -45,7 +39,7 @@ interface ESQLDataCascadeLeafCellProps
     >,
     Pick<
       Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
-      | 'stickyHeaderPortal'
+      | 'stickyHeaderExtensionPoint'
       | 'getScrollElement'
       | 'getScrollMargin'
       | 'getScrollOffset'
@@ -56,10 +50,14 @@ interface ESQLDataCascadeLeafCellProps
 }
 
 interface CustomCascadeGridBodyProps
-  extends CustomGridBodyContext, EuiDataGridCustomBodyProps,
+  extends CustomGridBodyContext,
+    EuiDataGridCustomBodyProps,
     Pick<
       ESQLDataCascadeLeafCellProps,
-      'stickyHeaderPortal' | 'getScrollElement' | 'getScrollMargin' | 'preventSizeChangePropagation'
+      | 'stickyHeaderExtensionPoint'
+      | 'getScrollElement'
+      | 'getScrollMargin'
+      | 'preventSizeChangePropagation'
     > {
   data: DataTableRecord[];
   isFullScreenMode?: boolean;
@@ -87,22 +85,23 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   visibleRowData,
   headerRow,
   footerRow,
-  stickyHeaderPortal,
+  stickyHeaderExtensionPoint,
   renderCustomToolbar,
   provideDataGridRefOverrides,
 }: CustomCascadeGridBodyProps) {
-  const visibleRows = useMemo(
-    () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
-    [data, visibleRowData.startRow, visibleRowData.endRow]
-  );
-  const customGridBodyScrollContainerRef = useRef<HTMLDivElement | null>(null);
-
   const { euiTheme } = useEuiTheme();
 
   const customCascadeGridBodyStyle = useMemo(
     () => getCustomCascadeGridBodyStyle(euiTheme),
     [euiTheme]
   );
+
+  const visibleRows = useMemo(
+    () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
+    [data, visibleRowData.startRow, visibleRowData.endRow]
+  );
+
+  const customGridBodyScrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   // create scroll element reference for custom nested virtualized grid
   const virtualizerScrollElementRef = useRef<Element | null>(getScrollElement());
@@ -152,7 +151,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
 
     return () => unregister?.();
   }, [preventSizeChangePropagation, scrollElementGetter, virtualizer.scrollElement]);
-  
+
   // Register custom scroll implementations with the parent data table.
   // This enables features like in-table search to work correctly with
   // our custom virtualization instead of EUI's built-in virtualization.
@@ -180,40 +179,79 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   // Calculate transform using current scroll margin (now reactive from parent)
   const translateY = items.length > 0 ? items[0].start - getScrollMargin() : 0;
 
+  const renderHeaderRow = useMemo(() => {
+    return (
+      <>
+        {stickyHeaderExtensionPoint?.isActiveSticky &&
+        stickyHeaderExtensionPoint.extensionPointRef.current
+          ? createPortal(
+              <div css={customCascadeGridBodyStyle.stickyHeaderExtensionPointWrapper}>
+                <div>
+                  {renderCustomToolbar?.({
+                    hasRoomForGridControls: false,
+                    fullScreenControl: (
+                      <EuiButtonIcon
+                        size="s"
+                        color="text"
+                        iconType="fullScreen"
+                        aria-label="Full Screen"
+                        css={{ height: '100%' }}
+                      />
+                    ),
+                    keyboardShortcutsControl: (
+                      <EuiButtonIcon
+                        size="s"
+                        color="text"
+                        iconType="keyboard"
+                        aria-label="Keyboard Shortcuts"
+                        css={{ height: '100%' }}
+                      />
+                    ),
+                    displayControl: (
+                      <EuiButtonIcon
+                        size="s"
+                        color="text"
+                        iconType="controls"
+                        aria-label="Display Options"
+                        css={{ height: '100%' }}
+                      />
+                    ),
+                    columnControl: (
+                      <EuiButtonIcon
+                        size="s"
+                        color="text"
+                        iconType="column"
+                        aria-label="Column Options"
+                        css={{ height: '100%' }}
+                      />
+                    ),
+                    columnSortingControl: (
+                      <EuiButtonIcon
+                        size="s"
+                        color="text"
+                        iconType="columnSorting"
+                        aria-label="Column Sorting Options"
+                        css={{ height: '100%' }}
+                      />
+                    ),
+                  })}
+                </div>
+                <>{headerRow}</>
+              </div>,
+              stickyHeaderExtensionPoint.extensionPointRef.current
+            )
+          : headerRow}
+      </>
+    );
+  }, [stickyHeaderExtensionPoint, renderCustomToolbar, headerRow, customCascadeGridBodyStyle]);
+
   return (
     <div
       data-test-subj="discoverCascadeCustomDataGridBody"
       role="rowgroup"
       css={customCascadeGridBodyStyle.wrapper}
     >
-      <>
-        {stickyHeaderPortal?.isActiveSticky && stickyHeaderPortal.extensionPointRef.current
-          ? createPortal(
-              <>
-                <div>
-                  {renderCustomToolbar?.({
-                    hasRoomForGridControls: true,
-                    fullScreenControl: (
-                      <EuiButtonIcon iconType="fullScreen" aria-label="Full Screen" />
-                    ),
-                    keyboardShortcutsControl: (
-                      <EuiButtonIcon iconType="keyboard" aria-label="Keyboard Shortcuts" />
-                    ),
-                    displayControl: (
-                      <EuiButtonIcon iconType="controls" aria-label="Display Options" />
-                    ),
-                    columnControl: <EuiButtonIcon iconType="column" aria-label="Column Options" />,
-                    columnSortingControl: (
-                      <EuiButtonIcon iconType="columnSorting" aria-label="Column Sorting Options" />
-                    ),
-                  })}
-                </div>
-                <>{headerRow}</>
-              </>,
-              stickyHeaderPortal.extensionPointRef.current
-            )
-          : headerRow}
-      </>
+      {renderHeaderRow}
       <div
         ref={customGridBodyScrollContainerRef}
         css={customCascadeGridBodyStyle.virtualizerContainer}
@@ -265,7 +303,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
     getScrollOffset,
     preventSizeChangePropagation,
     onUpdateDataGridDensity,
-    stickyHeaderPortal,
+    stickyHeaderExtensionPoint,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
@@ -339,7 +377,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
           preventSizeChangePropagation={preventSizeChangePropagation}
           initialOffset={getScrollOffset}
           isFullScreenMode={isCellInFullScreenMode}
-          stickyHeaderPortal={stickyHeaderPortal}
+          stickyHeaderExtensionPoint={stickyHeaderExtensionPoint}
           renderCustomToolbar={context.renderCustomToolbar}
           provideDataGridRefOverrides={context.provideDataGridRefOverrides}
         />
@@ -352,40 +390,38 @@ export const ESQLDataCascadeLeafCell = React.memo(
         getScrollMargin,
         getScrollOffset,
         isCellInFullScreenMode,
-        stickyHeaderPortal,
+        stickyHeaderExtensionPoint,
       ]
     );
 
     return (
-      <EuiPanel paddingSize="none">
-        <UnifiedDataTable
-          isPlainRecord
-          dataView={dataView}
-          showTimeCol={showTimeCol}
-          showKeyboardShortcuts={showKeyboardShortcuts}
-          services={services}
-          sort={EMPTY_SORT}
-          isSortEnabled={false}
-          enableInTableSearch
-          ariaLabelledBy="data-cascade-leaf-cell"
-          consumer={`discover_esql_cascade_row_leaf_${cellId}`}
-          rows={cellData}
-          loadingState={DataLoadingState.loaded}
-          columns={selectedColumns}
-          onSetColumns={setSelectedColumns}
-          renderCustomToolbar={renderCustomToolbarWithElements}
-          expandedDoc={expandedDoc}
-          setExpandedDoc={setExpandedDocFn}
-          dataGridDensityState={cascadeDataGridDensityState}
-          onUpdateDataGridDensity={setCascadeDataGridDensityState}
-          renderDocumentView={renderDocumentView}
-          renderCustomGridBody={renderCustomCascadeGridBodyCallback}
-          onFullScreenChange={setIsCellInFullScreenMode}
-          externalCustomRenderers={externalCustomRenderers}
-          paginationMode="infinite"
-          sampleSizeState={cellData.length}
-        />
-      </EuiPanel>
+      <UnifiedDataTable
+        isPlainRecord
+        dataView={dataView}
+        showTimeCol={showTimeCol}
+        showKeyboardShortcuts={showKeyboardShortcuts}
+        services={services}
+        sort={EMPTY_SORT}
+        isSortEnabled={false}
+        enableInTableSearch
+        ariaLabelledBy="data-cascade-leaf-cell"
+        consumer={`discover_esql_cascade_row_leaf_${cellId}`}
+        rows={cellData}
+        loadingState={DataLoadingState.loaded}
+        columns={selectedColumns}
+        onSetColumns={setSelectedColumns}
+        renderCustomToolbar={renderCustomToolbarWithElements}
+        expandedDoc={expandedDoc}
+        setExpandedDoc={setExpandedDocFn}
+        dataGridDensityState={cascadeDataGridDensityState}
+        onUpdateDataGridDensity={setCascadeDataGridDensityState}
+        renderDocumentView={renderDocumentView}
+        renderCustomGridBody={renderCustomCascadeGridBodyCallback}
+        onFullScreenChange={setIsCellInFullScreenMode}
+        externalCustomRenderers={externalCustomRenderers}
+        paginationMode="infinite"
+        sampleSizeState={cellData.length}
+      />
     );
   }
 );

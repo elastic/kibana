@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
+import { type UseEuiTheme, euiCanAnimate } from '@elastic/eui';
 import type { CascadeSizing } from '../types';
 
 export const rootRowAttribute = 'root' as const;
@@ -163,21 +163,47 @@ export const styles = (
   return {
     rowStickyHeaderInner: css({
       padding: euiSizing[size],
+      display: 'flex',
+      flexDirection: 'column',
       position: 'absolute',
       width: '100%',
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       borderWidth: `0 ${border.width.thin} ${border.width.thin} 0`,
       borderStyle: 'solid',
       borderColor: border.color,
+      [`${euiCanAnimate}`]: {
+        transition: `transform ${euiTheme.animation.extraFast} ${euiTheme.animation.resistance}`,
+      },
     }),
     // Hidden variant - keeps the element in DOM so refs are always available,
     // but visually hidden and non-interactive
     rowStickyHeaderInnerHidden: css({
-      position: 'absolute',
       visibility: 'hidden',
       pointerEvents: 'none',
       height: 0,
       overflow: 'hidden',
+      transform: 'translateY(-100%)',
+    }),
+    rowStickyHeaderExtensionPointWrapper: css({
+      marginTop: euiSizing[size],
+      marginBottom: `-${euiSizing[size]}`,
+      marginRight: `-${border.width.thin}`,
+      position: 'relative',
+
+      '&:after': {
+        content: '""',
+        display: 'block',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        borderTop: `${border.width.thin} solid ${border.color}`,
+        borderLeft: `${border.width.thin} solid ${border.color}`,
+        borderRight: `${border.width.thin} solid ${border.color}`,
+        borderRadius: `${border.radius.small} ${border.radius.small} 0 0`,
+      },
     }),
     rowWrapper: css({
       display: 'flex',
