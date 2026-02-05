@@ -19,8 +19,18 @@ import { EntityType, ALL_ENTITY_TYPES } from '../../domain/definitions/entity_sc
 
 const bodySchema = z.object({
   entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
-  logExtraction: LogExtractionBodyParams.optional(),
+  logExtraction: LogExtractionBodyParams.optional().superRefine(validateLogExtractionParams),
 });
+
+function validateLogExtractionParams(
+  data: LogExtractionBodyParams | undefined,
+  ctx: z.RefinementCtx
+): void {
+  console.log('data ============= ', data);
+  console.log('ctx ============= ', ctx);
+  if (data === undefined) return;
+  // Add validations via ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['field'], message: '...' })
+}
 
 export function registerInstall(router: EntityStorePluginRouter) {
   router.versioned
