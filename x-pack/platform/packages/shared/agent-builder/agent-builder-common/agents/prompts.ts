@@ -7,6 +7,7 @@
 
 export enum AgentPromptType {
   confirmation = 'confirmation',
+  authorization = 'authorization',
 }
 
 export enum AgentPromptRequestSourceType {
@@ -35,6 +36,11 @@ export enum ConfirmationStatus {
   rejected = 'rejected',
 }
 
+export enum AuthorizationStatus {
+  authorized = 'authorized',
+  unauthorized = 'unauthorized',
+}
+
 export interface ConfirmPromptDefinition {
   /** id of the permission to ask confirmation for */
   id: string;
@@ -48,21 +54,49 @@ export interface ConfirmPromptDefinition {
   cancel_text?: string;
 }
 
+export interface AuthorizationPromptDefinition {
+  connector_id: string;
+}
+
+export interface AuthorizationPromptResponse {
+  authorized: boolean;
+}
+
 export interface ConfirmationPromptResponse {
   allow: boolean;
 }
 
-export type PromptResponse = ConfirmationPromptResponse;
+export type PromptResponse = ConfirmationPromptResponse | AuthorizationPromptResponse;
+
+export const isAuthorizationPromptResponse = (
+  response: PromptResponse
+): response is AuthorizationPromptResponse => {
+  return 'authorized' in response;
+};
+
+export const isConfirmationPromptResponse = (
+  response: PromptResponse
+): response is ConfirmationPromptResponse => {
+  return 'allow' in response;
+};
 
 export interface ConfirmationPrompt extends ConfirmPromptDefinition {
   type: AgentPromptType.confirmation;
 }
 
+export interface AuthorizationPrompt extends AuthorizationPromptDefinition {
+  type: AgentPromptType.authorization;
+}
+
 // all types of prompt
-export type PromptRequest = ConfirmationPrompt;
+export type PromptRequest = ConfirmationPrompt | AuthorizationPrompt;
 
 export const isConfirmationPrompt = (prompt: PromptRequest): prompt is ConfirmationPrompt => {
   return prompt.type === AgentPromptType.confirmation;
+};
+
+export const isAuthorizationPrompt = (prompt: PromptRequest): prompt is AuthorizationPrompt => {
+  return prompt.type === AgentPromptType.authorization;
 };
 
 export interface ConfirmationPromptResponseState {
@@ -70,7 +104,14 @@ export interface ConfirmationPromptResponseState {
   response: ConfirmationPromptResponse;
 }
 
-export type PromptResponseState = ConfirmationPromptResponseState;
+export interface AuthorizationPromptResponseState {
+  type: AgentPromptType.authorization;
+  response: AuthorizationPromptResponse;
+}
+
+export type PromptResponseState =
+  | ConfirmationPromptResponseState
+  | AuthorizationPromptResponseState;
 
 /**
  * The internal representation of the prompt storage state for the conversation.

@@ -58,6 +58,7 @@ export interface ActionTypeExecutorResult<Data> {
   data?: Data;
   retry?: null | boolean | Date;
   errorSource?: TaskErrorSource;
+  errorName?: string;
 }
 
 export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {

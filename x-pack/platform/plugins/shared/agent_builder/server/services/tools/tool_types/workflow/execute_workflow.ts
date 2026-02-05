@@ -23,6 +23,14 @@ const CHECK_INTERVAL_MS = 2_500;
 
 const finalStatuses = [WorkflowExecutionStatus.COMPLETED, WorkflowExecutionStatus.FAILED];
 
+const getExecutionResult = (execution: WorkflowExecutionState | null) => {
+  if (!execution || !execution.error) {
+    return otherResult({ execution });
+  }
+  const { details, message, type } = execution.error;
+  return errorResult(message, { type, details });
+};
+
 export const executeWorkflow = async ({
   workflowId,
   workflowParams,
@@ -81,7 +89,7 @@ export const executeWorkflow = async ({
         : execution;
 
       if (shouldReturn) {
-        return [otherResult({ execution })];
+        return [getExecutionResult(execution)];
       }
     } catch (e) {
       // trap - we just keep waiting until timeout
@@ -91,7 +99,7 @@ export const executeWorkflow = async ({
   } while (Date.now() < waitLimit);
 
   if (execution) {
-    return [otherResult({ execution })];
+    return [getExecutionResult(execution)];
   } else {
     return [
       errorResult(

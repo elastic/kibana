@@ -69,9 +69,18 @@ export function registerChatRoutes({
       })
     ),
     prompts: schema.maybe(
-      schema.recordOf(schema.string(), schema.object({ allow: schema.boolean() }), {
-        meta: { description: 'Can be used to respond to a confirmation prompt.' },
-      })
+      schema.recordOf(
+        schema.string(),
+        schema.oneOf([
+          schema.object({ allow: schema.boolean() }),
+          schema.object({ authorized: schema.boolean() }),
+        ]),
+        {
+          meta: {
+            description: 'Can be used to respond to a confirmation or authorization prompt.',
+          },
+        }
+      )
     ),
     attachments: schema.maybe(
       schema.arrayOf(

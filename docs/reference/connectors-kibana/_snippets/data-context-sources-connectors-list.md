@@ -8,6 +8,7 @@
 * [AbuseIPDB](/reference/connectors-kibana/abuseipdb-action-type.md): Check IP reputation and report abusive IPs.
 * [AlienVault OTX](/reference/connectors-kibana/alienvault-otx-action-type.md): Retrieve community-driven threat intelligence.
 * [GreyNoise](/reference/connectors-kibana/greynoise-action-type.md): Detect and classify Internet scanning noise.
+* [Sharepoint online](/reference/connectors-kibana/sharepoint-online-action-type.md): TODO: Add brief description.
 * [Shodan](/reference/connectors-kibana/shodan-action-type.md): Perform Internet-wide asset discovery and vulnerability scanning.
 * [URLVoid](/reference/connectors-kibana/urlvoid-action-type.md): Check domain and URL reputation using multi-engine scanning.
 * [VirusTotal](/reference/connectors-kibana/virustotal-action-type.md): Perform file scanning, URL analysis, and threat intelligence lookups.

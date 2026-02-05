@@ -6,3 +6,4 @@
  */
 
 export { useSubAction } from './use_sub_action';
+export { useOAuthAuthorize, OAUTH_BROADCAST_CHANNEL } from './use_oauth_authorize';

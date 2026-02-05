@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
@@ -19,7 +19,7 @@ import { RoundThinking } from './round_thinking/round_thinking';
 import { RoundResponse } from './round_response/round_response';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { RoundError } from './round_error/round_error';
-import { ConfirmationPrompt } from './round_prompt';
+import { AuthorizationPrompt, ConfirmationPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
 
 interface RoundLayoutProps {
@@ -62,14 +62,6 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     status === ConversationRoundStatus.awaitingPrompt &&
     pendingPrompt &&
     !isResuming;
-
-  const handleConfirm = useCallback(() => {
-    resumeRound({ promptId: pendingPrompt!.id, confirm: true });
-  }, [resumeRound, pendingPrompt]);
-
-  const handleCancel = useCallback(() => {
-    resumeRound({ promptId: pendingPrompt!.id, confirm: false });
-  }, [resumeRound, pendingPrompt]);
 
   // Track if this round has ever been in a loading state during this session
   useEffect(() => {
@@ -132,16 +124,24 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       </EuiFlexItem>
 
       {/* Confirmation Prompt */}
-      {isAwaitingPrompt && isConfirmationPrompt(pendingPrompt) && (
-        <EuiFlexItem grow={false}>
-          <ConfirmationPrompt
-            prompt={pendingPrompt}
-            onConfirm={handleConfirm}
-            onCancel={handleCancel}
-            isLoading={isResuming}
-          />
-        </EuiFlexItem>
-      )}
+      {isAwaitingPrompt &&
+        (isConfirmationPrompt(pendingPrompt) ? (
+          <EuiFlexItem grow={false}>
+            <ConfirmationPrompt
+              prompt={pendingPrompt}
+              resumeRound={resumeRound}
+              isLoading={isResuming}
+            />
+          </EuiFlexItem>
+        ) : (
+          <EuiFlexItem grow={false}>
+            <AuthorizationPrompt
+              prompt={pendingPrompt}
+              resumeRound={resumeRound}
+              isLoading={isResuming}
+            />
+          </EuiFlexItem>
+        ))}
 
       {/* Response Message - hidden when awaiting confirmation */}
       {!isAwaitingPrompt && (

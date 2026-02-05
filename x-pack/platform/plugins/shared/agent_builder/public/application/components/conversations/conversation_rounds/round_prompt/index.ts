@@ -6,3 +6,4 @@
  */
 
 export { ConfirmationPrompt, type ConfirmationPromptProps } from './confirmation_prompt';
+export { AuthorizationPrompt, type AuthorizationPromptProps } from './authorization_prompt';

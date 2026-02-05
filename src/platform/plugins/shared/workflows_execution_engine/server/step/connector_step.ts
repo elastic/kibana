@@ -10,6 +10,7 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { CONNECTOR_AUTHORIZATION_ERROR_NAME } from '@kbn/connector-specs/src/all_errors';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
@@ -90,7 +91,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
         this.stepExecutionRuntime.abortController
       );
 
-      const { data, status, message, serviceMessage } = output;
+      const { data, status, message, serviceMessage, errorName } = output;
 
       if (status === 'ok') {
         return {
@@ -102,10 +103,19 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
         return {
           input: withInputs,
           output: undefined,
-          error: new ExecutionError({
-            type: 'ConnectorExecutionError',
-            message: serviceMessage ?? message ?? 'Unknown error',
-          }),
+          error:
+            errorName === CONNECTOR_AUTHORIZATION_ERROR_NAME
+              ? new ExecutionError({
+                  type: errorName,
+                  message: serviceMessage ?? 'Unknown authorization error',
+                  details: {
+                    connectorId: connectorIdRendered,
+                  },
+                })
+              : new ExecutionError({
+                  type: 'ConnectorExecutionError',
+                  message: serviceMessage ?? message ?? 'Unknown error',
+                }),
         };
       }
     } catch (error) {

@@ -7,6 +7,7 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SerializedError } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { getWorkflowOutput } from './get_workflow_output';
 
@@ -19,6 +20,7 @@ export interface WorkflowExecutionState {
   started_at: string;
   finished_at?: string;
   output?: JsonValue;
+  error?: SerializedError | null;
 }
 
 /**
@@ -48,6 +50,10 @@ export const getExecutionState = async ({
 
   if (execution.status === ExecutionStatus.COMPLETED) {
     state.output = getWorkflowOutput(execution.stepExecutions);
+  }
+
+  if (execution.status === ExecutionStatus.FAILED) {
+    state.error = execution.error;
   }
 
   return state;

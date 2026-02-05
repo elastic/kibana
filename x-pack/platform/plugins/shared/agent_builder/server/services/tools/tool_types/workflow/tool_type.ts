@@ -12,11 +12,18 @@ import type { WorkflowToolConfig } from '@kbn/agent-builder-common/tools';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { WAIT_FOR_COMPLETION_TIMEOUT_SEC } from '@kbn/agent-builder-common/tools/types/workflow';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { isErrorResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
+import { CONNECTOR_AUTHORIZATION_ERROR_NAME } from '@kbn/connector-specs/src/all_errors';
+import { AuthorizationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { AnyToolTypeDefinition } from '../definitions';
 import { executeWorkflow } from './execute_workflow';
 import { generateSchema } from './generate_schema';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 import { validateWorkflowId } from './validation';
+
+interface WorkflowToolState {
+  connectorId?: string;
+}
 
 export const getWorkflowToolType = ({
   workflowsManagement,
@@ -36,9 +43,25 @@ export const getWorkflowToolType = ({
     getDynamicProps: (config, { spaceId }) => {
       return {
         getHandler: () => {
-          return async (params, { request }) => {
+          return async (params, { request, prompts, stateManager }) => {
             const { management: workflowApi } = workflowsManagement;
             const workflowId = config.workflow_id;
+
+            const connectorId = stateManager.getState<WorkflowToolState>()?.connectorId;
+
+            if (
+              connectorId &&
+              prompts.checkAuthorizationStatus(connectorId).status ===
+                AuthorizationStatus.unauthorized
+            ) {
+              return {
+                results: [
+                  createErrorResult({
+                    message: 'User cancelled authorization.',
+                  }),
+                ],
+              };
+            }
 
             try {
               const workflowResults = await executeWorkflow({
@@ -49,6 +72,31 @@ export const getWorkflowToolType = ({
                 workflowParams: params,
                 waitForCompletion: config.wait_for_completion,
               });
+
+              const [result] = workflowResults;
+
+              if (isErrorResult(result) && result.data.metadata) {
+                const { type, details } = result.data.metadata;
+                if (type === CONNECTOR_AUTHORIZATION_ERROR_NAME) {
+                  const errorDetails = details as { connectorId: string };
+
+                  if (connectorId && errorDetails.connectorId === connectorId) {
+                    return {
+                      results: [
+                        createErrorResult({
+                          message: 'Detected authorization loop. Please try again later.',
+                        }),
+                      ],
+                    };
+                  }
+                  stateManager.setState<WorkflowToolState>({
+                    connectorId: errorDetails.connectorId,
+                  });
+                  return prompts.askForAuthorization({
+                    connector_id: errorDetails.connectorId,
+                  });
+                }
+              }
 
               return {
                 results: workflowResults,

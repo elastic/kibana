@@ -31,7 +31,6 @@ const GraphCollectionOutputSchema = z.object({
   value: z.array(z.any()).describe('Array of items returned from the API'),
   '@odata.nextLink': z.string().optional().describe('URL to fetch next page of results'),
 });
-
 export const SharepointOnline: ConnectorSpec = {
   metadata: {
     id: '.sharepoint-online',
@@ -46,10 +45,11 @@ export const SharepointOnline: ConnectorSpec = {
   auth: {
     types: [
       {
-        type: 'oauth_client_credentials',
+        type: 'oauth_authorization_code',
         defaults: {
-          scope: 'https://graph.microsoft.com/.default',
+          authorizationUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize',
           tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+          scope: 'https://graph.microsoft.com/.default offline_access',
         },
         overrides: {
           meta: {

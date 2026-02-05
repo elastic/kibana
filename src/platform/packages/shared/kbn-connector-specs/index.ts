@@ -11,3 +11,4 @@ export * as connectorsSpecs from './src/all_specs';
 export type * from './src/connector_spec';
 
 export * as authTypeSpecs from './src/all_auth_types';
+export * as errors from './src/all_errors';

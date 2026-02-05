@@ -536,6 +536,10 @@ describe('create()', () => {
       microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
       microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
       microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+      oAuthRateLimit: {
+        authorize: { lookbackWindow: '1h', limit: 100 },
+        callback: { lookbackWindow: '1h', limit: 100 },
+      },
     });
 
     const localActionTypeRegistryParams = {

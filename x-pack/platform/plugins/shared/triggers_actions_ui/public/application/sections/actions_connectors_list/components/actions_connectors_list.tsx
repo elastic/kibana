@@ -50,6 +50,7 @@ import {
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { routeToConnectors } from '../../../constants';
+import { OAUTH_BROADCAST_CHANNEL } from '../../../hooks';
 
 const ConnectorIconTipWithSpacing: React.FC = () => {
   return (
@@ -123,6 +124,34 @@ const ActionsConnectorsList = ({
     setBreadcrumbs([getAlertingSectionBreadcrumb('connectors')]);
     chrome.docTitle.change(getCurrentDocTitle('connectors'));
   }, [chrome, setBreadcrumbs]);
+
+  // Check for OAuth authorization success and show toast notification
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('oauth_authorization') === 'success') {
+      // Broadcast OAuth success to any listening pages (e.g., agent builder authorization prompts)
+      const channel = new BroadcastChannel(OAUTH_BROADCAST_CHANNEL);
+      channel.postMessage({ type: 'oauth_authorization_success' });
+      channel.close();
+
+      window.close();
+      // toasts.addSuccess({
+      //   title: i18n.translate(
+      //     'xpack.triggersActionsUI.sections.actionsConnectorsList.oauthAuthorizationSuccessTitle',
+      //     { defaultMessage: 'Authorization successful' }
+      //   ),
+      //   text: i18n.translate(
+      //     'xpack.triggersActionsUI.sections.actionsConnectorsList.oauthAuthorizationSuccessMessage',
+      //     { defaultMessage: 'Your connector has been authorized successfully.' }
+      //   ),
+      // });
+
+      // Clean up the URL parameter
+      // params.delete('oauth_authorization');
+      // const newUrl = `${location.pathname}${params.toString() ? `?${params.toString()}` : ''}`;
+      // history.replace(newUrl);
+    }
+  }, [location.search, location.pathname, history, toasts]);
 
   useEffect(() => {
     (async () => {

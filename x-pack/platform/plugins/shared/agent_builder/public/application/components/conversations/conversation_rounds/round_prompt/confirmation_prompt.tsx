@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
+import type { ConfirmPromptDefinition, PromptResponse } from '@kbn/agent-builder-common/agents';
 import { borderRadiusXlStyles } from '../../../../../common.styles';
 
 const defaultLabels = {
@@ -38,18 +38,24 @@ const defaultLabels = {
 
 export interface ConfirmationPromptProps {
   prompt: ConfirmPromptDefinition;
-  onConfirm: () => void;
-  onCancel: () => void;
+  resumeRound: (opts: { promptId: string; promptResponse: PromptResponse }) => void;
   isLoading?: boolean;
 }
 
 export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
   prompt,
-  onConfirm,
-  onCancel,
+  resumeRound,
   isLoading = false,
 }) => {
   const { euiTheme } = useEuiTheme();
+
+  const handleConfirm = useCallback(() => {
+    resumeRound({ promptId: prompt.id, promptResponse: { allow: true } });
+  }, [resumeRound, prompt.id]);
+
+  const handleCancel = useCallback(() => {
+    resumeRound({ promptId: prompt.id, promptResponse: { allow: false } });
+  }, [resumeRound, prompt.id]);
 
   const title = prompt.title ?? defaultLabels.title;
   const message = prompt.message ?? defaultLabels.message;
@@ -125,7 +131,7 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              onClick={onCancel}
+              onClick={handleCancel}
               disabled={isLoading}
               size="s"
               color="text"
@@ -136,7 +142,7 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              onClick={onConfirm}
+              onClick={handleConfirm}
               isLoading={isLoading}
               fill
               size="s"
