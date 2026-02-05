@@ -10,6 +10,7 @@
 import { CurrencyFormat } from './currency';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 import type { FieldFormatsGetConfigFn } from '../types';
+import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
 
 describe('CurrencyFormat', () => {
   const config: { [key: string]: string } = {
@@ -28,5 +29,18 @@ describe('CurrencyFormat', () => {
     const formatter = new CurrencyFormat({ pattern: '$0.[0]' }, getConfig);
 
     expect(formatter.convert('12000.23')).toBe('$12000.2');
+  });
+
+  test('missing value', () => {
+    const formatter = new CurrencyFormat({ pattern: '$0.[0]' }, getConfig);
+
+    expect(formatter.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(formatter.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(formatter.convert(null, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+    expect(formatter.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
   });
 });

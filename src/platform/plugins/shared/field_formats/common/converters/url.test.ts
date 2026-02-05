@@ -27,6 +27,23 @@ describe('UrlFormat', () => {
     );
   });
 
+  test('handles missing values', () => {
+    const url = new UrlFormat({});
+
+    expect(url.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(url.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(url.convert('', TEXT_CONTEXT_TYPE)).toBe('(blank)');
+    expect(url.convert(null, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+    expect(url.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+    expect(url.convert('', HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(blank)</span>'
+    );
+  });
+
   test('outputs an <audio> if type === "audio"', () => {
     const url = new UrlFormat({ type: 'audio' });
 

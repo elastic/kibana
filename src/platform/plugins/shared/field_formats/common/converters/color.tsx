@@ -63,6 +63,11 @@ export class ColorFormat extends FieldFormat {
   }
 
   htmlConvert: HtmlContextTypeConvert = (val: string | number, options) => {
+    const missing = this.checkForMissingValueHtml(val);
+    if (missing) {
+      return missing;
+    }
+
     const color = this.findColorRuleForVal(val) as typeof DEFAULT_CONVERTER_COLOR;
 
     const displayVal = escape(asPrettyString(val, options));
