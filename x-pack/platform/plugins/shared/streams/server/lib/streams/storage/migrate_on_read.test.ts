@@ -402,4 +402,14 @@ describe('migrateOnRead', () => {
       expect(() => migrateOnRead(groupStreamDefinition)).not.toThrow();
     });
   });
+
+  describe('ingest migration', () => {
+    it('should add ingest if missing', () => {
+      const definition = { name: 'test-stream' };
+
+      const result = migrateOnRead(definition);
+      expect(result.ingest).toBeDefined();
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+  });
 });
