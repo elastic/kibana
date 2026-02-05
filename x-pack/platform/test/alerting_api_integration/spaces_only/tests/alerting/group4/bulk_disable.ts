@@ -135,7 +135,6 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
     }
 
     before(async () => {
-      await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
 
       await esTestIndexToolOutput.destroy();
