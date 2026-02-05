@@ -131,9 +131,9 @@ export function isSpatialFilter(filter: AsCodeFilter): filter is AsCodeSpatialFi
 }
 
 /**
- * Type guard to check if condition is a nested AsCodeGroupFilter
+ * Type guard to check if condition is a group of conditions
  */
-export function isNestedFilterGroup(
+export function isGroupCondition(
   condition: AsCodeConditionFilter['condition'] | AsCodeGroupFilter['group']
 ): condition is AsCodeGroupFilter['group'] {
   const c = condition as { conditions?: unknown };

@@ -28,7 +28,7 @@ import {
   isGroupFilter,
   isDSLFilter,
   isSpatialFilter,
-  isNestedFilterGroup,
+  isGroupCondition,
   isAsCodeFilter,
 } from './type_guards';
 
@@ -245,7 +245,7 @@ function convertFromFilterGroup(
     };
 
     // Convert condition to a complete filter
-    const filter = isNestedFilterGroup(typedCondition)
+    const filter = isGroupCondition(typedCondition)
       ? convertFromFilterGroup(typedCondition, cleanBase)
       : convertFromSimpleCondition(typedCondition, cleanBase);
 

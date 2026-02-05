@@ -12,7 +12,7 @@ import type {
   AsCodeGroupFilter,
   AsCodeDSLFilter,
 } from '@kbn/as-code-filters-schema';
-import { isConditionFilter, isGroupFilter, isDSLFilter, isNestedFilterGroup } from './type_guards';
+import { isConditionFilter, isGroupFilter, isDSLFilter, isGroupCondition } from './type_guards';
 
 describe('Type Guards', () => {
   describe('SimpleFilter type guards', () => {
@@ -72,13 +72,13 @@ describe('Type Guards', () => {
   });
 
   describe('Condition type guards', () => {
-    describe('isNestedFilterGroup', () => {
+    describe('isGroupCondition', () => {
       it('should detect nested filter groups', () => {
         const group: AsCodeGroupFilter['group'] = {
           operator: 'and',
           conditions: [{ field: 'test', operator: 'is', value: 'test' }],
         };
-        expect(isNestedFilterGroup(group)).toBe(true);
+        expect(isGroupCondition(group)).toBe(true);
       });
 
       it('should reject simple conditions', () => {
@@ -87,7 +87,7 @@ describe('Type Guards', () => {
           operator: 'is',
           value: 'test',
         };
-        expect(isNestedFilterGroup(condition)).toBe(false);
+        expect(isGroupCondition(condition)).toBe(false);
       });
     });
   });
