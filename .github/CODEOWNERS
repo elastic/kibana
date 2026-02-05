@@ -413,6 +413,8 @@ src/platform/packages/shared/content-management/content_editor @elastic/appex-sh
 src/platform/packages/shared/content-management/content_insights/content_insights_public @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_server @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_list/kbn-content-list-provider @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_common @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_public @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_server @elastic/appex-sharedux
@@ -514,6 +516,8 @@ src/platform/packages/shared/kbn-es-query-server @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-types @elastic/kibana-core
 src/platform/packages/shared/kbn-esql-composer @elastic/obs-presentation-team @elastic/obs-ai-team
 src/platform/packages/shared/kbn-esql-language @elastic/kibana-esql
+src/platform/packages/shared/kbn-esql-resource-browser @elastic/kibana-management
+src/platform/packages/shared/kbn-esql-resource-browser/.storybook @elastic/kibana-management
 src/platform/packages/shared/kbn-esql-types @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-event-annotation-common @elastic/kibana-visualizations
@@ -643,6 +647,7 @@ src/platform/packages/shared/kbn-user-profile-components @elastic/kibana-securit
 src/platform/packages/shared/kbn-utility-types @elastic/kibana-core
 src/platform/packages/shared/kbn-utility-types-jest @elastic/kibana-operations
 src/platform/packages/shared/kbn-utils @elastic/kibana-operations
+src/platform/packages/shared/kbn-visualization-listing-components @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-visualization-ui-components @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-visualization-utils @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-visualizations-common @elastic/kibana-visualizations
@@ -808,6 +813,7 @@ src/platform/plugins/shared/unified_doc_viewer @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_search @elastic/kibana-presentation
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
 src/platform/plugins/shared/vis_types/timeseries @elastic/kibana-visualizations
+src/platform/plugins/shared/visualization_listing @elastic/kibana-visualizations
 src/platform/plugins/shared/visualizations @elastic/kibana-visualizations
 src/platform/plugins/shared/workflows_execution_engine @elastic/workflows-eng
 src/platform/plugins/shared/workflows_extensions @elastic/workflows-eng
@@ -2370,6 +2376,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/plugin_api_integration/test_suites/event_log/ @elastic/response-ops
 /x-pack/platform/test/functional_with_es_ssl/apps/embeddable_alerts_table/ @elastic/response-ops
 /x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
+/x-pack/platform/test/functional_with_es_ssl/apps/rules/ @elastic/actionable-obs-team @elastic/response-ops
 /x-pack/platform/test/task_manager_claimer_update_by_query/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops
 /docs/management/connectors/ @elastic/response-ops
@@ -2461,6 +2468,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/serverless/functional/test_suites/spaces/spaces_management.ts @elastic/kibana-management
 /x-pack/platform/test/stack_functional_integration/apps/management @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/*_management_page.ts @elastic/kibana-management
+/x-pack/platform/test/functional/page_objects/tag_management_page.ts @elastic/appex-sharedux
 /src/platform/test/functional/services/saved_query_management_component.ts @elastic/kibana-management
 /src/platform/test/functional/services/management @elastic/kibana-management
 /x-pack/platform/test/functional/apps/cross_cluster_replication @elastic/kibana-management
@@ -2585,8 +2593,8 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/integration-experience
 /x-pack/solutions/security/plugins/security_solution/public/configurations @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/ai_soc @elastic/security-solution @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/agent_builder @elastic/security-generative-ai
-/x-pack/solutions/security/plugins/security_solution/server/agent_builder @elastic/security-generative-ai
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder @elastic/security-threat-hunting @elastic/security-generative-ai
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder @elastic/security-threat-hunting @elastic/security-generative-ai
 
 # AI4DSOC in Security Solution
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/ai4dsoc @elastic/security-engineering-productivity
@@ -2926,6 +2934,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/public/exceptions @elastic/security-detection-engine
 
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/migrations @elastic/security-detection-engine
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/ai_rule_creation @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_exceptions @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview @elastic/security-detection-engine
@@ -3072,6 +3081,8 @@ x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details
 
 ## Fleet plugin (co-owned with Fleet team)
 x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/contextual-security-apps
+x-pack/platform/plugins/shared/fleet/public/components/cloud_connector @elastic/fleet @elastic/contextual-security-apps
+x-pack/platform/plugins/shared/fleet/common/services/cloud_connectors @elastic/fleet @elastic/contextual-security-apps
 x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/fleet @elastic/contextual-security-apps
 x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/detail/components/cloud_posture_third_party_support_callout.* @elastic/fleet @elastic/contextual-security-apps
 ## SessionView tests
@@ -3238,6 +3249,8 @@ x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 
 # Leads approval
 /AGENTS.md @elastic/kibana-tech-leads
+.cursorignore @elastic/kibana-tech-leads
+/.claude/ @elastic/kibana-tech-leads
 
 ####
 ## These rules are always last so they take ultimate priority over everything else

@@ -311,16 +311,19 @@ export class WorkflowsExecutionEnginePlugin
               }
               logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
 
-              // Guard check: Check if there's already a scheduled workflow execution in non-terminal state
-              const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
-                workflow,
-                spaceId,
-                workflowExecutionRepository,
-                taskInstance,
-                logger
-              );
-              if (wasSkipped) {
-                return;
+              // Guard check: Check&Skip only when workflow has no concurrency strategy. When strategy is
+              // set, the concurrency check (later) governs the limit and strategy.
+              if (!workflow.definition?.settings?.concurrency?.strategy) {
+                const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
+                  workflow,
+                  spaceId,
+                  workflowExecutionRepository,
+                  taskInstance,
+                  logger
+                );
+                if (wasSkipped) {
+                  return;
+                }
               }
 
               // Check for RRule triggers and log details
