@@ -6,7 +6,7 @@
  */
 
 import { pipe } from 'fp-ts/function';
-import type { BasicPrettyPrinterOptions } from '@kbn/esql-ast';
+import type { BasicPrettyPrinterOptions } from '@kbn/esql-language';
 import type { StreamlangDSL } from '../../../types/streamlang';
 import { streamlangDSLSchema } from '../../../types/streamlang';
 import { flattenSteps } from '../shared/flatten_steps';

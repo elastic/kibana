@@ -9,6 +9,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/security-plugin",
     "@kbn/task-manager-plugin",
   ],
   "exclude": [

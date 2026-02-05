@@ -53,6 +53,7 @@ export interface EntityItem extends EntitySpecificFields {
   itemType: typeof DOCUMENT_TYPE_ENTITY;
   type?: string;
   subType?: string;
+  availableInEntityStore?: boolean;
 }
 
 export type EntityOrEventItem = EventItem | AlertItem | EntityItem;

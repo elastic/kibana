@@ -25,17 +25,17 @@ export const swimLaneComparators: StateComparators<AnomalySwimLaneControlsState>
 };
 
 export const initializeSwimLaneControls = (
-  rawState: AnomalySwimLaneEmbeddableState,
+  initialState: AnomalySwimLaneEmbeddableState,
   titlesApi: TitlesApi
 ) => {
-  const jobIds = new BehaviorSubject<JobId[]>(rawState.jobIds);
-  const swimlaneType = new BehaviorSubject<SwimlaneType>(rawState.swimlaneType);
+  const jobIds = new BehaviorSubject<JobId[]>(initialState.jobIds);
+  const swimlaneType = new BehaviorSubject<SwimlaneType>(initialState.swimlaneType);
   const viewBy = new BehaviorSubject<string | undefined>(
-    rawState.swimlaneType === 'viewBy' ? rawState.viewBy : undefined
+    initialState.swimlaneType === 'viewBy' ? initialState.viewBy : undefined
   );
   const fromPage = new BehaviorSubject<number>(1);
   const perPage = new BehaviorSubject<number | undefined>(
-    rawState.perPage ?? SWIM_LANE_DEFAULT_PAGE_SIZE
+    initialState.perPage ?? SWIM_LANE_DEFAULT_PAGE_SIZE
   );
 
   const updateUserInput = (update: AnomalySwimlaneEmbeddableUserInput) => {

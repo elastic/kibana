@@ -33,6 +33,8 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/serverless/settings/observability_project/index.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -48,6 +50,8 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/serverless/settings/observability_project/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -63,6 +67,8 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/serverless/settings/observability_project/index.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

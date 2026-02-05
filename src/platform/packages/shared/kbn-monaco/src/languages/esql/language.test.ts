@@ -8,13 +8,12 @@
  */
 
 import type { PartialFieldsMetadataClient } from '@kbn/esql-types';
-import { getHoverItem, suggest } from '@kbn/esql-validation-autocomplete';
+import { getHoverItem, suggest } from '@kbn/esql-language';
 import { monaco } from '../../monaco_imports';
 import { ESQLLang, type ESQLDependencies } from './language';
 
 // Mock the getHoverItem and suggest functions
-jest.mock('@kbn/esql-validation-autocomplete', () => ({
-  ...jest.requireActual('@kbn/esql-validation-autocomplete'),
+jest.mock('@kbn/esql-language', () => ({
   getHoverItem: jest.fn(),
   suggest: jest.fn(),
 }));

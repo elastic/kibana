@@ -52,11 +52,9 @@ const props = {
 
 type AlertsPriveleges = Partial<ReturnType<typeof useAlertsPrivileges>>;
 
-const writePriveleges: AlertsPriveleges = { hasIndexWrite: true, hasSiemCRUD: true };
+const writePriveleges: AlertsPriveleges = { hasIndexWrite: true };
 const readPriveleges: AlertsPriveleges = {
   hasIndexWrite: false,
-  hasSiemCRUD: false,
-  hasSiemRead: true,
   hasIndexRead: true,
 };
 

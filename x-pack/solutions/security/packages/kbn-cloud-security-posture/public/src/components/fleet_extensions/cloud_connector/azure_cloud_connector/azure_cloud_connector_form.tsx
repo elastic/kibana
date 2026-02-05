@@ -12,6 +12,7 @@ import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
 import {
   AZURE_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ,
   AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ,
+  CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
 } from '@kbn/cloud-security-posture-common';
 import type { CloudConnectorFormProps, CloudSetupForCloudConnector } from '../types';
 import { AzureArmTemplateGuide } from './azure_arm_template_guide';
@@ -91,6 +92,7 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
             });
           }
         }}
+        data-test-subj={CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ}
       />
       <EuiSpacer size="m" />
       <EuiAccordion

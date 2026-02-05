@@ -33,7 +33,7 @@ describe('useNavigateToAlertsPageWithFilters', () => {
 
     expect(mockNavigateTo).toHaveBeenCalledWith({
       deepLinkId: SecurityPageName.alerts,
-      path: "?pageFilters=!((exclude:!f,existsSelected:!f,fieldName:'test field',hideActionBar:!f,selectedOptions:!('test value'),title:'test filter'))",
+      path: "?pageFilters=!((displaySettings:(hideActionBar:!f),exclude:!f,existsSelected:!f,fieldName:'test field',selectedOptions:!('test value'),title:'test filter'))",
       openInNewTab: false,
     });
   });
@@ -53,7 +53,7 @@ describe('useNavigateToAlertsPageWithFilters', () => {
         fieldName: 'test field 2',
         exclude: true,
         existsSelected: true,
-        hideActionBar: true,
+        displaySettings: { hideActionBar: true },
       },
     ];
 
@@ -65,7 +65,7 @@ describe('useNavigateToAlertsPageWithFilters', () => {
 
     expect(mockNavigateTo).toHaveBeenCalledWith({
       deepLinkId: SecurityPageName.alerts,
-      path: "?pageFilters=!((exclude:!f,existsSelected:!f,fieldName:'test field 1',hideActionBar:!f,selectedOptions:!('test value 1'),title:'test filter 1'),(exclude:!t,existsSelected:!t,fieldName:'test field 2',hideActionBar:!t,selectedOptions:!('test value 2'),title:'test filter 2'))",
+      path: "?pageFilters=!((displaySettings:(hideActionBar:!f),exclude:!f,existsSelected:!f,fieldName:'test field 1',selectedOptions:!('test value 1'),title:'test filter 1'),(displaySettings:(hideActionBar:!t),exclude:!t,existsSelected:!t,fieldName:'test field 2',selectedOptions:!('test value 2'),title:'test filter 2'))",
       openInNewTab: false,
     });
   });
@@ -100,7 +100,7 @@ describe('useNavigateToAlertsPageWithFilters', () => {
 
     expect(mockNavigateTo).toHaveBeenCalledWith({
       deepLinkId: SecurityPageName.alerts,
-      path: "?pageFilters=!((exclude:!f,existsSelected:!f,fieldName:'test field',hideActionBar:!f,selectedOptions:!('test value'),title:'test filter'))",
+      path: "?pageFilters=!((displaySettings:(hideActionBar:!f),exclude:!f,existsSelected:!f,fieldName:'test field',selectedOptions:!('test value'),title:'test filter'))",
       openInNewTab: true,
     });
   });
@@ -127,7 +127,7 @@ describe('useNavigateToAlertsPageWithFilters', () => {
 
     expect(mockNavigateTo).toHaveBeenCalledWith({
       deepLinkId: SecurityPageName.alerts,
-      path: `?pageFilters=!((exclude:!f,existsSelected:!f,fieldName:'test field',hideActionBar:!f,selectedOptions:!('test value'),title:'test filter'))&timerange=(global:(timerange:(from:"2024-12-12T17:03:23.481Z",kind:absolute,to:"2025-01-04T07:59:59.999Z")))`,
+      path: `?pageFilters=!((displaySettings:(hideActionBar:!f),exclude:!f,existsSelected:!f,fieldName:'test field',selectedOptions:!('test value'),title:'test filter'))&timerange=(global:(timerange:(from:"2024-12-12T17:03:23.481Z",kind:absolute,to:"2025-01-04T07:59:59.999Z")))`,
       openInNewTab: true,
     });
   });

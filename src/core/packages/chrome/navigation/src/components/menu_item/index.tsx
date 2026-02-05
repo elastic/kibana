@@ -99,7 +99,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         border-radius: ${euiTheme.border.radius.medium};
         background-color: ${isHighlighted
           ? euiTheme.components.buttons.backgroundPrimary
-          : euiTheme.components.buttons.backgroundText};
+          : euiTheme.colors.backgroundTransparent};
         z-index: 1;
       }
 
@@ -147,7 +147,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
           `);
 
     const textStyles = css`
-      ${euiFontSize(euiThemeContext, 'xxs', { unit: 'px' }).fontSize};
+      ${euiFontSize(euiThemeContext, 'xxs', { unit: 'px' })};
       font-weight: ${euiTheme.font.weight.semiBold};
     `;
 
@@ -167,7 +167,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
           </Suspense>
         </div>
         {isLabelVisible ? (
-          <EuiText size="xs" textAlign="center" css={labelStyles}>
+          <EuiText textAlign="center" css={labelStyles}>
             {children}
           </EuiText>
         ) : (

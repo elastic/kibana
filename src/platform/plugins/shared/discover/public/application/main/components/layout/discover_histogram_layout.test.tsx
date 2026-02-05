@@ -10,9 +10,7 @@
 import React from 'react';
 import { BehaviorSubject, of, ReplaySubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import { savedSearchMockWithTimeField } from '../../../../__mocks__/saved_search';
 import type {
   DataDocuments$,
   DataMain$,
@@ -32,10 +30,11 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { act } from 'react-dom/test-utils';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { internalStateActions } from '../../state_management/redux';
+import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
 import { UnifiedHistogramChart } from '@kbn/unified-histogram';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverMainContentProps } from './discover_main_content';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 
 const mockSearchSessionId = '123';
 
@@ -52,9 +51,12 @@ function getStateContainer({
   searchSessionId?: string;
 }) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
-  const dataView = savedSearch?.searchSource?.getField('index') as DataView;
+  const dataView = selectTabRuntimeState(
+    stateContainer.runtimeStateManager,
+    stateContainer.getCurrentTab().id
+  ).currentDataView$.getValue()!;
   const appState = {
-    dataSource: createDataViewDataSource({ dataViewId: dataView?.id! }),
+    dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
     interval: 'auto',
     hideChart: false,
     query: { query: '', language: 'kuery' },
@@ -88,15 +90,13 @@ function getStateContainer({
 
 const mountComponent = async ({
   storage,
-  savedSearch = savedSearchMockWithTimeField,
   noSearchSessionId,
 }: {
   isTimeBased?: boolean;
   storage?: Storage;
-  savedSearch?: SavedSearch;
   noSearchSessionId?: boolean;
 } = {}) => {
-  const dataView = savedSearch?.searchSource?.getField('index') as DataView;
+  const dataView = dataViewWithTimefieldMock;
 
   let services = discoverServiceMock;
 
@@ -130,7 +130,6 @@ const mountComponent = async ({
   };
 
   const stateContainer = getStateContainer({
-    savedSearch,
     searchSessionId: noSearchSessionId ? undefined : mockSearchSessionId,
   });
   stateContainer.dataState.data$ = savedSearchData$;

@@ -42,9 +42,11 @@ export function createAddAlertsPanelAction(
         embeddable.addNewPanel(
           {
             panelType: SLO_ALERTS_EMBEDDABLE_ID,
-            serializedState: { rawState: initialState },
+            serializedState: initialState,
           },
-          true
+          {
+            displaySuccessMessage: true,
+          }
         );
       } catch (e) {
         return Promise.reject();

@@ -20,5 +20,6 @@ EXCLUDE_DETAILS=${2:-false}
 # ./export_rules_to_file.sh test.ndjson false
 curl -s -k -OJ \
   -H 'kbn-xsrf: 123' \
+  -H 'elastic-api-version: 2023-10-31' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
   -X POST "${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_export?exclude_export_details=${EXCLUDE_DETAILS}&file_name=${FILENAME}"

@@ -81,7 +81,6 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           timeout,
           snapshot,
           removed,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           ecs_mapping,
         } = request.body;
 

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { createRuleAttachmentType } from './rule';
 import { createAlertAttachmentType } from './alert';
 import { createEntityAttachmentType } from './entity';
 
 /**
- * Registers all security agent builder attachments with the onechat plugin
+ * Registers all security agent builder attachments with the agentBuilder plugin
  */
-export const registerAttachments = async (onechat: OnechatPluginSetup) => {
-  onechat.attachments.registerType(createAlertAttachmentType());
-  onechat.attachments.registerType(createEntityAttachmentType());
-  onechat.attachments.registerType(createRuleAttachmentType());
+export const registerAttachments = async (agentBuilder: AgentBuilderPluginSetup) => {
+  agentBuilder.attachments.registerType(createAlertAttachmentType());
+  agentBuilder.attachments.registerType(createEntityAttachmentType());
+  agentBuilder.attachments.registerType(createRuleAttachmentType());
 };

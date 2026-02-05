@@ -303,10 +303,6 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
       const componentTemplateResponse = await esClient.cluster.getComponentTemplate(
         {
           name: `${policyType}-*@package`,
-          filter_path: [
-            'component_templates.*.name',
-            'component_templates.*.component_template.template.settings.index.lifecycle.name',
-          ],
         },
         {
           ignore: [404],

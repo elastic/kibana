@@ -18,6 +18,7 @@ import {
   MOCK_IDP_ATTRIBUTE_ROLES,
   MOCK_IDP_ENTITY_ID,
   MOCK_IDP_REALM_NAME,
+  MOCK_IDP_UIAM_ORGANIZATION_ID,
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { defineDockerServersConfig, fleetPackageRegistryDockerImage } from '@kbn/test';
@@ -206,6 +207,7 @@ export const defaultConfig: ScoutServerConfig = {
       // In the real world the SAML config is injected by control plane.
       `--plugin-path=${SAML_IDP_PLUGIN_PATH}`,
       '--xpack.cloud.id=ftr_fake_cloud_id',
+      `--xpack.cloud.organization_id=${MOCK_IDP_UIAM_ORGANIZATION_ID}`,
       // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
       // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login
       // Selector is disabled (replicating Serverless configuration). By declaring `cloud-basic` with a higher

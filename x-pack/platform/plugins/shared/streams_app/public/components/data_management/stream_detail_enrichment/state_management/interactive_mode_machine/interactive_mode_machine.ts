@@ -6,53 +6,55 @@
  */
 
 import { htmlIdGenerator } from '@elastic/eui';
-import type { MachineImplementationsFrom } from 'xstate5';
-import {
-  assign,
-  setup,
-  stopChild,
-  enqueueActions,
-  type ActorRefFrom,
-  type SnapshotFrom,
-  assertEvent,
-} from 'xstate5';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
-  type StreamlangProcessorDefinition,
-  convertUIStepsToDSL,
   convertStepsForUI,
+  convertUIStepsToDSL,
+  type StreamlangProcessorDefinition,
 } from '@kbn/streamlang';
-import type { StreamlangDSL, StreamlangConditionBlock } from '@kbn/streamlang/types/streamlang';
+import type { StreamlangConditionBlock, StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { stepMachine } from '../steps_state_machine';
-import { getDefaultGrokProcessor, stepConverter } from '../../utils';
+import type { MachineImplementationsFrom } from 'xstate5';
 import {
-  collectDescendantIds,
+  assertEvent,
+  assign,
+  enqueueActions,
+  setup,
+  stopChild,
+  type ActorRefFrom,
+  type SnapshotFrom,
+} from 'xstate5';
+import { getDefaultGrokProcessor, stepConverter } from '../../utils';
+import { selectPreviewRecords } from '../simulation_state_machine/selectors';
+import { stepMachine } from '../steps_state_machine';
+import type { StepParentActor } from '../steps_state_machine/types';
+import { hasErrorsInParentSnapshot } from '../stream_enrichment_state_machine/selectors';
+import {
   findInsertIndex,
   insertAtIndex,
   reorderSteps,
+  reorderStepsByDragDrop,
 } from '../stream_enrichment_state_machine/utils';
-import type {
-  InteractiveModeContext,
-  InteractiveModeInput,
-  InteractiveModeEvent,
-  InteractiveModeMachineDeps,
-} from './types';
-import {
-  getStepsForSimulation,
-  spawnStep,
-  getActiveDataSourceSamplesFromParent,
-  type StepSpawner,
-} from './utils';
+import { collectDescendantStepIds } from '../utils';
 import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
-import { selectPreviewRecords } from '../simulation_state_machine/selectors';
-import { hasErrorsInParentSnapshot } from '../stream_enrichment_state_machine/selectors';
-import type { StepParentActor } from '../steps_state_machine/types';
 import {
   createNotifySuggestionFailureNotifier,
   createSuggestPipelineActor,
 } from './suggest_pipeline_actor';
+import type {
+  InteractiveModeContext,
+  InteractiveModeEvent,
+  InteractiveModeInput,
+  InteractiveModeMachineDeps,
+} from './types';
+import {
+  getActiveDataSourceSamplesFromParent,
+  getStepsForSimulation,
+  spawnStep,
+  type StepSpawner,
+} from './utils';
+import { isNoSuggestionsError } from '../../steps/blocks/action/utils/no_suggestions_error';
 
 export type InteractiveModeActorRef = ActorRefFrom<typeof interactiveModeMachine>;
 export type InteractiveModeSnapshot = SnapshotFrom<typeof interactiveModeMachine>;
@@ -178,7 +180,8 @@ export const interactiveModeMachine = setup({
       }
     ),
     deleteStep: assign(({ context }, params: { id: string }) => {
-      const idsToDelete = collectDescendantIds(params.id, context.stepRefs);
+      const steps = context.stepRefs.map((ref) => ref.getSnapshot().context.step);
+      const idsToDelete = collectDescendantStepIds(steps, params.id);
       idsToDelete.add(params.id);
       return {
         stepRefs: context.stepRefs.filter((proc) => !idsToDelete.has(proc.id)),
@@ -189,6 +192,59 @@ export const interactiveModeMachine = setup({
         stepRefs: [...reorderSteps(context.stepRefs, params.stepId, params.direction)],
       };
     }),
+    reorderStepsByDragDrop: enqueueActions(
+      (
+        { context, enqueue },
+        params: {
+          sourceStepId: string;
+          targetStepId: string;
+          operation: 'before' | 'after' | 'inside';
+        }
+      ) => {
+        const steps = context.stepRefs.map((ref) => ref.getSnapshot().context.step);
+        const targetStep = steps.find((s) => s.customIdentifier === params.targetStepId);
+
+        if (!targetStep) {
+          return;
+        }
+
+        // Determine the new parentId for the source step
+        let newParentId: string | null;
+
+        // Nested inside a where block
+        if (params.operation === 'inside') {
+          newParentId = params.targetStepId;
+        } else {
+          // Use sibling's parentId
+          newParentId = targetStep.parentId ?? null;
+        }
+
+        // Reorder the steps
+        const reorderedStepRefs = reorderStepsByDragDrop(
+          context.stepRefs,
+          params.sourceStepId,
+          params.targetStepId,
+          params.operation
+        );
+
+        // Update context with reordered steps
+        enqueue.assign({
+          stepRefs: [...reorderedStepRefs],
+        });
+
+        // Update the source step actor's parentId
+        const sourceStepRef = reorderedStepRefs.find((ref) => ref.id === params.sourceStepId);
+
+        if (sourceStepRef) {
+          const currentParentId = sourceStepRef.getSnapshot().context.step.parentId;
+
+          if (currentParentId !== newParentId) {
+            // Send event to child actor to update its parentId
+            enqueue.sendTo(sourceStepRef, { type: 'step.changeParent', parentId: newParentId });
+          }
+        }
+      }
+    ),
     reassignSteps: assign(({ context }) => ({
       stepRefs: [...context.stepRefs],
     })),
@@ -219,11 +275,9 @@ export const interactiveModeMachine = setup({
     sendStepsToSimulator: enqueueActions(({ context }) => {
       // Check parent for any errors (schema or validation) - don't simulate if there are errors
       if (hasErrorsInParentSnapshot(context.parentRef.getSnapshot())) {
-        context.parentRef.send({ type: 'simulation.reset' });
         return;
       }
-
-      const { simulationMode } = context;
+      const { simulationMode, selectedConditionId } = context;
 
       if (simulationMode === 'partial' && selectWhetherAnyProcessorBeforePersisted(context)) {
         // Send reset to simulator via parent
@@ -237,8 +291,14 @@ export const interactiveModeMachine = setup({
         steps: getStepsForSimulation({
           stepRefs: context.stepRefs,
           simulationMode,
+          selectedConditionId,
         }),
       });
+    }),
+    storeConditionFilter: assign((_, params: { conditionId: string | undefined }) => {
+      return {
+        selectedConditionId: params.conditionId,
+      };
     }),
     /* Pipeline suggestion actions */
     overwriteSteps: assign((assignArgs, params: { steps: StreamlangDSL['steps'] }) => {
@@ -368,15 +428,21 @@ export const interactiveModeMachine = setup({
                 },
               ],
             },
-            onError: {
-              target: 'idle',
-              actions: [
-                {
-                  type: 'notifySuggestionFailure',
-                  params: ({ event }: { event: { error: unknown } }) => ({ event }),
-                },
-              ],
-            },
+            onError: [
+              {
+                guard: ({ event }) => isNoSuggestionsError(event.error),
+                target: 'noSuggestionsFound',
+              },
+              {
+                target: 'idle',
+                actions: [
+                  {
+                    type: 'notifySuggestionFailure',
+                    params: ({ event }: { event: { error: unknown } }) => ({ event }),
+                  },
+                ],
+              },
+            ],
           },
           on: {
             'suggestion.cancel': {
@@ -390,6 +456,16 @@ export const interactiveModeMachine = setup({
                 { type: 'syncToDSL' },
                 { type: 'sendStepsToSimulator' },
               ],
+            },
+          },
+        },
+        noSuggestionsFound: {
+          on: {
+            'suggestion.generate': {
+              target: 'generatingSuggestion',
+            },
+            'suggestion.dismiss': {
+              target: 'idle',
             },
           },
         },
@@ -440,6 +516,13 @@ export const interactiveModeMachine = setup({
                 { type: 'sendStepsToSimulator', params: ({ event }) => event },
               ],
             },
+            'step.parentChanged': {
+              actions: [
+                { type: 'reassignSteps' },
+                { type: 'syncToDSL' },
+                { type: 'sendStepsToSimulator', params: ({ event }) => event },
+              ],
+            },
             'step.edit': {
               guard: 'hasSimulatePrivileges',
               target: 'editing',
@@ -449,6 +532,14 @@ export const interactiveModeMachine = setup({
               actions: [{ type: 'reorderSteps', params: ({ event }) => event }],
               target: 'idle',
               reenter: true,
+            },
+            'step.reorderByDragDrop': {
+              guard: 'hasSimulatePrivileges',
+              actions: [{ type: 'reorderStepsByDragDrop', params: ({ event }) => event }],
+              target: 'idle',
+              reenter: true,
+              // Re-enter to trigger syncToDSL for sibling reordering.
+              // If parent changes, child will also send a step.parentChanged event (additional sync but safe).
             },
             'step.delete': {
               target: 'idle',
@@ -479,6 +570,22 @@ export const interactiveModeMachine = setup({
               actions: [
                 { type: 'overwriteSteps', params: ({ event }) => event },
                 { type: 'sendStepsToSimulator' },
+              ],
+            },
+            'step.filterByCondition': {
+              actions: [
+                { type: 'storeConditionFilter', params: ({ event }) => event },
+                {
+                  type: 'sendStepsToSimulator',
+                },
+              ],
+            },
+            'step.clearConditionFilter': {
+              actions: [
+                { type: 'storeConditionFilter', params: () => ({ conditionId: undefined }) },
+                {
+                  type: 'sendStepsToSimulator',
+                },
               ],
             },
           },

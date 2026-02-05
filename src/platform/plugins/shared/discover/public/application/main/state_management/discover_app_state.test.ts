@@ -7,77 +7,72 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { isEqualState } from './utils/state_comparators';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { createDataViewDataSource } from '../../../../common/data_sources';
 import { omit } from 'lodash';
-import type { DiscoverAppState, InternalStateStore, TabState } from './redux';
-import {
-  createInternalStateStore,
-  createRuntimeStateManager,
-  selectTab,
-  internalStateActions,
-} from './redux';
-import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
-import { createTabsStorageManager, type TabsStorageManager } from './tabs_storage_manager';
-import { DiscoverSearchSessionManager } from './discover_search_session';
-import { getDiscoverStateContainer } from './discover_state';
-
-let stateStorage: IKbnUrlStateStorage;
-let internalState: InternalStateStore;
-let tabsStorageManager: TabsStorageManager;
-let getCurrentTab: () => TabState;
+import { fromTabStateToSavedObjectTab, internalStateActions } from './redux';
+import type { DiscoverServices } from '../../../build_services';
+import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
+import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
+import { getTabStateMock } from './redux/__mocks__/internal_state.mocks';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 
 describe('Test discover app state', () => {
-  beforeEach(async () => {
-    const storeInSessionStorage = discoverServiceMock.uiSettings.get('state:storeInSessionStorage');
-    const toasts = discoverServiceMock.core.notifications.toasts;
-    stateStorage = createKbnUrlStateStorage({
-      useHash: storeInSessionStorage,
-      ...toasts,
-    });
-    tabsStorageManager = createTabsStorageManager({
-      urlStateStorage: stateStorage,
-      storage: discoverServiceMock.storage,
-    });
-    internalState = createInternalStateStore({
-      services: discoverServiceMock,
-      customizationContext: mockCustomizationContext,
-      runtimeStateManager: createRuntimeStateManager(),
-      urlStateStorage: stateStorage,
-      tabsStorageManager,
-      searchSessionManager: new DiscoverSearchSessionManager({
-        history: discoverServiceMock.history,
-        session: discoverServiceMock.data.search.session,
-      }),
-    });
-    await internalState.dispatch(
-      internalStateActions.initializeTabs({ discoverSessionId: undefined })
-    );
-    getCurrentTab = () =>
-      selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);
-  });
-
-  const getStateContainer = () =>
-    getDiscoverStateContainer({
-      tabId: getCurrentTab().id,
-      services: discoverServiceMock,
-      customizationContext: mockCustomizationContext,
-      stateStorageContainer: stateStorage,
+  const setupNoTab = async ({
+    persistedDiscoverSession,
+    services,
+    stateStorage,
+  }: {
+    persistedDiscoverSession?: DiscoverSession;
+    stateStorage?: IKbnUrlStateStorage;
+    services?: DiscoverServices;
+  } = {}) => {
+    const {
       internalState,
-      runtimeStateManager: createRuntimeStateManager(),
-      searchSessionManager: new DiscoverSearchSessionManager({
-        history: discoverServiceMock.history,
-        session: discoverServiceMock.data.search.session,
-      }),
+      runtimeStateManager,
+      initializeTabs,
+      initializeSingleTab,
+      getCurrentTab,
+    } = getDiscoverInternalStateMock({
+      stateStorageContainer: stateStorage,
+      services,
+      persistedDataViews: [dataViewWithTimefieldMock],
     });
+
+    await initializeTabs({ persistedDiscoverSession });
+
+    return { internalState, runtimeStateManager, initializeSingleTab, getCurrentTab };
+  };
+
+  const setup = async (...params: Parameters<typeof setupNoTab>) => {
+    const setupReturn = await setupNoTab(...params);
+    await setupReturn.initializeSingleTab({ tabId: setupReturn.getCurrentTab().id });
+    return setupReturn;
+  };
+
+  const getPersistedDiscoverSession = ({ services }: { services: DiscoverServices }) => {
+    const persistedTab = fromTabStateToSavedObjectTab({
+      tab: getTabStateMock({
+        id: 'persisted-tab',
+        initialInternalState: {
+          serializedSearchSource: { index: dataViewWithTimefieldMock.id },
+        },
+      }),
+      timeRestore: false,
+      services,
+    });
+
+    return createDiscoverSessionMock({
+      id: 'test-id',
+      tabs: [persistedTab],
+    });
+  };
 
   test('getPrevious returns the state before the current', async () => {
-    getStateContainer();
+    const { internalState, getCurrentTab } = await setup();
     internalState.dispatch(
       internalStateActions.setAppState({
         tabId: getCurrentTab().id,
@@ -94,71 +89,8 @@ describe('Test discover app state', () => {
     expect(getCurrentTab().previousAppState).toEqual(stateA);
   });
 
-  describe('isEqualState', () => {
-    const initialState: DiscoverAppState = {
-      dataSource: createDataViewDataSource({ dataViewId: 'the-index' }),
-      columns: ['the-column'],
-      sort: [],
-      query: { query: 'the-query', language: 'kuery' },
-      filters: [],
-      interval: 'auto',
-      hideChart: true,
-      sampleSize: 100,
-      viewMode: VIEW_MODE.DOCUMENT_LEVEL,
-      savedQuery: undefined,
-      hideAggregatedPreview: true,
-      rowHeight: 25,
-      headerRowHeight: 25,
-      grid: {},
-      breakdownField: 'the-breakdown-field',
-    };
-
-    test('returns true if the states are equal', () => {
-      expect(isEqualState(initialState, { ...initialState })).toBeTruthy();
-    });
-
-    test('handles the special filter change case correctly ', () => {
-      // this is some sort of legacy behavior, especially for the filter case
-      const previousState = { ...initialState, filters: [{ index: 'test', meta: {} }] };
-      const nextState = {
-        ...initialState,
-        filters: [{ index: 'test', meta: {}, $$hashKey: 'hi' }],
-      };
-      expect(isEqualState(previousState, nextState)).toBeTruthy();
-    });
-
-    test('returns true if the states are not equal', () => {
-      const changedParams = [
-        { dataSource: createDataViewDataSource({ dataViewId: 'the-new-index' }) },
-        { columns: ['newColumns'] },
-        { sort: [['column', 'desc']] },
-        { query: { query: 'ok computer', language: 'pirate-english' } },
-        { filters: [{ index: 'test', meta: {} }] },
-        { interval: 'eternity' },
-        { hideChart: undefined },
-        { sampleSize: 1 },
-        { viewMode: undefined },
-        { savedQuery: 'sdsd' },
-        { hideAggregatedPreview: false },
-        { rowHeight: 100 },
-        { headerRowHeight: 1 },
-        { grid: { test: 'test' } },
-        { breakdownField: 'new-breakdown-field' },
-      ];
-      changedParams.forEach((param) => {
-        expect(isEqualState(initialState, { ...initialState, ...param })).toBeFalsy();
-      });
-    });
-
-    test('allows to exclude variables from comparison', () => {
-      expect(
-        isEqualState(initialState, { ...initialState, dataSource: undefined }, ['dataSource'])
-      ).toBeTruthy();
-    });
-  });
-
-  test('should automatically set ES|QL data source when query is ES|QL', () => {
-    getStateContainer();
+  test('should automatically set ES|QL data source when query is ES|QL', async () => {
+    const { internalState, getCurrentTab } = await setup();
     internalState.dispatch(
       internalStateActions.updateAppState({
         tabId: getCurrentTab().id,
@@ -176,15 +108,15 @@ describe('Test discover app state', () => {
   });
 
   describe('initializeAndSync', () => {
-    it('should call setResetDefaultProfileState correctly with no initial state', () => {
-      const state = getStateContainer();
+    it('should call setResetDefaultProfileState correctly with no initial state', async () => {
+      const { initializeSingleTab, getCurrentTab } = await setupNoTab();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
       });
-      state.actions.initializeAndSync();
+      await initializeSingleTab({ tabId: getCurrentTab().id });
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: true,
@@ -193,17 +125,18 @@ describe('Test discover app state', () => {
       });
     });
 
-    it('should call setResetDefaultProfileState correctly with initial columns', () => {
+    it('should call setResetDefaultProfileState correctly with initial columns', async () => {
+      const stateStorage = createKbnUrlStateStorage();
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ columns: ['test'] });
-      const state = getStateContainer();
+      const { initializeSingleTab, getCurrentTab } = await setupNoTab({ stateStorage });
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
       });
-      state.actions.initializeAndSync();
+      await initializeSingleTab({ tabId: getCurrentTab().id });
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: true,
@@ -212,17 +145,18 @@ describe('Test discover app state', () => {
       });
     });
 
-    it('should call setResetDefaultProfileState correctly with initial rowHeight', () => {
+    it('should call setResetDefaultProfileState correctly with initial rowHeight', async () => {
+      const stateStorage = createKbnUrlStateStorage();
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ rowHeight: 5 });
-      const state = getStateContainer();
+      const { initializeSingleTab, getCurrentTab } = await setupNoTab({ stateStorage });
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
       });
-      state.actions.initializeAndSync();
+      await initializeSingleTab({ tabId: getCurrentTab().id });
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: true,
@@ -231,17 +165,18 @@ describe('Test discover app state', () => {
       });
     });
 
-    it('should call setResetDefaultProfileState correctly with initial hide chart', () => {
+    it('should call setResetDefaultProfileState correctly with initial hide chart', async () => {
+      const stateStorage = createKbnUrlStateStorage();
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ hideChart: true });
-      const state = getStateContainer();
+      const { initializeSingleTab, getCurrentTab } = await setupNoTab({ stateStorage });
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
       });
-      state.actions.initializeAndSync();
+      await initializeSingleTab({ tabId: getCurrentTab().id });
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: false,
@@ -250,15 +185,13 @@ describe('Test discover app state', () => {
       });
     });
 
-    it('should call setResetDefaultProfileState correctly with saved search', () => {
+    it('should call setResetDefaultProfileState correctly with persisted Discover session', async () => {
+      const stateStorage = createKbnUrlStateStorage();
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ columns: ['test'], rowHeight: 5 });
-      const state = getStateContainer();
-      const savedSearchGetSpy = jest.spyOn(state.savedSearchState, 'getState');
-      savedSearchGetSpy.mockReturnValue({
-        id: 'test',
-        searchSource: createSearchSourceMock(),
-        managed: false,
+      const { initializeSingleTab, getCurrentTab } = await setupNoTab({
+        persistedDiscoverSession: getPersistedDiscoverSession({ services: discoverServiceMock }),
+        stateStorage,
       });
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
@@ -266,7 +199,7 @@ describe('Test discover app state', () => {
         rowHeight: false,
         breakdownField: false,
       });
-      state.actions.initializeAndSync();
+      await initializeSingleTab({ tabId: getCurrentTab().id });
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,

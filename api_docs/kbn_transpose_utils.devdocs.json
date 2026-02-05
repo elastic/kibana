@@ -30,6 +30,8 @@
           "(id: string) => string"
         ],
         "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
+            "lineNumber": 30,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,6 +67,8 @@
           "(value: string, columnId: string) => string"
         ],
         "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -77,6 +83,8 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -92,6 +100,8 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -111,6 +121,8 @@
           "(id: string) => boolean"
         ],
         "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -125,6 +137,8 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
+            "lineNumber": 26,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -150,6 +164,8 @@
           "\"---\""
         ],
         "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -167,6 +183,8 @@
           "\"›\""
         ],
         "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

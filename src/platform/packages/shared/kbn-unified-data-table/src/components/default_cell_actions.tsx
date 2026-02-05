@@ -137,10 +137,14 @@ export function buildCellActions(
   toastNotifications: ToastsStart,
   valueToStringConverter: ValueToStringConverter,
   onFilter?: DocViewFilterFn,
-  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>,
+  hideFilteringOnComputedColumns?: boolean
 ) {
+  const shouldShowFilters =
+    onFilter && field.filterable && (!hideFilteringOnComputedColumns || !field.isComputedColumn);
+
   return [
-    ...(onFilter && field.filterable
+    ...(shouldShowFilters
       ? [
           (cellActionProps: EuiDataGridColumnCellActionProps) =>
             FilterInBtn({

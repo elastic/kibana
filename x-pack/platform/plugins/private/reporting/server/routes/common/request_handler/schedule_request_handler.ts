@@ -57,10 +57,7 @@ export class ScheduleRequestHandler extends RequestHandler<
   (typeof validation)['body'],
   ScheduledReportApiJSON
 > {
-  protected async checkLicenseAndTimezone(
-    exportTypeId: string,
-    browserTimezone: string
-  ): Promise<IKibanaResponse | null> {
+  protected async checkLicense(exportTypeId: string): Promise<IKibanaResponse | null> {
     const { reporting, res } = this.opts;
     const licenseInfo = await reporting.getLicenseInfo();
     const licenseResults = licenseInfo.scheduledReports;
@@ -68,7 +65,7 @@ export class ScheduleRequestHandler extends RequestHandler<
     if (!licenseResults.enableLinks) {
       return res.forbidden({ body: licenseResults.message });
     }
-    return super.checkLicenseAndTimezone(exportTypeId, browserTimezone);
+    return super.checkLicense(exportTypeId);
   }
 
   public static getValidation() {
@@ -209,10 +206,7 @@ export class ScheduleRequestHandler extends RequestHandler<
     const { exportTypeId, jobParams } = params;
     const { reporting, req, res } = this.opts;
 
-    const checkErrorResponse = await this.checkLicenseAndTimezone(
-      exportTypeId,
-      jobParams.browserTimezone
-    );
+    const checkErrorResponse = await this.checkLicense(exportTypeId);
     if (checkErrorResponse) {
       return checkErrorResponse;
     }

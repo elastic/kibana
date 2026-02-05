@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-ast';
-import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-ast';
+import { Builder } from '@kbn/esql-language';
+import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-language';
 import type { Condition } from '../../../../types/conditions';
 import type { DissectGrokPatternField } from '../../../../types/formats';
 

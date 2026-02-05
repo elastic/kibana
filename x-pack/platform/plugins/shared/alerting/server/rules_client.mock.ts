@@ -68,6 +68,7 @@ const createRulesClientMock = () => {
     bulkFillGapsByRuleIds: jest.fn(),
     getRuleTypesByQuery: jest.fn(),
     getTemplate: jest.fn(),
+    findTemplates: jest.fn(),
     createGapAutoFillScheduler: jest.fn(),
     getGapAutoFillScheduler: jest.fn(),
     updateGapAutoFillScheduler: jest.fn(),

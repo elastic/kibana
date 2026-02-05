@@ -24,6 +24,8 @@
           "; maxRetries?: number | undefined; maxRetryDelay?: number | undefined; }) => Promise<boolean>"
         ],
         "path": "src/core/packages/elasticsearch/server-internal/src/is_scripting_enabled.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -35,6 +37,8 @@
             "label": "{\n  client,\n  maxRetries = 20,\n  maxRetryDelay = 64,\n}",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/is_scripting_enabled.ts",
+            "lineNumber": 20,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -126,7 +130,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                   "default",
                   "; helpers: ",
                   "default",
@@ -690,6 +694,8 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<boolean>; }; profiling: ",
                   "default",
+                  "; project: ",
+                  "default",
                   "; putScript: { (this: That, params: ",
                   "PutScriptRequest",
                   ", options?: ",
@@ -1035,6 +1041,8 @@
                   "; }"
                 ],
                 "path": "src/core/packages/elasticsearch/server-internal/src/is_scripting_enabled.ts",
+                "lineNumber": 21,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1049,6 +1057,8 @@
                   "number | undefined"
                 ],
                 "path": "src/core/packages/elasticsearch/server-internal/src/is_scripting_enabled.ts",
+                "lineNumber": 22,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1063,6 +1073,8 @@
                   "number | undefined"
                 ],
                 "path": "src/core/packages/elasticsearch/server-internal/src/is_scripting_enabled.ts",
+                "lineNumber": 23,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1085,6 +1097,8 @@
           "(args: { statusCode: number | null; headers: Record<string, string | string[] | undefined> | null; }) => boolean"
         ],
         "path": "src/core/packages/elasticsearch/server-internal/src/supported_server_response_check.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1096,6 +1110,8 @@
             "label": "args",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/supported_server_response_check.ts",
+            "lineNumber": 33,
+            "columnNumber": 55,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1110,6 +1126,8 @@
                   "number | null"
                 ],
                 "path": "src/core/packages/elasticsearch/server-internal/src/supported_server_response_check.ts",
+                "lineNumber": 34,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1124,6 +1142,8 @@
                   "Record<string, string | string[] | undefined> | null"
                 ],
                 "path": "src/core/packages/elasticsearch/server-internal/src/supported_server_response_check.ts",
+                "lineNumber": 35,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1148,6 +1168,8 @@
           "(headers: Record<string, string | string[] | undefined> | null | undefined) => boolean"
         ],
         "path": "src/core/packages/elasticsearch/server-internal/src/supported_server_response_check.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1164,6 +1186,8 @@
               "Record<string, string | string[] | undefined> | null | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/supported_server_response_check.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1191,6 +1215,8 @@
           ">"
         ],
         "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+        "lineNumber": 177,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1205,6 +1231,8 @@
               "PollEsNodesVersionOptions"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 177,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1223,6 +1251,8 @@
         "label": "NodeInfo",
         "description": [],
         "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1234,6 +1264,8 @@
             "label": "version",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1245,6 +1277,8 @@
             "label": "ip",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1259,6 +1293,8 @@
               "{ publish_address: string; } | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1270,6 +1306,8 @@
             "label": "name",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1284,6 +1322,8 @@
         "label": "NodesInfo",
         "description": [],
         "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1300,6 +1340,8 @@
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1314,6 +1356,8 @@
         "label": "NodesVersionCompatibility",
         "description": [],
         "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1325,6 +1369,8 @@
             "label": "isCompatible",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1339,6 +1385,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1354,6 +1402,8 @@
               "[]"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1369,6 +1419,8 @@
               "[]"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1380,6 +1432,8 @@
             "label": "kibanaVersion",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1394,6 +1448,8 @@
               "Error | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1408,6 +1464,8 @@
         "label": "PollEsNodesVersionOptions",
         "description": [],
         "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1499,7 +1557,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -2063,6 +2121,8 @@
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
               "default",
+              "; project: ",
+              "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
               ", options?: ",
@@ -2408,6 +2468,8 @@
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2428,6 +2490,8 @@
               }
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2439,6 +2503,8 @@
             "label": "kibanaVersion",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2452,6 +2518,8 @@
             "label": "ignoreVersionMismatch",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2465,6 +2533,8 @@
             "label": "healthCheckInterval",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2479,6 +2549,8 @@
               "number | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2492,6 +2564,8 @@
             "label": "healthCheckRetry",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2520,6 +2594,8 @@
           "; readonly idleSocketTimeout: moment.Duration; readonly compression: boolean; readonly requestHeadersWhitelist: string | string[]; readonly customHeaders: Record<string, string>; readonly shardTimeout: moment.Duration; readonly requestTimeout: moment.Duration; readonly pingTimeout: moment.Duration; readonly logQueries: boolean; readonly ignoreVersionMismatch: boolean; readonly skipStartupConnectionCheck: boolean; readonly apisToRedactInLogs: Readonly<{ method?: string | undefined; } & { path: string; }>[]; readonly dnsCacheTtl: moment.Duration; }"
         ],
         "path": "src/core/packages/elasticsearch/server-internal/src/elasticsearch_config.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2882,6 +2958,8 @@
           "<string | undefined>; }>"
         ],
         "path": "src/core/packages/elasticsearch/server-internal/src/elasticsearch_config.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -596,327 +596,349 @@ const expectAssetsInstalled = ({
     expect(metricsAttributes.fields).to.be(undefined);
   });
   it('should have created the correct saved object', async function () {
-    const res = await kibanaServer.savedObjects.get({
-      type: 'epm-packages',
-      id: 'all_assets',
-    });
-    // during a reinstall the items can change
-    const sortedRes = {
-      ...res.attributes,
-      // verification_key_id can be null or undefined for install or reinstall cases,
-      // kbn/expect only does strict equality so undefined is normalised to null
-      verification_key_id:
-        res.attributes.verification_key_id === undefined
-          ? null
-          : res.attributes.verification_key_id,
-      installed_kibana: sortBy(res.attributes.installed_kibana, (o: AssetReference) => o.type),
-      installed_es: sortBy(res.attributes.installed_es, (o: AssetReference) => o.type),
-      package_assets: sortBy(res.attributes.package_assets, (o: AssetReference) => o.type),
-    };
+    async function verifySO() {
+      const res = await kibanaServer.savedObjects.get({
+        type: 'epm-packages',
+        id: 'all_assets',
+      });
+      // during a reinstall the items can change
+      const sortedRes = {
+        ...res.attributes,
+        // verification_key_id can be null or undefined for install or reinstall cases,
+        // kbn/expect only does strict equality so undefined is normalised to null
+        verification_key_id:
+          res.attributes.verification_key_id === undefined
+            ? null
+            : res.attributes.verification_key_id,
+        installed_kibana: sortBy(res.attributes.installed_kibana, (o: AssetReference) => o.type),
+        installed_es: sortBy(res.attributes.installed_es, (o: AssetReference) => o.type),
+        package_assets: sortBy(res.attributes.package_assets, (o: AssetReference) => o.type),
+      };
 
-    expect(sortedRes).eql({
-      installed_kibana: [
-        {
-          id: 'sample_alerting_rule_template',
-          type: 'alerting_rule_template',
+      const expectedSavedObject = {
+        installed_kibana: [
+          {
+            id: 'sample_alerting_rule_template',
+            type: 'alerting_rule_template',
+          },
+          {
+            id: 'sample_csp_rule_template',
+            type: 'csp-rule-template',
+          },
+          {
+            id: 'sample_dashboard',
+            type: 'dashboard',
+          },
+          {
+            id: 'sample_dashboard2',
+            type: 'dashboard',
+          },
+          {
+            id: 'test-*',
+            type: 'index-pattern',
+          },
+          {
+            id: 'sample_lens',
+            type: 'lens',
+          },
+          {
+            id: 'sample_ml_module',
+            type: 'ml-module',
+          },
+          {
+            id: 'sample_osquery_pack_asset',
+            type: 'osquery-pack-asset',
+          },
+          {
+            id: 'sample_osquery_saved_query',
+            type: 'osquery-saved-query',
+          },
+          {
+            id: 'sample_search',
+            type: 'search',
+          },
+          {
+            id: 'sample_security_ai_prompt',
+            type: 'security-ai-prompt',
+          },
+          {
+            id: 'sample_security_rule',
+            type: 'security-rule',
+          },
+          {
+            id: 'sample_slo_template',
+            type: 'slo_template',
+          },
+          {
+            id: 'sample_tag',
+            type: 'tag',
+          },
+          {
+            id: 'sample_visualization',
+            type: 'visualization',
+          },
+        ],
+        installed_kibana_space_id: 'default',
+        installed_es: [
+          {
+            id: 'logs-all_assets.test_logs@package',
+            type: 'component_template',
+          },
+          {
+            id: 'logs@custom',
+            type: 'component_template',
+          },
+          {
+            id: 'all_assets@custom',
+            type: 'component_template',
+          },
+          {
+            id: 'logs-all_assets.test_logs@custom',
+            type: 'component_template',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics@package',
+            type: 'component_template',
+          },
+          {
+            id: 'metrics@custom',
+            type: 'component_template',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics@custom',
+            type: 'component_template',
+          },
+          {
+            id: 'logs-all_assets.test_logs-all_assets',
+            type: 'data_stream_ilm_policy',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics-all_assets',
+            type: 'data_stream_ilm_policy',
+          },
+          {
+            id: 'all_assets',
+            type: 'ilm_policy',
+          },
+          {
+            id: 'logs-all_assets.test_logs',
+            type: 'index_template',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics',
+            type: 'index_template',
+          },
+          {
+            id: 'logs-all_assets.test_logs-0.1.0',
+            type: 'ingest_pipeline',
+          },
+          {
+            id: 'logs-all_assets.test_logs-0.1.0-pipeline1',
+            type: 'ingest_pipeline',
+          },
+          {
+            id: 'logs-all_assets.test_logs-0.1.0-pipeline2',
+            type: 'ingest_pipeline',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics-0.1.0',
+            type: 'ingest_pipeline',
+          },
+          {
+            id: 'default',
+            type: 'ml_model',
+          },
+        ],
+        package_assets: [
+          {
+            id: '333a22a1-e639-5af5-ae62-907ffc83d603',
+            path: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ilm_policy/all_assets.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '256f3dad-6870-56c3-80a1-8dfa11e2d568',
+            path: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ingest_pipeline/default.yml',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '3fa0512f-bc01-5c2e-9df1-bc2f2a8259c8',
+            path: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ingest_pipeline/pipeline1.yml',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: 'ea334ad8-80c2-5acd-934b-2a377290bf97',
+            path: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ingest_pipeline/pipeline2.yml',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '96c6eb85-fe2e-56c6-84be-5fda976796db',
+            path: 'all_assets-0.1.0/data_stream/test_logs/fields/ecs.yml',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '2d73a161-fa69-52d0-aa09-1bdc691b95bb',
+            path: 'all_assets-0.1.0/data_stream/test_logs/fields/fields.yml',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '0a00c2d2-ce63-5b9c-9aa0-0cf1938f7362',
+            path: 'all_assets-0.1.0/data_stream/test_logs/manifest.yml',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '691f0505-18c5-57a6-9f40-06e8affbdf7a',
+            path: 'all_assets-0.1.0/data_stream/test_metrics/elasticsearch/ilm_policy/all_assets.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: 'b36e6dd0-58f7-5dd0-a286-8187e4019274',
+            path: 'all_assets-0.1.0/data_stream/test_metrics/fields/ecs.yml',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: 'f839c76e-d194-555a-90a1-3265a45789e4',
+            path: 'all_assets-0.1.0/data_stream/test_metrics/fields/fields.yml',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '9af7bbb3-7d8a-50fa-acc9-9dde6f5efca2',
+            path: 'all_assets-0.1.0/data_stream/test_metrics/manifest.yml',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '1e97a20f-9d1c-529b-8ff2-da4e8ba8bb71',
+            path: 'all_assets-0.1.0/docs/README.md',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '4510252e-f145-5dd8-ba78-85cc8746c7f7',
+            path: 'all_assets-0.1.0/elasticsearch/esql_view/test_query.yml',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: 'ed5d54d5-2516-5d49-9e61-9508b0152d2b',
+            path: 'all_assets-0.1.0/elasticsearch/ml_model/test/default.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: 'bd5ff3c5-655e-5385-9918-b60ff3040aad',
+            path: 'all_assets-0.1.0/img/logo_overrides_64_color.svg',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '6440faa4-fe21-5620-9989-f0f2b9f6944f',
+            path: 'all_assets-0.1.0/kibana/alerting_rule_template/sample_alerting_rule_template.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '943d5767-41f5-57c3-ba02-48e0f6a837db',
+            path: 'all_assets-0.1.0/kibana/csp_rule_template/sample_csp_rule_template.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '0954ce3b-3165-5c1f-a4c0-56eb5f2fa487',
+            path: 'all_assets-0.1.0/kibana/dashboard/sample_dashboard.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '60d6d054-57e4-590f-a580-52bf3f5e7cca',
+            path: 'all_assets-0.1.0/kibana/dashboard/sample_dashboard2.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '47758dc2-979d-5fbe-a2bd-9eded68a5a43',
+            path: 'all_assets-0.1.0/kibana/index_pattern/invalid.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '318959c9-997b-5a14-b328-9fc7355b4b74',
+            path: 'all_assets-0.1.0/kibana/index_pattern/test_index_pattern.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: 'e21b59b5-eb76-5ab0-bef2-1c8e379e6197',
+            path: 'all_assets-0.1.0/kibana/lens/sample_lens.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '4c758d70-ecf1-56b3-b704-6d8374841b34',
+            path: 'all_assets-0.1.0/kibana/ml_module/sample_ml_module.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '313ddb31-e70a-59e8-8287-310d4652a9b7',
+            path: 'all_assets-0.1.0/kibana/osquery_pack_asset/sample_osquery_pack_asset.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '24a74223-5fdb-52ca-9cb5-b2cdd2a42b07',
+            path: 'all_assets-0.1.0/kibana/osquery_saved_query/sample_osquery_saved_query.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: 'e786cbd9-0f3b-5a0b-82a6-db25145ebf58',
+            path: 'all_assets-0.1.0/kibana/search/sample_search.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '5d12ad91-0624-5dce-800d-b1f9a7732f7c',
+            path: 'all_assets-0.1.0/kibana/security_ai_prompt/sample_security_ai_prompts.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: 'd8b175c3-0d42-5ec7-90c1-d1e4b307a4c2',
+            path: 'all_assets-0.1.0/kibana/security_rule/sample_security_rule.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: 'c09e8ecb-7030-5b81-8b93-890f0f3bd272',
+            path: 'all_assets-0.1.0/kibana/slo_template/nginx-availability.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: 'b265a5e0-c00b-5eda-ac44-2ddbd36d9ad0',
+            path: 'all_assets-0.1.0/kibana/tag/sample_tag.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '53c94591-aa33-591d-8200-cd524c2a0561',
+            path: 'all_assets-0.1.0/kibana/visualization/sample_visualization.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: 'b658d2d4-752e-54b8-afc2-4c76155c1466',
+            path: 'all_assets-0.1.0/manifest.yml',
+            type: 'epm-packages-assets',
+          },
+        ],
+        es_index_patterns: {
+          test_logs: 'logs-all_assets.test_logs-*',
+          test_metrics: 'metrics-all_assets.test_metrics-*',
         },
-        {
-          id: 'sample_csp_rule_template',
-          type: 'csp-rule-template',
-        },
-        {
-          id: 'sample_dashboard',
-          type: 'dashboard',
-        },
-        {
-          id: 'sample_dashboard2',
-          type: 'dashboard',
-        },
-        {
-          id: 'test-*',
-          type: 'index-pattern',
-        },
-        {
-          id: 'sample_lens',
-          type: 'lens',
-        },
-        {
-          id: 'sample_ml_module',
-          type: 'ml-module',
-        },
-        {
-          id: 'sample_osquery_pack_asset',
-          type: 'osquery-pack-asset',
-        },
-        {
-          id: 'sample_osquery_saved_query',
-          type: 'osquery-saved-query',
-        },
-        {
-          id: 'sample_search',
-          type: 'search',
-        },
-        {
-          id: 'sample_security_ai_prompt',
-          type: 'security-ai-prompt',
-        },
-        {
-          id: 'sample_security_rule',
-          type: 'security-rule',
-        },
-        {
-          id: 'sample_tag',
-          type: 'tag',
-        },
-        {
-          id: 'sample_visualization',
-          type: 'visualization',
-        },
-      ],
-      installed_kibana_space_id: 'default',
-      installed_es: [
-        {
-          id: 'logs-all_assets.test_logs@package',
-          type: 'component_template',
-        },
-        {
-          id: 'logs@custom',
-          type: 'component_template',
-        },
-        {
-          id: 'all_assets@custom',
-          type: 'component_template',
-        },
-        {
-          id: 'logs-all_assets.test_logs@custom',
-          type: 'component_template',
-        },
-        {
-          id: 'metrics-all_assets.test_metrics@package',
-          type: 'component_template',
-        },
-        {
-          id: 'metrics@custom',
-          type: 'component_template',
-        },
-        {
-          id: 'metrics-all_assets.test_metrics@custom',
-          type: 'component_template',
-        },
-        {
-          id: 'logs-all_assets.test_logs-all_assets',
-          type: 'data_stream_ilm_policy',
-        },
-        {
-          id: 'metrics-all_assets.test_metrics-all_assets',
-          type: 'data_stream_ilm_policy',
-        },
-        {
-          id: 'all_assets',
-          type: 'ilm_policy',
-        },
-        {
-          id: 'logs-all_assets.test_logs',
-          type: 'index_template',
-        },
-        {
-          id: 'metrics-all_assets.test_metrics',
-          type: 'index_template',
-        },
-        {
-          id: 'logs-all_assets.test_logs-0.1.0',
-          type: 'ingest_pipeline',
-        },
-        {
-          id: 'logs-all_assets.test_logs-0.1.0-pipeline1',
-          type: 'ingest_pipeline',
-        },
-        {
-          id: 'logs-all_assets.test_logs-0.1.0-pipeline2',
-          type: 'ingest_pipeline',
-        },
-        {
-          id: 'metrics-all_assets.test_metrics-0.1.0',
-          type: 'ingest_pipeline',
-        },
-        {
-          id: 'default',
-          type: 'ml_model',
-        },
-      ],
-      package_assets: [
-        {
-          id: '333a22a1-e639-5af5-ae62-907ffc83d603',
-          path: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ilm_policy/all_assets.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '256f3dad-6870-56c3-80a1-8dfa11e2d568',
-          path: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ingest_pipeline/default.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '3fa0512f-bc01-5c2e-9df1-bc2f2a8259c8',
-          path: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ingest_pipeline/pipeline1.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'ea334ad8-80c2-5acd-934b-2a377290bf97',
-          path: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ingest_pipeline/pipeline2.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '96c6eb85-fe2e-56c6-84be-5fda976796db',
-          path: 'all_assets-0.1.0/data_stream/test_logs/fields/ecs.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '2d73a161-fa69-52d0-aa09-1bdc691b95bb',
-          path: 'all_assets-0.1.0/data_stream/test_logs/fields/fields.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '0a00c2d2-ce63-5b9c-9aa0-0cf1938f7362',
-          path: 'all_assets-0.1.0/data_stream/test_logs/manifest.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '691f0505-18c5-57a6-9f40-06e8affbdf7a',
-          path: 'all_assets-0.1.0/data_stream/test_metrics/elasticsearch/ilm_policy/all_assets.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'b36e6dd0-58f7-5dd0-a286-8187e4019274',
-          path: 'all_assets-0.1.0/data_stream/test_metrics/fields/ecs.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'f839c76e-d194-555a-90a1-3265a45789e4',
-          path: 'all_assets-0.1.0/data_stream/test_metrics/fields/fields.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '9af7bbb3-7d8a-50fa-acc9-9dde6f5efca2',
-          path: 'all_assets-0.1.0/data_stream/test_metrics/manifest.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '1e97a20f-9d1c-529b-8ff2-da4e8ba8bb71',
-          path: 'all_assets-0.1.0/docs/README.md',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '4510252e-f145-5dd8-ba78-85cc8746c7f7',
-          path: 'all_assets-0.1.0/elasticsearch/esql_view/test_query.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'ed5d54d5-2516-5d49-9e61-9508b0152d2b',
-          path: 'all_assets-0.1.0/elasticsearch/ml_model/test/default.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'bd5ff3c5-655e-5385-9918-b60ff3040aad',
-          path: 'all_assets-0.1.0/img/logo_overrides_64_color.svg',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '6440faa4-fe21-5620-9989-f0f2b9f6944f',
-          path: 'all_assets-0.1.0/kibana/alerting_rule_template/sample_alerting_rule_template.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '943d5767-41f5-57c3-ba02-48e0f6a837db',
-          path: 'all_assets-0.1.0/kibana/csp_rule_template/sample_csp_rule_template.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '0954ce3b-3165-5c1f-a4c0-56eb5f2fa487',
-          path: 'all_assets-0.1.0/kibana/dashboard/sample_dashboard.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '60d6d054-57e4-590f-a580-52bf3f5e7cca',
-          path: 'all_assets-0.1.0/kibana/dashboard/sample_dashboard2.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '47758dc2-979d-5fbe-a2bd-9eded68a5a43',
-          path: 'all_assets-0.1.0/kibana/index_pattern/invalid.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '318959c9-997b-5a14-b328-9fc7355b4b74',
-          path: 'all_assets-0.1.0/kibana/index_pattern/test_index_pattern.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'e21b59b5-eb76-5ab0-bef2-1c8e379e6197',
-          path: 'all_assets-0.1.0/kibana/lens/sample_lens.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '4c758d70-ecf1-56b3-b704-6d8374841b34',
-          path: 'all_assets-0.1.0/kibana/ml_module/sample_ml_module.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '313ddb31-e70a-59e8-8287-310d4652a9b7',
-          path: 'all_assets-0.1.0/kibana/osquery_pack_asset/sample_osquery_pack_asset.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '24a74223-5fdb-52ca-9cb5-b2cdd2a42b07',
-          path: 'all_assets-0.1.0/kibana/osquery_saved_query/sample_osquery_saved_query.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'e786cbd9-0f3b-5a0b-82a6-db25145ebf58',
-          path: 'all_assets-0.1.0/kibana/search/sample_search.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '5d12ad91-0624-5dce-800d-b1f9a7732f7c',
-          path: 'all_assets-0.1.0/kibana/security_ai_prompt/sample_security_ai_prompts.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'd8b175c3-0d42-5ec7-90c1-d1e4b307a4c2',
-          path: 'all_assets-0.1.0/kibana/security_rule/sample_security_rule.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'b265a5e0-c00b-5eda-ac44-2ddbd36d9ad0',
-          path: 'all_assets-0.1.0/kibana/tag/sample_tag.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: '53c94591-aa33-591d-8200-cd524c2a0561',
-          path: 'all_assets-0.1.0/kibana/visualization/sample_visualization.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'b658d2d4-752e-54b8-afc2-4c76155c1466',
-          path: 'all_assets-0.1.0/manifest.yml',
-          type: 'epm-packages-assets',
-        },
-      ],
-      es_index_patterns: {
-        test_logs: 'logs-all_assets.test_logs-*',
-        test_metrics: 'metrics-all_assets.test_metrics-*',
-      },
-      name: 'all_assets',
-      version: '0.1.0',
-      install_version: '0.1.0',
-      install_status: 'installed',
-      install_started_at: res.attributes.install_started_at,
-      install_source: 'registry',
-      latest_install_failed_attempts: [],
-      rolled_back: false,
-      install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
-      verification_status: 'unknown',
-      verification_key_id: null,
-    });
+        name: 'all_assets',
+        version: '0.1.0',
+        install_version: '0.1.0',
+        install_status: 'installed',
+        install_started_at: res.attributes.install_started_at,
+        install_source: 'registry',
+        latest_install_failed_attempts: [],
+        rolled_back: false,
+        install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
+        verification_status: 'unknown',
+        verification_key_id: null,
+      };
+
+      expectedSavedObject.installed_es.forEach((item) => {
+        expect(
+          sortedRes.installed_es.find(
+            (asset: any) => asset.type === item.type && asset.id === item.id
+          )
+        ).to.not.be(undefined);
+      });
+      expect({ ...sortedRes, installed_es: [] }).eql({ ...expectedSavedObject, installed_es: [] });
+    }
+
+    await verifySO();
   });
 
   // TODO enable when feature flag is turned on https://github.com/elastic/kibana/issues/244655

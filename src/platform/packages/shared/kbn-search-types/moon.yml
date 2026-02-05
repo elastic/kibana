@@ -20,6 +20,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-views-plugin'
+  - '@kbn/es-query'
 tags:
   - shared-common
   - package

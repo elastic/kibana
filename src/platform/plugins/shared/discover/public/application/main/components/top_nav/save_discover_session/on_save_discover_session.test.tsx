@@ -83,9 +83,6 @@ const setup = async ({
     additionalPersistedTabs,
     services,
   });
-  if (savedSearch) {
-    stateContainer.actions.setDataView(savedSearch.searchSource.getField('index')!);
-  }
   if (dataViewsList) {
     stateContainer.internalState.dispatch(
       internalStateActions.loadDataViewList.fulfilled(

@@ -70,6 +70,7 @@ export const operatorToHumanReadableNameMap = {
   startsWith: i18n.translate('xpack.streams.filter.startsWith', { defaultMessage: 'starts with' }),
   endsWith: i18n.translate('xpack.streams.filter.endsWith', { defaultMessage: 'ends with' }),
   exists: i18n.translate('xpack.streams.filter.exists', { defaultMessage: 'exists' }),
+  range: i18n.translate('xpack.streams.filter.range', { defaultMessage: 'in range' }),
 };
 
 export const rangeConditionSchema = z

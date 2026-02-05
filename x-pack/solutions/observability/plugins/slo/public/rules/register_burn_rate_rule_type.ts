@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public/rules/create_observability_rule_type_registry';
 import { ALERT_REASON, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { lazy } from 'react';
-import { SLO_ID_FIELD, SLO_INSTANCE_ID_FIELD } from '../../common/field_names/slo';
+import { SLO_ID_FIELD, SLO_INSTANCE_ID_FIELD } from '../../common/burn_rate_rule/field_names';
 import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
 import type { LazyWithContextProviders } from '../utils/get_lazy_with_context_providers';
 

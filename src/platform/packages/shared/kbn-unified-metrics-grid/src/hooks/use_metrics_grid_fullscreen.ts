@@ -98,6 +98,10 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
           ${logicalCSS('top', '0 !important')}
           ${logicalCSS('height', '100%')}
         }
+
+        [id^='echTooltipPortalMainTooltip'] {
+          z-index: ${fullScreenZIndex + 1} !important;
+        }
       `,
     };
   }, [euiTheme]);

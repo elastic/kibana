@@ -30,10 +30,6 @@ const useStyles = ({ enabled, phase }: { enabled: boolean; phase: string }) => {
         : phaseIconColors[phase as keyof typeof phaseIconColors]};
       ${!enabled && `margin: ${euiTheme.size.s};`}
     `,
-    icon:
-      phase === 'delete'
-        ? euiTheme.colors.backgroundFilledText
-        : euiTheme.colors.backgroundBasePlain,
   };
 };
 interface Props {
@@ -46,7 +42,7 @@ export const PhaseIcon: FunctionComponent<Props> = ({ enabled, phase }) => {
   return (
     <div css={styles.container}>
       {enabled ? (
-        <EuiIcon color={styles.icon} type={phase === 'delete' ? 'trash' : 'check'} />
+        <EuiIcon type={phase === 'delete' ? 'trash' : 'check'} />
       ) : (
         <EuiIcon type={'dot'} size={'s'} />
       )}

@@ -1,0 +1,45 @@
+# CHANGE_POINT
+
+The CHANGE_POINT command detects spikes, dips, and change points in a metric.
+
+## Syntax
+
+`CHANGE_POINT value [ON key] [AS type_name, pvalue_name]`
+
+### Parameters
+
+#### value
+
+The column with the metric in which you want to detect a change point.
+
+#### key
+
+The column with the key to order the values by. If not specified, `@timestamp` is used.
+
+#### type_name
+
+Optional. The name of the output column with the change point type. If not specified, `type` is used.
+
+#### pvalue_name
+
+Optional. The name of the output column with the p-value that indicates how extreme the change point is. If not specified, `pvalue` is used.
+
+## Examples
+
+Detect change points in a generated sequence, where the first half of the values are 0 and the second half are 42:
+
+```esql
+ROW key=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
+| MV_EXPAND key
+| EVAL value = CASE(key<13, 0, 42)
+| CHANGE_POINT value ON key
+| WHERE type IS NOT NULL
+```
+
+This example creates a sequence of keys, assigns values that change at key 13, detects change points in the `value` column, and filters to show only detected change points.
+
+## Limitations
+
+- There must be at least 22 values for change point detection. Fewer than 1,000 is preferred.
+- The CHANGE_POINT command requires a platinum license.
+- This functionality is in technical preview and may be changed or removed in a future release. Features in technical preview are not subject to the support SLA of official GA features.

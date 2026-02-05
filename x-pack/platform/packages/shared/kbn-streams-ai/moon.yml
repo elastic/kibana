@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/zod-helpers'
   - '@kbn/fields-metadata-plugin'
   - '@kbn/apm-utils'
+  - '@kbn/i18n'
 tags:
   - shared-server
   - package

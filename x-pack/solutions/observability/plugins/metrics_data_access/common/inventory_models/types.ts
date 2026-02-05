@@ -15,7 +15,11 @@ import type {
   FormulasConfigMap,
   InventoryMetricsConfig,
 } from './shared/metrics/types';
-import type { HOST_METRICS_RECEIVER_OTEL, SYSTEM_INTEGRATION } from '../constants';
+import type {
+  HOST_METRICS_RECEIVER_OTEL,
+  KUBELET_STATS_RECEIVER_OTEL,
+  SYSTEM_INTEGRATION,
+} from '../constants';
 
 export { DataSchemaFormatEnum, type DataSchemaFormat } from './shared/metrics/types';
 export const ItemTypeRT = rt.keyof({
@@ -264,7 +268,7 @@ export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
 type BeatsIntegrations = 'aws' | 'docker' | typeof SYSTEM_INTEGRATION | 'kubernetes';
-type OtelReceivers = typeof HOST_METRICS_RECEIVER_OTEL;
+type OtelReceivers = typeof HOST_METRICS_RECEIVER_OTEL | typeof KUBELET_STATS_RECEIVER_OTEL;
 type Integrations =
   | {
       beats: BeatsIntegrations;

@@ -8,13 +8,9 @@
  */
 
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
-import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-
-export interface MetricsExperienceService {
-  client: MetricsExperienceClient;
-}
-
+import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
 interface ChartSectionActions {
   openInNewTab?: (params: {
     query?: Query | AggregateQuery;
@@ -27,3 +23,30 @@ interface ChartSectionActions {
 export interface UnifiedMetricsGridProps extends ChartSectionProps {
   actions: ChartSectionActions;
 }
+
+export interface Dimension {
+  name: string;
+  type: ES_FIELD_TYPES;
+}
+
+export interface MetricField {
+  name: string;
+  index: string;
+  type: string;
+  instrument?: MappingTimeSeriesMetricType;
+  unit?: MetricUnit;
+  dimensions: Dimension[];
+}
+
+export type MetricUnit =
+  | 'ns'
+  | 'us'
+  | 'ms'
+  | 's'
+  | 'm'
+  | 'h'
+  | 'd'
+  | 'percent'
+  | 'bytes'
+  | 'count'
+  | `{${string}}`; // otel special units of count

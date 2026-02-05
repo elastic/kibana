@@ -7,5 +7,7 @@
   },
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/repo-packages"
+  ]
 }

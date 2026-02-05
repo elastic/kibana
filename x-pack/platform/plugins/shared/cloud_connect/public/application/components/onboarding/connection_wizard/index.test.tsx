@@ -65,6 +65,7 @@ describe('ConnectionWizard', () => {
       cluster: { id: 'cluster-123', name: 'test-cluster', version: '8.15.0' },
     },
     hasConfigurePermission: true,
+    licensing: {} as any,
   };
 
   beforeEach(() => {

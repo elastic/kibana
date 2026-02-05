@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { ISessionsClient } from './sessions_client';
 import type { ISessionService } from './session_service';
 import { SearchSessionState } from './search_session_state';
@@ -42,7 +42,6 @@ export function getSessionServiceMock(
       state: SearchSessionState.None,
       isContinued: false,
     }).asObservable(),
-    disableSaveAfterSearchesExpire$: of(false),
     renameCurrentSession: jest.fn(),
     trackSearch: jest.fn((searchDescriptor) => ({
       complete: jest.fn(),

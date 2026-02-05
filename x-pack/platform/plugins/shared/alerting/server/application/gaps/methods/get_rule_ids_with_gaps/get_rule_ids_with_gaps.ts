@@ -71,6 +71,7 @@ export async function getRuleIdsWithGaps(
       statuses,
       sortOrder,
       ruleTypes,
+      ruleIds: ruleIdsFilter,
       highestPriorityGapFillStatuses = [],
     } = params;
     const eventLogClient = await context.getEventLogClient();
@@ -92,6 +93,13 @@ export async function getRuleIdsWithGaps(
         )
         .join(' OR ');
       filter = `${filter} AND (${ruleTypesFilter})`;
+    }
+
+    if (ruleIdsFilter?.length) {
+      const ruleIdsFilterKql = [...new Set(ruleIdsFilter)]
+        .map((ruleId) => `rule.id: "${ruleId}"`)
+        .join(' OR ');
+      filter = `${filter} AND (${ruleIdsFilterKql})`;
     }
 
     const perBucketAgg: Record<string, AggregationsAggregationContainer> =

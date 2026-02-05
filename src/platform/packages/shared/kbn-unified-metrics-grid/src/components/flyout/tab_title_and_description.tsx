@@ -9,7 +9,7 @@
 
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { MetricField } from '../../types';
 
 interface OverviewTabProps {
   metric: MetricField;

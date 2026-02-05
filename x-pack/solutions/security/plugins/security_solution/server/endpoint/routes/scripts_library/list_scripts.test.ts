@@ -91,14 +91,10 @@ describe('GET: fetch list of scripts', () => {
 
       expect(
         apiTestSetup.endpointAppContextMock.service.getScriptsLibraryClient
-      ).toHaveBeenCalledWith('space_a', 'unknown', expect.any(Object));
+      ).toHaveBeenCalledWith('space_a', 'unknown');
 
       expect(
-        apiTestSetup.endpointAppContextMock.service.getScriptsLibraryClient(
-          '',
-          '',
-          apiTestSetup.getEsClientMock()
-        ).list
+        apiTestSetup.endpointAppContextMock.service.getScriptsLibraryClient('', '').list
       ).toHaveBeenCalledWith(httpRequestMock.query);
     });
 

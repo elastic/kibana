@@ -73,6 +73,7 @@ export interface TableGridProps {
   customRenderCellValue?: RenderCellValue;
   customRenderCellPopover?: React.JSXElementConstructor<EuiDataGridCellPopoverElementProps>;
   gridStyle?: EuiDataGridStyle;
+  hideFilteringOnComputedColumns?: boolean;
 }
 
 const MIN_NAME_COLUMN_WIDTH = 150;
@@ -100,6 +101,7 @@ export function TableGrid({
   customRenderCellValue,
   customRenderCellPopover,
   gridStyle,
+  hideFilteringOnComputedColumns,
 }: TableGridProps) {
   const styles = useMemoCss(componentStyles);
   const { toasts } = getUnifiedDocViewerServices();
@@ -118,12 +120,27 @@ export function TableGrid({
   }, [onRemoveColumn, onAddColumn, columns]);
 
   const fieldCellActions = useMemo(
-    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn }),
-    [rows, isEsqlMode, filter, onToggleColumn]
+    () =>
+      getFieldCellActions({
+        rows,
+        isEsqlMode,
+        onFilter: filter,
+        onToggleColumn,
+        columns,
+        hideFilteringOnComputedColumns,
+      }),
+    [rows, isEsqlMode, filter, onToggleColumn, columns, hideFilteringOnComputedColumns]
   );
   const fieldValueCellActions = useMemo(
-    () => getFieldValueCellActions({ rows, isEsqlMode, toasts, onFilter: filter }),
-    [rows, isEsqlMode, toasts, filter]
+    () =>
+      getFieldValueCellActions({
+        rows,
+        isEsqlMode,
+        toasts,
+        onFilter: filter,
+        hideFilteringOnComputedColumns,
+      }),
+    [rows, isEsqlMode, toasts, filter, hideFilteringOnComputedColumns]
   );
 
   const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({
@@ -190,11 +207,12 @@ export function TableGrid({
           rowIndex={rowIndex}
           columnId={columnId}
           isDetails={isDetails}
+          isESQLMode={isEsqlMode}
           onFindSearchTermMatch={onFindSearchTermMatch}
         />
       );
     },
-    [searchTerm, rows, onFindSearchTermMatch]
+    [searchTerm, rows, isEsqlMode, onFindSearchTermMatch]
   );
 
   const renderCellPopover = useCallback(
@@ -254,6 +272,7 @@ const componentStyles = {
   fieldsGrid: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;
     const { fontSize } = euiFontSize(themeContext, 's');
+    const fieldNameTopPadding = `calc(${euiTheme.size.xs} * 1.5)`;
 
     return css({
       '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
@@ -274,7 +293,7 @@ const componentStyles = {
       },
 
       '.kbnDocViewer__fieldName': {
-        padding: euiTheme.size.xs,
+        paddingTop: fieldNameTopPadding,
         paddingLeft: 0,
         lineHeight: euiTheme.font.lineHeightMultiplier,
 
@@ -284,7 +303,7 @@ const componentStyles = {
       },
 
       '.kbnDocViewer__fieldName_icon': {
-        paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
+        paddingTop: fieldNameTopPadding,
         lineHeight: euiTheme.font.lineHeightMultiplier,
       },
 

@@ -8,8 +8,11 @@
  */
 
 import type { PresentationUtilPluginStart } from './types';
-import { registerExpressionsLanguage } from '.';
 import { setStubKibanaServices } from './services/mocks';
+import {
+  getPanelPlacementSettings,
+  registerPanelPlacementSettings,
+} from './registries/panel_placement';
 
 const createStartContract = (): PresentationUtilPluginStart => {
   const startContract: PresentationUtilPluginStart = {
@@ -20,7 +23,8 @@ const createStartContract = (): PresentationUtilPluginStart => {
       reset: jest.fn(),
       setProjectStatus: jest.fn(),
     },
-    registerExpressionsLanguage,
+    registerPanelPlacementSettings,
+    getPanelPlacementSettings,
   };
   return startContract;
 };

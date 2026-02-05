@@ -11,12 +11,8 @@ import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  MetricField,
-  Dimension,
-  DimensionFilters,
-} from '@kbn/metrics-experience-plugin/common/types';
 import { css } from '@emotion/react';
+import type { MetricField, Dimension } from '../types';
 import type { ChartSize } from './chart';
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
@@ -24,6 +20,7 @@ import { EmptyState } from './empty_state/empty_state';
 import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../context/fields_metadata';
 import { createESQLQuery } from '../common/utils';
+import { ACTION_OPEN_IN_DISCOVER } from '../common/constants';
 import { useChartLayers } from './chart/hooks/use_chart_layers';
 import type { UnifiedMetricsGridProps } from '../types';
 
@@ -31,12 +28,12 @@ export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
   'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
 > & {
-  filters?: DimensionFilters;
   dimensions: Dimension[];
   searchTerm?: string;
   columns: NonNullable<EuiFlexGridProps['columns']>;
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   fields: MetricField[];
+  whereStatements?: string[];
 };
 
 const getItemKey = (metric: MetricField, index: number) => {
@@ -48,12 +45,12 @@ export const MetricsGrid = ({
   onFilter,
   actions,
   dimensions,
+  whereStatements,
   services,
   columns,
   fetchParams,
   discoverFetch$,
   searchTerm,
-  filters = {},
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -161,7 +158,6 @@ export const MetricsGrid = ({
                   metric={metric}
                   size="s"
                   dimensions={dimensions}
-                  filters={filters}
                   services={services}
                   onBrushEnd={onBrushEnd}
                   onFilter={onFilter}
@@ -174,6 +170,7 @@ export const MetricsGrid = ({
                   onFocusCell={handleFocusCell}
                   onViewDetails={handleViewDetails}
                   searchTerm={searchTerm}
+                  whereStatements={whereStatements}
                 />
               </EuiFlexItem>
             );
@@ -202,7 +199,6 @@ interface ChartItemProps
   index: number;
   size: ChartSize;
   dimensions: Dimension[];
-  filters: DimensionFilters;
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   rowIndex: number;
   colIndex: number;
@@ -210,6 +206,7 @@ interface ChartItemProps
   searchTerm?: string;
   onFocusCell: (rowIndex: number, colIndex: number) => void;
   onViewDetails: (index: number, esqlQuery: string, metric: MetricField) => void;
+  whereStatements?: string[];
 }
 
 const ChartItem = React.memo(
@@ -221,7 +218,6 @@ const ChartItem = React.memo(
         index,
         size,
         dimensions,
-        filters,
         services,
         onBrushEnd,
         onFilter,
@@ -232,6 +228,7 @@ const ChartItem = React.memo(
         colIndex,
         isFocused,
         searchTerm,
+        whereStatements,
         onFocusCell,
         onViewDetails,
       }: ChartItemProps,
@@ -249,10 +246,10 @@ const ChartItem = React.memo(
           ? createESQLQuery({
               metric,
               dimensions,
-              filters,
+              whereStatements,
             })
           : '';
-      }, [metric, dimensions, filters]);
+      }, [metric, dimensions, whereStatements]);
 
       const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
       const chartLayers = useChartLayers({ dimensions, metric, color });
@@ -284,7 +281,7 @@ const ChartItem = React.memo(
             title={metric.name}
             chartLayers={chartLayers}
             titleHighlight={searchTerm}
-            extraDisabledActions={['ACTION_OPEN_IN_DISCOVER']}
+            extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
           />
         </A11yGridCell>
       );

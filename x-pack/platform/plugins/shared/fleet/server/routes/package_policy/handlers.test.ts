@@ -619,6 +619,19 @@ describe('When calling package policy', () => {
     });
   });
 
+  it('should filter out duplicate ids', async () => {
+    const items: PackagePolicy[] = [testPackagePolicy];
+    packagePolicyServiceMock.getByIDs.mockResolvedValue(items);
+    const request = httpServerMock.createKibanaRequest({
+      query: {},
+      body: { ids: ['1', '1'] },
+    });
+    await bulkGetPackagePoliciesHandler(context, request, response);
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { items },
+    });
+  });
+
   describe('orphaned package policies api handler', () => {
     it('should return valid response', async () => {
       const items: PackagePolicy[] = [testPackagePolicy];
@@ -740,25 +753,26 @@ describe('When calling package policy', () => {
   });
 
   describe('bulk delete api handler', () => {
-    it('should return valid response', async () => {
-      const responseBody: PostDeletePackagePoliciesResponse = [
-        {
-          id: '1',
-          name: 'policy',
-          success: true,
-          policy_ids: ['1'],
-          output_id: '1',
-          package: {
-            name: 'package',
-            version: '1.0.0',
-            title: 'Package',
-          },
-          statusCode: 409,
-          body: {
-            message: 'conflict',
-          },
+    const responseBody: PostDeletePackagePoliciesResponse = [
+      {
+        id: '1',
+        name: 'policy',
+        success: true,
+        policy_ids: ['1'],
+        output_id: '1',
+        package: {
+          name: 'package',
+          version: '1.0.0',
+          title: 'Package',
         },
-      ];
+        statusCode: 409,
+        body: {
+          message: 'conflict',
+        },
+      },
+    ];
+
+    it('should return valid response', async () => {
       packagePolicyServiceMock.delete.mockResolvedValue(responseBody);
       const request = httpServerMock.createKibanaRequest({
         body: {
@@ -771,6 +785,19 @@ describe('When calling package policy', () => {
       });
       const validationResp = DeletePackagePoliciesResponseBodySchema.validate(responseBody);
       expect(validationResp).toEqual(responseBody);
+    });
+
+    it('should deduplicate ids', async () => {
+      packagePolicyServiceMock.delete.mockResolvedValue(responseBody);
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1', '1'],
+        },
+      });
+      await deletePackagePolicyHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: responseBody,
+      });
     });
   });
 
@@ -815,18 +842,19 @@ describe('When calling package policy', () => {
   });
 
   describe('upgrade api handler', () => {
-    it('should return valid response', async () => {
-      const responseBody: UpgradePackagePolicyResponse = [
-        {
-          id: '1',
-          name: 'policy',
-          success: true,
-          statusCode: 200,
-          body: {
-            message: 'success',
-          },
+    const responseBody: UpgradePackagePolicyResponse = [
+      {
+        id: '1',
+        name: 'policy',
+        success: true,
+        statusCode: 200,
+        body: {
+          message: 'success',
         },
-      ];
+      },
+    ];
+
+    it('should return valid response', async () => {
       packagePolicyServiceMock.bulkUpgrade.mockResolvedValue(responseBody);
       const request = httpServerMock.createKibanaRequest({
         body: {
@@ -840,10 +868,24 @@ describe('When calling package policy', () => {
       const validationResp = UpgradePackagePoliciesResponseBodySchema.validate(responseBody);
       expect(validationResp).toEqual(responseBody);
     });
+
+    it('should deduplicate ids', async () => {
+      packagePolicyServiceMock.bulkUpgrade.mockResolvedValue(responseBody);
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1', '1'],
+        },
+      });
+      await upgradePackagePolicyHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: responseBody,
+      });
+    });
   });
 
   describe('dry run upgrade api handler', () => {
-    it('should return valid response', async () => {
+    let responseBody: UpgradePackagePolicyDryRunResponse;
+    beforeEach(() => {
       const dryRunPackagePolicy: DryRunPackagePolicy = {
         description: '',
         enabled: true,
@@ -917,9 +959,13 @@ describe('When calling package policy', () => {
           ],
         ],
       };
-      const responseBody: UpgradePackagePolicyDryRunResponse = [responseItem, responseItem];
+      responseBody = [responseItem, responseItem];
+
       packagePolicyServiceMock.getUpgradeDryRunDiff.mockResolvedValueOnce(responseBody[0]);
       packagePolicyServiceMock.getUpgradeDryRunDiff.mockResolvedValueOnce(responseBody[1]);
+    });
+
+    it('should return valid response', async () => {
       const request = httpServerMock.createKibanaRequest({
         body: {
           packagePolicyIds: ['1', '2'],
@@ -931,6 +977,18 @@ describe('When calling package policy', () => {
       });
       const validationResp = DryRunPackagePoliciesResponseBodySchema.validate(responseBody);
       expect(validationResp).toEqual(responseBody);
+    });
+
+    it('should deduplicate ids', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1', '2', '1', '2'],
+        },
+      });
+      await dryRunUpgradePackagePolicyHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: responseBody,
+      });
     });
   });
 });

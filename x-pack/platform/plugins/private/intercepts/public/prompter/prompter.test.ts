@@ -35,6 +35,8 @@ describe('ProductInterceptPrompter', () => {
     const http = httpServiceMock.createStartContract();
     const rendering = renderingServiceMock.create();
     const analytics = analyticsServiceMock.createAnalyticsServiceStart();
+    const notifications = notificationServiceMock.createStartContract();
+    const userAllowsFeedback = notifications.feedback.isEnabled();
 
     const interceptDialogServiceStartFnSpy = jest.spyOn(InterceptDialogService.prototype, 'start');
     const userInterceptRunPersistenceServiceStartFnSpy = jest.spyOn(
@@ -62,6 +64,7 @@ describe('ProductInterceptPrompter', () => {
           rendering,
           analytics,
           targetDomElement: document.createElement('div'),
+          userAllowsFeedback,
         })
       ).toEqual({
         registerIntercept: expect.any(Function),
@@ -135,6 +138,7 @@ describe('ProductInterceptPrompter', () => {
           rendering,
           analytics,
           targetDomElement: document.createElement('div'),
+          userAllowsFeedback,
         }));
       });
 
@@ -155,6 +159,26 @@ describe('ProductInterceptPrompter', () => {
         });
 
         expect(intercept$).toBeInstanceOf(Rx.Observable);
+      });
+
+      it('skips intercept registration logic if feedback is disabled', () => {
+        const httpPostSpy = jest.spyOn(http, 'post');
+
+        ({ registerIntercept } = prompter.start({
+          http,
+          rendering,
+          analytics,
+          targetDomElement: document.createElement('div'),
+          userAllowsFeedback: false,
+        }));
+
+        const intercept$ = registerIntercept({
+          id: intercept.id,
+          config: () => Promise.resolve(intercept),
+        });
+
+        expect(intercept$).toEqual(Rx.EMPTY);
+        expect(httpPostSpy).not.toHaveBeenCalled();
       });
 
       it('subscribing to the returned observable makes a request to the trigger info api endpoint', async () => {
@@ -309,15 +333,6 @@ describe('ProductInterceptPrompter', () => {
           expect(mockQueueInterceptFn).toHaveBeenCalled();
         });
 
-        // once because we started off with an existing value in localstorage but reset the existing record on displaying the intercept
-        expect(localStorageSetItemSpy).toHaveBeenCalledTimes(1);
-
-        // record in localstorage is updated to track the timer start of the intercept for next iteration
-        expect(localStorageSetItemSpy).toHaveBeenCalledWith(
-          INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY,
-          '{}'
-        );
-
         subscription.unsubscribe();
       });
 
@@ -389,12 +404,6 @@ describe('ProductInterceptPrompter', () => {
             })
           );
         });
-
-        // record in localstorage is cleared after showing the intercept
-        expect(localStorageSetItemSpy).toHaveBeenCalledWith(
-          INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY,
-          '{}'
-        );
 
         subscription.unsubscribe();
       });

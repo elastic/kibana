@@ -8,24 +8,25 @@
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
 
-const SERVICE_NAME = 'opbeans-java';
-const TRANSACTION_NAME = 'GET /api/product';
-
 test.describe('Transaction details', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { transactionDetailsPage } }) => {
     await browserAuth.loginAsViewer();
     await transactionDetailsPage.goToTransactionDetails({
-      serviceName: SERVICE_NAME,
-      transactionName: TRANSACTION_NAME,
-      start: testData.OPBEANS_START_DATE,
-      end: testData.OPBEANS_END_DATE,
+      serviceName: testData.SERVICE_OPBEANS_JAVA,
+      transactionName: testData.PRODUCT_TRANSACTION_NAME,
+      start: testData.START_DATE,
+      end: testData.END_DATE,
     });
   });
 
   test('Renders the page with expected content', async ({ page }) => {
     await test.step('Renders headings', async () => {
-      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(SERVICE_NAME);
-      await expect(page.getByRole('heading', { name: TRANSACTION_NAME, level: 2 })).toBeVisible();
+      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
+        testData.SERVICE_OPBEANS_JAVA
+      );
+      await expect(
+        page.getByRole('heading', { name: testData.PRODUCT_TRANSACTION_NAME, level: 2 })
+      ).toBeVisible();
     });
 
     await test.step('Renders SLOs callout', async () => {
@@ -41,7 +42,7 @@ test.describe('Transaction details', { tag: ['@ess', '@svlOblt'] }, () => {
 
     await test.step('Renders top errors table', async () => {
       await expect(page.getByTestId('topErrorsForTransactionTable')).toBeVisible();
-      await expect(page.getByTestId('apmErrorDetailsLink')).toContainText('[MockError] Foo');
+      await expect(page.getByTestId('apmErrorDetailsLink')).toContainText(testData.ERROR_MESSAGE);
     });
   });
 

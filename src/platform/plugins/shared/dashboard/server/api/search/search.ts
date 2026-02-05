@@ -40,7 +40,6 @@ export async function search(
 
   return {
     dashboards: soResponse.saved_objects.map((so) => {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { description, tags, time_range, title } = transformDashboardOut(
         so.attributes,
         so.references
@@ -52,6 +51,12 @@ export async function search(
           ...(description && { description }),
           ...(tags && { tags }),
           ...(time_range && { time_range }),
+          ...(so?.accessControl && {
+            access_control: {
+              owner: so.accessControl.owner,
+              access_mode: so.accessControl.accessMode,
+            },
+          }),
           title: title ?? '',
         },
         meta: getDashboardMeta(so, 'search'),

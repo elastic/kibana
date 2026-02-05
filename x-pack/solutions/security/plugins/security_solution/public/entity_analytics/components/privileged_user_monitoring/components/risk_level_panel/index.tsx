@@ -120,6 +120,12 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
                   items={severityTableData}
                   loading={isLoading}
                   id={RISK_LEVELS_PRIVILEGED_USERS_QUERY_ID}
+                  tableCaption={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.riskLevels.tableCaption',
+                    {
+                      defaultMessage: 'Privileged user risk level distribution',
+                    }
+                  )}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={1}>

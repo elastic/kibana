@@ -119,9 +119,6 @@ export const useBulkActions = ({
     };
   }, [kql, filterOptions]);
 
-  const isBulkEditAlertSuppressionFeatureEnabled = useIsExperimentalFeatureEnabled(
-    'bulkEditAlertSuppressionEnabled'
-  );
   const isBulkFillRuleGapsEnabled = useIsExperimentalFeatureEnabled('bulkFillRuleGapsEnabled');
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
   const license = useLicense();
@@ -310,9 +307,7 @@ export const useBulkActions = ({
 
         const dryRunResult = await executeBulkActionsDryRun({
           type: BulkActionTypeEnum.fill_gaps,
-          ...(isAllSelected
-            ? { query: convertRulesFilterToKQL(filterOptions) }
-            : { ids: selectedRuleIds }),
+          ...(isAllSelected ? globalQuery : { ids: selectedRuleIds }),
           fillGapsPayload: {
             start_date: new Date(Date.now() - 1000).toISOString(),
             end_date: new Date().toISOString(),
@@ -385,7 +380,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkActionTypeEnum.fill_gaps,
-          ...(isAllSelected ? { query: kql } : { ids: enabledIds }),
+          ...(isAllSelected ? globalQuery : { ids: enabledIds }),
           fillGapsPayload: {
             start_date: modalBulkFillRuleGapsConfirmationResult.startDate.toISOString(),
             end_date: modalBulkFillRuleGapsConfirmationResult.endDate.toISOString(),
@@ -550,20 +545,16 @@ export const useBulkActions = ({
               disabled: isEditDisabled,
               panel: 3,
             },
-            ...(isBulkEditAlertSuppressionFeatureEnabled
-              ? [
-                  {
-                    key: i18n.BULK_ACTION_ALERT_SUPPRESSION,
-                    name: i18n.BULK_ACTION_ALERT_SUPPRESSION,
-                    'data-test-subj': 'alertSuppressionBulkEditRule',
-                    disabled: isAlertSuppressionDisabled,
-                    toolTipContent: isAlertSuppressionLicenseValid
-                      ? undefined
-                      : alertSuppressionUpsellingMessage,
-                    panel: 4,
-                  },
-                ]
-              : []),
+            {
+              key: i18n.BULK_ACTION_ALERT_SUPPRESSION,
+              name: i18n.BULK_ACTION_ALERT_SUPPRESSION,
+              'data-test-subj': 'alertSuppressionBulkEditRule',
+              disabled: isAlertSuppressionDisabled,
+              toolTipContent: isAlertSuppressionLicenseValid
+                ? undefined
+                : alertSuppressionUpsellingMessage,
+              panel: 4,
+            },
             {
               key: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               name: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
@@ -795,13 +786,11 @@ export const useBulkActions = ({
       executeBulkActionsDryRun,
       filterOptions,
       completeBulkEditForm,
-      isBulkEditAlertSuppressionFeatureEnabled,
       startServices,
       canCreateTimelines,
       isAlertSuppressionLicenseValid,
       alertSuppressionUpsellingMessage,
       globalQuery,
-      kql,
       showBulkFillRuleGapsConfirmation,
       isBulkFillRuleGapsEnabled,
     ]

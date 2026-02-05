@@ -61,8 +61,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/es-query'
   - '@kbn/rule-registry-plugin'
-  - '@kbn/esql-validation-autocomplete'
-  - '@kbn/esql-ast'
+  - '@kbn/esql-language'
   - '@kbn/field-types'
   - '@kbn/security-plugin'
   - '@kbn/observability-plugin'
@@ -93,6 +92,8 @@ dependsOn:
   - '@kbn/utility-types-jest'
   - '@kbn/zod'
   - '@kbn/connector-schemas'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/object-utils'
 tags:
   - plugin
   - prod

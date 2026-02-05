@@ -37,7 +37,7 @@ exports[`it renders without blowing up 1`] = `
               "extraSlow": "500ms",
               "fast": "150ms",
               "normal": "250ms",
-              "resistance": "cubic-bezier(.694, .0482, .335, 1)",
+              "resistance": "cubic-bezier(.32, .72, 0, 1)",
               "slow": "350ms",
             },
             "base": 16,
@@ -884,6 +884,13 @@ exports[`it renders without blowing up 1`] = `
                     "colors.backgroundBaseHighlighted",
                   ],
                 },
+                "tourStepIndicatorActiveColor": Computed {
+                  "computer": [Function],
+                  "dependencies": Array [
+                    "colors.backgroundFilledSuccess",
+                  ],
+                },
+                "tourStepIndicatorInactiveColor": "#485975",
                 "treeViewItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -1315,6 +1322,13 @@ exports[`it renders without blowing up 1`] = `
                     "colors.backgroundBaseHighlighted",
                   ],
                 },
+                "tourStepIndicatorActiveColor": Computed {
+                  "computer": [Function],
+                  "dependencies": Array [
+                    "colors.backgroundFilledSuccess",
+                  ],
+                },
+                "tourStepIndicatorInactiveColor": "#A2B1C9",
                 "treeViewItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -2456,14 +2470,16 @@ exports[`it renders without blowing up 1`] = `
           <EuiUtilityClasses />
         </EuiCacheProvider>
         <EuiComponentDefaultsProvider>
-          <CollapsiblePanel
-            iconType="logoElasticsearch"
-            title="Elasticsearch"
-          >
-            <p>
-              child
-            </p>
-          </CollapsiblePanel>
+          <EuiFlyoutManager>
+            <CollapsiblePanel
+              iconType="logoElasticsearch"
+              title="Elasticsearch"
+            >
+              <p>
+                child
+              </p>
+            </CollapsiblePanel>
+          </EuiFlyoutManager>
         </EuiComponentDefaultsProvider>
       </EuiThemeProvider>
     </EuiSystemDefaultsProvider>

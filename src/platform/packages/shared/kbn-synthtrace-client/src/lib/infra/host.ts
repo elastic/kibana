@@ -20,6 +20,8 @@ interface HostDocument extends Fields {
   'host.name': string;
   'metricset.name'?: string;
   'event.module'?: string;
+  'data_stream.dataset'?: string;
+  'event.dataset'?: string;
   'service.name'?: string;
   'host.ip'?: string;
   'host.os.name'?: string;
@@ -50,16 +52,24 @@ export class Host extends Entity<HostDocument> {
     });
   }
 
-  memory() {
+  memory(fields?: {
+    'system.memory.actual.free'?: number;
+    'system.memory.actual.used.bytes'?: number;
+    'system.memory.actual.used.pct'?: number;
+    'system.memory.total'?: number;
+    'system.memory.used.bytes'?: number;
+    'system.memory.used.pct'?: number;
+    'process.memory.pct'?: number;
+  }) {
     return new HostMetrics({
       ...this.fields,
-      'system.memory.actual.free': 44704067584,
-      'system.memory.actual.used.bytes': 24015409152,
-      'system.memory.actual.used.pct': 0.35,
-      'system.memory.total': 68719476736,
-      'system.memory.used.bytes': 39964708864,
-      'system.memory.used.pct': 0.582,
-      'process.memory.pct': 0.1,
+      'system.memory.actual.free': fields?.['system.memory.actual.free'] ?? 44704067584,
+      'system.memory.actual.used.bytes': fields?.['system.memory.actual.used.bytes'] ?? 24015409152,
+      'system.memory.actual.used.pct': fields?.['system.memory.actual.used.pct'] ?? 0.35,
+      'system.memory.total': fields?.['system.memory.total'] ?? 68719476736,
+      'system.memory.used.bytes': fields?.['system.memory.used.bytes'] ?? 39964708864,
+      'system.memory.used.pct': fields?.['system.memory.used.pct'] ?? 0.582,
+      'process.memory.pct': fields?.['process.memory.pct'] ?? 0.1,
       'metricset.period': 10000,
       'metricset.name': 'memory',
     });

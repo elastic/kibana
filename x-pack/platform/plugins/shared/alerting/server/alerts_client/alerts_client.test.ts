@@ -680,7 +680,7 @@ describe('Alerts Client', () => {
           });
         });
 
-        test('should not index new alerts if the activeCount is less than the rule alertDelay', async () => {
+        test('should set alert status "delayed" if activeCount is less than the rule alertDelay', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
             ...alertsClientParams,
             rule: { ...alertsClientParams.rule, alertDelay: 3 },
@@ -690,22 +690,15 @@ describe('Alerts Client', () => {
 
           // Report 1 new alerts
           const alertExecutorService = alertsClient.factory();
-          alertExecutorService.create('1').scheduleActions('default');
+          const alert = alertExecutorService.create('1').scheduleActions('default');
 
           await alertsClient.processAlerts();
           alertsClient.determineFlappingAlerts();
-          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
-          alertsClient.logAlerts(logAlertsOpts);
+          alertsClient.determineDelayedAlerts({ ...determineDelayedAlertsOpts, alertDelay: 3 });
 
           await alertsClient.persistAlerts();
 
-          expect(clusterClient.bulk).not.toHaveBeenCalled();
-          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
-            eventLogger: alertingEventLogger,
-            request: fakeRequest,
-            ruleTypeCategory: 'test',
-            spaceId: 'space1',
-          });
+          expect(alert.isDelayed()).toBe(true);
         });
 
         test('should update ongoing alerts in existing index', async () => {
@@ -963,12 +956,14 @@ describe('Alerts Client', () => {
 
           await alertsClient.persistAlerts();
 
-          expect(spy).toHaveBeenCalledTimes(2);
+          expect(spy).toHaveBeenCalledTimes(4);
           expect(spy).toHaveBeenNthCalledWith(1, 'active');
-          expect(spy).toHaveBeenNthCalledWith(2, 'recovered');
+          expect(spy).toHaveBeenNthCalledWith(2, 'delayed');
+          expect(spy).toHaveBeenNthCalledWith(3, 'recovered');
+          expect(spy).toHaveBeenNthCalledWith(4, 'delayed');
 
           expect(logger.error).toHaveBeenCalledWith(
-            `Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active alerts ${ruleInfo}.`,
+            `Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active or delayed alerts ${ruleInfo}.`,
             logTags
           );
           spy.mockRestore();

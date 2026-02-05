@@ -7,7 +7,7 @@
 
 import React, { type MouseEvent } from 'react';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
-import type { AlertStatus } from '@kbn/rule-data-utils';
+import type { PublicAlertStatus } from '@kbn/rule-data-utils';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import {
   ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ,
@@ -22,7 +22,7 @@ interface Props {
   recoveredAlertCount: number;
   handleClick?: (
     event: MouseEvent<HTMLAnchorElement | HTMLDivElement>,
-    status?: AlertStatus
+    status?: PublicAlertStatus
   ) => void;
 }
 

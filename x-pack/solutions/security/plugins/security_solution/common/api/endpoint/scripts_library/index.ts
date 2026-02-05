@@ -7,3 +7,7 @@
 
 export * from './create_script';
 export * from './list_scripts';
+export * from './update_script';
+export * from './download_script';
+export * from './get_one_script';
+export * from './delete_script';

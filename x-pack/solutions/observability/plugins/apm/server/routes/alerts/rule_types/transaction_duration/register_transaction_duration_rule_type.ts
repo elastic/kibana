@@ -37,6 +37,7 @@ import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { transactionDurationParamsSchema } from '@kbn/response-ops-rule-params/transaction_duration';
 import { unflattenObject } from '@kbn/object-utils';
+import { getDurationFieldForTransactions } from '@kbn/apm-data-access-plugin/server/utils';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
@@ -62,10 +63,7 @@ import {
   getAlertUrlTransaction,
   getDurationFormatter,
 } from '../../../../../common/utils/formatters';
-import {
-  getBackwardCompatibleDocumentTypeFilter,
-  getDurationFieldForTransactions,
-} from '../../../../lib/helpers/transactions';
+import { getBackwardCompatibleDocumentTypeFilter } from '../../../../lib/helpers/transactions';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import type { RegisterRuleDependencies } from '../../register_apm_rule_types';

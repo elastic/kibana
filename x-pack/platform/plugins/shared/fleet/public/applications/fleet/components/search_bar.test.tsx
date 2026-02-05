@@ -70,7 +70,7 @@ jest.mock('../hooks', () => {
           }),
         },
       },
-      unifiedSearch: {
+      kql: {
         autocomplete: {
           getQuerySuggestions: jest.fn().mockResolvedValue([
             {
@@ -116,6 +116,8 @@ jest.mock('../hooks', () => {
           ]),
           hasQuerySuggestions: jest.fn().mockReturnValue(true),
         },
+      },
+      unifiedSearch: {
         ui: {
           IndexPatternSelect: jest.fn(),
           SearchBar: jest.fn().mockReturnValue(null),

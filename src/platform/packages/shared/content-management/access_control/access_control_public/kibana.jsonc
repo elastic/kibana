@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/content-management-access-control-public",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

@@ -15,12 +15,14 @@ import type {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDisabledActionIds,
+  PublishesProjectRoutingOverrides,
   PublishesRendered,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
   PublishesViewMode,
   PublishesWritableDescription,
   PublishesWritableTitle,
+  PublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import type { Simplify } from '@kbn/chart-expressions-common';
@@ -94,6 +96,9 @@ export type LensApi = Simplify<
     PublishesViewMode &
     // Let the container know the saved object id
     PublishesSavedObjectId &
+    // Let the container know about unsaved changes
+    PublishesUnsavedChanges &
+    PublishesProjectRoutingOverrides &
     // Lens specific API methods:
     // Let the container know when the data has been loaded/updated
     LensInspectorAdapters &

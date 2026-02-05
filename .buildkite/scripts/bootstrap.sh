@@ -45,7 +45,6 @@ if ! (yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}" || yarn kbn bootstrap "${BOOTS
   # So, we should just delete node_modules in between attempts
   rm -rf node_modules
 
-  export MOON_LOG=debug
   echo "--- yarn install and bootstrap, attempt 2"
   yarn kbn bootstrap --force-install || yarn kbn bootstrap
 fi

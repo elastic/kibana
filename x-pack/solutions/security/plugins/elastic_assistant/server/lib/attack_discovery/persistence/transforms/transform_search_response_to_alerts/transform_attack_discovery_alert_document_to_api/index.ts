@@ -14,6 +14,7 @@ import {
   ALERT_UPDATED_AT,
   ALERT_UPDATED_BY_USER_ID,
   ALERT_UPDATED_BY_USER_NAME,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
 } from '@kbn/rule-data-utils';
@@ -152,5 +153,6 @@ export const transformAttackDiscoveryAlertDocumentToApi = ({
     users: Array.isArray(attackDiscoveryAlertDocument[ALERT_ATTACK_DISCOVERY_USERS])
       ? attackDiscoveryAlertDocument[ALERT_ATTACK_DISCOVERY_USERS]
       : undefined,
+    assignees: attackDiscoveryAlertDocument[ALERT_WORKFLOW_ASSIGNEE_IDS],
   };
 };

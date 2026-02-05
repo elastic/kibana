@@ -185,6 +185,9 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
   loginAssistanceMessage=""
   notifications={
     Object {
+      "feedback": Object {
+        "isEnabled": [MockFunction],
+      },
       "showErrorDialog": [MockFunction],
       "toasts": Object {
         "add": [MockFunction],
@@ -195,6 +198,9 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
         "addWarning": [MockFunction],
         "get$": [MockFunction],
         "remove": [MockFunction],
+      },
+      "tours": Object {
+        "isEnabled": [MockFunction],
       },
     }
   }
@@ -224,6 +230,9 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
   loginAssistanceMessage="This is an *important* message"
   notifications={
     Object {
+      "feedback": Object {
+        "isEnabled": [MockFunction],
+      },
       "showErrorDialog": [MockFunction],
       "toasts": Object {
         "add": [MockFunction],
@@ -234,6 +243,9 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
         "addWarning": [MockFunction],
         "get$": [MockFunction],
         "remove": [MockFunction],
+      },
+      "tours": Object {
+        "isEnabled": [MockFunction],
       },
     }
   }
@@ -264,6 +276,9 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
   loginHelp="**some-help**"
   notifications={
     Object {
+      "feedback": Object {
+        "isEnabled": [MockFunction],
+      },
       "showErrorDialog": [MockFunction],
       "toasts": Object {
         "add": [MockFunction],
@@ -274,6 +289,9 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
         "addWarning": [MockFunction],
         "get$": [MockFunction],
         "remove": [MockFunction],
+      },
+      "tours": Object {
+        "isEnabled": [MockFunction],
       },
     }
   }
@@ -295,7 +313,7 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
 exports[`LoginPage page renders as expected 1`] = `
 <div>
   <div
-    class="css-vvcdom-kbnFullScreenBgCss"
+    class="css-1pqcqfr-kbnFullScreenBgCss"
     data-test-subj="loginForm"
   >
     <header
@@ -443,7 +461,7 @@ exports[`LoginPage page renders as expected 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+                class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
               />
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
@@ -476,7 +494,7 @@ exports[`LoginPage page renders as expected 1`] = `
 exports[`LoginPage page renders with custom branding 1`] = `
 <div>
   <div
-    class="css-vvcdom-kbnFullScreenBgCss"
+    class="css-1pqcqfr-kbnFullScreenBgCss"
     data-test-subj="loginForm"
   >
     <header
@@ -632,7 +650,7 @@ exports[`LoginPage page renders with custom branding 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+                class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
               />
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"

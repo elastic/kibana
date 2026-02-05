@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
+import {
+  defaultNavigationTree,
+  LazyIconAgentBuilder,
+} from '@kbn/security-solution-navigation/navigation_tree';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 
 import { AiNavigationIcon } from './icon';
@@ -19,7 +23,10 @@ const SOLUTION_NAME = i18n.translate(
   { defaultMessage: 'Elastic AI SOC Engine' }
 );
 
-export const createAiNavigationTree = (): NavigationTreeDefinition => ({
+export const createAiNavigationTree = (
+  chatExperience: AIChatExperience = AIChatExperience.Classic,
+  workflowsUiEnabled: boolean = false
+): NavigationTreeDefinition => ({
   body: [
     {
       id: 'ease_home',
@@ -55,10 +62,14 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
               id: SecurityPageName.configurationsBasicRules,
               link: securityLink(SecurityPageName.configurationsBasicRules),
             },
-            {
-              id: SecurityPageName.configurationsAiSettings,
-              link: securityLink(SecurityPageName.configurationsAiSettings),
-            },
+            ...(chatExperience !== AIChatExperience.Agent
+              ? [
+                  {
+                    id: SecurityPageName.configurationsAiSettings,
+                    link: securityLink(SecurityPageName.configurationsAiSettings),
+                  },
+                ]
+              : []),
           ],
         },
       ],
@@ -67,8 +78,24 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
       breadcrumbStatus: 'hidden',
       children: [
         {
-          link: 'discover',
+          link: 'discover' as AppDeepLinkId,
         },
+        ...(chatExperience === AIChatExperience.Agent
+          ? [
+              {
+                // TODO: update icon to 'robot' once it's available in EUI
+                icon: LazyIconAgentBuilder,
+                link: 'agent_builder' as AppDeepLinkId,
+              },
+            ]
+          : []),
+        ...(workflowsUiEnabled
+          ? [
+              {
+                link: 'workflows' as AppDeepLinkId,
+              },
+            ]
+          : []),
         {
           id: SecurityPageName.aiValue,
           link: securityLink(SecurityPageName.aiValue),

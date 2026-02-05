@@ -91,8 +91,8 @@ export const createNodeAllocationActions = (phase: Phase) => {
     hasDataTierAllocationControls: () => Boolean(screen.queryByTestId(controlsSelector)),
     openNodeAttributesSection,
     hasNodeAttributesSelect: (): boolean =>
-      Boolean(new EuiSelectTestHarness(nodeAttrsSelector).self),
-    getNodeAttributesSelectOptions: () => new EuiSelectTestHarness(nodeAttrsSelector).options,
+      Boolean(new EuiSelectTestHarness(nodeAttrsSelector).getElement()),
+    getNodeAttributesSelectOptions: () => new EuiSelectTestHarness(nodeAttrsSelector).getOptions(),
     setDataAllocation: async (value: DataTierAllocationType) => {
       await openNodeAttributesSection();
 
@@ -120,10 +120,13 @@ export const createNodeAllocationActions = (phase: Phase) => {
       // The field only renders when dataTierAllocationType === 'node_attrs'
       await waitFor(() => {
         const selectHarness = new EuiSelectTestHarness(nodeAttrsSelector);
-        expect(selectHarness.self).toBeInTheDocument();
+        expect(selectHarness.getElement()).toBeInTheDocument();
 
         // Check if options are loaded (more than just the empty default option)
-        const options = selectHarness.options.map((o) => o.value).filter((v) => v !== '');
+        const options = selectHarness
+          .getOptions()
+          .map((o) => o.value)
+          .filter((v) => v !== '');
         if (options.length === 0) {
           throw new Error('Options not yet loaded');
         }

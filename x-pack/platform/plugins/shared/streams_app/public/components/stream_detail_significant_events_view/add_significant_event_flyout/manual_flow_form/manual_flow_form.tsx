@@ -17,23 +17,28 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { StreamQueryKql, Streams, Feature } from '@kbn/streams-schema';
-import React, { useEffect, useState } from 'react';
+import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useDebounceFn } from '@kbn/react-hooks';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
-import { NO_FEATURE } from '../utils/default_query';
 import { SeveritySelector } from '../common/severity_selector';
+import { ALL_DATA_OPTION } from '../../system_selector';
 
 interface Props {
   definition: Streams.all.Definition;
   query: StreamQueryKql;
   isSubmitting: boolean;
+  isEditMode: boolean;
   setQuery: (query: StreamQueryKql) => void;
   setCanSave: (canSave: boolean) => void;
-  features: Feature[];
+  systems: System[];
   dataViews: DataView[];
 }
+
+const DEBOUNCE_DELAY_MS = 300;
+const DEBOUNCE_OPTIONS = { wait: DEBOUNCE_DELAY_MS };
 
 export function ManualFlowForm({
   definition,
@@ -41,7 +46,8 @@ export function ManualFlowForm({
   setQuery,
   setCanSave,
   isSubmitting,
-  features,
+  isEditMode,
+  systems,
   dataViews,
 }: Props) {
   const [touched, setTouched] = useState({
@@ -51,6 +57,23 @@ export function ManualFlowForm({
     severity: false,
   });
 
+  // Debounced KQL query for preview chart API calls
+  const [debouncedKqlQuery, setDebouncedKqlQuery] = useState(query.kql.query);
+
+  const { run: updateDebouncedKqlQuery } = useDebounceFn(
+    (kqlQuery: string) => setDebouncedKqlQuery(kqlQuery),
+    DEBOUNCE_OPTIONS
+  );
+
+  // Create a query object with debounced KQL for the preview chart
+  const debouncedQuery = useMemo(
+    (): StreamQueryKql => ({
+      ...query,
+      kql: { query: debouncedKqlQuery },
+    }),
+    [query, debouncedKqlQuery]
+  );
+
   const validation = validateQuery(query);
 
   useEffect(() => {
@@ -59,20 +82,13 @@ export function ManualFlowForm({
     setCanSave(isValid && isTouched);
   }, [validation, setCanSave, touched]);
 
-  const options = features
-    .map((feature) => ({
-      value: feature,
-      inputDisplay: feature.name,
-    }))
-    .concat([
-      {
-        value: NO_FEATURE,
-        inputDisplay: i18n.translate(
-          'xpack.streams.addSignificantEventFlyout.manualFlow.noFeatureOptionLabel',
-          { defaultMessage: 'No feature' }
-        ),
-      },
-    ]);
+  const options = [
+    { value: ALL_DATA_OPTION.value, inputDisplay: ALL_DATA_OPTION.label },
+    ...systems.map((system) => ({
+      value: system,
+      inputDisplay: system.name,
+    })),
+  ];
 
   return (
     <EuiPanel hasShadow={false} color="subdued">
@@ -130,8 +146,8 @@ export function ManualFlowForm({
             label={
               <EuiFormLabel>
                 {i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldFeatureLabel',
-                  { defaultMessage: 'Feature' }
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldSystemLabel',
+                  { defaultMessage: 'System' }
                 )}
               </EuiFormLabel>
             }
@@ -139,29 +155,32 @@ export function ManualFlowForm({
             <EuiSuperSelect
               options={options}
               valueOfSelected={
-                options.find(
-                  (option) =>
-                    option.value.name === query.feature?.name &&
-                    option.value.type === query.feature?.type
-                )?.value
+                query.feature
+                  ? options.find(
+                      (option) =>
+                        option.value.name === query.feature?.name &&
+                        option.value.type === query.feature?.type
+                    )?.value
+                  : ALL_DATA_OPTION.value
               }
               placeholder={i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.manualFlow.featurePlaceholder',
-                { defaultMessage: 'Select feature' }
+                'xpack.streams.addSignificantEventFlyout.manualFlow.systemPlaceholder',
+                { defaultMessage: 'Select system' }
               )}
-              disabled={isSubmitting || features.length === 0}
+              disabled={isSubmitting || systems.length === 0 || isEditMode}
               onBlur={() => {
                 setTouched((prev) => ({ ...prev, feature: true }));
               }}
               onChange={(value) => {
-                setQuery({
-                  ...query,
-                  feature: {
-                    name: value.name,
-                    filter: value.filter,
-                    type: value.type,
-                  },
-                });
+                const feature =
+                  value.type === ALL_DATA_OPTION.value.type
+                    ? undefined
+                    : {
+                        name: value.name,
+                        filter: value.filter,
+                        type: value.type,
+                      };
+                setQuery({ ...query, feature });
                 setTouched((prev) => ({ ...prev, feature: true }));
               }}
               fullWidth
@@ -186,17 +205,15 @@ export function ManualFlowForm({
               showQueryInput
               showSubmitButton={false}
               isDisabled={isSubmitting}
-              onQueryChange={() => {
-                setTouched((prev) => ({ ...prev, kql: true }));
-              }}
-              onQuerySubmit={(next) => {
+              onQueryChange={(next) => {
+                // Immediately sync query state so it's always up-to-date for save
+                const nextKqlQuery = typeof next.query?.query === 'string' ? next.query.query : '';
                 setQuery({
                   ...query,
-                  kql: {
-                    query: typeof next.query?.query === 'string' ? next.query.query : '',
-                  },
+                  kql: { query: nextKqlQuery },
                 });
-
+                // Debounce the preview chart update
+                updateDebouncedKqlQuery(nextKqlQuery);
                 setTouched((prev) => ({ ...prev, kql: true }));
               }}
               placeholder={i18n.translate(
@@ -204,7 +221,6 @@ export function ManualFlowForm({
                 { defaultMessage: 'Enter query' }
               )}
               indexPatterns={dataViews}
-              submitOnBlur
             />
           </EuiFormRow>
         </EuiForm>
@@ -213,7 +229,7 @@ export function ManualFlowForm({
 
         <PreviewDataSparkPlot
           definition={definition}
-          query={query}
+          query={debouncedQuery}
           isQueryValid={!validation.kql.isInvalid}
         />
       </EuiFlexGroup>

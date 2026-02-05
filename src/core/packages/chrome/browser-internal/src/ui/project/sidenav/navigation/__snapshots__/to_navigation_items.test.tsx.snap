@@ -62,7 +62,7 @@ Array [
     "href": "/jom/app/dev_tools",
     "iconType": "editorCodeBlock",
     "id": "dev_tools",
-    "label": "Developer tools",
+    "label": "Developer Tools",
     "sections": undefined,
   },
   Object {
@@ -989,7 +989,7 @@ Array [
             "label": "Change point detection",
           },
         ],
-        "label": "AIOps labs",
+        "label": "Aiops labs",
       },
     ],
   },

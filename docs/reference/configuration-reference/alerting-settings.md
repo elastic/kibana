@@ -511,13 +511,13 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 
     * For an [{{bedrock}} connector](/reference/connectors-kibana/bedrock-action-type.md), current support is for the Anthropic Claude models.
        * {applies_to}`serverless: ga` Defaults to `us.anthropic.claude-sonnet-4-5-20250929-v1:0`.
-       * {applies_to}`stack: ga 9.2` Defaults to `us.anthropic.claude-sonnet-4-5-20250929-v1:0`.
-       * {applies_to}`stack: ga 9.1` Defaults to `us.anthropic.claude-3-7-sonnet-20250219-v1:0`.
-       * {applies_to}`stack: ga 9.0` Defaults to `anthropic.claude-3-5-sonnet-20240620-v1:0`.
+       * {applies_to}`stack: ga 9.2+` Defaults to `us.anthropic.claude-sonnet-4-5-20250929-v1:0`.
+       * {applies_to}`stack: ga =9.1` Defaults to `us.anthropic.claude-3-7-sonnet-20250219-v1:0`.
+       * {applies_to}`stack: ga =9.0` Defaults to `anthropic.claude-3-5-sonnet-20240620-v1:0`.
     * For a [{{gemini}} connector](/reference/connectors-kibana/gemini-action-type.md), current support is for the Gemini models. 
        * {applies_to}`serverless: ga` Defaults to `gemini-2.5-pro`.
-       * {applies_to}`stack: ga 9.1` Defaults to `gemini-2.5-pro`.
-       * {applies_to}`stack: ga 9.0` Defaults to `gemini-1.5-pro-002`.
+       * {applies_to}`stack: ga 9.1+` Defaults to `gemini-2.5-pro`.
+       * {applies_to}`stack: ga =9.0` Defaults to `gemini-1.5-pro-002`.
     * For a [OpenAI connector](/reference/connectors-kibana/openai-action-type.md), it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
 
     Data type: `string`

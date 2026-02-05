@@ -111,6 +111,7 @@ export interface FetchRulesResponse {
   perPage: number;
   total: number;
   data: RuleResponse[];
+  warnings?: WarningSchema[];
 }
 
 export interface FetchRuleProps {

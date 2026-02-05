@@ -84,4 +84,31 @@ describe('checkForDuplicateDashboardTitle', () => {
 
     expect(onTitleDuplicate).toHaveBeenCalledWith(`${baseDashboardName} (15)`);
   });
+
+  it('does not warn about the duplicated title when the casing is different', async () => {
+    const baseDashboardName = 'dashboard';
+    const dashboardNameUpper = baseDashboardName.toUpperCase();
+
+    mockSearchDashboards.mockResolvedValue({
+      total: 1,
+      dashboards: [
+        {
+          data: { title: baseDashboardName },
+        },
+      ],
+    });
+
+    const onTitleDuplicate = jest.fn();
+
+    const result = await checkForDuplicateDashboardTitle({
+      title: dashboardNameUpper,
+      lastSavedTitle: baseDashboardName,
+      copyOnSave: true,
+      isTitleDuplicateConfirmed: false,
+      onTitleDuplicate,
+    });
+
+    expect(result).toBe(true);
+    expect(onTitleDuplicate).not.toHaveBeenCalled();
+  });
 });

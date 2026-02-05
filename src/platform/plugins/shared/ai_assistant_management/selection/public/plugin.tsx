@@ -183,10 +183,7 @@ export class AIAssistantManagementPlugin
     if (!this.isServerless && licensing) {
       this.managementAppVisibilitySubscription = combineLatest([
         licensing.license$,
-        coreStart.settings.client.get$<AIChatExperience>(
-          PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
-          AIChatExperience.Classic
-        ),
+        coreStart.settings.client.get$<AIChatExperience>(PREFERRED_CHAT_EXPERIENCE_SETTING_KEY),
       ]).subscribe(([license, chatExperience]) => {
         const isEnterprise = license?.hasAtLeast('enterprise');
 

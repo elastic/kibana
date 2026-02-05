@@ -17,6 +17,16 @@ import type {
 
 export type { ProductDocBasePluginSetup, ProductDocBasePluginStart };
 
+export {
+  useProductDocStatus,
+  useInstallProductDoc,
+  useUninstallProductDoc,
+  REACT_QUERY_KEYS,
+  type UseProductDocStatusOptions,
+  type UseInstallProductDocOptions,
+  type UseUninstallProductDocOptions,
+} from './hooks';
+
 export const plugin: PluginInitializer<
   ProductDocBasePluginSetup,
   ProductDocBasePluginStart,

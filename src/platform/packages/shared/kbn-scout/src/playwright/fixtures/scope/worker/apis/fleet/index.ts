@@ -27,6 +27,7 @@ export interface FleetApiService {
   };
   package_policies: {
     get: (queryParams?: Record<string, any>) => Promise<any>;
+    getById: (id: string) => Promise<any>;
     delete: (id: string) => Promise<any>;
     bulkDelete: (ids: [string]) => Promise<any>;
   };
@@ -141,6 +142,18 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
             },
           });
         });
+      },
+      getById: async (id: string) => {
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.package_policies.getById [${id}]`,
+          async () => {
+            return await kbnClient.request({
+              method: 'GET',
+              path: `/api/fleet/package_policies/${id}`,
+            });
+          }
+        );
       },
       delete: async (id: string) => {
         return await measurePerformanceAsync(

@@ -247,4 +247,46 @@ describe('CloudConnectorSelector', () => {
       expect(screen.queryByText('Organization')).not.toBeInTheDocument();
     });
   });
+
+  describe('IntegrationCountBadge rendering', () => {
+    it('should display integration count badges in dropdown options', async () => {
+      const user = userEvent.setup();
+      renderSelector();
+
+      const selector = screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
+      await user.click(selector);
+
+      await waitFor(() => {
+        // Badge should show plural for count > 1
+        expect(screen.getByText('Used by 2 integrations')).toBeInTheDocument();
+        // Badge should show singular for count = 1
+        expect(screen.getByText('Used by 1 integration')).toBeInTheDocument();
+      });
+    });
+
+    it('should display zero integrations badge when packagePolicyCount is 0', async () => {
+      const connectorsWithZeroCount = [
+        {
+          ...mockCloudConnectors[0],
+          packagePolicyCount: 0,
+        },
+      ];
+
+      mockUseGetCloudConnectors.mockReturnValue({
+        data: connectorsWithZeroCount,
+        isLoading: false,
+        error: null,
+      } as unknown as ReturnType<typeof useGetCloudConnectors>);
+
+      const user = userEvent.setup();
+      renderSelector();
+
+      const selector = screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
+      await user.click(selector);
+
+      await waitFor(() => {
+        expect(screen.getByText('Used by 0 integrations')).toBeInTheDocument();
+      });
+    });
+  });
 });

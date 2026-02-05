@@ -29,6 +29,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import type { Store } from 'redux';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -170,6 +171,7 @@ export const mockCore: () => Partial<CoreStart> = () => {
       ),
     },
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+    kql: kqlPluginMock.createStartContract(),
     charts: chartPluginMock.createStartContract(),
   };
 

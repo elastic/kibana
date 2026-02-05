@@ -119,7 +119,6 @@ export async function parseDataStream({
       responseMessageId =
         'id' in chunk && chunk.id ? allocateResponseId(chunk.id) : allocateResponseId();
       prefixMap.text = undefined;
-      messageAnnotations = undefined;
       continue;
     } else if (type === 'text-delta' && 'delta' in chunk && typeof chunk.delta === 'string') {
       if (prefixMap.text) {

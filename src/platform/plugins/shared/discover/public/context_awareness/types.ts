@@ -32,7 +32,18 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
-import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type {
+  UpdateCascadeGroupingActionPayload,
+  UpdateESQLQueryActionPayload,
+} from '../application/main/state_management/redux/types';
+
+export type UpdateESQLQueryFn = (
+  queryOrUpdater: UpdateESQLQueryActionPayload['queryOrUpdater']
+) => void;
+
+export type UpdateCascadeGroupingFn = (
+  groupingOrUpdater: UpdateCascadeGroupingActionPayload['groupingOrUpdater']
+) => void;
 
 /**
  * Supports extending the Discover app menu
@@ -133,7 +144,7 @@ export interface ChartSectionConfigurationExtensionParams {
     /**
      * Updates the current ES|QL query
      */
-    updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
+    updateESQLQuery?: UpdateESQLQueryFn;
   };
 }
 
@@ -197,7 +208,7 @@ export interface DocViewerExtensionParams {
     /**
      * Updates the current ES|QL query
      */
-    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+    updateESQLQuery?: UpdateESQLQueryFn;
   };
   /**
    * The record being displayed in the doc viewer
@@ -312,7 +323,7 @@ export interface RowControlsExtensionParams {
     /**
      * Updates the current ES|QL query
      */
-    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+    updateESQLQuery?: UpdateESQLQueryFn;
     /**
      * Sets the expanded document, which is displayed in a flyout
      * @param record - The record to display in the flyout
@@ -531,7 +542,11 @@ export interface Profile {
 
   /**
    * Supports customizing the behaviour of the Discover document
-   * viewer flyout, such as the flyout title and available tabs
+   * viewer flyout, such as the flyout title and available tabs.
+   *
+   * To add restorable state to your custom doc viewer tabs, see:
+   * {@link /src/platform/plugins/shared/unified_doc_viewer/README.md#using-restorable-state-in-doc-viewer-tabs}
+   *
    * @param params The doc viewer extension parameters
    * @returns The doc viewer extension
    */

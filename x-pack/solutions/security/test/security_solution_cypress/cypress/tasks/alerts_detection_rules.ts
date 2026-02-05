@@ -7,6 +7,7 @@
 
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import type {
+  ADD_ELASTIC_RULES_TABLE,
   RULES_MONITORING_TABLE,
   RULES_UPDATES_TABLE,
 } from '../screens/alerts_detection_rules';
@@ -376,11 +377,24 @@ export const expectToContainRule = (
   tableSelector:
     | typeof RULES_MANAGEMENT_TABLE
     | typeof RULES_MONITORING_TABLE
-    | typeof RULES_UPDATES_TABLE,
+    | typeof RULES_UPDATES_TABLE
+    | typeof ADD_ELASTIC_RULES_TABLE,
   ruleName: string
 ) => {
   cy.log(`Expecting rules table to contain '${ruleName}'`);
   cy.get(tableSelector).find(RULES_ROW).should('include.text', ruleName);
+};
+
+export const expectVisibleRulesCount = (
+  tableSelector:
+    | typeof RULES_MANAGEMENT_TABLE
+    | typeof RULES_MONITORING_TABLE
+    | typeof RULES_UPDATES_TABLE
+    | typeof ADD_ELASTIC_RULES_TABLE,
+  expectedCount: number
+) => {
+  cy.log(`Expecting rules table page to contain ${expectedCount} rules`);
+  cy.get(tableSelector).find(RULES_ROW).should('have.length', expectedCount);
 };
 
 export const expectModifiedRuleBadgeToBeDisplayed = () => {
@@ -424,6 +438,28 @@ export const expectRulesInTable = (
   for (const ruleName of ruleNames) {
     expectToContainRule(tableSelector, ruleName);
   }
+};
+
+export const expectFirstRuleInTable = (
+  tableSelector:
+    | typeof RULES_MANAGEMENT_TABLE
+    | typeof RULES_MONITORING_TABLE
+    | typeof RULES_UPDATES_TABLE
+    | typeof ADD_ELASTIC_RULES_TABLE,
+  ruleName: string
+): void => {
+  cy.get(tableSelector).find(RULES_ROW).first().should('contain.text', ruleName);
+};
+
+export const expectLastRuleInTable = (
+  tableSelector:
+    | typeof RULES_MANAGEMENT_TABLE
+    | typeof RULES_MONITORING_TABLE
+    | typeof RULES_UPDATES_TABLE
+    | typeof ADD_ELASTIC_RULES_TABLE,
+  ruleName: string
+): void => {
+  cy.get(tableSelector).find(RULES_ROW).last().should('contain.text', ruleName);
 };
 
 export const expectToContainModifiedBadge = (ruleName: string) => {

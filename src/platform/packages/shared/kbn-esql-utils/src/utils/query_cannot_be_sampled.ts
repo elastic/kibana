@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { Walker } from '@kbn/esql-ast';
-import { Parser } from '@kbn/esql-ast';
+import { Walker } from '@kbn/esql-language';
+import { Parser } from '@kbn/esql-language';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 
 /**

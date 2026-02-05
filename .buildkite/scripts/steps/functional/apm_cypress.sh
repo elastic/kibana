@@ -13,4 +13,9 @@ echo "--- APM Cypress Tests"
 cd "$XPACK_DIR/solutions/observability/plugins/apm/ftr_e2e"
 
 set +e
-yarn cypress:run; status=$?; yarn junit:merge || :; exit $status
+yarn cypress:run; status=$?; yarn junit:merge || :
+
+# Scout reporter
+upload_scout_cypress_events "Cypress tests"
+
+exit $status

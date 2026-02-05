@@ -16,6 +16,7 @@ import type {
   TextBasedLayerColumn,
   TextBasedPersistedState,
 } from '@kbn/lens-common';
+import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
@@ -30,9 +31,9 @@ import {
   LENS_SAMPLING_DEFAULT_VALUE,
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from '../schema/constants';
-import type { DatasetType } from '../schema/dataset';
 import type { LayerSettingsSchema } from '../schema/shared';
 import type { LensApiFilterType, UnifiedSearchFilterType } from '../schema/filter';
+import type { DatasetType, DatasetTypeESQL, DatasetTypeNoESQL } from '../schema/dataset';
 import type { LayerTypeESQL } from '../schema/charts/xy';
 
 export type DataSourceStateLayer =
@@ -73,17 +74,20 @@ export const operationFromColumn = (
   columnId: string,
   layer: Omit<FormBasedLayer, 'indexPatternId'>
 ): LensApiAllOperations | undefined => {
-  const typedLayer = convertToTypedLayerColumns(layer);
+  const cleanedLayer = cleanupFormulaReferenceColumns(layer);
+  const typedLayer = convertToTypedLayerColumns(cleanedLayer);
   const column = typedLayer.columns[columnId];
-  if (!column) {
-    return undefined;
-  }
-  // map columns to array of { column, id }
-  const columnMap = Object.entries(layer.columns).map(([id, c]) => ({
-    // need to cast here as the GenericIndexPatternColumn type is not compatible with Reference based column types
-    column: c as AnyLensStateColumn,
-    id,
-  }));
+  if (!column) return;
+
+  // map columns to array of { column, id } in columnOrder sequence (matches visualization.columns order)
+  const columnMap = cleanedLayer.columnOrder
+    .filter((id) => cleanedLayer.columns[id] != null)
+    .map((id) => ({
+      // need to cast here as the GenericIndexPatternColumn type is not compatible with Reference based column types
+      column: cleanedLayer.columns[id] as AnyLensStateColumn,
+      id,
+    }));
+
   if (isLensStateBucketColumnType(column)) {
     return fromBucketLensStateToAPI(column, columnMap);
   }
@@ -171,6 +175,13 @@ export const getAdhocDataviews = (
   return { adHocDataViews, internalReferences };
 };
 
+export function buildDatasetStateESQL(layer: TextBasedLayer): DatasetTypeESQL {
+  return {
+    type: 'esql',
+    query: layer.query?.esql ?? '',
+  };
+}
+
 export function isDataViewSpec(spec: unknown): spec is DataViewSpec {
   return spec != null && typeof spec === 'object' && 'title' in spec;
 }
@@ -179,29 +190,16 @@ function getReferenceCriteria(layerId: string) {
   return (ref: SavedObjectReference) => ref.name === `${LENS_LAYER_SUFFIX}${layerId}`;
 }
 
-/**
- * Builds dataset state from the layer configuration
- *
- * @param layer Lens State Layer
- * @returns Lens API Dataset configuration
- */
-export const buildDatasetState = (
-  layer: FormBasedLayer | Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
+export function buildDatasetStateNoESQL(
+  layer: FormBasedLayer | Omit<FormBasedLayer, 'indexPatternId'>,
+  layerId: string,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
-  adhocReferences: SavedObjectReference[] = [],
-  layerId: string
-): DatasetType => {
-  if (isTextBasedLayer(layer)) {
-    return {
-      type: 'esql',
-      query: layer.query?.esql ?? '',
-    };
-  }
-
+  adhocReferences: SavedObjectReference[] = []
+): DatasetTypeNoESQL {
   const referenceCriteria = getReferenceCriteria(layerId);
-
   const adhocReference = adhocReferences?.find(referenceCriteria);
+
   if (adhocReference && adHocDataViews?.[adhocReference.id]) {
     const dataViewSpec = adHocDataViews[adhocReference.id];
     if (isDataViewSpec(dataViewSpec)) {
@@ -225,11 +223,30 @@ export const buildDatasetState = (
     type: 'dataView',
     id: 'indexPatternId' in layer ? layer.indexPatternId ?? '' : '',
   };
-};
+}
+
+/**
+ * Builds dataset state from the layer configuration
+ *
+ * @deprecated use `buildDatasetStateESQL` or `buildDatasetStateNoESQL` instead
+ */
+export function buildDatasetState(
+  layer: FormBasedLayer | Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
+  layerId: string,
+  adHocDataViews: Record<string, unknown>,
+  references: SavedObjectReference[],
+  adhocReferences: SavedObjectReference[] = []
+): DatasetType {
+  if (isTextBasedLayer(layer)) {
+    return buildDatasetStateESQL(layer);
+  }
+
+  return buildDatasetStateNoESQL(layer, layerId, adHocDataViews, references, adhocReferences);
+}
 
 // builds Lens State references from list of dataviews
-export function buildReferences(dataviews: Record<string, string>) {
-  const references = [];
+export function buildReferences(dataviews: Record<string, string>): SavedObjectReference[] {
+  const references: SavedObjectReference[][] = [];
   for (const layerid in dataviews) {
     if (dataviews[layerid]) {
       references.push(getDefaultReferences(dataviews[layerid], layerid));
@@ -366,9 +383,8 @@ export const buildDatasourceStates = (
   // a few charts types support multiple layers
   const hasMultipleLayers = 'layers' in config;
   const configLayers = hasMultipleLayers ? config.layers : [config];
-  // @ts-expect-error upgrade typescript v5.9.3
+
   for (let i = 0; i < configLayers.length; i++) {
-    // @ts-expect-error upgrade typescript v5.9.3
     const layer = configLayers[i];
     const layerId = hasMultipleLayers && 'type' in layer ? `${layer.type}_${i}` : `layer_${i}`;
     const dataset = 'dataset' in layer ? layer.dataset : mainDataset;

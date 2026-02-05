@@ -32,6 +32,8 @@
           "(interval: string | number, checkValidEsUnit: boolean) => moment.Duration | null"
         ],
         "path": "x-pack/platform/packages/private/ml/parse_interval/parse_interval.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               "string | number"
             ],
             "path": "x-pack/platform/packages/private/ml/parse_interval/parse_interval.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -65,6 +69,8 @@
               "boolean"
             ],
             "path": "x-pack/platform/packages/private/ml/parse_interval/parse_interval.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

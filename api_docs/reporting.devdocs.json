@@ -26,6 +26,8 @@
         }
       ],
       "path": "x-pack/platform/plugins/private/reporting/public/index.ts",
+      "lineNumber": 22,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -58,6 +60,8 @@
         }
       ],
       "path": "x-pack/platform/plugins/private/reporting/server/types.ts",
+      "lineNumber": 50,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

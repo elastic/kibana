@@ -5,32 +5,54 @@
  * 2.0.
  */
 
-import type { AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { registerTestBed } from '@kbn/test-jest-helpers';
-import type { HttpSetup } from '@kbn/core/public';
-import { TemplateCreate } from '../../../public/application/sections/template_create';
-import { WithAppDependencies } from '../helpers';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 
-import type { TestSubjects } from './template_form.helpers';
-import { formSetup } from './template_form.helpers';
+import type { setupEnvironment } from '../helpers/setup_environment';
 
-export const setup = async (httpSetup: HttpSetup, isLegacy: boolean = false) => {
-  const route = isLegacy
-    ? { pathname: '/create_template', search: '?legacy=true' }
-    : { pathname: '/create_template' };
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
 
-  const testBedConfig: AsyncTestBedConfig = {
-    memoryRouter: {
-      initialEntries: [route],
-      componentRoutePath: route,
-    },
-    doMountAsync: true,
-  };
+export const expectString = (value: unknown): string => {
+  expect(typeof value).toBe('string');
+  return value as string;
+};
 
-  const initTestBed = registerTestBed<TestSubjects>(
-    WithAppDependencies(TemplateCreate, httpSetup),
-    testBedConfig
+type HttpPost = ReturnType<typeof setupEnvironment>['httpSetup']['post'];
+
+const normalizePostCall = (call: readonly unknown[]) => {
+  // Some http typings model `post()` as `(optionsWithPath)` instead of `(path, options)`.
+  // Normalize both shapes without using `any`.
+  const first = call[0];
+  const second = call[1];
+
+  if (typeof first === 'string') {
+    expect(isRecord(second)).toBe(true);
+    return { path: first, options: second as Record<string, unknown> };
+  }
+
+  expect(isRecord(first)).toBe(true);
+  const options = first as Record<string, unknown>;
+  return { path: expectString(options.path), options };
+};
+
+export const getPostCalls = (post: HttpPost) => {
+  const postMock = jest.mocked(post);
+  return postMock.mock.calls.map((call) =>
+    normalizePostCall(call as unknown as readonly unknown[])
   );
+};
 
-  return formSetup(initTestBed);
+export const getLastPostCall = (post: HttpPost) => {
+  const postMock = jest.mocked(post);
+  const lastCall = postMock.mock.calls.at(-1);
+  expect(lastCall).toBeDefined();
+
+  return normalizePostCall(lastCall as unknown as readonly unknown[]);
+};
+
+export const clickSaveAndAwaitExit = async () => {
+  fireEvent.click(screen.getByTestId('nextButton'));
+  // Save triggers async state updates (`isSaving`) and a router navigation on success.
+  // Waiting for the wizard UI to unmount ensures those updates are wrapped/awaited.
+  await waitFor(() => expect(screen.queryByTestId('nextButton')).not.toBeInTheDocument());
 };

@@ -15,8 +15,6 @@ import type {
 import { registerObservabilityAgent } from './agent/register_observability_agent';
 import { registerTools } from './tools/register_tools';
 import { registerAttachments } from './attachments/register_attachments';
-import { getIsObservabilityAgentEnabled } from './utils/get_is_obs_agent_enabled';
-import { OBSERVABILITY_AGENT_FEATURE_FLAG } from '../common/constants';
 import type {
   ObservabilityAgentBuilderPluginSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -50,43 +48,29 @@ export class ObservabilityAgentBuilderPlugin
     >,
     plugins: ObservabilityAgentBuilderPluginSetupDependencies
   ): ObservabilityAgentBuilderPluginSetup {
-    // Routes must be registered synchronously during setup
-    registerServerRoutes({
+    registerObservabilityAgent({ core, plugins, logger: this.logger }).catch((error) => {
+      this.logger.error(`Error registering observability agent: ${error}`);
+    });
+
+    registerTools({
+      core,
+      plugins,
+      dataRegistry: this.dataRegistry,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(`Error registering observability tools: ${error}`);
+    });
+
+    registerAttachments({
       core,
       plugins,
       logger: this.logger,
       dataRegistry: this.dataRegistry,
+    }).catch((error) => {
+      this.logger.error(`Error registering observability attachments: ${error}`);
     });
 
-    getIsObservabilityAgentEnabled(core)
-      .then((isObservabilityAgentEnabled) => {
-        if (!isObservabilityAgentEnabled) {
-          this.logger.debug(
-            `Skipping observability agent registration because feature flag "${OBSERVABILITY_AGENT_FEATURE_FLAG}" is set to false`
-          );
-          return;
-        }
-
-        registerObservabilityAgent({ plugins, logger: this.logger }).catch((error) => {
-          this.logger.error(`Error registering observability agent: ${error}`);
-        });
-
-        registerTools({ core, plugins, logger: this.logger }).catch((error) => {
-          this.logger.error(`Error registering observability tools: ${error}`);
-        });
-
-        registerAttachments({
-          core,
-          plugins,
-          logger: this.logger,
-          dataRegistry: this.dataRegistry,
-        }).catch((error) => {
-          this.logger.error(`Error registering observability attachments: ${error}`);
-        });
-      })
-      .catch((error) => {
-        this.logger.error(`Error checking whether the observability agent is enabled: ${error}`);
-      });
+    registerServerRoutes({ core, plugins, logger: this.logger, dataRegistry: this.dataRegistry });
 
     return {
       registerDataProvider: (id, provider) => this.dataRegistry.registerDataProvider(id, provider),

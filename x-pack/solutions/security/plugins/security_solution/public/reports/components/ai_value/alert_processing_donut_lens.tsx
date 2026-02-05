@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useId } from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { TOTAL_ALERTS_PROCESSED } from './translations';
 import { PageScope } from '../../../data_view_manager/constants';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
@@ -16,6 +17,7 @@ import { getAlertProcessingDonutAttributes } from '../../../common/components/vi
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 
 const ChartSize = 250;
+const visualizationIdPrefix = 'aiValueAlertProcessingDonut';
 interface Props {
   attackAlertIds: string[];
   from: string;
@@ -23,6 +25,9 @@ interface Props {
 }
 export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to }) => {
   const spaceId = useSpaceId();
+  // Lens embeddables (and our query store) key state by `id`; make it instance-unique to avoid stale/cross-instance rendering.
+  const instanceId = useId();
+  const visualizationId = `${visualizationIdPrefix}-${instanceId}`;
   const {
     euiTheme: { font },
   } = useEuiTheme();
@@ -69,9 +74,9 @@ export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to
         }
         height={ChartSize}
         width={'100%'}
-        id={`open`}
+        id={visualizationId}
         isDonut={true}
-        donutTitleLabel={'Total alerts processed'}
+        donutTitleLabel={TOTAL_ALERTS_PROCESSED}
         donutTextWrapperClassName={'donutText'}
         scopeId={PageScope.alerts}
         timerange={{ from, to }}

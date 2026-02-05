@@ -37,7 +37,8 @@
     ],
     "requiredBundles": [
       "kibanaReact",
-      "kibanaUtils"
+      "kibanaUtils",
+      "agentBuilder"
     ]
   },
   "build": {

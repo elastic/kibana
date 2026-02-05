@@ -96,6 +96,7 @@ export const transformToCreateScheme = (
       '@timestamp': message.timestamp,
       id: message.id ?? uuidv4(),
       content: message.content,
+      ...(message.refusal ? { refusal: message.refusal } : {}),
       is_error: message.isError,
       reader: message.reader,
       role: message.role,

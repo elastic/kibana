@@ -104,7 +104,10 @@ export const getItems: (
           defaultMessage: 'Asset Criticality',
         }
       ),
-      score: entityData?.risk.category_2_score ?? 0,
+      score: isPrivmonEnabled
+        ? entityData?.risk.modifiers?.find((modifier) => modifier.type === 'asset_criticality')
+            ?.contribution ?? 0
+        : entityData?.risk.category_2_score ?? 0,
       count: undefined,
     },
   ];
@@ -117,7 +120,10 @@ export const getItems: (
           defaultMessage: 'Privileged User',
         }
       ),
-      score: entityData?.risk.category_3_score ?? 0,
+      score:
+        entityData?.risk.modifiers?.find(
+          (modifier) => modifier.type === 'watchlist' && modifier.subtype === 'privmon'
+        )?.contribution ?? 0,
       count: undefined,
     });
   }

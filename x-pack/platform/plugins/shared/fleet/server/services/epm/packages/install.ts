@@ -107,7 +107,7 @@ const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
 const MAX_INSTALL_RETRIES = 5;
 const BASE_RETRY_DELAY_MS = 1000; // 1s
 
-const PACKAGES_TO_INSTALL_WITH_STREAMING = [
+export const PACKAGES_TO_INSTALL_WITH_STREAMING = [
   // The security_detection_engine package contains a large number of assets and
   // is not suitable for regular installation as it might cause OOM errors.
   'security_detection_engine',

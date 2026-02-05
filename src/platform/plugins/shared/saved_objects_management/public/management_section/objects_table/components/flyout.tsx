@@ -385,6 +385,10 @@ export class FlyoutClass extends Component<
         columns={columns}
         pagination={pagination}
         onTableChange={onTableChange}
+        tableCaption={i18n.translate(
+          'savedObjectsManagement.objectsTable.flyout.renderConflicts.tableCaption',
+          { defaultMessage: 'Conflicting data views' }
+        )}
       />
     );
   }

@@ -46,7 +46,6 @@ export class DeployPrivateLocationMonitors {
 
   async syncPackagePoliciesForMws({
     allPrivateLocations,
-    encryptedSavedObjects,
     updatedMWs,
     missingMWIds,
     soClient,
@@ -57,7 +56,6 @@ export class DeployPrivateLocationMonitors {
     missingMWIds?: string[];
     soClient: SavedObjectsClientContract;
     allPrivateLocations: PrivateLocationAttributes[];
-    encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   }) {
     if (allPrivateLocations.length === 0) {
       this.debugLog('No private locations found, skipping sync of private location monitors');
@@ -65,71 +63,111 @@ export class DeployPrivateLocationMonitors {
     }
     const { syntheticsService } = this.syntheticsMonitorClient;
 
-    const encryptedClient = encryptedSavedObjects.getClient();
-
     const paramsBySpace = await syntheticsService.getSyntheticsParams({
       spaceId: ALL_SPACES_ID,
     });
-
-    const updatedMwIds = updatedMWs?.map((mw) => mw.id) || [];
-
-    const allMwIdsToProcess = new Set<string>([...updatedMwIds, ...(missingMWIds || [])]);
 
     // config can have multiple mws, so we need to track which configs have been updated to avoid duplicate processing
     const listOfUpdatedConfigs: Array<string> = [];
 
     return this.serverSetup.fleet.runWithCache(async () => {
-      for (const mwId of allMwIdsToProcess || []) {
-        const finder =
-          await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-            {
-              type: syntheticsMonitorSOTypes,
-              perPage: 500,
-              namespaces: ['*'],
-              // TODO: Exclude public monitors
-              filter: `${syntheticsMonitorAttributes}.${ConfigKey.MAINTENANCE_WINDOWS}: "${mwId}" or ${legacyMonitorAttributes}.${ConfigKey.MAINTENANCE_WINDOWS}: "${mwId}"`,
-            }
-          );
+      const commonProps = {
+        listOfUpdatedConfigs,
+        allPrivateLocations,
+        maintenanceWindows,
+        soClient,
+        paramsBySpace,
+      };
+      for (const mw of updatedMWs || []) {
+        await this.updateMonitorsForMw({
+          ...commonProps,
+          mwId: mw.id,
+        });
+      }
 
-        for await (const result of finder.find()) {
-          const monitors = result.saved_objects.filter((monitor) => {
-            // Avoid processing the same config multiple times, updating it once will update all mws on it
-            if (listOfUpdatedConfigs.includes(monitor.id)) {
-              return false;
-            }
-            listOfUpdatedConfigs.push(monitor.id);
-            return true;
-          });
-          this.debugLog(`Processing mw id: ${mwId}, monitors count: ${monitors?.length ?? 0}`);
-
-          const { configsBySpaces, monitorSpaceIds } = this.mixParamsWithMonitors(
-            monitors,
-            paramsBySpace
-          );
-
-          const mw = updatedMWs?.find((window) => window.id === mwId);
-
-          await this.deployEditMonitors({
-            allPrivateLocations,
-            configsBySpaces,
-            monitorSpaceIds,
-            paramsBySpace,
-            maintenanceWindows,
-          });
-          if (!mw) {
-            await this.removeMwsFromMonitorConfigs({
-              mwId,
-              monitors,
-              soClient,
-            });
-          }
-        }
-
-        finder.close().catch(() => {});
-
-        this.debugLog(`Syncing package policies for updated maintenance window id: ${mwId}`);
+      for (const mwId of missingMWIds || []) {
+        await this.updateMonitorsForMw({
+          ...commonProps,
+          mwId,
+          isMissingMw: true,
+        });
       }
     });
+  }
+
+  async updateMonitorsForMw({
+    listOfUpdatedConfigs,
+    allPrivateLocations,
+    mwId,
+    maintenanceWindows,
+    soClient,
+    paramsBySpace,
+    isMissingMw = false,
+  }: {
+    mwId: string;
+    maintenanceWindows: MaintenanceWindow[];
+    missingMWIds?: string[];
+    soClient: SavedObjectsClientContract;
+    allPrivateLocations: PrivateLocationAttributes[];
+    paramsBySpace: Record<string, Record<string, string>>;
+    listOfUpdatedConfigs: Array<string>;
+    isMissingMw?: boolean;
+  }) {
+    const {
+      pluginsStart: { encryptedSavedObjects },
+    } = this.serverSetup;
+    const encryptedClient = encryptedSavedObjects.getClient();
+
+    const finder =
+      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
+        {
+          type: syntheticsMonitorSOTypes,
+          perPage: 500,
+          namespaces: ['*'],
+          // TODO: Exclude public monitors
+          filter: `${syntheticsMonitorAttributes}.${ConfigKey.MAINTENANCE_WINDOWS}: "${mwId}" or ${legacyMonitorAttributes}.${ConfigKey.MAINTENANCE_WINDOWS}: "${mwId}"`,
+        }
+      );
+
+    for await (const result of finder.find()) {
+      const monitors = result.saved_objects.filter((monitor) => {
+        // Avoid processing the same config multiple times, updating it once will update all mws on it
+        if (listOfUpdatedConfigs.includes(monitor.id)) {
+          this.debugLog(
+            `Skipping monitor id: ${monitor.id} as it has already been processed for another maintenance window`
+          );
+          return false;
+        }
+        listOfUpdatedConfigs.push(monitor.id);
+        return true;
+      });
+      this.debugLog(`Processing mw id: ${mwId}, monitors count: ${monitors?.length ?? 0}`);
+
+      const { configsBySpaces, monitorSpaceIds } = this.mixParamsWithMonitors(
+        monitors,
+        paramsBySpace
+      );
+
+      await this.deployEditMonitors({
+        allPrivateLocations,
+        configsBySpaces,
+        monitorSpaceIds,
+        paramsBySpace,
+        maintenanceWindows,
+      });
+
+      if (isMissingMw) {
+        await this.removeMwsFromMonitorConfigs({
+          mwId,
+          monitors,
+          soClient,
+        });
+      }
+    }
+
+    finder.close().catch(() => {});
+
+    this.debugLog(`Syncing package policies for updated maintenance window id: ${mwId}`);
   }
 
   async syncAllPackagePolicies({
@@ -137,7 +175,9 @@ export class DeployPrivateLocationMonitors {
     encryptedSavedObjects,
     soClient,
     spaceIdToSync,
+    privateLocationId,
   }: {
+    privateLocationId?: string;
     spaceIdToSync?: string;
     soClient: SavedObjectsClientContract;
     allPrivateLocations: PrivateLocationAttributes[];
@@ -152,6 +192,7 @@ export class DeployPrivateLocationMonitors {
       await this.getAllMonitorConfigs({
         encryptedSavedObjects,
         soClient,
+        privateLocationId,
         spaceId: spaceIdToSync,
       });
 
@@ -162,7 +203,9 @@ export class DeployPrivateLocationMonitors {
         )}`
       );
       await this.deployEditMonitors({
-        allPrivateLocations,
+        allPrivateLocations: allPrivateLocations.filter(
+          (loc) => loc.id === privateLocationId || !privateLocationId
+        ),
         configsBySpaces,
         monitorSpaceIds,
         paramsBySpace,
@@ -222,14 +265,16 @@ export class DeployPrivateLocationMonitors {
     soClient,
     encryptedSavedObjects,
     spaceId = ALL_SPACES_ID,
+    privateLocationId,
   }: {
     soClient: SavedObjectsClientContract;
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     spaceId?: string;
+    privateLocationId?: string;
   }) {
     const { syntheticsService } = this.syntheticsMonitorClient;
     const paramsBySpacePromise = syntheticsService.getSyntheticsParams({ spaceId });
-    const maintenanceWindowsPromise = syntheticsService.getMaintenanceWindows();
+    const maintenanceWindowsPromise = syntheticsService.getMaintenanceWindows(spaceId);
     const monitorConfigRepository = new MonitorConfigRepository(
       soClient,
       encryptedSavedObjects.getClient()
@@ -237,6 +282,9 @@ export class DeployPrivateLocationMonitors {
 
     const monitorsPromise = monitorConfigRepository.findDecryptedMonitors({
       spaceId,
+      ...(privateLocationId && {
+        filter: `${syntheticsMonitorAttributes}.locations.id:"${privateLocationId}"`,
+      }),
     });
 
     const [paramsBySpace, monitors, maintenanceWindows] = await Promise.all([

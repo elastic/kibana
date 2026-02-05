@@ -46,6 +46,7 @@ export const getRuleIdsWithGapsParamsSchema = schema.object({
   ),
   sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   maxRulesToFetch: schema.maybe(schema.number()),
+  ruleIds: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export const getRuleIdsWithGapsResponseSchema = schema.object({

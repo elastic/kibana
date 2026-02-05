@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
+import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 
 /**
  * Creates a security tool ID with the core.security namespace.

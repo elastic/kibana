@@ -17,17 +17,14 @@ export const saveDashboard = async ({
   lastSavedId,
   saveOptions,
   dashboardState,
-  references,
+  accessMode,
 }: SaveDashboardProps): Promise<SaveDashboardReturn> => {
-  /**
-   * Save the saved object using the content management
-   */
   const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
 
   try {
     const result = idToSaveTo
-      ? await dashboardClient.update(idToSaveTo, dashboardState, references)
-      : await dashboardClient.create(dashboardState, references);
+      ? await dashboardClient.update(idToSaveTo, dashboardState)
+      : await dashboardClient.create(dashboardState, accessMode);
 
     const newId = result.id;
 
@@ -46,10 +43,10 @@ export const saveDashboard = async ({
        */
       if (newId !== lastSavedId) {
         getDashboardBackupService().clearState(lastSavedId);
-        return { redirectRequired: true, id: newId, references };
+        return { redirectRequired: true, id: newId };
       }
     }
-    return { id: newId, references };
+    return { id: newId };
   } catch (error) {
     coreServices.notifications.toasts.addDanger({
       title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {

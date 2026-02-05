@@ -32,14 +32,8 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
   const hasPreviousVersion = !!packageInfo?.installationInfo?.previous_version;
   const isRollbackTTLExpired = !!packageInfo.installationInfo?.is_rollback_ttl_expired;
   const isUploadedPackage = packageInfo.installationInfo?.install_source === 'upload';
-  const isDisabled =
-    !canRollbackPackages ||
-    !hasPreviousVersion ||
-    isUploadedPackage ||
-    isCustomPackage ||
-    !licenseService.isEnterprise() ||
-    isRollbackTTLExpired ||
-    !isAvailable;
+  const isRegistryPackage = packageInfo.installationInfo?.install_source === 'registry';
+
   const {
     actions: { bulkRollbackIntegrationsWithConfirmModal },
   } = useInstalledIntegrationsActions();
@@ -47,6 +41,22 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(packageInfo.name);
   const isRollingBack = installationStatus === InstallStatus.rollingBack;
+  const isReinstalling = installationStatus === InstallStatus.reinstalling;
+  const isUninstalling = installationStatus === InstallStatus.uninstalling;
+  const isInstalling = installationStatus === InstallStatus.installing;
+
+  const isDisabled =
+    !canRollbackPackages ||
+    !hasPreviousVersion ||
+    isUploadedPackage ||
+    !isRegistryPackage ||
+    isCustomPackage ||
+    !licenseService.isEnterprise() ||
+    isRollbackTTLExpired ||
+    !isAvailable ||
+    isReinstalling ||
+    isUninstalling ||
+    isInstalling;
 
   const openRollbackModal = useCallback(async () => {
     await rollbackPackage(packageInfo, bulkRollbackIntegrationsWithConfirmModal);
@@ -95,6 +105,11 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
               <FormattedMessage
                 id="xpack.fleet.integrations.rollbackPackage.customTooltip"
                 defaultMessage="Custom integrations cannot be rolled back."
+              />
+            ) : !isRegistryPackage ? (
+              <FormattedMessage
+                id="xpack.fleet.integrations.rollbackPackage.registryTooltip"
+                defaultMessage="This integration was not installed from the registry and cannot be rolled back."
               />
             ) : !licenseService.isEnterprise() ? (
               <FormattedMessage

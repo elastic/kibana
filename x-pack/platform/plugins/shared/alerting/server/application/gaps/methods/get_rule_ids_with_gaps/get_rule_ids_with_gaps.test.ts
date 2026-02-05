@@ -395,6 +395,77 @@ describe('getRuleIdsWithGaps', () => {
     });
   });
 
+  describe('ruleIds filter', () => {
+    it('should include ruleIds filter for a single rule id', async () => {
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+        aggregations: {
+          unique_rule_ids: { buckets: [] },
+          latest_gap_timestamp: { value: null },
+          by_rule: { buckets: [] },
+        },
+      });
+
+      await rulesClient.getRuleIdsWithGaps({
+        ...params,
+        ruleIds: ['rule-123'],
+      });
+
+      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        filter,
+        expect.objectContaining({
+          filter: expect.stringContaining('AND (rule.id: "rule-123")'),
+        })
+      );
+    });
+
+    it('should include ruleIds filter joined with OR for multiple rule ids', async () => {
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+        aggregations: {
+          unique_rule_ids: { buckets: [] },
+          latest_gap_timestamp: { value: null },
+          by_rule: { buckets: [] },
+        },
+      });
+
+      await rulesClient.getRuleIdsWithGaps({
+        ...params,
+        ruleIds: ['rule-a', 'rule-b'],
+      });
+
+      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        filter,
+        expect.objectContaining({
+          filter: expect.stringContaining('AND (rule.id: "rule-a" OR rule.id: "rule-b")'),
+        })
+      );
+    });
+
+    it('should not include ruleIds filter when ruleIds is empty', async () => {
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+        aggregations: {
+          unique_rule_ids: { buckets: [] },
+          latest_gap_timestamp: { value: null },
+          by_rule: { buckets: [] },
+        },
+      });
+
+      await rulesClient.getRuleIdsWithGaps({
+        ...params,
+        ruleIds: [],
+      });
+
+      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        filter,
+        expect.objectContaining({
+          filter: expect.not.stringContaining('rule.id:'),
+        })
+      );
+    });
+  });
+
   describe('error handling', () => {
     it('should handle and wrap errors from event log client', async () => {
       const error = new Error('Event log client error');

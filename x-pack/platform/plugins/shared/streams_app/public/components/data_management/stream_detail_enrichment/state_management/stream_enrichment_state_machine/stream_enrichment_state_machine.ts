@@ -4,24 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { assign, forwardTo, setup, sendTo, stopChild, raise, cancel } from 'xstate5';
-import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
-import type { MachineImplementationsFrom, ActorRefFrom, SnapshotFrom } from 'xstate5';
+import { isEnabledFailureStore, Streams } from '@kbn/streams-schema';
+import { getPlaceholderFor } from '@kbn/xstate-utils';
+import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
+import { assign, cancel, forwardTo, raise, sendTo, setup, stopChild } from 'xstate5';
 
 import {
   addDeterministicCustomIdentifiers,
   checkAdditiveChanges,
-  validateStreamlangModeCompatibility,
   validateStreamlang,
+  validateStreamlangModeCompatibility,
 } from '@kbn/streamlang';
+import { sanitiseForEditing } from '@kbn/streamlang-yaml-editor/src/utils/sanitise_for_editing';
 import {
   isStreamlangDSLSchema,
   streamlangDSLSchema,
   type StreamlangDSL,
 } from '@kbn/streamlang/types/streamlang';
-import { sanitiseForEditing } from '@kbn/streamlang-yaml-editor/src/utils/sanitise_for_editing';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import type {
@@ -37,27 +37,28 @@ import {
 } from './upsert_stream_actor';
 
 import {
-  simulationMachine,
-  createSimulationMachineImplementations,
-} from '../simulation_state_machine';
-import {
-  defaultEnrichmentUrlState,
-  getActiveDataSourceSamples,
-  getDataSourcesUrlState,
-  getUpsertFields,
-  spawnDataSource,
-  selectDataSource,
-  getActiveDataSourceRef,
-} from './utils';
-import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
-import {
   createDataSourceMachineImplementations,
   dataSourceMachine,
 } from '../data_source_state_machine';
-import { setupGrokCollectionActor } from './setup_grok_collection_actor';
 import { interactiveModeMachine } from '../interactive_mode_machine';
-import { yamlModeMachine } from '../yaml_mode_machine';
 import { createInteractiveModeMachineImplementations } from '../interactive_mode_machine/interactive_mode_machine';
+import {
+  createSimulationMachineImplementations,
+  simulationMachine,
+} from '../simulation_state_machine';
+import { yamlModeMachine } from '../yaml_mode_machine';
+import { setupGrokCollectionActor } from './setup_grok_collection_actor';
+import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
+import {
+  createFailureStoreDataSource,
+  defaultEnrichmentUrlState,
+  getActiveDataSourceRef,
+  getActiveDataSourceSamples,
+  getDataSourcesUrlState,
+  getUpsertFields,
+  selectDataSource,
+  spawnDataSource,
+} from './utils';
 
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
 export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;
@@ -100,17 +101,9 @@ export const streamEnrichmentMachine = setup({
 
       const isWiredStream = Streams.WiredStream.Definition.is(context.definition.stream);
 
-      // Only run full validation for wired streams
-      if (!isWiredStream) {
-        return {
-          schemaErrors: [],
-          validationErrors: new Map(),
-          fieldTypesByProcessor: new Map(),
-        };
-      }
-
       const validationResult = validateStreamlang(context.nextStreamlangDSL, {
         reservedFields: [],
+        streamType: isWiredStream ? 'wired' : 'classic',
       });
 
       const errorsByStep = new Map<string, typeof validationResult.errors>();
@@ -184,6 +177,18 @@ export const streamEnrichmentMachine = setup({
       const activeDataSourceSnapshot = activeDataSourceRef?.getSnapshot();
       const simulationMode = activeDataSourceSnapshot?.context.simulationMode ?? 'partial';
 
+      /**
+       * YAML mode does not yet support filtering by condition,
+       * so all state related to filtering should be reset prior to
+       * switching.
+       */
+      context.interactiveModeRef?.send({
+        type: 'step.clearConditionFilter',
+      });
+      context.simulatorRef.send({
+        type: 'simulation.clearConditionFilter',
+      });
+
       return {
         yamlModeRef: spawn('yamlModeMachine', {
           id: 'yamlMode',
@@ -201,11 +206,28 @@ export const streamEnrichmentMachine = setup({
     stopInteractiveMode: stopChild('interactiveMode'),
     stopYamlMode: stopChild('yamlMode'),
     /* Data sources actions */
-    setupDataSources: assign((assignArgs) => ({
-      dataSourcesRefs: assignArgs.context.urlState.dataSources.map((dataSource) =>
-        spawnDataSource(dataSource, assignArgs)
-      ),
-    })),
+    setupDataSources: assign((assignArgs) => {
+      const { definition, urlState } = assignArgs.context;
+      const dataSources = [...urlState.dataSources];
+
+      // Add failure store data source by default if available and not already present
+      const isFailureStoreAvailable =
+        isEnabledFailureStore(definition.effective_failure_store) &&
+        definition.privileges?.read_failure_store;
+      const hasFailureStoreDataSource = dataSources.some((ds) => ds.type === 'failure-store');
+
+      if (isFailureStoreAvailable && !hasFailureStoreDataSource) {
+        // Add with enabled: false since there's already an active data source
+        dataSources.push({
+          ...createFailureStoreDataSource(definition.stream.name),
+          enabled: false,
+        });
+      }
+
+      return {
+        dataSourcesRefs: dataSources.map((dataSource) => spawnDataSource(dataSource, assignArgs)),
+      };
+    }),
     addDataSource: assign((assignArgs, { dataSource }: { dataSource: EnrichmentDataSource }) => {
       const newDataSourceRef = spawnDataSource(dataSource, assignArgs);
 
@@ -245,6 +267,25 @@ export const streamEnrichmentMachine = setup({
 
     sendResetToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
+
+    filterByCondition: ({ context }, params: { conditionId: string }) => {
+      context.interactiveModeRef?.send({
+        type: 'step.filterByCondition',
+        conditionId: params.conditionId,
+      });
+      context.simulatorRef.send({
+        type: 'simulation.filterByCondition',
+        conditionId: params.conditionId,
+      });
+    },
+    clearConditionFilter: ({ context }) => {
+      context.interactiveModeRef?.send({
+        type: 'step.clearConditionFilter',
+      });
+      context.simulatorRef.send({
+        type: 'simulation.clearConditionFilter',
+      });
+    },
   },
   guards: {
     /* Staged changes are determined by comparing previous and next DSL */
@@ -370,6 +411,8 @@ export const streamEnrichmentMachine = setup({
                   definition: context.definition,
                   streamlangDSL: context.nextStreamlangDSL,
                   fields: getUpsertFields(context),
+                  configurationMode:
+                    context.interactiveModeRef !== undefined ? 'interactive' : 'yaml',
                 }),
                 onDone: {
                   target: 'idle',
@@ -515,7 +558,22 @@ export const streamEnrichmentMachine = setup({
                     'simulation.updateSteps': {
                       actions: forwardTo('simulator'),
                     },
-                    // Forward step events to interactive mode machine
+                    'simulation.filterByCondition': {
+                      actions: [
+                        {
+                          type: 'filterByCondition',
+                          params: ({ event }) => ({ conditionId: event.conditionId }),
+                        },
+                      ],
+                    },
+                    'simulation.clearConditionFilter': {
+                      actions: [
+                        {
+                          type: 'clearConditionFilter',
+                        },
+                      ],
+                    },
+                    // Forward other step events to interactive mode machine
                     'step.*': {
                       actions: forwardTo('interactiveMode'),
                     },
@@ -587,6 +645,7 @@ export const createStreamEnrichmentMachineImplementations = ({
         data,
         toasts: core.notifications.toasts,
         telemetryClient,
+        streamsRepositoryClient,
       })
     ),
     simulationMachine: simulationMachine.provide(

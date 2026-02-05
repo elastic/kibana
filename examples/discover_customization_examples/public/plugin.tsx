@@ -19,10 +19,12 @@ import type {
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupRenderer,
+  type ControlPanelsState,
+  type ControlGroupRendererApi,
+} from '@kbn/control-group-renderer';
 import { css } from '@emotion/react';
-import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -72,6 +74,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       }}
                       scopedHistory={appMountParams.history}
                       customizationCallbacks={[this.customizationCallback]}
+                      customizationContext={{ displayMode: 'standalone' }}
                     />
                   </Route>
                 </Routes>
@@ -159,7 +162,12 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       title: 'Saved logs views',
                       items: savedSearches.map((savedSearch) => ({
                         name: savedSearch.attributes.title,
-                        onClick: () => stateContainer.actions.onOpenSavedSearch(savedSearch.id),
+                        onClick: () =>
+                          stateContainer.internalState.dispatch(
+                            stateContainer.internalActions.openDiscoverSession({
+                              discoverSessionId: savedSearch.id,
+                            })
+                          ),
                         icon: savedSearch.id === currentSavedSearch.id ? 'check' : 'empty',
                         'data-test-subj': `logsViewSelectorOption-${savedSearch.attributes.title.replace(
                           /[^a-zA-Z0-9]/g,
@@ -200,9 +208,13 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                 stateStorage.set('controlPanels', input.initialChildControlState);
             });
 
-            const filterSubscription = controlGroupAPI.filters$.subscribe((newFilters = []) => {
-              stateContainer.actions.fetchData();
-            });
+            const filterSubscription = controlGroupAPI.appliedFilters$.subscribe(
+              (newFilters = []) => {
+                stateContainer.internalState.dispatch(
+                  stateContainer.injectCurrentTab(stateContainer.internalActions.fetchData)({})
+                );
+              }
+            );
 
             return () => {
               stateSubscription.unsubscribe();

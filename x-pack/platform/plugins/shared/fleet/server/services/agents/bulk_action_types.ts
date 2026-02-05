@@ -13,4 +13,5 @@ export enum BulkActionTaskType {
   REQUEST_DIAGNOSTICS_RETRY = 'fleet:request_diagnostics:retry',
   MIGRATE_RETRY = 'fleet:migrate_action:retry',
   PRIVILEGE_LEVEL_CHANGE_RETRY = 'fleet:privilege_level_change:retry',
+  ROLLBACK_RETRY = 'fleet:rollback_action:retry',
 }

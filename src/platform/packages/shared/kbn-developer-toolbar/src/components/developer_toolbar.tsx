@@ -21,6 +21,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { isMac } from '@kbn/shared-ux-utility';
 import { ConsoleErrorIndicator } from '../toolbar_items/console_error/console_error_indicator';
 import { MemoryUsageIndicator } from '../toolbar_items/memory/memory_usage_indicator';
 import { FrameJankIndicator } from '../toolbar_items/frame_jank/frame_jank_indicator';
@@ -77,7 +78,7 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
   const state = useToolbarState();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const keyboardShortcutLabel = isMac() ? '⌘+\\' : 'Ctrl+\\';
+  const keyboardShortcutLabel = isMac ? '⌘+\\' : 'Ctrl+\\';
 
   useEffect(() => {
     if (onHeightChange) {
@@ -239,8 +240,3 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
 // CMD + \ or CTRL + \ keyboard shortcut to toggle the developer toolbar
 const isToggleShortcut = (event: KeyboardEvent) =>
   (event.metaKey || event.ctrlKey) && event.key === '\\';
-
-const isMac = (): boolean =>
-  ((navigator as any)?.userAgentData?.platform || navigator.userAgent)
-    .toLowerCase()
-    .includes('mac');

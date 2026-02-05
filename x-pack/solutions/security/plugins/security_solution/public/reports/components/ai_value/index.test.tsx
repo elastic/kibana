@@ -96,7 +96,7 @@ describe('AIValueMetrics', () => {
     } as Partial<StartServices>);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
     useAIValueExportContextMock.mockReturnValue(undefined);
     mockUseKibana.mockReturnValue(createMockKibanaServices());
 
@@ -210,7 +210,7 @@ describe('AIValueMetrics', () => {
     };
     useAIValueExportContextMock.mockReturnValue({
       forwardedState: {
-        timeRange,
+        timeRange: { kind: 'absolute', ...timeRange },
       },
     });
 
@@ -221,6 +221,40 @@ describe('AIValueMetrics', () => {
         ...timeRange,
       })
     );
+  });
+
+  describe('when exporting with a relative time range', () => {
+    beforeAll(() => {
+      jest.useFakeTimers();
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    beforeEach(() => {
+      jest.setSystemTime(new Date('2025-12-19T00:00:00.000Z'));
+      useAIValueExportContextMock.mockReturnValue({
+        forwardedState: {
+          timeRange: {
+            kind: 'relative',
+            fromStr: 'now-7d',
+            toStr: 'now',
+          },
+        },
+      });
+    });
+
+    it('returns an absolute time range for useValueMetrics', () => {
+      render(<AIValueMetrics {...defaultProps} />);
+
+      expect(mockUseValueMetrics).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: '2025-12-12T00:00:00.000Z',
+          to: '2025-12-19T00:00:00.000Z',
+        })
+      );
+    });
   });
 
   it('should set the report input in the export context when the data is loaded', () => {

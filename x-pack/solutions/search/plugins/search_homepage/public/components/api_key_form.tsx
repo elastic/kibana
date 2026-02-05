@@ -54,9 +54,15 @@ const ApiKeyFormContent = ({
           display="empty"
           onClick={toggleApiKeyVisibility}
           data-test-subj="searchHomepageShowAPIKeyButton"
-          aria-label={i18n.translate('xpack.searchHomepage.apiKeyForm.showApiKey', {
-            defaultMessage: 'Show API key',
-          })}
+          aria-label={
+            status === Status.showPreviewKey
+              ? i18n.translate('xpack.searchHomepage.apiKeyForm.hideApiKey', {
+                  defaultMessage: 'Hide API key',
+                })
+              : i18n.translate('xpack.searchHomepage.apiKeyForm.showApiKey', {
+                  defaultMessage: 'Show API key',
+                })
+          }
         />,
         <EuiButtonIcon
           size="s"

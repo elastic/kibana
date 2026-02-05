@@ -18,6 +18,8 @@
         "label": "ApmConfiguration",
         "description": [],
         "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,6 +34,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -46,6 +50,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
+                "lineNumber": 76,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -61,6 +67,8 @@
                   "KibanaRawConfig"
                 ],
                 "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
+                "lineNumber": 77,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -76,6 +84,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
+                "lineNumber": 78,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -95,6 +105,8 @@
               "AgentConfigOptions"
             ],
             "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -109,6 +121,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
+                "lineNumber": 86,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -134,6 +148,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -150,6 +166,8 @@
               "() => Readonly<{} & { enabled: boolean; opentelemetry: Readonly<{} & { metrics: Readonly<{} & { otlp: Readonly<{ url?: string | undefined; headers?: Record<string, string> | undefined; } & { exportIntervalMillis: number; logLevel: string; }>; prometheus: Readonly<{} & { enabled: boolean; }>; }>; }>; }>"
             ],
             "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -166,6 +184,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -189,6 +209,8 @@
           " | undefined"
         ],
         "path": "src/platform/packages/private/kbn-apm-config-loader/src/config_loader.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -203,6 +225,8 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-apm-config-loader/src/config_loader.ts",
+            "lineNumber": 36,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -222,6 +246,8 @@
           "(argv: string[], rootDir: string, isDistributable: boolean, serviceName: string) => void"
         ],
         "path": "src/platform/packages/private/kbn-apm-config-loader/src/init_apm.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -236,6 +262,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/private/kbn-apm-config-loader/src/init_apm.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -251,6 +279,8 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-apm-config-loader/src/init_apm.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -266,6 +296,8 @@
               "boolean"
             ],
             "path": "src/platform/packages/private/kbn-apm-config-loader/src/init_apm.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -281,6 +313,8 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-apm-config-loader/src/init_apm.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -309,6 +343,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-apm-config-loader/src/config_loader.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -325,6 +361,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/private/kbn-apm-config-loader/src/config_loader.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -342,6 +380,8 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-apm-config-loader/src/config_loader.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -359,6 +399,8 @@
               "boolean"
             ],
             "path": "src/platform/packages/private/kbn-apm-config-loader/src/config_loader.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -380,6 +422,8 @@
           " | undefined) => boolean"
         ],
         "path": "src/platform/packages/private/kbn-apm-config-loader/src/rum_agent_configuration.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -395,6 +439,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-apm-config-loader/src/rum_agent_configuration.ts",
+            "lineNumber": 12,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -490,6 +536,8 @@
           "<boolean | undefined>; }>>"
         ],
         "path": "src/platform/packages/private/kbn-apm-config-loader/src/apm_config.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

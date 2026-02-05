@@ -53,8 +53,8 @@ describe('Elasticsearch max response size', () => {
 
   afterAll(async () => {
     mockConsoleLog.mockRestore();
-    await kibanaServer.stop();
-    await esServer.stop();
+    await kibanaServer?.stop();
+    await esServer?.stop();
   });
 
   it('rejects the response when the response size is larger than the requested limit', async () => {

@@ -44,7 +44,7 @@ describe('trace', () => {
   });
 
   afterAll(async () => {
-    await esServer.stop();
+    await esServer?.stop();
   });
 
   beforeEach(async () => {

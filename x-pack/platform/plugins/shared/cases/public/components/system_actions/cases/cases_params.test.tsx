@@ -113,6 +113,7 @@ describe('CasesParamsFields renders', () => {
     expect(await screen.findByTestId('time-window-unit-select')).toBeInTheDocument();
     expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
     expect(await screen.findByTestId('reopen-case')).toBeInTheDocument();
+    expect(await screen.findByTestId('maximum-case-to-open-input')).toBeInTheDocument();
   });
 
   it('renders loading state of grouping by fields correctly', async () => {
@@ -165,6 +166,22 @@ describe('CasesParamsFields renders', () => {
     render(<CasesParamsFields {...newProps} />);
 
     expect(await screen.findByText('error')).toBeInTheDocument();
+  });
+
+  it('renders the default maximum amount of cases correctly', async () => {
+    render(<CasesParamsFields {...defaultProps} />);
+
+    const maximumCasesInput = await screen.findByTestId('maximum-case-to-open-input');
+    expect(maximumCasesInput).toHaveValue(5);
+
+    // set to the maximum
+    fireEvent.change(maximumCasesInput, { target: { value: '20' } });
+    expect(editAction.mock.calls[0][1].maximumCasesToOpen).toEqual(20);
+    expect(maximumCasesInput).toBeValid();
+
+    // set to an invalid value
+    fireEvent.change(maximumCasesInput, { target: { value: '22' } });
+    expect(maximumCasesInput).toBeInvalid();
   });
 
   describe('UI updates', () => {

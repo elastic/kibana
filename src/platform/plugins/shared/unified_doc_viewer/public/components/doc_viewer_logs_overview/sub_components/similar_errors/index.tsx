@@ -71,6 +71,9 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
     hitFlattened,
     fieldConstants.TIMESTAMP_FIELD
   );
+  const normalizedTimestamp = Array.isArray(timestampValue)
+    ? String(timestampValue[0])
+    : String(timestampValue);
 
   const sectionDescription = useMemo(
     () =>
@@ -147,7 +150,7 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
     >
       <SimilarErrorsOccurrencesChart
         baseEsqlQuery={esqlQuery}
-        currentDocumentTimestamp={typeof timestampValue === 'string' ? timestampValue : undefined}
+        currentDocumentTimestamp={normalizedTimestamp}
       />
     </ContentFrameworkSection>
   );

@@ -61,7 +61,7 @@ export const useAddToDashboard = ({
       const stateTransfer = embeddable.getStateTransfer();
 
       const state = {
-        serializedState: { rawState: embeddableInput },
+        serializedState: embeddableInput,
         type,
       };
 

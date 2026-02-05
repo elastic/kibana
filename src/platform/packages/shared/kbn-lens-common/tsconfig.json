@@ -38,7 +38,6 @@
     "@kbn/esql-types",
     "@kbn/inspector-plugin",
     "@kbn/embeddable-plugin",
-    "@kbn/presentation-containers",
     "@kbn/interpreter",
     "@kbn/data-plugin",
     "@kbn/share-plugin",
@@ -64,6 +63,8 @@
     "@kbn/i18n",
     "@kbn/chart-icons",
     "@kbn/alerts-ui-shared",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/kql",
+    "@kbn/control-group-renderer"
   ]
 }

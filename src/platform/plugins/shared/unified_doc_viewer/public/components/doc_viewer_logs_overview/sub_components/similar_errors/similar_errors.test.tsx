@@ -38,8 +38,11 @@ jest.mock('../../../content_framework/lazy_content_framework_section', () => ({
 }));
 
 jest.mock('./similar_errors_occurrences_chart', () => ({
-  SimilarErrorsOccurrencesChart: ({ baseEsqlQuery }: any) => (
-    <div data-test-subj="SimilarErrorsOccurrencesChart" />
+  SimilarErrorsOccurrencesChart: ({ baseEsqlQuery, currentDocumentTimestamp }: any) => (
+    <div
+      data-test-subj="SimilarErrorsOccurrencesChart"
+      data-current-document-timestamp={currentDocumentTimestamp}
+    />
   ),
 }));
 
@@ -140,15 +143,47 @@ describe('SimilarErrors', () => {
     });
   });
 
-  it('renders chart', () => {
-    const hit = buildHit({
-      [fieldConstants.SERVICE_NAME_FIELD]: 'test-service',
-      [fieldConstants.ERROR_CULPRIT_FIELD]: 'test-culprit',
-      message: 'test error message',
+  describe('Chart rendering', () => {
+    it('renders chart', () => {
+      const hit = buildHit({
+        [fieldConstants.SERVICE_NAME_FIELD]: 'test-service',
+        [fieldConstants.ERROR_CULPRIT_FIELD]: 'test-culprit',
+        message: 'test error message',
+      });
+
+      renderSimilarErrors(hit);
+
+      expect(screen.getByTestId('SimilarErrorsOccurrencesChart')).toBeInTheDocument();
     });
 
-    renderSimilarErrors(hit);
+    it('passes currentDocumentTimestamp to chart when timestamp is available', () => {
+      const timestamp = '2024-12-10T10:30:00.000Z';
+      const hit = buildHit({
+        [fieldConstants.SERVICE_NAME_FIELD]: 'test-service',
+        [fieldConstants.ERROR_CULPRIT_FIELD]: 'test-culprit',
+        message: 'test error message',
+        '@timestamp': timestamp,
+      });
 
-    expect(screen.getByTestId('SimilarErrorsOccurrencesChart')).toBeInTheDocument();
+      renderSimilarErrors(hit);
+
+      const chart = screen.getByTestId('SimilarErrorsOccurrencesChart');
+      expect(chart).toHaveAttribute('data-current-document-timestamp', timestamp);
+    });
+
+    it('handles array timestamp values correctly', () => {
+      const timestampArray = ['2024-12-10T10:30:00.000Z'];
+      const hit = buildHit({
+        [fieldConstants.SERVICE_NAME_FIELD]: 'test-service',
+        [fieldConstants.ERROR_CULPRIT_FIELD]: 'test-culprit',
+        message: 'test error message',
+        '@timestamp': timestampArray,
+      });
+
+      renderSimilarErrors(hit);
+
+      const chart = screen.getByTestId('SimilarErrorsOccurrencesChart');
+      expect(chart).toHaveAttribute('data-current-document-timestamp', timestampArray[0]);
+    });
   });
 });

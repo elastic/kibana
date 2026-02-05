@@ -10,8 +10,11 @@
 import type { ObjectType } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
-import { controlsGroupSchema } from '@kbn/controls-schemas';
-import { referenceSchema } from '@kbn/content-management-utils';
+/**
+ * Currently, controls are the only pinnable panels. However, if we intend to make this extendable, we should instead
+ * get the pinned panel schema from a pinned panel registry **independent** from controls
+ */
+import { controlsGroupSchema as pinnedPanelsSchema } from '@kbn/controls-schemas';
 import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
@@ -110,6 +113,12 @@ export function getSectionSchema() {
 }
 
 export const optionsSchema = schema.object({
+  auto_apply_filters: schema.maybe(
+    schema.boolean({
+      defaultValue: DEFAULT_DASHBOARD_OPTIONS.auto_apply_filters,
+      meta: { description: 'Auto apply control filters.' },
+    })
+  ),
   hide_panel_titles: schema.maybe(
     schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.hide_panel_titles,
@@ -144,20 +153,18 @@ export const optionsSchema = schema.object({
   ),
 });
 
+export const accessControlSchema = schema.maybe(
+  schema.object({
+    owner: schema.maybe(schema.string()),
+    access_mode: schema.maybe(
+      schema.oneOf([schema.literal('write_restricted'), schema.literal('default')])
+    ),
+  })
+);
+
 export function getDashboardStateSchema() {
   return schema.object({
-    // unsuppoted "as code" keys
-    // TODO remove before GA
-    controlGroupInput: schema.maybe(controlsGroupSchema),
-    references: schema.maybe(
-      schema.arrayOf(referenceSchema, {
-        meta: {
-          deprecated: true,
-        },
-      })
-    ),
-
-    // supported "as code" keys
+    pinned_panels: schema.maybe(pinnedPanelsSchema),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
     options: schema.maybe(optionsSchema),
@@ -176,5 +183,6 @@ export function getDashboardStateSchema() {
     ),
     time_range: schema.maybe(timeRangeSchema),
     title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
+    access_control: accessControlSchema,
   });
 }

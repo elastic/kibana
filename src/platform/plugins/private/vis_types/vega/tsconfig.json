@@ -46,6 +46,8 @@
     "@kbn/ui-actions-plugin",
     "@kbn/css-utils",
     "@kbn/visualizations-common",
+    "@kbn/es-types",
+    "@kbn/esql-utils",
   ],
   "exclude": [
     "target/**/*",

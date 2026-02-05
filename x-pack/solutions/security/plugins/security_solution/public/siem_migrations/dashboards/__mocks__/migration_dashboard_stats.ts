@@ -6,6 +6,7 @@
  */
 
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
+import { MigrationSource } from '../../common/types';
 import type { DashboardMigrationStats } from '../types';
 
 export const migrationDashboardsStats: DashboardMigrationStats[] = [
@@ -22,6 +23,7 @@ export const migrationDashboardsStats: DashboardMigrationStats[] = [
       processing: 0,
       failed: 0,
     },
+    vendor: MigrationSource.SPLUNK,
   },
   {
     id: '2',
@@ -36,6 +38,7 @@ export const migrationDashboardsStats: DashboardMigrationStats[] = [
       processing: 0,
       failed: 0,
     },
+    vendor: MigrationSource.SPLUNK,
   },
 ];
 
@@ -55,6 +58,7 @@ export const getDashboardMigrationStatsMock = (
       processing: 0,
       failed: 0,
     },
+    vendor: MigrationSource.SPLUNK,
     ...overrides,
   };
 };

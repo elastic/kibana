@@ -154,7 +154,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         disableAutoSync: false,
         hasAlreadyDoneCleanup: false,
         lastStartedAt: expect.anything(),
-        lastTotalMWs: 1,
         maxCleanUpRetries: 2,
       });
     });
@@ -191,7 +190,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
         disableAutoSync: false,
-        lastTotalMWs: 1,
         maxCleanUpRetries: 2,
         hasAlreadyDoneCleanup: false,
         lastStartedAt: expect.anything(),
@@ -222,7 +220,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.state).toEqual({
         disableAutoSync: false,
         lastStartedAt: expect.anything(),
-        lastTotalMWs: 1,
         hasAlreadyDoneCleanup: false,
         maxCleanUpRetries: 2,
       });
@@ -251,6 +248,43 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.runTask({ taskInstance });
 
       expect(result.state.lastStartedAt).toBe(startedAt.toISOString());
+    });
+
+    it('should sync only for provided privateLocationId and clear it from state', async () => {
+      const taskInstance = getMockTaskInstance({ privateLocationId: 'pl-1' });
+      // Ensure the server's savedObjects.createInternalRepository returns an object for the call
+      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
+        .fn()
+        .mockReturnValue(mockSoClient as any);
+
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+
+      const syncSpy = jest
+        .spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies')
+        .mockResolvedValue(undefined);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(syncSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          allPrivateLocations: expect.any(Array),
+          encryptedSavedObjects: mockEncryptedSoClient,
+          privateLocationId: 'pl-1',
+          soClient: expect.any(Object),
+        })
+      );
+
+      expect(result.state).toEqual({
+        ...taskInstance.state,
+        privateLocationId: undefined,
+      });
     });
   });
 
@@ -291,12 +325,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
   describe('hasMWsChanged', () => {
     it('returns true if updated MWs are found', async () => {
       // mock maintenance window client to return an updated MW
-      const bulkGet = jest.fn().mockResolvedValue({
-        maintenanceWindows: [{ id: 'mw-1', updatedAt: '2024-01-02T00:00:00.000Z' }],
-      });
-      mockServerSetup.getMaintenanceWindowClientInternal = jest.fn().mockReturnValue({
-        bulkGet,
-      });
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockReturnValue([{ id: 'mw-1', updatedAt: '2024-01-02T00:00:00.000Z' }]);
 
       const { hasMWsChanged } = await task.hasMWsChanged({
         soClient: mockSoClient as any,
@@ -307,17 +338,13 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         monitorMwsIds: ['mw-1'],
       });
       expect(hasMWsChanged).toBe(true);
-      expect(bulkGet).toHaveBeenCalledWith({ ids: ['mw-1'] });
     });
 
     it('returns true if total number of MWs changed (missing ids)', async () => {
-      // bulkGet returns no maintenance windows -> missing ids detected
-      const bulkGet = jest.fn().mockResolvedValue({
-        maintenanceWindows: [],
-      });
-      mockServerSetup.getMaintenanceWindowClientInternal = jest.fn().mockReturnValue({
-        bulkGet,
-      });
+      //  returns no maintenance windows -> missing ids detected
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockReturnValue([]);
 
       const { hasMWsChanged } = await task.hasMWsChanged({
         soClient: mockSoClient as any,
@@ -332,12 +359,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
     it('returns false if no changes are detected', async () => {
       // bulkGet returns MWs updated before lastStartedAt and all ids present
-      const bulkGet = jest.fn().mockResolvedValue({
-        maintenanceWindows: [{ id: 'mw-1', updatedAt: '2023-01-01T00:00:00.000Z' }],
-      });
-      mockServerSetup.getMaintenanceWindowClientInternal = jest.fn().mockReturnValue({
-        bulkGet,
-      });
+
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockReturnValue([{ id: 'mw-1', updatedAt: '2023-01-01T00:00:00.000Z' }]);
 
       const { hasMWsChanged } = await task.hasMWsChanged({
         soClient: mockSoClient as any,
@@ -451,6 +476,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
                 attributes: {
                   origin: 'ui',
                   locations: [{ id: 'loc1', isServiceManaged: false }],
+                  id: 'monitor1',
                 },
                 namespaces: ['space1'],
               },

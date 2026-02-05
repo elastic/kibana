@@ -85,7 +85,7 @@ function getTagcloudDataset(
   adhocReferences: SavedObjectReference[] = [],
   layerId: string
 ): TagcloudState['dataset'] {
-  const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
+  const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
 
   if (!dataset || dataset.type == null) {
     throw new Error('Unsupported dataset type');

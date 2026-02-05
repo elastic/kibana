@@ -18,6 +18,7 @@ import {
   useEuiTheme,
   EuiPanel,
   EuiToolTip,
+  EuiOutsideClickDetector,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -178,94 +179,102 @@ export const ToolbarSelector = ({
 
   const panelMinWidth = calculateWidthFromEntries(options, ['label']) + 2 * euiTheme.base; // plus extra width for the right Enter button
 
+  const handleOutsideClick = useCallback(() => {
+    if (!isOpen) return;
+    closePopover();
+  }, [closePopover, isOpen]);
+
   return (
-    <EuiPopover
-      id={dataTestSubj}
-      ownFocus
-      initialFocus={
-        searchable ? `#${dataTestSubj}SelectableInput` : `#${dataTestSubj}Selectable_listbox`
-      }
-      panelProps={{
-        css: searchable
-          ? css`
-              min-width: ${panelMinWidth}px;
-            `
-          : css`
-              width: ${panelMinWidth}px;
-            `,
-      }}
-      panelPaddingSize="none"
-      button={
-        <EuiToolTip
-          content={labelPopoverDisabled ? undefined : buttonLabel}
-          delay="long"
-          display="block"
-        >
-          <ToolbarButton
-            size="s"
-            data-test-subj={`${dataTestSubj}Button`}
-            data-selected-value={dataSelectedValue}
-            aria-label={popoverTitle}
-            label={buttonLabel}
-            onClick={togglePopover}
-            onBlur={enableLabelPopover}
-            hasArrow={hasArrow}
-            fullWidth={fullWidth}
-            isDisabled={disabled}
-          />
-        </EuiToolTip>
-      }
-      isOpen={isOpen}
-      closePopover={closePopover}
-    >
-      {popoverTitle && <EuiPopoverTitle paddingSize="s">{popoverTitle}</EuiPopoverTitle>}
-      <EuiSelectable<SelectableEntry>
-        id={`${dataTestSubj}Selectable`}
-        singleSelection={singleSelection ?? true}
-        aria-label={popoverTitle}
-        data-test-subj={`${dataTestSubj}Selectable`}
-        isPreFiltered={searchable}
-        options={filteredOptions}
-        onChange={onSelectionChange}
-        listProps={{
-          truncationProps: { truncation: 'middle' },
-          isVirtualized: searchable,
+    <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
+      <EuiPopover
+        id={dataTestSubj}
+        ownFocus
+        initialFocus={
+          searchable ? `#${dataTestSubj}SelectableInput` : `#${dataTestSubj}Selectable_listbox`
+        }
+        panelProps={{
+          css: searchable
+            ? css`
+                min-width: ${panelMinWidth}px;
+              `
+            : css`
+                width: ${panelMinWidth}px;
+              `,
         }}
-        {...(searchable
-          ? {
-              searchable,
-              searchProps,
-              noMatchesMessage: (
-                <p>
-                  <FormattedMessage
-                    id="sharedUXPackages.toolbarSelectorPopover.noResults"
-                    defaultMessage="No results found for {term}"
-                    values={{
-                      term: <strong>{searchTerm}</strong>,
-                    }}
-                  />
-                </p>
-              ),
-            }
-          : {})}
+        panelPaddingSize="none"
+        button={
+          <EuiToolTip
+            content={labelPopoverDisabled ? undefined : buttonLabel}
+            delay="long"
+            display="block"
+          >
+            <ToolbarButton
+              size="s"
+              data-test-subj={`${dataTestSubj}Button`}
+              data-selected-value={dataSelectedValue}
+              aria-label={popoverTitle}
+              label={buttonLabel}
+              onClick={togglePopover}
+              onBlur={enableLabelPopover}
+              hasArrow={hasArrow}
+              fullWidth={fullWidth}
+              isDisabled={disabled}
+            />
+          </EuiToolTip>
+        }
+        isOpen={isOpen}
+        closePopover={closePopover}
       >
-        {(list, search) => (
-          <>
-            {search && (
-              <EuiPanel
-                color="transparent"
-                paddingSize="s"
-                hasShadow={false}
-                css={{ paddingBottom: 0 }}
-              >
-                {search}
-                {popoverContentBelowSearch && <>{popoverContentBelowSearch}</>}
-              </EuiPanel>
-            )}
-            {list}
-          </>
-        )}
-      </EuiSelectable>
-    </EuiPopover>
+        {popoverTitle && <EuiPopoverTitle paddingSize="s">{popoverTitle}</EuiPopoverTitle>}
+        <EuiSelectable<SelectableEntry>
+          id={`${dataTestSubj}Selectable`}
+          singleSelection={singleSelection ?? true}
+          aria-label={popoverTitle}
+          data-test-subj={`${dataTestSubj}Selectable`}
+          data-is-searching={searchTerm !== searchTermDebounced}
+          isPreFiltered={searchable}
+          options={filteredOptions}
+          onChange={onSelectionChange}
+          listProps={{
+            truncationProps: { truncation: 'middle' },
+            isVirtualized: searchable,
+          }}
+          {...(searchable
+            ? {
+                searchable,
+                searchProps,
+                noMatchesMessage: (
+                  <p>
+                    <FormattedMessage
+                      id="sharedUXPackages.toolbarSelectorPopover.noResults"
+                      defaultMessage="No results found for {term}"
+                      values={{
+                        term: <strong>{searchTerm}</strong>,
+                      }}
+                    />
+                  </p>
+                ),
+              }
+            : {})}
+        >
+          {(list, search) => (
+            <>
+              {search && (
+                <EuiPanel
+                  color="transparent"
+                  paddingSize="s"
+                  hasShadow={false}
+                  css={{ paddingBottom: 0 }}
+                >
+                  {search}
+                  {popoverContentBelowSearch && <>{popoverContentBelowSearch}</>}
+                </EuiPanel>
+              )}
+              {list}
+            </>
+          )}
+        </EuiSelectable>
+      </EuiPopover>
+    </EuiOutsideClickDetector>
   );
 };

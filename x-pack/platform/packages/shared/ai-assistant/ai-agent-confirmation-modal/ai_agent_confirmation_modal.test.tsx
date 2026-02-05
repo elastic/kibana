@@ -10,15 +10,26 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AIAgentConfirmationModal } from './ai_agent_confirmation_modal';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { DocLinks } from '@kbn/doc-links';
 
 describe('AIAgentConfirmationModal', () => {
   const mockOnConfirm = jest.fn();
   const mockOnCancel = jest.fn();
 
+  const mockDocLinks: DocLinks = {
+    agentBuilder: {
+      learnMore: 'https://www.elastic.co/docs/explore-analyze/ai-features/ai-agent-or-ai-assistant',
+    },
+  } as DocLinks;
+
   const renderComponent = () => {
     return render(
       <I18nProvider>
-        <AIAgentConfirmationModal onConfirm={mockOnConfirm} onCancel={mockOnCancel} />
+        <AIAgentConfirmationModal
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          docLinks={mockDocLinks}
+        />
       </I18nProvider>
     );
   };

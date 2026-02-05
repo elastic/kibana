@@ -6,27 +6,29 @@
  */
 
 import { useMemo } from 'react';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useProductFeatureKeys } from '../../../common/hooks/use_product_feature_keys';
 
 /**
  * Centralized capability helper for everything related to the rule gaps auto-fill feature. ()
  */
 export const useGapAutoFillCapabilities = () => {
   const license = useLicense();
-  const gapAutoFillSchedulerEnabled = useIsExperimentalFeatureEnabled(
-    'gapAutoFillSchedulerEnabled'
-  );
+  const productFeatureKeys = useProductFeatureKeys();
   const hasEnterpriseLicense = license.isEnterprise();
+  const hasRuleGapsAutoFillFeature = productFeatureKeys.has(
+    ProductFeatureSecurityKey.ruleGapsAutoFill
+  );
   const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges;
 
   return useMemo(
     () => ({
       hasEnterpriseLicense,
-      canAccessGapAutoFill: gapAutoFillSchedulerEnabled && hasEnterpriseLicense && canReadRules,
-      canEditGapAutoFill: gapAutoFillSchedulerEnabled && hasEnterpriseLicense && canEditRules,
+      canAccessGapAutoFill: hasEnterpriseLicense && hasRuleGapsAutoFillFeature && canReadRules,
+      canEditGapAutoFill: hasEnterpriseLicense && hasRuleGapsAutoFillFeature && canEditRules,
     }),
-    [gapAutoFillSchedulerEnabled, hasEnterpriseLicense, canEditRules, canReadRules]
+    [hasEnterpriseLicense, hasRuleGapsAutoFillFeature, canEditRules, canReadRules]
   );
 };

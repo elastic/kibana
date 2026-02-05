@@ -7,16 +7,21 @@
 
 import { z } from '@kbn/zod';
 import type { RequestHandlerContext, SavedObjectsServiceStart } from '@kbn/core/server';
-import { ToolType } from '@kbn/onechat-common';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { getToolResultId } from '@kbn/onechat-server';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { getToolResultId } from '@kbn/agent-builder-server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { DashboardAppLocator } from '@kbn/dashboard-plugin/common/locator/locator';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import { dashboardTools } from '../../../common';
-import { checkDashboardToolsAvailability, normalizePanels } from '../utils';
+import {
+  checkDashboardToolsAvailability,
+  normalizePanels,
+  buildMarkdownPanel,
+  getMarkdownPanelHeight,
+} from '../utils';
 
 const createDashboardSchema = z.object({
   title: z.string().describe('The title of the dashboard to create.'),
@@ -25,6 +30,11 @@ const createDashboardSchema = z.object({
     .array(z.unknown())
     .optional()
     .describe('An array of panel configurations (PanelJSON or lens_tool_artifact).'),
+  markdownContent: z
+    .string()
+    .describe(
+      'Markdown content for a summary panel displayed at the top of the dashboard. Should describe what the dashboard shows and provide helpful context.'
+    ),
 });
 
 export const createDashboardTool = (
@@ -42,18 +52,25 @@ export const createDashboardTool = (
       cacheMode: 'space',
       handler: checkDashboardToolsAvailability,
     },
-    description: `Create a dashboard with the specified title, description, and panels.
+    description: `Create a dashboard with the specified title, description, panels, and a markdown summary.
 
 This tool will:
 1. Accept a title and description for the dashboard
-2. Accept an array of panel configurations
-3. Create a dashboard with the provided configuration`,
+2. Accept markdown content for a summary panel at the top
+3. Accept an array of panel configurations
+4. Create a dashboard with the markdown panel followed by visualization panels`,
     schema: createDashboardSchema,
     tags: [],
-    handler: async ({ title, description, panels, ...rest }, { logger, request, esClient }) => {
+    handler: async (
+      { title, description, panels, markdownContent },
+      { logger, request, esClient, resultStore }
+    ) => {
       try {
         const coreContext = {
-          savedObjects: { client: savedObjects.getScopedClient(request) },
+          savedObjects: {
+            client: savedObjects.getScopedClient(request),
+            typeRegistry: savedObjects.getTypeRegistry(),
+          },
         };
 
         // Create a minimal request handler context
@@ -62,7 +79,10 @@ This tool will:
           resolve: async () => ({ core: coreContext }),
         } as unknown as RequestHandlerContext;
 
-        const normalizedPanels = normalizePanels(panels);
+        // Build markdown panel and offset other panels accordingly
+        const markdownPanel = buildMarkdownPanel(markdownContent);
+        const yOffset = getMarkdownPanelHeight(markdownContent);
+        const normalizedPanels = [markdownPanel, ...normalizePanels(panels, yOffset, resultStore)];
 
         const dashboardCreateResponse = await dashboard.client.create(requestHandlerContext, {
           data: { title, description, panels: normalizedPanels },

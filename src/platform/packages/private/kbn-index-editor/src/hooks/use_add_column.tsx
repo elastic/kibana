@@ -24,7 +24,7 @@ type ErrorCode = keyof typeof errorCodes;
 export const errorMessages: Record<ErrorCode, (columnName: string) => string> = {
   [errorCodes.DUPLICATED_FIELD_ERROR]: (columnName: string) =>
     i18n.translate('indexEditor.addColumn.duplicatedName', {
-      defaultMessage: 'Column name {columnName} already exists',
+      defaultMessage: 'Field name {columnName} already exists',
       values: { columnName },
     }),
 };

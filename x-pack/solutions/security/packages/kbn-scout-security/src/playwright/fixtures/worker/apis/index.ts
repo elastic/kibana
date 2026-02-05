@@ -7,3 +7,8 @@
 
 export { getDetectionRuleApiService } from './detection_rule';
 export type { DetectionRuleApiService } from './detection_rule';
+
+export { getEntityAnalyticsApiService } from './entity_analytics';
+export type { EntityAnalyticsApiService } from './entity_analytics';
+export { getCloudConnectorApiService } from './cloud_connector';
+export type { CloudConnectorApiService } from './cloud_connector';

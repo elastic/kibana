@@ -17,7 +17,7 @@ import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_eng
 
 import * as i18n from './translations';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
@@ -53,21 +53,20 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
     return `${ruleNameForChat} - ${title} ${date}`;
   }, [date, title, ruleNameForChat]);
 
-  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
-
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const ruleAttachment = useMemo(
     () => ({
       attachmentType: SecurityAgentBuilderAttachments.rule,
       attachmentData: {
         text:
-          ruleName != null && dataSources != null
-            ? `Rule name: ${ruleName}\nData sources: ${dataSources}\nError message: ${message}`
+          ruleNameForChat != null && dataSources != null
+            ? `Rule name: ${ruleNameForChat}\nData sources: ${dataSources}\nError message: ${message}`
             : `Error message: ${message}`,
-        attachmentLabel: ruleName,
+        attachmentLabel: ruleNameForChat,
       },
       attachmentPrompt: i18n.ASK_ASSISTANT_USER_PROMPT,
     }),
-    [message, ruleName, dataSources]
+    [message, ruleNameForChat, dataSources]
   );
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 
@@ -104,11 +103,18 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
         >
           {message}
         </EuiCodeBlock>
-        {hasAssistantPrivilege && (
-          <>
-            {isAgentBuilderEnabled ? (
-              <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} color={color} />
-            ) : (
+        <>
+          {isAgentChatExperienceEnabled ? (
+            <NewAgentBuilderAttachment
+              onClick={openAgentBuilderFlyout}
+              color={color}
+              telemetry={{
+                pathway: 'rule_failure',
+                attachments: ['rule'],
+              }}
+            />
+          ) : (
+            hasAssistantPrivilege && (
               <NewChat
                 category="detection-rules"
                 color={color}
@@ -121,9 +127,9 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
               >
                 {i18n.ASK_ASSISTANT_ERROR_BUTTON}
               </NewChat>
-            )}
-          </>
-        )}
+            )
+          )}
+        </>
       </EuiCallOut>
     </div>
   );

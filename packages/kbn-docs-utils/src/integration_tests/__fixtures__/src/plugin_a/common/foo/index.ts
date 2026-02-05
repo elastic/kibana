@@ -8,3 +8,9 @@
  */
 
 export const commonFoo = 'COMMON VAR!';
+
+// Expected issues:
+//   missing comments (1):
+//     line 10 - commonFoo
+//   no references (1):
+//     line 10 - commonFoo

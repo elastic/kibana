@@ -18,6 +18,7 @@ import slackLogoSvg from './icons/logo_slack.svg';
 import plugs from './icons/plugs.svg';
 import refresh from './icons/refresh.svg';
 import sparkles from './icons/sparkles.svg';
+import tableOfContents from './icons/table_of_contents.svg';
 import user from './icons/user.svg';
 import warning from './icons/warning.svg';
 
@@ -30,6 +31,7 @@ export const HardcodedIcons: Record<string, string> = {
   kibana: kibanaLogoSvg,
   console,
   http: globe,
+  'data.set': tableOfContents,
   foreach: refresh,
   if: branch,
   wait: clock,

@@ -54,6 +54,14 @@ export interface ObservabilityLogsAIAssistantFeature {
   render: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
 }
 
+export interface ObservabilityLogsAiInsightFeatureRenderDeps {
+  doc: DataTableRecord;
+}
+export interface ObservabilityLogsAIInsightFeature {
+  id: 'observability-logs-ai-insight';
+  render: (deps: ObservabilityLogsAiInsightFeatureRenderDeps) => JSX.Element;
+}
+
 export interface ObservabilityCreateSLOFeature {
   id: 'observability-create-slo';
   createSLOFlyout: (props: {
@@ -221,6 +229,7 @@ export type ObservabilityTracesFeature =
 export type DiscoverFeature =
   | ObservabilityStreamsFeature
   | ObservabilityLogsAIAssistantFeature
+  | ObservabilityLogsAIInsightFeature
   | ObservabilityCreateSLOFeature
   | ObservabilityLogEventsFeature
   | ObservabilityTracesFeature

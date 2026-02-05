@@ -16,23 +16,57 @@ import {
   EuiSpacer,
   EuiFormRow,
   EuiComboBox,
-  EuiFieldText,
   EuiButtonGroup,
   EuiLink,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { useSubAction, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type {
   PostBlockkitParams,
   PostMessageParams,
   SlackApiConfig,
-  ValidChannelIdSubActionParams,
 } from '@kbn/connector-schemas/slack_api';
-import type { ValidChannelResponse } from '../../../common/slack_api/types';
 
-const SlackParamsFields: React.FunctionComponent<
-  ActionParamsProps<PostMessageParams | PostBlockkitParams>
-> = ({
+type ParamsProps = ActionParamsProps<PostMessageParams | PostBlockkitParams>;
+
+const SlackParamsFields: React.FunctionComponent<ParamsProps> = (props) => {
+  const { editAction, index, useDefaultMessage, defaultMessage } = props;
+  const { subActionParams } = props.actionParams;
+  const { channels = [], channelIds = [], channelNames = [], text } = subActionParams ?? {};
+
+  const connectorId = props.actionConnector?.id ?? '';
+  const key = `${connectorId}:${index}`;
+
+  useEffect(() => {
+    editAction('subAction', 'postMessage', index);
+    editAction(
+      'subActionParams',
+      {
+        channels,
+        channelIds,
+        channelNames,
+        text,
+      },
+      index
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectorId, index]);
+
+  useEffect(() => {
+    if (shouldUseDefaultValue({ useDefaultMessage, defaultMessage, text })) {
+      editAction(
+        'subActionParams',
+        { channels, channelIds, channelNames, text: defaultMessage },
+        index
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultMessage, useDefaultMessage]);
+
+  return <SlackParamsFieldsComponent {...props} key={key} />;
+};
+
+const SlackParamsFieldsComponent: React.FunctionComponent<ParamsProps> = ({
   actionConnector,
   actionParams,
   editAction,
@@ -42,254 +76,136 @@ const SlackParamsFields: React.FunctionComponent<
   defaultMessage,
   useDefaultMessage,
 }) => {
-  const [connectorId, setConnectorId] = useState<string>();
-  const { subAction, subActionParams } = actionParams;
-  const { channels = [], text, channelIds = [] } = subActionParams ?? {};
-  const [tempChannelId, setTempChannelId] = useState(
-    channels.length > 0
-      ? channels[0]
-      : channelIds.length > 0 && channelIds[0].length > 0
-      ? channelIds[0]
-      : ''
-  );
+  const channelsLabelId = useGeneratedHtmlId();
+
+  const { subActionParams } = actionParams;
+  const { channels = [], text, channelIds = [], channelNames = [] } = subActionParams ?? {};
+
+  const selectedChannel = getSelectedChannel({
+    channels,
+    channelIds,
+    channelNames,
+  });
+
+  const initialTextValue = shouldUseDefaultValue({ useDefaultMessage, defaultMessage, text })
+    ? defaultMessage
+    : text;
+
   const [messageType, setMessageType] = useState('text');
-  const [textValue, setTextValue] = useState<string | undefined>(text);
-  const [validChannelId, setValidChannelId] = useState('');
-  const { toasts } = useKibana().services.notifications;
+  const [textValue, setTextValue] = useState<string | undefined>(initialTextValue);
+
   const allowedChannelsConfig =
     (actionConnector as UserConfiguredActionConnector<SlackApiConfig, unknown>)?.config
       ?.allowedChannels ?? [];
-  const [selectedChannels, setSelectedChannels] = useState<EuiComboBoxOptionOption[]>(
-    (channelIds ?? []).map((c) => {
-      const allowedChannelSelected = allowedChannelsConfig?.find((ac) => ac.id === c);
-      return {
-        value: c,
-        label: allowedChannelSelected
-          ? `${allowedChannelSelected.id} - ${allowedChannelSelected.name}`
-          : c,
-      };
-    })
+
+  const slackChannelsOptions = allowedChannelsConfig.map((ac) => ({
+    label: formatChannel(ac.name),
+    value: formatChannel(ac.name),
+    'data-test-subj': ac.name,
+  }));
+
+  const hasAllowedChannelsConfig = Boolean(allowedChannelsConfig.length);
+
+  const [selectedChannels, setSelectedChannels] = useState<EuiComboBoxOptionOption<string>[]>(
+    selectedChannel ? [{ value: selectedChannel, label: selectedChannel }] : []
   );
-  const [channelValidError, setChannelValidError] = useState<string[]>([]);
-  const {
-    response: { channel: channelValidInfo } = {},
-    isLoading: isValidatingChannel,
-    error: channelValidErrorResp,
-  } = useSubAction<ValidChannelIdSubActionParams, ValidChannelResponse>({
-    connectorId: actionConnector?.id,
-    subAction: 'validChannelId',
-    subActionParams: {
-      channelId: validChannelId,
-    },
-    disabled: validChannelId.length === 0 && allowedChannelsConfig.length === 0,
-  });
 
   const onToggleInput = useCallback(
     (id: string) => {
       // clear the text when toggled
       setTextValue('');
-      editAction('subAction', id === 'text' ? 'postMessage' : 'postBlockkit', index);
+      editAction('subAction', getSubAction(id), index);
       setMessageType(id);
     },
-    [setMessageType, editAction, index, setTextValue]
+    [editAction, index]
   );
-
-  useEffect(() => {
-    if (useDefaultMessage || !text) {
-      editAction('subActionParams', { channels, channelIds, text: defaultMessage }, index);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultMessage, useDefaultMessage]);
-
-  useEffect(() => {
-    if (
-      !isValidatingChannel &&
-      !channelValidErrorResp &&
-      channelValidInfo &&
-      validChannelId === channelValidInfo.id
-    ) {
-      editAction(
-        'subActionParams',
-        { channels: undefined, channelIds: [channelValidInfo.id], text },
-        index
-      );
-      setValidChannelId('');
-      setChannelValidError([]);
-    }
-  }, [
-    channelValidInfo,
-    validChannelId,
-    channelValidErrorResp,
-    isValidatingChannel,
-    editAction,
-    text,
-    index,
-  ]);
-
-  useEffect(() => {
-    if (channelValidErrorResp && validChannelId.length > 0) {
-      editAction('subActionParams', { channels: undefined, channelIds: [], text }, index);
-      const errorMessage = i18n.translate(
-        'xpack.stackConnectors.slack.params.componentError.validChannelsRequestFailed',
-        {
-          defaultMessage: '{validChannelId} is not a valid Slack channel',
-          values: {
-            validChannelId,
-          },
-        }
-      );
-      setChannelValidError([errorMessage]);
-      setValidChannelId('');
-      toasts.addDanger({
-        title: errorMessage,
-        text: channelValidErrorResp.message,
-      });
-    }
-  }, [toasts, channelValidErrorResp, validChannelId, editAction, text, index]);
-
-  useEffect(() => {
-    if (subAction) {
-      setMessageType(subAction === 'postMessage' ? 'text' : 'blockkit');
-    }
-  }, [subAction]);
-
-  useEffect(() => {
-    // Reset channel id input when we changes connector
-    if (connectorId && connectorId !== actionConnector?.id) {
-      editAction('subActionParams', { channels: undefined, channelIds: [], text }, index);
-      setTempChannelId('');
-      setValidChannelId('');
-      setChannelValidError([]);
-      setSelectedChannels([]);
-    }
-    setConnectorId(actionConnector?.id ?? '');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionConnector?.id]);
-
-  if (!subAction) {
-    editAction('subAction', 'postMessage', index);
-  }
-  if (!subActionParams) {
-    editAction(
-      'subActionParams',
-      {
-        channels,
-        channelIds,
-        text,
-      },
-      index
-    );
-  }
-  const typeChannelInput = useMemo(() => {
-    if (channels.length > 0 && channelIds.length === 0) {
-      return 'channel-name';
-    } else if (
-      (
-        (actionConnector as UserConfiguredActionConnector<SlackApiConfig, unknown>)?.config
-          ?.allowedChannels ?? []
-      ).length > 0
-    ) {
-      return 'channel-allowed-ids';
-    }
-    return 'channel-id';
-  }, [actionConnector, channelIds.length, channels.length]);
-
-  const slackChannelsOptions = useMemo(() => {
-    return (
-      (actionConnector as UserConfiguredActionConnector<SlackApiConfig, unknown>)?.config
-        ?.allowedChannels ?? []
-    ).map((ac) => ({
-      label: `${ac.id} - ${ac.name}`,
-      value: ac.id,
-      'data-test-subj': ac.id,
-    }));
-  }, [actionConnector]);
 
   const onChangeComboBox = useCallback(
-    (newOptions: EuiComboBoxOptionOption[]) => {
+    (newOptions: EuiComboBoxOptionOption<string>[]) => {
       const newSelectedChannels = newOptions.map<string>((option) => option.value!.toString());
       setSelectedChannels(newOptions);
+
       editAction(
         'subActionParams',
-        { channels: undefined, channelIds: newSelectedChannels, text },
+        { channels: undefined, channelIds: undefined, channelNames: newSelectedChannels, text },
         index
       );
     },
     [editAction, index, text]
   );
-  const onBlurChannelIds = useCallback(() => {
-    if (tempChannelId === '') {
-      editAction('subActionParams', { channels: undefined, channelIds: [], text }, index);
-    }
-    setValidChannelId(tempChannelId.trim());
-  }, [editAction, index, tempChannelId, text]);
 
-  const onChangeTextField = useCallback(
-    (evt: React.ChangeEvent<HTMLInputElement>) => {
-      editAction('subActionParams', { channels: undefined, channelIds: [], text }, index);
-      setTempChannelId(evt.target.value);
+  const onCreateOption = useCallback(
+    (searchValue: string) => {
+      const normalizedSearchValue = searchValue.trim().toLowerCase();
+
+      if (!normalizedSearchValue) {
+        return;
+      }
+
+      const newOption = {
+        label: searchValue,
+      };
+
+      setSelectedChannels([newOption]);
+
+      editAction(
+        'subActionParams',
+        { channels: undefined, channelIds: undefined, channelNames: [searchValue], text },
+        index
+      );
     },
     [editAction, index, text]
   );
 
+  const onTextChange = (value: string) => {
+    setTextValue(value);
+    editAction('subAction', getSubAction(messageType), index);
+    editAction('subActionParams', { channels, channelIds, channelNames, text: value }, index);
+  };
+
   const channelInput = useMemo(() => {
-    if (typeChannelInput === 'channel-name' || typeChannelInput === 'channel-id') {
-      return (
-        <EuiFieldText
-          data-test-subj="slackApiChannelId"
-          name="slackApiChannelId"
-          value={tempChannelId}
-          isLoading={isValidatingChannel}
-          onChange={onChangeTextField}
-          onBlur={onBlurChannelIds}
-          isInvalid={channelValidError.length > 0}
-          fullWidth={true}
-        />
-      );
-    }
     return (
       <EuiComboBox
         noSuggestions={false}
         data-test-subj="slackChannelsComboBox"
-        options={slackChannelsOptions}
+        options={hasAllowedChannelsConfig ? slackChannelsOptions : undefined}
         selectedOptions={selectedChannels}
         onChange={onChangeComboBox}
+        onCreateOption={hasAllowedChannelsConfig ? undefined : onCreateOption}
         singleSelection={true}
         fullWidth={true}
+        aria-labelledby="channelsLabelId"
+        onBlur={() => {
+          if (!channelNames || channelNames?.length === 0) {
+            editAction('subActionParams', { channels, channelIds, channelNames: [], text }, index);
+          }
+        }}
       />
     );
   }, [
-    channelValidError.length,
-    isValidatingChannel,
-    onBlurChannelIds,
+    channelIds,
+    channelNames,
+    channels,
+    editAction,
+    hasAllowedChannelsConfig,
+    index,
     onChangeComboBox,
-    onChangeTextField,
+    onCreateOption,
     selectedChannels,
     slackChannelsOptions,
-    tempChannelId,
-    typeChannelInput,
+    text,
   ]);
 
   return (
     <>
       <EuiFormRow
-        label={
-          typeChannelInput === 'channel-name'
-            ? i18n.translate('xpack.stackConnectors.slack.params.channelsComboBoxLabel', {
-                defaultMessage: 'Channel',
-              })
-            : i18n.translate('xpack.stackConnectors.slack.params.channelIdComboBoxLabel', {
-                defaultMessage: 'Channel ID',
-              })
-        }
+        label={i18n.translate('xpack.stackConnectors.slack.params.channelsComboBoxLabel', {
+          defaultMessage: 'Channel name',
+        })}
         fullWidth
-        error={channelValidError.length > 0 ? channelValidError : (errors.channels as string[])}
-        isInvalid={Number(errors.channels?.length) > 0 || channelValidError.length > 0}
-        helpText={
-          channelIds.length > 0 && channelValidInfo
-            ? `${channelValidInfo.id} - ${channelValidInfo.name}`
-            : ''
-        }
+        error={errors.channels as string[]}
+        isInvalid={Number(errors.channels?.length) > 0}
+        id={channelsLabelId}
       >
         {channelInput}
       </EuiFormRow>
@@ -321,58 +237,19 @@ const SlackParamsFields: React.FunctionComponent<
       )}
       <EuiSpacer size="m" />
       {messageType === 'text' ? (
-        <TextAreaWithMessageVariables
+        <TextMessage
           index={index}
-          editAction={(_: string, value: string) => {
-            setTextValue(value);
-            editAction('subActionParams', { channels, channelIds, text: value }, index);
-          }}
-          messageVariables={messageVariables}
-          paramsProperty="webApiText"
-          inputTargetValue={textValue}
-          label={i18n.translate(
-            'xpack.stackConnectors.components.slack.messageTextAreaFieldLabel',
-            {
-              defaultMessage: 'Message',
-            }
-          )}
+          onChange={onTextChange}
+          value={textValue}
           errors={(errors.text ?? []) as string[]}
         />
       ) : (
-        <>
-          <JsonEditorWithMessageVariables
-            onDocumentsChange={(json: string) => {
-              setTextValue(json);
-              editAction('subActionParams', { channels, channelIds, text: json }, index);
-            }}
-            messageVariables={messageVariables}
-            paramsProperty="webApiBlock"
-            inputTargetValue={textValue}
-            label={i18n.translate(
-              'xpack.stackConnectors.components.slack.messageJsonAreaFieldLabel',
-              {
-                defaultMessage: 'Block Kit',
-              }
-            )}
-            dataTestSubj="webApiBlock"
-            errors={(errors.text ?? []) as string[]}
-          />
-          {text && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiLink
-                target="_blank"
-                href={`https://app.slack.com/block-kit-builder/#${encodeURIComponent(text)}`}
-                external
-              >
-                <FormattedMessage
-                  id="xpack.stackConnectors.components.slack.viewInBlockkitBuilder"
-                  defaultMessage="View in Slack Block Kit Builder"
-                />
-              </EuiLink>
-            </>
-          )}
-        </>
+        <BlockKitMessage
+          onTextChange={onTextChange}
+          messageVariables={messageVariables}
+          textValue={textValue}
+          errors={(errors.text ?? []) as string[]}
+        />
       )}
     </>
   );
@@ -380,3 +257,116 @@ const SlackParamsFields: React.FunctionComponent<
 
 // eslint-disable-next-line import/no-default-export
 export { SlackParamsFields as default };
+
+type TextMessageProps = Pick<ParamsProps, 'index' | 'messageVariables'> & {
+  errors: string[];
+  value?: string;
+  onChange: (value: string) => void;
+};
+
+const TextMessage = ({ index, onChange, messageVariables, errors, value }: TextMessageProps) => {
+  return (
+    <TextAreaWithMessageVariables
+      index={index}
+      editAction={(_: string, newValue: string) => {
+        onChange(newValue);
+      }}
+      messageVariables={messageVariables}
+      paramsProperty="webApiText"
+      inputTargetValue={value}
+      label={i18n.translate('xpack.stackConnectors.components.slack.messageTextAreaFieldLabel', {
+        defaultMessage: 'Message',
+      })}
+      errors={errors}
+    />
+  );
+};
+
+type BlockKitMessageProps = Pick<ParamsProps, 'messageVariables'> & {
+  errors: string[];
+  textValue?: string;
+  onTextChange: (value: string) => void;
+};
+
+const BlockKitMessage = ({
+  onTextChange,
+  messageVariables,
+  errors,
+  textValue,
+}: BlockKitMessageProps) => {
+  return (
+    <>
+      <JsonEditorWithMessageVariables
+        onDocumentsChange={onTextChange}
+        messageVariables={messageVariables}
+        paramsProperty="webApiBlock"
+        inputTargetValue={textValue}
+        label={i18n.translate('xpack.stackConnectors.components.slack.messageJsonAreaFieldLabel', {
+          defaultMessage: 'Block Kit',
+        })}
+        dataTestSubj="webApiBlock"
+        errors={errors}
+      />
+      {textValue && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiLink
+            target="_blank"
+            href={`https://app.slack.com/block-kit-builder/#${encodeURIComponent(textValue)}`}
+            external
+          >
+            <FormattedMessage
+              id="xpack.stackConnectors.components.slack.viewInBlockkitBuilder"
+              defaultMessage="View in Slack Block Kit Builder"
+            />
+          </EuiLink>
+        </>
+      )}
+    </>
+  );
+};
+
+const getSelectedChannel = ({
+  channels,
+  channelIds,
+  channelNames,
+}: {
+  channels?: string[];
+  channelIds?: string[];
+  channelNames?: string[];
+}) => {
+  if (channelNames && channelNames.length > 0) {
+    return channelNames[0];
+  }
+
+  if (channelIds && channelIds.length > 0) {
+    return channelIds[0];
+  }
+
+  if (channels && channels.length > 0) {
+    return channels[0];
+  }
+
+  return null;
+};
+
+const formatChannel = (channel: string): string => {
+  if (channel.startsWith('#')) {
+    return channel;
+  }
+
+  return `#${channel}`;
+};
+
+const getSubAction = (messageType: string) =>
+  messageType === 'text' ? 'postMessage' : 'postBlockkit';
+
+const shouldUseDefaultValue = ({
+  useDefaultMessage,
+  defaultMessage,
+  text,
+}: {
+  useDefaultMessage?: boolean;
+  defaultMessage?: string;
+  text?: string;
+}) => (Boolean(useDefaultMessage) || Boolean(defaultMessage)) && !Boolean(text);

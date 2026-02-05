@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Builder, type ESQLAstCommand } from '@kbn/esql-ast';
+import { Builder, type ESQLAstCommand } from '@kbn/esql-language';
 import type { Condition } from '../../../../types/conditions';
 import type { DropDocumentProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';

@@ -122,7 +122,7 @@ export function createStatusTimeBins(
       };
     }
     const { ups, downs } = heatmapData
-      .filter(({ key }) => key >= start && key <= end)
+      .filter(({ key }) => key >= start && key < end)
       .reduce(
         (acc, cur) => ({
           ups: acc.ups + cur.up.value,

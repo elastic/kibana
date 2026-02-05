@@ -20,6 +20,8 @@
         "label": "ClusterDetails",
         "description": [],
         "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,6 +33,8 @@
             "label": "clusterUuid",
             "description": [],
             "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -45,6 +49,8 @@
         "label": "StatsCollectionConfig",
         "description": [],
         "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -67,6 +73,8 @@
               "UsageCountersServiceSetup"
             ],
             "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -158,7 +166,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -722,6 +730,8 @@
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
               "default",
+              "; project: ",
+              "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
               ", options?: ",
@@ -1067,6 +1077,8 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1081,6 +1093,8 @@
               "SavedObjectsClientContract"
             ],
             "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1092,6 +1106,8 @@
             "label": "refreshCache",
             "description": [],
             "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1106,6 +1122,8 @@
         "label": "StatsCollectionContext",
         "description": [],
         "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+        "lineNumber": 99,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1127,6 +1145,8 @@
               " | Console"
             ],
             "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1138,6 +1158,8 @@
             "label": "version",
             "description": [],
             "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1163,6 +1185,8 @@
           "BasicStatsPayload"
         ],
         "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+        "lineNumber": 89,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1177,6 +1201,8 @@
               "CacheDetails"
             ],
             "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1188,6 +1214,8 @@
             "label": "collectionSource",
             "description": [],
             "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1232,6 +1260,8 @@
           "[]>"
         ],
         "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+        "lineNumber": 105,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1253,6 +1283,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1273,6 +1305,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1314,6 +1348,8 @@
           ") => Promise<T[]>"
         ],
         "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+        "lineNumber": 109,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1336,6 +1372,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1356,6 +1394,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1376,6 +1416,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1395,6 +1437,8 @@
           "EncryptedStatsGetterConfig"
         ],
         "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+        "lineNumber": 104,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1428,6 +1472,8 @@
         }
       ],
       "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+      "lineNumber": 14,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1446,6 +1492,8 @@
             "<T>) => void"
           ],
           "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 19,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1461,6 +1509,8 @@
                 "<T>"
               ],
               "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+              "lineNumber": 20,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1482,6 +1532,8 @@
         "\nPublic contract coming from the start method."
       ],
       "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+      "lineNumber": 24,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1504,6 +1556,8 @@
             "): Promise<{ clusterUuid: string; stats: string; }[]>; }"
           ],
           "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 28,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1532,6 +1586,8 @@
             "): Promise<{ clusterUuid: string; stats: string; }[]>; }"
           ],
           "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 32,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1548,6 +1604,8 @@
             "() => Promise<boolean>"
           ],
           "path": "src/platform/plugins/shared/telemetry_collection_manager/server/types.ts",
+          "lineNumber": 36,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1572,6 +1630,8 @@
         "label": "CACHE_DURATION_MS",
         "description": [],
         "path": "src/platform/plugins/shared/telemetry_collection_manager/common/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1587,6 +1647,8 @@
           "\"telemetryCollectionManager\""
         ],
         "path": "src/platform/plugins/shared/telemetry_collection_manager/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1602,6 +1664,8 @@
           "\"telemetry_collection_manager\""
         ],
         "path": "src/platform/plugins/shared/telemetry_collection_manager/common/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

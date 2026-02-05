@@ -55,3 +55,10 @@ export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION = i18n.tran
     defaultMessage: 'Do not suppress alerts for events with missing fields',
   }
 );
+
+export const ALERT_SUPPRESSION_MISSING_FIELDS_HELP_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleManagement.ruleFields.alertSuppression.missingFields.helpAriaLabel',
+  {
+    defaultMessage: 'Alert suppression missing fields help',
+  }
+);

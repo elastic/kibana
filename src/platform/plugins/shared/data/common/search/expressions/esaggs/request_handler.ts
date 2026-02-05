@@ -109,10 +109,6 @@ export const handleRequest = ({
     requestSearchSource.setField('filter', filters);
     requestSearchSource.setField('query', query);
 
-    if (projectRouting) {
-      requestSearchSource.setField('projectRouting', projectRouting);
-    }
-
     return { allTimeFields, forceNow, requestSearchSource };
   }).pipe(
     switchMap(({ allTimeFields, forceNow, requestSearchSource }) =>
@@ -136,6 +132,7 @@ export const handleRequest = ({
               }),
           },
           executionContext,
+          ...(projectRouting ? { projectRouting } : {}),
         })
         .pipe(
           map(({ rawResponse: response }) => {

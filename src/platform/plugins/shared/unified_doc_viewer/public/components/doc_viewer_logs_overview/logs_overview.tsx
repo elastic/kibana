@@ -19,6 +19,7 @@ import {
 } from '@kbn/discover-utils';
 import type {
   ObservabilityLogsAIAssistantFeature,
+  ObservabilityLogsAIInsightFeature,
   ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
 import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src';
@@ -41,6 +42,7 @@ import { hasErrorFields } from './utils/has_error_fields';
 
 export type LogsOverviewProps = DocViewRenderProps & {
   renderAIAssistant?: ObservabilityLogsAIAssistantFeature['render'];
+  renderAIInsight?: ObservabilityLogsAIInsightFeature['render'];
   renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
   indexes: ObservabilityIndexes;
@@ -62,6 +64,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       onAddColumn,
       onRemoveColumn,
       renderAIAssistant,
+      renderAIInsight,
       renderFlyoutStreamField,
       renderFlyoutStreamProcessingLink,
       indexes,
@@ -72,6 +75,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
     const { fieldFormats } = getUnifiedDocViewerServices();
     const parsedDoc = getLogDocumentOverview(hit, { dataView, fieldFormats });
     const LogsOverviewAIAssistant = renderAIAssistant;
+    const LogsOverviewAIInsight = renderAIInsight;
     const stacktraceFields = getStacktraceFields(hit as LogDocument);
     const isStacktraceAvailable = Object.values(stacktraceFields).some(Boolean);
     const traceId = parsedDoc[TRACE_ID_FIELD];
@@ -147,6 +151,8 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             ) : null}
           </DataSourcesProvider>
           {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
+          <EuiSpacer size="m" />
+          {LogsOverviewAIInsight && <LogsOverviewAIInsight doc={hit} />}
         </div>
       </FieldActionsProvider>
     );

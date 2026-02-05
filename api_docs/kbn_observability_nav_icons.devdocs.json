@@ -16,6 +16,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/packages/nav-icons/icons/briefcase.tsx",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,6 +34,8 @@
               ", \"type\">"
             ],
             "path": "x-pack/solutions/observability/packages/nav-icons/icons/briefcase.tsx",
+            "lineNumber": 19,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -53,6 +57,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/packages/nav-icons/icons/product_cloud_infra.tsx",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -69,6 +75,8 @@
               ", \"type\">"
             ],
             "path": "x-pack/solutions/observability/packages/nav-icons/icons/product_cloud_infra.tsx",
+            "lineNumber": 29,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -90,6 +98,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/packages/nav-icons/icons/product_ml.tsx",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -106,6 +116,8 @@
               ", \"type\">"
             ],
             "path": "x-pack/solutions/observability/packages/nav-icons/icons/product_ml.tsx",
+            "lineNumber": 33,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -127,6 +139,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/packages/nav-icons/icons/product_streams_wired.tsx",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -143,6 +157,86 @@
               ", \"type\">"
             ],
             "path": "x-pack/solutions/observability/packages/nav-icons/icons/product_streams_wired.tsx",
+            "lineNumber": 27,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-nav-icons",
+        "id": "def-public.iconRobot",
+        "type": "Function",
+        "tags": [],
+        "label": "iconRobot",
+        "description": [],
+        "signature": [
+          "({ size, ...rest }: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/observability/packages/nav-icons/icons/robot.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-nav-icons",
+            "id": "def-public.iconRobot.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ size = 'm', ...rest }",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "x-pack/solutions/observability/packages/nav-icons/icons/robot.tsx",
+            "lineNumber": 26,
+            "columnNumber": 27,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-nav-icons",
+        "id": "def-public.robotIconType",
+        "type": "Function",
+        "tags": [],
+        "label": "robotIconType",
+        "description": [],
+        "signature": [
+          "(props: React.SVGProps<SVGSVGElement>) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/observability/packages/nav-icons/icons/robot.tsx",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-nav-icons",
+            "id": "def-public.robotIconType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "React.SVGProps<SVGSVGElement>"
+            ],
+            "path": "x-pack/solutions/observability/packages/nav-icons/icons/robot.tsx",
+            "lineNumber": 13,
+            "columnNumber": 66,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

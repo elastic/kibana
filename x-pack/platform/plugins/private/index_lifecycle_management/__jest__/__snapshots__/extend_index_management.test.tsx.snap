@@ -61,12 +61,12 @@ Array [
     "name": "Lifecycle status",
     "options": Array [
       Object {
+        "name": "Managed",
         "value": true,
-        "view": "Managed",
       },
       Object {
+        "name": "Unmanaged",
         "value": false,
-        "view": "Unmanaged",
       },
     ],
     "type": "field_value_selection",
@@ -106,7 +106,7 @@ Array [
 exports[`extend index management ilm summary extension should render a phase definition panel when lifecycle has phase definition 1`] = `
 <div>
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-grow-1-IndexLifecycleSummary"
@@ -116,7 +116,7 @@ exports[`extend index management ilm summary extension should render a phase def
         data-test-subj="policyPropertiesPanel"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-center-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -153,7 +153,7 @@ exports[`extend index management ilm summary extension should render a phase def
           </div>
         </div>
         <div
-          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <dl
           class="euiDescriptionList emotion-euiDescriptionList-column-left-m-s"
@@ -180,7 +180,7 @@ exports[`extend index management ilm summary extension should render a phase def
           >
             <span
               class="euiBadge emotion-euiBadge"
-              style="--euiBadgeBackgroundColor: #B9A888; --euiBadgeTextColor: #07101F;"
+              style="--euiBadgeBackgroundColor: #FF995E; --euiBadgeTextColor: #07101F;"
               title="Hot"
             >
               <span
@@ -246,7 +246,7 @@ exports[`extend index management ilm summary extension should render a phase def
           </h3>
         </div>
         <div
-          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <div>
           <pre>
@@ -278,7 +278,7 @@ exports[`extend index management ilm summary extension should render a phase def
 exports[`extend index management ilm summary extension should render a step info panel when lifecycle is waiting for a step completion 1`] = `
 <div>
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-grow-1-IndexLifecycleSummary"
@@ -288,7 +288,7 @@ exports[`extend index management ilm summary extension should render a step info
         data-test-subj="policyPropertiesPanel"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-center-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -325,7 +325,7 @@ exports[`extend index management ilm summary extension should render a step info
           </div>
         </div>
         <div
-          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <dl
           class="euiDescriptionList emotion-euiDescriptionList-column-left-m-s"
@@ -352,7 +352,7 @@ exports[`extend index management ilm summary extension should render a step info
           >
             <span
               class="euiBadge emotion-euiBadge"
-              style="--euiBadgeBackgroundColor: #B9A888; --euiBadgeTextColor: #07101F;"
+              style="--euiBadgeBackgroundColor: #FF995E; --euiBadgeTextColor: #07101F;"
               title="Hot"
             >
               <span
@@ -417,7 +417,7 @@ exports[`extend index management ilm summary extension should render a step info
             Current step info
           </h3>
           <div
-            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
           />
           <div>
             <pre>
@@ -436,7 +436,7 @@ exports[`extend index management ilm summary extension should render a step info
         </div>
       </div>
       <div
-        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
     </div>
   </div>
@@ -446,7 +446,7 @@ exports[`extend index management ilm summary extension should render a step info
 exports[`extend index management ilm summary extension should render an error panel when index has lifecycle error 1`] = `
 <div>
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-grow-1-IndexLifecycleSummary"
@@ -456,7 +456,7 @@ exports[`extend index management ilm summary extension should render an error pa
         data-test-subj="policyPropertiesPanel"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-center-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -493,7 +493,7 @@ exports[`extend index management ilm summary extension should render an error pa
           </div>
         </div>
         <div
-          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <dl
           class="euiDescriptionList emotion-euiDescriptionList-column-left-m-s"
@@ -520,7 +520,7 @@ exports[`extend index management ilm summary extension should render an error pa
           >
             <span
               class="euiBadge emotion-euiBadge"
-              style="--euiBadgeBackgroundColor: #B9A888; --euiBadgeTextColor: #07101F;"
+              style="--euiBadgeBackgroundColor: #FF995E; --euiBadgeTextColor: #07101F;"
               title="Hot"
             >
               <span
@@ -585,7 +585,7 @@ exports[`extend index management ilm summary extension should render an error pa
             Lifecycle error
           </h3>
           <div
-            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
           />
           <div>
             <pre>
@@ -605,7 +605,7 @@ exports[`extend index management ilm summary extension should render an error pa
         </div>
       </div>
       <div
-        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
     </div>
   </div>
@@ -615,7 +615,7 @@ exports[`extend index management ilm summary extension should render an error pa
 exports[`extend index management ilm summary extension should render the tab when index has lifecycle policy 1`] = `
 <div>
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-grow-1-IndexLifecycleSummary"
@@ -625,7 +625,7 @@ exports[`extend index management ilm summary extension should render the tab whe
         data-test-subj="policyPropertiesPanel"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-center-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -662,7 +662,7 @@ exports[`extend index management ilm summary extension should render the tab whe
           </div>
         </div>
         <div
-          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <dl
           class="euiDescriptionList emotion-euiDescriptionList-column-left-m-s"

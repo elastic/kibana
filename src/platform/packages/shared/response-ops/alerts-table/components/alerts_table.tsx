@@ -217,6 +217,7 @@ const AlertsTableContent = typedForwardRef(
       renderAdditionalToolbarControls: AdditionalToolbarControlsComponent,
       lastReloadRequestTime,
       configurationStorage: configurationStorageProp,
+      isMutedAlertsEnabled = true,
       services,
       ...publicDataGridProps
     }: AlertsTableProps<AC>,
@@ -407,11 +408,14 @@ const AlertsTableContent = typedForwardRef(
     );
 
     const ruleIds = useMemo(() => getRuleIdsFromAlerts(alerts), [alerts]);
-    const mutedAlertsQuery = useGetMutedAlertsQuery({
-      ruleIds,
-      http,
-      notifications,
-    });
+    const mutedAlertsQuery = useGetMutedAlertsQuery(
+      {
+        ruleIds,
+        http,
+        notifications,
+      },
+      { enabled: isMutedAlertsEnabled }
+    );
 
     const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
     const casesPermissions = useMemo(() => {
@@ -544,6 +548,7 @@ const AlertsTableContent = typedForwardRef(
           expandedAlertIndex,
           onExpandedAlertIndexChange: updateExpandedAlertIndex,
           renderExpandedAlertView,
+          isMutedAlertsEnabled,
         } as RenderContext<AC>),
       [
         additionalContext,
@@ -577,6 +582,7 @@ const AlertsTableContent = typedForwardRef(
         expandedAlertIndex,
         updateExpandedAlertIndex,
         renderExpandedAlertView,
+        isMutedAlertsEnabled,
       ]
     );
 

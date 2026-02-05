@@ -9,6 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
+import { CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ } from '@kbn/cloud-security-posture-common';
 import { type CloudConnectorFormProps } from '../types';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide';
 import {
@@ -66,6 +67,7 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
             });
           }
         }}
+        data-test-subj={CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ}
       />
       <EuiSpacer size="m" />
       <EuiAccordion

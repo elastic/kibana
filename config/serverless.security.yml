@@ -20,10 +20,6 @@ xpack.features.overrides:
   visualize_v2.hidden: true
   maps.hidden: true
   maps_v2.hidden: true
-  ### agent builder feature is moved from Analytics category to the Security one the bottom
-  agentBuilder:
-    category: "security"
-    order: 1101
   ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
   ml:
     category: "security"
@@ -260,7 +256,7 @@ xpack.alerting.rules.run.ruleTypeOverrides:
 # Experimental Security Solution features
 
 # These features are disabled in Serverless until fully tested
-xpack.securitySolution.enableExperimental: [riskScoreAssistantToolDisabled]
+xpack.securitySolution.enableExperimental: [riskScoreAssistantToolDisabled, disable:enableRiskScorePrivmonModifier, disable:kubernetesEnabled]
 
 # AI Assistant config
 aiAssistantManagementSelection.preferredAIAssistantType: 'security'

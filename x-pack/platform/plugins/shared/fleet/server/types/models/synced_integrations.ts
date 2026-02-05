@@ -58,7 +58,7 @@ export const CustomAssetsDataSchema = schema.object({
 });
 
 export const GetRemoteSyncedIntegrationsStatusResponseSchema = schema.object({
-  integrations: schema.arrayOf(RemoteSyncedIntegrationsStatusSchema),
+  integrations: schema.arrayOf(RemoteSyncedIntegrationsStatusSchema, { maxSize: 10000 }),
   custom_assets: schema.maybe(schema.recordOf(schema.string(), CustomAssetsDataSchema)),
   error: schema.maybe(schema.string()),
   warning: schema.maybe(

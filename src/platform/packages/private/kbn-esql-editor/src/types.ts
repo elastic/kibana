@@ -13,6 +13,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { ILicense } from '@kbn/licensing-types';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -98,6 +99,8 @@ export interface ESQLEditorProps {
   formLabel?: string;
   /** Whether to merge external messages into the editor's message list */
   mergeExternalMessages?: boolean;
+  /** If true, automatically opens the quick search visor when the editor initially loads with a query that has only source commands */
+  openVisorOnSourceCommands?: boolean;
 }
 
 interface ESQLVariableService {
@@ -120,6 +123,7 @@ export interface ESQLEditorDeps {
   data: DataPublicPluginStart;
   storage: Storage;
   uiActions: UiActionsStart;
+  kql: KqlPluginStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
   esql?: EsqlPluginStartBase;

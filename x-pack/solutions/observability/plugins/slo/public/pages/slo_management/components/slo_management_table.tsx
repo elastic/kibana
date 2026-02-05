@@ -25,10 +25,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, type SLODefinitionResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useState } from 'react';
-import { sloPaths } from '../../../../common';
 import { SLO_MODEL_VERSION } from '../../../../common/constants';
-import { paths } from '../../../../common/locators/paths';
 import { useActionModal } from '../../../context/action_modal';
 import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -182,7 +181,7 @@ export function SloManagementTable() {
         return (
           <EuiLink
             data-test-subj="sloDetailsLink"
-            href={http.basePath.prepend(sloPaths.sloDetails(slo.id, ALL_VALUE))}
+            href={http.basePath.prepend(paths.sloDetails(slo.id, ALL_VALUE))}
             target="_blank"
           >
             {slo.name}
@@ -288,7 +287,7 @@ export function SloManagementTable() {
           <EuiHealth color="danger">
             <EuiLink
               data-test-subj="sloDetailsLink"
-              href={http.basePath.prepend(sloPaths.sloDetails(item.id, ALL_VALUE))}
+              href={http.basePath.prepend(paths.sloDetails(item.id, ALL_VALUE))}
               target="_blank"
               color="danger"
             >

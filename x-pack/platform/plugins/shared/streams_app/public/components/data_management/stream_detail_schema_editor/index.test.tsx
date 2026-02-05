@@ -29,6 +29,11 @@ jest.mock('../schema_editor/hooks/use_schema_fields', () => {
 jest.mock('@kbn/unsaved-changes-prompt', () => ({
   useUnsavedChangesPrompt: jest.fn(),
 }));
+jest.mock('@kbn/ebt-tools', () => ({
+  usePerformanceContext: jest.fn(() => ({
+    onPageReady: jest.fn(),
+  })),
+}));
 
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';

@@ -48,6 +48,7 @@ export function PipelineSuggestion({
       css={css`
         flex-shrink: 0;
       `}
+      data-test-subj="streamsAppPipelineSuggestionCallout"
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiText size="s">
@@ -77,7 +78,12 @@ export function PipelineSuggestion({
             </GenerateSuggestionButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onDismiss} color="primary" size="s">
+            <EuiButtonEmpty
+              onClick={onDismiss}
+              color="primary"
+              size="s"
+              data-test-subj="streamsAppPipelineSuggestionRejectButton"
+            >
               {i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.rejectButton',
                 {
@@ -87,7 +93,14 @@ export function PipelineSuggestion({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="check" onClick={onAccept} color="primary" size="s" fill>
+            <EuiButton
+              iconType="check"
+              onClick={onAccept}
+              color="primary"
+              size="s"
+              fill
+              data-test-subj="streamsAppPipelineSuggestionAcceptButton"
+            >
               {i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.acceptButton',
                 {

@@ -23,7 +23,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ASK_AI_ASSISTANT } from '../shared/translations';
 import { useAssetInventoryAssistant } from './hooks/use_asset_inventory_assistant';
 import type { AssetCriticalityLevel } from '../../../../common/api/entity_analytics/asset_criticality';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
 
 interface GenericEntityFlyoutFooterProps {
   entityId: EntityEcs['id'];
@@ -50,7 +50,7 @@ export const GenericEntityFlyoutFooter = ({
     assetCriticalityLevel,
   });
 
-  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
   const openDocumentFlyout = useCallback(() => {
     openFlyout({
@@ -90,7 +90,7 @@ export const GenericEntityFlyoutFooter = ({
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           {isPreviewMode && <EuiFlexItem grow={false}>{fullDetailsLink}</EuiFlexItem>}
 
-          {showAssistant && !isAgentBuilderEnabled && (
+          {showAssistant && !isAgentChatExperienceEnabled && (
             <EuiFlexItem grow={false}>
               <NewChatByTitle showAssistantOverlay={showAssistantOverlay} text={ASK_AI_ASSISTANT} />
             </EuiFlexItem>

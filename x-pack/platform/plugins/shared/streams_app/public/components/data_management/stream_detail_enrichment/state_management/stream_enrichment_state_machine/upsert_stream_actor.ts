@@ -14,6 +14,7 @@ import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import type { FieldDefinition, Streams } from '@kbn/streams-schema';
 import type { ErrorActorEvent } from 'xstate5';
 import { fromPromise } from 'xstate5';
+import type { ConfigurationMode } from '../../../../../telemetry/types';
 import { getFormattedError } from '../../../../../util/errors';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import { buildUpsertStreamRequestPayload } from '../../utils';
@@ -25,6 +26,7 @@ export interface UpsertStreamInput {
   definition: Streams.ingest.all.GetResponse;
   streamlangDSL: StreamlangDSL;
   fields?: FieldDefinition;
+  configurationMode: ConfigurationMode;
 }
 
 export function createUpsertStreamActor({
@@ -56,6 +58,7 @@ export function createUpsertStreamActor({
     telemetryClient.trackProcessingSaved({
       processors_count: processorsCount,
       stream_type: getStreamTypeFromDefinition(input.definition.stream),
+      configuration_mode: input.configurationMode,
     });
 
     return response;

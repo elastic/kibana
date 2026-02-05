@@ -637,6 +637,8 @@ describe('Cases API', () => {
       total_deletions: 0,
       total_comments: 10,
       total_comment_deletions: 0,
+      total_comment_creations: 10,
+      total_hidden_comment_updates: 0,
       total_other_actions: 10,
       total_other_action_deletions: 0,
     };

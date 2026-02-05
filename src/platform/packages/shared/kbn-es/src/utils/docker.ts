@@ -50,6 +50,7 @@ import {
   SERVERLESS_FILES_PATH,
   SERVERLESS_SECRETS_SSL_PATH,
   SERVERLESS_ROLES_ROOT_PATH,
+  SERVERLESS_OPERATOR_PATH,
 } from '../paths';
 import {
   ELASTIC_SERVERLESS_SUPERUSER,
@@ -266,7 +267,7 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   [
     'xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path',
-    `${SERVERLESS_CONFIG_PATH}secrets/jwks.json`,
+    `${SERVERLESS_CONFIG_PATH}jwks/jwks.json`,
   ],
 
   ['xpack.security.operator_privileges.enabled', 'true'],
@@ -279,6 +280,19 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
   ],
 
   ['xpack.security.transport.ssl.verification_mode', 'certificate'],
+
+  [
+    'xpack.security.remote_cluster_client.ssl.keystore.path',
+    `${SERVERLESS_CONFIG_PATH}certs/elasticsearch.p12`,
+  ],
+  ['xpack.security.remote_cluster_client.ssl.verification_mode', 'certificate'],
+
+  [
+    'xpack.security.remote_cluster_server.ssl.keystore.path',
+    `${SERVERLESS_CONFIG_PATH}certs/elasticsearch.p12`,
+  ],
+  ['xpack.security.remote_cluster_server.ssl.verification_mode', 'certificate'],
+  ['xpack.security.remote_cluster_server.ssl.client_authentication', 'required'],
 ];
 // Temporary workaround for https://github.com/elastic/elasticsearch/issues/118583
 if (process.arch === 'arm64') {
@@ -625,7 +639,7 @@ export function resolveEsArgs(
     esArgs.set(`xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order`, '0');
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path`,
-      `${SERVERLESS_CONFIG_PATH}secrets/idp_metadata.xml`
+      `${SERVERLESS_CONFIG_PATH}idp_metadata.xml`
     );
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id`,
@@ -859,20 +873,21 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     await Fsp.writeFile(SERVERLESS_IDP_METADATA_PATH, metadata);
     volumeCmds.push(
       '--volume',
-      `${SERVERLESS_IDP_METADATA_PATH}:${SERVERLESS_CONFIG_PATH}secrets/idp_metadata.xml:z`
+      `${SERVERLESS_IDP_METADATA_PATH}:${SERVERLESS_CONFIG_PATH}idp_metadata.xml:z`
     );
   }
 
   volumeCmds.push(
     ...getESp12Volume(),
     ...serverlessResources,
+    ...(await getOperatorVolume(esProjectTypeFromKbn.get(projectType)!)),
 
     '--volume',
     `${
       ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH
     }:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
     '--volume',
-    `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/jwks.json:z`
+    `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}jwks/jwks.json:z`
   );
 
   return volumeCmds;
@@ -1124,4 +1139,38 @@ export async function runDockerContainer(log: ToolingLog, options: DockerOptions
     // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
     stdio: ['ignore', 'inherit', 'inherit'],
   });
+}
+
+/**
+ * A volume mount for the operator folder, that contains operator specific configuration files like settings.json.
+ * We mount entire folder since Elasticsearch cannot properly watch changes in bind-mounted files.
+ * @param projectType Type of the serverless project.
+ */
+async function getOperatorVolume(projectType: string) {
+  await Fsp.mkdir(SERVERLESS_OPERATOR_PATH, { recursive: true });
+
+  // Settings should include information about the project that's normally populated by the Elasticsearch Controller.
+  const projectInfo = {
+    id: MOCK_IDP_UIAM_PROJECT_ID,
+    type: projectType,
+    alias: 'local_project',
+    organization: MOCK_IDP_UIAM_ORGANIZATION_ID,
+  };
+  const projectTags = {
+    ...Object.fromEntries(Object.entries(projectInfo).map(([key, value]) => [`_${key}`, value])),
+    env: 'local',
+  };
+
+  await Fsp.writeFile(
+    join(SERVERLESS_OPERATOR_PATH, 'settings.json'),
+    JSON.stringify(
+      {
+        metadata: { version: '100', compatibility: '' },
+        state: { project: { ...projectInfo, tags: projectTags } },
+      },
+      null,
+      2
+    )
+  );
+  return ['--volume', `${SERVERLESS_OPERATOR_PATH}:${SERVERLESS_CONFIG_PATH}operator`];
 }

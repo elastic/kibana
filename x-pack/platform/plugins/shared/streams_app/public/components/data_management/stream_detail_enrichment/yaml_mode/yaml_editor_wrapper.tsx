@@ -165,7 +165,7 @@ export const YamlEditorWrapper = () => {
               buttonContent={
                 <strong>
                   {i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.validationErrors.title',
+                    'xpack.streams.streamDetailView.managementTab.enrichment.validationErrors.count',
                     {
                       defaultMessage:
                         '{count, plural, one {# validation error} other {# validation errors}}',

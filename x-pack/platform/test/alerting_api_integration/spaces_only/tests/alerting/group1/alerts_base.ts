@@ -113,7 +113,6 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
           createdBy: null,
           updatedBy: null,
           actions: response.body.actions.map((action: any) => {
-            /* eslint-disable @typescript-eslint/naming-convention */
             const { connector_type_id, group, id, params, uuid } = action;
             return {
               actionTypeId: connector_type_id,

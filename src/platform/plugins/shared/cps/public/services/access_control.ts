@@ -45,20 +45,8 @@ export type AccessControlConfig = Record<string, AppAccessConfig>;
  * - READONLY: View-only mode - shows current scope but prevents changes
  * - DISABLED: Picker is completely disabled
  *
- * Default Configuration:
- *
- * | App        | Route                  | Access Level | Notes                              |
- * |------------|------------------------|--------------|-------------------------------------|
- * | dashboards | all routes except list | EDITABLE     | All dashboard pages except listing  |
- * | dashboards | #/list                 | DISABLED     | List page only                     |
- * | discover   | all routes             | EDITABLE     | All discover pages                 |
- * | visualize  | type:vega in route     | EDITABLE     | Vega visualizations only           |
- * | visualize  | other routes           | DISABLED     | Other visualization types          |
- * | lens       | all routes             | EDITABLE     | All lens pages       |
- * | maps       | all routes             | EDITABLE     | All maps pages
- * | all others | all routes             | DISABLED     | Default behavior for unknown apps  |
  */
-export const DEFAULT_ACCESS_CONTROL_CONFIG: AccessControlConfig = {
+export const ACCESS_CONTROL_CONFIG: AccessControlConfig = {
   dashboards: {
     defaultAccess: ProjectRoutingAccess.EDITABLE,
     routeRules: [
@@ -93,10 +81,9 @@ export const DEFAULT_ACCESS_CONTROL_CONFIG: AccessControlConfig = {
  */
 export const getProjectRoutingAccess = (
   currentAppId: string,
-  hash: string,
-  config: AccessControlConfig = DEFAULT_ACCESS_CONTROL_CONFIG
+  hash: string
 ): ProjectRoutingAccess => {
-  const appConfig = config[currentAppId];
+  const appConfig = ACCESS_CONTROL_CONFIG[currentAppId];
   if (!appConfig) {
     return ProjectRoutingAccess.DISABLED;
   }

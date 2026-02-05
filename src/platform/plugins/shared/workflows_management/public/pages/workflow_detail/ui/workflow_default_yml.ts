@@ -10,72 +10,17 @@
 export const workflowDefaultYaml = `name: New workflow
 enabled: false
 description: This is a new workflow
-tags:
-  - workflow
-  - example
 triggers:
   - type: manual
 
-# Inputs allow you to provide values when running the workflow
 inputs:
-  - name: people
-    type: array
-    default:
-      - alice
-      - bob
-      - charlie
-    description: List of people to greet
-  - name: greeting
+  - name: message
     type: string
-    default: Hello
-    description: The greeting message to use
-
-# Constants are reusable values defined once
-consts:
-  favorite_person: bob
-  api_endpoint: https://api.example.com
+    default: "hello world"
 
 steps:
-  # Foreach loops iterate over arrays
-  - name: iterate_people
-    type: foreach
-    foreach: "{{ inputs.people }}"
-    steps:
-      # Access foreach context: foreach.item, foreach.index
-      - name: log_current_person
-        type: console
-        with:
-          message: |
-            Processing: {{ foreach.item }}
-            Index: {{ foreach.index }}
-
-      # If conditions allow conditional execution (uses KQL syntax)
-      - name: check_if_favorite
-        type: if
-        condition: "foreach.item: {{ consts.favorite_person }}"
-        steps:
-          - name: greet_favorite
-            type: console
-            with:
-              # Templates support data transformation, like 'upcase' or 'capitalize'
-              message: "{{ inputs.greeting }}, {{ foreach.item | upcase }}! You're special! ❤️"
-        else:
-          - name: greet_normal
-            type: console
-            with:
-              message: "{{ inputs.greeting }}, {{ foreach.item | capitalize }}!"
-
-      # Example of accessing previous step output
-      - name: use_step_output
-        type: console
-        with:
-          message: |
-            Previous step logged: {{ steps.log_current_person.output }}
-            Using const: {{ consts.api_endpoint }}
-
-      # Example of using filters (json filter formats data as JSON string)
-      - name: demonstrate_filters
-        type: console
-        with:
-          message: "People array as JSON: {{ inputs.people | json }}"
+  - name: hello_world_step
+    type: console
+    with:
+      message: "{{ inputs.message }}"
 `;

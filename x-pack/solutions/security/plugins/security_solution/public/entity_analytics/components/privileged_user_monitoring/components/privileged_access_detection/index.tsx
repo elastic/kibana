@@ -134,7 +134,6 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
                     id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.title"
                     defaultMessage="Top privileged access anomalies"
                   />
-
                   <PrivilegedAccessInfoPopover />
                 </>
               }

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import {
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
@@ -49,17 +50,21 @@ export const AIAssistantVisibility: React.FC = () => {
   const canEditAdvancedSettings = application.capabilities.advancedSettings?.save;
 
   return (
-    <FieldRowProvider
-      links={docLinks.links.management}
-      showDanger={(message: string) => notifications.toasts.addDanger(message)}
-      validateChange={(key: string, value: any) => settings.client.validateValue(key, value)}
-    >
-      <FieldRow
-        field={field}
-        isSavingEnabled={!!canEditAdvancedSettings}
-        onFieldChange={handleFieldChange}
-        unsavedChange={unsavedChanges[AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE]}
-      />
-    </FieldRowProvider>
+    <>
+      <EuiSpacer size="l" />
+      <EuiSpacer size="l" />
+      <FieldRowProvider
+        links={docLinks.links.management}
+        showDanger={(message: string) => notifications.toasts.addDanger(message)}
+        validateChange={(key: string, value: any) => settings.client.validateValue(key, value)}
+      >
+        <FieldRow
+          field={field}
+          isSavingEnabled={!!canEditAdvancedSettings}
+          onFieldChange={handleFieldChange}
+          unsavedChange={unsavedChanges[AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE]}
+        />
+      </FieldRowProvider>
+    </>
   );
 };

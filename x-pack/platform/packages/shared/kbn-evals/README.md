@@ -155,6 +155,73 @@ TRACING_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwright te
 
 This creates a dedicated `traceEsClient` that connects to your monitoring cluster while `esClient` continues to use your test environment cluster.
 
+### RAG Evaluators
+
+RAG (Retrieval-Augmented Generation) evaluators measure the quality of document retrieval in your system. They calculate Precision@K, Recall@K, and F1@K metrics by comparing retrieved documents against a ground truth.
+
+#### Ground Truth Format
+
+Ground truth is defined per index, mapping document IDs to relevance scores:
+
+```typescript
+{
+  groundTruth: {
+    'my-index': {
+      'doc_id_1': 1,  // relevant
+      'doc_id_2': 2,  // highly relevant
+    },
+    'another-index': {
+      'doc_id_3': 1,
+    },
+  },
+}
+```
+
+#### Using RAG Evaluators
+
+```typescript
+import { createRagEvaluators, type RetrievedDoc } from '@kbn/evals';
+
+const ragEvaluators = createRagEvaluators({
+  k: 10,
+  relevanceThreshold: 1,
+  extractRetrievedDocs: (output): RetrievedDoc[] => {
+    // Extract { index, id } objects from your task output
+    return output.results.map((r) => ({ index: r.index, id: r.id }));
+  },
+  extractGroundTruth: (referenceOutput) => referenceOutput?.groundTruth ?? {},
+});
+```
+
+#### Index-Focused Evaluation
+
+By default, all retrieved documents are evaluated against the ground truth. To evaluate only documents from indices that appear in the ground truth, set the `INDEX_FOCUSED_RAG_EVAL` environment variable:
+
+```bash
+INDEX_FOCUSED_RAG_EVAL=true node scripts/playwright test --config ...
+```
+
+Alternatively, configure it per-evaluator:
+
+```typescript
+const ragEvaluators = createRagEvaluators({
+  k: 10,
+  filterByGroundTruthIndices: true,  // Only evaluate docs from ground truth indices
+  extractRetrievedDocs: ...,
+  extractGroundTruth: ...,
+});
+```
+
+#### Overriding K at Runtime
+
+The `k` parameter determines how many top results are evaluated for Precision@K, Recall@K, and F1@K metrics. To override the `k` value defined in the evaluator config at runtime, use the `RAG_EVAL_K` environment variable:
+
+```bash
+RAG_EVAL_K=5 node scripts/playwright test --config ...
+```
+
+The environment variable takes priority over the value passed to `createRagEvaluators()`.
+
 ## Customizing Report Display
 
 By default, evaluation results are displayed in the terminal as a formatted table. You can override this behavior to create custom reports (e.g., JSON files, dashboards, or custom formats).
@@ -303,7 +370,7 @@ await phoenixClient.runExperiment(
 Then control which evaluators run using the `SELECTED_EVALUATORS` environment variable with a comma-separated list of evaluator names:
 
 ```bash
-SELECTED_EVALUATORS="Factuality,Relevance" node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
+SELECTED_EVALUATORS="Factuality,Relevance" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 ```
 
 If not specified, all evaluators will run by default.

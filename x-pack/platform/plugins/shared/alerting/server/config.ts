@@ -79,9 +79,6 @@ export const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     cacheInterval: schema.number({ defaultValue: DEFAULT_CACHE_INTERVAL_MS }),
   }),
-  maintenanceWindow: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-  }),
   gapAutoFillScheduler: schema.maybe(
     schema.object({
       enabled: schema.boolean({ defaultValue: false }),

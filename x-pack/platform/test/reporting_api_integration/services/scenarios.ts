@@ -431,9 +431,17 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     return body.path;
   };
 
-  const postJobJSON = async (apiPath: string, jobJSON: object = {}): Promise<string> => {
+  const postJobJSON = async (
+    apiPath: string,
+    jobJSON: object = {},
+    statusCode: number = 200
+  ): Promise<string> => {
     log.debug(`ReportingAPI.postJobJSON((${apiPath}): ${JSON.stringify(jobJSON)})`);
-    const { body } = await supertest.post(apiPath).set('kbn-xsrf', 'xxx').send(jobJSON).expect(200);
+    const { body } = await supertest
+      .post(apiPath)
+      .set('kbn-xsrf', 'xxx')
+      .send(jobJSON)
+      .expect(statusCode);
     return body.path;
   };
 

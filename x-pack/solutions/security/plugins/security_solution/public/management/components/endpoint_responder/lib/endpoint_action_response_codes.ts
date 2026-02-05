@@ -11,6 +11,11 @@ const CODES = Object.freeze({
   // -----------------------------------------------------------------
   // GET-FILE CODES
   // -----------------------------------------------------------------
+  'ra_get-file_error_canceled': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.canceled',
+    { defaultMessage: 'Response action was canceled' }
+  ),
+
   /** file not found */
   'ra_get-file_error_not-found': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.getFile.notFound',
@@ -134,6 +139,11 @@ const CODES = Object.freeze({
   // EXECUTE CODES
   // -----------------------------------------------------------------
 
+  ra_execute_error_canceled: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.execute.canceled',
+    { defaultMessage: 'Response action was canceled' }
+  ),
+
   // Dev:
   // Something interrupted preparing the zip: file read error, zip error. I think these should be rare,
   // and should succeed on retry by the user or result in file-not-found. We might implement some retries
@@ -225,6 +235,11 @@ const CODES = Object.freeze({
   // UPLOAD CODES
   // -----------------------------------------------------------------
 
+  ra_upload_error_canceled: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.upload.canceled',
+    { defaultMessage: 'Response action was canceled' }
+  ),
+
   // Dev:
   // generic failure (rare corner case, software bug, etc)
   ra_upload_error_failure: i18n.translate(
@@ -292,6 +307,11 @@ const CODES = Object.freeze({
   // SCAN CODES
   // -----------------------------------------------------------------
 
+  ra_scan_error_canceled: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.scan.canceled',
+    { defaultMessage: 'Response action was canceled' }
+  ),
+
   'ra_scan_error_invalid-input': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.invalidInput',
     { defaultMessage: 'Invalid absolute file path provided' }
@@ -336,6 +356,10 @@ const CODES = Object.freeze({
   // -----------------------------------------------------------------
   // MEMORY-DUMP CODES
   // -----------------------------------------------------------------
+  'ra_memory-dump_error_canceled': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.canceled',
+    { defaultMessage: 'Response action was canceled' }
+  ),
   'ra_memory-dump_error_failure': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.memoryDump.failure',
     { defaultMessage: 'Unknown failure while capturing memory dump' }

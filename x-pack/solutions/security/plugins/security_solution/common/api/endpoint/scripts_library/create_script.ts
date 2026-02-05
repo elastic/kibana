@@ -6,26 +6,30 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { SUPPORTED_HOST_OS_TYPE } from '../../../endpoint/constants';
 import type { DeepMutable } from '../../../endpoint/types';
-import { validateNoDuplicateValues, validateNonEmptyString } from '../schema_utils';
+import {
+  ScriptDescriptionSchema,
+  ScriptExampleSchema,
+  ScriptFileSchema,
+  ScriptInstructionsSchema,
+  ScriptNameSchema,
+  ScriptPathToExecutableSchema,
+  ScriptPlatformSchema,
+  ScriptRequiresInputSchema,
+  ScriptTagsSchema,
+} from './common';
 
 export const CreateScriptRequestSchema = {
   body: schema.object({
-    name: schema.string({ minLength: 1, validate: validateNonEmptyString }),
-    platform: schema.arrayOf(
-      // @ts-expect-error TS2769: No overload matches this call. (due to now `oneOf()` type is defined)
-      schema.oneOf(SUPPORTED_HOST_OS_TYPE.map((osType) => schema.literal(osType))),
-      { minSize: 1, maxSize: 3, validate: validateNoDuplicateValues }
-    ),
-    file: schema.stream(),
-    requiresInput: schema.maybe(schema.boolean({ defaultValue: false })),
-    description: schema.maybe(schema.string({ minLength: 1, validate: validateNonEmptyString })),
-    instructions: schema.maybe(schema.string({ minLength: 1, validate: validateNonEmptyString })),
-    example: schema.maybe(schema.string({ minLength: 1, validate: validateNonEmptyString })),
-    pathToExecutable: schema.maybe(
-      schema.string({ minLength: 1, validate: validateNonEmptyString })
-    ),
+    name: ScriptNameSchema,
+    platform: ScriptPlatformSchema,
+    file: ScriptFileSchema,
+    requiresInput: schema.maybe(ScriptRequiresInputSchema),
+    description: schema.maybe(ScriptDescriptionSchema),
+    instructions: schema.maybe(ScriptInstructionsSchema),
+    example: schema.maybe(ScriptExampleSchema),
+    pathToExecutable: schema.maybe(ScriptPathToExecutableSchema),
+    tags: schema.maybe(ScriptTagsSchema),
   }),
 };
 

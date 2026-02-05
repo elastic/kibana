@@ -39,8 +39,6 @@ export class InterceptTriggerService {
     this.kibanaVersion = kibanaVersion;
     this.counter = getCounters(usageCollector);
 
-    core.savedObjects.registerType(this.savedObjectRef);
-
     return {
       fetchRegisteredTask: this.fetchRegisteredTask.bind(this),
     };

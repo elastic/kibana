@@ -56,6 +56,8 @@
           "[]; }"
         ],
         "path": "src/platform/packages/shared/kbn-aiops-utils/src/get_categorization_field.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -78,6 +80,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-aiops-utils/src/get_categorization_field.ts",
+            "lineNumber": 55,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -101,6 +105,8 @@
           "(fields: string[]) => string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-aiops-utils/src/get_categorization_field.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -117,6 +123,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-aiops-utils/src/get_categorization_field.ts",
+            "lineNumber": 34,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

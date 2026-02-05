@@ -320,3 +320,40 @@ export const APMExample: StoryFn<{}> = () => {
 
   return <TraceWaterfall traceItems={traceItems} />;
 };
+
+export const CompositeSpanExample: StoryFn<{}> = () => {
+  return (
+    <TraceWaterfall
+      traceItems={[
+        {
+          id: 'root-tx',
+          timestampUs: new Date('2025-05-27T12:15:04.973Z').getTime() * 1000,
+          name: 'GET /users',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 10000000,
+          errors: [],
+          serviceName: 'api-service',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+        },
+        {
+          id: 'composite-span',
+          timestampUs: new Date('2025-05-27T12:15:05.000Z').getTime() * 1000,
+          name: 'SELECT * FROM users',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 5000000,
+          errors: [],
+          parentId: 'root-tx',
+          serviceName: 'api-service',
+          type: 'db',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          icon: 'database',
+          composite: {
+            count: 9,
+            sum: 4500000,
+            compressionStrategy: 'exact_match',
+          },
+        },
+      ]}
+    />
+  );
+};

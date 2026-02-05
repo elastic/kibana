@@ -29,6 +29,7 @@ import type {
   RulesSnoozeSettingsMap,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
+import type { WarningSchema } from '../../../../../../common/api/detection_engine';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import {
@@ -130,6 +131,10 @@ export interface RulesTableState {
    * Rules snooze settings for the current rules
    */
   rulesSnoozeSettings: RulesSnoozeSettings;
+  /**
+   * Warning, such as when the number of rules with gaps is greater than the limit.
+   */
+  warnings?: WarningSchema[];
 }
 
 export type LoadingRuleAction =
@@ -289,7 +294,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   // Fetch rules
   const {
-    data: { rules, total } = { rules: [], total: 0 },
+    data: { rules, total, warnings } = { rules: [], total: 0, warnings: [] },
     refetch,
     dataUpdatedAt,
     isFetched,
@@ -414,6 +419,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
           perPage,
           total,
         }),
+        warnings,
       },
       actions,
     };
@@ -441,6 +447,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     selectedRuleIds,
     sortingOptions,
     actions,
+    warnings,
   ]);
 
   return <RulesTableContext.Provider value={providerValue}>{children}</RulesTableContext.Provider>;

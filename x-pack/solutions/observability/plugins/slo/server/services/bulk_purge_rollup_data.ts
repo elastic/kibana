@@ -16,10 +16,10 @@ import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { SLODefinition } from '../domain/models';
 import { IllegalArgumentError } from '../errors';
-import type { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 
 export class BulkPurgeRollupData {
-  constructor(private esClient: ElasticsearchClient, private repository: SLORepository) {}
+  constructor(private esClient: ElasticsearchClient, private repository: SLODefinitionRepository) {}
 
   public async execute(params: BulkPurgeRollupParams): Promise<BulkPurgeRollupResponse> {
     const lookback = this.getTimestamp(params.purgePolicy);

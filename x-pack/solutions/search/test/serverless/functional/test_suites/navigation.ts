@@ -75,11 +75,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           pageTestSubject: 'dashboardLandingPage',
         },
         {
-          link: { deepLinkId: 'searchPlayground' },
-          breadcrumbs: ['Playground'],
-          pageTestSubject: 'playgroundsListPage',
-        },
-        {
           link: { deepLinkId: 'searchGettingStarted' },
           breadcrumbs: ['Getting started'],
           pageTestSubject: 'gettingStartedHeader',
@@ -161,7 +156,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           'agent_builder',
           'discover',
           'dashboards',
-          'searchPlayground',
           'machine_learning',
           // footer:
           'search_getting_started',
@@ -173,6 +167,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       );
     });
 
+    it('does not show cloud connect in sidebar navigation', async () => {
+      // Cloud Connect should NOT appear in serverless deployments
+      expect(await testSubjects.missingOrFail('cloud_connect'));
+    });
+
     it('renders a feedback callout', async function () {
       await solutionNavigation.sidenav.feedbackCallout.reset();
       await solutionNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
@@ -181,19 +180,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.feedbackCallout.expectMissing();
       await browser.refresh();
       await solutionNavigation.sidenav.feedbackCallout.expectMissing();
-    });
-
-    it('renders tour', async () => {
-      await solutionNavigation.sidenav.tour.reset();
-      await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
-      await solutionNavigation.sidenav.tour.nextStep();
-      await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
-      await solutionNavigation.sidenav.tour.nextStep();
-      await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-search-getting-started');
-      await solutionNavigation.sidenav.tour.nextStep();
-      await solutionNavigation.sidenav.tour.expectHidden();
-      await browser.refresh();
-      await solutionNavigation.sidenav.tour.expectHidden();
     });
 
     it('opens panel on legacy management landing page', async () => {

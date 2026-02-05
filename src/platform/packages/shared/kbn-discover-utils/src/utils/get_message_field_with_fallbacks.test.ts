@@ -86,20 +86,6 @@ describe('getMessageFieldWithFallbacks', () => {
     });
   });
 
-  it('should prefer ECS message over OTel body.text', () => {
-    const doc = {
-      message: 'ECS message',
-      'body.text': 'OTel message',
-    };
-
-    const result = getMessageFieldWithFallbacks(doc);
-    expect(result).toEqual({
-      field: 'message',
-      value: 'ECS message',
-      formattedValue: undefined,
-    });
-  });
-
   it('should handle includeFormattedValue option for valid JSON', () => {
     const doc = {
       message: '{"key":"value"}',
@@ -122,6 +108,46 @@ describe('getMessageFieldWithFallbacks', () => {
     expect(result).toEqual({
       field: 'message',
       value: 'plain text message',
+      formattedValue: undefined,
+    });
+  });
+
+  it('should return body.text field object when it exists (highest priority)', () => {
+    const doc = {
+      'body.text': 'OTel log message',
+    };
+
+    const result = getMessageFieldWithFallbacks(doc);
+    expect(result).toEqual({
+      field: 'body.text',
+      value: 'OTel log message',
+      formattedValue: undefined,
+    });
+  });
+
+  it('should prefer OTel body.text over ECS message', () => {
+    const doc = {
+      message: 'ECS message',
+      'body.text': 'OTel message',
+    };
+
+    const result = getMessageFieldWithFallbacks(doc);
+    expect(result).toEqual({
+      field: 'body.text',
+      value: 'OTel message',
+      formattedValue: undefined,
+    });
+  });
+
+  it('should return message field when body.text does not exist', () => {
+    const doc = {
+      message: 'log message',
+    };
+
+    const result = getMessageFieldWithFallbacks(doc);
+    expect(result).toEqual({
+      field: 'message',
+      value: 'log message',
       formattedValue: undefined,
     });
   });

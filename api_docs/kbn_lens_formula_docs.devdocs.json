@@ -30,6 +30,8 @@
           "(type: string) => string"
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -67,6 +71,8 @@
           "\"average\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/average.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -79,6 +85,8 @@
         "label": "AVG_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/average.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -94,6 +102,8 @@
           "\"unique_count\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/cardinality.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -106,6 +116,8 @@
         "label": "CARDINALITY_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/cardinality.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -121,6 +133,8 @@
           "\"count\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/count.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -133,6 +147,8 @@
         "label": "COUNT_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/count.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -148,6 +164,8 @@
           "\"counter_rate\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/counter_rate.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -160,6 +178,8 @@
         "label": "COUNTER_RATE_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/counter_rate.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -175,6 +195,8 @@
           "\"cumulative_sum\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/cumulative_sum.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -187,6 +209,8 @@
         "label": "CUMULATIVE_SUM_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/cumulative_sum.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -202,6 +226,8 @@
           "\"differences\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/differences.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -214,6 +240,8 @@
         "label": "DIFFERENCES_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/differences.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -229,6 +257,8 @@
           "\"interval\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/interval.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -241,6 +271,8 @@
         "label": "INTERVAL_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/interval.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -256,6 +288,8 @@
           "\"last_value\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/last_value.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -268,6 +302,8 @@
         "label": "LAST_VALUE_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/last_value.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -283,6 +319,8 @@
           "\"max\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/max.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -295,6 +333,8 @@
         "label": "MAX_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/max.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -310,6 +350,8 @@
           "\"median\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/median.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -322,6 +364,8 @@
         "label": "MEDIAN_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/median.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -337,6 +381,8 @@
           "\"min\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/min.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -349,6 +395,8 @@
         "label": "MIN_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/min.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -364,6 +412,8 @@
           "\"moving_average\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/moving_average.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -376,6 +426,8 @@
         "label": "MOVING_AVERAGE_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/moving_average.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -391,6 +443,8 @@
           "5"
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/moving_average.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -406,6 +460,8 @@
           "\"normalize_by_unit\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/normalize_by_unit.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -418,6 +474,8 @@
         "label": "NORMALIZE_BY_UNIT_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/normalize_by_unit.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -433,6 +491,8 @@
           "\"now\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/now.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -445,6 +505,8 @@
         "label": "NOW_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/now.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -460,6 +522,8 @@
           "\"overall_average\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/overall_average.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -472,6 +536,8 @@
         "label": "OVERALL_AVERAGE_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/overall_average.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -487,6 +553,8 @@
           "\"overall_max\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/overall_max.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -499,6 +567,8 @@
         "label": "OVERALL_MAX_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/overall_max.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -514,6 +584,8 @@
           "\"overall_min\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/overall_min.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -526,6 +598,8 @@
         "label": "OVERALL_MIN_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/overall_min.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -541,6 +615,8 @@
           "\"overall_sum\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/overall_sum.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -553,6 +629,8 @@
         "label": "OVERALL_SUM_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/overall_sum.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -568,6 +646,8 @@
           "\"percentile\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/percentile.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -580,6 +660,8 @@
         "label": "PERCENTILE_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/percentile.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -595,6 +677,8 @@
           "\"percentile_rank\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/percentile_ranks.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -607,6 +691,8 @@
         "label": "PERCENTILE_RANK_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/percentile_ranks.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -622,6 +708,8 @@
           "\"standard_deviation\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/std_deviation.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -634,6 +722,8 @@
         "label": "STD_DEVIATION_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/std_deviation.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -649,6 +739,8 @@
           "\"sum\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/sum.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -661,6 +753,8 @@
         "label": "SUM_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/sum.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -676,6 +770,8 @@
           "\"time_range\""
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/time_range.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -688,6 +784,8 @@
         "label": "TIME_RANGE_NAME",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/operations/time_range.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -707,6 +805,8 @@
           "; }"
         ],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/index.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -719,6 +819,8 @@
         "label": "sections",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/sections/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -730,6 +832,8 @@
             "label": "howTo",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/sections/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -744,6 +848,8 @@
               "{ label: string; description: string; }"
             ],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/sections/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -758,6 +864,8 @@
               "{ label: string; description: string; items: { label: string; description: string; }[]; }"
             ],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/sections/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -772,6 +880,8 @@
               "{ label: string; description: string; }"
             ],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/sections/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -786,6 +896,8 @@
               "{ label: string; description: string; }"
             ],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/sections/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -800,6 +912,8 @@
               "{ label: string; description: string; }"
             ],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/sections/index.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -814,6 +928,8 @@
               "{ label: string; description: string; }"
             ],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/sections/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -828,6 +944,8 @@
         "label": "tinymathFunctions",
         "description": [],
         "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -839,6 +957,8 @@
             "label": "add",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -853,6 +973,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -867,6 +989,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -878,6 +1002,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 55,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -891,6 +1017,8 @@
             "label": "subtract",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -905,6 +1033,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 71,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -919,6 +1049,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 72,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -930,6 +1062,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 82,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -943,6 +1077,8 @@
             "label": "multiply",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -957,6 +1093,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 93,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -971,6 +1109,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 94,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -982,6 +1122,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 104,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -995,6 +1137,8 @@
             "label": "divide",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1009,6 +1153,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 118,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1023,6 +1169,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 119,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1034,6 +1182,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 129,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1047,6 +1197,8 @@
             "label": "abs",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1061,6 +1213,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 142,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1075,6 +1229,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 143,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1086,6 +1242,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 149,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1099,6 +1257,8 @@
             "label": "cbrt",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 157,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1113,6 +1273,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 158,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1127,6 +1289,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 159,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1138,6 +1302,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 165,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1151,6 +1317,8 @@
             "label": "ceil",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1165,6 +1333,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 175,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1179,6 +1349,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 176,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1190,6 +1362,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 182,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1203,6 +1377,8 @@
             "label": "clamp",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 191,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1217,6 +1393,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 192,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1231,6 +1409,8 @@
                   "({ name: string; type: string; } | { name: string; type: string; alternativeWhenMissing: string; })[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 193,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1242,6 +1422,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 209,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1255,6 +1437,8 @@
             "label": "cube",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 224,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1269,6 +1453,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 225,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1283,6 +1469,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 226,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1294,6 +1482,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 232,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1307,6 +1497,8 @@
             "label": "exp",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 241,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1321,6 +1513,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 242,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1335,6 +1529,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 243,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1346,6 +1542,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 249,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1359,6 +1557,8 @@
             "label": "fix",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 259,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1373,6 +1573,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 260,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1387,6 +1589,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 261,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1398,6 +1602,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 267,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1411,6 +1617,8 @@
             "label": "floor",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 276,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1425,6 +1633,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 277,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1439,6 +1649,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 278,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1450,6 +1662,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 284,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1463,6 +1677,8 @@
             "label": "log",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 293,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1477,6 +1693,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 294,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1491,6 +1709,8 @@
                   "({ name: string; type: string; } | { name: string; optional: true; defaultValue: string; type: string; })[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 295,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1502,6 +1722,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 307,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1515,6 +1737,8 @@
             "label": "mod",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 319,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1529,6 +1753,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 320,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1543,6 +1769,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 321,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1554,6 +1782,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 331,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1567,6 +1797,8 @@
             "label": "pow",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 340,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1581,6 +1813,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 341,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1595,6 +1829,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 342,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1606,6 +1842,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 352,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1619,6 +1857,8 @@
             "label": "round",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 361,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1633,6 +1873,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 362,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1647,6 +1889,8 @@
                   "({ name: string; type: string; } | { name: string; optional: true; defaultValue: number; type: string; })[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 363,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1658,6 +1902,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 375,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1671,6 +1917,8 @@
             "label": "sqrt",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 387,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1685,6 +1933,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 388,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1699,6 +1949,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 389,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1710,6 +1962,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 395,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1723,6 +1977,8 @@
             "label": "square",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 404,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1737,6 +1993,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 405,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1751,6 +2009,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 406,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1762,6 +2022,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 412,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1775,6 +2037,8 @@
             "label": "pick_max",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 421,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1789,6 +2053,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 422,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1803,6 +2069,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 423,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1814,6 +2082,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 433,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1827,6 +2097,8 @@
             "label": "pick_min",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 442,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1841,6 +2113,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 443,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1855,6 +2129,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 444,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1866,6 +2142,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 454,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1879,6 +2157,8 @@
             "label": "defaults",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 463,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1893,6 +2173,8 @@
                   "\"math\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 464,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1907,6 +2189,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 465,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1918,6 +2202,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 477,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1931,6 +2217,8 @@
             "label": "lt",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 486,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1945,6 +2233,8 @@
                   "\"comparison\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 487,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1959,6 +2249,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 488,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1970,6 +2262,8 @@
                 "label": "outputType",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 498,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1981,6 +2275,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 499,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1994,6 +2290,8 @@
             "label": "gt",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 512,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2008,6 +2306,8 @@
                   "\"comparison\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 513,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2022,6 +2322,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 514,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2033,6 +2335,8 @@
                 "label": "outputType",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 524,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2044,6 +2348,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 525,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2057,6 +2363,8 @@
             "label": "eq",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 538,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2071,6 +2379,8 @@
                   "\"comparison\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 539,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2085,6 +2395,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 540,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2096,6 +2408,8 @@
                 "label": "outputType",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 550,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2107,6 +2421,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 551,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2120,6 +2436,8 @@
             "label": "lte",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 564,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2134,6 +2452,8 @@
                   "\"comparison\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 565,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2148,6 +2468,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 566,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2159,6 +2481,8 @@
                 "label": "outputType",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 576,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2170,6 +2494,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 577,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2183,6 +2509,8 @@
             "label": "gte",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 590,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2197,6 +2525,8 @@
                   "\"comparison\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 591,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2211,6 +2541,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 592,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2222,6 +2554,8 @@
                 "label": "outputType",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 602,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2233,6 +2567,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 603,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2246,6 +2582,8 @@
             "label": "ifelse",
             "description": [],
             "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+            "lineNumber": 616,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2260,6 +2598,8 @@
                   "\"comparison\""
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 617,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2274,6 +2614,8 @@
                   "{ name: string; type: string; }[]"
                 ],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 618,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2285,6 +2627,8 @@
                 "label": "help",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-lens-formula-docs/src/math/index.ts",
+                "lineNumber": 632,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }

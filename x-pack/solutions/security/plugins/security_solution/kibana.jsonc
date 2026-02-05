@@ -46,6 +46,7 @@
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
+      "kql",
       "files",
       "controls",
       "dataViewEditor",
@@ -80,7 +81,8 @@
       "savedObjectsTaggingOss",
       "automaticImport",
       "serverless",
-      "onechat"
+      "agentBuilder",
+      "llmTasks"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -92,7 +94,7 @@
       "ml",
       "unifiedSearch",
       "esql",
-      "onechat"
+      "agentBuilder"
     ],
     "extraPublicDirs": [
       "common"

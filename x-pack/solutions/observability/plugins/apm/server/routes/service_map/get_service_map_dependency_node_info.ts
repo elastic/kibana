@@ -7,6 +7,12 @@
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  calculateThroughputWithRange,
+  calculateFailedTransactionRate,
+  getOutcomeAggregation,
+} from '@kbn/apm-data-access-plugin/server/utils';
+import { getFailedTransactionRateTimeSeries } from '../../lib/helpers/transaction_error_rate';
 import { ApmDocumentType } from '../../../common/document_type';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -17,14 +23,8 @@ import type { NodeStats } from '../../../common/service_map';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
-import {
-  calculateFailedTransactionRate,
-  getFailedTransactionRateTimeSeries,
-  getOutcomeAggregation,
-} from '../../lib/helpers/transaction_error_rate';
 import { withApmSpan } from '../../utils/with_apm_span';
 
 interface Options {

@@ -14,4 +14,6 @@ export {
   type GridData,
   type SavedDashboardPanel,
   type SavedDashboardSection,
+  type StoredControlState,
+  type StoredControlGroupInput,
 } from './v3';

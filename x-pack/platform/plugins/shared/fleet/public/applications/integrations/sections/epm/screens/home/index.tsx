@@ -17,8 +17,9 @@ import {
   INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM,
 } from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
-import { isPackageUpdatable } from '../../../../services';
+import { ExperimentalFeaturesService, isPackageUpdatable } from '../../../../services';
 import { InstalledIntegrationsPage } from '../installed_integrations';
+import { BrowseIntegrationsPage } from '../browse_integrations';
 import {
   useAuthz,
   useConfig,
@@ -124,9 +125,19 @@ export const EPMHomePage: React.FC = () => {
         </DefaultLayout>
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
-        <DefaultLayout section="browse" notificationsBySection={notificationsBySection}>
-          <AvailablePackages prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled} />
-        </DefaultLayout>
+        {ExperimentalFeaturesService.get().newBrowseIntegrationUx ? (
+          <DefaultLayout
+            section="browse"
+            noSpacerInContent={true}
+            notificationsBySection={notificationsBySection}
+          >
+            <BrowseIntegrationsPage prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled} />
+          </DefaultLayout>
+        ) : (
+          <DefaultLayout section="browse" notificationsBySection={notificationsBySection}>
+            <AvailablePackages prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled} />
+          </DefaultLayout>
+        )}
       </Route>
     </Routes>
   );

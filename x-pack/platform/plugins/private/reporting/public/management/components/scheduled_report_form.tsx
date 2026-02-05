@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Moment } from 'moment';
 import moment from 'moment';
 import {
-  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -285,15 +284,7 @@ export const ScheduledReportForm = ({
     <>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="s">
-          <h2>
-            {i18n.SCHEDULED_REPORT_FLYOUT_TITLE}{' '}
-            <EuiBetaBadge
-              className="eui-alignMiddle"
-              iconType="flask"
-              label={i18n.TECH_PREVIEW_LABEL}
-              tooltipContent={i18n.TECH_PREVIEW_DESCRIPTION}
-            />
-          </h2>
+          <h2>{i18n.SCHEDULED_REPORT_FLYOUT_TITLE}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -424,6 +415,7 @@ export const ScheduledReportForm = ({
                         {i18n.SCHEDULED_REPORT_FORM_TIMEZONE_LABEL}
                       </EuiFormLabel>
                     ),
+                    'aria-label': `${i18n.SCHEDULED_REPORT_FORM_TIMEZONE_LABEL} ${timezone}`,
                   },
                 }}
               />

@@ -15,6 +15,7 @@ import { silence } from '../common';
 import { getPlaywrightGrepTag } from '../playwright/utils';
 import { getConfigRootDir, loadServersConfig } from './configs';
 import type { StartServerOptions } from './flags';
+import { preCreateSecurityIndexesViaSamlAuth } from './pre_create_security_indexes';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
 
@@ -52,6 +53,9 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     // wait for 5 seconds of silence before logging the
     // success message so that it doesn't get buried
     await silence(log, 5000);
+
+    // Pre-create Elasticsearch Security indexes after server startup
+    await preCreateSecurityIndexesViaSamlAuth(config, log);
 
     log.success(
       '\n\n' +

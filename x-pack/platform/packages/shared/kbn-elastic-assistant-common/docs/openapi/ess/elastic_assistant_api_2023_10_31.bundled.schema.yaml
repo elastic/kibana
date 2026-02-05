@@ -2925,6 +2925,9 @@ components:
         reader:
           $ref: '#/components/schemas/Reader'
           description: Message content.
+        refusal:
+          description: Refusal reason returned by the model when content is filtered.
+          type: string
         role:
           $ref: '#/components/schemas/MessageRole'
           description: Message role.

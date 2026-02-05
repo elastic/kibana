@@ -21,7 +21,15 @@ Object {
 `;
 
 exports[`transpile - Streamlang DSL to ES|QL) should transpile a variety of processor steps and where blocks 1`] = `
-"  | WHERE NOT \`https.status_code\` == 200
+"  | EVAL my_joined_field = CONCAT(field1, \\", \\", field2, \\", \\", field3)
+  | EVAL full_name = CASE(first_name IS NULL OR last_name IS NULL, NULL, CONCAT(first_name, \\" \\", last_name))
+  | WHERE NOT(message IS NULL)
+  | EVAL message_uppercase = TO_UPPER(message)
+  | WHERE NOT(message IS NULL)
+  | EVAL message_lowercase = TO_LOWER(message)
+  | WHERE NOT(message IS NULL)
+  | EVAL message_trimmed = TRIM(message)
+  | WHERE NOT \`https.status_code\` == 200
   | WHERE NOT(\`http.status_code\` IS NULL)
   | EVAL \`http.status_code_str\` = CASE(\`http.error\` == 404, TO_STRING(\`http.status_code\`), NULL)
   | WHERE NOT(message IS NULL)
@@ -31,6 +39,8 @@ exports[`transpile - Streamlang DSL to ES|QL) should transpile a variety of proc
   | EVAL \`attributes.new_name\` = \`attributes.old_name\`
   | DROP \`attributes.old_name\`
   | EVAL \`attributes.status\` = \\"active\\"
+  | EVAL total = price * quantity
+  | EVAL \`attributes.total\` = \`attributes.price\` * \`attributes.quantity\` + \`attributes.tax\`
   | WHERE NOT(\`body.message\` IS NULL)
   | GROK \`body.message\` \\"%{IP:attributes.client_ip} - %{WORD:attributes.method}\\"
   | EVAL \`attributes.parsed_time\` = DATE_FORMAT(\\"yyyy-MM-dd\\", COALESCE(DATE_PARSE(\\"yyyy-MM-dd'T'HH:mm:ss.SSSZ\\", TO_STRING(\`attributes.timestamp\`)), DATE_PARSE(\\"yyyy-MM-dd HH:mm:ss\\", TO_STRING(\`attributes.timestamp\`))))

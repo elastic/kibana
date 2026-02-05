@@ -45,7 +45,7 @@ export interface CloudConnector {
   cloudProvider: CloudProvider;
   accountType?: AccountType;
   vars: CloudConnectorVars;
-  packagePolicyCount: number;
+  packagePolicyCount?: number;
   created_at: string;
   updated_at: string;
   namespace?: string;

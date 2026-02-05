@@ -753,10 +753,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(2);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
@@ -845,9 +846,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(result).toEqual({
         scheduled_report_ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
@@ -953,9 +956,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
@@ -1085,10 +1090,11 @@ describe('ScheduledReportsService', () => {
       );
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
       // TM still called with both in case the task was not disabled
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
@@ -1162,9 +1168,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(3);
       expect(auditLogger.log).toHaveBeenNthCalledWith(3, {
@@ -1240,10 +1248,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(result).toEqual({
         scheduled_report_ids: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
@@ -1337,7 +1346,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(2);
@@ -1429,7 +1439,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(result).toEqual({
@@ -1538,7 +1549,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
@@ -1671,7 +1683,8 @@ describe('ScheduledReportsService', () => {
       // TM still called with both in case the task was not disabled
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
@@ -1748,7 +1761,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(3);
@@ -1827,7 +1841,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(result).toEqual({

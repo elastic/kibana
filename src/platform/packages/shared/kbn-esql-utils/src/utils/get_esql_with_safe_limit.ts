@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser } from '@kbn/esql-ast';
+import { Parser } from '@kbn/esql-language';
 
 export function getESQLWithSafeLimit(esql: string, limit: number): string {
   const { root } = Parser.parse(esql);

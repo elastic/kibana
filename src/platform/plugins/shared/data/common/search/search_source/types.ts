@@ -127,6 +127,7 @@ export interface SearchSourceFields {
    * {@link ProjectRouting}
    */
   projectRouting?: ProjectRouting;
+  timezone?: string;
 
   parent?: SearchSourceFields;
 }
@@ -186,6 +187,7 @@ export type SerializedSearchSourceFields = {
    * {@link ProjectRouting}
    */
   projectRouting?: ProjectRouting;
+  timezone?: string;
 
   parent?: SerializedSearchSourceFields;
 };

@@ -29,6 +29,7 @@ export interface UpdateConversationSchema {
     '@timestamp': string;
     id: string;
     content: string;
+    refusal?: string;
     reader?: Reader;
     role: MessageRole;
     is_error?: boolean;
@@ -136,6 +137,7 @@ export const transformToUpdateScheme = (
             '@timestamp': message.timestamp,
             id: message.id ?? uuidv4(),
             content: message.content,
+            ...(message.refusal ? { refusal: message.refusal } : {}),
             is_error: message.isError,
             reader: message.reader,
             role: message.role,

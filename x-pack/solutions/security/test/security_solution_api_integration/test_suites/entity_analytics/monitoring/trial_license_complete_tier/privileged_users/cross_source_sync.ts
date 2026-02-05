@@ -10,7 +10,6 @@ import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/com
 import { waitFor } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { PrivMonUtils, PlainIndexSyncUtils } from '../utils';
-import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const entityAnalyticsApi = getService('entityAnalyticsApi');
@@ -18,19 +17,13 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
 
   // FLAKY: https://github.com/elastic/kibana/issues/237416
-  describe.skip('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
-    const kibanaServer = getService('kibanaServer');
+  describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
     const index1 = 'privmon_index1';
     const indexSyncUtils = PlainIndexSyncUtils(getService, index1);
     const user1 = { name: 'user_1' };
 
-    before(async () => {
-      await enablePrivmonSetting(kibanaServer);
-    });
-
     after(async () => {
       await entityAnalyticsApi.deleteMonitoringEngine({ query: { data: true } });
-      await disablePrivmonSetting(kibanaServer);
     });
 
     beforeEach(async () => {
@@ -82,10 +75,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       expect(createEntitySourceResponse.status).toBe(200);
-      // Use scheduleEngineAndWaitForUserCount to ensure sync completes before checking
-      users = await privMonUtils.scheduleEngineAndWaitForUserCount(1);
+      // Schedule the sync manually instead of using scheduleEngineAndWaitForUserCount
+      // because the user count is already 1 (from API/CSV sources), so waiting for count=1
+      // would return immediately before the index sync completes
+      await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
 
-      // Additional wait to ensure the 'index' source has been merged
+      // Wait for the 'index' source to be merged while also verifying user count stays at 1
       await waitFor(
         async () => {
           const currentUsers = (await entityAnalyticsApi.listPrivMonUsers({ query: {} }))
@@ -93,7 +88,8 @@ export default ({ getService }: FtrProviderContext) => {
           const currentUser = privMonUtils.findUser(currentUsers, user1.name);
           const sources = currentUser?.labels?.sources || [];
           log.info(`Waiting for 'index' source. Current sources: ${JSON.stringify(sources)}`);
-          return sources.includes('index') && sources.length === 3;
+          // Verify user count remains at 1 (no duplicates created) and index source is present
+          return currentUsers.length === 1 && sources.includes('index') && sources.length === 3;
         },
         'wait for index source to be merged',
         log
@@ -102,6 +98,8 @@ export default ({ getService }: FtrProviderContext) => {
       users = (await entityAnalyticsApi.listPrivMonUsers({ query: {} }))
         .body as ListPrivMonUsersResponse;
       user = privMonUtils.findUser(users, user1.name);
+
+      expect(users.length).toBe(1); // Verify no duplicate users were created
       privMonUtils.assertIsPrivileged(user, true);
       expect(user?.user?.name).toEqual(user1.name);
       expect(user?.labels?.sources).toContain('api');

@@ -22,6 +22,8 @@
           "<string>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/index.tsx",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
               "<string>"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/index.tsx",
+            "lineNumber": 18,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -71,6 +75,8 @@
           "<Kind>"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -87,6 +93,8 @@
               "Kind"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -111,6 +119,8 @@
               "<unknown>) => boolean) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -132,6 +142,8 @@
                   "<unknown>"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+                "lineNumber": 46,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -152,6 +164,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -178,6 +192,8 @@
               "<unknown>[]) => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -199,6 +215,8 @@
                   "<unknown>[]"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+                "lineNumber": 54,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -227,6 +245,8 @@
               "<unknown>[]) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -248,6 +268,8 @@
                   "<unknown>[]"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+                "lineNumber": 58,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -268,6 +290,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -284,6 +308,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -302,6 +328,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

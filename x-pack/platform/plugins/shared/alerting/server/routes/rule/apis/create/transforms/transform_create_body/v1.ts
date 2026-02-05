@@ -73,6 +73,7 @@ const transformCreateBodyFlapping = <Params extends RuleParams = never>(
     return flapping;
   }
   return {
+    enabled: flapping.enabled,
     lookBackWindow: flapping.look_back_window,
     statusChangeThreshold: flapping.status_change_threshold,
   };

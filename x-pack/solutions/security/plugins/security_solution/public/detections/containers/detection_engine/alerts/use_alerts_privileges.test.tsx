@@ -101,8 +101,8 @@ describe('useAlertsPrivileges', () => {
         hasIndexMaintenance: null,
         hasIndexWrite: null,
         hasIndexUpdateDelete: null,
-        hasSiemCRUD: false,
-        hasSiemRead: false,
+        hasAlertsRead: false,
+        hasAlertsAll: false,
         isAuthenticated: null,
         loading: false,
       })
@@ -123,8 +123,8 @@ describe('useAlertsPrivileges', () => {
         hasIndexRead: false,
         hasIndexWrite: false,
         hasIndexUpdateDelete: false,
-        hasSiemCRUD: true,
-        hasSiemRead: true,
+        hasAlertsRead: true,
+        hasAlertsAll: true,
         isAuthenticated: false,
         loading: false,
       })
@@ -149,8 +149,8 @@ describe('useAlertsPrivileges', () => {
         hasIndexRead: true,
         hasIndexWrite: true,
         hasIndexUpdateDelete: true,
-        hasSiemCRUD: true,
-        hasSiemRead: true,
+        hasAlertsRead: true,
+        hasAlertsAll: true,
         isAuthenticated: true,
         loading: false,
       })
@@ -172,18 +172,18 @@ describe('useAlertsPrivileges', () => {
         hasIndexRead: true,
         hasIndexWrite: true,
         hasIndexUpdateDelete: true,
-        hasSiemCRUD: true,
-        hasSiemRead: true,
+        hasAlertsRead: true,
+        hasAlertsAll: true,
         isAuthenticated: true,
         loading: false,
       })
     );
   });
 
-  test('returns "hasSiemCRUD" as false if user does not have SIEM Kibana "all" privileges', async () => {
+  test('returns "hasAlertsAll" as false if user does not have SecurityRules "all" privilege', async () => {
     const userPrivileges = produce(userPrivilegesInitial, (draft) => {
       draft.detectionEnginePrivileges.result = privilege;
-      draft.siemPrivileges = { crud: false, read: true };
+      draft.rulesPrivileges = { edit: false, read: true };
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
@@ -196,18 +196,18 @@ describe('useAlertsPrivileges', () => {
         hasIndexRead: true,
         hasIndexWrite: true,
         hasIndexUpdateDelete: true,
-        hasSiemCRUD: false,
-        hasSiemRead: true,
+        hasAlertsAll: false,
+        hasAlertsRead: true,
         isAuthenticated: true,
         loading: false,
       })
     );
   });
 
-  test('returns "hasSiemRead" as false if user does not have at least SIEM Kibana "read" privileges', async () => {
+  test('returns "hasAlertsRead" as false if user does not have the SecurityRules "read" privileges', async () => {
     const userPrivileges = produce(userPrivilegesInitial, (draft) => {
       draft.detectionEnginePrivileges.result = privilege;
-      draft.siemPrivileges = { crud: false, read: false };
+      draft.rulesPrivileges = { edit: false, read: false };
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
@@ -220,8 +220,8 @@ describe('useAlertsPrivileges', () => {
         hasIndexRead: true,
         hasIndexWrite: true,
         hasIndexUpdateDelete: true,
-        hasSiemCRUD: false,
-        hasSiemRead: false,
+        hasAlertsAll: false,
+        hasAlertsRead: false,
         isAuthenticated: true,
         loading: false,
       })

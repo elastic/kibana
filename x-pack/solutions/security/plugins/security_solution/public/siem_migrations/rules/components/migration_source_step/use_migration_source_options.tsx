@@ -7,9 +7,9 @@
 import React from 'react';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
-import * as i18n from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { MigrationSource } from '../../../common/types';
+import { MIGRATION_VENDOR_DISPLAY_NAME } from '../../../common/constants';
 
 export const useMigrationSourceOptions = () => {
   const isQradarEnabled = useIsExperimentalFeatureEnabled('qradarRulesMigration');
@@ -17,7 +17,7 @@ export const useMigrationSourceOptions = () => {
   const options: Array<EuiSuperSelectOption<MigrationSource>> = [
     {
       value: MigrationSource.SPLUNK,
-      inputDisplay: <span>{i18n.MIGRATION_SOURCE_DROPDOWN_OPTION_SPLUNK}</span>,
+      inputDisplay: <span>{MIGRATION_VENDOR_DISPLAY_NAME[MigrationSource.SPLUNK]}</span>,
     },
   ];
 
@@ -26,7 +26,7 @@ export const useMigrationSourceOptions = () => {
       value: MigrationSource.QRADAR,
       inputDisplay: (
         <span>
-          {i18n.MIGRATION_SOURCE_DROPDOWN_OPTION_QRADAR}
+          {MIGRATION_VENDOR_DISPLAY_NAME[MigrationSource.QRADAR]}
           <EuiIcon type="flask" />
         </span>
       ),

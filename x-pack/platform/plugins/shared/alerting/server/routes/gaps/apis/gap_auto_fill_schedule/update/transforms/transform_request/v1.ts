@@ -10,7 +10,7 @@ import type {
   GetGapAutoFillSchedulerParamsV1,
   UpdateGapAutoFillSchedulerRequestBodyV1,
 } from '../../../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
-import type { UpdateGapAutoFillSchedulerParams } from '../../../../../../../application/gap_auto_fill_scheduler/methods/update/types';
+import type { UpdateGapAutoFillSchedulerParams } from '../../../../../../../application/gaps/auto_fill_scheduler/methods/update/types';
 
 export const transformRequest = (
   request: KibanaRequest<

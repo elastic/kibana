@@ -5,20 +5,16 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import type { Attachment } from '@kbn/onechat-common/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
-const riskEntityAttachmentDataSchema = z.object({
+import { securityAttachmentDataSchema } from './security_attachment_data_schema';
+
+const riskEntityAttachmentDataSchema = securityAttachmentDataSchema.extend({
   identifierType: z.enum(['host', 'user', 'service', 'generic']),
   identifier: z.string().min(1),
 });
-
-/**
- * Data for a risk entity attachment.
- * Note: After validation, the data is stored as a formatted string.
- */
-type EntityRiskAttachmentData = z.infer<typeof riskEntityAttachmentDataSchema>;
 
 /**
  * Type guard to check if data is a formatted risk entity string
@@ -38,7 +34,7 @@ export const createEntityAttachmentType = (): AttachmentTypeDefinition => {
     validate: (input) => {
       const parseResult = riskEntityAttachmentDataSchema.safeParse(input);
       if (parseResult.success) {
-        return { valid: true, data: formatEntityRiskData(parseResult.data) };
+        return { valid: true, data: parseResult.data };
       } else {
         return { valid: false, error: parseResult.error.message };
       }
@@ -47,7 +43,7 @@ export const createEntityAttachmentType = (): AttachmentTypeDefinition => {
       // Extract data to allow proper type narrowing
       const data = attachment.data;
       // Necessary because we cannot currently use the AttachmentType type as agent is not
-      // registered with enum AttachmentType in onechat attachment_types.ts
+      // registered with enum AttachmentType in agentBuilder attachment_types.ts
       if (!isEntityRiskFormattedData(data)) {
         throw new Error(`Invalid risk entity attachment data for attachment ${attachment.id}`);
       }
@@ -71,8 +67,4 @@ RISK ENTITY DATA:
       return description;
     },
   };
-};
-
-const formatEntityRiskData = (data: EntityRiskAttachmentData): string => {
-  return `identifier: ${data.identifier}, identifierType: ${data.identifierType}`;
 };

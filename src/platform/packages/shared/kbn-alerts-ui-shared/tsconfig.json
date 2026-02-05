@@ -18,7 +18,6 @@
     "@kbn/data-views-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/es-query",
-    "@kbn/controls-plugin",
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
     "@kbn/kibana-utils-plugin",
@@ -35,7 +34,10 @@
     "@kbn/presentation-publishing",
     "@kbn/response-ops-rules-apis",
     "@kbn/controls-constants",
-    "@kbn/es-ui-shared-plugin",
+    "@kbn/controls-schemas",
+    "@kbn/control-group-renderer",
     "@kbn/react-query",
+    "@kbn/kql",
+    "@kbn/es-ui-shared-plugin"
   ]
 }

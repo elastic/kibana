@@ -38,6 +38,8 @@
           "[] | undefined) => (value: T) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/common/src/utils/filter_scopes.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,6 +61,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/common/src/utils/filter_scopes.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -69,7 +73,22 @@
       }
     ],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/ai-assistant-common",
+        "id": "def-common.AIChatExperience",
+        "type": "Enum",
+        "tags": [],
+        "label": "AIChatExperience",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-assistant/common/src/constants/ai_chat_experience.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/ai-assistant-common",
@@ -79,9 +98,11 @@
         "label": "AssistantScope",
         "description": [],
         "signature": [
-          "\"search\" | \"observability\" | \"all\""
+          "\"search\" | \"all\" | \"observability\""
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/common/src/types/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

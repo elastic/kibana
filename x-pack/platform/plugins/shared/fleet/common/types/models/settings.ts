@@ -24,6 +24,7 @@ export interface BaseSettings {
     metrics?: 'success' | null;
     synthetics?: 'success' | null;
   };
+  integration_knowledge_enabled?: boolean;
 }
 
 export interface Settings extends BaseSettings {

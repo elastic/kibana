@@ -23,9 +23,9 @@ export type { Intercept } from './service';
 type ProductInterceptPrompterSetupDeps = Pick<CoreSetup, 'analytics' | 'notifications'>;
 type ProductInterceptPrompterStartDeps = Omit<
   InterceptServiceStartDeps,
-  'persistInterceptRunId' | 'staticAssetsHelper'
+  'persistInterceptRunId' | 'staticAssetsHelper' | 'resetInterceptTimingRecord'
 > &
-  Pick<CoreStart, 'http'>;
+  Pick<CoreStart, 'http'> & { userAllowsFeedback: boolean };
 
 export class InterceptPrompter {
   private userInterceptRunPersistenceService = new UserInterceptRunPersistenceService();
@@ -33,28 +33,35 @@ export class InterceptPrompter {
   private queueIntercept?: ReturnType<InterceptDialogService['start']>['add'];
   // observer for page visibility changes, shared across all intercepts
   private pageHidden$?: Rx.Observable<boolean>;
+  private userAllowsFeedback?: boolean;
 
   // Registry for intercept timers, used to track activation of a particular intercept for each user
   private interceptTimerRegistry = new Proxy<Record<Intercept['id'], { timerStart: Date }>>(
     {},
     {
-      get: (target, prop) => {
+      get: (_target, prop) => {
         if (typeof prop === 'symbol') return undefined;
         const storage = JSON.parse(
-          localStorage.getItem(INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY) || JSON.stringify(target)
+          localStorage.getItem(INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY) || '{}'
         );
         return storage[prop];
       },
-      set: (target, prop, value) => {
+      set: (_target, prop, value) => {
         if (typeof prop === 'symbol') return false;
-        target[prop] = value;
-        localStorage.setItem(INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY, JSON.stringify(target));
+        const storage = JSON.parse(
+          localStorage.getItem(INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY) || '{}'
+        );
+        storage[prop] = value;
+        localStorage.setItem(INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY, JSON.stringify(storage));
         return true;
       },
-      deleteProperty: (target, prop) => {
+      deleteProperty: (_target, prop) => {
         if (typeof prop === 'symbol') return false;
-        delete target[prop];
-        localStorage.setItem(INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY, JSON.stringify(target));
+        const storage = JSON.parse(
+          localStorage.getItem(INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY) || '{}'
+        );
+        delete storage[prop];
+        localStorage.setItem(INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY, JSON.stringify(storage));
         return true;
       },
     }
@@ -66,7 +73,9 @@ export class InterceptPrompter {
     return {};
   }
 
-  start({ http, ...dialogServiceDeps }: ProductInterceptPrompterStartDeps) {
+  start({ http, userAllowsFeedback, ...dialogServiceDeps }: ProductInterceptPrompterStartDeps) {
+    this.userAllowsFeedback = userAllowsFeedback;
+
     const { getUserTriggerData$, updateUserTriggerData } =
       this.userInterceptRunPersistenceService.start(http);
 
@@ -74,6 +83,7 @@ export class InterceptPrompter {
       ...dialogServiceDeps,
       persistInterceptRunId: updateUserTriggerData,
       staticAssetsHelper: http.staticAssets,
+      resetInterceptTimingRecord: this.clearInterceptTimerStartRecord.bind(this),
     }));
 
     this.pageHidden$ = Rx.fromEvent(document, 'visibilitychange').pipe(
@@ -101,6 +111,8 @@ export class InterceptPrompter {
       config: () => Promise<Omit<Intercept, 'id'>>;
     }
   ) {
+    if (!this.userAllowsFeedback) return Rx.EMPTY;
+
     return Rx.from(
       http.post<NonNullable<TriggerInfo>>(TRIGGER_INFO_API_ROUTE, {
         body: JSON.stringify({
@@ -138,9 +150,6 @@ export class InterceptPrompter {
               const timeElapsedSinceTimerStart = now - timerStart;
 
               if (timeElapsedSinceTimerStart >= response.triggerIntervalInMs) {
-                // Reset the timer start record, so the next interval starts fresh
-                this.clearInterceptTimerStartRecord(intercept.id);
-
                 // fetch user trigger again because it's possible that the user has already interacted with the intercept,
                 // especially that the user might have interacted with the intercept in a different tab
                 return getUserTriggerData$(intercept.id);

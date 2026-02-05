@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/code-editor'
+  - '@kbn/code-editor-mock'
   - '@kbn/react-kibana-context-render'
   - '@kbn/licensing-types'
 tags:

@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/inference-common'
   - '@kbn/actions-plugin'
+  - '@kbn/utility-types'
 tags:
   - plugin
   - prod

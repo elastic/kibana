@@ -31,6 +31,7 @@ import {
   SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH,
   SIEM_RULE_MIGRATION_RULES_PATH,
   SIEM_RULE_MIGRATION_QRADAR_RULES_PATH,
+  SIEM_RULE_MIGRATION_RULES_ENHANCE_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationResponse,
@@ -51,6 +52,8 @@ import type {
   UpdateRuleMigrationRequestBody,
   StopRuleMigrationResponse,
   UpdateRuleMigrationIndexPatternResponse,
+  RuleMigrationEnhanceRuleRequestBody,
+  RuleMigrationEnhanceRuleResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { RuleMigrationStats } from '../types';
 import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../../common/types';
@@ -181,6 +184,7 @@ export const upsertMigrationResources = async ({
 export interface StartRuleMigrationParams {
   /** `id` of the migration to start */
   migrationId: string;
+
   settings: {
     /** The connector id to use for the migration */
     connectorId: string;
@@ -458,5 +462,25 @@ export const updateIndexPattern = async ({
   return KibanaServices.get().http.post<UpdateRuleMigrationIndexPatternResponse>(
     replaceParams(SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH, { migration_id: migrationId }),
     { version: '1', body: JSON.stringify(payload), signal }
+  );
+};
+
+export interface EnhanceRulesParams {
+  /** `id` of the migration to enhance rules for */
+  migrationId: string;
+  /** The enhancement data body */
+  body: RuleMigrationEnhanceRuleRequestBody;
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Enhances migration rules with additional vendor-specific data such as MITRE mappings */
+export const enhanceRules = async ({
+  migrationId,
+  body,
+  signal,
+}: EnhanceRulesParams): Promise<RuleMigrationEnhanceRuleResponse> => {
+  return KibanaServices.get().http.post<RuleMigrationEnhanceRuleResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_RULES_ENHANCE_PATH, { migration_id: migrationId }),
+    { body: JSON.stringify(body), version: '1', signal }
   );
 };

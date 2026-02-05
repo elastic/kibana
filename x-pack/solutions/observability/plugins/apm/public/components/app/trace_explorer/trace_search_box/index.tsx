@@ -40,9 +40,7 @@ const options: EuiSelectOption[] = [
 
 export function TraceSearchBox({ query, onQueryChange, onQueryCommit, loading }: Props) {
   const {
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
   } = useApmPluginContext();
 
   const { dataView } = useAdHocApmDataView();

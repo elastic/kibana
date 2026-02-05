@@ -2936,9 +2936,6 @@ describe('Output Service', () => {
       expect(mockedLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining(`Unable to parse ssl for output ${so.id}`)
       );
-      expect(mockedLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining(`ssl value: invalid-json`)
-      );
     });
 
     it('should return output object with no SSL field when SSL is not a string', () => {

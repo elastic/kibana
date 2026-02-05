@@ -12,7 +12,8 @@ import {
   isFunctionExpression,
   isLiteral,
   LeafPrinter,
-} from '@kbn/esql-ast';
+  SettingNames,
+} from '@kbn/esql-language';
 
 /**
  * Extracts the project routing value from an ES|QL query string.
@@ -21,8 +22,8 @@ import {
  * @returns The project routing value if found, undefined otherwise
  *
  * @example
- * getProjectRoutingFromEsqlQuery('SET project_routing = "_alias: *"; FROM my_index')
- * // Returns: '_alias: *'
+ * getProjectRoutingFromEsqlQuery('SET project_routing = "_alias:*"; FROM my_index')
+ * // Returns: '_alias:*'
  *
  * getProjectRoutingFromEsqlQuery('FROM my_index')
  * // Returns: undefined
@@ -37,7 +38,7 @@ export function getProjectRoutingFromEsqlQuery(queryString: string): string | un
       if (!instructionFunction) continue;
 
       const identifierArg = instructionFunction.args.find(isIdentifier);
-      if (identifierArg?.name !== 'project_routing') continue;
+      if (identifierArg?.name !== SettingNames.PROJECT_ROUTING) continue;
 
       const valueArg = instructionFunction.args[1];
       if (!valueArg || Array.isArray(valueArg)) continue;

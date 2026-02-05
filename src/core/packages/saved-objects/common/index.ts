@@ -9,6 +9,7 @@
 
 export type {
   SavedObject,
+  SavedObjectAccessControl,
   SavedObjectsNamespaceType,
   SavedObjectAttributeSingle,
   SavedObjectAttribute,
@@ -31,6 +32,7 @@ export type {
   SavedObjectsImportUnknownError,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportConflictError,
+  SavedObjectsImportUnexpectedAccessControlMetadataError,
 } from './src/saved_objects_imports';
 
 export type { SavedObjectTypeIdTuple, LegacyUrlAliasTarget } from './src/types';

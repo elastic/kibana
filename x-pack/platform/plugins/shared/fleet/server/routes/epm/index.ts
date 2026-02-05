@@ -7,7 +7,10 @@
 
 import type { RouteSecurity } from '@kbn/core-http-server';
 
-import { RollbackAvailableCheckResponseSchema } from '../../../common/types/rest_spec/epm';
+import {
+  BulkRollbackAvailableCheckResponseSchema,
+  RollbackAvailableCheckResponseSchema,
+} from '../../../common/types/rest_spec/epm';
 
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { API_VERSIONS } from '../../../common/constants';
@@ -99,6 +102,7 @@ import {
   getKnowledgeBaseHandler,
   rollbackPackageHandler,
   rollbackAvailableCheckHandler,
+  bulkRollbackAvailableCheckHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
 import {
@@ -1278,6 +1282,69 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           },
         },
         rollbackAvailableCheckHandler
+      );
+
+    router.versioned
+      .get({
+        path: EPM_API_ROUTES.BULK_ROLLBACK_AVAILABLE_CHECK_PATTERN,
+        security: READ_PACKAGE_INFO_SECURITY,
+        summary: `Check if rollback is available for installed packages`,
+        options: {
+          tags: ['internal', 'oas-tag:Elastic Package Manager (EPM)'],
+        },
+        access: 'internal',
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.internal.v1,
+          options: {
+            oasOperationObject: () => ({
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        successResponse: {
+                          value: {
+                            reason: 'reason',
+                            isAvailable: false,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                400: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+          },
+          validate: {
+            request: {},
+            response: {
+              200: {
+                description: 'OK: A successful request.',
+                body: () => BulkRollbackAvailableCheckResponseSchema,
+              },
+              400: {
+                description: 'A bad request.',
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        bulkRollbackAvailableCheckHandler
       );
   }
 };

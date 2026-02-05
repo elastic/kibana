@@ -100,6 +100,10 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
     subFeatureIds: [SecuritySubFeatureId.policyManagement],
   },
 
+  [ProductFeatureSecurityKey.endpointScriptsManagement]: {
+    subFeatureIds: [SecuritySubFeatureId.scriptsManagement],
+  },
+
   // Adds no additional kibana feature controls
   [ProductFeatureSecurityKey.endpointPolicyProtections]: {},
 

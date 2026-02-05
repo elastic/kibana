@@ -10,7 +10,11 @@
 import type { Client } from '@elastic/elasticsearch';
 import { createHmac, randomBytes, X509Certificate } from 'crypto';
 import { readFile } from 'fs/promises';
+import Url from 'url';
+import { promisify } from 'util';
 import { SignedXml } from 'xml-crypto';
+import { parseString } from 'xml2js';
+import zlib from 'zlib';
 
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 
@@ -28,6 +32,7 @@ import {
   MOCK_IDP_LOGOUT_PATH,
   MOCK_IDP_REALM_NAME,
   MOCK_IDP_ROLE_MAPPING_NAME,
+  MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
 import { seedTestUser } from './cosmos_db_seeder';
@@ -103,7 +108,15 @@ export async function createSAMLResponse(options: {
   full_name?: string;
   email?: string;
   roles: string[];
-  serverless?: { organizationId: string; projectType: string; uiamEnabled: boolean };
+  serverless?:
+    | { organizationId: string; projectType: string; uiamEnabled: false }
+    | {
+        organizationId: string;
+        projectType: string;
+        uiamEnabled: true;
+        accessTokenLifetimeSec?: number;
+        refreshTokenLifetimeSec?: number;
+      };
 }) {
   const issueInstant = new Date().toISOString();
   const notOnOrAfter = new Date(Date.now() + 3600 * 1000).toISOString();
@@ -116,6 +129,8 @@ export async function createSAMLResponse(options: {
         roles: options.roles,
         fullName: options.full_name,
         email: options.email,
+        accessTokenLifetimeSec: options.serverless.accessTokenLifetimeSec,
+        refreshTokenLifetimeSec: options.serverless.refreshTokenLifetimeSec,
       })
     : undefined;
 
@@ -249,6 +264,34 @@ export async function ensureSAMLRoleMapping(client: Client) {
   });
 }
 
+export function generateCosmosDBApiRequestHeaders(
+  httpVerb: 'POST' | 'PUT',
+  resourceType: 'dbs' | 'colls' | 'docs',
+  resourceId: string
+) {
+  // Generate date in RFC 1123 format
+  const timestamp = new Date().toUTCString();
+
+  // Cosmos DB expects all inputs in the string-to-sign to be lowercased
+  // Format: Verb\nResourceType\nResourceID\nTimestamp\n\n
+  const stringToSign =
+    `${httpVerb.toLowerCase()}\n` +
+    `${resourceType.toLowerCase()}\n` +
+    `${resourceId}\n` +
+    `${timestamp.toLowerCase()}\n` +
+    `\n`;
+
+  const key = Buffer.from(MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY, 'base64');
+  return {
+    Authorization: encodeURIComponent(
+      `type=master&ver=1.0&sig=${createHmac('sha256', key).update(stringToSign).digest('base64')}`
+    ),
+    'x-ms-date': timestamp,
+    'x-ms-version': '2018-12-31',
+    'Content-Type': 'application/json',
+  };
+}
+
 async function createUiamSessionTokens({
   username,
   organizationId,
@@ -256,6 +299,10 @@ async function createUiamSessionTokens({
   roles,
   fullName,
   email,
+  // 1H
+  accessTokenLifetimeSec = 3600,
+  // 3D
+  refreshTokenLifetimeSec = 3 * 24 * 3600,
 }: {
   username: string;
   organizationId: string;
@@ -263,6 +310,8 @@ async function createUiamSessionTokens({
   roles: string[];
   fullName?: string;
   email?: string;
+  accessTokenLifetimeSec?: number;
+  refreshTokenLifetimeSec?: number;
 }) {
   const iat = Math.floor(Date.now() / 1000);
 
@@ -308,8 +357,7 @@ async function createUiamSessionTokens({
       },
 
       nbf: iat,
-      // 1H
-      exp: iat + 3600,
+      exp: iat + accessTokenLifetimeSec,
       iat,
       jti: randomBytes(16).toString('hex'),
     })
@@ -324,8 +372,7 @@ async function createUiamSessionTokens({
       sub: username,
 
       nbf: iat,
-      // 3D
-      exp: iat + 3600 * 24 * 3,
+      exp: iat + refreshTokenLifetimeSec,
       iat,
       session_created: iat,
       jti: randomBytes(16).toString('hex'),
@@ -342,9 +389,9 @@ async function createUiamSessionTokens({
 
   return {
     accessToken: prepareJwtForUiam(accessToken),
-    accessTokenExpiresAt: (iat + 3600) * 1000,
+    accessTokenExpiresAt: (iat + accessTokenLifetimeSec) * 1000,
     refreshToken: prepareJwtForUiam(refreshToken),
-    refreshTokenExpiresAt: (iat + 3600) * 1000,
+    refreshTokenExpiresAt: (iat + refreshTokenLifetimeSec) * 1000,
   };
 }
 
@@ -362,4 +409,28 @@ function signJwt(unsignedJwt: string): string {
 function wrapSignedJwt(signedJwt: string): string {
   const accessTokenEncodedWithChecksum = encodeWithChecksum(signedJwt);
   return prefixWithEssuDev(accessTokenEncodedWithChecksum);
+}
+
+const inflateRawAsync = promisify(zlib.inflateRaw);
+const parseStringAsync = promisify(parseString);
+
+export async function getSAMLRequestId(requestUrl: string): Promise<string | undefined> {
+  const samlRequest = Url.parse(requestUrl, true /* parseQueryString */).query.SAMLRequest;
+
+  let requestId: string | undefined;
+
+  if (samlRequest) {
+    try {
+      const inflatedSAMLRequest = (await inflateRawAsync(
+        Buffer.from(samlRequest as string, 'base64')
+      )) as Buffer;
+
+      const parsedSAMLRequest = (await parseStringAsync(inflatedSAMLRequest.toString())) as any;
+      requestId = parsedSAMLRequest['saml2p:AuthnRequest'].$.ID as string;
+    } catch (e) {
+      return undefined;
+    }
+  }
+
+  return requestId;
 }

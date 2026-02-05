@@ -35,6 +35,8 @@
           "KibanaExecutionContext"
         ],
         "path": "x-pack/platform/packages/private/ml/route_utils/src/create_execution_context.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,6 +53,8 @@
               "CoreStart"
             ],
             "path": "x-pack/platform/packages/private/ml/route_utils/src/create_execution_context.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -68,6 +72,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/ml/route_utils/src/create_execution_context.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -85,6 +91,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/route_utils/src/create_execution_context.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -102,6 +110,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/ml/route_utils/src/create_execution_context.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

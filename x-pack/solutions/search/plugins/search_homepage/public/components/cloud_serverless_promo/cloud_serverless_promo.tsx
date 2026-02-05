@@ -15,14 +15,17 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 export const CloudServerlessPromo = () => {
+  const currentBreakpoint = useCurrentEuiBreakpoint();
+
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="xl" direction={currentBreakpoint === 'xl' ? 'row' : 'column'}>
       <EuiFlexItem>
         <PromoItem promoItem="hosted" />
       </EuiFlexItem>
@@ -96,7 +99,7 @@ export const PromoItem = ({ promoItem }: { promoItem: 'serverless' | 'hosted' })
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
+            <EuiTitle size="xs">
               <h3>{promoTitle}</h3>
             </EuiTitle>
           </EuiFlexItem>
@@ -104,7 +107,7 @@ export const PromoItem = ({ promoItem }: { promoItem: 'serverless' | 'hosted' })
             <EuiText size="s" color="subdued" grow={false}>
               {description}
             </EuiText>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <EuiLink
               data-test-subj={`searchHomepagePromoItemExternalLink-${promoItem}`}
               external
