@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { getModelId } from '../../utils/get_model_id';
-import * as i18n from './endpoint_stats_translations';
+import { SERVICES_LABEL, MODELS_LABEL, ENDPOINTS_LABEL } from './endpoint_stats_translations';
 
 interface EndpointStatsProps {
   endpoints: InferenceInferenceEndpointInfo[];
@@ -39,17 +39,17 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
     <EuiFlexGroup gutterSize="l" alignItems="center" data-test-subj="endpointStats">
       <EuiFlexItem grow={false}>
         <EuiText size="s" data-test-subj="endpointStatsServices">
-          <strong>{i18n.SERVICES_LABEL}</strong> {stats.servicesCount}
+          <strong>{SERVICES_LABEL}</strong> {stats.servicesCount}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" data-test-subj="endpointStatsModels">
-          <strong>{i18n.MODELS_LABEL}</strong> {stats.modelsCount}
+          <strong>{MODELS_LABEL}</strong> {stats.modelsCount}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" data-test-subj="endpointStatsEndpoints">
-          <strong>{i18n.ENDPOINTS_LABEL}</strong> {stats.endpointsCount}
+          <strong>{ENDPOINTS_LABEL}</strong> {stats.endpointsCount}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
