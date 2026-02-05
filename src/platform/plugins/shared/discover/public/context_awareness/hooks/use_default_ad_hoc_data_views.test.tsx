@@ -9,7 +9,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useDefaultAdHocDataViews } from './use_default_ad_hoc_data_views';
-import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../__mocks__/discover_state.mock';
 import { discoverServiceMock } from '../../__mocks__/services';
 import React from 'react';
 import { internalStateActions } from '../../application/main/state_management/redux';
@@ -42,8 +42,16 @@ const rootProfileState = {
     }),
 };
 
-const renderDefaultAdHocDataViewsHook = () => {
-  const stateContainer = getDiscoverStateMock({});
+const renderDefaultAdHocDataViewsHook = async () => {
+  const toolkit = getDiscoverInternalStateMock({
+    services: discoverServiceMock,
+    persistedDataViews: [existingAdHocDataVew],
+  });
+  await toolkit.initializeTabs();
+  const { stateContainer } = await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
+    skipWaitForDataFetching: true,
+  });
   stateContainer.internalState.dispatch(
     internalStateActions.appendAdHocDataViews(existingAdHocDataVew)
   );
@@ -70,7 +78,7 @@ describe('useDefaultAdHocDataViews', () => {
   });
 
   it('should set default profile ad hoc data views', async () => {
-    const { result, stateContainer } = renderDefaultAdHocDataViewsHook();
+    const { result, stateContainer } = await renderDefaultAdHocDataViewsHook();
     expect(clearInstanceCache).not.toHaveBeenCalled();
     expect(createDataView).not.toHaveBeenCalled();
     expect(stateContainer.runtimeStateManager.adHocDataViews$.getValue()).toEqual([
@@ -94,7 +102,7 @@ describe('useDefaultAdHocDataViews', () => {
   });
 
   it('should clear instance cache on unmount', async () => {
-    const { unmount, stateContainer } = renderDefaultAdHocDataViewsHook();
+    const { unmount, stateContainer } = await renderDefaultAdHocDataViewsHook();
     expect(clearInstanceCache).not.toHaveBeenCalled();
     expect(stateContainer.runtimeStateManager.adHocDataViews$.getValue()).toEqual([
       existingAdHocDataVew,

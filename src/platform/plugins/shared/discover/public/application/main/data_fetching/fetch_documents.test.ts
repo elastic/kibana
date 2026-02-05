@@ -19,12 +19,18 @@ import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTabRuntimeState } from '../state_management/redux';
 
-const getDeps = (): CommonFetchParams => {
+const getDeps = async (): Promise<CommonFetchParams> => {
+  const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
+  await toolkit.initializeTabs();
+  const { stateContainer } = await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
+    skipWaitForDataFetching: true,
+  });
   const { internalState, dataState, runtimeStateManager, getCurrentTab, injectCurrentTab } =
-    getDiscoverStateMock({});
+    stateContainer;
   const { scopedProfilesManager$, scopedEbtManager$ } = selectTabRuntimeState(
     runtimeStateManager,
     getCurrentTab().id
@@ -60,7 +66,7 @@ describe('test fetchDocuments', () => {
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     savedSearchMock.searchSource.fetch$ = <T>() =>
       of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
-    const deps = getDeps();
+    const deps = await getDeps();
     const resolveDocumentProfileSpy = jest.spyOn(
       deps.scopedProfilesManager,
       'resolveDocumentProfile'
@@ -78,14 +84,14 @@ describe('test fetchDocuments', () => {
     savedSearchMock.searchSource.fetch$ = () => throwErrorRx(() => new Error('Oh noes!'));
 
     try {
-      await fetchDocuments(savedSearchMock.searchSource, getDeps());
+      await fetchDocuments(savedSearchMock.searchSource, await getDeps());
     } catch (e) {
       expect(e).toEqual(new Error('Oh noes!'));
     }
   });
 
   test('passes a correct session id', async () => {
-    const deps = getDeps();
+    const deps = await getDeps();
     const hits = [
       { _id: '1', foo: 'bar' },
       { _id: '2', foo: 'baz' },

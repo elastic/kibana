@@ -14,11 +14,12 @@ import type { Adapters } from '@kbn/inspector-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { OverlayRef } from '@kbn/core/public';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
-import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { internalStateActions } from '../state_management/redux';
 import React from 'react';
 import { DiscoverTestProvider } from '../../../__mocks__/test_provider';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 describe('test useInspector', () => {
   test('inspector open function is executed, expanded doc is closed', async () => {
@@ -29,7 +30,12 @@ describe('test useInspector', () => {
     });
     const requests = new RequestAdapter();
     const lensRequests = new RequestAdapter();
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
+    await toolkit.initializeTabs();
+    const { stateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+      skipWaitForDataFetching: true,
+    });
     const currentTabId = stateContainer.internalState.getState().tabs.unsafeCurrentId;
     stateContainer.internalState.dispatch(
       internalStateActions.setExpandedDoc({

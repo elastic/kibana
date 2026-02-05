@@ -14,7 +14,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { BehaviorSubject } from 'rxjs';
 import { useTopNavLinks } from './use_top_nav_links';
 import type { DiscoverServices } from '../../../../build_services';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import { internalStateActions } from '../../state_management/redux';
@@ -37,18 +37,26 @@ describe('useTopNavLinks', () => {
     },
   } as unknown as DiscoverServices;
 
-  const state = getDiscoverStateMock({ isTimeBased: true });
-  state.internalState.dispatch(
-    state.injectCurrentTab(internalStateActions.assignNextDataView)({
-      dataView: dataViewMock,
-    })
-  );
+  const getStateContainer = async () => {
+    const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
+    await toolkit.initializeTabs();
+    const { stateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+      skipWaitForDataFetching: true,
+    });
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
+        dataView: dataViewMock,
+      })
+    );
+    return stateContainer;
+  };
 
   // identifier to denote if share integration is available,
   // we default to false especially that there a specific test scenario for when this is true
   const hasShareIntegration = false;
 
-  const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const Wrapper: React.FC<{ children: React.ReactNode; state: Awaited<ReturnType<typeof getStateContainer>> }> = ({ children, state }) => {
     return (
       <DiscoverTestProvider
         services={services}
@@ -63,7 +71,8 @@ describe('useTopNavLinks', () => {
     );
   };
 
-  const setup = (hookAttrs: Partial<Parameters<typeof useTopNavLinks>[0]> = {}) => {
+  const setup = async (hookAttrs: Partial<Parameters<typeof useTopNavLinks>[0]> = {}) => {
+    const state = await getStateContainer();
     return renderHook(
       () =>
         useTopNavLinks({
@@ -79,13 +88,13 @@ describe('useTopNavLinks', () => {
           ...hookAttrs,
         }),
       {
-        wrapper: Wrapper,
+        wrapper: ({ children }) => <Wrapper state={state}>{children}</Wrapper>,
       }
     ).result.current;
   };
 
-  it('should return results', () => {
-    const appMenuConfig = setup();
+  it('should return results', async () => {
+    const appMenuConfig = await setup();
 
     expect(appMenuConfig.items).toBeDefined();
     expect(appMenuConfig.items?.length).toBeGreaterThan(0);
@@ -101,8 +110,8 @@ describe('useTopNavLinks', () => {
   });
 
   describe('when ES|QL mode is true', () => {
-    it('should NOT include the esql secondary action item', () => {
-      const appMenuConfig = setup({
+    it('should NOT include the esql secondary action item', async () => {
+      const appMenuConfig = await setup({
         isEsqlMode: true,
       });
 
@@ -112,8 +121,8 @@ describe('useTopNavLinks', () => {
   });
 
   describe('when ES|QL mode is false (classic mode)', () => {
-    it('should include the esql secondary action item', () => {
-      const appMenuConfig = setup({
+    it('should include the esql secondary action item', async () => {
+      const appMenuConfig = await setup({
         isEsqlMode: false,
       });
 
@@ -134,8 +143,8 @@ describe('useTopNavLinks', () => {
       services.share = undefined;
     });
 
-    it('should include the share menu item', () => {
-      const appMenuConfig = setup();
+    it('should include the share menu item', async () => {
+      const appMenuConfig = await setup();
 
       expect(appMenuConfig.items).toBeDefined();
 
@@ -145,7 +154,7 @@ describe('useTopNavLinks', () => {
       expect(shareItem?.label).toBe('Share');
     });
 
-    it('should include the export menu item', () => {
+    it('should include the export menu item', async () => {
       jest
         .spyOn(services.share!, 'availableIntegrations')
         .mockImplementation((_objectType, groupId) => {
@@ -162,6 +171,7 @@ describe('useTopNavLinks', () => {
           return [];
         });
 
+      const state = await getStateContainer();
       const appMenuConfig = renderHook(
         () =>
           useTopNavLinks({
@@ -176,7 +186,7 @@ describe('useTopNavLinks', () => {
             persistedDiscoverSession: undefined,
           }),
         {
-          wrapper: Wrapper,
+          wrapper: ({ children }) => <Wrapper state={state}>{children}</Wrapper>,
         }
       ).result.current;
 
@@ -201,8 +211,8 @@ describe('useTopNavLinks', () => {
       services.data.search.isBackgroundSearchEnabled = false;
     });
 
-    it('should return the background search menu item', () => {
-      const appMenuConfig = setup();
+    it('should return the background search menu item', async () => {
+      const appMenuConfig = await setup();
 
       const backgroundSearchItem = appMenuConfig.items?.find(
         (item) => item.id === 'backgroundSearch'
@@ -212,8 +222,8 @@ describe('useTopNavLinks', () => {
   });
 
   describe('when background search is disabled', () => {
-    it('should NOT return the background search menu item', () => {
-      const appMenuConfig = setup();
+    it('should NOT return the background search menu item', async () => {
+      const appMenuConfig = await setup();
 
       const backgroundSearchItem = appMenuConfig.items?.find(
         (item) => item.id === 'backgroundSearch'
@@ -223,8 +233,8 @@ describe('useTopNavLinks', () => {
   });
 
   describe('save button with unsaved changes', () => {
-    it('should show notification indicator when there are unsaved changes', () => {
-      const appMenuConfig = setup({ hasUnsavedChanges: true });
+    it('should show notification indicator when there are unsaved changes', async () => {
+      const appMenuConfig = await setup({ hasUnsavedChanges: true });
 
       expect(appMenuConfig.primaryActionItem).toBeDefined();
       expect(appMenuConfig.primaryActionItem?.id).toBe('save');
@@ -236,8 +246,8 @@ describe('useTopNavLinks', () => {
       ).toBe('You have unsaved changes');
     });
 
-    it('should NOT show notification indicator when there are no unsaved changes', () => {
-      const appMenuConfig = setup({ hasUnsavedChanges: false });
+    it('should NOT show notification indicator when there are no unsaved changes', async () => {
+      const appMenuConfig = await setup({ hasUnsavedChanges: false });
 
       expect(appMenuConfig.primaryActionItem).toBeDefined();
       expect(appMenuConfig.primaryActionItem?.id).toBe('save');
@@ -249,8 +259,8 @@ describe('useTopNavLinks', () => {
       ).toBeUndefined();
     });
 
-    it('should include Save as and Reset changes options in split button menu', () => {
-      const appMenuConfig = setup({ hasUnsavedChanges: true });
+    it('should include Save as and Reset changes options in split button menu', async () => {
+      const appMenuConfig = await setup({ hasUnsavedChanges: true });
 
       expect(appMenuConfig.primaryActionItem?.splitButtonProps?.items).toBeDefined();
       const itemIds = appMenuConfig.primaryActionItem?.splitButtonProps?.items?.map(
@@ -260,8 +270,8 @@ describe('useTopNavLinks', () => {
       expect(itemIds).toContain('resetChanges');
     });
 
-    it('should have correct labels for split button menu items', () => {
-      const appMenuConfig = setup({ hasUnsavedChanges: true });
+    it('should have correct labels for split button menu items', async () => {
+      const appMenuConfig = await setup({ hasUnsavedChanges: true });
 
       const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
       const saveAsItem = items?.find((item) => item.id === 'saveAs');
@@ -271,8 +281,8 @@ describe('useTopNavLinks', () => {
       expect(resetChangesItem?.label).toBe('Reset changes');
     });
 
-    it('should have run functions defined for split button menu items', () => {
-      const appMenuConfig = setup({ hasUnsavedChanges: true });
+    it('should have run functions defined for split button menu items', async () => {
+      const appMenuConfig = await setup({ hasUnsavedChanges: true });
 
       const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
       const saveAsItem = items?.find((item) => item.id === 'saveAs');
@@ -282,8 +292,8 @@ describe('useTopNavLinks', () => {
       expect(resetChangesItem?.run).toBeDefined();
     });
 
-    it('should disable reset changes button when there are no unsaved changes', () => {
-      const appMenuConfig = setup({ hasUnsavedChanges: false });
+    it('should disable reset changes button when there are no unsaved changes', async () => {
+      const appMenuConfig = await setup({ hasUnsavedChanges: false });
 
       const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
       const resetChangesItem = items?.find((item) => item.id === 'resetChanges');
@@ -291,8 +301,8 @@ describe('useTopNavLinks', () => {
       expect(resetChangesItem?.disableButton).toBe(true);
     });
 
-    it('should enable reset changes button when there are unsaved changes', () => {
-      const appMenuConfig = setup({ hasUnsavedChanges: true });
+    it('should enable reset changes button when there are unsaved changes', async () => {
+      const appMenuConfig = await setup({ hasUnsavedChanges: true });
 
       const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
       const resetChangesItem = items?.find((item) => item.id === 'resetChanges');

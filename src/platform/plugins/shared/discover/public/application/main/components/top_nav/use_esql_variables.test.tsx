@@ -11,7 +11,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
 import { BehaviorSubject, Observable, skip } from 'rxjs';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { useESQLVariables } from './use_esql_variables';
 import type {
@@ -22,6 +22,7 @@ import type {
 } from '@kbn/esql-types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import React from 'react';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 // Mock ControlGroupRendererApi
 class MockControlGroupRendererApi {
@@ -49,10 +50,18 @@ class MockControlGroupRendererApi {
 // --- Test Suite ---
 describe('useESQLVariables', () => {
   let mockControlGroupAPI: MockControlGroupRendererApi;
-  const getStateContainer = () => getDiscoverStateMock({ isTimeBased: true });
+  const getStateContainer = async () => {
+    const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
+    await toolkit.initializeTabs();
+    const { stateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+      skipWaitForDataFetching: true,
+    });
+    return stateContainer;
+  };
 
   const renderUseESQLVariables = async ({
-    stateContainer = getStateContainer(),
+    stateContainer,
     isEsqlMode = true,
     controlGroupApi = mockControlGroupAPI as unknown as ControlGroupRendererApi,
     currentEsqlVariables = [],
@@ -64,14 +73,15 @@ describe('useESQLVariables', () => {
     currentEsqlVariables?: ESQLControlVariable[];
     onUpdateESQLQuery?: (query: string) => void;
   }) => {
+    const actualStateContainer = stateContainer || (await getStateContainer());
     const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
-      <DiscoverTestProvider stateContainer={stateContainer}>{children}</DiscoverTestProvider>
+      <DiscoverTestProvider stateContainer={actualStateContainer}>{children}</DiscoverTestProvider>
     );
 
     const hook = renderHook(
       () =>
         useESQLVariables({
-          stateContainer,
+          stateContainer: actualStateContainer,
           isEsqlMode,
           controlGroupApi,
           currentEsqlVariables,
@@ -101,7 +111,7 @@ describe('useESQLVariables', () => {
 
   describe('useEffect for ControlGroupAPI input', () => {
     it('should not subscribe if not in ESQL mode or controlGroupAPI is missing', async () => {
-      const stateContainer = getStateContainer();
+      const stateContainer = await getStateContainer();
       const dispatchSpy = jest.spyOn(stateContainer.internalState, 'dispatch');
 
       const { hook } = await renderUseESQLVariables({
@@ -127,7 +137,7 @@ describe('useESQLVariables', () => {
         { key: 'foo', type: 'values', value: 'bar' },
       ] as ESQLControlVariable[];
 
-      const stateContainer = getStateContainer();
+      const stateContainer = await getStateContainer();
       const dispatchSpy = jest.spyOn(stateContainer.internalState, 'dispatch');
       const updateControlStateSpy = jest.spyOn(
         stateContainer.savedSearchState,
@@ -187,7 +197,7 @@ describe('useESQLVariables', () => {
       );
 
       // Mock the savedSearchState with getInitial$ observable
-      const stateContainer = getStateContainer();
+      const stateContainer = await getStateContainer();
       const mockGetInitial$ = new BehaviorSubject(null) as unknown as BehaviorSubject<SavedSearch>;
       jest.spyOn(mockGetInitial$, 'pipe').mockReturnValue(
         new Observable(() => {
@@ -217,7 +227,7 @@ describe('useESQLVariables', () => {
       };
       const mockGetInitial$ = new BehaviorSubject(mockInitialSavedSearch as SavedSearch);
 
-      const stateContainer = getStateContainer();
+      const stateContainer = await getStateContainer();
 
       jest.spyOn(stateContainer.savedSearchState, 'getInitial$').mockReturnValue(mockGetInitial$);
 
@@ -303,7 +313,7 @@ describe('useESQLVariables', () => {
     });
 
     it('should handle numeric type coercion for ESQL variable values', async () => {
-      const stateContainer = getStateContainer();
+      const stateContainer = await getStateContainer();
       const dispatchSpy = jest.spyOn(stateContainer.internalState, 'dispatch');
 
       await renderUseESQLVariables({

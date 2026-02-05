@@ -27,7 +27,7 @@ import { fetchEsql } from './fetch_esql';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
-import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTabRuntimeState } from '../state_management/redux';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
@@ -60,14 +60,20 @@ describe('test fetchAll', () => {
   let deps: Parameters<typeof fetchAll>[0];
   let searchSource: SearchSource;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     subjects = {
       main$: new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       documents$: new BehaviorSubject<DataDocumentsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       totalHits$: new BehaviorSubject<DataTotalHitsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
     };
     searchSource = savedSearchMock.searchSource.createChild();
-    const { internalState, runtimeStateManager, getCurrentTab } = getDiscoverStateMock({});
+    const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
+    await toolkit.initializeTabs();
+    const { stateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+      skipWaitForDataFetching: true,
+    });
+    const { internalState, runtimeStateManager, getCurrentTab } = stateContainer;
     const { scopedProfilesManager$, scopedEbtManager$ } = selectTabRuntimeState(
       runtimeStateManager,
       getCurrentTab().id
