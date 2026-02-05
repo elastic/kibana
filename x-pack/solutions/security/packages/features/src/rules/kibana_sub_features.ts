@@ -173,7 +173,7 @@ export const getEnableDisableRulesSubFeature = (): SubFeatureConfig => ({
             }
           ),
           savedObject: {
-            all: [], // TODO: this might need to be filled
+            all: [],
             read: [],
           },
           alerting: {

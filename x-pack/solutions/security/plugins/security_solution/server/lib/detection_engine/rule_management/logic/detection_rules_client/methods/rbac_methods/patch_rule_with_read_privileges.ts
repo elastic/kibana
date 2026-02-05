@@ -35,7 +35,7 @@ export const patchReadAuthEditRuleFields = async ({
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   rulesAuthz: DetectionRulesAuthz;
 }): Promise<BulkEditResult<RuleParams>> => {
-  await validateFieldWritePermissions(rulePatch, rulesAuthz);
+  validateFieldWritePermissions(rulePatch, rulesAuthz);
 
   const { rule_source } = await applyRulePatch({
     prebuiltRuleAssetClient,

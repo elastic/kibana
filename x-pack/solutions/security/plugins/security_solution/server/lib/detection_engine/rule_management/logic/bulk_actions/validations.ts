@@ -45,6 +45,14 @@ const throwMlAuthError = (mlAuthz: MlAuthz, ruleType: RuleType) =>
     BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH
   );
 
+/**
+ * Validates that the user has the required permissions for the specified bulk edit actions.
+ * Throws a dry run error with USER_INSUFFICIENT_RULE_PRIVILEGES code if the user lacks
+ * the necessary permissions for any of the requested actions.
+ *
+ * @param rulesAuthz - The user's detection rules authorization context
+ * @param editActions - The bulk edit actions being requested
+ */
 const throwRulesAuthError = (
   rulesAuthz: DetectionRulesAuthz,
   editActions: BulkActionEditPayload[]

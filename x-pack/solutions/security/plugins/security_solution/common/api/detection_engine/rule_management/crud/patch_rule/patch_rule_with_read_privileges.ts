@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { RulePatchProps, RuleSource } from '../../../model';
+import type { RuleSource, RulePatchProps } from '../../../model';
 
 export type ReadAuthRulePatchProps = Pick<
   RulePatchProps,
   'exceptions_list' | 'note' | 'investigation_fields'
 >;
 
-export type ReadAuthRulePatchWithRuleSource = ReadAuthRulePatchProps & { rule_source: RuleSource };
+export type ReadAuthRulePatchWithRuleSource = ReadAuthRulePatchProps & {
+  rule_source: RuleSource;
+};
