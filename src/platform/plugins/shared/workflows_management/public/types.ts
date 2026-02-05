@@ -23,15 +23,43 @@ import type {
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsPublicPluginSetup {}
+/**
+ * AgentBuilder plugin start contract interface.
+ * Defined here to avoid circular dependency with @kbn/agent-builder-plugin.
+ */
+export interface AgentBuilderPluginStartContract {
+  openConversationFlyout: (options?: {
+    agentId?: string;
+    sessionTag?: string;
+    attachments?: Array<{ type: string; data: unknown }>;
+    browserApiTools?: Array<{
+      id: string;
+      description: string;
+      schema: unknown;
+      handler: (params: unknown) => void | Promise<void>;
+    }>;
+  }) => { flyoutRef: { close(): void } };
+}
+
+export interface WorkflowsPublicPluginSetup {
+  /**
+   * Register the Agent Builder service with Workflows Management.
+   * This is called by the agentBuilder plugin during its start phase to provide
+   * the flyout service to workflowsManagement without creating a circular dependency.
+   */
+  registerAgentBuilder: (agentBuilder: AgentBuilderPluginStartContract) => void;
+}
 
 export interface WorkflowsPublicPluginSetupDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsPublicPluginStart {}
+export interface WorkflowsPublicPluginStart {
+  /**
+   * Get the registered Agent Builder service, if available.
+   */
+  getAgentBuilder: () => AgentBuilderPluginStartContract | undefined;
+}
 
 export interface WorkflowsPublicPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
@@ -48,6 +76,8 @@ export interface WorkflowsPublicPluginStartDependencies {
 
 export interface WorkflowsPublicPluginStartAdditionalServices {
   storage: Storage;
+  /** Agent Builder service - registered dynamically by the agentBuilder plugin */
+  agentBuilder?: AgentBuilderPluginStartContract;
 }
 
 export type WorkflowsServices = CoreStart &

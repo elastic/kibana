@@ -20,6 +20,7 @@ import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TriggerType } from '@kbn/workflows';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
 
+import { registerWorkflowAiIntegration } from './ai_integration';
 import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
@@ -27,6 +28,7 @@ import {
 import { WorkflowsManagementFeatureConfig } from './features';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
+  AgentBuilderPluginSetupContract,
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
   WorkflowsServerPluginSetupDeps,
@@ -54,6 +56,7 @@ export class WorkflowsPlugin
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private api: WorkflowsManagementApi | null = null;
   private spaces?: SpacesServiceStart | null = null;
+  private aiIntegrationRegistered = false;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -183,8 +186,34 @@ export class WorkflowsPlugin
     // Register server side APIs
     defineRoutes(router, this.api, this.logger, this.spaces);
 
+    // Register AI integration components if agentBuilder is available from setup deps
+    // (this handles the case where agentBuilder is listed as a dependency)
+    if (plugins.agentBuilder && !this.aiIntegrationRegistered) {
+      this.aiIntegrationRegistered = true;
+      registerWorkflowAiIntegration({
+        agentBuilder: plugins.agentBuilder,
+        logger: this.logger,
+      });
+    }
+
     return {
       management: this.api,
+      // Allow agentBuilder to register itself with workflowsManagement
+      // This avoids a circular dependency: agentBuilder -> workflowsManagement -> agentBuilder
+      registerAgentBuilder: (agentBuilder: AgentBuilderPluginSetupContract) => {
+        if (this.aiIntegrationRegistered) {
+          this.logger.debug('Workflows Management: AI integration already registered, skipping');
+          return;
+        }
+        this.aiIntegrationRegistered = true;
+        this.logger.debug(
+          'Workflows Management: Agent Builder registered via registerAgentBuilder'
+        );
+        registerWorkflowAiIntegration({
+          agentBuilder,
+          logger: this.logger,
+        });
+      },
     };
   }
 

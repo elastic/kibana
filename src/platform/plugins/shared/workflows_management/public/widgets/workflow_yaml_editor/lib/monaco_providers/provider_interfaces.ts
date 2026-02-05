@@ -136,6 +136,15 @@ export interface MonacoConnectorHandler {
 }
 
 /**
+ * Callback for "Fix in Chat" action on validation errors
+ */
+export type FixInChatCallback = (errorContext: {
+  message: string;
+  lineNumber: number;
+  columnNumber: number;
+}) => void;
+
+/**
  * Configuration for Monaco providers
  */
 export interface ProviderConfig {
@@ -143,6 +152,8 @@ export interface ProviderConfig {
   getYamlDocument: () => YAML.Document | null;
   /** Function to get the current execution context (for template expression hover) */
   getExecutionContext?: () => ExecutionContext | null;
+  /** Callback for "Fix in Chat" action on validation errors */
+  onFixInChat?: FixInChatCallback;
   /** Additional configuration options */
   options?: Record<string, any>;
 }

@@ -21,6 +21,7 @@ import {
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import type {
+  AgentBuilderPluginStartContract,
   WorkflowsPublicPluginSetup,
   WorkflowsPublicPluginSetupDependencies,
   WorkflowsPublicPluginStart,
@@ -43,6 +44,7 @@ export class WorkflowsPlugin
     >
 {
   private appUpdater$: Subject<AppUpdater>;
+  private registeredAgentBuilder?: AgentBuilderPluginStartContract;
 
   constructor() {
     this.appUpdater$ = new Subject<AppUpdater>();
@@ -88,7 +90,11 @@ export class WorkflowsPlugin
       },
     });
 
-    return {};
+    return {
+      registerAgentBuilder: (agentBuilder: AgentBuilderPluginStartContract) => {
+        this.registeredAgentBuilder = agentBuilder;
+      },
+    };
   }
 
   public start(
@@ -107,7 +113,9 @@ export class WorkflowsPlugin
       }
     });
 
-    return {};
+    return {
+      getAgentBuilder: () => this.registeredAgentBuilder,
+    };
   }
 
   public stop() {}
@@ -121,6 +129,9 @@ export class WorkflowsPlugin
 
     const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),
+      // agentBuilder is registered by the agentBuilder plugin during its start phase
+      // via the registerAgentBuilder method exposed in our setup contract
+      agentBuilder: this.registeredAgentBuilder,
     };
 
     return { ...coreStart, ...depsStart, ...additionalServices };

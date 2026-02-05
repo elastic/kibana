@@ -10,12 +10,14 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiAccordion,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   euiFontSize,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -37,6 +39,8 @@ interface WorkflowYamlValidationAccordionProps {
   error: Error | null;
   validationErrors: YamlValidationResult[] | null;
   onErrorClick?: (error: YamlValidationResult) => void;
+  onFixInChat?: (error: YamlValidationResult) => void;
+  isFixInChatAvailable?: boolean;
   extraAction?: React.ReactNode;
 }
 
@@ -46,6 +50,8 @@ export function WorkflowYamlValidationAccordion({
   error: errorValidating,
   validationErrors,
   onErrorClick,
+  onFixInChat,
+  isFixInChatAvailable = false,
   extraAction,
 }: WorkflowYamlValidationAccordionProps) {
   const styles = useMemoCss(componentStyles);
@@ -172,62 +178,98 @@ export function WorkflowYamlValidationAccordion({
       <div css={styles.accordionContent} className="eui-yScrollWithShadows">
         <EuiFlexGroup direction="column" gutterSize="s">
           {sortedValidationErrors?.map((error, index) => (
-            <button
-              type="button"
+            <EuiFlexGroup
               key={`${error.startLineNumber}-${error.startColumn}-${error.message}-${index}-${error.severity}`}
-              css={styles.validationError}
-              onClick={() => onErrorClick?.(error)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  onErrorClick?.(error);
-                }
-              }}
-              tabIndex={0}
+              gutterSize="none"
+              alignItems="flexStart"
+              responsive={false}
             >
-              <EuiFlexItem grow={false}>
-                <EuiIcon
-                  type={
-                    error.severity === 'error'
-                      ? 'errorFilled'
-                      : error.severity === 'warning'
-                      ? 'warningFilled'
-                      : 'iInCircle'
-                  }
-                  color={
-                    error.severity === 'error'
-                      ? 'danger'
-                      : error.severity === 'warning'
-                      ? euiTheme.colors.vis.euiColorVis8
-                      : 'primary'
-                  }
-                  size="s"
-                  css={styles.validationErrorIcon}
-                />
+              <EuiFlexItem>
+                <button
+                  type="button"
+                  css={styles.validationError}
+                  onClick={() => onErrorClick?.(error)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onErrorClick?.(error);
+                    }
+                  }}
+                  tabIndex={0}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon
+                      type={
+                        error.severity === 'error'
+                          ? 'errorFilled'
+                          : error.severity === 'warning'
+                          ? 'warningFilled'
+                          : 'iInCircle'
+                      }
+                      color={
+                        error.severity === 'error'
+                          ? 'danger'
+                          : error.severity === 'warning'
+                          ? euiTheme.colors.vis.euiColorVis8
+                          : 'primary'
+                      }
+                      size="s"
+                      css={styles.validationErrorIcon}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem css={styles.validationErrorText}>
+                    <EuiText color="text" size="xs">
+                      <span>{error.message}</span>
+                    </EuiText>
+                    <EuiText color="subdued" size="xs">
+                      <span>
+                        <FormattedMessage
+                          id="workflowsManagement.workflowYAMLValidationErrors.lineAndColumn"
+                          defaultMessage="Ln {lineNumber}, Col {columnNumber}"
+                          values={{
+                            lineNumber: error.startLineNumber,
+                            columnNumber: error.startColumn,
+                          }}
+                        />
+                      </span>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText color="subdued" size="xs">
+                      <span>{error.source}</span>
+                    </EuiText>
+                  </EuiFlexItem>
+                </button>
               </EuiFlexItem>
-              <EuiFlexItem css={styles.validationErrorText}>
-                <EuiText color="text" size="xs">
-                  <span>{error.message}</span>
-                </EuiText>
-                <EuiText color="subdued" size="xs">
-                  <span>
-                    <FormattedMessage
-                      id="workflowsManagement.workflowYAMLValidationErrors.lineAndColumn"
-                      defaultMessage="Ln {lineNumber}, Col {columnNumber}"
-                      values={{
-                        lineNumber: error.startLineNumber,
-                        columnNumber: error.startColumn,
+              {isFixInChatAvailable && onFixInChat && (
+                <EuiFlexItem grow={false} css={styles.fixInChatButton}>
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'workflowsManagement.workflowYAMLValidationErrors.fixInChat',
+                      {
+                        defaultMessage: 'Fix in Chat',
+                      }
+                    )}
+                  >
+                    <EuiButtonIcon
+                      iconType="sparkles"
+                      aria-label={i18n.translate(
+                        'workflowsManagement.workflowYAMLValidationErrors.fixInChatAriaLabel',
+                        {
+                          defaultMessage: 'Fix this error using AI chat',
+                        }
+                      )}
+                      size="xs"
+                      color="primary"
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        onFixInChat(error);
                       }}
                     />
-                  </span>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="xs">
-                  <span>{error.source}</span>
-                </EuiText>
-              </EuiFlexItem>
-            </button>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           ))}
         </EuiFlexGroup>
       </div>
@@ -301,5 +343,12 @@ const componentStyles = {
   validationErrorIcon: css({
     marginTop: '0.125rem',
     flexShrink: 0,
+  }),
+  fixInChatButton: css({
+    marginLeft: '4px',
+    opacity: 0.7,
+    '&:hover': {
+      opacity: 1,
+    },
   }),
 };

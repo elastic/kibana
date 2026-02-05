@@ -11,6 +11,7 @@ import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { JsonValue } from '@kbn/utility-types';
 import type {
+  FixInChatCallback,
   HoverContext,
   ParameterContext,
   ProviderConfig,
@@ -37,10 +38,19 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
 
   private readonly getYamlDocument: () => YAML.Document | null;
   private readonly getExecutionContext?: () => ExecutionContext | null;
+  private onFixInChat?: FixInChatCallback;
 
   constructor(config: ProviderConfig) {
     this.getYamlDocument = config.getYamlDocument;
     this.getExecutionContext = config.getExecutionContext;
+    this.onFixInChat = config.onFixInChat;
+  }
+
+  /**
+   * Update the Fix in Chat callback (useful when callback changes after construction)
+   */
+  setOnFixInChat(callback: FixInChatCallback | undefined): void {
+    this.onFixInChat = callback;
   }
 
   async provideHover(
@@ -78,13 +88,11 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       );
 
       if (validationMarkersNearby.length > 0) {
-        // console.log('UnifiedHoverProvider: Found validation errors nearby, skipping to let validation provider handle');
-        // console.log('Nearby validation markers:', validationMarkersNearby.map(m => ({
-        //  message: m.message,
-        //  startCol: m.startColumn,
-        //  endCol: m.endColumn,
-        //  currentCol: position.column
-        // })));
+        // Provide custom hover with "Fix in Chat" link if callback is available
+        if (this.onFixInChat) {
+          return this.createValidationHoverWithFixInChat(validationMarkersNearby, position);
+        }
+        // Otherwise let the default validation hover handle it
         return null;
       }
 
@@ -424,6 +432,66 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     } catch (error) {
       return null;
     }
+  }
+
+  /**
+   * Create a hover with validation error info and a "Fix in Chat" link
+   */
+  private createValidationHoverWithFixInChat(
+    markers: monaco.editor.IMarker[],
+    position: monaco.Position
+  ): monaco.languages.Hover {
+    const contents: monaco.IMarkdownString[] = [];
+
+    for (const marker of markers) {
+      // Create the error message content
+      const severityLabel = marker.severity === monaco.MarkerSeverity.Error ? 'Error' : 'Warning';
+
+      // Build the hover content with the error message
+      const errorContent: monaco.IMarkdownString = {
+        value: `**${severityLabel}:** ${marker.message}`,
+        isTrusted: true,
+      };
+      contents.push(errorContent);
+
+      // Add source info if available
+      if (marker.source) {
+        contents.push({
+          value: `_Source: ${marker.source}_`,
+          isTrusted: true,
+        });
+      }
+
+      // Add the "Fix in Chat" link as a command link
+      // Monaco supports command URIs in markdown: [text](command:commandId?args)
+      const args = encodeURIComponent(
+        JSON.stringify({
+          message: marker.message,
+          lineNumber: marker.startLineNumber,
+          columnNumber: marker.startColumn,
+        })
+      );
+
+      contents.push({
+        value: `\n[$(sparkle) Fix in Chat](command:workflows.fixInChat?${args} "Ask AI to fix this error")`,
+        isTrusted: true,
+        supportThemeIcons: true,
+      });
+    }
+
+    // Calculate the range for the hover
+    const firstMarker = markers[0];
+    const range = new monaco.Range(
+      firstMarker.startLineNumber,
+      firstMarker.startColumn,
+      firstMarker.endLineNumber,
+      firstMarker.endColumn
+    );
+
+    return {
+      range,
+      contents,
+    };
   }
 
   /**
