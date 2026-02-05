@@ -66,7 +66,7 @@ describe('Boolean Format', () => {
     expect(boolean.convert(s)).toBe(s);
   });
 
-  test('does not convert missing value', () => {
+  test('handles a missing value', () => {
     expect(boolean.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
     expect(boolean.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
     expect(boolean.convert(null, HTML_CONTEXT_TYPE)).toBe(

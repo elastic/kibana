@@ -567,6 +567,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('Other formats', () => {
+        const checkColorPickerColor = async (picker: string, expectedColor: string) => {
+          await retry.waitFor('color swatch to be updated', async () => {
+            const pickerElement = await testSubjects.find(picker);
+            const colorSwatchIcon = await testSubjects.findDescendant(
+              'buttonColorSwatchIcon',
+              pickerElement
+            );
+            const style = await colorSwatchIcon.getAttribute('style');
+            return style?.includes(expectedColor) || false;
+          });
+        };
+
+        const configureRedColor = async () => {
+          await testSubjects.click('~colorEditorColorPicker');
+          await testSubjects.setValue('~euiColorPickerInput_bottom', '#ffffff');
+          await checkColorPickerColor('~colorEditorColorPicker', 'rgb(255, 255, 255)');
+          await testSubjects.click('~colorEditorColorPicker');
+          await testSubjects.click('~colorEditorBackgroundPicker');
+          await testSubjects.setValue('~euiColorPickerInput_bottom', '#ff0000');
+          await checkColorPickerColor('~colorEditorBackgroundPicker', 'rgb(255, 0, 0)');
+          await testSubjects.click('~colorEditorBackgroundPicker');
+        };
+
         testFormatEditors([
           {
             fieldType: ES_FIELD_TYPES.LONG,
@@ -656,10 +679,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             beforeSave: async () => {
               await testSubjects.click('colorEditorAddColor');
               await testSubjects.setValue('~colorEditorKeyPattern', 'red');
-              await testSubjects.click('~colorEditorColorPicker');
-              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ffffff');
-              await testSubjects.click('~colorEditorBackgroundPicker');
-              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ff0000');
+              await configureRedColor();
             },
             expect: async (renderedValueContainer) => {
               const span = await renderedValueContainer.findByTagName('span');
@@ -675,10 +695,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             beforeSave: async () => {
               await testSubjects.click('colorEditorAddColor');
               await testSubjects.setValue('~colorEditorKeyPattern', 'red');
-              await testSubjects.click('~colorEditorColorPicker');
-              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ffffff');
-              await testSubjects.click('~colorEditorBackgroundPicker');
-              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ff0000');
+              await configureRedColor();
             },
             expect: async (renderedValueContainer) => {
               const span = await renderedValueContainer.findByTagName('span');
@@ -693,10 +710,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             beforeSave: async () => {
               await testSubjects.click('colorEditorAddColor');
               await testSubjects.setValue('~colorEditorKeyPattern', '');
-              await testSubjects.click('~colorEditorColorPicker');
-              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ffffff');
-              await testSubjects.click('~colorEditorBackgroundPicker');
-              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ff0000');
+              await configureRedColor();
             },
             expect: async (renderedValueContainer) => {
               const span = await renderedValueContainer.findByTagName('span');
@@ -709,10 +723,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             applyFormatterType: FIELD_FORMAT_IDS.COLOR,
             expectFormattedValue: 'true',
             beforeSave: async () => {
-              await testSubjects.click('~colorEditorColorPicker');
-              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ffffff');
-              await testSubjects.click('~colorEditorBackgroundPicker');
-              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ff0000');
+              await configureRedColor();
             },
             expect: async (renderedValueContainer) => {
               const span = await renderedValueContainer.findByTagName('span');
