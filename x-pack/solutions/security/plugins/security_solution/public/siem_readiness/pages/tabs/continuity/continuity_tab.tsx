@@ -36,13 +36,14 @@ import {
 // Extended PipelineStats with computed fields and Record<string, unknown> for CategoryAccordionTable
 interface PipelineWithCategory extends PipelineStats, Record<string, unknown> {
   failureRate: string;
-  status: 'healthy' | 'non_healthy';
+  status: 'healthy' | 'critical';
 }
 
 export const ContinuityTab: React.FC = () => {
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
   const { getReadinessCategories, getReadinessPipelines } = useSiemReadinessApi();
+
   const { data: categoriesData, isLoading: categoriesLoading } = getReadinessCategories;
   const { data: pipelinesData, isLoading: pipelinesLoading } = getReadinessPipelines;
 
@@ -69,12 +70,12 @@ export const ContinuityTab: React.FC = () => {
 
     pipelinesData.forEach((pipeline) => {
       const failureRate =
-        pipeline.count > 0 ? ((pipeline.failed / pipeline.count) * 100).toFixed(1) : '0.00';
+        pipeline.count > 0 ? ((pipeline.failed / pipeline.count) * 100).toFixed(1) : '0.0';
 
       const pipelineWithStats: PipelineWithCategory = {
         ...pipeline,
         failureRate,
-        status: pipeline.failed > 0 ? 'non_healthy' : 'healthy',
+        status: Number(failureRate) > 1 ? 'critical' : 'healthy',
       };
 
       // Find all categories this pipeline belongs to based on its indices
@@ -154,9 +155,7 @@ export const ContinuityTab: React.FC = () => {
           defaultMessage: 'Failed Docs',
         }),
         sortable: true,
-        render: (failed: number) => (
-          <EuiBadge color={failed > 0 ? 'danger' : 'default'}>{failed.toLocaleString()}</EuiBadge>
-        ),
+        render: (failed: number) => failed.toLocaleString(),
         width: '15%',
       },
       {
@@ -169,19 +168,19 @@ export const ContinuityTab: React.FC = () => {
         width: '15%',
       },
       {
-        field: 'failed',
+        field: 'failureRate',
         name: i18n.translate('xpack.securitySolution.siemReadiness.continuity.column.status', {
           defaultMessage: 'Status',
         }),
-        render: (failed: number) => {
-          const hasFailures = failed > 0;
+        render: (failureRate: string) => {
+          const isCritical = Number(failureRate) > 1;
           return (
-            <EuiBadge color={hasFailures ? 'danger' : 'success'}>
-              {hasFailures
+            <EuiBadge color={isCritical ? 'danger' : 'success'}>
+              {isCritical
                 ? i18n.translate(
-                    'xpack.securitySolution.siemReadiness.continuity.status.criticalFailure',
+                    'xpack.securitySolution.siemReadiness.continuity.status.criticalFailureRate',
                     {
-                      defaultMessage: 'Critical Failure',
+                      defaultMessage: 'Critical failure rate',
                     }
                   )
                 : i18n.translate('xpack.securitySolution.siemReadiness.continuity.status.healthy', {
@@ -205,7 +204,7 @@ export const ContinuityTab: React.FC = () => {
             )}`}
             target="_blank"
           >
-            {item.failed > 0
+            {Number(item.failureRate) > 1
               ? i18n.translate(
                   'xpack.securitySolution.siemReadiness.continuity.action.viewFailure',
                   {
@@ -231,9 +230,8 @@ export const ContinuityTab: React.FC = () => {
     const totalPipelines = category.items.length;
     const totalDocs = category.items.reduce((sum, p) => sum + p.count, 0);
     const totalFailed = category.items.reduce((sum, p) => sum + p.failed, 0);
-    const overallFailureRate =
-      totalDocs > 0 ? ((totalFailed / totalDocs) * 100).toFixed(2) : '0.00';
-    const hasFailures = totalFailed > 0;
+    const overallFailureRate = totalDocs > 0 ? ((totalFailed / totalDocs) * 100).toFixed(1) : '0.0';
+    const isCritical = Number(overallFailureRate) > 1;
 
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -246,12 +244,12 @@ export const ContinuityTab: React.FC = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color={hasFailures ? 'warning' : 'success'}>
-            {hasFailures
+          <EuiBadge color={isCritical ? 'warning' : 'success'}>
+            {isCritical
               ? i18n.translate(
-                  'xpack.securitySolution.siemReadiness.continuity.status.hasFailures',
+                  'xpack.securitySolution.siemReadiness.continuity.status.actionsRequired',
                   {
-                    defaultMessage: 'Has Failures',
+                    defaultMessage: 'Actions required',
                   }
                 )
               : i18n.translate('xpack.securitySolution.siemReadiness.continuity.status.healthy', {
@@ -305,7 +303,7 @@ export const ContinuityTab: React.FC = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color={hasFailures ? 'warning' : 'hollow'}>{`${overallFailureRate}%`}</EuiBadge>
+          <EuiBadge color="hollow">{`${overallFailureRate}%`}</EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -407,11 +405,11 @@ export const ContinuityTab: React.FC = () => {
             ),
           },
           {
-            value: 'non_healthy',
+            value: 'critical',
             label: i18n.translate(
-              'xpack.securitySolution.siemReadiness.continuity.filter.nonHealthy',
+              'xpack.securitySolution.siemReadiness.continuity.filter.criticalFailureRate',
               {
-                defaultMessage: 'Non-healthy',
+                defaultMessage: 'Critical failure rate',
               }
             ),
           },

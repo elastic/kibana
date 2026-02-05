@@ -13,7 +13,7 @@ interface PipelineInfoWithStatus {
   count: number;
   failed: number;
   failureRate: string;
-  status: 'healthy' | 'non_healthy';
+  status: 'healthy' | 'critical';
 }
 
 export const buildContinuityCaseDescription = (
@@ -25,7 +25,7 @@ export const buildContinuityCaseDescription = (
   // Build the list of failing pipelines grouped by category
   const categoryDetails = categories
     .map((category) => {
-      const failingPipelines = category.items.filter((item) => item.status === 'non_healthy');
+      const failingPipelines = category.items.filter((item) => item.status === 'critical');
 
       if (failingPipelines.length === 0) {
         return null;
@@ -46,7 +46,7 @@ export const buildContinuityCaseDescription = (
     .join('\n\n');
 
   const totalFailingPipelines = categories.reduce(
-    (sum, category) => sum + category.items.filter((item) => item.status === 'non_healthy').length,
+    (sum, category) => sum + category.items.filter((item) => item.status === 'critical').length,
     0
   );
 
