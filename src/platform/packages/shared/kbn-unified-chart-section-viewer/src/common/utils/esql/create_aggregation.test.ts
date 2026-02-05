@@ -55,14 +55,21 @@ describe('getAggregationTemplate', () => {
     expect(result).toBe('SUM(RATE(??metricName))');
   });
 
-  it('should return custom function', () => {
-    const result = getAggregationTemplate({
-      type: ES_FIELD_TYPES.HISTOGRAM,
-      instrument: 'gauge',
-      placeholderName: 'metricName',
-      customFunction: 'custom',
+  it('returns custom function template when customFunction is provided, ignoring instrument', () => {
+    const placeholderName = 'metricName';
+    const customFunction = 'custom';
+    const expectedTemplate = 'custom(??metricName)';
+
+    const instruments = ['gauge', 'counter', 'histogram'] as const;
+    instruments.forEach((instrument) => {
+      const template = getAggregationTemplate({
+        type: ES_FIELD_TYPES.HISTOGRAM,
+        instrument,
+        placeholderName,
+        customFunction,
+      });
+      expect(template).toBe(expectedTemplate);
     });
-    expect(result).toBe('custom(??metricName)');
   });
 
   it('should return PERCENTILE for exponential histogram instrument', () => {
