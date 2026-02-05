@@ -21,6 +21,10 @@
     "**/*.tsx"
   ],
   "kbn_references": [
+    "@kbn/content-list-assembly",
+    "@kbn/content-list-provider",
+    "@kbn/content-list-mock-data",
+    "@kbn/i18n",
   ],
   "exclude": [
     "target/**/*"
