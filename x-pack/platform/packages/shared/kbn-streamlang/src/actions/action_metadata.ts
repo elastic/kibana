@@ -635,6 +635,52 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  user_agent: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.userAgent.name', {
+      defaultMessage: 'User Agent',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.userAgent.description', {
+      defaultMessage: 'Extract details from browser user agent strings',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.userAgent.usage', {
+      defaultMessage:
+        'Provide `from` for the field containing the user agent string. Optionally specify `to` for the target field (defaults to user_agent) and `properties` to limit which details are extracted.',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.userAgent.examples.basic', {
+          defaultMessage: 'Extract user agent details from a header field',
+        }),
+        yaml: `- action: user_agent
+  from: http.request.headers.user-agent
+  to: user_agent`,
+      },
+      {
+        description: i18n.translate(
+          'xpack.streamlang.actionMetadata.userAgent.examples.properties',
+          {
+            defaultMessage: 'Extract only specific properties',
+          }
+        ),
+        yaml: `- action: user_agent
+  from: attributes.user_agent_string
+  to: attributes.browser
+  properties:
+    - name
+    - version
+    - os`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.userAgent.tips.properties', {
+        defaultMessage: 'Available properties: name, os, device, original, version',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.userAgent.tips.deviceType', {
+        defaultMessage: 'Use extract_device_type to identify desktop, mobile, or tablet devices',
+      }),
+    ],
+  },
+
   manual_ingest_pipeline: {
     name: i18n.translate('xpack.streamlang.actionMetadata.manualIngestPipeline.name', {
       defaultMessage: 'Manual Ingest Pipeline',

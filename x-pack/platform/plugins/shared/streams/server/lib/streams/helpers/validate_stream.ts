@@ -28,6 +28,7 @@ import type {
   StreamlangProcessorDefinition,
   TrimProcessor,
   UppercaseProcessor,
+  UserAgentProcessor,
 } from '@kbn/streamlang';
 import {
   isActionBlock,
@@ -194,6 +195,12 @@ const actionStepValidators: {
         checkFieldName(from.value);
       }
     });
+  },
+  user_agent: (step: UserAgentProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
   },
   // fields referenced in manual ingest pipelines are not validated here because
   // the interface is Elasticsearch directly here, which has its own validation

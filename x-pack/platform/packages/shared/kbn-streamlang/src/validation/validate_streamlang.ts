@@ -257,6 +257,13 @@ function extractModifiedFields(processor: StreamlangProcessorDefinition): string
     case 'manual_ingest_pipeline':
       // These processors don't create new fields, they remove or drop
       break;
+
+    case 'user_agent':
+      // User agent processor extracts to 'to' field (defaults to user_agent)
+      if (processor.to) {
+        fields.push(processor.to);
+      }
+      break;
     default: {
       const _exhaustiveCheck: never = processor;
       return _exhaustiveCheck;
@@ -399,6 +406,7 @@ function getProcessorOutputType(
     case 'remove_by_prefix':
     case 'drop_document':
     case 'manual_ingest_pipeline':
+    case 'user_agent':
       // These processors don't produce typed output or type is unknown
       return 'unknown';
     default: {
@@ -485,6 +493,7 @@ function getExpectedInputType(
     case 'remove_by_prefix':
     case 'drop_document':
     case 'manual_ingest_pipeline':
+    case 'user_agent':
       // These processors don't have strict type requirements for their inputs
       return null;
     default: {
@@ -565,6 +574,7 @@ function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDefinitio
       case 'drop_document':
       case 'manual_ingest_pipeline':
       case 'remove_by_prefix':
+      case 'user_agent':
         // These processors don't use specific fields in a way that requires type validation
         break;
       default: {
@@ -786,6 +796,7 @@ function validateProcessorValues(
     case 'trim':
     case 'join':
     case 'concat':
+    case 'user_agent':
     case 'manual_ingest_pipeline':
       // No value validation implemented for these processors yet
       break;

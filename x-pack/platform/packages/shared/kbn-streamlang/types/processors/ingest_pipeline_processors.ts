@@ -25,6 +25,7 @@ import type {
   LowercaseProcessor,
   JoinProcessor,
   ConcatProcessor,
+  UserAgentProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -134,6 +135,12 @@ export type IngestPipelineConcatProcessor = RenameFieldsAndRemoveAction<
   { to: 'field'; where: 'if' }
 >;
 
+// User Agent
+export type IngestPipelineUserAgentProcessor = RenameFieldsAndRemoveAction<
+  UserAgentProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -158,4 +165,5 @@ export type IngestPipelineProcessor =
   | IngestPipelineTrimProcessor
   | IngestPipelineJoinProcessor
   | IngestPipelineConcatProcessor
+  | IngestPipelineUserAgentProcessor
   | IngestPipelineManualIngestPipelineProcessor;

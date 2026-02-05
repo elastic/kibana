@@ -24,6 +24,7 @@ import type {
   IngestPipelineTrimProcessor,
   IngestPipelineJoinProcessor,
   IngestPipelineConcatProcessor,
+  IngestPipelineUserAgentProcessor,
 } from '../../../../types/processors/ingest_pipeline_processors';
 
 type WithOptionalTracingTag<T> = T & { tag?: string };
@@ -46,5 +47,6 @@ export interface ActionToIngestType {
   join: WithOptionalTracingTag<IngestPipelineJoinProcessor>;
   replace: WithOptionalTracingTag<IngestPipelineReplaceProcessor>;
   concat: WithOptionalTracingTag<IngestPipelineConcatProcessor>;
+  user_agent: WithOptionalTracingTag<IngestPipelineUserAgentProcessor>;
   manual_ingest_pipeline: WithOptionalTracingTag<IngestPipelineManualIngestPipelineProcessor>;
 }

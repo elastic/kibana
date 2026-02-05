@@ -28,6 +28,7 @@ import type {
   TrimProcessor,
   JoinProcessor,
   ConcatProcessor,
+  UserAgentProcessor,
 } from '../../../types/processors';
 import { type StreamlangProcessorDefinition } from '../../../types/processors';
 import { convertRenameProcessorToESQL } from './processors/rename';
@@ -45,6 +46,7 @@ import { convertMathProcessorToESQL } from './processors/math';
 import { createTransformStringESQL } from './transform_string';
 import { convertJoinProcessorToESQL } from './processors/join';
 import { convertConcatProcessorToESQL } from './processors/concat';
+import { convertUserAgentProcessorToESQL } from './processors/user_agent';
 
 function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand[] | null {
   switch (processor.action) {
@@ -101,6 +103,9 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
 
     case 'concat':
       return convertConcatProcessorToESQL(processor as ConcatProcessor);
+
+    case 'user_agent':
+      return convertUserAgentProcessorToESQL(processor as UserAgentProcessor);
 
     case 'manual_ingest_pipeline':
       return [
