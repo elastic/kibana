@@ -8,10 +8,7 @@
 import React from 'react';
 import type { Node, Parent } from 'unist';
 import { render, screen } from '@testing-library/react';
-import {
-  ToolResultType,
-  type EsqlResults,
-} from '@kbn/agent-builder-common/tools/tool_result';
+import { ToolResultType, type EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
 import { cloneDeep } from 'lodash';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
