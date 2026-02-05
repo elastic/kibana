@@ -226,6 +226,11 @@ export default function CreateSLOFormFlyout({
         maxWidth={620}
         ownFocus
         session="start"
+        flyoutMenuProps={{
+          title: i18n.translate('xpack.slo.createSLOFormFlyout.title', {
+            defaultMessage: 'Create SLO form',
+          }),
+        }}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="addSLOFlyoutTitle">
