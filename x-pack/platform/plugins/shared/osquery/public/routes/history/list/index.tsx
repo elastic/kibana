@@ -50,7 +50,7 @@ export const HistoryPage = React.memo(HistoryPageComponent);
 
 const NewLiveQueryButton = React.memo(() => {
   const permissions = useKibana().services.application.capabilities.osquery;
-  const newQueryLinkProps = useRouterNavigate('history/new');
+  const newQueryLinkProps = useRouterNavigate('new');
 
   return (
     <EuiButton

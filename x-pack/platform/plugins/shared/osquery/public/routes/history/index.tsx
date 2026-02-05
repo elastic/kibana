@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { Redirect, useRouteMatch } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { HistoryPage } from './list';
-import { NewLiveQueryPage } from '../live_queries/new';
 import { LiveQueryDetailsPage } from '../live_queries/details';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useKibana } from '../../common/lib/kibana';
@@ -28,12 +27,7 @@ const HistoryComponent = () => {
   return (
     <Routes>
       <Route path={`${match.url}/new`}>
-        {(permissions.runSavedQueries && (permissions.readSavedQueries || permissions.readPacks)) ||
-        permissions.writeLiveQueries ? (
-          <NewLiveQueryPage />
-        ) : (
-          <MissingPrivileges />
-        )}
+        <Redirect to="/new" />
       </Route>
       <Route path={`${match.url}/:actionId`}>
         <LiveQueryDetailsPage />

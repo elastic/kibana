@@ -6,15 +6,40 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { useBreadcrumbs } from '../common/hooks/use_breadcrumbs';
 import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
+import { useKibana } from '../common/lib/kibana';
 import { LiveQueries } from './live_queries';
 import { History } from './history';
 import { SavedQueries } from './saved_queries';
 import { Packs } from './packs';
+import { NewLiveQueryPage } from './live_queries/new';
+import { MissingPrivileges } from './components';
+
+const LiveQueriesToHistoryRedirect = () => {
+  const location = useLocation();
+  // /live_queries/new → /new (top-level route)
+  // /live_queries/:actionId → /history/:actionId
+  // /live_queries → /history
+  const newPath =
+    location.pathname === '/live_queries/new'
+      ? '/new' + location.search
+      : location.pathname.replace('/live_queries', '/history') + location.search;
+
+  return <Redirect to={newPath} />;
+};
+
+const NewQueryRoute = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
+  const canRunQuery =
+    permissions.writeLiveQueries ||
+    (permissions.runSavedQueries && (permissions.readSavedQueries || permissions.readPacks));
+
+  return canRunQuery ? <NewLiveQueryPage /> : <MissingPrivileges />;
+};
 
 const OsqueryAppRoutesComponent = () => {
   useBreadcrumbs('base');
@@ -30,11 +55,14 @@ const OsqueryAppRoutesComponent = () => {
       </Route>
       {isHistoryEnabled ? (
         <>
+          <Route path="/new">
+            <NewQueryRoute />
+          </Route>
           <Route path="/history">
             <History />
           </Route>
           <Route path="/live_queries">
-            <Redirect to="/history" />
+            <LiveQueriesToHistoryRedirect />
           </Route>
           <Redirect to="/history" />
         </>
