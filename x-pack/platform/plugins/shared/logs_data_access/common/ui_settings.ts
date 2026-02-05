@@ -26,7 +26,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
         'Sources to be used for logs data. If the data contained in these indices is not logs data, you may experience degraded functionality. Changes to this setting can potentially impact the sources queried in Log Threshold rules.',
     }),
     type: 'array',
-    schema: schema.arrayOf(schema.string()),
+    schema: schema.arrayOf(schema.string(), { maxSize: 1000 }),
     requiresPageReload: true,
     solutionViews: ['classic', 'oblt'],
   },
