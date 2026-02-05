@@ -350,11 +350,21 @@ export class WorkflowsExecutionEnginePlugin
               };
 
               // Extract user from fake request (contains API key of user who scheduled the workflow)
-              const executedBy = await getAuthenticatedUser(
-                fakeRequest,
-                coreStart.security,
-                coreStart.elasticsearch.client
+              const span = apm.startSpan(
+                'workflow get authenticated user',
+                'workflow',
+                'execution'
               );
+              let executedBy: string;
+              try {
+                executedBy = await getAuthenticatedUser(
+                  fakeRequest,
+                  coreStart.security,
+                  coreStart.elasticsearch.client
+                );
+              } finally {
+                if (span) span.end();
+              }
 
               const workflowExecution: Partial<EsWorkflowExecution> = {
                 id: generateUuid(),
