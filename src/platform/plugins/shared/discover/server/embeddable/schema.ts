@@ -19,13 +19,33 @@ import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { VIEW_MODE, Density } from '@kbn/saved-search-plugin/common';
 
 const columnSchema = schema.object({
-  column: schema.string(), // field name
-  width: schema.maybe(schema.number({ min: 0 })),
+  name: schema.string({
+    meta: {
+      description: 'The name of the field to display in the data table.',
+    },
+  }),
+  width: schema.maybe(
+    schema.number({
+      min: 0,
+      meta: {
+        description: 'Optional width of the column in pixels.',
+      },
+    })
+  ),
 });
 
 const sortSchema = schema.object({
-  column: schema.string(), // field name
-  direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+  name: schema.string({
+    meta: {
+      description: 'The name of the field to sort by.',
+    },
+  }),
+  direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+    meta: {
+      description:
+        'The direction to sort the field by: "asc" for ascending, "desc" for descending.',
+    },
+  }),
 });
 
 // TODO: This is duplicated from the Lens embeddable schema. We should move these to a shared location.
@@ -120,15 +140,32 @@ export const datasetTypeSchema = schema.oneOf([
 
 const dataTableSchema = schema.object(
   {
-    columns: schema.arrayOf(columnSchema, { maxSize: 100, defaultValue: [] }),
-    sort: schema.arrayOf(sortSchema, { maxSize: 100, defaultValue: [] }),
+    columns: schema.arrayOf(columnSchema, {
+      maxSize: 100,
+      defaultValue: [],
+      meta: {
+        description: 'List of columns to display in the data table.',
+      },
+    }),
+    sort: schema.arrayOf(sortSchema, {
+      maxSize: 100,
+      defaultValue: [],
+      meta: {
+        description: 'List of sort fields and their directions for the data table.',
+      },
+    }),
     view_mode: schema.oneOf(
       [
         schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
         schema.literal(VIEW_MODE.PATTERN_LEVEL),
         schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
       ],
-      { defaultValue: VIEW_MODE.DOCUMENT_LEVEL }
+      {
+        defaultValue: VIEW_MODE.DOCUMENT_LEVEL,
+        meta: {
+          description: 'The view mode for the data table: document, pattern, or aggregated level.',
+        },
+      }
     ),
     density: schema.oneOf(
       [
@@ -136,26 +173,43 @@ const dataTableSchema = schema.object(
         schema.literal(Density.EXPANDED),
         schema.literal(Density.NORMAL),
       ],
-      { defaultValue: Density.COMPACT }
+      {
+        defaultValue: Density.COMPACT,
+        meta: {
+          description: 'The density setting for the data table: compact, expanded, or normal.',
+        },
+      }
     ),
-    header_row_height: schema.number({
-      min: -1,
-      max: 5,
-      defaultValue: 3,
-      meta: {
-        description:
-          'Height of the header row in the data table. A value of -1 indicates automatic height adjustment based on content.',
-      },
-    }),
-    row_height: schema.number({
-      min: -1,
-      max: 5,
-      defaultValue: 3,
-      meta: {
-        description:
-          'Height of the data row(s) in the data table. A value of -1 indicates automatic height adjustment based on content.',
-      },
-    }),
+    header_row_height: schema.oneOf(
+      [
+        schema.number({
+          min: 1,
+          max: 5,
+        }),
+        schema.literal('auto'),
+      ],
+      {
+        meta: {
+          description:
+            'Height of the header row in the data table. Use "auto" for automatic height adjustment based on content.',
+        },
+      }
+    ),
+    row_height: schema.oneOf(
+      [
+        schema.number({
+          min: 1,
+          max: 20,
+        }),
+        schema.literal('auto'),
+      ],
+      {
+        meta: {
+          description:
+            'Height of the data row(s) in the data table. Use "auto" for automatic height adjustment based on content.',
+        },
+      }
+    ),
     rows_per_page: schema.oneOf(
       [
         schema.literal(10),
@@ -165,9 +219,21 @@ const dataTableSchema = schema.object(
         schema.literal(250),
         schema.literal(500),
       ],
-      { defaultValue: 100 }
+      {
+        defaultValue: 100,
+        meta: {
+          description: 'The number of rows to display per page in the data table.',
+        },
+      }
     ),
-    sample_size: schema.number({ min: 10, max: 500, defaultValue: 500 }),
+    sample_size: schema.number({
+      min: 10,
+      max: 10000,
+      defaultValue: 500,
+      meta: {
+        description: 'The number of documents to sample for the data table.',
+      },
+    }),
   },
   { meta: { id: 'discoverSessionEmbeddableDataTableSchema' } }
 );
@@ -176,7 +242,13 @@ const classicTabSchema = schema.allOf([
   dataTableSchema,
   schema.object({
     query: schema.maybe(querySchema),
-    filters: schema.arrayOf(asCodeFilterSchema, { maxSize: 100, defaultValue: [] }),
+    filters: schema.arrayOf(asCodeFilterSchema, {
+      maxSize: 100,
+      defaultValue: [],
+      meta: {
+        description: 'List of filters to apply to the data in the tab.',
+      },
+    }),
     dataset: datasetTypeSchema,
   }),
 ]);
@@ -184,9 +256,7 @@ const classicTabSchema = schema.allOf([
 // TODO: Should we follow Lens & use a dataset instead of a separate query field?
 const esqlTabSchema = schema.allOf([
   dataTableSchema,
-  schema.object({
-    query: schema.maybe(aggregateQuerySchema),
-  }),
+  schema.object({ query: aggregateQuerySchema }),
 ]);
 
 const tabSchema = schema.oneOf([classicTabSchema, esqlTabSchema]);
@@ -194,7 +264,14 @@ const tabSchema = schema.oneOf([classicTabSchema, esqlTabSchema]);
 export const discoverSessionByValueEmbeddableSchema = schema.allOf([
   serializedTitlesSchema,
   schema.object({
-    tabs: schema.arrayOf(tabSchema, { minSize: 1, maxSize: 1 }),
+    tabs: schema.arrayOf(tabSchema, {
+      minSize: 1,
+      maxSize: 1,
+      meta: {
+        description:
+          'Array of tabs for the Discover session embeddable. Currently supports one tab.',
+      },
+    }),
     time_range: schema.maybe(timeRangeSchema),
   }),
 ]);
@@ -203,6 +280,11 @@ export const discoverSessionByReferenceEmbeddableSchema = schema.allOf([
   serializedTitlesSchema,
   schema.object({
     discover_session_id: schema.string(),
+    selected_tab_id: schema.string({
+      meta: {
+        description: 'The unique identifier of the selected tab in the Discover session',
+      },
+    }),
     time_range: schema.maybe(timeRangeSchema),
   }),
 ]);
