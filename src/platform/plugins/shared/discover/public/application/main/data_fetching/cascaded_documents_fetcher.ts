@@ -18,7 +18,7 @@ import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
-interface FetchCascadedDocumentsParams extends CascadeQueryArgs {
+export interface FetchCascadedDocumentsParams extends CascadeQueryArgs {
   nodeId: string;
   timeRange: TimeRange | undefined;
 }
