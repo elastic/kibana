@@ -36,11 +36,39 @@ if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
     echo "EVAL_FANOUT=1 requires buildkite-agent; falling back to running all projects in-process"
   else
     CONNECTOR_IDS="$(
-      node -e "const cfg=JSON.parse(process.env.KIBANA_TESTING_AI_CONNECTORS||'{}'); console.log(Object.keys(cfg).join('\\n'));"
+      node - <<'NODE'
+const raw = process.env.KIBANA_TESTING_AI_CONNECTORS || '';
+function tryParseJson(text) {
+  try {
+    const obj = JSON.parse(text);
+    if (obj && typeof obj === 'object') return obj;
+  } catch {}
+  return null;
+}
+
+// In CI, @kbn/evals expects KIBANA_TESTING_AI_CONNECTORS to be base64-encoded JSON.
+// But allow raw JSON as a fallback for local usage.
+let parsed = null;
+if (raw) {
+  parsed = tryParseJson(raw);
+  if (!parsed) {
+    try {
+      const decoded = Buffer.from(raw, 'base64').toString('utf8');
+      parsed = tryParseJson(decoded);
+    } catch {}
+  }
+}
+
+const cfg = parsed ?? {};
+process.stdout.write(Object.keys(cfg).join('\n'));
+NODE
     )"
 
     if [[ -z "${CONNECTOR_IDS:-}" ]]; then
-      echo "No connectors found in KIBANA_TESTING_AI_CONNECTORS; falling back to running suite without --project"
+      echo "No connectors found in KIBANA_TESTING_AI_CONNECTORS; falling back to evaluation connector only"
+      if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]]; then
+        export EVAL_PROJECT="${EVALUATION_CONNECTOR_ID}"
+      fi
     else
       echo "--- Uploading eval connector fanout steps"
 
