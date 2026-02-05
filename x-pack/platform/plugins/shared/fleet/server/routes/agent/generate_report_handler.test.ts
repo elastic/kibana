@@ -210,24 +210,20 @@ describe('generateReportHandler', () => {
           request: mockRequest,
           response: mockResponse,
           context: mockContext,
-          jobConfig: expect.objectContaining({
-            jobParams: expect.objectContaining({
-              title: 'Agent List',
-              objectType: 'search',
-              columns: ['id', 'status', 'enrolled_at'],
-              version: '8.99.0',
-              browserTimezone: 'UTC',
-              searchSource: expect.objectContaining({
-                fields: ['id', 'status', 'enrolled_at'],
-                filter: expect.objectContaining({
+          reportParams: expect.objectContaining({
+            title: 'Agent List',
+            timezone: 'UTC',
+            searchSource: expect.objectContaining({
+              fields: ['id', 'status', 'enrolled_at'],
+              filter: expect.arrayContaining([
+                expect.objectContaining({
                   meta: expect.objectContaining({
                     index: 'fleet-agents',
                   }),
                   query: expect.objectContaining(expectedAgentIdFilterQuery),
                 }),
-              }),
+              ]),
             }),
-            exportTypeId: 'csv_searchsource',
           }),
         }),
         expect.any(Function)
@@ -256,24 +252,20 @@ describe('generateReportHandler', () => {
           request: mockRequest,
           response: mockResponse,
           context: mockContext,
-          jobConfig: expect.objectContaining({
-            jobParams: expect.objectContaining({
-              title: 'Agent List',
-              objectType: 'search',
-              columns: ['id', 'status', 'enrolled_at'],
-              version: '8.99.0',
-              browserTimezone: 'UTC',
-              searchSource: expect.objectContaining({
-                fields: ['id', 'status', 'enrolled_at'],
-                filter: expect.objectContaining({
+          reportParams: expect.objectContaining({
+            title: 'Agent List',
+            timezone: 'UTC',
+            searchSource: expect.objectContaining({
+              fields: ['id', 'status', 'enrolled_at'],
+              filter: expect.arrayContaining([
+                expect.objectContaining({
                   meta: expect.objectContaining({
                     index: 'fleet-agents',
                   }),
-                  query: expectedKueryFilterQuery,
+                  query: expect.objectContaining(expectedKueryFilterQuery),
                 }),
-              }),
+              ]),
             }),
-            exportTypeId: 'csv_searchsource',
           }),
         }),
         expect.any(Function)
@@ -298,11 +290,9 @@ describe('generateReportHandler', () => {
       ).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          jobConfig: expect.objectContaining({
-            jobParams: expect.objectContaining({
-              searchSource: expect.objectContaining({
-                sort: expect.arrayContaining([{ enrolled_at: { order: SortDirection.desc } }]),
-              }),
+          reportParams: expect.objectContaining({
+            searchSource: expect.objectContaining({
+              sort: expect.arrayContaining([{ enrolled_at: { order: SortDirection.desc } }]),
             }),
           }),
         }),
@@ -325,13 +315,11 @@ describe('generateReportHandler', () => {
       ).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          jobConfig: expect.objectContaining({
-            jobParams: expect.objectContaining({
-              searchSource: expect.objectContaining({
-                sort: expect.arrayContaining([
-                  { 'local_metadata.host.hostname.keyword': { order: SortDirection.asc } },
-                ]),
-              }),
+          reportParams: expect.objectContaining({
+            searchSource: expect.objectContaining({
+              sort: expect.arrayContaining([
+                { 'local_metadata.host.hostname.keyword': { order: SortDirection.asc } },
+              ]),
             }),
           }),
         }),
@@ -356,15 +344,13 @@ describe('generateReportHandler', () => {
       ).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          jobConfig: expect.objectContaining({
-            jobParams: expect.objectContaining({
-              searchSource: expect.objectContaining({
-                index: expect.objectContaining({
-                  runtimeFieldMap: expect.objectContaining({
-                    status: expect.objectContaining({
-                      script: expect.objectContaining({
-                        source: mockRuntimeScript,
-                      }),
+          reportParams: expect.objectContaining({
+            searchSource: expect.objectContaining({
+              index: expect.objectContaining({
+                runtimeFieldMap: expect.objectContaining({
+                  status: expect.objectContaining({
+                    script: expect.objectContaining({
+                      source: mockRuntimeScript,
                     }),
                   }),
                 }),

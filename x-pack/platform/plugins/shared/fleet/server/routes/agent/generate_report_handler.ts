@@ -6,12 +6,11 @@
  */
 import type { TypeOf } from '@kbn/config-schema';
 import {
-  DataView,
+  type DataViewSpec,
   SortDirection,
   type EsQuerySortValue,
-  type SearchSourceFields,
+  type SerializedSearchSourceFields,
 } from '@kbn/data-plugin/common';
-import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { ReportingStart } from '@kbn/reporting-plugin/server';
 
@@ -42,11 +41,14 @@ export const generateReportHandler: FleetRequestHandler<
     throw new FleetError('Report generation is not available');
   }
 
-  const jobConfig = {
-    jobParams: await getJobParams(agents, fields, runtimeFields, timezone, spaceId, sort),
-    exportTypeId: 'csv_searchsource',
-  };
-
+  const reportParams = await getReportParams(
+    agents,
+    fields,
+    runtimeFields,
+    spaceId,
+    timezone,
+    sort
+  );
   const handleResponse: HandleResponseFunc = async (result, err?) => {
     if (err) {
       throw err;
@@ -70,7 +72,7 @@ export const generateReportHandler: FleetRequestHandler<
         request,
         response,
         context,
-        jobConfig,
+        reportParams,
       },
       handleResponse
     );
@@ -90,29 +92,26 @@ export const getSortFieldForAPI = (field: string): string => {
   return field;
 };
 
-const getJobParams = async (
+const getReportParams = async (
   agents: string[] | string,
   fields: string[],
   runtimeFields: string,
-  timezone: string,
   spaceId: string,
+  timezone?: string,
   sortOptions?: { field?: string; direction?: string }
 ) => {
-  const index = new DataView({
-    spec: {
-      title: '.fleet-agents',
-      allowHidden: true,
-      runtimeFieldMap: {
-        status: {
-          type: 'keyword',
-          script: {
-            source: runtimeFields,
-          },
+  const index: DataViewSpec = {
+    title: '.fleet-agents',
+    allowHidden: true,
+    runtimeFieldMap: {
+      status: {
+        type: 'keyword',
+        script: {
+          source: runtimeFields,
         },
       },
     },
-    fieldFormats: {} as FieldFormatsStartCommon,
-  });
+  };
 
   const agentsQuery = Array.isArray(agents) ? `agent.id:(${agents.join(' OR ')})` : agents;
   const spaceFilter = await getSpaceAwarenessFilterForAgents(spaceId);
@@ -126,18 +125,20 @@ const getJobParams = async (
   const sort = getSortConfig(sortField, sortOrder) as EsQuerySortValue[];
 
   const filterQueryDsl = toElasticsearchQuery(fromKueryExpression(removeSOAttributes(filterQuery)));
-  const searchSource: SearchSourceFields = {
+  const searchSource: SerializedSearchSourceFields = {
     query: {
       query: '',
       language: 'kuery',
     },
-    filter: {
-      meta: {
-        index: 'fleet-agents',
-        params: {},
+    filter: [
+      {
+        meta: {
+          index: 'fleet-agents',
+          params: {},
+        },
+        query: filterQueryDsl,
       },
-      query: filterQueryDsl,
-    },
+    ],
     fields,
     index,
     sort,
@@ -145,10 +146,7 @@ const getJobParams = async (
 
   return {
     title: 'Agent List',
-    objectType: 'search',
-    columns: fields,
     searchSource,
-    version: appContextService.getKibanaVersion(),
-    browserTimezone: timezone,
+    timezone,
   };
 };

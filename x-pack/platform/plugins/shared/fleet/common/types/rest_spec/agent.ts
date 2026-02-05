@@ -372,7 +372,7 @@ export interface PostGenerateAgentsReportRequest {
   body: {
     agents: string[] | string;
     fields: string[];
-    timezone: string;
+    timezone?: string;
     sort?: {
       field?: string;
       direction?: 'asc' | 'desc';

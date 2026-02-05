@@ -907,7 +907,7 @@ export const PostGenerateAgentsReportRequestSchema = {
       }),
     ]),
     fields: schema.arrayOf(schema.string()),
-    timezone: schema.string(),
+    timezone: schema.maybe(schema.string()),
     sort: schema.maybe(
       schema.object({
         field: schema.maybe(schema.string()),

@@ -15,8 +15,8 @@ import type {
   IKibanaResponse,
 } from '@kbn/core/server';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
-import type { BaseParams } from '@kbn/reporting-common/types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 
 import type { ReportingCore } from '../../..';
 import type { ReportingRequestHandlerContext, ReportingUser } from '../../../types';
@@ -25,13 +25,14 @@ import { Report } from '../../../lib/store';
 import type { RequestParams } from './request_handler';
 import { RequestHandler } from './request_handler';
 
-export interface JobConfig {
-  exportTypeId: string;
-  jobParams: BaseParams;
+export interface InternalReportParams {
+  title: string;
+  searchSource: SerializedSearchSourceFields;
+  timezone?: string;
 }
 
 export interface GenerateSystemReportRequestParams {
-  jobConfig: JobConfig;
+  reportParams: InternalReportParams;
   request: KibanaRequest;
   response: KibanaResponseFactory;
   context: RequestHandlerContext;
@@ -50,7 +51,8 @@ export type HandleResponseFunc = (
   result: GenerateSystemReportResult | null,
   err?: Error
 ) => Promise<IKibanaResponse>;
-export type CreateJobConfigFunc = () => JobConfig;
+
+const SUPPORTED_INDICES = ['.fleet-agents'];
 
 /**
  * Creates a request handler that can be configured by other plugin routes
@@ -178,8 +180,28 @@ export async function handleGenerateSystemReportRequest(
   requestParams: GenerateSystemReportRequestParams,
   handleResponse: HandleResponseFunc
 ) {
-  const { jobConfig, request: req, response: res, context } = requestParams;
-  const { exportTypeId, jobParams } = jobConfig;
+  const { reportParams, request: req, response: res, context } = requestParams;
+  const { title, searchSource, timezone } = reportParams;
+  const index =
+    typeof searchSource.index === 'string' ? searchSource.index : searchSource.index?.title;
+
+  if (index && !SUPPORTED_INDICES.includes(index)) {
+    logger.error(`Attempted to generate system report with unsupported index: ${index}`);
+    return res.badRequest({
+      body: `Unsupported index of ${index} for system report`,
+    });
+  }
+
+  const exportTypeId = 'csv_searchsource';
+  const jobParams = {
+    title,
+    searchSource,
+    browserTimezone: timezone ?? 'UTC',
+    version: reporting.getKibanaPackageInfo().version,
+    objectType: 'search',
+    columns: searchSource.fields,
+  };
+
   const { securityService } = await reporting.getPluginStartDeps();
   const reportingContext = {
     ...context,

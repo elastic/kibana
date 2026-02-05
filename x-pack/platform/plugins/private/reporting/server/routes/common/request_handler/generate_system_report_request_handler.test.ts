@@ -21,12 +21,13 @@ import type { ReportingStore } from '../../../lib/store';
 import { Report } from '../../../lib/store';
 import { createMockPluginStart, createMockReportingCore } from '../../../test_helpers';
 import type { ReportingRequestHandlerContext, ReportingSetup, ReportingUser } from '../../../types';
+import type { RequestParams } from './request_handler';
 import {
   GenerateSystemReportRequestHandler,
   handleGenerateSystemReportRequest,
   type HandleResponseFunc,
-  type JobConfig,
   type GenerateSystemReportRequestParams,
+  type InternalReportParams,
 } from './generate_system_report_request_handler';
 
 jest.mock('@kbn/reporting-server/crypto', () => ({
@@ -42,16 +43,26 @@ const getMockContext = () =>
   } as unknown as ReportingRequestHandlerContext);
 
 const mockLogger = loggingSystemMock.createLogger();
-const mockJobParams: JobParamsCSV = {
-  browserTimezone: 'UTC',
+
+const mockReportParams: InternalReportParams = {
   title: 'system_report_title',
-  objectType: 'search',
-  version: '8.99.0',
-  columns: ['col1', 'col2'],
-  searchSource: { index: 'system-index-*', query: { query: '', language: 'kuery' } },
+  searchSource: {
+    index: '.fleet-agents',
+    fields: ['col1', 'col2'],
+    query: { query: '', language: 'kuery' },
+  },
 };
 
-const mockJobConfig: JobConfig = {
+const mockJobParams: JobParamsCSV = {
+  browserTimezone: 'UTC',
+  title: mockReportParams.title,
+  objectType: 'search',
+  version: '8.99.0',
+  columns: mockReportParams.searchSource.fields as string[],
+  searchSource: mockReportParams.searchSource,
+};
+
+const mockRequestParams: RequestParams = {
   exportTypeId: 'csv_searchsource',
   jobParams: mockJobParams,
 };
@@ -103,10 +114,7 @@ describe('GenerateSystemReportRequestHandler', () => {
 
   describe('Enqueue Job', () => {
     test('creates a system report object to queue', async () => {
-      const report = await requestHandler.enqueueJob({
-        exportTypeId: 'csv_searchsource',
-        jobParams: mockJobParams,
-      });
+      const report = await requestHandler.enqueueJob(mockRequestParams);
 
       const { _id, created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
@@ -152,7 +160,11 @@ describe('GenerateSystemReportRequestHandler', () => {
           "objectType": "search",
           "pagingStrategy": undefined,
           "searchSource": Object {
-            "index": "system-index-*",
+            "fields": Array [
+              "col1",
+              "col2",
+            ],
+            "index": ".fleet-agents",
             "query": Object {
               "language": "kuery",
               "query": "",
@@ -166,10 +178,7 @@ describe('GenerateSystemReportRequestHandler', () => {
     });
 
     test('uses scheduleTaskWithInternalES for system reports', async () => {
-      await requestHandler.enqueueJob({
-        exportTypeId: 'csv_searchsource',
-        jobParams: mockJobParams,
-      });
+      await requestHandler.enqueueJob(mockRequestParams);
 
       expect(reportingCore.scheduleTaskWithInternalES).toHaveBeenCalledWith(
         mockRequest,
@@ -178,10 +187,7 @@ describe('GenerateSystemReportRequestHandler', () => {
     });
 
     test('logs correct message about internal ES client', async () => {
-      await requestHandler.enqueueJob({
-        exportTypeId: 'csv_searchsource',
-        jobParams: mockJobParams,
-      });
+      await requestHandler.enqueueJob(mockRequestParams);
 
       expect(mockLogger.info).toHaveBeenCalledWith(
         expect.stringContaining(
@@ -213,20 +219,14 @@ describe('GenerateSystemReportRequestHandler', () => {
         },
       }));
 
-      const response = await requestHandler.handleRequest({
-        exportTypeId: 'csv_searchsource',
-        jobParams: mockJobParams,
-      });
+      const response = await requestHandler.handleRequest(mockRequestParams);
 
       expect(response.payload).toBe("seeing this means the license isn't supported");
       expect(response.status).toBe(403);
     });
 
     test('successfully handles system report request', async () => {
-      await requestHandler.handleRequest({
-        exportTypeId: 'csv_searchsource',
-        jobParams: mockJobParams,
-      });
+      await requestHandler.handleRequest(mockRequestParams);
 
       expect(mockHandleResponse).toHaveBeenCalledWith({
         report: expect.any(Report),
@@ -240,10 +240,7 @@ describe('GenerateSystemReportRequestHandler', () => {
       const mockError = new Error('System report enqueue error');
       jest.spyOn(requestHandler, 'enqueueJob').mockRejectedValueOnce(mockError);
 
-      await requestHandler.handleRequest({
-        exportTypeId: 'csv_searchsource',
-        jobParams: mockJobParams,
-      });
+      await requestHandler.handleRequest(mockRequestParams);
 
       expect(mockHandleResponse).toHaveBeenCalledWith(null, mockError);
     });
@@ -294,7 +291,7 @@ describe('handleGenerateSystemReportRequest', () => {
     mockHandleResponse = jest.fn().mockResolvedValue({ body: 'mock response' });
 
     requestParams = {
-      jobConfig: mockJobConfig,
+      reportParams: mockReportParams,
       request: mockRequest,
       response: mockResponseFactory,
       context: mockContext,
@@ -354,5 +351,37 @@ describe('handleGenerateSystemReportRequest', () => {
     );
 
     expect(mockHandleResponse).toHaveBeenCalledWith(null, expect.any(Error));
+  });
+
+  test('returns bad request when index is not supported', async () => {
+    const mockSecurityService = {
+      authc: {
+        getCurrentUser: jest.fn().mockReturnValue(null),
+      },
+    };
+    reportingCore.getPluginStartDeps = jest.fn().mockResolvedValue({
+      securityService: mockSecurityService,
+    });
+
+    await handleGenerateSystemReportRequest(
+      reportingCore,
+      mockLogger,
+      '/api/some-plugin/resource/_generateReport',
+      {
+        ...requestParams,
+        reportParams: {
+          ...mockReportParams,
+          searchSource: {
+            ...mockReportParams.searchSource,
+            index: 'unsupported-index-*',
+          },
+        },
+      },
+      mockHandleResponse
+    );
+
+    expect(mockResponseFactory.badRequest).toHaveBeenCalledWith({
+      body: `Unsupported index of unsupported-index-* for system report`,
+    });
   });
 });
