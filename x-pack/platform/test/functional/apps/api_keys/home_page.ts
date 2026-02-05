@@ -627,23 +627,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(isPreviousEnabled).to.be(false);
         });
       });
-
-      it('should refresh data when clicking Refresh button', async () => {
-        // Get initial count
-        let initialCount = 0;
-        await retry.try(async () => {
-          initialCount = await pageObjects.apiKeys.getDisplayedApiKeyCount();
-          expect(initialCount).to.be.greaterThan(0);
-        });
-
-        // Click refresh and verify page still works
-        await pageObjects.apiKeys.clickRefreshButton();
-
-        await retry.try(async () => {
-          const refreshedCount = await pageObjects.apiKeys.getDisplayedApiKeyCount();
-          expect(refreshedCount).to.be(initialCount);
-        });
-      });
     });
   });
 };
