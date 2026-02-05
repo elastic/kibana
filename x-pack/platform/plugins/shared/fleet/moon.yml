@@ -100,7 +100,6 @@ dependsOn:
   - '@kbn/core-security-server-mocks'
   - '@kbn/server-http-tools'
   - '@kbn/zod'
-  - '@kbn/field-formats-plugin'
   - '@kbn/core-security-server'
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/handlebars'
