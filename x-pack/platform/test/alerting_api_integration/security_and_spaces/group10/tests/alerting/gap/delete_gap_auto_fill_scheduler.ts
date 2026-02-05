@@ -10,7 +10,7 @@ import moment from 'moment';
 import { UserAtSpaceScenarios } from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
-import { getFindGaps } from './utils';
+import { getFindGaps } from '../../../../rule_gaps_utils';
 
 export default function deleteGapAutoFillSchedulerTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
