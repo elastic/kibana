@@ -213,6 +213,91 @@ describe('snoozeAlertRoute', () => {
     });
   });
 
+  it('snoozes an alert with recurring with hourly', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    snoozeRuleRoute(router, licenseState);
+
+    const [config, handler] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/snooze_schedule"`);
+
+    rulesClient.snooze.mockResolvedValueOnce({
+      ...mockedRule,
+      snoozeSchedule: [
+        {
+          duration: 1800000,
+          id: mockedUUID,
+          rRule: {
+            tzid: 'America/New_York',
+            dtstart: '2021-03-07T00:00:00.000Z',
+            freq: 4,
+            interval: 1,
+            until: '2021-05-10T00:00:00.000Z',
+          },
+        },
+      ],
+    } as unknown as SanitizedRule);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: {
+          id: '1',
+        },
+        body: {
+          schedule: {
+            custom: {
+              duration: '30m',
+              start: '2021-03-07T00:00:00.000Z',
+              timezone: 'America/New_York',
+              recurring: {
+                every: '1h',
+                end: '2021-05-10T00:00:00.000Z',
+              },
+            },
+          },
+        },
+      },
+      ['noContent']
+    );
+
+    expect(await handler(context, req, res)).toEqual(undefined);
+
+    expect(rulesClient.snooze).toHaveBeenCalledTimes(1);
+    expect(rulesClient.snooze.mock.calls[0][0].snoozeSchedule.rRule).toMatchInlineSnapshot(`
+      Object {
+        "bymonth": undefined,
+        "bymonthday": undefined,
+        "byweekday": undefined,
+        "count": undefined,
+        "dtstart": "2021-03-07T00:00:00.000Z",
+        "freq": 4,
+        "interval": 1,
+        "tzid": "America/New_York",
+        "until": "2021-05-10T00:00:00.000Z",
+      }
+    `);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: {
+        schedule: {
+          custom: {
+            duration: '30m',
+            start: '2021-03-07T00:00:00.000Z',
+            timezone: 'America/New_York',
+            recurring: {
+              every: '1h',
+              end: '2021-05-10T00:00:00.000Z',
+            },
+          },
+          id: mockedUUID,
+        },
+      },
+    });
+  });
+
   it('snoozes an alert with occurrences', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

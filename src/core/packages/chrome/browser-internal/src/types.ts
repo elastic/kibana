@@ -92,6 +92,12 @@ export interface InternalChromeStart extends ChromeStart {
   getProjectAppMenuComponent(): JSX.Element;
 
   /**
+   * Used only by the rendering service to render the sidebar UI
+   * @internal
+   */
+  getSidebarComponent(): JSX.Element;
+
+  /**
    * Used only by the rendering service to retrieve the set of classNames
    * that will be set on the body element.
    * @internal
