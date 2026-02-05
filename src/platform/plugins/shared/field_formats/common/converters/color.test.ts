@@ -26,7 +26,7 @@ describe('Color Format', () => {
     );
     expect(colorer.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
     expect(colorer.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
-    expect(colorer.convert('', TEXT_CONTEXT_TYPE)).toBe('');
+    expect(colorer.convert('', TEXT_CONTEXT_TYPE)).toBe('(blank)');
   };
 
   describe('field is a number', () => {
