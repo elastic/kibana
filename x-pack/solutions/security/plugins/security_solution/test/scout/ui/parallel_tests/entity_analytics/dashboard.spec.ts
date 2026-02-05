@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, spaceTest } from '@kbn/scout-security';
+import { spaceTest } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/ui';
 
 spaceTest.describe('Entity analytics dashboard page', { tag: ['@ess', '@svlSecurity'] }, () => {
   spaceTest.beforeEach(async ({ browserAuth, apiServices }) => {
