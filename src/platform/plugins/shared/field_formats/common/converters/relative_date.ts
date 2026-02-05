@@ -36,12 +36,12 @@ export class RelativeDateFormat extends FieldFormat {
     }
   };
 
-  htmlConvert: HtmlContextTypeConvert = (val: string | number) => {
+  htmlConvert: HtmlContextTypeConvert = (val, options) => {
     const missing = this.checkForMissingValueHtml(val);
     if (missing) {
       return missing;
     }
 
-    return this.textConvert(val);
+    return this.textConvert(val, options);
   };
 }

@@ -33,12 +33,12 @@ export class IpFormat extends FieldFormat {
     return [val >>> 24, (val >>> 16) & 0xff, (val >>> 8) & 0xff, val & 0xff].join('.');
   };
 
-  htmlConvert: HtmlContextTypeConvert = (val) => {
+  htmlConvert: HtmlContextTypeConvert = (val, options) => {
     const missing = this.checkForMissingValueHtml(val);
     if (missing) {
       return missing;
     }
 
-    return this.textConvert(val);
+    return this.textConvert(val, options);
   };
 }
