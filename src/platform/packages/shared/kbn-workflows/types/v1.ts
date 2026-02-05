@@ -538,10 +538,10 @@ export interface ConnectorIdSelectionHandler {
   actionTypeIds: string[];
   /**
    * Whether to disable creation of a new connector from the connector ID selection.
-   * If false (default), the first entry in the `actionTypeIds` list will be used to create new connectors.
-   * If true, creation from the connector ID selection will be disabled.
+   * If false (default), creation from the connector ID selection will be disabled.
+   * If true, creation from the connector ID selection will be enabled for the first action type ID in the `actionTypeIds` list.
    */
-  disableCreation?: boolean;
+  enableCreation?: boolean;
 }
 
 export interface ConnectorExamples {

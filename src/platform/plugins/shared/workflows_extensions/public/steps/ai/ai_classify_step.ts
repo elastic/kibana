@@ -113,10 +113,7 @@ When \`allowMultipleCategories\` is true, the output includes a \`categories\` a
   editorHandlers: {
     config: {
       'connector-id': {
-        connectorIdSelection: {
-          actionTypeIds: ['.gen-ai', '.inference'],
-          disableCreation: true,
-        },
+        connectorIdSelection: { actionTypeIds: ['.gen-ai', '.inference'], enableCreation: false },
       },
     },
     dynamicSchema: {

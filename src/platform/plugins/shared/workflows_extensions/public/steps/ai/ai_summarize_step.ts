@@ -88,10 +88,7 @@ Supports objects and arrays as input.`,
   editorHandlers: {
     config: {
       'connector-id': {
-        connectorIdSelection: {
-          actionTypeIds: ['.gen-ai', '.inference'],
-          disableCreation: true,
-        },
+        connectorIdSelection: { actionTypeIds: ['.gen-ai', '.inference'], enableCreation: false },
       },
     },
   },
