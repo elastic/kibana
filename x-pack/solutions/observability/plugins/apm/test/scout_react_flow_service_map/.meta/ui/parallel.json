@@ -1,0 +1,90 @@
+{
+  "lastModified": "2026-02-02T17:20:08.659Z",
+  "sha1": "398f5bea606c0592ce82d46c0f3a6eec762b55e8",
+  "tests": [
+    {
+      "id": "f1638ceb5181f0e-4166cca575a1e11",
+      "title": "Ingest data to Elasticsearch for React Flow Service Map tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout_react_flow_service_map/ui/parallel_tests/global.setup.ts",
+        "line": 14,
+        "column": 16
+      }
+    },
+    {
+      "id": "7143508568be1fb-68a707a25cb8968",
+      "title": "React Flow Service Map renders service map with controls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout_react_flow_service_map/ui/parallel_tests/service_map/react_flow_service_map.spec.ts",
+        "line": 30,
+        "column": 7
+      }
+    },
+    {
+      "id": "7143508568be1fb-ea6a47168b42ca1",
+      "title": "React Flow Service Map shows popover when clicking on a service node",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout_react_flow_service_map/ui/parallel_tests/service_map/react_flow_service_map.spec.ts",
+        "line": 66,
+        "column": 7
+      }
+    },
+    {
+      "id": "7143508568be1fb-9d2cbecfb46f50c",
+      "title": "React Flow Service Map dismisses popover when clicking outside",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout_react_flow_service_map/ui/parallel_tests/service_map/react_flow_service_map.spec.ts",
+        "line": 87,
+        "column": 7
+      }
+    },
+    {
+      "id": "7143508568be1fb-a0273ef0cf0793c",
+      "title": "React Flow Service Map shows popover when clicking on an edge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout_react_flow_service_map/ui/parallel_tests/service_map/react_flow_service_map.spec.ts",
+        "line": 104,
+        "column": 7
+      }
+    },
+    {
+      "id": "7143508568be1fb-a76716e7ffd48b5",
+      "title": "React Flow Service Map shows popover when clicking on a dependency node",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout_react_flow_service_map/ui/parallel_tests/service_map/react_flow_service_map.spec.ts",
+        "line": 119,
+        "column": 7
+      }
+    }
+  ]
+}
