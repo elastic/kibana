@@ -65,6 +65,13 @@ export const STREAMS_TABLE_CAPTION_ARIA_LABEL = i18n.translate(
   }
 );
 
+export const DISCOVER_INSIGHTS_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.discoverInsightsButtonLabel',
+  {
+    defaultMessage: 'Discover insights',
+  }
+);
+
 export const RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.runBulkStreamOnboardingButtonEmptyLabel',
   {

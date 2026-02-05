@@ -15,6 +15,7 @@ import pMap from 'p-map';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { TableRow } from './utils';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
+import { useInsightsDiscoveryApi } from '../../../../hooks/use_insights_discovery_api';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 import { getFormattedError } from '../../../../util/errors';
@@ -22,6 +23,7 @@ import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 import { useDiscoveryStreams } from '../../hooks/use_discovery_streams_fetch';
 import { useOnboardingStatusUpdateQueue } from '../../hooks/use_onboarding_status_update_queue';
 import {
+  DISCOVER_INSIGHTS_BUTTON_LABEL,
   ONBOARDING_FAILURE_TITLE,
   ONBOARDING_SCHEDULING_FAILURE_TITLE,
   RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL,
@@ -39,9 +41,15 @@ const datePickerStyle = css`
 
 interface StreamsViewProps {
   refreshUnbackedQueriesCount: () => void;
+  isInsightsTaskRunning?: boolean;
+  onInsightsTaskScheduled?: () => void;
 }
 
-export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
+export function StreamsView({
+  refreshUnbackedQueriesCount,
+  isInsightsTaskRunning = false,
+  onInsightsTaskScheduled,
+}: StreamsViewProps) {
   const {
     core: {
       notifications: { toasts },
@@ -55,6 +63,9 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   >({});
   const aiFeatures = useAIFeatures();
   const { scheduleOnboardingTask, cancelOnboardingTask } = useOnboardingApi(
+    aiFeatures?.genAiConnectors.selectedConnector
+  );
+  const { scheduleInsightsDiscoveryTask } = useInsightsDiscoveryApi(
     aiFeatures?.genAiConnectors.selectedConnector
   );
   const onStreamStatusUpdate = useCallback(
@@ -180,11 +191,16 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
           </EuiButtonEmpty>
 
           <EuiButtonEmpty
-            onClick={() => {}}
+            onClick={async () => {
+              const streamNames = selectedStreams.map((row) => row.stream.name);
+              await scheduleInsightsDiscoveryTask(streamNames);
+              onInsightsTaskScheduled?.();
+            }}
             iconType="crosshairs"
-            disabled={selectedStreams.length === 0}
+            disabled={selectedStreams.length === 0 || isInsightsTaskRunning}
+            isLoading={isInsightsTaskRunning}
           >
-            Discover insights
+            {DISCOVER_INSIGHTS_BUTTON_LABEL}
           </EuiButtonEmpty>
         </EuiFlexGroup>
       </EuiFlexItem>

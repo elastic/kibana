@@ -18,9 +18,18 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
+import type { TaskResult } from '@kbn/streams-schema';
+import type { InsightsResult } from '@kbn/streams-schema';
 import { Summary } from './summary';
 
-export function InsightsTab() {
+export type InsightsTaskResult = TaskResult<InsightsResult>;
+
+interface InsightsTabProps {
+  insightsTask?: InsightsTaskResult;
+  refreshInsightsTask?: () => void;
+}
+
+export function InsightsTab({ insightsTask, refreshInsightsTask }: InsightsTabProps) {
   const {
     dependencies: {
       start: {
@@ -97,5 +106,11 @@ export function InsightsTab() {
     );
   }
 
-  return <Summary count={totalEvents} />;
+  return (
+    <Summary
+      count={totalEvents}
+      insightsTask={insightsTask}
+      refreshInsightsTask={refreshInsightsTask}
+    />
+  );
 }
