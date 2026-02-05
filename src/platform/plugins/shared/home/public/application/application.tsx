@@ -44,7 +44,9 @@ export const renderApp = async (
     render(
       coreStart.rendering.addContext(
         <KibanaContextProvider services={{ ...coreStart }}>
-          <SampleDataTabKibanaProvider {...{ coreStart, dataViews, trackUiMetric, sampleDataIngest }}>
+          <SampleDataTabKibanaProvider
+            {...{ coreStart, dataViews, trackUiMetric, sampleDataIngest }}
+          >
             <HomeApp directories={directories} solutions={solutions} />
           </SampleDataTabKibanaProvider>
         </KibanaContextProvider>
