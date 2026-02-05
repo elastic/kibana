@@ -16,7 +16,7 @@ describe('EditorFrameServiceContext', () => {
   };
 
   const mockDatasourceMap: DatasourceMap = {
-    testDatasource: {} as Datasource,
+    formBased: {} as Datasource,
   };
 
   function TestComponent() {
