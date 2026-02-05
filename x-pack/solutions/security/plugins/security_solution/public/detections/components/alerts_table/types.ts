@@ -106,7 +106,7 @@ export type GroupTakeActionItems = (props: {
    */
   groupBucket: GroupingBucket<AlertsGroupingAggregation>;
   /**
-   * Optional callback to close the containing popover menu
-   * */
+   * Callback to close the containing popover menu
+   */
   closePopover: () => void;
 }) => JSX.Element | undefined;

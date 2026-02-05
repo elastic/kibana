@@ -9,8 +9,6 @@ import { useCallback, useMemo } from 'react';
 import type { Filter, Query } from '@kbn/es-query';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-
-// import type { TimeRange } from '../../../../../common/store/inputs/model';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { buildAlertsKqlFilter } from '../../../../components/alerts_table/actions';
@@ -26,7 +24,9 @@ export interface UseAttackInvestigateInTimelineContextMenuItemsProps {
    * Query representing the current table scope.
    */
   query?: Query;
-  /** Optional callback to close the containing popover menu */
+  /**
+   * Optional callback to close the containing popover menu
+   */
   closePopover?: () => void;
 }
 
