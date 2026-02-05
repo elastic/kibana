@@ -46,80 +46,78 @@ export class FeedbackPlugin implements Plugin {
     core.chrome.navControls.registerRight({
       order: 1001,
       mount: (element) => {
-        import('@kbn/feedback-components/src/components/feedback_trigger_button').then(
-          ({ FeedbackTriggerButton }) => {
-            const getSolution = async (): Promise<string> => {
-              try {
-                const space = await spaces?.getActiveSpace();
-                return space?.solution || cloud?.serverless?.projectType || 'classic';
-              } catch {
-                return cloud?.serverless?.projectType || 'classic';
-              }
-            };
+        import('@kbn/feedback-components').then(({ FeedbackTriggerButton }) => {
+          const getSolution = async (): Promise<string> => {
+            try {
+              const space = await spaces?.getActiveSpace();
+              return space?.solution || cloud?.serverless?.projectType || 'classic';
+            } catch {
+              return cloud?.serverless?.projectType || 'classic';
+            }
+          };
 
-            const getAppDetailsWrapper = () => {
-              return getAppDetails(core);
-            };
+          const getAppDetailsWrapper = () => {
+            return getAppDetails(core);
+          };
 
-            const getQuestions = (appId: string): FeedbackRegistryEntry[] => {
-              return getFeedbackQuestionsForApp(appId);
-            };
+          const getQuestions = (appId: string): FeedbackRegistryEntry[] => {
+            return getFeedbackQuestionsForApp(appId);
+          };
 
-            const getCurrentUserEmail = async (): Promise<string | undefined> => {
-              if (!core.security) {
-                return undefined;
-              }
-              try {
-                const user = await core.security.authc.getCurrentUser();
-                return user?.email;
-              } catch {
-                return;
-              }
-            };
+          const getCurrentUserEmail = async (): Promise<string | undefined> => {
+            if (!core.security) {
+              return undefined;
+            }
+            try {
+              const user = await core.security.authc.getCurrentUser();
+              return user?.email;
+            } catch {
+              return;
+            }
+          };
 
-            const sendFeedback = async (data: FeedbackFormData) => {
-              const solution = await getSolution();
-              await core.http.post('/internal/feedback/send', {
-                body: JSON.stringify({ ...data, solution, organization_id: this.organizationId }),
-              });
-            };
+          const sendFeedback = async (data: FeedbackFormData) => {
+            const solution = await getSolution();
+            await core.http.post('/internal/feedback/send', {
+              body: JSON.stringify({ ...data, solution, organization_id: this.organizationId }),
+            });
+          };
 
-            const showToast = (title: string, color: 'success' | 'error') => {
-              if (color === 'success') {
-                core.notifications.toasts.addSuccess({ title });
-              }
-              if (color === 'error') {
-                core.notifications.toasts.addDanger({ title });
-              }
-            };
+          const showToast = (title: string, color: 'success' | 'error') => {
+            if (color === 'success') {
+              core.notifications.toasts.addSuccess({ title });
+            }
+            if (color === 'error') {
+              core.notifications.toasts.addDanger({ title });
+            }
+          };
 
-            const checkTelemetryOptIn = async (): Promise<boolean> => {
-              try {
-                const telemetryConfig = await core.http.get<{ optIn: boolean | null }>(
-                  '/internal/telemetry/config',
-                  { version: '2' }
-                );
-                return telemetryConfig.optIn === true;
-              } catch {
-                return false;
-              }
-            };
+          const checkTelemetryOptIn = async (): Promise<boolean> => {
+            try {
+              const telemetryConfig = await core.http.get<{ optIn: boolean | null }>(
+                '/internal/telemetry/config',
+                { version: '2' }
+              );
+              return telemetryConfig.optIn === true;
+            } catch {
+              return false;
+            }
+          };
 
-            ReactDOM.render(
-              core.rendering.addContext(
-                <FeedbackTriggerButton
-                  getQuestions={getQuestions}
-                  getAppDetails={getAppDetailsWrapper}
-                  getCurrentUserEmail={getCurrentUserEmail}
-                  sendFeedback={sendFeedback}
-                  showToast={showToast}
-                  checkTelemetryOptIn={checkTelemetryOptIn}
-                />
-              ),
-              element
-            );
-          }
-        );
+          ReactDOM.render(
+            core.rendering.addContext(
+              <FeedbackTriggerButton
+                getQuestions={getQuestions}
+                getAppDetails={getAppDetailsWrapper}
+                getCurrentUserEmail={getCurrentUserEmail}
+                sendFeedback={sendFeedback}
+                showToast={showToast}
+                checkTelemetryOptIn={checkTelemetryOptIn}
+              />
+            ),
+            element
+          );
+        });
 
         return () => {
           ReactDOM.unmountComponentAtNode(element);
