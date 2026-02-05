@@ -66,18 +66,6 @@ const TRACES_ESQL_RECOMMENDED_QUERIES = [
   },
 ];
 
-const METRICS_ESQL_RECOMMENDED_QUERIES = [
-  {
-    name: i18n.translate('xpack.observability.esqlQueries.searchAllMetrics.name', {
-      defaultMessage: 'Search all metrics',
-    }),
-    query: `TS ${METRICS_INDEX_PATTERN}`,
-    description: i18n.translate('xpack.observability.esqlQueries.searchAllMetrics.description', {
-      defaultMessage: 'Searches all available metrics',
-    }),
-  },
-];
-
 const LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES = [
   {
     name: i18n.translate('xpack.observability.esqlQueries.k8sPodsByMemory.name', {
@@ -118,6 +106,15 @@ const LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES = [
         'Counts error occurrences by host name and shows the top 50 hosts with the most errors',
     }),
   },
+  {
+    name: i18n.translate('xpack.observability.esqlQueries.searchAllMetrics.name', {
+      defaultMessage: 'Search all metrics',
+    }),
+    query: `TS ${METRICS_INDEX_PATTERN}`,
+    description: i18n.translate('xpack.observability.esqlQueries.searchAllMetrics.description', {
+      defaultMessage: 'Searches all available metrics',
+    }),
+  },
 ];
 
 export function setEsqlRecommendedQueries(esqlPlugin: ESQLSetup) {
@@ -125,11 +122,7 @@ export function setEsqlRecommendedQueries(esqlPlugin: ESQLSetup) {
 
   // Register recommended queries
   esqlExtensionsRegistry.setRecommendedQueries(
-    [
-      ...TRACES_ESQL_RECOMMENDED_QUERIES,
-      ...LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES,
-      ...METRICS_ESQL_RECOMMENDED_QUERIES,
-    ],
+    [...TRACES_ESQL_RECOMMENDED_QUERIES, ...LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES],
     'oblt'
   );
 

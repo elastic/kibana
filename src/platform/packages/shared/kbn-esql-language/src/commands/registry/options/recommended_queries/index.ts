@@ -49,7 +49,7 @@ export const getRecommendedQueriesTemplates = ({
         }
       ),
       queryString: 'TS metrics-*',
-      sortText: 'C',
+      sortText: 'E',
       category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
     },
     {
