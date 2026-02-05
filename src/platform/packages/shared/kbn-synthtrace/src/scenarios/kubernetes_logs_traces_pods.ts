@@ -26,7 +26,7 @@ import {
   getKubernetesMessages,
   KUBERNETES_SERVICES,
 } from './helpers/logs_mock_data';
-import { parseStringToBoolean } from './helpers/logs_scenario_opts_parser';
+import { parseLogsScenarioOpts, parseStringToBoolean } from './helpers/logs_scenario_opts_parser';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -115,7 +115,7 @@ function getTimestampBlock(timestamp: number, milliInterval: number) {
 }
 
 const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOptions) => {
-  const { isLogsDb } = runOptions.scenarioOpts ?? DEFAULT_SCENARIO_OPTS;
+  const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
 
   return {
     bootstrap: async ({ logsEsClient }) => {
