@@ -36,20 +36,22 @@ const labels = {
   }),
 };
 
+// TODO: fix logic
+
 // Exposed in main thinking chain, for now query and tabular data
-const mainThinkingResultTypes = [
+const mainThinkingResultTypes: string[] = [
   ToolResultType.query,
   ToolResultType.tabularData,
   ToolResultType.error,
 ];
 // Populated in flyout
-const flyoutResultTypes = [
+const flyoutResultTypes: string[] = [
   ToolResultType.visualization,
   ToolResultType.other,
   ToolResultType.resource,
 ];
 // Tool result types that should not have an icon displayed in the thinking steps list
-const disabledToolResultIconTypes = [ToolResultType.error, ToolResultType.query];
+const disabledToolResultIconTypes: string[] = [ToolResultType.error, ToolResultType.query];
 
 const getItemIcon = (isLastItem: boolean, isLoading: boolean): ReactNode => {
   if (isLastItem && isLoading) {

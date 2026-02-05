@@ -6,7 +6,7 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
-import { visualizationElement } from '@kbn/agent-builder-common/tools/tool_result';
+import { visualizationElement } from '@kbn/agent-builder-common/tools/custom_rendering';
 import { ChartType } from '@kbn/visualization-utils';
 
 export const renderVisualizationPrompt = () => {

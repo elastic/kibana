@@ -72,5 +72,14 @@ export {
   isQueryResult,
   isResourceResult,
   isTabularDataResult,
+  isVisualizationResult,
+  isDashboardResult,
+  isFileReferenceResult,
 } from './tool_result';
 export { type BrowserApiToolMetadata } from './browser_tool_metadata';
+export {
+  visualizationElement,
+  dashboardElement,
+  type DashboardElementAttributes,
+  type VisualizationElementAttributes,
+} from './custom_rendering';

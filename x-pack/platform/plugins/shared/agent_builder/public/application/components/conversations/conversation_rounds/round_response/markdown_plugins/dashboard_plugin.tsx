@@ -18,12 +18,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import { type DashboardResult, ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   dashboardElement,
   type DashboardElementAttributes,
-  type DashboardResult,
-  ToolResultType,
-} from '@kbn/agent-builder-common/tools/tool_result';
+} from '@kbn/agent-builder-common/tools/custom_rendering';
 
 import { createTagParser, findToolResult } from './utils';
 

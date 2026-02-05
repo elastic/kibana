@@ -8,12 +8,14 @@ import React from 'react';
 import { EuiCode, EuiText } from '@elastic/eui';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import {
-  visualizationElement,
-  type VisualizationElementAttributes,
   type TabularDataResult,
   type VisualizationResult,
   ToolResultType,
 } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  visualizationElement,
+  type VisualizationElementAttributes,
+} from '@kbn/agent-builder-common/tools/custom_rendering';
 
 import type { AgentBuilderStartDependencies } from '../../../../../../types';
 import { VisualizeESQL } from '../../../../tools/esql/visualize_esql';
