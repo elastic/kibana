@@ -21,6 +21,13 @@ export const MODELS_LABEL = i18n.translate(
   }
 );
 
+export const TYPES_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.endpointStats.typesLabel',
+  {
+    defaultMessage: 'Types:',
+  }
+);
+
 export const ENDPOINTS_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.endpointStats.endpointsLabel',
   {

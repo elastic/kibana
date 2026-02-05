@@ -60,10 +60,11 @@ describe('EndpointStats', () => {
     expect(screen.getByTestId('endpointStats')).toBeInTheDocument();
     expect(screen.getByTestId('endpointStatsServices')).toBeInTheDocument();
     expect(screen.getByTestId('endpointStatsModels')).toBeInTheDocument();
+    expect(screen.getByTestId('endpointStatsTypes')).toBeInTheDocument();
     expect(screen.getByTestId('endpointStatsEndpoints')).toBeInTheDocument();
   });
 
-  it('displays correct counts for services, models, and endpoints', () => {
+  it('displays correct counts for services, models, tasks, and endpoints', () => {
     render(<EndpointStats endpoints={mockEndpoints} />);
 
     // 3 unique services: elasticsearch, elastic, openai
@@ -71,6 +72,9 @@ describe('EndpointStats', () => {
 
     // 4 unique models: .elser_model_2, .multilingual-e5-small, rainbow-sprinkles, gpt-4
     expect(screen.getByTestId('endpointStatsModels')).toHaveTextContent('Models: 4');
+
+    // 4 unique types: sparse_embedding, text_embedding, chat_completion, rerank
+    expect(screen.getByTestId('endpointStatsTypes')).toHaveTextContent('Types: 4');
 
     // 5 endpoints total
     expect(screen.getByTestId('endpointStatsEndpoints')).toHaveTextContent('Endpoints: 5');
@@ -81,6 +85,7 @@ describe('EndpointStats', () => {
 
     expect(screen.getByTestId('endpointStatsServices')).toHaveTextContent('Services: 0');
     expect(screen.getByTestId('endpointStatsModels')).toHaveTextContent('Models: 0');
+    expect(screen.getByTestId('endpointStatsTypes')).toHaveTextContent('Types: 0');
     expect(screen.getByTestId('endpointStatsEndpoints')).toHaveTextContent('Endpoints: 0');
   });
 
@@ -98,10 +103,11 @@ describe('EndpointStats', () => {
 
     expect(screen.getByTestId('endpointStatsServices')).toHaveTextContent('Services: 1');
     expect(screen.getByTestId('endpointStatsModels')).toHaveTextContent('Models: 0');
+    expect(screen.getByTestId('endpointStatsTypes')).toHaveTextContent('Types: 1');
     expect(screen.getByTestId('endpointStatsEndpoints')).toHaveTextContent('Endpoints: 1');
   });
 
-  it('correctly counts duplicate services and models', () => {
+  it('correctly counts duplicate services, models, and types', () => {
     const endpointsWithDuplicates: InferenceInferenceEndpointInfo[] = [
       {
         inference_id: 'endpoint-1',
@@ -117,7 +123,7 @@ describe('EndpointStats', () => {
       },
       {
         inference_id: 'endpoint-3',
-        task_type: 'chat_completion',
+        task_type: 'sparse_embedding', // duplicate type
         service: 'elasticsearch', // duplicate service
         service_settings: { model_id: 'model-b' }, // different model
       },
@@ -130,6 +136,9 @@ describe('EndpointStats', () => {
 
     // 2 unique models: model-a, model-b
     expect(screen.getByTestId('endpointStatsModels')).toHaveTextContent('Models: 2');
+
+    // 2 unique types: sparse_embedding, text_embedding
+    expect(screen.getByTestId('endpointStatsTypes')).toHaveTextContent('Types: 2');
 
     // 3 endpoints total
     expect(screen.getByTestId('endpointStatsEndpoints')).toHaveTextContent('Endpoints: 3');

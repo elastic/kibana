@@ -9,7 +9,12 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { getModelId } from '../../utils/get_model_id';
-import { SERVICES_LABEL, MODELS_LABEL, ENDPOINTS_LABEL } from './endpoint_stats_translations';
+import {
+  SERVICES_LABEL,
+  MODELS_LABEL,
+  TYPES_LABEL,
+  ENDPOINTS_LABEL,
+} from './endpoint_stats_translations';
 
 interface EndpointStatsProps {
   endpoints: InferenceInferenceEndpointInfo[];
@@ -19,6 +24,7 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
   const stats = useMemo(() => {
     const services = new Set<string>();
     const models = new Set<string>();
+    const tasks = new Set<string>();
 
     endpoints.forEach((endpoint) => {
       services.add(endpoint.service);
@@ -26,11 +32,15 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
       if (modelId) {
         models.add(modelId);
       }
+      if (endpoint.task_type) {
+        tasks.add(endpoint.task_type);
+      }
     });
 
     return {
       servicesCount: services.size,
       modelsCount: models.size,
+      tasksCount: tasks.size,
       endpointsCount: endpoints.length,
     };
   }, [endpoints]);
@@ -64,6 +74,15 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
         <EuiText size="s" data-test-subj="endpointStatsEndpoints">
           <EuiTextColor color="subdued">{ENDPOINTS_LABEL}</EuiTextColor>&nbsp;
           <strong>{stats.endpointsCount}</strong>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">|</EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" data-test-subj="endpointStatsTypes">
+          <EuiTextColor color="subdued">{TYPES_LABEL}</EuiTextColor>&nbsp;
+          <strong>{stats.tasksCount}</strong>
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

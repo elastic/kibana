@@ -63,20 +63,24 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
         await testSubjects.existOrFail('endpointStats');
         await testSubjects.existOrFail('endpointStatsServices');
         await testSubjects.existOrFail('endpointStatsModels');
+        await testSubjects.existOrFail('endpointStatsTypes');
         await testSubjects.existOrFail('endpointStatsEndpoints');
 
         // Verify stats show non-zero counts (we have preconfigured endpoints)
         const servicesText = await testSubjects.getVisibleText('endpointStatsServices');
         const modelsText = await testSubjects.getVisibleText('endpointStatsModels');
+        const typesText = await testSubjects.getVisibleText('endpointStatsTypes');
         const endpointsText = await testSubjects.getVisibleText('endpointStatsEndpoints');
 
         const servicesCount = parseCountFromStatsLabel(servicesText);
         const modelsCount = parseCountFromStatsLabel(modelsText);
+        const typesCount = parseCountFromStatsLabel(typesText);
         const endpointsCount = parseCountFromStatsLabel(endpointsText);
 
-        // We should have at least 1 service, 1 model, and 1 endpoint (preconfigured)
+        // We should have at least 1 service, 1 model, 1 type, and 1 endpoint (preconfigured)
         expect(servicesCount).to.greaterThan(0);
         expect(modelsCount).to.greaterThan(0);
+        expect(typesCount).to.greaterThan(0);
         expect(endpointsCount).to.greaterThan(0);
       },
 
