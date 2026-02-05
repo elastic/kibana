@@ -10,6 +10,7 @@ import type { Connector, ConnectorType } from './types';
 import './jest_matchers';
 
 export function createMockConnector(overrides: Partial<Connector> = {}): Connector {
+  console.log('overrides', overrides);
   return {
     id: 'test',
     actionTypeId: '.test-connector-type',

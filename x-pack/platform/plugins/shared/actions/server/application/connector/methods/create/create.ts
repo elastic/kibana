@@ -18,7 +18,7 @@ import { tryCatch } from '../../../../lib';
 
 export async function create({
   context,
-  action: { actionTypeId, name, config, secrets },
+  action: { actionTypeId, name, config, secrets, authMode },
   options,
 }: ConnectorCreateParams): Promise<ActionResult> {
   const id = options?.id || SavedObjectsUtils.generateId();
@@ -126,6 +126,7 @@ export async function create({
           isMissingSecrets: false,
           config: validatedActionTypeConfig as SavedObjectAttributes,
           secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+          ...(authMode ? { authMode } : {}),
         },
         { id }
       )
@@ -168,5 +169,6 @@ export async function create({
     isSystemAction: false,
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
+    ...(result.attributes.authMode ? { authMode: result.attributes.authMode } : {}),
   };
 }

@@ -39,6 +39,7 @@ describe('updateConnectorRoute', () => {
       actionTypeId: 'my-action-type-id',
       name: 'My name',
       config: { foo: true },
+      authMode: 'shared',
     });
 
     const actionsClient = actionsClientMock.create();
@@ -69,6 +70,7 @@ describe('updateConnectorRoute', () => {
         is_deprecated: false,
         is_system_action: false,
         is_connector_type_deprecated: false,
+        auth_mode: 'shared',
       },
     });
 

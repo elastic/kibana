@@ -93,4 +93,138 @@ describe('getAllConnectorsRoute', () => {
 
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
   });
+
+  it('returns connectors with authMode "shared"', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAllConnectorsRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([
+      {
+        id: '1',
+        name: 'Test Connector',
+        actionTypeId: '.webhook',
+        config: {},
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+        referencedByCount: 0,
+        authMode: 'shared',
+      },
+    ]);
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+
+    const result = await handler(context, req, res);
+
+    expect(result).toMatchObject({
+      body: [
+        {
+          id: '1',
+          name: 'Test Connector',
+          connector_type_id: '.webhook',
+          is_preconfigured: false,
+          is_deprecated: false,
+          is_system_action: false,
+          is_connector_type_deprecated: false,
+          referenced_by_count: 0,
+          auth_mode: 'shared',
+        },
+      ],
+    });
+
+    expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns connectors with authMode "per-user"', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAllConnectorsRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([
+      {
+        id: '1',
+        name: 'Test Connector',
+        actionTypeId: '.webhook',
+        config: {},
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+        referencedByCount: 0,
+        authMode: 'per-user',
+      },
+    ]);
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+
+    const result = await handler(context, req, res);
+
+    expect(result).toMatchObject({
+      body: [
+        {
+          id: '1',
+          name: 'Test Connector',
+          connector_type_id: '.webhook',
+          is_preconfigured: false,
+          is_deprecated: false,
+          is_system_action: false,
+          is_connector_type_deprecated: false,
+          referenced_by_count: 0,
+          auth_mode: 'per-user',
+        },
+      ],
+    });
+
+    expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns connectors without authMode when not set', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAllConnectorsRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([
+      {
+        id: '1',
+        name: 'Test Connector',
+        actionTypeId: '.slack',
+        config: {},
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+        referencedByCount: 0,
+      },
+    ]);
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.arrayContaining([
+        expect.objectContaining({
+          id: '1',
+          name: 'Test Connector',
+          connector_type_id: '.slack',
+        }),
+      ]),
+    });
+
+    expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
+  });
 });
