@@ -10,55 +10,55 @@
 import { getTopNavBadges } from './get_top_nav_badges';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { fromSavedSearchToSavedObjectTab } from '../../state_management/redux';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import { fromTabStateToSavedObjectTab } from '../../state_management/redux';
+import { getTabStateMock } from '../../state_management/redux/__mocks__/internal_state.mocks';
 
-const getStateContainer = async () => {
-  const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
-  await toolkit.initializeTabs();
+const setupStateContainer = async ({ managed = false } = {}) => {
+  const services = createDiscoverServicesMock();
+  services.capabilities.discover_v2.save = true;
+  
+  const toolkit = getDiscoverInternalStateMock({
+    persistedDataViews: [dataViewMock],
+    services,
+  });
+
+  if (managed) {
+    const persistedDiscoverSession = createDiscoverSessionMock({
+      id: 'test-id',
+      managed: true,
+      tabs: [
+        fromTabStateToSavedObjectTab({
+          tab: getTabStateMock({
+            id: 'test-tab',
+            initialInternalState: {
+              serializedSearchSource: { index: dataViewMock.id },
+            },
+          }),
+          timeRestore: false,
+          services,
+        }),
+      ],
+    });
+
+    await toolkit.initializeTabs({ persistedDiscoverSession });
+  } else {
+    await toolkit.initializeTabs();
+  }
+
   const { stateContainer } = await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
-    skipWaitForDataFetching: true,
   });
-  return stateContainer;
-};
 
-const discoverServiceMock = createDiscoverServicesMock();
-discoverServiceMock.capabilities.discover_v2.save = true;
+  return { stateContainer, services };
+};
 
 describe('getTopNavBadges()', function () {
   describe('managed saved search', () => {
     test('should return the managed badge when managed saved search', async () => {
-      const services = createDiscoverServicesMock();
-      services.capabilities.discover_v2.save = true;
-      const toolkit = getDiscoverInternalStateMock({
-        persistedDataViews: [dataViewMock],
-        services,
-      });
-      const managedSavedSearch = { ...savedSearchMock, managed: true };
-      const persistedDiscoverSession = {
-        ...managedSavedSearch,
-        id: managedSavedSearch.id ?? 'test-id',
-        title: managedSavedSearch.title ?? 'title',
-        description: managedSavedSearch.description ?? 'description',
-        tabs: [
-          fromSavedSearchToSavedObjectTab({
-            tab: {
-              id: managedSavedSearch.id ?? '',
-              label: managedSavedSearch.title ?? '',
-            },
-            savedSearch: managedSavedSearch,
-            services,
-          }),
-        ],
-      };
-      await toolkit.initializeTabs({ persistedDiscoverSession });
-      const { stateContainer } = await toolkit.initializeSingleTab({
-        tabId: toolkit.getCurrentTab().id,
-        skipWaitForDataFetching: true,
-      });
+      const { stateContainer, services } = await setupStateContainer({ managed: true });
       const topNavBadges = getTopNavBadges({
         isMobile: false,
         services,
@@ -71,15 +71,15 @@ describe('getTopNavBadges()', function () {
   });
 
   describe('solutions view badge', () => {
-    const discoverServiceWithSpacesMock = createDiscoverServicesMock();
-    discoverServiceWithSpacesMock.capabilities.discover_v2.save = true;
-    discoverServiceWithSpacesMock.spaces = spacesPluginMock.createStartContract();
-
     test('should return the solutions view badge when spaces is enabled', async () => {
-      const stateContainer = await getStateContainer();
+      const { stateContainer } = await setupStateContainer();
+      const servicesWithSpaces = createDiscoverServicesMock();
+      servicesWithSpaces.capabilities.discover_v2.save = true;
+      servicesWithSpaces.spaces = spacesPluginMock.createStartContract();
+      
       const topNavBadges = getTopNavBadges({
         isMobile: false,
-        services: discoverServiceWithSpacesMock,
+        services: servicesWithSpaces,
         stateContainer,
       });
       expect(topNavBadges).toMatchInlineSnapshot(`

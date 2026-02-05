@@ -10,7 +10,7 @@
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { getAlertsAppMenuItem } from './get_alerts';
-import { discoverServiceMock } from '../../../../../__mocks__/services';
+import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
@@ -23,14 +23,16 @@ const getAlertsMenuItem = async (
   isEsqlMode = false,
   authorizedRuleTypeIds = [ES_QUERY_ID]
 ): Promise<DiscoverAppMenuItemType> => {
-  const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataView] });
+  const services = createDiscoverServicesMock();
+  const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataView], services });
   await toolkit.initializeTabs();
   const { stateContainer } = await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
-    skipWaitForDataFetching: true,
   });
-  stateContainer.internalState.dispatch(
-    stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
+  
+  toolkit.internalState.dispatch(
+    internalStateActions.assignNextDataView({
+      tabId: toolkit.getCurrentTab().id,
       dataView,
     })
   );
@@ -47,7 +49,7 @@ const getAlertsMenuItem = async (
 
   return getAlertsAppMenuItem({
     discoverParams: discoverParamsMock,
-    services: discoverServiceMock,
+    services,
     stateContainer,
   });
 };

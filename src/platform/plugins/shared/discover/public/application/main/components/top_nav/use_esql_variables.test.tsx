@@ -10,7 +10,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
 import { BehaviorSubject, Observable, skip } from 'rxjs';
-import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { useESQLVariables } from './use_esql_variables';
@@ -20,9 +20,9 @@ import type {
   ESQLVariableType,
   EsqlControlType,
 } from '@kbn/esql-types';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import React from 'react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
 
 // Mock ControlGroupRendererApi
 class MockControlGroupRendererApi {
@@ -50,38 +50,43 @@ class MockControlGroupRendererApi {
 // --- Test Suite ---
 describe('useESQLVariables', () => {
   let mockControlGroupAPI: MockControlGroupRendererApi;
-  const getStateContainer = async () => {
+  
+  const setupToolkit = async () => {
     const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
     await toolkit.initializeTabs();
-    const { stateContainer } = await toolkit.initializeSingleTab({
+    await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
-      skipWaitForDataFetching: true,
     });
-    return stateContainer;
+    return toolkit;
   };
 
   const renderUseESQLVariables = async ({
-    stateContainer,
+    toolkit,
     isEsqlMode = true,
     controlGroupApi = mockControlGroupAPI as unknown as ControlGroupRendererApi,
     currentEsqlVariables = [],
     onUpdateESQLQuery = jest.fn(),
   }: {
-    stateContainer?: DiscoverStateContainer;
+    toolkit?: InternalStateMockToolkit;
     isEsqlMode?: boolean;
     controlGroupApi?: ControlGroupRendererApi;
     currentEsqlVariables?: ESQLControlVariable[];
     onUpdateESQLQuery?: (query: string) => void;
   }) => {
-    const actualStateContainer = stateContainer || (await getStateContainer());
+    const actualToolkit = toolkit || (await setupToolkit());
     const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
-      <DiscoverTestProvider stateContainer={actualStateContainer}>{children}</DiscoverTestProvider>
+      <DiscoverToolkitTestProvider toolkit={actualToolkit}>{children}</DiscoverToolkitTestProvider>
     );
 
     const hook = renderHook(
       () =>
         useESQLVariables({
-          stateContainer: actualStateContainer,
+          stateContainer: actualToolkit.internalState.getState().tabs.unsafeCurrentId
+            ? require('../../state_management/redux').selectTabRuntimeState(
+                actualToolkit.runtimeStateManager,
+                actualToolkit.internalState.getState().tabs.unsafeCurrentId
+              ).stateContainer$.getValue()!
+            : undefined as any,
           isEsqlMode,
           controlGroupApi,
           currentEsqlVariables,
@@ -94,7 +99,7 @@ describe('useESQLVariables', () => {
 
     await act(() => setTimeout(() => {}, 0));
 
-    return { hook };
+    return { hook, toolkit: actualToolkit };
   };
 
   beforeEach(() => {
@@ -111,13 +116,10 @@ describe('useESQLVariables', () => {
 
   describe('useEffect for ControlGroupAPI input', () => {
     it('should not subscribe if not in ESQL mode or controlGroupAPI is missing', async () => {
-      const stateContainer = await getStateContainer();
-      const dispatchSpy = jest.spyOn(stateContainer.internalState, 'dispatch');
-
-      const { hook } = await renderUseESQLVariables({
+      const { hook, toolkit } = await renderUseESQLVariables({
         isEsqlMode: false,
-        stateContainer,
       });
+      const dispatchSpy = jest.spyOn(toolkit.internalState, 'dispatch');
 
       // Try to simulate input, it should not trigger any dispatch
       act(() => {
@@ -137,18 +139,19 @@ describe('useESQLVariables', () => {
         { key: 'foo', type: 'values', value: 'bar' },
       ] as ESQLControlVariable[];
 
-      const stateContainer = await getStateContainer();
-      const dispatchSpy = jest.spyOn(stateContainer.internalState, 'dispatch');
+      const { toolkit } = await renderUseESQLVariables({
+        isEsqlMode: true,
+      });
+      const dispatchSpy = jest.spyOn(toolkit.internalState, 'dispatch');
+      const stateContainer = require('../../state_management/redux').selectTabRuntimeState(
+        toolkit.runtimeStateManager,
+        toolkit.internalState.getState().tabs.unsafeCurrentId
+      ).stateContainer$.getValue()!;
       const updateControlStateSpy = jest.spyOn(
         stateContainer.savedSearchState,
         'updateControlState'
       );
       const fetchSpy = jest.spyOn(stateContainer.dataState, 'fetch');
-
-      await renderUseESQLVariables({
-        isEsqlMode: true,
-        stateContainer,
-      });
 
       // Simulate initial input from controlGroupAPI
       act(() => {
