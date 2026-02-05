@@ -83,10 +83,10 @@ const DEFAULT_SCENARIO_OPTS = {
   numAgents: 5,
   logsInterval: '1m',
   logsRate: 1,
-  ingestPods: true,
-  ingestContainers: true,
-  ingestTraces: true,
-  logsdb: false,
+  ingestPods: 'true',
+  ingestContainers: 'true',
+  ingestTraces: 'true',
+  logsdb: 'false',
 };
 
 const generatePodName = (serviceName: string) => {
@@ -137,9 +137,9 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
         ingestTraces,
       } = { ...DEFAULT_SCENARIO_OPTS, ...(runOptions.scenarioOpts || {}) };
 
-      const parsedIngestPods = parseStringToBoolean(`${ingestPods}`);
-      const parsedIngestContainers = parseStringToBoolean(`${ingestContainers}`);
-      const parsedIngestTraces = parseStringToBoolean(`${ingestTraces}`);
+      const parsedIngestPods = parseStringToBoolean(ingestPods);
+      const parsedIngestContainers = parseStringToBoolean(ingestContainers);
+      const parsedIngestTraces = parseStringToBoolean(ingestTraces);
 
       const { logger } = runOptions;
 
