@@ -14,7 +14,7 @@ import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
-import { changeAlertsFilter } from '../../tasks/alerts';
+import { changeAlertsFilter, goToAlertsTab } from '../../tasks/alerts';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
@@ -81,6 +81,7 @@ describe(
       toggleRuleOffAndOn(ruleName);
 
       visitRuleAlerts(ruleName);
+      goToAlertsTab();
       closeAllToasts();
 
       changeAlertsFilter(`process.name: "sshd" and agent.id: "${createdHost.agentId}"`);

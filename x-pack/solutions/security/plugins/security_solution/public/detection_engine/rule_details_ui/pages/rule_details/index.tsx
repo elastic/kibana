@@ -109,7 +109,6 @@ import {
   explainLackOfPermission,
   isBoolean,
 } from '../../../../common/utils/privileges';
-
 import {
   RuleStatus,
   RuleStatusFailedCallOut,
