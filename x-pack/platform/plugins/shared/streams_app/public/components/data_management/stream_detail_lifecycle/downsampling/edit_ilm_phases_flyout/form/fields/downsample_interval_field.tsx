@@ -124,7 +124,7 @@ export const DownsampleIntervalField = ({
                     defaultMessage: 'Interval',
                   }
                 )}
-                helpText={helpText}
+                helpText={showInvalid ? undefined : helpText}
                 isInvalid={showInvalid}
                 error={showError}
               >
