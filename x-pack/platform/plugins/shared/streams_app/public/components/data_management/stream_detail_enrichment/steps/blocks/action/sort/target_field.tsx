@@ -24,7 +24,7 @@ export const SortTargetFieldSelector = () => {
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.targetFieldMustacheError',
           {
             defaultMessage:
-              'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names',
+              "Mustache template syntax '{{' '}}' or '{{{' '}}}' is not allowed in field names",
           }
         );
       }

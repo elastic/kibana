@@ -78,7 +78,7 @@ export const ProcessorFieldSelector = ({
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorMustacheError',
             {
               defaultMessage:
-                'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names',
+                "Mustache template syntax '{{' '}}' or '{{{' '}}}' is not allowed in field names",
             }
           );
         }
