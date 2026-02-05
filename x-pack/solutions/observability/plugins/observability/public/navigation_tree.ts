@@ -13,6 +13,7 @@ import { lazy } from 'react';
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import type { Location } from 'history';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 const LazyIconBriefcase = lazy(() =>
   import('@kbn/observability-nav-icons').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
@@ -44,6 +45,24 @@ const title = i18n.translate(
 );
 const icon = 'logoObservability';
 
+/**
+ * CONTEXT: After restructuring Dashboards to integrate the Visualize library,
+ * we need to maintain proper navigation state when users edit visualizations accessed
+ * from the Dashboard Viz tab. This keeps the Dashboard nav item active during editing.
+ */
+function isEditingFromDashboard(
+  location: Location,
+  pathNameSerialized: string,
+  prepend: (path: string) => string
+): boolean {
+  const vizApps = ['/app/visualize', '/app/maps', '/app/lens'];
+  const isVizApp = vizApps.some((app) => pathNameSerialized.startsWith(prepend(app)));
+  const hasOriginatingApp =
+    location.search.includes('originatingApp=dashboards') ||
+    location.hash.includes('originatingApp=dashboards');
+  return isVizApp && hasOriginatingApp;
+}
+
 function createNavTree({
   streamsAvailable,
   showAiAssistant,
@@ -69,9 +88,9 @@ function createNavTree({
       },
       {
         link: 'dashboards',
-        getIsActive: ({ pathNameSerialized, prepend }) => {
-          return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-        },
+        getIsActive: ({ pathNameSerialized, prepend, location }) =>
+          pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
+          isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
       {
         link: 'workflows',
@@ -395,14 +414,13 @@ function createNavTree({
               defaultMessage: 'Logs categories',
             }),
           },
-          { link: 'maps' },
-          { link: 'graph' },
           {
-            link: 'visualize',
-            title: i18n.translate('xpack.observability.obltNav.otherTools.logsCategories', {
-              defaultMessage: 'Visualize library',
-            }),
+            link: 'maps',
+            getIsActive: ({ pathNameSerialized, location, prepend }) =>
+              !isEditingFromDashboard(location, pathNameSerialized, prepend) &&
+              pathNameSerialized.includes('/app/maps'),
           },
+          { link: 'graph' },
         ],
       },
     ],
