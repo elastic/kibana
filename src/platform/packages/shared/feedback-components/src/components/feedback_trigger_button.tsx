@@ -18,10 +18,8 @@ const LazyFeedbackContainer = lazy(() =>
 );
 
 interface Props {
-  organizationId?: string;
   getQuestions: (appId: string) => FeedbackRegistryEntry[];
   getAppDetails: () => { title: string; id: string; url: string };
-  getSolution: () => Promise<string>;
   getCurrentUserEmail: () => Promise<string | undefined>;
   sendFeedback: (data: Record<string, unknown>) => Promise<void>;
   showToast: (title: string, type: 'success' | 'error') => void;
@@ -29,10 +27,8 @@ interface Props {
 }
 
 export const FeedbackTriggerButton = ({
-  organizationId,
   getQuestions,
   getAppDetails,
-  getSolution,
   getCurrentUserEmail,
   sendFeedback,
   showToast,
@@ -105,8 +101,6 @@ export const FeedbackTriggerButton = ({
             <LazyFeedbackContainer
               getAppDetails={getAppDetails}
               getQuestions={getQuestions}
-              getSolution={getSolution}
-              organizationId={organizationId}
               getCurrentUserEmail={getCurrentUserEmail}
               sendFeedback={sendFeedback}
               showToast={showToast}

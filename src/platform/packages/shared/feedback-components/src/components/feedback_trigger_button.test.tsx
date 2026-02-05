@@ -22,7 +22,6 @@ const createMockProps = ({
 }: {
   isTelemetryGlobalSettingEnabled: boolean;
 }) => ({
-  organizationId: 'org123',
   getQuestions: jest.fn().mockReturnValue([]),
   getAppDetails: jest
     .fn()
@@ -30,7 +29,6 @@ const createMockProps = ({
   getCurrentUserEmail: jest.fn().mockResolvedValue('capybara@elastic.co'),
   sendFeedback: jest.fn().mockResolvedValue(undefined),
   showToast: jest.fn(),
-  getSolution: jest.fn().mockResolvedValue('oblt'),
   checkTelemetryOptIn: jest.fn().mockResolvedValue(isTelemetryGlobalSettingEnabled),
 });
 

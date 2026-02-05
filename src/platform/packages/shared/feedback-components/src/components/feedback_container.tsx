@@ -17,10 +17,8 @@ import { FeedbackBody } from './body/feedback_body';
 import { FeedbackFooter } from './footer/feedback_footer';
 
 interface Props {
-  organizationId?: string;
   getQuestions: (appId: string) => FeedbackRegistryEntry[];
   getAppDetails: () => { title: string; id: string; url: string };
-  getSolution: () => Promise<string>;
   getCurrentUserEmail: () => Promise<string | undefined>;
   sendFeedback: (data: Record<string, unknown>) => Promise<void>;
   showToast: (title: string, type: 'success' | 'error') => void;
@@ -28,10 +26,8 @@ interface Props {
 }
 
 export const FeedbackContainer = ({
-  organizationId,
   getQuestions,
   getAppDetails,
-  getSolution,
   getCurrentUserEmail,
   sendFeedback,
   showToast,
@@ -83,14 +79,10 @@ export const FeedbackContainer = ({
     try {
       setIsSubmitting(true);
 
-      const solution = await getSolution();
-
       const eventData = {
         app_id: appId,
         user_email: allowEmailContact && email ? email : undefined,
         allow_email_contact: allowEmailContact,
-        solution,
-        organization_id: organizationId,
         csat_score: Number(selectedCsatOptionId) || undefined,
         questions: questions.map((question) => ({
           id: question.id,

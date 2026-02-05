@@ -14,7 +14,6 @@ import userEvent from '@testing-library/user-event';
 import { FeedbackContainer } from './feedback_container';
 
 const mockProps = {
-  organizationId: 'test-org-id',
   getQuestions: jest.fn().mockReturnValue([
     {
       id: 'experience',
@@ -31,7 +30,6 @@ const mockProps = {
   sendFeedback: jest.fn().mockResolvedValue(undefined),
   showToast: jest.fn(),
   hideFeedbackContainer: jest.fn(),
-  getSolution: jest.fn().mockResolvedValue('oblt'),
 };
 
 describe('FeedbackContainer', () => {
@@ -85,19 +83,18 @@ describe('FeedbackContainer', () => {
     const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });
     await userEvent.click(csatButtons[3]);
 
+    const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
+
     await waitFor(() => {
-      const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
       expect(sendButton).not.toBeDisabled();
     });
 
-    const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
     await userEvent.click(sendButton);
 
     await waitFor(() => {
       expect(mockProps.sendFeedback).toHaveBeenCalledWith(
         expect.objectContaining({
           app_id: 'test-app',
-          organization_id: 'test-org-id',
         })
       );
     });
@@ -139,6 +136,7 @@ describe('FeedbackContainer', () => {
     await userEvent.click(csatButtons[3]);
 
     const emailInput = await screen.findByTestId('feedbackEmailInput');
+
     await userEvent.clear(emailInput);
     await userEvent.type(emailInput, 'invalid-email');
 

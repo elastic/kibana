@@ -47,6 +47,15 @@ export class FeedbackPlugin implements Plugin {
       mount: (element) => {
         import('@kbn/feedback-components/src/components/feedback_trigger_button').then(
           ({ FeedbackTriggerButton }) => {
+            const getSolution = async (): Promise<string> => {
+              try {
+                const space = await spaces?.getActiveSpace();
+                return space?.solution || cloud?.serverless?.projectType || 'classic';
+              } catch {
+                return cloud?.serverless?.projectType || 'classic';
+              }
+            };
+
             const getAppDetailsWrapper = () => {
               return getAppDetails(core);
             };
@@ -68,8 +77,9 @@ export class FeedbackPlugin implements Plugin {
             };
 
             const sendFeedback = async (data: Record<string, unknown>) => {
+              const solution = await getSolution();
               await core.http.post('/internal/feedback/send', {
-                body: JSON.stringify(data),
+                body: JSON.stringify({ ...data, solution, organization_id: this.organizationId }),
               });
             };
 
@@ -94,22 +104,11 @@ export class FeedbackPlugin implements Plugin {
               }
             };
 
-            const getSolution = async (): Promise<string> => {
-              try {
-                const space = await spaces?.getActiveSpace();
-                return space?.solution || cloud?.serverless?.projectType || 'classic';
-              } catch {
-                return cloud?.serverless?.projectType || 'classic';
-              }
-            };
-
             ReactDOM.render(
               core.rendering.addContext(
                 <FeedbackTriggerButton
-                  organizationId={this.organizationId}
                   getQuestions={getQuestions}
                   getAppDetails={getAppDetailsWrapper}
-                  getSolution={getSolution}
                   getCurrentUserEmail={getCurrentUserEmail}
                   sendFeedback={sendFeedback}
                   showToast={showToast}
