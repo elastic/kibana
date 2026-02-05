@@ -24,6 +24,7 @@ import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { createActionService } from './handlers/action/create_action_service';
 
 export interface OsqueryPluginSetup {
@@ -38,7 +39,7 @@ export interface SetupPlugins {
   cases?: CasesServerSetup;
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
-  security: SecurityPluginStart;
+  security: SecurityPluginSetup;
   taskManager?: TaskManagerPluginSetup;
   telemetry?: TelemetryPluginSetup;
   licensing: LicensingPluginSetup;
@@ -50,6 +51,7 @@ export interface StartPlugins {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   fleet?: FleetStartContract;
+  security: SecurityPluginStart;
   taskManager?: TaskManagerPluginStart;
   telemetry?: TelemetryPluginStart;
   ruleRegistry?: RuleRegistryPluginStartContract;
