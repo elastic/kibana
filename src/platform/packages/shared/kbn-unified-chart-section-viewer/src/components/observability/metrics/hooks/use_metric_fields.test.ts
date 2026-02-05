@@ -39,6 +39,9 @@ describe('useMetricFields', () => {
     searchTerm: '',
     onSearchTermChange: jest.fn(),
     onToggleFullscreen: jest.fn(),
+    flyoutState: undefined,
+    onFlyoutStateChange: jest.fn(),
+    onFlyoutTabChange: jest.fn(),
   };
 
   const defaultFieldsContext = {

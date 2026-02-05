@@ -137,6 +137,9 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutTabChange: jest.fn(),
     });
 
     useMetricsGridFullScreenMock.mockReturnValue({
@@ -237,6 +240,9 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange,
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutTabChange: jest.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -279,6 +285,9 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen,
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutTabChange: jest.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
