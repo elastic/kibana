@@ -694,7 +694,7 @@ describe('useOnSubmit', () => {
       });
     });
 
-    it('should clear cloud_connectors and set supports_cloud_connector to false for gcp', () => {
+    it('should update cloud_connectors with target_csp gcp and set supports_cloud_connector to false for gcp', () => {
       const setNewAgentPolicy = jest.fn();
       const setPackagePolicy = jest.fn();
 
@@ -736,7 +736,10 @@ describe('useOnSubmit', () => {
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
-          cloud_connectors: undefined,
+          cloud_connectors: {
+            enabled: false,
+            target_csp: 'gcp',
+          },
         },
       });
       expect(setPackagePolicy).toHaveBeenCalledWith({
