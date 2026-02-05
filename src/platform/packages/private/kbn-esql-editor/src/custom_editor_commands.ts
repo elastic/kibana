@@ -28,6 +28,7 @@ export interface MonacoCommandDependencies {
   esqlVariables: React.RefObject<ESQLControlVariable[] | undefined>;
   controlsContext: React.RefObject<ESQLControlsContext | undefined>;
   openTimePickerPopover: () => void;
+  openIndicesBrowser?: () => void;
 }
 
 const triggerControl = async (
@@ -61,6 +62,7 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
     esqlVariables,
     controlsContext,
     openTimePickerPopover,
+    openIndicesBrowser,
   } = deps;
 
   const commandDisposables: monaco.IDisposable[] = [];
@@ -81,6 +83,15 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
       openTimePickerPopover();
     })
   );
+
+  // Open indices browser command
+  if (openIndicesBrowser) {
+    commandDisposables.push(
+      monaco.editor.registerCommand('esql.indicesBrowser.open', (...args) => {
+        openIndicesBrowser();
+      })
+    );
+  }
 
   // Accept recommended query command
   commandDisposables.push(

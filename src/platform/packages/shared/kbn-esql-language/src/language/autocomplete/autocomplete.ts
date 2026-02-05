@@ -20,7 +20,10 @@ import { esqlCommandRegistry } from '../../commands';
 import { isHeaderCommand, Walker } from '../../ast';
 import { parse } from '../../parser';
 import { SuggestionOrderingEngine } from '../../shared';
-import { getCommandAutocompleteDefinitions } from '../../commands/registry/complete_items';
+import {
+  getCommandAutocompleteDefinitions,
+  createIndicesBrowserSuggestion,
+} from '../../commands/registry/complete_items';
 import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '../../commands/registry/options/recommended_queries';
 import type {
@@ -284,6 +287,18 @@ async function getSuggestionsWithinCommandExpression(
     context,
     offset
   );
+
+  const commandName = astContext.command.name.toLowerCase();
+  const isSourceCommand = commandName === 'from' || commandName === 'ts';
+  const isInsideSubquery = astContext.isCursorInSubquery; // We only show the resource browser in the main query
+  if (isSourceCommand && callbacks?.isResourceBrowserEnabled && !isInsideSubquery) {
+    const { rangeToReplace, filterText } =
+      suggestions.find((s) => s.rangeToReplace && s.filterText) ?? {};
+    const insertText = rangeToReplace
+      ? fullText.substring(rangeToReplace.start, rangeToReplace.end)
+      : '';
+    suggestions.unshift(createIndicesBrowserSuggestion(rangeToReplace, insertText, filterText));
+  }
 
   // Apply context-aware ordering
   const orderedSuggestions = orderingEngine.sort(suggestions, {
