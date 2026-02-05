@@ -10,18 +10,19 @@
 /* eslint-disable @kbn/eslint/module_migration */
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
-import 'monaco-editor/esm/vs/base/common/worker/simpleWorker';
-import 'monaco-editor/esm/vs/base/browser/defaultWorkerFactory';
+import 'monaco-editor/esm/vs/base/common/worker/webWorker';
+import 'monaco-editor/esm/vs/base/browser/webWorkerFactory';
 
 import 'monaco-editor/esm/vs/editor/browser/coreCommands.js';
-import 'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js';
+import 'monaco-editor/esm/vs/editor/browser/widget/codeEditor/codeEditorWidget.js';
 
 import 'monaco-editor/esm/vs/editor/contrib/wordOperations/browser/wordOperations.js'; // Needed for word-wise char navigation
 import 'monaco-editor/esm/vs/editor/contrib/linesOperations/browser/linesOperations.js'; // Needed for enabling shortcuts of removing/joining/moving lines
 import 'monaco-editor/esm/vs/editor/contrib/folding/browser/folding.js'; // Needed for folding
 import 'monaco-editor/esm/vs/editor/contrib/suggest/browser/suggestController.js'; // Needed for suggestions
 import 'monaco-editor/esm/vs/editor/contrib/inlineCompletions/browser/inlineCompletions.contribution.js'; // Needed for inline completions
-import 'monaco-editor/esm/vs/editor/contrib/hover/browser/hover.js'; // Needed for hover
+// Monaco 0.54.0+ renamed hover.js to hoverContribution.js
+import 'monaco-editor/esm/vs/editor/contrib/hover/browser/hoverContribution.js'; // Needed for hover
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/browser/parameterHints.js'; // Needed for signature
 import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/browser/bracketMatching.js'; // Needed for brackets matching highlight
 import 'monaco-editor/esm/vs/editor/contrib/links/browser/links.js'; // Needed for clickable links with Cmd/Ctrl+Click
@@ -65,14 +66,19 @@ const languageThemeResolverDefinitions = new Map<
 >();
 
 declare module 'monaco-editor/esm/vs/editor/editor.api' {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
+  // eslint-disable-next-line @typescript-eslint/no-namespace -- augment monaco editor types
   export namespace editor {
-    // augment monaco editor types
+    /**
+     * @description Registers language theme definition for a language
+     */
     function registerLanguageThemeResolver(
       langId: string,
       languageThemeResolver: CustomLangModuleType['languageThemeResolver'],
       forceOverride?: boolean
     ): void;
+    /**
+     * @description Returns the registered language theme definition for the provided id
+     */
     function getLanguageThemeResolver(
       langId: string
     ): CustomLangModuleType['languageThemeResolver'];
@@ -82,7 +88,7 @@ declare module 'monaco-editor/esm/vs/editor/editor.api' {
 // add custom methods to monaco editor
 Object.defineProperties(monaco.editor, {
   /**
-   * @description Registers language theme definition for a language
+   * @description Registration for implementation of {@link monaco.editor.registerLanguageThemeResolver}
    */
   registerLanguageThemeResolver: {
     value: ((langId, languageThemeDefinition, forceOverride) => {
@@ -95,7 +101,7 @@ Object.defineProperties(monaco.editor, {
     configurable: false,
   },
   /**
-   * @description Returns language theme definition for a language
+   * @description Registration for implementation of {@link monaco.editor.getLanguageThemeResolver}
    */
   getLanguageThemeResolver: {
     value: ((langId) =>

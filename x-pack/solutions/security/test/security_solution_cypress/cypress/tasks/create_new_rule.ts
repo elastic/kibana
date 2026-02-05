@@ -151,6 +151,7 @@ import {
   EMAIL_ACTION_BTN,
   INDEX_SELECTOR,
 } from '../screens/common/rule_actions';
+import { setCodeEditorValue } from './common/monaco';
 import { fillEmailConnectorForm, fillIndexConnectorForm } from './common/rule_actions';
 import { TOAST_ERROR } from '../screens/shared';
 import { ALERTS_TABLE_COUNT } from '../screens/timeline';
@@ -641,8 +642,8 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
 };
 
 const typeEsqlQueryBar = (query: string) => {
-  // eslint-disable-next-line cypress/no-force
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('not.be.disabled').type(query, { force: true });
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('not.be.disabled');
+  return setCodeEditorValue(ESQL_QUERY_BAR, query);
 };
 
 /**

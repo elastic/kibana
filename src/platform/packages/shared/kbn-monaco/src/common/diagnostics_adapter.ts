@@ -68,7 +68,10 @@ export class DiagnosticsAdapter {
           });
           // Every time a new change is made, wait 500ms before validating
           handle = setTimeout(() => {
-            this.validate(model.uri, idx);
+            this.validate(model.uri, idx).catch((e) => {
+              // eslint-disable-next-line no-console
+              console.warn('DiagnosticsAdapter validation failed', e);
+            });
           }, 500);
         });
 
@@ -98,8 +101,16 @@ export class DiagnosticsAdapter {
       return;
     }
 
-    const worker = await this.worker(resource);
-    const errorMarkers = await worker.getSyntaxErrors(resource.toString());
+    let errorMarkers: MonacoEditorError[] | undefined;
+    try {
+      const worker = await this.worker(resource);
+      errorMarkers = await worker.getSyntaxErrors(resource.toString());
+    } catch (e) {
+      // Gracefully handle worker errors by disabling validation
+      // eslint-disable-next-line no-console
+      console.warn('Monaco worker validation failed', e);
+      errorMarkers = [];
+    }
 
     if (idx !== this.validateIdx) {
       return;

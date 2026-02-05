@@ -237,7 +237,16 @@ export function syntheticsAppPageProvider({
     },
 
     async fillCodeEditor(value: string) {
-      await page.fill('[data-test-subj=codeEditorContainer] textarea', value);
+      await page.evaluate((text: string) => {
+        const container = document.querySelector('[data-test-subj="codeEditorContainer"]');
+        const editor = (window as any).MonacoEnvironment?.monaco?.editor
+          ?.getEditors()
+          ?.find((e: any) => container?.contains(e.getDomNode()));
+        if (editor) {
+          editor.focus();
+          editor.getModel()?.setValue(text);
+        }
+      }, value);
     },
 
     async adjustRows() {
