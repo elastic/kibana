@@ -97,6 +97,7 @@ export function InfraTabs() {
         {tabs.map(({ id, name }) => {
           return (
             <EuiTab
+              key={id}
               onClick={() => {
                 push(history, {
                   query: {
