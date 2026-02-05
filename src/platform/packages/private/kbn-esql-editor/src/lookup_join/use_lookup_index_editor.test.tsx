@@ -288,13 +288,14 @@ describe('useLookupIndexCommand', () => {
     );
 
     // Access the private onFlyoutClose function through the openFlyout mechanism
-    const trigger = mockServices.uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID');
-    (trigger.exec as jest.Mock).mockImplementation(async (context) => {
-      await context.onClose({
-        indexName: 'new-index',
-        indexCreatedDuringFlyout: true,
-      });
-    });
+    (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+      async (_, context) => {
+        await context.onClose({
+          indexName: 'new-index',
+          indexCreatedDuringFlyout: true,
+        });
+      }
+    );
 
     // Trigger the command
     const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
@@ -331,13 +332,14 @@ describe('useLookupIndexCommand', () => {
       { wrapper: createWrapper }
     );
 
-    const trigger = mockServices.uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID');
-    (trigger.exec as jest.Mock).mockImplementation(async (context) => {
-      await context.onClose({
-        indexName: 'cursor-index',
-        indexCreatedDuringFlyout: true,
-      });
-    });
+    (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+      async (_, context) => {
+        await context.onClose({
+          indexName: 'cursor-index',
+          indexCreatedDuringFlyout: true,
+        });
+      }
+    );
 
     const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
     const commandHandler = registerCommandCall[1];
@@ -370,15 +372,15 @@ describe('useLookupIndexCommand', () => {
       { wrapper: createWrapper }
     );
 
-    const trigger = mockServices.uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID');
-
     await expect(async () => {
-      (trigger.exec as jest.Mock).mockImplementation(async (context) => {
-        await context.onClose({
-          indexName: 'new-index',
-          indexCreatedDuringFlyout: true,
-        });
-      });
+      (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+        async (_, context) => {
+          await context.onClose({
+            indexName: 'new-index',
+            indexCreatedDuringFlyout: true,
+          });
+        }
+      );
 
       const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
       const commandHandler = registerCommandCall[1];
@@ -404,13 +406,14 @@ describe('useLookupIndexCommand', () => {
       { wrapper: createWrapper }
     );
 
-    const trigger = mockServices.uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID');
-    (trigger.exec as jest.Mock).mockImplementation(async (context) => {
-      await context.onClose({
-        indexName: null,
-        indexCreatedDuringFlyout: false,
-      });
-    });
+    (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+      async (_, context) => {
+        await context.onClose({
+          indexName: null,
+          indexCreatedDuringFlyout: false,
+        });
+      }
+    );
 
     const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
     const commandHandler = registerCommandCall[1];
@@ -461,14 +464,15 @@ describe('useLookupIndexCommand', () => {
     );
 
     // Access the onFlyoutClose function through the openFlyout mechanism
-    const trigger = mockServices.uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID');
-    (trigger.exec as jest.Mock).mockImplementation(async (context) => {
-      await context.onClose({
-        indexName: 'test-index',
-        indexCreatedDuringFlyout: false,
-        indexHasNewFields: true,
-      });
-    });
+    (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+      async (_, context) => {
+        await context.onClose({
+          indexName: 'test-index',
+          indexCreatedDuringFlyout: false,
+          indexHasNewFields: true,
+        });
+      }
+    );
 
     // Trigger the command
     const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
@@ -500,14 +504,15 @@ describe('useLookupIndexCommand', () => {
     );
 
     // Access the onFlyoutClose function through the openFlyout mechanism
-    const trigger = mockServices.uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID');
-    (trigger.exec as jest.Mock).mockImplementation(async (context) => {
-      await context.onClose({
-        indexName: 'test-index',
-        indexCreatedDuringFlyout: false,
-        indexHasNewFields: false,
-      });
-    });
+    (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+      async (_, context) => {
+        await context.onClose({
+          indexName: 'test-index',
+          indexCreatedDuringFlyout: false,
+          indexHasNewFields: false,
+        });
+      }
+    );
 
     // Trigger the command
     const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];

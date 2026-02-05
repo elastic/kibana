@@ -6,7 +6,6 @@
  */
 
 import type { History } from 'history';
-import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '@kbn/discover-plugin/public';
 import type { CoreSetup } from '@kbn/core/public';
 import {
   CELL_VALUE_TRIGGER,
@@ -14,6 +13,7 @@ import {
   SECURITY_CELL_ACTIONS_CASE_EVENTS,
   SECURITY_CELL_ACTIONS_DEFAULT,
   SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';

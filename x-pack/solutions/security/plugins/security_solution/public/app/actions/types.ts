@@ -9,7 +9,7 @@ import type { CellAction, CellActionExecutionContext, CellActionFactory } from '
 import type { RefObject } from 'react';
 import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
 import type { QueryOperator } from '../../../common/types';
-export { EsqlInTimelineTrigger, EsqlInTimelineAction } from './constants';
+export { EsqlInTimelineAction } from './constants';
 export interface AndFilter {
   field: string;
   value: string | string[];

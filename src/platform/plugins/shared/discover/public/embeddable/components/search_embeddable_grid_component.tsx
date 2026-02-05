@@ -26,7 +26,10 @@ import { DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
-import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import {
+  DISCOVER_CELL_ACTIONS_TRIGGER_ID,
+  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { isEsqlMode } from '../initialize_fetch';
@@ -38,7 +41,6 @@ import { useAdditionalCellActions } from '../../context_awareness';
 import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 import { createDataSource } from '../../../common/data_sources';
 import { replaceColumnsWithVariableDriven } from '../utils/replace_columns_with_variable_driven';
-import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '..';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & {

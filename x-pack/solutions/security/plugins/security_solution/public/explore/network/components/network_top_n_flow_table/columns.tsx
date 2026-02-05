@@ -9,11 +9,8 @@ import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import React from 'react';
 
-import {
-  SecurityCellActions,
-  CellActionsMode,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { SecurityCellActions, CellActionsMode } from '../../../../common/components/cell_actions';
 import { CountryFlag } from '../source_destination/country_flag';
 import type {
   AutonomousSystemItem,
@@ -71,7 +68,7 @@ export const getNetworkTopNFlowColumns = (
               mode={CellActionsMode.HOVER_DOWN}
               visibleCellActions={5}
               showActionTooltips
-              triggerId={SecurityCellActionsTrigger.DEFAULT}
+              triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
               data={{
                 value: ip,
                 field: ipAttr,
@@ -86,7 +83,7 @@ export const getNetworkTopNFlowColumns = (
                 mode={CellActionsMode.HOVER_DOWN}
                 visibleCellActions={5}
                 showActionTooltips
-                triggerId={SecurityCellActionsTrigger.DEFAULT}
+                triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
                 data={{
                   value: geo,
                   field: geoAttrName,
