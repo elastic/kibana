@@ -8,39 +8,72 @@
 import { EuiTextTruncate } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { useRiskInputActions } from './use_risk_input_actions';
 import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useSendBulkToTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_send_bulk_to_timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { EntityEventTypes } from '../../../../common/lib/telemetry';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
 export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: () => void) => {
-  const { cases: casesService } = useKibana<{ cases?: CasesPublicStart }>().services;
-  const { addToExistingCase, addToNewCaseClick, addToNewTimeline } = useRiskInputActions(
-    inputs,
-    closePopover
-  );
+  const { cases: casesService, telemetry } = useKibana().services;
+  const { addToExistingCase, addToNewCaseClick } = useRiskInputActions(inputs, closePopover);
+  const { from, to } = useGlobalTime();
+  const {
+    timelinePrivileges: { read: canReadTimelines },
+  } = useUserPrivileges();
   const userCasesPermissions = casesService?.helpers.canUseCases([SECURITY_SOLUTION_OWNER]);
   const hasCasesPermissions = userCasesPermissions?.create && userCasesPermissions?.read;
-  const {
-    timelinePrivileges: { read: canAddToTimeline },
-  } = useUserPrivileges();
+
+  const { sendBulkEventsToTimelineHandler } = useSendBulkToTimeline({
+    to,
+    from,
+    tableId: TableId.riskInputs,
+  });
+  const timelineActions = useMemo(() => {
+    if (!canReadTimelines) {
+      return [];
+    }
+
+    return [
+      {
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewTimeline"
+            defaultMessage="Add to new timeline"
+          />
+        ),
+
+        onClick: () => {
+          telemetry.reportEvent(EntityEventTypes.AddRiskInputToTimelineClicked, {
+            quantity: inputs.length,
+          });
+
+          closePopover();
+          const items = inputs.map(({ input }: InputAlert) => {
+            return {
+              _id: input.id,
+              _index: input.index,
+              data: [],
+              ecs: {
+                _id: input.id,
+                _index: input.index,
+              },
+            };
+          });
+          sendBulkEventsToTimelineHandler(items);
+        },
+      },
+    ];
+  }, [canReadTimelines, inputs, sendBulkEventsToTimelineHandler, closePopover, telemetry]);
 
   return useMemo(() => {
-    const timelinePanel = {
-      name: (
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewTimeline"
-          defaultMessage="Add to new timeline"
-        />
-      ),
-
-      onClick: addToNewTimeline,
-    };
     const ruleName = get(['alert', ALERT_RULE_NAME], inputs[0]) ?? '';
     const title = i18n.translate(
       'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.title',
@@ -73,7 +106,7 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
         ),
         id: 0,
         items: [
-          ...(canAddToTimeline ? [timelinePanel] : []),
+          ...timelineActions,
           ...(hasCasesPermissions
             ? [
                 {
@@ -102,12 +135,5 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
         ],
       },
     ];
-  }, [
-    addToExistingCase,
-    addToNewCaseClick,
-    addToNewTimeline,
-    inputs,
-    hasCasesPermissions,
-    canAddToTimeline,
-  ]);
+  }, [addToExistingCase, addToNewCaseClick, inputs, hasCasesPermissions, timelineActions]);
 };

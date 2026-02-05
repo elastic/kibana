@@ -11,6 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ILicense } from '@kbn/licensing-types';
+import type { DetectionRulesAuthz } from '../../../../../../common/detection_engine/rule_management/authz';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { MlAuthz } from '../../../../machine_learning/authz';
@@ -44,6 +45,7 @@ interface DetectionRulesClientParams {
   rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
   mlAuthz: MlAuthz;
+  rulesAuthz: DetectionRulesAuthz;
   productFeaturesService: ProductFeaturesService;
   license: ILicense;
 }
@@ -52,6 +54,7 @@ export const createDetectionRulesClient = ({
   actionsClient,
   rulesClient,
   mlAuthz,
+  rulesAuthz,
   savedObjectsClient,
   productFeaturesService,
   license,
@@ -128,6 +131,7 @@ export const createDetectionRulesClient = ({
           rulesClient,
           prebuiltRuleAssetClient,
           mlAuthz,
+          rulesAuthz,
           rulePatch,
         });
       });

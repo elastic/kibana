@@ -6,12 +6,12 @@
  */
 
 import {
-  rulesRead,
-  rulesReadNoIndices,
-  rulesReadNoDetectionIndices,
-  rulesReadNoAttackIndices,
+  alertsRead,
+  alertsReadNoIndices,
+  alertsReadNoDetectionIndices,
+  alertsReadNoAttackIndices,
   attackDiscoveryOnlyAll,
-  rulesReadAndAttackDiscoveryAll,
+  alertsReadAndAttackDiscoveryAll,
   noKibanaPrivileges as noKibanaPrivilegesRole,
 } from './roles';
 import type { User } from './types';
@@ -28,28 +28,28 @@ export const noKibanaPrivileges: User = {
   roles: [noKibanaPrivilegesRole.name],
 };
 
-export const rulesReadUser: User = {
-  username: 'rules_read_all_spaces',
-  password: 'rules_read_all_spaces',
-  roles: [rulesRead.name],
+export const alertsReadUser: User = {
+  username: 'alerts_read_all_spaces',
+  password: 'alerts_read_all_spaces',
+  roles: [alertsRead.name],
 };
 
-export const rulesReadNoIndicesUser: User = {
-  username: 'rules_read_all_spaces_no_indices',
-  password: 'rules_read_all_spaces_no_indices',
-  roles: [rulesReadNoIndices.name],
+export const alertsReadNoIndicesUser: User = {
+  username: 'alerts_read_all_spaces_no_indices',
+  password: 'alerts_read_all_spaces_no_indices',
+  roles: [alertsReadNoIndices.name],
 };
 
-export const rulesReadNoDetectionIndicesUser: User = {
-  username: 'rules_read_all_spaces_no_detection_indices',
-  password: 'rules_read_all_spaces_no_detection_indices',
-  roles: [rulesReadNoDetectionIndices.name],
+export const alertsReadNoDetectionIndicesUser: User = {
+  username: 'alerts_read_all_spaces_no_detection_indices',
+  password: 'alerts_read_all_spaces_no_detection_indices',
+  roles: [alertsReadNoDetectionIndices.name],
 };
 
-export const rulesReadNoAttackIndicesUser: User = {
-  username: 'rules_read_all_spaces_no_attack_indices',
-  password: 'rules_read_all_spaces_no_attack_indices',
-  roles: [rulesReadNoAttackIndices.name],
+export const alertsReadNoAttackIndicesUser: User = {
+  username: 'alerts_read_all_spaces_no_attack_indices',
+  password: 'alerts_read_all_spaces_no_attack_indices',
+  roles: [alertsReadNoAttackIndices.name],
 };
 
 export const attackDiscoveryOnly: User = {
@@ -58,19 +58,19 @@ export const attackDiscoveryOnly: User = {
   roles: [attackDiscoveryOnlyAll.name],
 };
 
-export const rulesReadAndAttackDiscoveryAllUser: User = {
-  username: 'rules_read_and_attack_discovery_all_spaces',
-  password: 'rules_read_and_attack_discovery_all_spaces',
-  roles: [rulesReadAndAttackDiscoveryAll.name],
+export const alertsReadAndAttackDiscoveryAllUser: User = {
+  username: 'alerts_read_and_attack_discovery_all_spaces',
+  password: 'alerts_read_and_attack_discovery_all_spaces',
+  roles: [alertsReadAndAttackDiscoveryAll.name],
 };
 
 export const allUsers = [
   superUser,
   noKibanaPrivileges,
-  rulesReadUser,
-  rulesReadNoIndicesUser,
-  rulesReadNoDetectionIndicesUser,
-  rulesReadNoAttackIndicesUser,
+  alertsReadUser,
+  alertsReadNoIndicesUser,
+  alertsReadNoDetectionIndicesUser,
+  alertsReadNoAttackIndicesUser,
   attackDiscoveryOnly,
-  rulesReadAndAttackDiscoveryAllUser,
+  alertsReadAndAttackDiscoveryAllUser,
 ];

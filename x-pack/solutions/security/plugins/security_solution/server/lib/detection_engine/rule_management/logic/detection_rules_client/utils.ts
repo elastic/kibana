@@ -15,12 +15,14 @@ import type { ValidReadAuthEditFields } from '@kbn/alerting-plugin/common/consta
 import { validFields } from '@kbn/alerting-plugin/common/constants';
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
 
+import type { DetectionRulesAuthz } from '../../../../../../common/detection_engine/rule_management/authz';
 import { convertObjectKeysToCamelCase } from '../../../../../utils/object_case_converters';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import type {
+  ReadAuthRulePatchProps,
   ReadAuthRulePatchWithRuleSource,
   RuleResponse,
 } from '../../../../../../common/api/detection_engine';
@@ -46,6 +48,33 @@ export const toggleRuleEnabledOnUpdate = async (
 
 export const validateMlAuth = async (mlAuthz: MlAuthz, ruleType: Type) => {
   throwAuthzError(await mlAuthz.validateRuleType(ruleType));
+};
+
+export const validateFieldWritePermissions = (
+  rulePatch: ReadAuthRulePatchProps,
+  rulesAuthz: DetectionRulesAuthz
+) => {
+  const errors = [];
+  if (rulePatch.exceptions_list != null && !rulesAuthz.canEditExceptions) {
+    errors.push('exceptions_list');
+  }
+
+  if (rulePatch.investigation_fields != null && !rulesAuthz.canEditCustomHighlightedFields) {
+    errors.push('investigation_fields');
+  }
+
+  if (rulePatch.note != null && !rulesAuthz.canEditInvestigationGuides) {
+    errors.push('note');
+  }
+
+  if (errors.length > 0) {
+    throw new ClientError(
+      `The current user does not have the permissions to edit the following fields: ${errors.join(
+        ','
+      )}`,
+      403
+    );
+  }
 };
 
 export class ClientError extends Error {
@@ -141,6 +170,16 @@ export const getReadAuthFieldValue = (
     case validFields.EXCEPTIONS_LIST:
       if (rulePatch.exceptions_list != null) {
         return rulePatch.exceptions_list;
+      }
+
+    case validFields.NOTE:
+      if (rulePatch.note != null) {
+        return rulePatch.note;
+      }
+
+    case validFields.INVESTIGATION_FIELDS:
+      if (rulePatch.investigation_fields != null) {
+        return rulePatch.investigation_fields;
       }
 
     case validFields.RULE_SOURCE:

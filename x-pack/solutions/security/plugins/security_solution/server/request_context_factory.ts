@@ -44,6 +44,7 @@ import { getApiKeyManager as getApiKeyManagerEntityStore } from './lib/entity_an
 import { monitoringEntitySourceType } from './lib/entity_analytics/privilege_monitoring/saved_objects';
 import { getSiemMigrationClients } from './lib/siem_migrations';
 import { EntityStoreCrudClient } from './lib/entity_analytics/entity_store/entity_store_crud_client';
+import { calculateRulesAuthz } from './lib/detection_engine/rule_management/authz';
 
 export interface IRequestContextFactory {
   create(
@@ -167,6 +168,18 @@ export class RequestContextFactory implements IRequestContextFactory {
       });
     });
 
+    const mlAuthz = buildMlAuthz({
+      license: licensing.license,
+      ml: plugins.ml,
+      request,
+      savedObjectsClient: coreContext.savedObjects.client,
+    });
+
+    const rulesAuthz = await calculateRulesAuthz({
+      coreStart,
+      request,
+    });
+
     // List of endpoint authz for the current request's user. Will be initialized the first
     // time it is requested (see `getEndpointAuthz()` below)
     let endpointAuthz: Immutable<EndpointAuthz>;
@@ -216,18 +229,12 @@ export class RequestContextFactory implements IRequestContextFactory {
       getProductFeatureService: () => productFeaturesService,
 
       getDetectionRulesClient: memoize(() => {
-        const mlAuthz = buildMlAuthz({
-          license: licensing.license,
-          ml: plugins.ml,
-          request,
-          savedObjectsClient: coreContext.savedObjects.client,
-        });
-
         return createDetectionRulesClient({
           rulesClient,
           actionsClient,
           savedObjectsClient: coreContext.savedObjects.client,
           mlAuthz,
+          rulesAuthz,
           productFeaturesService,
           license: licensing.license,
         });
@@ -359,12 +366,10 @@ export class RequestContextFactory implements IRequestContextFactory {
           })
       ),
       getMlAuthz: memoize(() => {
-        return buildMlAuthz({
-          license: licensing.license,
-          ml: plugins.ml,
-          request,
-          savedObjectsClient: coreContext.savedObjects.client,
-        });
+        return mlAuthz;
+      }),
+      getRulesAuthz: memoize(() => {
+        return rulesAuthz;
       }),
     };
   }

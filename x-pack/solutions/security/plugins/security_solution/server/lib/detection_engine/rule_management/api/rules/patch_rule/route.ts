@@ -9,9 +9,10 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
+  CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
   EXCEPTIONS_API_ALL,
+  INVESTIGATION_GUIDE_API_EDIT,
   RULES_API_ALL,
-  RULES_API_READ,
 } from '@kbn/security-solution-features/constants';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
@@ -35,7 +36,12 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
         authz: {
           requiredPrivileges: [
             {
-              anyRequired: [RULES_API_ALL, { allOf: [RULES_API_READ, EXCEPTIONS_API_ALL] }],
+              anyRequired: [
+                RULES_API_ALL,
+                EXCEPTIONS_API_ALL,
+                CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
+                INVESTIGATION_GUIDE_API_EDIT,
+              ],
             },
           ],
         },
