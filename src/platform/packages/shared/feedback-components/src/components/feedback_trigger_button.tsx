@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon, EuiToolTip, EuiModal } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
+import { FeedbackContainer } from './feedback_container';
 import type { FeedbackFormData } from '../types';
-
-const LazyFeedbackContainer = lazy(() =>
-  import('./feedback_container').then((m) => ({ default: m.FeedbackContainer }))
-);
 
 interface Props {
   getQuestions: (appId: string) => FeedbackRegistryEntry[];
@@ -98,16 +95,14 @@ export const FeedbackTriggerButton = ({
           })}
           css={modalCss}
         >
-          <Suspense fallback={null}>
-            <LazyFeedbackContainer
-              getAppDetails={getAppDetails}
-              getQuestions={getQuestions}
-              getCurrentUserEmail={getCurrentUserEmail}
-              sendFeedback={sendFeedback}
-              showToast={showToast}
-              hideFeedbackContainer={handleHideFeedbackContainer}
-            />
-          </Suspense>
+          <FeedbackContainer
+            getAppDetails={getAppDetails}
+            getQuestions={getQuestions}
+            getCurrentUserEmail={getCurrentUserEmail}
+            sendFeedback={sendFeedback}
+            showToast={showToast}
+            hideFeedbackContainer={handleHideFeedbackContainer}
+          />
         </EuiModal>
       )}
     </>
