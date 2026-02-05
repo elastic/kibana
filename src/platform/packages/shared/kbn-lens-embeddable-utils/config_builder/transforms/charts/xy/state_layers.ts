@@ -118,7 +118,7 @@ function buildAnnotationLayer(
           outside: annotation.fill === 'outside',
           color: annotation.color?.color,
           label: annotation.label ?? 'Event',
-          ...(annotation.hidden != null ? { hidden: annotation.hidden } : {}),
+          ...(annotation.hidden != null ? { isHidden: annotation.hidden } : {}),
         };
       }
       if (annotation.type === 'point') {
@@ -131,8 +131,13 @@ function buildAnnotationLayer(
           },
           color: annotation.color?.color,
           label: annotation.label ?? 'Event',
-          ...(annotation.hidden != null ? { hidden: annotation.hidden } : {}),
+          ...(annotation.hidden != null ? { isHidden: annotation.hidden } : {}),
           ...(annotation.text != null ? { textVisibility: annotation.text === 'label' } : {}),
+          ...(annotation.icon ? { icon: annotation.icon } : {}),
+          ...(annotation.line?.stroke_width != null
+            ? { lineWidth: annotation.line.stroke_width }
+            : {}),
+          ...(annotation.line?.stroke_dash ? { lineStyle: annotation.line.stroke_dash } : {}),
         };
       }
       return {
@@ -141,13 +146,18 @@ function buildAnnotationLayer(
         filter: { type: 'kibana_query', ...annotation.query },
         label: annotation.label ?? 'Event',
         color: annotation.color?.color,
-        ...(annotation.hidden != null ? { hidden: annotation.hidden } : {}),
+        ...(annotation.hidden != null ? { isHidden: annotation.hidden } : {}),
         timeField: annotation.time_field,
         ...(annotation.extra_fields ? { extraFields: annotation.extra_fields } : {}),
         ...(annotation.text != null ? { textVisibility: annotation.text === 'label' } : {}),
         ...(typeof annotation.text !== 'string' && annotation.text?.type === 'field'
           ? { textField: annotation.text.field }
           : {}),
+        ...(annotation.icon ? { icon: annotation.icon } : {}),
+        ...(annotation.line?.stroke_width != null
+          ? { lineWidth: annotation.line.stroke_width }
+          : {}),
+        ...(annotation.line?.stroke_dash ? { lineStyle: annotation.line.stroke_dash } : {}),
         key: {
           type: 'point_in_time',
         },

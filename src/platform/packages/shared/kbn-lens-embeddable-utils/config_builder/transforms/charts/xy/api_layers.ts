@@ -412,6 +412,20 @@ export function buildAPIAnnotationsLayer(
           color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
           ...(annotation.isHidden != null ? { hidden: annotation.isHidden } : {}),
           ...getTextConfigurationForQueryAnnotation(annotation),
+          ...('icon' in annotation && annotation.icon ? { icon: annotation.icon } : {}),
+          ...(('lineWidth' in annotation && annotation.lineWidth) ||
+          ('lineStyle' in annotation && annotation.lineStyle)
+            ? {
+                line: {
+                  stroke_width:
+                    'lineWidth' in annotation && annotation.lineWidth ? annotation.lineWidth : 1,
+                  stroke_dash:
+                    'lineStyle' in annotation && annotation.lineStyle
+                      ? annotation.lineStyle
+                      : 'solid',
+                },
+              }
+            : {}),
         };
       }
       if (annotation.key.type === 'range') {
@@ -438,6 +452,20 @@ export function buildAPIAnnotationsLayer(
             }
           : {}),
         ...('label' in annotation && annotation.label ? { label: annotation.label } : {}),
+        ...('icon' in annotation && annotation.icon ? { icon: annotation.icon } : {}),
+        ...(('lineWidth' in annotation && annotation.lineWidth) ||
+        ('lineStyle' in annotation && annotation.lineStyle)
+          ? {
+              line: {
+                stroke_width:
+                  'lineWidth' in annotation && annotation.lineWidth ? annotation.lineWidth : 1,
+                stroke_dash:
+                  'lineStyle' in annotation && annotation.lineStyle
+                    ? annotation.lineStyle
+                    : 'solid',
+              },
+            }
+          : {}),
       };
     }),
   };
