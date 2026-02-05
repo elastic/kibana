@@ -74,9 +74,9 @@ export const createIlmPhasesFlyoutDeserializer = () => {
         delete: {
           enabled: Boolean(phases.delete),
           deleteSearchableSnapshotEnabled: phases.delete
-            ? (phases.delete as any)?.delete_searchable_snapshot == null
+            ? phases.delete?.delete_searchable_snapshot == null
               ? true
-              : Boolean((phases.delete as any)?.delete_searchable_snapshot)
+              : Boolean(phases.delete?.delete_searchable_snapshot)
             : true,
           ...withMillis(phases.delete?.min_age),
         },
