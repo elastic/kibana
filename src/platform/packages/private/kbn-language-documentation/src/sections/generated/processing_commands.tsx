@@ -101,7 +101,7 @@ The \`COMPLETION\` processing command uses a machine learning model to generate 
 **Syntax**
 
 \`\`\` esql
-COMPLETION [column =] prompt WITH { "inference_id" : "my_inference_endpoint" }
+COMPLETION [column =] prompt WITH '{ "inference_id" : "my_inference_endpoint" }'
 \`\`\`
 
 **Parameters**
@@ -127,7 +127,7 @@ The following is a basic example with an inline prompt:
 
 \`\`\` esql
 ROW question = "What is Elasticsearch?"
-| COMPLETION answer = question WITH { "inference_id" : "my_inference_endpoint" }
+| COMPLETION answer = question WITH '{ "inference_id" : "my_inference_endpoint" }'
 | KEEP question, answer
 \`\`\`
 
@@ -147,7 +147,7 @@ FROM movies
    "Synopsis: ", synopsis, "\\n",
    "Actors: ", MV_CONCAT(actors, ", "), "\\n",
   )
-| COMPLETION summary = prompt WITH { "inference_id" : "my_inference_endpoint" }
+| COMPLETION summary = prompt WITH '{ "inference_id" : "my_inference_endpoint" }'
 | KEEP title, summary, rating
 \`\`\`
 
