@@ -7,7 +7,7 @@
 
 /* eslint-disable playwright/expect-expect */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 
