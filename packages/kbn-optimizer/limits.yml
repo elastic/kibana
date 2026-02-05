@@ -21,17 +21,17 @@ pageLoadAssetSize:
   cloudExperiments: 103984
   cloudFullStory: 4752
   cloudLinks: 36333
-  cloudSecurityPosture: 19745
+  cloudSecurityPosture: 19743
   console: 31191
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10786
-  core: 558848
+  core: 556473
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
-  dashboardEnhanced: 12159
+  dashboardEnhanced: 11961
   dashboardMarkdown: 4994
   data: 500179
   dataQuality: 11469
@@ -44,8 +44,8 @@ pageLoadAssetSize:
   dataViews: 65000
   dataVisualizer: 32797
   developerToolbar: 4467
-  devTools: 8109
-  discover: 28617
+  devTools: 8107
+  discover: 28284
   discoverEnhanced: 5660
   discoverShared: 2322
   elasticAssistant: 338870
@@ -53,9 +53,9 @@ pageLoadAssetSize:
   embeddable: 18432
   embeddableAlertsTable: 6524
   embeddableEnhanced: 7912
-  enterpriseSearch: 40244
+  enterpriseSearch: 40158
   entityStore: 1755
-  esql: 18224
+  esql: 19247
   esqlDataGrid: 10209
   esUiShared: 101220
   eventAnnotation: 22361
@@ -82,7 +82,7 @@ pageLoadAssetSize:
   globalSearchProviders: 4646
   graph: 9924
   grokdebugger: 5484
-  home: 13560
+  home: 13091
   imageEmbeddable: 6000
   indexLifecycleManagement: 29818
   indexManagement: 35522
@@ -149,7 +149,7 @@ pageLoadAssetSize:
   screenshotMode: 2351
   screenshotting: 3252
   searchAssistant: 6150
-  searchGettingStarted: 6682
+  searchGettingStarted: 6659
   searchHomepage: 7962
   searchIndices: 9991
   searchInferenceEndpoints: 8071
@@ -209,4 +209,4 @@ pageLoadAssetSize:
   watcher: 10485
   workflowsExtensions: 76765
   workflowsManagement: 8497
-  workplaceAIApp: 65731
+  workplaceAIApp: 65529

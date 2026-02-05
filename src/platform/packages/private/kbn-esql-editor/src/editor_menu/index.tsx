@@ -6,33 +6,24 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
+import React, { Suspense } from 'react';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { useEsqlEditorActions } from '../editor_actions_context';
 import { searchPlaceholder } from '../editor_visor';
-import { HelpPopover } from './help_popover';
 import { MagnifyGradientIcon } from './magnify_gradient_icon';
+import {
+  addStarredQueryLabel,
+  helpLabel,
+  hideHistoryLabel,
+  removeStarredQueryLabel,
+  showHistoryLabel,
+} from './menu_i18n';
 
-const showHistoryLabel = i18n.translate('esqlEditor.query.showQueriesLabel', {
-  defaultMessage: 'Show recent queries',
+const LazyHelpPopover = React.lazy(async () => {
+  const module = await import('./help_popover');
+  return { default: module.HelpPopover };
 });
-
-const hideHistoryLabel = i18n.translate('esqlEditor.query.hideQueriesLabel', {
-  defaultMessage: 'Hide recent queries',
-});
-
-const addStarredQueryLabel = i18n.translate('esqlEditor.query.querieshistory.addFavoriteTitle', {
-  defaultMessage: 'Add ES|QL query to Starred',
-});
-
-const removeStarredQueryLabel = i18n.translate(
-  'esqlEditor.query.querieshistory.removeFavoriteTitle',
-  {
-    defaultMessage: 'Remove ES|QL query from Starred',
-  }
-);
 
 export function ESQLMenu({ hideHistory }: { hideHistory?: boolean } = {}) {
   const editorActions = useEsqlEditorActions();
@@ -102,7 +93,22 @@ export function ESQLMenu({ hideHistory }: { hideHistory?: boolean } = {}) {
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <HelpPopover />
+        <Suspense
+          fallback={
+            <EuiToolTip position="top" content={helpLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="question"
+                size="xs"
+                aria-label={helpLabel}
+                data-test-subj="esql-help-popover-button"
+                color="text"
+                isDisabled
+              />
+            </EuiToolTip>
+          }
+        >
+          <LazyHelpPopover />
+        </Suspense>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -33,10 +33,7 @@ import { prettifyQueryTemplate } from '@kbn/esql-language/src/commands/registry/
 import { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import type { ESQLEditorDeps } from '../types';
 import { useEsqlEditorActions } from '../editor_actions_context';
-
-const esqlHelpLabel = i18n.translate('esqlEditor.menu.helpLabel', {
-  defaultMessage: 'ES|QL help',
-});
+import { helpLabel } from './menu_i18n';
 
 export const HelpPopover: React.FC = () => {
   const kibana = useKibana<ESQLEditorDeps>();
@@ -312,14 +309,14 @@ export const HelpPopover: React.FC = () => {
     <>
       <EuiPopover
         button={
-          <EuiToolTip position="top" content={esqlHelpLabel} disableScreenReaderOutput>
+          <EuiToolTip position="top" content={helpLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               color="text"
               onClick={() => setIsESQLMenuPopoverOpen(!isESQLMenuPopoverOpen)}
               data-test-subj="esql-help-popover-button"
               size="xs"
               iconType="question"
-              aria-label={esqlHelpLabel}
+              aria-label={helpLabel}
             />
           </EuiToolTip>
         }
