@@ -10,6 +10,7 @@ import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { getConversationAttachmentsSystemMessages } from '../../utils/attachment_presentation';
+import { convertPreviousRounds } from '../../utils/to_langchain_messages';
 import { attachmentTypeInstructions } from './utils/attachments';
 import { customInstructionsBlock, structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
@@ -28,8 +29,15 @@ type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntim
 export const getResearchAgentPrompt = async (
   params: ResearchAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const { initialMessages, actions } = params;
+  const { actions, processedConversation, resultTransformer } = params;
   const clearSystemMessage = params.configuration.research.replace_default_instructions;
+
+  // Generate messages from the conversation's rounds
+  const previousRoundsAsMessages = await convertPreviousRounds({
+    conversation: processedConversation,
+    resultTransformer,
+  });
+
   return [
     [
       'system',
@@ -40,7 +48,7 @@ export const getResearchAgentPrompt = async (
     ...getConversationAttachmentsSystemMessages(
       params.processedConversation.versionedAttachmentPresentation
     ),
-    ...initialMessages,
+    ...previousRoundsAsMessages,
     ...formatResearcherActionHistory({ actions }),
   ];
 };
