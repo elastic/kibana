@@ -41,18 +41,22 @@ import {
   assertAccessErrorToast,
   assertGenericConversationErrorToast,
 } from '../../tasks/assistant';
-import { deleteConversations, waitForConversation } from '../../tasks/api_calls/assistant';
+import {
+  deleteConversations,
+  waitForConversation,
+  waitForUserProfile,
+} from '../../tasks/api_calls/assistant';
 import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
-import { login, loginWithUser } from '../../tasks/login';
+import { login } from '../../tasks/login';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 const userRole: MessageRole = 'user';
 const assistantRole: MessageRole = 'assistant';
 // TODO: Skipped due to https://github.com/elastic/kibana/issues/235416
 describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, () => {
   const isServerless = Cypress.env(IS_SERVERLESS);
-  const primaryUser = isServerless ? 'elastic_admin' : 'system_indices_superuser';
-  const secondaryUser = isServerless ? 'elastic_serverless' : 'elastic';
+  const primaryUser = isServerless ? 'platform_engineer' : 'system_indices_superuser';
+  const secondaryUser = isServerless ? 't2_analyst' : 'elastic';
   const mockConvo1 = {
     id: 'spooky',
     title: 'Spooky convo',
@@ -92,7 +96,18 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
     ],
   };
   before(() => {
-    loginSecondaryUser(isServerless, secondaryUser);
+    // Login as secondary user to ensure their profile is created/seeded in the system
+    login(secondaryUser);
+    // Visit a page to ensure the user profile is properly initialized
+    visitGetStartedPage();
+
+    // Wait for the user profile to be available for sharing functionality
+    waitForUserProfile(secondaryUser).then((profileExists) => {
+      if (!profileExists) {
+        cy.log(`Warning: User profile for ${secondaryUser} may not be properly seeded`);
+      }
+    });
+
     cy.clearCookies();
   });
   beforeEach(() => {
@@ -177,8 +192,8 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
     // First logout admin user
     cy.clearCookies();
 
-    // Login as elastic user who should have access to shared conversations
-    loginSecondaryUser(isServerless, secondaryUser);
+    // Login as secondary user who should have access to shared conversations
+    login(secondaryUser);
     visitGetStartedPage();
     openAssistant();
 
@@ -211,7 +226,7 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
     ]);
     cy.clearCookies();
 
-    loginSecondaryUser(isServerless, secondaryUser);
+    login(secondaryUser);
     visitGetStartedPage();
     openAssistant();
 
@@ -235,7 +250,7 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
 
     cy.clearCookies();
 
-    loginSecondaryUser(isServerless, secondaryUser);
+    login(secondaryUser);
     visitGetStartedPage();
     openAssistant();
 
@@ -260,8 +275,8 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
 
     cy.clearCookies();
 
-    // Login as elastic user who should have access to shared conversations
-    loginSecondaryUser(isServerless, secondaryUser);
+    // Login as secondary user who should have access to shared conversations
+    login(secondaryUser);
     visitGetStartedPage();
     openAssistant();
 
@@ -303,8 +318,8 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
   it('Visiting a URL with the assistant param shows access error when user does not have access to the conversation', () => {
     cy.clearCookies();
 
-    // Login as elastic user who should have access to shared conversations
-    loginSecondaryUser(isServerless, secondaryUser);
+    // Login as secondary user who should have access to shared conversations
+    login(secondaryUser);
 
     cy.location('origin').then((origin) => {
       visit(`${origin}/app/security/get_started?assistant=${mockConvo1.id}`);
@@ -318,11 +333,3 @@ describe.skip('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] 
     assertGenericConversationErrorToast();
   });
 });
-
-const loginSecondaryUser = (isServerless: boolean, username: string) => {
-  if (isServerless) {
-    loginWithUser({ username, password: 'changeme' });
-  } else {
-    login(username);
-  }
-};

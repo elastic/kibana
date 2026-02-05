@@ -11,10 +11,11 @@ import type {
   PerformPromptsBulkActionResponse,
   PromptCreateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { deleteAllDocuments } from './elasticsearch';
 import { getMockConversation, getMockCreatePrompt } from '../../objects/assistant';
 import { getSpaceUrl } from '../space';
-import { rootRequest, waitForRootRequest } from './common';
+import { rootRequest, waitForRootRequest, API_HEADERS } from './common';
 
 const createConversation = (
   body?: Partial<ConversationCreateProps>
@@ -58,4 +59,60 @@ export const waitForCreatePrompts = (prompts: Array<Partial<PromptCreateProps>>)
   return waitForRootRequest<PerformPromptsBulkActionResponse>(
     bulkPrompts({ create: prompts.map((prompt) => getMockCreatePrompt(prompt)) })
   );
+};
+
+/**
+ * Verify that a user profile exists and is searchable
+ * This ensures the user profile is seeded properly for sharing functionality
+ */
+export const verifyUserProfileExists = (username: string): Cypress.Chainable<boolean> => {
+  cy.log(`Verifying user profile exists for: ${username}`);
+
+  return cy.currentSpace().then((spaceId) => {
+    return rootRequest<{ users: Array<{ uid: string; user: { username: string } }> }>({
+      method: 'POST',
+      url: spaceId
+        ? getSpaceUrl(spaceId, `internal/elastic_assistant/users/_suggest`)
+        : `internal/elastic_assistant/users/_suggest`,
+      body: { searchTerm: username, size: 10 },
+      headers: {
+        ...API_HEADERS,
+        [ELASTIC_HTTP_VERSION_HEADER]: ['1'], // Override version for elastic assistant internal API
+      },
+    }).then((response) => {
+      const users = response.body.users || [];
+      const userExists = users.some((user) => user.user.username === username);
+      cy.log(`User profile exists for ${username}: ${userExists}`);
+      return userExists;
+    });
+  });
+};
+
+/**
+ * Wait for user profile to exist with retry logic
+ */
+export const waitForUserProfile = (
+  username: string,
+  maxRetries: number = 10
+): Cypress.Chainable<boolean> => {
+  cy.log(`Waiting for user profile: ${username}`);
+
+  const checkUserProfile = (attempt: number): Cypress.Chainable<boolean> => {
+    if (attempt > maxRetries) {
+      cy.log(`Failed to find user profile for ${username} after ${maxRetries} attempts`);
+      return cy.wrap(false);
+    }
+
+    return verifyUserProfileExists(username).then((exists) => {
+      if (exists) {
+        cy.log(`User profile found for ${username} on attempt ${attempt}`);
+        return cy.wrap(true);
+      } else {
+        cy.log(`User profile not found for ${username}, attempt ${attempt}/${maxRetries}`);
+        return checkUserProfile(attempt + 1);
+      }
+    });
+  };
+
+  return checkUserProfile(1);
 };
