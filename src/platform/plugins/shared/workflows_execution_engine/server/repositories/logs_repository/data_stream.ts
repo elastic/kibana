@@ -17,7 +17,7 @@ import { WORKFLOWS_EXECUTION_LOGS_DATA_STREAM } from './constants';
 export const initializeLogsRepositoryDataStream = (coreDataStreams: DataStreamsSetup) => {
   return coreDataStreams.registerDataStream({
     name: WORKFLOWS_EXECUTION_LOGS_DATA_STREAM,
-    version: 1,
+    version: 2,
     template: {
       mappings: logsRepositoryMappings,
     },
