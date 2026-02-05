@@ -17,7 +17,8 @@ const ExternalTriggerEventSchema = z.object({
 
 export const externalTriggerDefinition: TriggerDefinition<typeof ExternalTriggerEventSchema> = {
   id: 'example.external_trigger',
-  description: 'Emitted when an external event occurs. Used by the workflows extensions example plugin.',
+  description:
+    'Emitted when an external event occurs. Used by the workflows extensions example plugin.',
   eventSchema: ExternalTriggerEventSchema,
   examples: [
     { message: 'Hello from the example plugin' },

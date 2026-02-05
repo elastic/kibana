@@ -9,8 +9,8 @@
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { TriggerDefinition } from '../common';
 import type { ServerStepDefinition } from './step_registry/types';
+import type { TriggerDefinition } from '../common';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
 
 /**

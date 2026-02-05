@@ -106,10 +106,7 @@ describe('TriggerRegistry', () => {
 
     it('validates all examples against eventSchema', () => {
       const def = createValidDefinition({
-        examples: [
-          { caseId: '1', status: 'open', updatedBy: 'u' },
-          { wrong: 'field' },
-        ],
+        examples: [{ caseId: '1', status: 'open', updatedBy: 'u' }, { wrong: 'field' }],
       });
       expect(() => registry.register(def)).toThrow('example at index 1');
     });
@@ -123,7 +120,9 @@ describe('TriggerRegistry', () => {
     it('throws if examples is not an array', () => {
       expect(() => {
         registry.register(
-          createValidDefinition({ examples: 'not-array' as unknown as TriggerDefinition['examples'] })
+          createValidDefinition({
+            examples: 'not-array' as unknown as TriggerDefinition['examples'],
+          })
         );
       }).toThrow('"examples" must be an array');
     });

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import stringify from 'json-stable-stringify';
 import { createHash } from 'node:crypto';
 import type { IRouter } from '@kbn/core/server';
-import stringify from 'json-stable-stringify';
 import { z } from '@kbn/zod/v4';
 import type { TriggerRegistry } from '../trigger_registry';
 
@@ -53,8 +53,7 @@ export function registerGetTriggerDefinitionsRoute(
       security: {
         authz: {
           enabled: false,
-          reason:
-            'This route is used for testing purposes only. No sensitive data is exposed.',
+          reason: 'This route is used for testing purposes only. No sensitive data is exposed.',
         },
       },
       validate: false,
