@@ -231,6 +231,7 @@ for (const testSuite of testSuites) {
       command: `.buildkite/scripts/steps/test/scout_flaky_configs.sh`,
       env: {
         SCOUT_CONFIG: testSuite.scoutConfig,
+        SCOUT_REPORTER_ENABLED: 'true',
         SCOUT_SERVER_RUN_FLAGS: serverRunFlags.join('\n'),
       },
       key: `${TestSuiteType.SCOUT}-${suiteIndex++}`,
