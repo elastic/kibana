@@ -13,40 +13,64 @@ import {
   EuiSkeletonText,
   EuiSkeletonLoading,
   EuiSkeletonTitle,
+  EuiCodeBlock,
 } from '@elastic/eui';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
+import { useSpaceRulesHealth } from '../../../health/logic/use_space_rules_health';
 
 export const DetectionEngineSpaceRulesHealthPage = memo(
   function DetectionEngineSpaceRulesHealthPage(): JSX.Element {
+    const spaceRulesHealth = useSpaceRulesHealth({});
+    const isLoading = spaceRulesHealth.isLoading || spaceRulesHealth.isFetching;
+
+    const skeleton = useMemo(
+      () => (
+        <>
+          <EuiSpacer size="m" />
+          <EuiSkeletonText lines={2} />
+          <EuiSpacer size="m" />
+          <EuiSkeletonText lines={4} />
+          <EuiSpacer size="m" />
+          <EuiSkeletonText lines={3} />
+          <EuiSpacer size="m" />
+          <EuiSkeletonLoading
+            isLoading
+            loadingContent={
+              <>
+                <EuiSkeletonTitle />
+                <EuiSkeletonText />
+              </>
+            }
+            loadedContent={null}
+          />
+        </>
+      ),
+      []
+    );
+    const data = useMemo(
+      () => (
+        <>
+          <EuiCodeBlock language="json" fontSize="m" paddingSize="m">
+            {JSON.stringify(spaceRulesHealth.data, null, 2)}
+          </EuiCodeBlock>
+        </>
+      ),
+      [spaceRulesHealth.data]
+    );
+
     return (
       <>
         <SecuritySolutionPageWrapper>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              <EuiSpacer size="m" />
               <EuiTitle size="s">
                 <h3>{'Detection Engine Health'}</h3>
               </EuiTitle>
               <EuiSpacer size="m" />
-              <EuiSkeletonText lines={2} />
-              <EuiSpacer size="m" />
-              <EuiSkeletonText lines={4} />
-              <EuiSpacer size="m" />
-              <EuiSkeletonText lines={3} />
-              <EuiSpacer size="m" />
-              <EuiSkeletonLoading
-                isLoading
-                loadingContent={
-                  <>
-                    <EuiSkeletonTitle />
-                    <EuiSkeletonText />
-                  </>
-                }
-                loadedContent={null}
-              />
+              {isLoading ? skeleton : data}
             </EuiFlexItem>
           </EuiFlexGroup>
         </SecuritySolutionPageWrapper>
