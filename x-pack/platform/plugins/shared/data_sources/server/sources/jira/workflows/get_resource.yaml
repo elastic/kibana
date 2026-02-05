@@ -1,0 +1,31 @@
+version: '1'
+name: 'sources.jira.get_resource'
+description: 'Get a Jira issue or project by ID/key'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: resourceType
+    type: choice
+    options:
+      - 'issue'
+      - 'project'
+  - name: id
+    type: string
+steps:
+  - name: route-by-type
+    type: if
+    condition: "${{ inputs.resourceType == 'issue' }}"
+    steps:
+      - name: get-issue
+        type: jira-cloud.getIssue
+        connector-id: <%= stackConnectorId %>
+        with:
+          issueId: "${{ inputs.id }}"
+    else:
+      - name: get-project
+        type: jira-cloud.getProject
+        connector-id: <%= stackConnectorId %>
+        with:
+          projectId: "${{ inputs.id }}"
