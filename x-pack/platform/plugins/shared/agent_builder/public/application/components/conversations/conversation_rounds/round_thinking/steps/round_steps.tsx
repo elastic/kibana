@@ -36,20 +36,13 @@ const labels = {
   }),
 };
 
-// TODO: fix logic
-
 // Exposed in main thinking chain, for now query and esql results
 const mainThinkingResultTypes: string[] = [
   ToolResultType.query,
   ToolResultType.esqlResults,
   ToolResultType.error,
 ];
-// Populated in flyout
-const flyoutResultTypes: string[] = [
-  ToolResultType.visualization,
-  ToolResultType.other,
-  ToolResultType.resource,
-];
+
 // Tool result types that should not have an icon displayed in the thinking steps list
 const disabledToolResultIconTypes: string[] = [ToolResultType.error, ToolResultType.query];
 
@@ -135,8 +128,8 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
           });
 
         // Add flyout result items
-        const flyoutResultItems = step.results.filter((result: ToolResult) =>
-          flyoutResultTypes.includes(result.type)
+        const flyoutResultItems = step.results.filter(
+          (result: ToolResult) => !mainThinkingResultTypes.includes(result.type)
         );
         if (flyoutResultItems.length > 0) {
           itemFactories.push({

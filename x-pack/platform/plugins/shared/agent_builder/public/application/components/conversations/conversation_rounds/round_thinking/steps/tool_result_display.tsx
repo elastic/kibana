@@ -8,7 +8,7 @@
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   isQueryResult,
-  isEsqlResults,
+  isEsqlResultsResult,
   isErrorResult,
 } from '@kbn/agent-builder-common/tools/tool_result';
 import React from 'react';
@@ -25,7 +25,7 @@ export const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolResult
   if (isQueryResult(toolResult)) {
     return <QueryResultStep result={toolResult} />;
   }
-  if (isEsqlResults(toolResult)) {
+  if (isEsqlResultsResult(toolResult)) {
     return <EsqlResultsStep result={toolResult} />;
   }
   if (isErrorResult(toolResult)) {
