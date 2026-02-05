@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import {
@@ -20,6 +19,7 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
 } from '@elastic/eui';
+import { txtClose, txtBack } from './i18n';
 
 export interface FlyoutFrameProps {
   title?: React.ReactNode;
@@ -51,12 +51,7 @@ export const FlyoutFrame: FC<PropsWithChildren<FlyoutFrameProps>> = ({
                   color="text"
                   onClick={onBack}
                   iconType="arrowLeft"
-                  aria-label={i18n.translate(
-                    'embeddable.drilldowns.components.FlyoutFrame.BackButtonLabel',
-                    {
-                      defaultMessage: 'Back',
-                    }
-                  )}
+                  aria-label={txtBack}
                 />
               </div>
             </EuiFlexItem>
@@ -82,12 +77,7 @@ export const FlyoutFrame: FC<PropsWithChildren<FlyoutFrameProps>> = ({
               flush="left"
               data-test-subj="flyoutCloseButton"
             >
-              {i18n.translate(
-                'embeddable.drilldowns.components.FlyoutFrame.CloseButtonLabel',
-                {
-                  defaultMessage: 'Close',
-                }
-              )}
+              {txtClose}
             </EuiButtonEmpty>
           )}
         </EuiFlexItem>
