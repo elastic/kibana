@@ -42,6 +42,8 @@ export function buildWorkflowContext(
       isTestRun: !!workflowExecution.isTestRun,
       startedAt: new Date(workflowExecution.startedAt),
       url: executionUrl,
+      executedBy: workflowExecution.executedBy,
+      triggeredBy: workflowExecution.triggeredBy,
     },
     workflow: {
       id: workflowExecution.workflowId,

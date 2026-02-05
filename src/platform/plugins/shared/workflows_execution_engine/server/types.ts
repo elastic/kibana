@@ -55,6 +55,7 @@ export interface WorkflowsExecutionEnginePluginStartDeps {
   cloud: CloudStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   licensing: LicensingPluginStart;
+  security?: SecurityPluginStart;
 }
 
 export type ExecuteWorkflow = (
