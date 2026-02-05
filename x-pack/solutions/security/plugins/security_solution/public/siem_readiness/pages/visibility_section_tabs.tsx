@@ -32,7 +32,8 @@ export const VisibilitySectionTabs: React.FC<VisibilitySectionTabsProps> = ({
       name: i18n.translate('xpack.securitySolution.siemReadiness.visibility.coverage.tab.title', {
         defaultMessage: 'Coverage',
       }),
-      content: <CoverageTab selectedCategories={selectedCategories} />,
+      /* Configuration panel won't be affecting Coverage tab as per plan */
+      content: <CoverageTab />,
     },
     {
       id: 'quality',

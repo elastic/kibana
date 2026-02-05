@@ -26,7 +26,6 @@ import type { SiemReadinessPackageInfo } from '@kbn/siem-readiness';
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { IntegrationSelectablePopover } from '../../components/integrations_selectable_popover';
-import type { CategoryOption } from '../../components/configuration_panel';
 
 const CATEGORY_ORDER = ['Endpoint', 'Identity', 'Network', 'Cloud', 'Application/SaaS'] as const;
 
@@ -68,12 +67,8 @@ const buildMissingCategoriesDescription = (
   );
 };
 
-interface DataCoveragePanelProps {
-  selectedCategories: CategoryOption[];
-}
-
 // Component
-export const DataCoveragePanel: React.FC<DataCoveragePanelProps> = ({ selectedCategories }) => {
+export const DataCoveragePanel: React.FC = () => {
   const basePath = useBasePath();
   const { getReadinessCategories, getIntegrations } = useSiemReadinessApi();
   const { openNewCaseFlyout } = useSiemReadinessCases();
@@ -119,19 +114,17 @@ export const DataCoveragePanel: React.FC<DataCoveragePanelProps> = ({ selectedCa
 
     const categoryDataMap = new Map(mainCategoriesMap.map((item) => [item.category, item]));
 
-    return CATEGORY_ORDER.filter((category) => selectedCategories.includes(category)).map(
-      (category) => {
-        const categoryData = categoryDataMap.get(category);
-        const totalDocs = categoryData?.indices.reduce((sum, index) => sum + index.docs, 0) || 0;
+    return CATEGORY_ORDER.map((category) => {
+      const categoryData = categoryDataMap.get(category);
+      const totalDocs = categoryData?.indices.reduce((sum, index) => sum + index.docs, 0) || 0;
 
-        return {
-          category,
-          hasCoverage: totalDocs > 0,
-          totalDocs,
-        };
-      }
-    );
-  }, [getReadinessCategories.data?.mainCategoriesMap, selectedCategories]);
+      return {
+        category,
+        hasCoverage: totalDocs > 0,
+        totalDocs,
+      };
+    });
+  }, [getReadinessCategories.data?.mainCategoriesMap]);
 
   const missingCategories = useMemo(
     () => coverageData.filter((row) => !row.hasCoverage),

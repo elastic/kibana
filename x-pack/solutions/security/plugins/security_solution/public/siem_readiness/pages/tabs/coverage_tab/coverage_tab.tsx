@@ -9,19 +9,14 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { RuleCoveragePanel } from './rule_coverage_panel';
 import { DataCoveragePanel } from './data_coverage_panel';
-import type { CategoryOption } from '../../components/configuration_panel';
 
-interface CoverageTabProps {
-  selectedCategories: CategoryOption[];
-}
-
-export const CoverageTab: React.FC<CoverageTabProps> = ({ selectedCategories }) => {
+export const CoverageTab: React.FC = () => {
   return (
     <>
       <EuiSpacer size="m" />
       <RuleCoveragePanel />
       <EuiSpacer size="m" />
-      <DataCoveragePanel selectedCategories={selectedCategories} />
+      <DataCoveragePanel />
     </>
   );
 };

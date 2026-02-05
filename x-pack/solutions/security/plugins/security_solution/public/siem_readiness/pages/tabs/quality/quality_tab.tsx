@@ -34,7 +34,10 @@ import {
   getQualityCaseTitle,
   getQualityCaseTags,
 } from './quality_add_case_details';
-import type { CategoryOption } from '../../components/configuration_panel';
+import type {
+  CategoryOption,
+  SiemReadinessTabSelectedCategoriesProps,
+} from '../../components/configuration_panel';
 
 // Extended IndexInfo with computed fields
 interface IndexInfoWithStatus extends IndexInfo, Record<string, unknown> {
@@ -43,11 +46,9 @@ interface IndexInfoWithStatus extends IndexInfo, Record<string, unknown> {
   checkedAt: number | undefined;
 }
 
-interface QualityTabProps {
-  selectedCategories: CategoryOption[];
-}
-
-export const QualityTab: React.FC<QualityTabProps> = ({ selectedCategories }) => {
+export const QualityTab: React.FC<SiemReadinessTabSelectedCategoriesProps> = ({
+  selectedCategories,
+}) => {
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
   const { getReadinessCategories, getIndexQualityResultsLatest } = useSiemReadinessApi();

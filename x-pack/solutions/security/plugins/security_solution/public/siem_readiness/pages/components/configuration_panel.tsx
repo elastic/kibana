@@ -28,6 +28,11 @@ import { i18n } from '@kbn/i18n';
 // Category options available for filtering
 export type CategoryOption = 'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/SaaS';
 
+// Props interface for tabs that use selectedCategories
+export interface SiemReadinessTabSelectedCategoriesProps {
+  selectedCategories: CategoryOption[];
+}
+
 // Type for checkbox state mapping
 type CategorySelectionMap = Record<CategoryOption, boolean>;
 
