@@ -171,6 +171,12 @@ export interface WorkflowExecutionCompletedParams extends BaseWorkflowExecutionT
     stepType?: string;
     duration: number;
   }>;
+  /**
+   * Average duration per step type (dictionary with sanitized step type as key).
+   * Step types with dots are sanitized (dots replaced with underscores) for proper ES field indexing.
+   * E.g., { "if": 100, "console": 40, "elasticsearch_search": 250 }
+   */
+  stepAvgDurationsByType?: Record<string, number>;
 }
 
 /**
@@ -301,6 +307,12 @@ export interface WorkflowExecutionFailedParams extends BaseWorkflowExecutionTele
     stepType?: string;
     duration: number;
   }>;
+  /**
+   * Average duration per step type (dictionary with sanitized step type as key).
+   * Step types with dots are sanitized (dots replaced with underscores) for proper ES field indexing.
+   * E.g., { "if": 100, "console": 40, "elasticsearch_search": 250 }
+   */
+  stepAvgDurationsByType?: Record<string, number>;
 }
 
 /**
@@ -419,6 +431,12 @@ export interface WorkflowExecutionCancelledParams extends BaseWorkflowExecutionT
     stepType?: string;
     duration: number;
   }>;
+  /**
+   * Average duration per step type (dictionary with sanitized step type as key).
+   * Step types with dots are sanitized (dots replaced with underscores) for proper ES field indexing.
+   * E.g., { "if": 100, "console": 40, "elasticsearch_search": 250 }
+   */
+  stepAvgDurationsByType?: Record<string, number>;
 }
 
 /**

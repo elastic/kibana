@@ -160,6 +160,10 @@ export class WorkflowExecutionTelemetryClient {
         executionMetadata.stepDurations.length > 0 && {
           stepDurations: executionMetadata.stepDurations,
         }),
+      ...(executionMetadata.stepAvgDurationsByType &&
+        Object.keys(executionMetadata.stepAvgDurationsByType).length > 0 && {
+          stepAvgDurationsByType: executionMetadata.stepAvgDurationsByType,
+        }),
     };
 
     this.reportEvent(
@@ -244,6 +248,10 @@ export class WorkflowExecutionTelemetryClient {
         executionMetadata.stepDurations.length > 0 && {
           stepDurations: executionMetadata.stepDurations,
         }),
+      ...(executionMetadata.stepAvgDurationsByType &&
+        Object.keys(executionMetadata.stepAvgDurationsByType).length > 0 && {
+          stepAvgDurationsByType: executionMetadata.stepAvgDurationsByType,
+        }),
     };
 
     this.reportEvent(
@@ -319,6 +327,10 @@ export class WorkflowExecutionTelemetryClient {
       ...(executionMetadata.stepDurations &&
         executionMetadata.stepDurations.length > 0 && {
           stepDurations: executionMetadata.stepDurations,
+        }),
+      ...(executionMetadata.stepAvgDurationsByType &&
+        Object.keys(executionMetadata.stepAvgDurationsByType).length > 0 && {
+          stepAvgDurationsByType: executionMetadata.stepAvgDurationsByType,
         }),
     };
 

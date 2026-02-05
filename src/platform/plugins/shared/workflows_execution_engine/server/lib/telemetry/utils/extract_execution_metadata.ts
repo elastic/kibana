@@ -85,6 +85,12 @@ export interface WorkflowExecutionTelemetryMetadata {
     stepType?: string;
     duration: number;
   }>;
+  /**
+   * Average duration per step type (dictionary with sanitized step type as key).
+   * Step types with dots are sanitized (dots replaced with underscores) for proper ES field indexing.
+   * E.g., { "if": 100, "console": 40, "elasticsearch_search": 250 }
+   */
+  stepAvgDurationsByType?: Record<string, number>;
 }
 
 /**
@@ -201,6 +207,9 @@ export function extractExecutionMetadata(
   // Extract step durations
   const stepDurations = extractStepDurations(stepExecutions);
 
+  // Extract average duration per step type
+  const stepAvgDurationsByType = extractStepAvgDurationsByType(stepExecutions);
+
   return {
     executedStepCount,
     successfulStepCount,
@@ -220,6 +229,7 @@ export function extractExecutionMetadata(
       timeoutExceededByMs: timeoutInfo.timeoutExceededByMs,
     }),
     ...(stepDurations.length > 0 && { stepDurations }),
+    ...(Object.keys(stepAvgDurationsByType).length > 0 && { stepAvgDurationsByType }),
   };
 }
 
@@ -357,4 +367,53 @@ function extractStepDurations(stepExecutions: EsWorkflowStepExecution[]): Array<
   }
 
   return durations;
+}
+
+/**
+ * Sanitizes a step type name for use as an Elasticsearch field name.
+ * Replaces dots with underscores to avoid nested field path issues.
+ *
+ * @param stepType - The original step type (e.g., "elasticsearch.search")
+ * @returns Sanitized step type (e.g., "elasticsearch_search")
+ */
+function sanitizeStepType(stepType: string): string {
+  return stepType.replace(/\./g, '_');
+}
+
+/**
+ * Extracts average duration per step type from step executions.
+ * Groups durations by step type and calculates the average for each type.
+ * Step types are sanitized (dots replaced with underscores) for proper ES field indexing.
+ *
+ * @param stepExecutions - Array of step executions
+ * @returns Dictionary with sanitized step type as key and average duration as value
+ */
+function extractStepAvgDurationsByType(
+  stepExecutions: EsWorkflowStepExecution[]
+): Record<string, number> {
+  // Group durations by step type
+  const durationsByType = new Map<string, number[]>();
+
+  for (const stepExecution of stepExecutions) {
+    if (
+      stepExecution.stepType &&
+      stepExecution.executionTimeMs !== undefined &&
+      stepExecution.executionTimeMs !== null &&
+      stepExecution.executionTimeMs >= 0
+    ) {
+      const sanitizedType = sanitizeStepType(stepExecution.stepType);
+      const durations = durationsByType.get(sanitizedType) || [];
+      durations.push(stepExecution.executionTimeMs);
+      durationsByType.set(sanitizedType, durations);
+    }
+  }
+
+  // Calculate average for each step type
+  const avgDurationsByType: Record<string, number> = {};
+  for (const [stepType, durations] of durationsByType) {
+    const sum = durations.reduce((acc, d) => acc + d, 0);
+    avgDurationsByType[stepType] = Math.round(sum / durations.length);
+  }
+
+  return avgDurationsByType;
 }

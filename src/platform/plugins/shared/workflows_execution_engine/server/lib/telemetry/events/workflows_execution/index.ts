@@ -297,6 +297,14 @@ const workflowExecutionCompletedSchema: RootSchema<WorkflowExecutionCompletedPar
       optional: true,
     },
   },
+  stepAvgDurationsByType: {
+    type: 'pass_through',
+    _meta: {
+      description:
+        'Average duration per step type (dictionary with sanitized step type as key). Step types with dots are sanitized (dots replaced with underscores) for proper ES field indexing. E.g., { "if": 100, "console": 40, "elasticsearch_search": 250 }',
+      optional: true,
+    },
+  },
 };
 
 const workflowExecutionFailedSchema: RootSchema<WorkflowExecutionFailedParams> = {
@@ -533,6 +541,14 @@ const workflowExecutionFailedSchema: RootSchema<WorkflowExecutionFailedParams> =
       optional: true,
     },
   },
+  stepAvgDurationsByType: {
+    type: 'pass_through',
+    _meta: {
+      description:
+        'Average duration per step type (dictionary with sanitized step type as key). Step types with dots are sanitized (dots replaced with underscores) for proper ES field indexing. E.g., { "if": 100, "console": 40, "elasticsearch_search": 250 }',
+      optional: true,
+    },
+  },
 };
 
 const workflowExecutionCancelledSchema: RootSchema<WorkflowExecutionCancelledParams> = {
@@ -744,6 +760,14 @@ const workflowExecutionCancelledSchema: RootSchema<WorkflowExecutionCancelledPar
     _meta: {
       description:
         'Array of step durations with step identification. Only includes steps that have completed (have both startedAt and finishedAt).',
+      optional: true,
+    },
+  },
+  stepAvgDurationsByType: {
+    type: 'pass_through',
+    _meta: {
+      description:
+        'Average duration per step type (dictionary with sanitized step type as key). Step types with dots are sanitized (dots replaced with underscores) for proper ES field indexing. E.g., { "if": 100, "console": 40, "elasticsearch_search": 250 }',
       optional: true,
     },
   },
