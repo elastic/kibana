@@ -603,7 +603,7 @@ processing was cancelled due to a timeout. Default: `true`. This setting can be
 overridden by individual rule types.
 
 `xpack.alerting.rules.maxScheduledPerMinute`::
-Specifies the maximum number of rules to run per minute. Default: 10000
+Specifies the maximum number of rules to run per minute. Default: 32000
 
 `xpack.alerting.rules.minimumScheduleInterval.value` {ess-icon}::
 Specifies the minimum schedule interval for rules. This minimum is applied to all rules created or updated after you set this value.
