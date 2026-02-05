@@ -22,7 +22,8 @@
       "inference",
       "security",
       "features",
-      "taskManager"
+      "taskManager",
+      "kibanaUtils"
     ],
     "requiredBundles": [
       "esUiShared"
