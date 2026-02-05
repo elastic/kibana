@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiNotificationBadge, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { encode } from '@kbn/rison';
 import { useSiemReadinessGetCasesCountByTags } from '@kbn/siem-readiness';
@@ -31,35 +31,15 @@ export const ViewCasesButton: React.FC<ViewCasesButtonProps> = ({
   }, [basePath, caseTagsArray]);
 
   const casesByTagsQuery = useSiemReadinessGetCasesCountByTags(caseTagsArray);
+
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={true}>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          iconSide="right"
-          size="s"
-          href={casesUrl}
-          target="_blank"
-          data-test-subj={dataTestSubj}
-        >
-          {i18n.translate('xpack.securitySolution.siemReadiness.viewCase', {
-            defaultMessage: 'View case',
-          })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          onClick={() => {}}
-          color="text"
-          size="xs"
-          style={{
-            backgroundColor: euiTheme.colors.backgroundLightText,
-            borderRadius: `${euiTheme.size.xs}`,
-            padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
-          }}
-        >
-          {casesByTagsQuery.data?.total ?? 0}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiButtonEmpty size="s" href={casesUrl} target="_blank" data-test-subj={dataTestSubj}>
+      {i18n.translate('xpack.securitySolution.siemReadiness.viewCases', {
+        defaultMessage: 'View Cases',
+      })}
+      <EuiNotificationBadge color="subdued" style={{ marginLeft: euiTheme.size.s }}>
+        {casesByTagsQuery.data?.total ?? 0}
+      </EuiNotificationBadge>
+    </EuiButtonEmpty>
   );
 };
