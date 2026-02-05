@@ -51,7 +51,7 @@ export type ClientCreate<TDocumentType> = (
   request: ClientCreateRequest<TDocumentType>
 ) => Promise<ClientCreateResponse>;
 
-export type ClientExistsIndex = () => Promise<boolean>;
+export type ClientExists = () => Promise<boolean>;
 
 export interface InternalIDataStreamClient<
   S extends MappingsDefinition,
@@ -64,5 +64,5 @@ export interface InternalIDataStreamClient<
   ) => Promise<api.SearchResponse<FullDocumentType, Agg>>;
 
   create: ClientCreate<FullDocumentType>;
-  existsIndex: ClientExistsIndex;
+  exists: ClientExists;
 }

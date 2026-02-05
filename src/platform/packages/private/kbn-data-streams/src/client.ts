@@ -120,7 +120,7 @@ export class DataStreamClient<
     });
   }
 
-  public async existsIndex() {
+  public async exists() {
     return this.client.indices.exists({
       index: this.dataStreamDefinition.name,
     });

@@ -64,12 +64,12 @@ const response = await client.search({
 });
 ```
 
-#### `existsIndex()`
+#### `exists()`
 
 Check if the data stream exists.
 
 ```typescript
-const exists = await client.existsIndex();
+const exists = await client.exists();
 ```
 
 ### Unsupported Operations
@@ -102,6 +102,15 @@ if (response.hits.hits.length > 0) {
 
 This approach works across all backing indices in the data stream, unlike Elasticsearch's `get()` API which requires a specific backing index name.
 
+## Space-aware behavior
+
+All CRUD operations (`create`, `search`) accept an optional `space` parameter:
+
+* **When provided**: Documents are space-bound. IDs are prefixed as `{space}::{id}` (e.g. `myspace::abc123`). Documents are decorated with `kibana.space_ids: [space]`. Searches are filtered to that space. The system property `kibana.space_ids` is stripped from responses.
+* **When undefined**: Documents are space-agnostic. No ID prefixing or `kibana.space_ids` decoration. Searches return only space-agnostic documents. IDs containing the `::` separator are rejected (reserved for system use).
+
+Data streams can contain both space-bound and space-agnostic documents. The package does not handle RBAC; higher-level repositories should wrap these APIs for access control.
+
 ## Mapping Validation
 
 When registering a data stream, the following reserved keys are automatically validated and will cause an error if found in your mappings:
@@ -109,7 +118,7 @@ When registering a data stream, the following reserved keys are automatically va
 * **`kibana`**: Reserved for system properties (e.g., `kibana.space_ids`)
 * **`_id`**: Reserved for document identifiers (cannot be defined in mappings)
 
-These validations occur during data stream registration via `registerDataStream()`.
+The `kibana.space_ids` mapping is automatically injected during registration. These validations occur via `registerDataStream()`. When the data stream version is incremented, mappings are applied to the write index.
 
 ## Mapping updates
 
