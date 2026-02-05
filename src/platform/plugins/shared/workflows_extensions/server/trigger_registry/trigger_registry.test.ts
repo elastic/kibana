@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { TriggerRegistry } from './trigger_registry';
-import type { TriggerDefinition } from '../../common';
+import type { ServerTriggerDefinition } from '../types';
 
 const validEventSchema = z.object({
   caseId: z.string(),
@@ -17,11 +17,11 @@ const validEventSchema = z.object({
   updatedBy: z.string(),
 });
 
-const createValidDefinition = (overrides: Partial<TriggerDefinition> = {}): TriggerDefinition => ({
+const createValidDefinition = (
+  overrides: Partial<ServerTriggerDefinition> = {}
+): ServerTriggerDefinition => ({
   id: 'cases.updated',
-  description: 'Emitted when a case is updated',
   eventSchema: validEventSchema,
-  examples: [{ caseId: '123', status: 'open', updatedBy: 'alice' }],
   ...overrides,
 });
 
@@ -78,53 +78,14 @@ describe('TriggerRegistry', () => {
       expect(registry.list()).toHaveLength(3);
     });
 
-    it('throws if description is missing or empty', () => {
-      expect(() => {
-        registry.register(createValidDefinition({ description: '' }));
-      }).toThrow('"description" must be a non-empty string');
-    });
-
     it('throws if eventSchema is not a Zod object schema', () => {
       expect(() => {
         registry.register(
           createValidDefinition({
-            eventSchema: z.string() as unknown as TriggerDefinition['eventSchema'],
+            eventSchema: z.string() as unknown as ServerTriggerDefinition['eventSchema'],
           })
         );
       }).toThrow('"eventSchema" must be a Zod object schema');
-    });
-
-    it('throws if an example event does not match eventSchema', () => {
-      expect(() => {
-        registry.register(
-          createValidDefinition({
-            examples: [{ caseId: 123, status: 'open', updatedBy: 'alice' }],
-          })
-        );
-      }).toThrow('does not match eventSchema');
-    });
-
-    it('validates all examples against eventSchema', () => {
-      const def = createValidDefinition({
-        examples: [{ caseId: '1', status: 'open', updatedBy: 'u' }, { wrong: 'field' }],
-      });
-      expect(() => registry.register(def)).toThrow('example at index 1');
-    });
-
-    it('allows trigger without examples', () => {
-      const def = createValidDefinition({ examples: undefined });
-      registry.register(def);
-      expect(registry.get('cases.updated')).toEqual(def);
-    });
-
-    it('throws if examples is not an array', () => {
-      expect(() => {
-        registry.register(
-          createValidDefinition({
-            examples: 'not-array' as unknown as TriggerDefinition['examples'],
-          })
-        );
-      }).toThrow('"examples" must be an array');
     });
   });
 

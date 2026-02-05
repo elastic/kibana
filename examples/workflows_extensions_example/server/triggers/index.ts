@@ -8,8 +8,8 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import { externalTriggerDefinition } from './external_trigger';
+import { customTriggerDefinition } from './custom_trigger';
 
 export const registerTriggers = (workflowsExtensions: WorkflowsExtensionsServerPluginSetup) => {
-  workflowsExtensions.registerTrigger(externalTriggerDefinition);
+  workflowsExtensions.registerTrigger(customTriggerDefinition);
 };

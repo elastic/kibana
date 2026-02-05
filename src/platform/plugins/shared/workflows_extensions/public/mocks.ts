@@ -14,6 +14,7 @@ import type { WorkflowsExtensionsStartContract } from '../common/types';
 const createSetupMock: () => jest.Mocked<WorkflowsExtensionsPublicPluginSetup> = () => {
   return {
     registerStepDefinition: jest.fn(),
+    registerTriggerDefinition: jest.fn(),
   };
 };
 
@@ -24,6 +25,9 @@ const createStartMock: () => jest.Mocked<
     getStepDefinition: jest.fn(),
     hasStepDefinition: jest.fn(),
     getAllStepDefinitions: jest.fn(() => []),
+    getTrigger: jest.fn(),
+    hasTrigger: jest.fn(),
+    listTriggers: jest.fn(() => []),
   };
 };
 

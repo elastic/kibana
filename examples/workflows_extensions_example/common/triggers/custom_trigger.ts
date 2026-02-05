@@ -7,21 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TriggerDefinition } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 
-const ExternalTriggerEventSchema = z.object({
+export const CUSTOM_TRIGGER_ID = 'example.custom_trigger' as const;
+
+export const customTriggerEventSchema = z.object({
   message: z.string(),
   source: z.string().optional(),
 });
 
-export const externalTriggerDefinition: TriggerDefinition<typeof ExternalTriggerEventSchema> = {
-  id: 'example.external_trigger',
-  description:
-    'Emitted when an external event occurs. Used by the workflows extensions example plugin.',
-  eventSchema: ExternalTriggerEventSchema,
-  examples: [
-    { message: 'Hello from the example plugin' },
-    { message: 'Demo event', source: 'workflows_extensions_example' },
-  ],
-};
+export type CustomTriggerEvent = z.infer<typeof customTriggerEventSchema>;

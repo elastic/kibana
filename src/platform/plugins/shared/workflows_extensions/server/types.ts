@@ -9,9 +9,14 @@
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { z } from '@kbn/zod/v4';
 import type { ServerStepDefinition } from './step_registry/types';
-import type { TriggerDefinition } from '../common';
+import type { CommonTriggerDefinition } from '../common';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
+
+/** Server-side alias: same as CommonTriggerDefinition (used when registering on the server). */
+export type ServerTriggerDefinition<EventSchema extends z.ZodType = z.ZodType> =
+  CommonTriggerDefinition<EventSchema>;
 
 /**
  * Server-side plugin setup contract.
@@ -34,7 +39,7 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @param definition - The trigger definition
    * @throws Error if trigger id is already registered, validation fails, or registration is attempted after setup
    */
-  registerTrigger(definition: TriggerDefinition): void;
+  registerTrigger(definition: ServerTriggerDefinition): void;
 }
 
 /**
@@ -47,7 +52,7 @@ export interface WorkflowsExtensionsTriggerStartContract {
    * @param triggerId - The trigger identifier
    * @returns The trigger definition, or undefined if not found
    */
-  getTrigger(triggerId: string): TriggerDefinition | undefined;
+  getTrigger(triggerId: string): ServerTriggerDefinition | undefined;
   /**
    * Check if definition for a trigger id is registered.
    * @param triggerId - The trigger identifier
@@ -58,7 +63,7 @@ export interface WorkflowsExtensionsTriggerStartContract {
    * Get all registered trigger definitions.
    * @returns Array of all registered trigger definitions
    */
-  listTriggers(): TriggerDefinition[];
+  listTriggers(): ServerTriggerDefinition[];
 }
 
 /**

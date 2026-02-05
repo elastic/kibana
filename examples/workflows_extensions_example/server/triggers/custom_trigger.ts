@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { CommonStepDefinition } from './step_registry/types';
-export type { CommonTriggerDefinition } from './trigger_registry/types';
-export { DataMapStepTypeId } from './steps/data';
+import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
+import { CUSTOM_TRIGGER_ID, customTriggerEventSchema } from '../../common/triggers/custom_trigger';
+
+export const customTriggerDefinition: ServerTriggerDefinition<typeof customTriggerEventSchema> = {
+  id: CUSTOM_TRIGGER_ID,
+  eventSchema: customTriggerEventSchema,
+};

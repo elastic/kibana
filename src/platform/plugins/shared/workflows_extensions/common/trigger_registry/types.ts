@@ -10,21 +10,15 @@
 import type { z } from '@kbn/zod/v4';
 
 /**
- * Immutable, semantic contract for a workflow trigger.
- * Describes an event type and its payload shape; no workflow or execution references.
+ * Shared trigger contract (common to server and public).
  *
  * Constraints (enforced at registration):
  * - id: globally unique, namespaced format <solution>.<event>
  * - eventSchema: must be a Zod object schema that rejects unknown fields
- * - examples: each item must be an event payload that validates against eventSchema
  */
-export interface TriggerDefinition<EventSchema extends z.ZodType = z.ZodType> {
+export interface CommonTriggerDefinition<EventSchema extends z.ZodType = z.ZodType> {
   /** Globally unique, namespaced identifier (e.g. cases.updated, alerts.severity_high) */
   id: string;
-  /** Semantic meaning of the trigger */
-  description: string;
   /** Payload contract (Zod object schema; must reject unknown fields by default) */
   eventSchema: EventSchema;
-  /** Optional example event payloads for authoring help; each must validate against eventSchema */
-  examples?: z.infer<EventSchema>[];
 }

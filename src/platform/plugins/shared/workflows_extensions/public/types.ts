@@ -9,11 +9,12 @@
 
 import type { z } from '@kbn/zod/v4';
 import type { PublicStepDefinition } from './step_registry/types';
+import type { PublicTriggerDefinition } from './trigger_registry/types';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
 
 /**
  * Public-side plugin setup contract.
- * Exposes methods for other plugins to register public-side step definition.
+ * Exposes methods for other plugins to register public-side step and trigger definitions.
  */
 
 export interface WorkflowsExtensionsPublicPluginSetup {
@@ -31,14 +32,35 @@ export interface WorkflowsExtensionsPublicPluginSetup {
   >(
     definition: PublicStepDefinition<Input, Output, Config>
   ): void;
+
+  /**
+   * Register user-facing definition for a workflow trigger.
+   * This should be called during the plugin's setup phase.
+   * Must be paired with server-side registration (registerTrigger) for the same trigger id.
+   *
+   * @param definition - The public-side trigger definition
+   * @throws Error if definition for the same trigger id is already registered
+   */
+  registerTriggerDefinition<EventSchema extends z.ZodType = z.ZodType>(
+    definition: PublicTriggerDefinition<EventSchema>
+  ): void;
+}
+
+/**
+ * Read-only contract for trigger discovery at start.
+ */
+export interface TriggerRegistryStartContract {
+  getAllTriggerDefinitions(): PublicTriggerDefinition[];
+  getTriggerDefinition(triggerId: string): PublicTriggerDefinition | undefined;
+  hasTriggerDefinition(triggerId: string): boolean;
 }
 
 /**
  * Public-side plugin start contract.
- * Exposes methods for retrieving registered public-side step definition.
+ * Exposes methods for retrieving registered step and trigger definitions.
  */
 export type WorkflowsExtensionsPublicPluginStart =
-  WorkflowsExtensionsStartContract<PublicStepDefinition>;
+  WorkflowsExtensionsStartContract<PublicStepDefinition> & TriggerRegistryStartContract;
 
 /**
  * Dependencies for the public plugin setup phase.

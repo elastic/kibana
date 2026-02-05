@@ -8,7 +8,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import type { TriggerDefinition } from '../../common';
+import type { ServerTriggerDefinition } from '../types';
 
 /** Id must be <domain>.<event> (e.g. cases.updated, alerts.recovered) */
 const TRIGGER_ID_REGEX = /^[a-zA-Z0-9_]+\.[a-zA-Z0-9_.]+$/;
@@ -17,8 +17,8 @@ function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
   return typeof schema === 'object' && schema !== null && 'shape' in schema;
 }
 
-function validateDefinition(definition: TriggerDefinition): void {
-  const { id, description, eventSchema, examples } = definition;
+function validateDefinition(definition: ServerTriggerDefinition): void {
+  const { id, eventSchema } = definition;
 
   if (typeof id !== 'string' || id.length === 0) {
     throw new Error('Trigger definition "id" must be a non-empty string.');
@@ -28,9 +28,6 @@ function validateDefinition(definition: TriggerDefinition): void {
       `Trigger id "${id}" must follow namespaced format <domain>.<event> (e.g. cases.updated).`
     );
   }
-  if (typeof description !== 'string' || description.length === 0) {
-    throw new Error(`Trigger "${id}": "description" must be a non-empty string.`);
-  }
   if (!eventSchema || typeof eventSchema.safeParse !== 'function') {
     throw new Error(`Trigger "${id}": "eventSchema" must be a Zod schema.`);
   }
@@ -39,42 +36,23 @@ function validateDefinition(definition: TriggerDefinition): void {
       `Trigger "${id}": "eventSchema" must be a Zod object schema (e.g. z.object({...})).`
     );
   }
-
-  if (examples !== undefined) {
-    if (!Array.isArray(examples)) {
-      throw new Error(`Trigger "${id}": "examples" must be an array.`);
-    }
-    for (let i = 0; i < examples.length; i++) {
-      const ex = examples[i];
-      if (!ex || typeof ex !== 'object' || ex === null) {
-        throw new Error(`Trigger "${id}": example at index ${i} must be an object.`);
-      }
-      const result = eventSchema.safeParse(ex);
-      if (!result.success) {
-        const msg = result.error.issues?.map((e) => e.message).join('; ') ?? result.error.message;
-        throw new Error(
-          `Trigger "${id}": example at index ${i} does not match eventSchema: ${msg}`
-        );
-      }
-    }
-  }
 }
 
 /**
- * Registry for workflow trigger definitions.
+ * Registry for workflow trigger definitions (server contract: id + eventSchema only).
  */
 export class TriggerRegistry {
-  private readonly registry = new Map<string, TriggerDefinition>();
+  private readonly registry = new Map<string, ServerTriggerDefinition>();
   private frozen = false;
 
   /**
    * Register a trigger definition.
-   * Must be called during plugin setup. Validates id format, required metadata, eventSchema (Zod object), and examples.
+   * Must be called during plugin setup. Validates id format and eventSchema (Zod object).
    *
-   * @param definition - The trigger definition to register
+   * @param definition - The server trigger definition (id + eventSchema)
    * @throws Error if trigger id is already registered, validation fails, or registration is attempted after setup
    */
-  public register(definition: TriggerDefinition): void {
+  public register(definition: ServerTriggerDefinition): void {
     if (this.frozen) {
       throw new Error(
         'Trigger registration is only allowed during plugin setup. Cannot register after start.'
@@ -106,7 +84,7 @@ export class TriggerRegistry {
    * @param triggerId - The trigger identifier
    * @returns The trigger definition, or undefined if not found
    */
-  public get(triggerId: string): TriggerDefinition | undefined {
+  public get(triggerId: string): ServerTriggerDefinition | undefined {
     return this.registry.get(triggerId);
   }
 
@@ -125,7 +103,7 @@ export class TriggerRegistry {
    *
    * @returns Array of registered trigger definitions
    */
-  public list(): TriggerDefinition[] {
+  public list(): ServerTriggerDefinition[] {
     return Array.from(this.registry.values());
   }
 }
