@@ -305,7 +305,6 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   'url.port': 443,
   'source.inline.script':
     "step('Go to https://www.elastic.co/', async () => {\n  await page.goto('https://www.elastic.co/');\n});",
-  'source.inline.encoding': 'base64',
   'source.project.content': '',
   urls: 'https://www.elastic.co/',
   screenshots: 'on',
