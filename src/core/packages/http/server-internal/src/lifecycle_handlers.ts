@@ -9,6 +9,7 @@
 
 import type {
   OnPostAuthHandler,
+  OnPreAuthHandler,
   OnPreResponseHandler,
   OnPreResponseInfo,
   KibanaRequest,
@@ -20,6 +21,7 @@ import {
 import type { Logger } from '@kbn/logging';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
 import type { HttpConfig } from './http_config';
+import { BasePath } from './base_path_service';
 
 const VERSION_HEADER = 'kbn-version';
 const XSRF_HEADER = 'kbn-xsrf';
@@ -42,6 +44,29 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
 
     if (!isSafeMethod(request.route.method) && !hasVersionHeader && !hasXsrfHeader) {
       return response.badRequest({ body: `Request must contain a ${XSRF_HEADER} header.` });
+    }
+
+    return toolkit.next();
+  };
+};
+
+export const createExcludeRoutesPreAuthHandler = (
+  config: HttpConfig,
+  log: Logger
+): OnPreAuthHandler => {
+  const excludedRoutes = new Set(config.excludeRoutes);
+  const basePath = new BasePath(config.basePath);
+  log = log.get('server', 'exclude_routes');
+
+  return (request, response, toolkit) => {
+    if (excludedRoutes.size === 0) {
+      return toolkit.next();
+    }
+
+    const normalizedPath = basePath.remove(request.url.pathname);
+    if (excludedRoutes.has(normalizedPath)) {
+      log.warn(`Access to uri [${request.url.pathname}] is blocked by server.excludeRoutes`);
+      return response.notFound();
     }
 
     return toolkit.next();
