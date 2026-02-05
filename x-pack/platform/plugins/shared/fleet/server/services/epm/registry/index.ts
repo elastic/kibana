@@ -299,7 +299,9 @@ function setSpecVersion(url: URL) {
     config?.internal?.registry?.kibanaVersionCheckEnabled === false;
 
   if (disableVersionCheck) {
-    logger.debug('[DEBUG] setSpecVersion: version check disabled, skipping spec.min/max constraints');
+    logger.debug(
+      '[DEBUG] setSpecVersion: version check disabled, skipping spec.min/max constraints'
+    );
     return;
   }
 
