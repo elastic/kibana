@@ -35,7 +35,7 @@ export default function (providerContext: FtrProviderContext) {
       const connectors = getAvailableConnectors();
 
       for (const connector of connectors) {
-        converseApiSuite(connector.id, connector.id, supertest);
+        converseApiSuite(connector.id, connector.id, providerContext);
       }
     });
 
@@ -82,7 +82,7 @@ export default function (providerContext: FtrProviderContext) {
             }
             return connectorId;
           };
-          converseApiSuite(model.modelId, getConnectorId, supertest);
+          converseApiSuite(model.modelId, getConnectorId, providerContext);
         }
       }
     });

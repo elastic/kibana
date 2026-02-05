@@ -26,7 +26,7 @@ export default async function (ftrContext: FtrConfigProviderContext) {
   const preconfiguredConnectors = getPreconfiguredConnectorConfig();
   const eisServerArg = `xpack.inference.elastic.url=${EIS_QA_URL}`;
 
-  const config = await createStatefulTestConfig({
+  return createStatefulTestConfig({
     services: agentBuilderApiServices,
     testFiles: [require.resolve('./tests')],
     junit: {
@@ -40,6 +40,4 @@ export default async function (ftrContext: FtrConfigProviderContext) {
       serverArgs: [`--xpack.actions.preconfigured=${JSON.stringify(preconfiguredConnectors)}`],
     },
   })(ftrContext);
-
-  return config;
 }
