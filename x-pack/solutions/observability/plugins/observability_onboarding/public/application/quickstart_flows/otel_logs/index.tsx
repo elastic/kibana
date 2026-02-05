@@ -21,6 +21,7 @@ import {
   EuiImage,
   EuiCallOut,
   EuiSkeletonText,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -58,6 +59,7 @@ export const OtelLogsPanel: React.FC = () => {
   const {
     services: { share, http },
   } = useKibana<ObservabilityOnboardingAppServices>();
+  const isSmallScreen = useIsWithinBreakpoints(['xs', 's']);
 
   const {
     data: setupData,
@@ -314,11 +316,11 @@ export const OtelLogsPanel: React.FC = () => {
                     </p>
                   </EuiText>
                   <EuiSpacer />
-                  <EuiFlexGroup>
+                  <EuiFlexGroup alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiImage
                         src={http?.staticAssets.getPluginAssetHref('waterfall_screen.svg')}
-                        width={160}
+                        width={isSmallScreen ? 120 : 160}
                         alt="Illustration"
                         hasShadow
                       />
