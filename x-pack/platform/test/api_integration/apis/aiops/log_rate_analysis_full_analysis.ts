@@ -29,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
   const aiops = getService('aiops');
   const supertest = getService('supertest');
   const config = getService('config');
-  const kibanaServer = config.get('servers.kibana');
+  const kibanaServer = new URL(config.get('servers.kibana'));
   // Native fetch doesn't support credentials in URLs, so we need to extract them
   const { username, password } = kibanaServer;
   kibanaServer.username = '';
