@@ -240,17 +240,16 @@ export const createCustomThresholdExecutor = ({
        * If `alertOnNoData` is true but `alertOnGroupDisappear` is false, we don't need to worry about the {a, b, c} possibility.
        * At this point in the function, a false `alertOnGroupDisappear` would already have prevented group 'a' from being evaluated at all.
        */
-      if (alertOnNoData || (alertOnGroupDisappear && hasGroups)) {
-        // In the previous line we've determined if the user is interested in No Data states, so only now do we actually
-        // check to see if a No Data state has occurred
-        if (nextState === AlertStates.NO_DATA) {
-          reason = alertResults
-            .filter((result) => result[group]?.isNoData)
-            .map((result) =>
-              buildNoDataAlertReason({ ...result[group], label: getLabel(result[group]), group })
-            )
-            .join('\n');
-        }
+      const shouldBuildNoDataReason = params.noDataBehavior
+        ? params.noDataBehavior !== 'recover'
+        : alertOnNoData || (alertOnGroupDisappear && hasGroups);
+      if (shouldBuildNoDataReason && (nextState === AlertStates.NO_DATA || isIndeterminateState)) {
+        reason = alertResults
+          .filter((result) => result[group]?.isNoData)
+          .map((result) =>
+            buildNoDataAlertReason({ ...result[group], label: getLabel(result[group]), group })
+          )
+          .join('\n');
       }
 
       if (reason) {
