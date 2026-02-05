@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('machine learning - data visualizer', function () {
+  describe('machine learning - data visualizer - group1', function () {
     this.tags(['skipFirefox', 'ml']);
 
     before(async () => {
@@ -37,10 +37,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./index_data_visualizer_grid_in_discover'));
     loadTestFile(require.resolve('./index_data_visualizer_grid_in_discover_trial'));
     loadTestFile(require.resolve('./index_data_visualizer_grid_in_dashboard'));
-    loadTestFile(require.resolve('./index_data_visualizer_actions_panel'));
-    loadTestFile(require.resolve('./index_data_visualizer_data_view_management'));
-    loadTestFile(require.resolve('./file_data_visualizer'));
-    loadTestFile(require.resolve('./data_drift'));
-    loadTestFile(require.resolve('./esql_data_visualizer'));
   });
 }

@@ -6,7 +6,7 @@
  */
 
 import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const testDataListPositive = [
     {
       suiteSuffix: 'with an artificial server log',
-      filePath: require.resolve('./files_to_import/artificial_server_log'),
+      filePath: require.resolve('../files_to_import/artificial_server_log'),
       indexName: 'user-import_1',
       createIndexPattern: false,
       fieldTypeFilters: [ML_JOB_FIELD_TYPES.NUMBER, ML_JOB_FIELD_TYPES.DATE],
@@ -114,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
     {
       suiteSuffix: 'with a file containing geo field',
-      filePath: require.resolve('./files_to_import/geo_file.csv'),
+      filePath: require.resolve('../files_to_import/geo_file.csv'),
       indexName: 'user-import_2',
       createIndexPattern: false,
       fieldTypeFilters: [ML_JOB_FIELD_TYPES.GEO_POINT],
@@ -157,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
     {
       suiteSuffix: 'with a file with a missing new line char at the end',
-      filePath: require.resolve('./files_to_import/missing_end_of_file_newline.csv'),
+      filePath: require.resolve('../files_to_import/missing_end_of_file_newline.csv'),
       indexName: 'user-import_3',
       createIndexPattern: false,
       fieldTypeFilters: [],
@@ -202,7 +202,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
     {
       suiteSuffix: 'with a file which does not generate a ingest pipeline',
-      filePath: require.resolve('./files_to_import/flights_small.json'),
+      filePath: require.resolve('../files_to_import/flights_small.json'),
       indexName: 'user-import_4',
       createIndexPattern: false,
       fieldTypeFilters: [ML_JOB_FIELD_TYPES.KEYWORD],
@@ -276,7 +276,7 @@ export default function ({ getService }: FtrProviderContext) {
   const testDataListNegative = [
     {
       suiteSuffix: 'with a non-log file',
-      filePath: require.resolve('./files_to_import/not_a_log_file'),
+      filePath: require.resolve('../files_to_import/not_a_log_file'),
     },
   ];
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
-import type { TestData } from './types';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { TestData } from '../types';
 
 const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
-import { farequoteDataViewTestData } from './index_test_data';
+import { farequoteDataViewTestData } from '../index_test_data';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const endTime = 'Nov 1, 2020 @ 00:00:00.000';
 
   function runTestsWhenDisabled(testData: TestData) {
-    it('should not show view mode toggle or Field stats table', async function () {
+    it('should show view mode toggle but not Field stats tab', async function () {
       await PageObjects.common.navigateToApp('discover');
       if (testData.isSavedSearch) {
         await retry.tryForTime(2 * 1000, async () => {
@@ -34,12 +34,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
 
-      await PageObjects.discover.assertViewModeToggleNotExists();
+      await PageObjects.discover.assertViewModeToggleExists();
       await PageObjects.discover.assertFieldStatsTableNotExists();
     });
   }
 
-  describe('field statistics in Discover (basic license)', function () {
+  describe('field statistics in Discover (trial license)', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
