@@ -268,6 +268,7 @@ describe('AddNewMonitorsPublicAPI', () => {
         labels: {},
         maintenance_windows: [],
         spaces: [],
+        'source.inline.encoding': 'base64',
       });
     });
   });
