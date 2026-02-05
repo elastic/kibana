@@ -16,7 +16,6 @@
     ],
     "requiredPlugins": [
       "uiActions",
-      "embeddable",
       "discover"
     ],
     "optionalPlugins": [

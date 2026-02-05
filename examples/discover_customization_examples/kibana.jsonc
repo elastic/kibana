@@ -15,7 +15,8 @@
       "embeddable",
       "kibanaUtils",
       "data",
-      "savedSearch"
+      "savedSearch",
+      "uiActions"
     ],
     "requiredBundles": ["kibanaReact"]
   }

@@ -12,7 +12,7 @@ import { ADD_PANEL_OTHER_GROUP } from '@kbn/embeddable-plugin/public';
 import { type TracksOverlays } from '@kbn/presentation-util';
 import type { PresentableGroup } from '@kbn/ui-actions-browser/src/types';
 import type { HasAppContext } from '@kbn/presentation-publishing';
-import { triggers } from '@kbn/ui-actions-plugin/public/triggers';
+import { triggers } from '@kbn/ui-actions-plugin/public';
 import { uiActionsService } from '../../../services/kibana_services';
 import type { MenuItem, MenuItemGroup } from './types';
 
