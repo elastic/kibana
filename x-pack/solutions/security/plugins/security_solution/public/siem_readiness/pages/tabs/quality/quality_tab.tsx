@@ -29,12 +29,10 @@ import {
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { QualityWarningPrompt } from './quality_warning_prompt';
-import {
-  buildQualityCaseDescription,
-  getQualityCaseTitle,
-  getQualityCaseTags,
-} from './quality_add_case_details';
+import { buildQualityCaseDescription, getQualityCaseTitle } from './quality_add_case_details';
 import { ViewCasesButton } from '../../components/view_cases_button';
+
+const DATA_QUALITY_CASE_TAGS = ['siem-readiness', 'data-quality', 'ecs-compatibility'];
 
 // Extended IndexInfo with computed fields
 interface IndexInfoWithStatus extends IndexInfo, Record<string, unknown> {
@@ -99,7 +97,7 @@ export const QualityTab: React.FC = () => {
     openNewCaseFlyout({
       title: getQualityCaseTitle(),
       description: caseDescription,
-      tags: getQualityCaseTags(),
+      tags: DATA_QUALITY_CASE_TAGS,
     });
   }, [openNewCaseFlyout, caseDescription]);
 
@@ -366,7 +364,7 @@ export const QualityTab: React.FC = () => {
         {hasIncompatibleIndices && (
           <>
             <EuiFlexItem grow={false}>
-              <ViewCasesButton caseTagsArray={getQualityCaseTags()} />
+              <ViewCasesButton caseTagsArray={DATA_QUALITY_CASE_TAGS} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
