@@ -26,6 +26,7 @@ import {
 } from '@kbn/detections-response-ftr-services';
 import type TestAgent from 'supertest/lib/agent';
 import { v4 as uuidV4 } from 'uuid';
+import type { Response } from 'supertest';
 import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
@@ -704,6 +705,9 @@ export default ({ getService }: FtrProviderContext) => {
       let dataCleanup: Array<() => Promise<void>>;
       let apiCreatePayload: ReturnType<typeof getCustomQueryRuleParams>;
 
+      const checkCleanupResponse = async (response: Response) => {
+        if (response.error) throw response.error;
+      };
       const logCleanupError = (e: Error) => {
         log.warning(`Failed to clean up test data`, e);
       };
@@ -744,7 +748,11 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await detectionsApi.createRule({ body: apiCreatePayload }).expect(200);
 
         dataCleanup.push(async () => {
-          await detectionsApi.deleteRule({ query: { id: body.id } }).catch(logCleanupError);
+          log.info(`Cleaning up test data: rule id [${body.id}]`);
+          await detectionsApi
+            .deleteRule({ query: { id: body.id } })
+            .then(checkCleanupResponse)
+            .catch(logCleanupError);
         });
 
         expect(body.response_actions).toEqual(apiCreatePayload.response_actions);

@@ -27,6 +27,7 @@ import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-service
 import { getGapsByRuleId } from '@kbn/detections-response-ftr-services/rules/get_gaps_by_rule_id';
 import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import type TestAgent from 'supertest/lib/agent';
+import type { Response } from 'supertest';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
 import { ROLE } from '../../../../../config/services/security_solution_edr_workflows_roles_users';
@@ -552,11 +553,14 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(rulesResponse.total).toEqual(2);
     });
 
-    describe('Duplicate with Response Actions', () => {
+    describe('Duplicate bulk action with Response Actions', () => {
       let superTestResponseActionsNoAuthz: TestAgent;
       let dataCleanup: Array<() => Promise<void>>;
       let id: string;
 
+      const checkCleanupResponse = async (response: Response) => {
+        if (response.error) throw response.error;
+      };
       const logCleanupError = (e: Error) => {
         log.warning(`Failed to clean up test data`, e);
       };
@@ -587,7 +591,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         dataCleanup = [
           async () => {
-            await detectionsApi.deleteRule({ query: { id } }).catch(logCleanupError);
+            log.info(`Cleaning up test data: rule id [${id}]`);
+            await detectionsApi
+              .deleteRule({ query: { id } })
+              .then(checkCleanupResponse)
+              .catch(logCleanupError);
           },
         ];
       });
@@ -608,8 +616,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
         if (body.attributes?.results?.created?.[0]?.rule_id) {
           dataCleanup.push(async () => {
+            const ruleId = body.attributes.results.created[0].rule_id;
+
+            log.info(`Cleaning up test data: rule_id [${ruleId}]`);
+
             await detectionsApi
-              .deleteRule({ query: { rule_id: body.attributes.results.created[0].rule_id } })
+              .deleteRule({ query: { rule_id: ruleId } })
+              .then(checkCleanupResponse)
               .catch(logCleanupError);
           });
         }

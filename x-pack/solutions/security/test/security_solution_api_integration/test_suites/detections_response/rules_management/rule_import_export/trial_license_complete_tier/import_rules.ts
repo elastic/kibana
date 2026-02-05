@@ -21,8 +21,12 @@ import type {
 } from '@kbn/securitysolution-exceptions-common/api';
 import { createRule } from '@kbn/detections-response-ftr-services';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
+import type TestAgent from 'supertest/lib/agent';
+import type { Response } from 'supertest';
+import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
 import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
 import {
+  combineArrayToNdJson,
   fetchRule,
   getCustomQueryRuleParams,
   getThresholdRuleForAlertTesting,
@@ -33,6 +37,7 @@ import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 import { createConnector } from '../../../utils/connectors';
+import { ROLE } from '../../../../../config/services/security_solution_edr_workflows_roles_users';
 
 const RULE_TO_IMPORT_RULE_ID = 'imported-rule';
 const RULE_TO_IMPORT_RULE_ID_2 = 'another-imported-rule';
@@ -43,6 +48,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const exceptionsApi = getService('exceptionsApi');
   const log = getService('log');
   const spacesServices = getService('spaces');
+  const utils = getService('securitySolutionUtils');
+  const rolesUsersProvider = getService('rolesUsersProvider');
 
   describe('@ess @serverless @skipInServerlessMKI import custom rules', () => {
     const spaceId = '4567-space';
@@ -1434,6 +1441,110 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_success_count: 1,
           action_connectors_errors: [],
           action_connectors_warnings: [],
+        });
+      });
+    });
+
+    describe('importing with endpoint response actions', () => {
+      let superTestResponseActionsNoAuthz: TestAgent;
+      let dataCleanup: Array<() => Promise<void>>;
+      let rulesToImport: unknown[];
+
+      const checkCleanupResponse = async (response: Response) => {
+        if (response.error) throw response.error;
+      };
+      const logCleanupError = (e: Error) => {
+        log.warning(`Failed to clean up test data`, e);
+      };
+
+      before(async () => {
+        await rolesUsersProvider.createRole({
+          predefinedRole: ROLE.endpoint_response_actions_no_access,
+        });
+        await rolesUsersProvider.createUser({
+          name: ROLE.endpoint_response_actions_no_access,
+          roles: [ROLE.endpoint_response_actions_no_access],
+        });
+
+        superTestResponseActionsNoAuthz = await utils.createSuperTest(
+          ROLE.endpoint_response_actions_no_access
+        );
+      });
+
+      beforeEach(async () => {
+        rulesToImport = [
+          getCustomQueryRuleParams({
+            rule_id: uuid(),
+            response_actions: [
+              {
+                action_type_id: '.endpoint',
+                params: {
+                  command: 'suspend-process',
+                  config: { field: 'some-field', overwrite: false },
+                },
+              },
+            ],
+          }),
+        ];
+
+        dataCleanup = [];
+      });
+
+      afterEach(async () => {
+        await Promise.allSettled(dataCleanup.splice(0).map((cleanupFn) => cleanupFn()));
+      });
+
+      it('should import rules with response actions when user has authz', async () => {
+        const importResponse = await importRules({
+          getService,
+          rules: rulesToImport,
+          overwrite: false,
+        });
+
+        dataCleanup.push(async () => {
+          // @ts-expect-error due to array of `unknown` items
+          const ruleId = rulesToImport[0].rule_id;
+          log.info(`Cleaning up test data: rule_id [${ruleId}]`);
+          await detectionsApi
+            .deleteRule({ query: { rule_id: ruleId } })
+            .then(checkCleanupResponse)
+            .catch(logCleanupError);
+        });
+
+        expect(importResponse).toMatchObject({
+          success: true,
+          success_count: 1,
+          rules_count: 1,
+          errors: [],
+        });
+      });
+
+      it('should NOT import rules with response actions when user does NOT have authz', async () => {
+        // @ts-expect-error due to array of `unknown` items
+        const ruleId = rulesToImport[0].rule_id;
+        const fileBuffer = Buffer.from(combineArrayToNdJson(rulesToImport));
+
+        const { body } = await superTestResponseActionsNoAuthz
+          .post('/api/detection_engine/rules/_import')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+          .attach('file', fileBuffer, { filename: 'rules.ndjson' })
+          .expect(200);
+
+        expect(body).toMatchObject({
+          success: false,
+          success_count: 0,
+          errors: [
+            {
+              error: {
+                message: 'User is not authorized to create/update suspend-process response action',
+                status_code: 403,
+              },
+              id: '',
+              rule_id: ruleId,
+            },
+          ],
         });
       });
     });
