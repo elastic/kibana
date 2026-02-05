@@ -90,6 +90,6 @@ export interface SiemReadinessPackageInfo {
 export interface PipelineStats {
   name: string;
   indices: string[];
-  count: number;
-  failed: number;
+  docsCount: number;
+  failedDocsCount: number;
 }

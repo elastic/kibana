@@ -34,7 +34,7 @@ import {
 } from './continuity_add_case_details';
 
 // Extended PipelineStats with computed fields and Record<string, unknown> for CategoryAccordionTable
-interface PipelineWithCategory extends PipelineStats, Record<string, unknown> {
+export interface PipelineInfoWithStatus extends PipelineStats, Record<string, unknown> {
   failureRate: string;
   status: 'healthy' | 'critical';
 }
@@ -63,16 +63,18 @@ export const ContinuityTab: React.FC = () => {
   }, [categoriesData?.mainCategoriesMap]);
 
   // Group pipelines by category based on their associated indices
-  const categorizedPipelines: Array<CategoryData<PipelineWithCategory>> = useMemo(() => {
+  const categorizedPipelines: Array<CategoryData<PipelineInfoWithStatus>> = useMemo(() => {
     if (!pipelinesData?.length) return [];
 
-    const categoryMap = new Map<string, PipelineWithCategory[]>();
+    const categoryMap = new Map<string, PipelineInfoWithStatus[]>();
 
     pipelinesData.forEach((pipeline) => {
       const failureRate =
-        pipeline.count > 0 ? ((pipeline.failed / pipeline.count) * 100).toFixed(1) : '0.0';
+        pipeline.docsCount > 0
+          ? ((pipeline.failedDocsCount / pipeline.docsCount) * 100).toFixed(1)
+          : '0.0';
 
-      const pipelineWithStats: PipelineWithCategory = {
+      const pipelineWithStats: PipelineInfoWithStatus = {
         ...pipeline,
         failureRate,
         status: Number(failureRate) > 1 ? 'critical' : 'healthy',
@@ -90,14 +92,14 @@ export const ContinuityTab: React.FC = () => {
     });
 
     // Build result in category order, sorted by count descending
-    const result: Array<CategoryData<PipelineWithCategory>> = [];
+    const result: Array<CategoryData<PipelineInfoWithStatus>> = [];
     CATEGORY_ORDER.forEach((category) => {
       const items = categoryMap.get(category);
       if (!items) return;
 
       result.push({
         category,
-        items: items.sort((a, b) => b.count - a.count),
+        items: items.sort((a, b) => b.docsCount - a.docsCount),
       });
     });
 
@@ -107,7 +109,7 @@ export const ContinuityTab: React.FC = () => {
   // Check if any pipeline has failures
   const hasDocFailures = useMemo(() => {
     return categorizedPipelines.some((category) =>
-      category.items.some((pipeline) => pipeline.failed > 0)
+      category.items.some((pipeline) => pipeline.failedDocsCount > 0)
     );
   }, [categorizedPipelines]);
 
@@ -126,7 +128,7 @@ export const ContinuityTab: React.FC = () => {
   }, [openNewCaseFlyout, caseDescription]);
 
   // Table columns
-  const columns: Array<EuiBasicTableColumn<PipelineWithCategory>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<PipelineInfoWithStatus>> = useMemo(
     () => [
       {
         field: 'name',
@@ -138,7 +140,7 @@ export const ContinuityTab: React.FC = () => {
         width: '30%',
       },
       {
-        field: 'count',
+        field: 'docsCount',
         name: i18n.translate(
           'xpack.securitySolution.siemReadiness.continuity.column.docsIngested',
           {
@@ -146,16 +148,16 @@ export const ContinuityTab: React.FC = () => {
           }
         ),
         sortable: true,
-        render: (count: number) => count.toLocaleString(),
+        render: (docsCount: number) => docsCount.toLocaleString(),
         width: '20%',
       },
       {
-        field: 'failed',
+        field: 'failedDocsCount',
         name: i18n.translate('xpack.securitySolution.siemReadiness.continuity.column.failedDocs', {
           defaultMessage: 'Failed Docs',
         }),
         sortable: true,
-        render: (failed: number) => failed.toLocaleString(),
+        render: (failedDocsCount: number) => failedDocsCount.toLocaleString(),
         width: '15%',
       },
       {
@@ -164,7 +166,7 @@ export const ContinuityTab: React.FC = () => {
           defaultMessage: 'Failure Rate',
         }),
         sortable: true,
-        render: (rate: string) => `${rate}%`,
+        render: (failureRate: string) => `${failureRate}%`,
         width: '15%',
       },
       {
@@ -196,7 +198,7 @@ export const ContinuityTab: React.FC = () => {
         name: i18n.translate('xpack.securitySolution.siemReadiness.continuity.column.action', {
           defaultMessage: 'Action',
         }),
-        render: (pipelineName: string, item: PipelineWithCategory) => (
+        render: (pipelineName: string, item: PipelineInfoWithStatus) => (
           <EuiButtonEmpty
             size="s"
             href={`/app/management/ingest/ingest_pipelines?pipeline=${encodeURIComponent(
@@ -226,10 +228,10 @@ export const ContinuityTab: React.FC = () => {
   );
 
   // Render function for accordion extra action (right side badges/stats)
-  const renderExtraAction = (category: CategoryData<PipelineWithCategory>) => {
+  const renderExtraAction = (category: CategoryData<PipelineInfoWithStatus>) => {
     const totalPipelines = category.items.length;
-    const totalDocs = category.items.reduce((sum, p) => sum + p.count, 0);
-    const totalFailed = category.items.reduce((sum, p) => sum + p.failed, 0);
+    const totalDocs = category.items.reduce((sum, p) => sum + p.docsCount, 0);
+    const totalFailed = category.items.reduce((sum, p) => sum + p.failedDocsCount, 0);
     const overallFailureRate = totalDocs > 0 ? ((totalFailed / totalDocs) * 100).toFixed(1) : '0.0';
     const isCritical = Number(overallFailureRate) > 1;
 

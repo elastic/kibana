@@ -15,8 +15,8 @@ import type { SiemReadinessRoutesDeps } from '../types';
 export interface PipelineStats {
   name: string;
   indices: string[];
-  count: number;
-  failed: number;
+  docsCount: number;
+  failedDocsCount: number;
 }
 
 export type PipelinesResponse = PipelineStats[];
@@ -114,8 +114,8 @@ export const getReadinessPipelinesRoute = (
             pipelines.push({
               name,
               indices: Array.from(pipelineToIndices[name] || []),
-              count: activePipelineStats.count,
-              failed: activePipelineStats.failed,
+              docsCount: activePipelineStats.count,
+              failedDocsCount: activePipelineStats.failed,
             });
           });
 

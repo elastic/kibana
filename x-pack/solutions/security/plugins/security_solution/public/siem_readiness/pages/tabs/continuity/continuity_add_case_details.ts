@@ -7,14 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { CategoryData } from '../../components/category_accordion_table';
-
-interface PipelineInfoWithStatus {
-  name: string;
-  count: number;
-  failed: number;
-  failureRate: string;
-  status: 'healthy' | 'critical';
-}
+import type { PipelineInfoWithStatus } from './continuity_tab';
 
 export const buildContinuityCaseDescription = (
   categories: Array<CategoryData<PipelineInfoWithStatus>>,
@@ -25,7 +18,7 @@ export const buildContinuityCaseDescription = (
   // Build the list of failing pipelines grouped by category
   const categoryDetails = categories
     .map((category) => {
-      const failingPipelines = category.items.filter((item) => item.status === 'critical');
+      const failingPipelines = category.items.filter((item) => Number(item.failureRate) > 1);
 
       if (failingPipelines.length === 0) {
         return null;
@@ -34,7 +27,7 @@ export const buildContinuityCaseDescription = (
       const pipelinesList = failingPipelines
         .map(
           (item) =>
-            `  - \`${item.name}\` (${item.failed.toLocaleString()} failed docs, ${
+            `  - \`${item.name}\` (${item.failedDocsCount.toLocaleString()} failed docs, ${
               item.failureRate
             }% failure rate)`
         )
@@ -46,12 +39,13 @@ export const buildContinuityCaseDescription = (
     .join('\n\n');
 
   const totalFailingPipelines = categories.reduce(
-    (sum, category) => sum + category.items.filter((item) => item.status === 'critical').length,
+    (sum, category) => sum + category.items.filter((item) => Number(item.failureRate) > 1).length,
     0
   );
 
   const totalFailedDocs = categories.reduce(
-    (sum, category) => sum + category.items.reduce((catSum, item) => catSum + item.failed, 0),
+    (sum, category) =>
+      sum + category.items.reduce((catSum, item) => catSum + item.failedDocsCount, 0),
     0
   );
 
