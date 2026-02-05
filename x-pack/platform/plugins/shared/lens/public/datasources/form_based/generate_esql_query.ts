@@ -85,7 +85,8 @@ function getEsqlQueryFailedResult(
 /**
  * Optional mapping of column IDs to semantic role names.
  * Used to generate more meaningful ES|QL column names.
- * e.g., { 'col-123': 'max_value' } will generate `EVAL max_value = 100` instead of `EVAL static = 100`
+ * e.g., { 'col-123': 'max_value' } will generate
+ * `EVAL static_max_value = 100` instead of `EVAL static_value = 100`.
  */
 export interface ColumnRoles {
   [columnId: string]: string;
