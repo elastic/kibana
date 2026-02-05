@@ -30,7 +30,7 @@ pageLoadAssetSize:
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
-  dashboard: 19957
+  dashboard: 20000
   dashboardEnhanced: 12159
   dashboardMarkdown: 4994
   data: 500179
@@ -205,7 +205,8 @@ pageLoadAssetSize:
   visTypeVega: 38538
   visTypeVislib: 14679
   visTypeXy: 32342
-  visualizations: 38375
+  visualizationListing: 5148
+  visualizations: 53333
   watcher: 10485
   workflowsExtensions: 90040
   workflowsManagement: 8497
