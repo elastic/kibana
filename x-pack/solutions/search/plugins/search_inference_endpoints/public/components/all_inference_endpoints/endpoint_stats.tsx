@@ -36,7 +36,12 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
   }, [endpoints]);
 
   return (
-    <EuiFlexGroup gutterSize="m" alignItems="center" data-test-subj="endpointStats">
+    <EuiFlexGroup
+      gutterSize="m"
+      alignItems="center"
+      responsive={false}
+      data-test-subj="endpointStats"
+    >
       <EuiFlexItem grow={false}>
         <EuiText size="s" data-test-subj="endpointStatsServices">
           <EuiTextColor color="subdued">{SERVICES_LABEL}</EuiTextColor>&nbsp;
