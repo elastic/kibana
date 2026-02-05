@@ -1,0 +1,26 @@
+# STDDEV_OVER_TIME
+
+Calculates the population standard deviation of a numeric field over a specified time window.
+
+## Syntax
+
+`STDDEV_OVER_TIME(field, window)`
+
+### Parameters
+
+#### field
+
+The metric field to calculate the standard deviation for.
+
+#### window
+
+The time window over which to compute the standard deviation.
+
+## Examples
+
+Calculates the maximum standard deviation of the `network.cost` field over time, grouping results by cluster and 1-minute time buckets.
+
+```esql
+TS k8s
+| STATS max_stddev_cost=MAX(STDDEV_OVER_TIME(network.cost)) BY cluster, time_bucket = TBUCKET(1minute)
+```

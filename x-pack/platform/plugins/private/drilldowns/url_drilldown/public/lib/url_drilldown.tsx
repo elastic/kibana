@@ -39,6 +39,11 @@ import type { SerializedAction } from '@kbn/ui-actions-enhanced-plugin/common/ty
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { EuiText, EuiTextBlockTruncate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  DEFAULT_ENCODE_URL,
+  DEFAULT_OPEN_IN_NEW_TAB,
+  URL_DRILLDOWN_SUPPORTED_TRIGGERS,
+} from '../../common/constants';
 import { txtUrlDrilldownDisplayName } from './i18n';
 import { getEventScopeValues, getEventVariableList } from './variables/event_variables';
 import { getContextScopeValues, getContextVariableList } from './variables/context_variables';
@@ -130,13 +135,7 @@ export class UrlDrilldown implements Drilldown<Config, ChartActionContext, Actio
   public readonly euiIcon = 'link';
 
   supportedTriggers(): UrlTrigger[] {
-    return [
-      VALUE_CLICK_TRIGGER,
-      SELECT_RANGE_TRIGGER,
-      ROW_CLICK_TRIGGER,
-      CONTEXT_MENU_TRIGGER,
-      IMAGE_CLICK_TRIGGER,
-    ];
+    return URL_DRILLDOWN_SUPPORTED_TRIGGERS as UrlTrigger[];
   }
   public readonly CollectConfig: React.FC<CollectConfigProps> = ({ config, onConfig, context }) => {
     const [variables, exampleUrl] = React.useMemo(
@@ -167,8 +166,8 @@ export class UrlDrilldown implements Drilldown<Config, ChartActionContext, Actio
     url: {
       template: '',
     },
-    openInNewTab: true,
-    encodeUrl: true,
+    openInNewTab: DEFAULT_OPEN_IN_NEW_TAB,
+    encodeUrl: DEFAULT_ENCODE_URL,
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {
@@ -210,7 +209,7 @@ export class UrlDrilldown implements Drilldown<Config, ChartActionContext, Actio
       throw new Error(errorMessage);
     }
 
-    const doEncode = config.encodeUrl ?? true;
+    const doEncode = config.encodeUrl ?? DEFAULT_ENCODE_URL;
 
     const url = await urlDrilldownCompileUrl(
       config.url.template,
