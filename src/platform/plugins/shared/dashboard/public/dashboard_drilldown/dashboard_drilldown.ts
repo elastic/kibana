@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DrilldownDefinition } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { isFilterPinned } from '@kbn/es-query';
@@ -15,7 +15,7 @@ import type { DashboardDrilldownState } from '../../server/dashboard_drilldown/t
 import { coreServices } from '../services/kibana_services';
 import { getLocation } from './get_location';
 import { cleanEmptyKeys } from '../../common/locator/locator';
-import { DASHBOARD_DRILLDOWN_SUPPORTED_TRIGGERS } from '../../common/page_bundle_constants';
+import { DASHBOARD_DRILLDOWN_SUPPORTED_TRIGGERS, DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '../../common/page_bundle_constants';
 
 export const dashboardDrilldown: DrilldownDefinition<
   DashboardDrilldownState,
@@ -34,6 +34,12 @@ export const dashboardDrilldown: DrilldownDefinition<
     }
   },
   getHref,
+  getInitialState: () => ({
+    label: i18n.translate('dashboard.drilldown.goToDashboard', {
+      defaultMessage: 'Go to Dashboard',
+    }),
+    ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
+  }),
   supportedTriggers: DASHBOARD_DRILLDOWN_SUPPORTED_TRIGGERS,
 };
 

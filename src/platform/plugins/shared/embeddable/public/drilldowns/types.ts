@@ -13,7 +13,7 @@ import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { Observable } from 'rxjs';
 import type { SerializedDrilldowns, DrilldownState } from '../../server';
 
-export type DrilldownStateInternal = DrilldownState & { actionId: string };
+export type DrilldownActionState = DrilldownState & { actionId: string };
 
 export type DrilldownDefinition<
   TDrilldownState extends DrilldownState = DrilldownState,
@@ -37,6 +37,8 @@ export type DrilldownDefinition<
    * Returns a link where drilldown should navigate on middle click or Ctrl + click.
    */
   getHref?(drilldownState: TDrilldownState, context: TContext): Promise<string | undefined>;
+
+  getInitialState(): Partial<TDrilldownState>;
 
   isCompatible?: ActionDefinition['isCompatible'];
 
@@ -72,5 +74,5 @@ export interface DrilldownsManager {
 
 export type HasDrilldowns = {
   setDrilldowns: (drilldowns: DrilldownState[]) => void;
-  drilldowns$: PublishingSubject<DrilldownState[]>;
+  drilldowns$: PublishingSubject<DrilldownActionState[]>;
 };

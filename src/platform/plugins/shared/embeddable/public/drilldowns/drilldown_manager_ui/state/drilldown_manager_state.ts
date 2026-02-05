@@ -1,0 +1,454 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import useObservable from 'react-use/lib/useObservable';
+import { BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs';
+import type {
+  PublicDrilldownManagerProps,
+  DrilldownManagerDependencies,
+  DrilldownType,
+} from '../types';
+import {
+  toastDrilldownCreated,
+  toastDrilldownsCRUDError,
+  txtDefaultTitle,
+  toastDrilldownDeleted,
+  toastDrilldownsDeleted,
+} from './i18n';
+import { DrilldownState } from '../../../../server/drilldowns/types';
+
+const helloMessageStorageKey = `drilldowns:hidWelcomeMessage`;
+
+export interface DrilldownManagerStateDeps
+  extends DrilldownManagerDependencies,
+    PublicDrilldownManagerProps {}
+
+/**
+ * An instance of this class holds all the state necessary for Drilldown
+ * Manager. It also holds all the necessary controllers to change the state.
+ *
+ * `<DrilldownManager>` and other container components access this state using
+ * the `useDrilldownManager()` React hook:
+ *
+ * ```ts
+ * const state = useDrilldownManager();
+ * ```
+ */
+export class DrilldownManagerState {
+  /**
+   * Title displayed at the top of <DrilldownManager> flyout.
+   */
+  private readonly title$ = new BehaviorSubject<React.ReactNode>(txtDefaultTitle);
+
+  /**
+   * Footer displayed at the bottom of <DrilldownManager> flyout.
+   */
+  private readonly footer$ = new BehaviorSubject<React.ReactNode>(null);
+
+  /**
+   * Route inside Drilldown Manager flyout that is displayed to the user. Some
+   * available routes are:
+   *
+   * - `['create']`
+   * - `['new']`
+   * - `['new', 'DASHBOARD_TO_DASHBOARD_DRILLDOWN']`
+   * - `['manage']`
+   * - `['manage', 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy']`
+   */
+  public readonly route$: BehaviorSubject<string[]>;
+
+  /**
+   * Whether a drilldowns welcome message should be displayed to the user at
+   * the very top of the drilldowns manager flyout.
+   */
+  public readonly hideWelcomeMessage$: BehaviorSubject<boolean>;
+
+  /**
+   * Currently selected drilldown type.
+   */
+  public readonly activeDrilldownType$: BehaviorSubject<undefined | DrilldownType>;
+
+  /**
+   * State for each drilldown type used for new drilldown creation, so when user
+   * switched between drilldown types the configuration of the previous
+   * drilldown is preserved.
+   */
+  public readonly drilldownStateCache = new Map<string, Partial<DrilldownState>>();
+
+  /**
+   * Whether user can unlock more drilldown types if they subscribe to a higher
+   * license tier.
+   */
+  public readonly canUnlockMoreDrilldowns: boolean;
+
+  /**
+   * Used to show cloning success notification.
+   */
+  public lastCloneRecord: null | { time: number; templateIds: string[] } = null;
+
+  constructor(public readonly deps: DrilldownManagerStateDeps) {
+    const hideWelcomeMessage = deps.storage.get(helloMessageStorageKey);
+    this.hideWelcomeMessage$ = new BehaviorSubject<boolean>(hideWelcomeMessage ?? false);
+    this.canUnlockMoreDrilldowns = deps.drilldownTypes.some(
+      ({ isCompatibleLicense }) => !isCompatibleLicense
+    );
+
+    /*this.events$ = new BehaviorSubject<DrilldownTableItem[]>(
+      this.deps.dynamicActionManager.state.get().events.map(this.mapEventToDrilldownItem)
+    );
+
+    deps.dynamicActionManager.state.state$
+      .pipe(map((state) => state.events.map(this.mapEventToDrilldownItem)))
+      .subscribe(this.events$);*/
+
+    let { initialRoute = '' } = deps;
+    if (!initialRoute) initialRoute = 'manage';
+    else if (initialRoute[0] === '/') initialRoute = initialRoute.substr(1);
+    this.route$ = new BehaviorSubject(initialRoute.split('/'));
+
+    this.activeDrilldownType$ = new BehaviorSubject<undefined | DrilldownType>(
+      this.getActiveDrilldownType()
+    );
+    this.route$.pipe(map(() => this.getActiveDrilldownType())).subscribe(this.activeDrilldownType$);
+  }
+
+  /**
+   * Set flyout main heading text.
+   * @param title New title.
+   */
+  public setTitle(title: React.ReactNode) {
+    this.title$.next(title);
+  }
+
+  /**
+   * Set the new flyout footer that renders at the very bottom of the Drilldown
+   * Manager flyout.
+   * @param footer New title.
+   */
+  public setFooter(footer: React.ReactNode) {
+    this.footer$.next(footer);
+  }
+
+  /**
+   * Set the flyout main heading back to its default state.
+   */
+  public resetTitle() {
+    this.setTitle(txtDefaultTitle);
+  }
+
+  /**
+   * Change the screen of Drilldown Manager.
+   */
+  public setRoute(route: string[]): void {
+    if (route[0] === 'manage') this.deps.closeAfterCreate = false;
+    this.route$.next(route);
+  }
+
+  /**
+   * Callback called to hide drilldowns welcome message, and remember in local
+   * storage that user opted to hide this message.
+   */
+  public readonly hideWelcomeMessage = (): void => {
+    this.hideWelcomeMessage$.next(true);
+    this.deps.storage.set(helloMessageStorageKey, true);
+  };
+
+  /**
+   * Select a different drilldown.
+   */
+  public setDrilldownType(drilldownType: undefined | DrilldownType): void {
+    if (!drilldownType) {
+      const route = this.route$.getValue();
+      if (route[0] === 'new' && route.length > 1) this.setRoute(['new']);
+      return;
+    }
+
+    if (!this.drilldownStateCache.has(drilldownType.id)) {
+      this.drilldownStateCache.set(drilldownType.id, {
+        ...drilldownType.getInitialState(),
+        type: drilldownType.id
+      });
+    }
+
+    this.route$.next(['new', drilldownType.id]);
+  }
+
+  public getActiveDrilldownType(): undefined | DrilldownType {
+    const [step1, id] = this.route$.getValue();
+    if (step1 !== 'new' || !id) return undefined;
+    return this.deps.drilldownTypes.find((drilldownType) => drilldownType.id === id);
+  }
+
+  /**
+   * Close the drilldown flyout.
+   */
+  public readonly close = (): void => {
+    this.deps.onClose();
+  };
+
+  /**
+   * Get action factory context, which also contains a custom place context
+   * provided by the user who triggered rendering of the <DrilldownManager>.
+   */
+  /*public getActionFactoryContext(): BaseActionFactoryContext {
+    const placeContext = this.deps.placeContext ?? [];
+    const context: BaseActionFactoryContext = {
+      ...placeContext,
+      triggers: [],
+    };
+
+    return context;
+  }*/
+
+  /*public getCompatibleActionFactories(
+    context: BaseActionFactoryContext
+  ): Observable<ActionFactory[] | undefined> {
+    const compatibleActionFactories$ = new BehaviorSubject<undefined | ActionFactory[]>(undefined);
+    Promise.allSettled(
+      this.deps.actionFactories.map((factory) => factory.isCompatible(context))
+    ).then((factoryCompatibility) => {
+      compatibleActionFactories$.next(
+        this.deps.actionFactories.filter((_factory, i) => {
+          const result = factoryCompatibility[i];
+          // treat failed isCompatible checks as non-compatible
+          return result.status === 'fulfilled' && result.value;
+        })
+      );
+    });
+    return compatibleActionFactories$.asObservable();
+  }*/
+
+  /**
+   * Get state object of the drilldown which is currently being created.
+   */
+  public getDrilldownState(): undefined | Partial<DrilldownState> {
+    const activeDrilldownType = this.getActiveDrilldownType();
+    if (!activeDrilldownType) return undefined;
+    const drilldownState = this.drilldownStateCache.get(activeDrilldownType.id);
+    return drilldownState;
+  }
+
+  /**
+   * Called when user presses "Create drilldown" button to save the
+   * currently edited drilldown.
+   */
+  public async createDrilldown(): Promise<void> {
+    const { drilldowns$, setDrilldowns, toastService } = this.deps;
+    const drilldownState = this.getDrilldownState() as DrilldownState;
+
+    if (!drilldownState) return;
+
+    try {
+      setDrilldowns([
+        ...drilldowns$.getValue(),
+        drilldownState
+      ]);
+      toastService.addSuccess({
+        title: toastDrilldownCreated.title(drilldownState.label),
+        text: toastDrilldownCreated.text,
+      });
+      this.drilldownStateCache.delete(drilldownState.type);
+      if (this.deps.closeAfterCreate) {
+        this.deps.onClose();
+      } else {
+        this.setRoute(['manage']);
+      }
+    } catch (error) {
+      toastService.addError(error, {
+        title: toastDrilldownsCRUDError,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Deletes a list of drilldowns and shows toast notifications to the user.
+   *
+   * @param ids Drilldown IDs.
+   */
+  public readonly onDelete = (ids: string[]) => {
+    const { drilldowns$, setDrilldowns, toastService } = this.deps;
+    try {
+      setDrilldowns([
+        ...drilldowns$.getValue().filter(({ actionId }) => !ids.includes(actionId))
+      ])
+      this.deps.toastService.addSuccess(
+        ids.length === 1
+          ? {
+              title: toastDrilldownDeleted.title,
+              text: toastDrilldownDeleted.text,
+            }
+          : {
+              title: toastDrilldownsDeleted.title(ids.length),
+              text: toastDrilldownsDeleted.text,
+            }
+      );
+    } catch (error) {
+      toastService.addError(error, {
+        title: toastDrilldownsCRUDError,
+      });
+    }
+  };
+
+  /**
+   * Clone a list of selected templates.
+   */
+  /*public readonly onClone = async (templateIds: string[]) => {
+    const { templates } = this.deps;
+    if (!templates) return;
+    const templatesToClone: DrilldownTemplate[] = templateIds
+      .map((templateId) => templates.find(({ id }) => id === templateId))
+      .filter(Boolean) as DrilldownTemplate[];
+
+    for (const template of templatesToClone) {
+      await this.cloneTemplate(template);
+    }
+
+    this.lastCloneRecord = {
+      time: Date.now(),
+      templateIds,
+    };
+    this.setRoute(['manage']);
+  };*/
+
+  /*private async cloneTemplate(template: DrilldownTemplate) {
+    const { dynamicActionManager } = this.deps;
+    const name = this.pickName(template.name);
+    const action: SerializedAction = {
+      factoryId: template.factoryId,
+      name,
+      config: (template.config || {}) as SerializableRecord,
+    };
+    await dynamicActionManager.createEvent(action, template.triggers);
+  }*/
+
+  /**
+   * Checks if drilldown with such a name already exists.
+   */
+  /*private hasDrilldownWithName(name: string): boolean {
+    return this.deps.drilldowns$.getValue().some(({ label }) => label === name);
+  }*/
+
+  /**
+   * Picks a unique name for the cloned drilldown. Adds "(copy)", "(copy 1)",
+   * "(copy 2)", etc. if drilldown with such name already exists.
+   */
+  /*private pickName(name: string): string {
+    if (this.hasDrilldownWithName(name)) {
+      const matches = name.match(/(.*) (\(copy[^\)]*\))/);
+      if (matches) name = matches[1];
+      for (let i = 0; i < 100; i++) {
+        const proposedName = !i ? `${name} (copy)` : `${name} (copy ${i})`;
+        const exists = this.hasDrilldownWithName(proposedName);
+        if (!exists) return proposedName;
+      }
+    }
+    return name;
+  }*/
+
+  /*public readonly onCreateFromTemplate = async (templateId: string) => {
+    const { templates } = this.deps;
+    if (!templates) return;
+    const template = templates.find(({ id }) => id === templateId);
+    if (!template) return;
+    const actionFactory = this.deps.actionFactories.find(({ id }) => id === template.factoryId);
+    if (!actionFactory) return;
+    this.setActionFactory(actionFactory);
+    const drilldownState = this.getDrilldownState();
+    if (drilldownState) {
+      drilldownState.setName(this.pickName(template.name));
+      drilldownState.setTriggers(template.triggers);
+      drilldownState.setConfig(template.config as SerializableRecord);
+    }
+  };*/
+
+  /*public readonly onCreateFromDrilldown = async (eventId: string) => {
+    const { dynamicActionManager } = this.deps;
+    const { events } = dynamicActionManager.state.get();
+    const event = events.find((ev) => ev.eventId === eventId);
+    if (!event) return;
+    const actionFactory = this.deps.actionFactories.find(({ id }) => id === event.action.factoryId);
+    if (!actionFactory) return;
+    this.setActionFactory(actionFactory);
+    const drilldownState = this.getDrilldownState();
+    if (drilldownState) {
+      drilldownState.setName(this.pickName(event.action.name));
+      drilldownState.setTriggers(event.triggers);
+      drilldownState.setConfig(event.action.config);
+    }
+  };*/
+
+  /**
+   * Returns the state object of an existing drilldown for editing purposes.
+   *
+   * @param eventId ID of the saved dynamic action event.
+   */
+  /*public createEventDrilldownState(eventId: string): null | DrilldownState {
+    const { dynamicActionManager, actionFactories, triggers: placeTriggers } = this.deps;
+    const { events } = dynamicActionManager.state.get();
+    const event = events.find((ev) => ev.eventId === eventId);
+    if (!event) return null;
+    const factory = actionFactories.find(({ id }) => id === event.action.factoryId);
+    if (!factory) return null;
+    const { action, triggers } = event;
+    const { name, config } = action;
+    const state = new DrilldownState({
+      factory,
+      placeContext: this.getActionFactoryContext(),
+      placeTriggers,
+      name,
+      config,
+      triggers,
+    });
+    return state;
+  }*/
+
+  /**
+   * Save edits to an existing drilldown.
+   *
+   * @param eventId ID of the saved dynamic action event.
+   * @param drilldownState Latest state of the drilldown as edited by the user.
+   */
+  /*public async updateEvent(eventId: string, drilldownState: DrilldownState): Promise<void> {
+    const { dynamicActionManager, toastService } = this.deps;
+    const action = drilldownState.serialize();
+
+    try {
+      await dynamicActionManager.updateEvent(eventId, action, drilldownState.triggers$.getValue());
+      toastService.addSuccess({
+        title: toastDrilldownEdited.title(action.name),
+        text: toastDrilldownEdited.text,
+      });
+      this.setRoute(['manage']);
+    } catch (error) {
+      toastService.addError(error, {
+        title: toastDrilldownsCRUDError,
+      });
+      throw error;
+    }
+  }*/
+
+  // Below are convenience React hooks for consuming observables in connected
+  // React components.
+
+  public readonly useTitle = () => useObservable(this.title$, this.title$.getValue());
+  public readonly useFooter = () => useObservable(this.footer$, this.footer$.getValue());
+  public readonly useRoute = () => useObservable(this.route$, this.route$.getValue());
+  public readonly useWelcomeMessage = () =>
+    useObservable(this.hideWelcomeMessage$, this.hideWelcomeMessage$.getValue());
+  // public readonly useActionFactory = () =>
+  //  useObservable(this.actionFactory$, this.actionFactory$.getValue());
+  //public readonly useEvents = () => useObservable(this.events$, this.events$.getValue());
+  /*public readonly useCompatibleActionFactories = (context: BaseActionFactoryContext) =>
+    useObservable(
+      useMemo(() => this.getCompatibleActionFactories(context), [context]),
+      undefined
+    );*/
+}
