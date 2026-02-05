@@ -62,6 +62,7 @@ dependsOn:
   - '@kbn/response-ops-form-generator'
   - '@kbn/mcp-client'
   - '@kbn/actions-types'
+  - '@kbn/std'
 tags:
   - plugin
   - prod
