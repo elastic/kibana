@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
@@ -27,7 +26,7 @@ import {
   DEFAULT_LOG_SOURCE_FIELDS,
   DEFAULT_TRACE_FIELDS,
 } from './constants';
-import { getAnchorLogs } from './fetch_anchor_logs/fetch_anchor_logs';
+import { getCorrelationIdentifiers } from './get_correlation_identifiers/get_correlation_identifiers';
 import type { Correlation, TraceSequence } from './types';
 
 export function getApmTraceError({
@@ -131,11 +130,9 @@ export async function getToolHandler({
   esClient,
   start,
   end,
-  traceId,
   index,
   kqlFilter,
   errorLogsOnly,
-  logId,
   maxSequences,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
@@ -145,50 +142,27 @@ export async function getToolHandler({
   esClient: IScopedClusterClient;
   start: string;
   end: string;
-  traceId?: string;
   index?: string;
   kqlFilter?: string;
   errorLogsOnly: boolean;
-  logId?: string;
   maxSequences: number;
 }) {
   const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
   const startTime = parseDatemath(start);
   const endTime = parseDatemath(end, { roundUp: true });
-  let correlationIdentifiers: Correlation[] = [];
-  if (traceId) {
-    correlationIdentifiers = [
-      {
-        start: startTime,
-        end: endTime,
-        identifier: { field: 'trace.id', value: traceId },
-      },
-    ];
-  } else {
-    const anchorLogs = await getAnchorLogs({
-      esClient,
-      logsIndices,
-      startTime,
-      endTime,
-      kqlFilter,
-      errorLogsOnly,
-      logger,
-      logId,
-      maxSequences,
-    });
-    correlationIdentifiers = anchorLogs.map((anchorLog) => {
-      const { correlation, '@timestamp': timestamp } = anchorLog;
-      return {
-        identifier: {
-          field: correlation.field,
-          value: correlation.value,
-        },
-        start: moment(timestamp).subtract(1, 'hour').valueOf(),
-        end: moment(timestamp).add(1, 'hour').valueOf(),
-      };
-    });
-  }
   const { apmEventClient } = await buildApmResources({ core, plugins, request, logger });
+
+  const correlationIdentifiers = await getCorrelationIdentifiers({
+    esClient,
+    apmEventClient,
+    logsIndices,
+    startTime,
+    endTime,
+    kqlFilter,
+    errorLogsOnly,
+    logger,
+    maxSequences,
+  });
 
   // For each correlation identifier, find the full distributed trace (transactions, spans, errors, and logs)
   const sequences: TraceSequence[] = await Promise.all(

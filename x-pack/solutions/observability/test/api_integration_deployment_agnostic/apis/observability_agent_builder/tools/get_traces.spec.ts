@@ -112,7 +112,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: START,
             end: END,
-            traceId: DEFAULT_TRACE_CONFIGS[0].traceId,
+            kqlFilter: `trace.id: "${DEFAULT_TRACE_CONFIGS[0].traceId}"`,
           },
         });
         const { sequences } = results[0].data;
@@ -135,7 +135,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: START,
             end: END,
-            traceId: 'trace-does-not-exist',
+            kqlFilter: 'trace.id: "trace-does-not-exist"',
           },
         });
 
@@ -159,6 +159,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         const { sequences } = results[0].data;
         expect(sequences.length).to.be(0);
+      });
+
+      it('returns sequences for slow transactions', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
+          id: OBSERVABILITY_GET_TRACES_TOOL_ID,
+          params: {
+            start: 'now-10m',
+            end: 'now',
+            kqlFilter: 'transaction.duration.us > 5',
+          },
+        });
+        const { sequences } = results[0].data;
+        expect(sequences.length).to.be.greaterThan(0);
       });
     });
   });

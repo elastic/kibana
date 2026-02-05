@@ -15,7 +15,7 @@ import { kqlFilter as buildKqlFilter, timeRangeFilter } from '../../../utils/dsl
 import type { AnchorLog } from '../types';
 import type { CorrelationFieldAggregations } from './types';
 
-export async function getAnchorLogsForTimeRange({
+export async function getAnchorLogs({
   esClient,
   logsIndices,
   startTime,

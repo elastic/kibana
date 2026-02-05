@@ -24,23 +24,10 @@ export const OBSERVABILITY_GET_TRACES_TOOL_ID = 'observability.get_traces';
 const getTracesSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   index: z.string().describe(indexDescription).optional(),
-  traceId: z
-    .string()
-    .optional()
-    .describe(
-      'Trace ID to retrieve the full distributed trace (transactions, spans, errors, and logs). Example: "abc123".'
-    ),
-  logId: z
-    .string()
-    .optional()
-    .describe(
-      'ID of a specific log entry to use as an anchor. When provided, other filter parameters are ignored.'
-    ),
   kqlFilter: z
     .string()
-    .optional()
     .describe(
-      'KQL filter to narrow down logs. Examples: \'service.name: "payment"\', \'host.name: "web-server-01"\'. Ignored if logId is provided.'
+      'KQL filter used to find anchor log(s). Examples: \'service.name: "payment-service"\', \'trace.id: "abc123"\', \'_id: "a1b2c3"\'. The tool will pick an anchor log matching this filter, extract the best available correlation identifier (prefers trace.id), then return APM trace docs and logs for that identifier.'
     ),
   errorLogsOnly: z
     .boolean()
@@ -68,27 +55,16 @@ export function createGetTracesTool({
     type: ToolType.builtin,
     description: `Retrieves trace data (APM transactions/spans/errors) plus logs for a single request/flow.
 
-You can look up a trace in two ways:
-- Direct: provide traceId to fetch for that trace within the provided time range
-- Anchor-based: provide a logId (or a KQL filter + time range) and the tool will find anchor logs, extract the best available correlation identifier (prefers trace.id), then fetch APM events and logs for that identifier
+  This tool is KQL-driven: it first finds one or more anchor logs within the time range, then extracts the best available correlation identifier from each anchor (prefers trace.id). For each identifier it returns:
+  - APM events (transactions, spans, errors)
+  - Logs
 
-When to use:
-- You already have a trace.id and want a single place to fetch APM events + logs for that trace
-- You have an error log (logId) but not a trace.id yet, and you want to expand to the surrounding context
-- You have a log query (kqlFilter) and want to sample a few representative sequences, then expand each one
+  Common patterns:
+  - Retrieve a specific trace: kqlFilter: "trace.id: abc123"
+  - Expand from a specific log doc: kqlFilter: "_id: a1b2c3" (useful when you have a log document id)
 
-How it works:
-1. Determine correlation identifiers:
-   - If traceId is provided: use trace.id
-   - Else: find up to maxSequences anchor logs (errors by default), and derive correlation identifiers from their fields
-2. For each correlation identifier, query:
-   - APM events (transactions, spans, errors) using the same identifier field/value
-   - APM error documents (filtered to exclude debug/info/warning)
-   - Logs with the same identifier field/value from the selected indices
-3. Each result set is sorted by @timestamp (APM and logs are returned as separate arrays, not merged).
-
-Do NOT use for:
-- Finding traces by a broad query (use observability.get_trace_metrics or observability.get_trace_change_points to scope first)`,
+  Do NOT use for:
+  - Finding traces by a broad query (use observability.get_trace_metrics or observability.get_trace_change_points to scope first)`,
     schema: getTracesSchema,
     tags: ['observability', 'trace', 'apm', 'logs'],
     availability: {
@@ -98,7 +74,7 @@ Do NOT use for:
       },
     },
     handler: async (
-      { start, end, traceId, index, logId, kqlFilter, errorLogsOnly, maxSequences },
+      { start, end, index, kqlFilter, errorLogsOnly, maxSequences },
       { esClient, request }
     ) => {
       try {
@@ -110,11 +86,9 @@ Do NOT use for:
           esClient,
           start,
           end,
-          traceId,
           index,
           kqlFilter,
           errorLogsOnly,
-          logId,
           maxSequences,
         });
 

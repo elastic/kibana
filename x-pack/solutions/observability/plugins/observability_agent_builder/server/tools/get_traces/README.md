@@ -2,16 +2,13 @@
 
 Retrieves trace data (APM transactions/spans/errors) plus logs for a single request/flow.
 
-This tool supports:
+This tool is KQL-driven: it finds one or more anchor logs within the time range, extracts the best available correlation identifier from each anchor log (prefers `trace.id`), then fetches APM events and logs for that identifier.
 
-- Direct lookup by `traceId`
-- Anchor-based lookup from logs (via `logId`, or `kqlFilter` + time range)
-
-When anchoring from logs, the tool tries to extract the best correlation identifier from the anchor log (prefers `trace.id`). If the anchor only contains non-APM identifiers (e.g., `request.id`), APM results may be empty while logs still return.
+If the anchor only contains non-APM identifiers (e.g., `request.id`), APM results may be empty while logs still return.
 
 ## Examples
 
-### Direct lookup by `traceId`
+### Retrieve a specific trace by trace id
 
 ```jsonc
 POST kbn://api/agent_builder/tools/_execute
@@ -20,19 +17,21 @@ POST kbn://api/agent_builder/tools/_execute
   "tool_params": {
     "start": "now-1h",
     "end": "now",
-    "traceId": "abc123"
+    "kqlFilter": "trace.id: abc123"
   }
 }
 ```
 
-### Anchor from a specific log entry (`logId`)
+### Expand from a specific log document id
+
+Use this when you already have a log event id (e.g. from Discover) and want to retrieve the surrounding trace/log context.
 
 ```jsonc
 POST kbn://api/agent_builder/tools/_execute
 {
   "tool_id": "observability.get_traces",
   "tool_params": {
-    "logId": "abc123"
+    "kqlFilter": "_id: abc123"
   }
 }
 ```
@@ -63,7 +62,7 @@ POST kbn://api/agent_builder/tools/_execute
   "tool_params": {
     "start": "now-15m",
     "end": "now",
-    "traceId": "abc123",
+    "kqlFilter": "trace.id: abc123",
     "index": "logs-*,filebeat-*"
   }
 }
