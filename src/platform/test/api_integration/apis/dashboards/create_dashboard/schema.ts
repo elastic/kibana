@@ -44,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
         (schema: any) => 'config' in schema.properties
       );
       const configSchema = panelSchema.properties.config;
-      expect(configSchema.anyOf.length).to.be(2);
+      expect(configSchema.anyOf.length).to.be(4);
 
       // API integration tests do not support jest expect
       // so we had to roll our own toMatchSnapshot
