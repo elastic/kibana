@@ -6,6 +6,12 @@
  */
 
 import { ALERT_INDEX_PATTERN, ApmRuleType } from '@kbn/rule-data-utils';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '@kbn/apm-types';
 import type { Rule } from '@kbn/alerts-ui-shared';
 import type { TopAlert } from '../../../../../typings/alerts';
 import { getApmTransactionRuleData } from './apm_transaction_rule';
@@ -205,7 +211,7 @@ describe('getApmTransactionRuleData', () => {
   });
 
   describe('when searchConfiguration is provided', () => {
-    it('uses searchConfiguration query instead of building from params', () => {
+    it('combines searchConfiguration query with generated filters', () => {
       const rule: Rule = {
         ...baseRule,
         params: {
@@ -225,18 +231,14 @@ describe('getApmTransactionRuleData', () => {
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        'custom.field: "custom-value" AND another.field: 123'
+        '(custom.field: "custom-value" AND another.field: 123) AND ((service.name:"checkout-service" AND transaction.type:"request" AND transaction.name:"POST /api/checkout" AND service.environment:"production"))'
       );
     });
 
-    it('ignores rule params when searchConfiguration query exists', () => {
+    it('uses only searchConfiguration query when no rule params provided', () => {
       const rule: Rule = {
         ...baseRule,
         params: {
-          serviceName: 'ignored-service',
-          transactionType: 'ignored-type',
-          transactionName: 'ignored-name',
-          environment: 'ignored-env',
           searchConfiguration: {
             query: {
               query: 'my.custom.query: true',
@@ -248,12 +250,7 @@ describe('getApmTransactionRuleData', () => {
       const result = getApmTransactionRuleData({ alert: mockAlert, rule })!;
 
       expect(result).toBeDefined();
-      const queryString = result.discoverAppLocatorParams?.query?.query;
-      expect(queryString).toBe('my.custom.query: true');
-      expect(queryString).not.toContain('ignored-service');
-      expect(queryString).not.toContain('ignored-type');
-      expect(queryString).not.toContain('ignored-name');
-      expect(queryString).not.toContain('ignored-env');
+      expect(result.discoverAppLocatorParams?.query?.query).toBe('my.custom.query: true');
     });
 
     it('uses basic params when searchConfiguration query is empty string', () => {
@@ -296,6 +293,147 @@ describe('getApmTransactionRuleData', () => {
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
         '(service.name:"checkout-service" AND transaction.type:"request" AND service.environment:"production")'
+      );
+    });
+  });
+
+  describe('when alert fields are available', () => {
+    it('uses alert fields over rule params for all fields', () => {
+      const alertWithFields: TopAlert = {
+        ...mockAlert,
+        fields: {
+          ...mockAlert.fields,
+          [SERVICE_NAME]: 'alert-service',
+          [TRANSACTION_TYPE]: 'alert-type',
+          [TRANSACTION_NAME]: 'alert-transaction',
+          [SERVICE_ENVIRONMENT]: 'alert-env',
+        },
+      } as unknown as TopAlert;
+
+      const rule: Rule = {
+        ...baseRule,
+        params: {
+          serviceName: 'rule-service',
+          transactionType: 'rule-type',
+          transactionName: 'rule-transaction',
+          environment: 'rule-env',
+        },
+      };
+
+      const result = getApmTransactionRuleData({ alert: alertWithFields, rule })!;
+
+      expect(result).toBeDefined();
+      expect(result.discoverAppLocatorParams?.query?.query).toBe(
+        '(service.name:"alert-service" AND transaction.type:"alert-type" AND transaction.name:"alert-transaction" AND service.environment:"alert-env")'
+      );
+    });
+
+    it('uses rule params when alert fields are not available', () => {
+      const alertWithoutFields: TopAlert = {
+        ...mockAlert,
+        fields: {
+          [ALERT_INDEX_PATTERN]: 'metrics-apm*,apm-*',
+        },
+      } as unknown as TopAlert;
+
+      const rule: Rule = {
+        ...baseRule,
+        params: {
+          serviceName: 'rule-service',
+          transactionType: 'rule-type',
+          transactionName: 'rule-transaction',
+          environment: 'rule-env',
+        },
+      };
+
+      const result = getApmTransactionRuleData({ alert: alertWithoutFields, rule })!;
+
+      expect(result).toBeDefined();
+      expect(result.discoverAppLocatorParams?.query?.query).toBe(
+        '(service.name:"rule-service" AND transaction.type:"rule-type" AND transaction.name:"rule-transaction" AND service.environment:"rule-env")'
+      );
+    });
+
+    it('mixes alert fields and rule params when some alert fields are missing', () => {
+      const alertWithPartialFields: TopAlert = {
+        ...mockAlert,
+        fields: {
+          ...mockAlert.fields,
+          [SERVICE_NAME]: 'alert-service',
+          [TRANSACTION_TYPE]: 'alert-type',
+        },
+      } as unknown as TopAlert;
+
+      const rule: Rule = {
+        ...baseRule,
+        params: {
+          serviceName: 'rule-service',
+          transactionType: 'rule-type',
+          transactionName: 'rule-transaction',
+          environment: 'rule-env',
+        },
+      };
+
+      const result = getApmTransactionRuleData({ alert: alertWithPartialFields, rule })!;
+
+      expect(result).toBeDefined();
+      expect(result.discoverAppLocatorParams?.query?.query).toBe(
+        '(service.name:"alert-service" AND transaction.type:"alert-type" AND transaction.name:"rule-transaction" AND service.environment:"rule-env")'
+      );
+    });
+
+    it('respects ENVIRONMENT_ALL from alert fields', () => {
+      const alertWithEnvAll: TopAlert = {
+        ...mockAlert,
+        fields: {
+          ...mockAlert.fields,
+          [SERVICE_NAME]: 'alert-service',
+          [SERVICE_ENVIRONMENT]: 'ENVIRONMENT_ALL',
+        },
+      } as unknown as TopAlert;
+
+      const rule: Rule = {
+        ...baseRule,
+        params: {
+          serviceName: 'rule-service',
+          environment: 'production',
+        },
+      };
+
+      const result = getApmTransactionRuleData({ alert: alertWithEnvAll, rule })!;
+
+      expect(result).toBeDefined();
+      expect(result.discoverAppLocatorParams?.query?.query).toBe('service.name:"alert-service"');
+    });
+
+    it('uses alert fields even when searchConfiguration is provided', () => {
+      const alertWithFields: TopAlert = {
+        ...mockAlert,
+        fields: {
+          ...mockAlert.fields,
+          [SERVICE_NAME]: 'alert-service',
+          [TRANSACTION_TYPE]: 'alert-type',
+        },
+      } as unknown as TopAlert;
+
+      const rule: Rule = {
+        ...baseRule,
+        params: {
+          serviceName: 'rule-service',
+          transactionType: 'rule-type',
+          searchConfiguration: {
+            query: {
+              query: 'custom.field: true',
+            },
+          },
+        },
+      };
+
+      const result = getApmTransactionRuleData({ alert: alertWithFields, rule })!;
+
+      expect(result).toBeDefined();
+      expect(result.discoverAppLocatorParams?.query?.query).toBe(
+        '(custom.field: true) AND ((service.name:"alert-service" AND transaction.type:"alert-type"))'
       );
     });
   });

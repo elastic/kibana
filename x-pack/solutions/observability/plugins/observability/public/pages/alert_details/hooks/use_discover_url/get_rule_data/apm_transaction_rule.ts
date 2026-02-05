@@ -12,6 +12,7 @@ import type { transactionErrorRateParamsSchema } from '@kbn/response-ops-rule-pa
 import type { transactionDurationParamsSchema } from '@kbn/response-ops-rule-params/transaction_duration';
 import type { TypeOf } from '@kbn/config-schema';
 import { escapeKuery, escapeQuotes } from '@kbn/es-query';
+import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 
 import {
   SERVICE_ENVIRONMENT,
@@ -31,23 +32,33 @@ type ApmTransactionRuleDataResult = {
   };
 } | null;
 
-export const apmTransactionParamsToKqlQuery = (params: TransactionRuleParams): string => {
+export const apmTransactionParamsToKqlQuery = (
+  params: TransactionRuleParams,
+  _alert?: TopAlert
+): string => {
   const filters = [];
 
-  if (params.serviceName) {
-    filters.push(`${escapeKuery(SERVICE_NAME)}:"${escapeQuotes(params.serviceName)}"`);
+  const alert = _alert as TopAlert<ObservabilityApmAlert>;
+
+  // Use alert fields first, fallback to rule params
+  const serviceName = alert?.fields[SERVICE_NAME] ?? params.serviceName;
+  if (serviceName) {
+    filters.push(`${escapeKuery(SERVICE_NAME)}:"${escapeQuotes(serviceName)}"`);
   }
 
-  if (params.transactionType) {
-    filters.push(`${escapeKuery(TRANSACTION_TYPE)}:"${escapeQuotes(params.transactionType)}"`);
+  const transactionType = alert?.fields[TRANSACTION_TYPE] ?? params.transactionType;
+  if (transactionType) {
+    filters.push(`${escapeKuery(TRANSACTION_TYPE)}:"${escapeQuotes(transactionType)}"`);
   }
 
-  if (params.transactionName) {
-    filters.push(`${escapeKuery(TRANSACTION_NAME)}:"${escapeQuotes(params.transactionName)}"`);
+  const transactionName = alert?.fields[TRANSACTION_NAME] ?? params.transactionName;
+  if (transactionName) {
+    filters.push(`${escapeKuery(TRANSACTION_NAME)}:"${escapeQuotes(transactionName)}"`);
   }
 
-  if (params.environment && params.environment !== 'ENVIRONMENT_ALL') {
-    filters.push(`${escapeKuery(SERVICE_ENVIRONMENT)}:"${escapeQuotes(params.environment)}"`);
+  const environment = alert?.fields[SERVICE_ENVIRONMENT] ?? params.environment;
+  if (environment && environment !== 'ENVIRONMENT_ALL') {
+    filters.push(`${escapeKuery(SERVICE_ENVIRONMENT)}:"${escapeQuotes(environment)}"`);
   }
 
   if (filters.length === 0) {
@@ -78,10 +89,14 @@ export const getApmTransactionRuleData = ({
   const ruleParams = rule.params as TransactionRuleParams;
 
   const queryText = ruleParams.searchConfiguration?.query?.query;
-  const kqlQuery =
-    typeof queryText === 'string' && queryText
-      ? queryText
-      : apmTransactionParamsToKqlQuery(ruleParams);
+  const generatedQuery = apmTransactionParamsToKqlQuery(ruleParams, alert);
+
+  let kqlQuery: string;
+  if (typeof queryText === 'string' && queryText) {
+    kqlQuery = generatedQuery ? `(${queryText}) AND (${generatedQuery})` : queryText;
+  } else {
+    kqlQuery = generatedQuery;
+  }
 
   const discoverAppLocatorParams = {
     dataViewSpec: {

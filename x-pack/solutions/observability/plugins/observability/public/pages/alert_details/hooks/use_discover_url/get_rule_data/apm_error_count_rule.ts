@@ -13,21 +13,30 @@ import { ERROR_GROUP_ID, PROCESSOR_EVENT, SERVICE_ENVIRONMENT, SERVICE_NAME } fr
 import type { TypeOf } from '@kbn/config-schema';
 import type { errorCountParamsSchema } from '@kbn/response-ops-rule-params/error_count';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
+import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import type { TopAlert } from '../../../../../typings/alerts';
 
-const apmErrorCountParamsToKqlQuery = (params: TypeOf<typeof errorCountParamsSchema>): string => {
+const apmErrorCountParamsToKqlQuery = (
+  params: TypeOf<typeof errorCountParamsSchema>,
+  _alert?: TopAlert,
+): string => {
   const filters = [];
 
-  if (params.serviceName) {
-    filters.push(`${escapeKuery(SERVICE_NAME)}:"${escapeQuotes(params.serviceName)}"`);
+  const alert = _alert as TopAlert<ObservabilityApmAlert>;
+
+  const serviceName = alert?.fields[SERVICE_NAME] ?? params.serviceName;
+  if (serviceName) {
+    filters.push(`${escapeKuery(SERVICE_NAME)}:"${escapeQuotes(serviceName)}"`);
   }
 
-  if (params.errorGroupingKey) {
-    filters.push(`${escapeKuery(ERROR_GROUP_ID)}:"${escapeQuotes(params.errorGroupingKey)}"`);
+  const errorGroupingKey = alert?.fields[ERROR_GROUP_ID] ?? params.errorGroupingKey;
+  if (errorGroupingKey) {
+    filters.push(`${escapeKuery(ERROR_GROUP_ID)}:"${escapeQuotes(errorGroupingKey)}"`);
   }
 
-  if (params.environment && params.environment !== 'ENVIRONMENT_ALL') {
-    filters.push(`${escapeKuery(SERVICE_ENVIRONMENT)}:"${escapeQuotes(params.environment)}"`);
+  const environment = alert?.fields[SERVICE_ENVIRONMENT] ?? params.environment;
+  if (environment && environment !== 'ENVIRONMENT_ALL') {
+    filters.push(`${escapeKuery(SERVICE_ENVIRONMENT)}:"${escapeQuotes(environment)}"`);
   }
 
   filters.push(`${escapeKuery(PROCESSOR_EVENT)}:"${escapeQuotes(ProcessorEvent.error)}"`);
@@ -62,10 +71,14 @@ export const getApmErrorCountRuleData = ({
   const ruleParams = rule.params as TypeOf<typeof errorCountParamsSchema>;
 
   const queryText = ruleParams.searchConfiguration?.query?.query;
-  const kqlQuery =
-    typeof queryText === 'string' && queryText
-      ? queryText
-      : apmErrorCountParamsToKqlQuery(ruleParams);
+  const generatedQuery = apmErrorCountParamsToKqlQuery(ruleParams, alert);
+
+  let kqlQuery: string;
+  if (typeof queryText === 'string' && queryText) {
+    kqlQuery = generatedQuery ? `(${queryText}) AND (${generatedQuery})` : queryText;
+  } else {
+    kqlQuery = generatedQuery;
+  }
 
   const discoverAppLocatorParams = {
     dataViewSpec: {
