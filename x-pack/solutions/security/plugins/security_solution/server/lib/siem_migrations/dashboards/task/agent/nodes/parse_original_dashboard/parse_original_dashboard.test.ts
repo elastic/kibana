@@ -61,6 +61,7 @@ describe('getParseOriginalDashboardNode', () => {
       getPanelPosition: jest.fn(),
       getPanelTitle: jest.fn(),
       getPanelQuery: jest.fn(),
+      getVersion: jest.fn().mockResolvedValue('1.1'),
     };
     jest
       .mocked(mockSplunkXmlDashboardParser)
@@ -189,6 +190,7 @@ describe('getParseOriginalDashboardNode', () => {
     });
 
     const mockParserInstance = {
+      getVersion: jest.fn().mockResolvedValue('1.1'),
       extractPanels: jest.fn().mockRejectedValue(new Error('Parser error')),
     };
     jest
@@ -209,6 +211,7 @@ describe('getParseOriginalDashboardNode', () => {
     });
 
     const mockParserInstance = {
+      getVersion: jest.fn().mockResolvedValue('1.1'),
       extractPanels: jest.fn().mockResolvedValue([]),
     };
     jest
@@ -252,6 +255,7 @@ describe('getParseOriginalDashboardNode', () => {
     });
 
     const mockParserInstance = {
+      getVersion: jest.fn().mockResolvedValue('1.1'),
       extractPanels: jest.fn().mockResolvedValue(mockPanels),
     };
     jest

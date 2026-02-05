@@ -163,31 +163,9 @@ export interface FieldSummary {
   field: string;
 
   /**
-   * AST node where the field was found.
+   * AST argument node where the field was found.
    */
   arg: ESQLProperNode;
-
-  /**
-   * The expression that defines the value of the field.
-   *
-   * What's the difference between arg and definition?
-   * arg is the full assignment expression (e.g. foo = bar + 1)
-   * definition is just the right side (e.g. bar + 1), the expression that defines the value of the field.
-   * {
-   *  fields: 'foo',
-   *  arg: <AST node representing 'foo = bar + 1'>,
-   *  definition: <AST node representing 'bar + 1'>
-   * }
-   *
-   * If not in an assignement, arg and definition are the same.
-   * e.g. in STATS count() BY field, for the BY field, both arg and definition are the same node representing 'field'.
-   * {
-   *  fields: 'field',
-   *  arg: <AST node representing 'field'>,
-   *  definition: <AST node representing 'field'>
-   * }
-   */
-  definition: ESQLProperNode;
 }
 
 export interface ESQLPolicy {
