@@ -9,16 +9,10 @@
 
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
-import type { LicenseType } from '@kbn/licensing-types';
 import { getDrilldown, hasDrilldown } from './registry';
 import { licensing, uiActions } from '../kibana_services';
 import type { DrilldownStateInternal } from './types';
-
-async function isCompatibleLicense(minimalLicense?: LicenseType) {
-  if (!minimalLicense || !licensing) return true;
-  const license = await licensing?.getLicense();
-  return license.isAvailable && license.isActive && license.hasAtLeast(minimalLicense);
-}
+import { isCompatibleLicense } from './is_compatible_license';
 
 export function createAction(embeddableUuid: string, drilldownState: DrilldownStateInternal) {
   const { actionId, label, trigger, type } = drilldownState;
