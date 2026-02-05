@@ -13,7 +13,6 @@ import {
   type EuiContextMenuPanelProps,
   type EuiPopoverProps,
 } from '@elastic/eui';
-import type { ListScriptsRequestQuery } from '../../../../../../common/api/endpoint';
 import type { EndpointScript } from '../../../../../../common/endpoint/types';
 import { ContextMenuItemNavByRouter } from '../../../../components/context_menu_with_router_support';
 import { SCRIPT_LIBRARY_LABELS as i18n } from '../../translations';
@@ -21,18 +20,16 @@ import { useScriptActionItems } from '../hooks/use_script_action_items';
 import type { ScriptsLibraryTableProps } from './scripts_library_table';
 
 export interface ScriptRowActionsProps {
-  queryParams: ListScriptsRequestQuery;
   scriptItem: EndpointScript;
   onClickAction: ScriptsLibraryTableProps['onClickAction'];
   'data-test-subj'?: string;
 }
 
 export const ScriptRowActions = memo<ScriptRowActionsProps>(
-  ({ queryParams, onClickAction, scriptItem, 'data-test-subj': dataTestSubj }) => {
+  ({ onClickAction, scriptItem, 'data-test-subj': dataTestSubj }) => {
     const [isOpen, setIsOpen] = useState(false);
     const scriptItemActions = useScriptActionItems({
       script: scriptItem,
-      queryParams,
       onClickAction,
     });
 
