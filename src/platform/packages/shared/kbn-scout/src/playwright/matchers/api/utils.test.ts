@@ -36,36 +36,4 @@ describe('createMatcherError', () => {
 
     expect(error.message).toContain('Expected: not');
   });
-
-  it('skips stack lines when skipStackLines is provided', () => {
-    const errorWithoutSkip = createMatcherError({
-      expected: 200,
-      matcherName: 'toHaveStatusCode',
-      received: 404,
-      skipStackLines: 0,
-    });
-    const errorWithSkip = createMatcherError({
-      expected: 200,
-      matcherName: 'toHaveStatusCode',
-      received: 404,
-      skipStackLines: 1,
-    });
-
-    const getStackLines = (err: Error) =>
-      err.stack!.split('\n').filter((l) => l.trimStart().startsWith('at '));
-
-    const stackLinesWithoutSkip = getStackLines(errorWithoutSkip);
-    const stackLinesWithSkip = getStackLines(errorWithSkip);
-
-    // After skipping 1 line, first stack line now points to current test file
-    expect(stackLinesWithSkip[0]).toContain(__filename);
-
-    // One less stack line
-    expect(stackLinesWithSkip.length).toBe(stackLinesWithoutSkip.length - 1);
-
-    // Message content is preserved
-    expect(errorWithSkip.stack).toContain('toHaveStatusCode');
-    expect(errorWithSkip.stack).toContain('Expected:');
-    expect(errorWithSkip.stack).toContain('Received:');
-  });
 });

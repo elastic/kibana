@@ -7,8 +7,8 @@
 
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandSection } from '../hooks/use_expand_section';
-import { ExpandableSection } from './expandable_section';
+import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { ABOUT_SECTION_TEST_ID } from './test_ids';
 import { AlertDescription } from './alert_description';
 import { Reason } from './reason';
@@ -21,6 +21,7 @@ import { EventCategoryDescription } from './event_category_description';
 import { EventKindDescription } from './event_kind_description';
 import { EventRenderer } from './event_renderer';
 import { AlertStatus } from './alert_status';
+import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
 const KEY = 'about';
 
@@ -35,7 +36,11 @@ export const AboutSection = memo(() => {
   const eventKind = getField(getFieldsData('event.kind'));
   const eventKindInECS = eventKind && isEcsAllowedValue('event.kind', eventKind);
 
-  const expanded = useExpandSection({ title: KEY, defaultValue: true });
+  const expanded = useExpandSection({
+    storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
+    title: KEY,
+    defaultValue: true,
+  });
 
   const content =
     eventKind === EventKind.signal ? (
@@ -68,7 +73,8 @@ export const AboutSection = memo(() => {
           defaultMessage="About"
         />
       }
-      localStorageKey={KEY}
+      localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+      sectionId={KEY}
       gutterSize="s"
       data-test-subj={ABOUT_SECTION_TEST_ID}
     >
