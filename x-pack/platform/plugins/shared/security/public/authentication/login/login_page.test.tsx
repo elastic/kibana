@@ -105,6 +105,191 @@ describe('LoginPage', () => {
     });
   });
 
+  describe("Valentine's Day logo", () => {
+    const RealDate = global.Date;
+
+    const mockDate = (date: Date) => {
+      const MockDate = class extends RealDate {
+        constructor(...args: any[]) {
+          if (args.length === 0) {
+            super(date.getTime());
+            return;
+          }
+          // @ts-ignore
+          super(...args);
+        }
+      } as DateConstructor;
+      MockDate.now = () => date.getTime();
+      global.Date = MockDate;
+    };
+
+    afterEach(() => {
+      global.Date = RealDate;
+    });
+
+    it('renders elasticheart logo during Valentine season (Feb 1-14)', async () => {
+      mockDate(new RealDate(2026, 1, 10)); // Feb 10, 2026
+
+      const coreStartMock = coreMock.createStart();
+      customBrandingMock.customBranding$ = of({});
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      const { container } = renderWithI18n(
+        <LoginPage
+          http={httpMock}
+          customBranding={customBrandingMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+        />,
+        { wrapper: EuiThemeProvider }
+      );
+
+      await act(async () => {
+        await nextTick();
+      });
+
+      const heartSvg = container.querySelector('svg[aria-label="Elastic Heart"]');
+      expect(heartSvg).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="logoElastic"]')).not.toBeInTheDocument();
+    });
+
+    it('renders elasticheart logo on Feb 1', async () => {
+      mockDate(new RealDate(2026, 1, 1)); // Feb 1, 2026
+
+      const coreStartMock = coreMock.createStart();
+      customBrandingMock.customBranding$ = of({});
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      const { container } = renderWithI18n(
+        <LoginPage
+          http={httpMock}
+          customBranding={customBrandingMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+        />,
+        { wrapper: EuiThemeProvider }
+      );
+
+      await act(async () => {
+        await nextTick();
+      });
+
+      const heartSvg = container.querySelector('svg[aria-label="Elastic Heart"]');
+      expect(heartSvg).toBeInTheDocument();
+    });
+
+    it('renders elasticheart logo on Feb 14', async () => {
+      mockDate(new RealDate(2026, 1, 14)); // Feb 14, 2026
+
+      const coreStartMock = coreMock.createStart();
+      customBrandingMock.customBranding$ = of({});
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      const { container } = renderWithI18n(
+        <LoginPage
+          http={httpMock}
+          customBranding={customBrandingMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+        />,
+        { wrapper: EuiThemeProvider }
+      );
+
+      await act(async () => {
+        await nextTick();
+      });
+
+      const heartSvg = container.querySelector('svg[aria-label="Elastic Heart"]');
+      expect(heartSvg).toBeInTheDocument();
+    });
+
+    it('renders standard Elastic logo outside Valentine season (Feb 15)', async () => {
+      mockDate(new RealDate(2026, 1, 15)); // Feb 15, 2026
+
+      const coreStartMock = coreMock.createStart();
+      customBrandingMock.customBranding$ = of({});
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      const { container } = renderWithI18n(
+        <LoginPage
+          http={httpMock}
+          customBranding={customBrandingMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+        />,
+        { wrapper: EuiThemeProvider }
+      );
+
+      await act(async () => {
+        await nextTick();
+      });
+
+      const heartSvg = container.querySelector('svg[aria-label="Elastic Heart"]');
+      expect(heartSvg).not.toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="logoElastic"]')).toBeInTheDocument();
+    });
+
+    it('renders standard Elastic logo outside Valentine season (Jan 31)', async () => {
+      mockDate(new RealDate(2026, 0, 31)); // Jan 31, 2026
+
+      const coreStartMock = coreMock.createStart();
+      customBrandingMock.customBranding$ = of({});
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      const { container } = renderWithI18n(
+        <LoginPage
+          http={httpMock}
+          customBranding={customBrandingMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+        />,
+        { wrapper: EuiThemeProvider }
+      );
+
+      await act(async () => {
+        await nextTick();
+      });
+
+      const heartSvg = container.querySelector('svg[aria-label="Elastic Heart"]');
+      expect(heartSvg).not.toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="logoElastic"]')).toBeInTheDocument();
+    });
+
+    it('custom branding takes priority over Valentine logo', async () => {
+      mockDate(new RealDate(2026, 1, 10)); // Feb 10, 2026 (Valentine season)
+
+      const coreStartMock = coreMock.createStart();
+      customBrandingMock.customBranding$ = of({ logo: 'custom-logo.png' });
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      const { container } = renderWithI18n(
+        <LoginPage
+          http={httpMock}
+          customBranding={customBrandingMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+        />,
+        { wrapper: EuiThemeProvider }
+      );
+
+      await act(async () => {
+        await nextTick();
+      });
+
+      const heartSvg = container.querySelector('svg[aria-label="Elastic Heart"]');
+      expect(heartSvg).not.toBeInTheDocument();
+      const customLogoImg = container.querySelector('img[alt="logo"]');
+      expect(customLogoImg).toBeInTheDocument();
+      expect(customLogoImg).toHaveAttribute('src', 'custom-logo.png');
+    });
+  });
+
   describe('disabled form states', () => {
     const originalNavigator = window.navigator;
     const originalTop = window.top;
