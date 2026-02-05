@@ -27,8 +27,8 @@ export async function deleteIngestPipeline({ esClient, id, logger }: DeletePipel
     await retryTransientEsErrors(() => esClient.ingest.deletePipeline({ id }, { ignore: [404] }), {
       logger,
     });
-  } catch (error: any) {
-    logger.error(`Error deleting ingest pipeline: ${error.message}`);
+  } catch (error) {
+    logger.error(`Error deleting ingest pipeline: ${(error as Error).message}`);
     throw error;
   }
 }
@@ -41,8 +41,8 @@ export async function upsertIngestPipeline({
   try {
     await retryTransientEsErrors(() => esClient.ingest.putPipeline(pipeline), { logger });
     logger.debug(() => `Installed ingest pipeline: ${JSON.stringify(pipeline)}`);
-  } catch (error: any) {
-    logger.error(`Error updating ingest pipeline: ${error.message}`);
+  } catch (error) {
+    logger.error(`Error updating ingest pipeline: ${(error as Error).message}`);
     throw error;
   }
 }

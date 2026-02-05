@@ -46,6 +46,7 @@ const mockDefinition = {
       },
     },
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
 
 const mockDataStreamStats = {
@@ -104,11 +105,13 @@ beforeEach(() => {
         streams: { streamsRepositoryClient: mockStreamsRepositoryClient },
       },
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
 
   mockUseTimefilter.mockReturnValue({
     timeState: {},
     timeState$: of({ kind: 'initial' }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
 
   mockDataStreamsClient.getDataStreamsStats.mockResolvedValue({
@@ -248,6 +251,7 @@ describe('useDataStreamStats', () => {
         effective_failure_store: {
           disabled: {},
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const { result } = renderHook(() =>

@@ -35,6 +35,7 @@ jest.mock('../../../../../../hooks/use_stream_data_view_field_types', () => ({
       ['service.name', 'keyword'],
       ['error.message', 'text'],
     ]),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dataView: {} as any,
   })),
 }));
@@ -96,6 +97,7 @@ const TestWrapper = ({
   defaultValues = {},
 }: {
   children: React.ReactNode;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValues?: Record<string, any>;
 }) => {
   const methods = useForm({ defaultValues });

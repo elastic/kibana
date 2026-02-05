@@ -32,6 +32,20 @@ import { useIngestionRate, useIngestionRatePerTier } from '../hooks/use_ingestio
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import type { CalculatedStats } from '../helpers/get_calculated_stats';
 
+interface IngestionRateBuckets {
+  start: moment.Moment;
+  end: moment.Moment;
+  interval: string;
+  buckets: Array<{ key: number; value: number }>;
+}
+
+interface IngestionRateTieredBuckets {
+  start: moment.Moment;
+  end: moment.Moment;
+  interval: string;
+  buckets: Record<string, Array<{ key: number; value: number }>>;
+}
+
 interface ChartComponentProps {
   definition: Streams.ingest.all.GetResponse;
   timeState: TimeState;
@@ -119,7 +133,7 @@ export function ChartBarSeriesBase({
   formatAsBytes,
   isFailureStore,
 }: {
-  ingestionRate: any;
+  ingestionRate: IngestionRateBuckets | undefined;
   isLoadingIngestionRate: boolean;
   ingestionRateError: Error | undefined;
   isLoadingStats: boolean;
@@ -142,7 +156,7 @@ export function ChartBarSeriesBase({
         <BarSeries
           id="ingestionRate"
           name="Ingestion rate"
-          data={ingestionRate.buckets as Array<{ key: any; value: any }>}
+          data={ingestionRate.buckets}
           color={
             isFailureStore ? euiTheme.colors.severity.danger : euiTheme.colors.severity.success
           }
@@ -176,7 +190,7 @@ function ChartBarPhasesSeriesBase({
   isLoadingStats,
   formatAsBytes,
 }: {
-  ingestionRate: any;
+  ingestionRate: IngestionRateTieredBuckets | undefined;
   isLoadingIngestionRate: boolean;
   ingestionRateError: Error | undefined;
   isLoadingStats: boolean;
@@ -189,6 +203,7 @@ function ChartBarPhasesSeriesBase({
     if (!ingestionRate) return {};
     const phaseKeys = Object.keys(ingestionRate.buckets) as (keyof typeof ilmPhases)[];
     return phaseKeys.reduce((acc, phase) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       acc[phase] = { name: phase } as any;
       return acc;
     }, {} as IlmPolicyPhases);
@@ -213,7 +228,7 @@ function ChartBarPhasesSeriesBase({
                 id={`ingestionRate-${tier}`}
                 key={`ingestionRate-${tier}`}
                 name={capitalize(tier)}
-                data={buckets as Array<{ key: any; value: any }>}
+                data={buckets as Array<{ key: number; value: number }>}
                 color={ilmPhases[tier as PhaseName].color}
                 // Defaults to multi layer time axis as of Elastic Charts v70
                 xScaleType={ScaleType.Time}

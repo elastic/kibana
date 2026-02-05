@@ -23,6 +23,7 @@ const createBaseDefinition = (name: string): Partial<Streams.ingest.all.GetRespo
       processing: { steps: [], updated_at: new Date().toISOString() },
       settings: {},
       failure_store: { inherit: {} },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
   },
 });

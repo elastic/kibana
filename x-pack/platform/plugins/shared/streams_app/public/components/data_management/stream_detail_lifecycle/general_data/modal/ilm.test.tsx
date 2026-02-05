@@ -15,6 +15,7 @@ import { getPhaseDescription } from './ilm';
 describe('getPhaseDescription', () => {
   const colors = { hot: 'hotC', warm: 'warmC', cold: 'coldC', frozen: 'frozenC' };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const collect = (phases: any) =>
     getPhaseDescription(phases, colors).map((p: PhaseProps) => p.description);
 
@@ -30,6 +31,7 @@ describe('getPhaseDescription', () => {
         warm: { min_age: '30d' },
         cold: { min_age: '60d' },
         frozen: { min_age: '90d' },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       colors
     );
@@ -46,6 +48,7 @@ describe('getPhaseDescription', () => {
         hot: { min_age: '0d' },
         warm: { min_age: '30d' },
         cold: { min_age: '60d' },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       colors
     );
@@ -61,6 +64,7 @@ describe('getPhaseDescription', () => {
       {
         delete: { min_age: '180d' },
         hot: { min_age: '0d' },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       colors
     );
@@ -76,6 +80,7 @@ describe('IlmField', () => {
   const policies = [
     { name: 'policyA', policy: { phases: { hot: { min_age: '0d' } } } },
     { name: 'policyB', policy: { phases: { hot: { min_age: '0d' }, warm: { min_age: '30d' } } } },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ] as any;
 
   it('loads and displays ILM policies', async () => {
@@ -85,6 +90,7 @@ describe('IlmField', () => {
     renderI18n(
       <IlmField
         getIlmPolicies={getIlmPolicies}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         initialValue={{} as any}
         setLifecycle={setLifecycle}
         setSaveButtonDisabled={setSaveDisabled}
@@ -104,6 +110,7 @@ describe('IlmField', () => {
     renderI18n(
       <IlmField
         getIlmPolicies={getIlmPolicies}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         initialValue={{ ilm: { policy: 'policyA' } } as any}
         setLifecycle={jest.fn()}
         setSaveButtonDisabled={jest.fn()}
@@ -125,6 +132,7 @@ describe('IlmField', () => {
     renderI18n(
       <IlmField
         getIlmPolicies={getIlmPolicies}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         initialValue={{} as any}
         setLifecycle={setLifecycle}
         setSaveButtonDisabled={setSaveDisabled}

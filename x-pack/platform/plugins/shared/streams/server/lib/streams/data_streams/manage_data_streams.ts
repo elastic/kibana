@@ -66,9 +66,12 @@ export async function upsertDataStream({ esClient, name, logger }: DataStreamMan
   try {
     await retryTransientEsErrors(() => esClient.indices.createDataStream({ name }), { logger });
     logger.debug(() => `Installed data stream: ${name}`);
-  } catch (error: any) {
-    if (error?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
-      logger.error(`Error creating data stream: ${error.message}`);
+  } catch (error) {
+    if (
+      (error as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type !==
+      'resource_already_exists_exception'
+    ) {
+      logger.error(`Error creating data stream: ${(error as Error).message}`);
       throw error;
     }
   }
@@ -80,8 +83,8 @@ export async function deleteDataStream({ esClient, name, logger }: DeleteDataStr
       () => esClient.indices.deleteDataStream({ name }, { ignore: [404] }),
       { logger }
     );
-  } catch (error: any) {
-    logger.error(`Error deleting data stream: ${error.message}`);
+  } catch (error) {
+    logger.error(`Error deleting data stream: ${(error as Error).message}`);
     throw error;
   }
 }
@@ -122,8 +125,8 @@ export interface DataStreamMappingsUpdateResponse {
     name: string;
     applied_to_data_stream: boolean;
     error?: string;
-    mappings: Record<string, any>;
-    effective_mappings: Record<string, any>;
+    mappings: Record<string, unknown>;
+    effective_mappings: Record<string, unknown>;
   }>;
 }
 
@@ -250,8 +253,8 @@ export async function updateDataStreamsLifecycle({
         })
       );
     }
-  } catch (err: any) {
-    logger.error(`Error updating data stream lifecycle: ${err.message}`);
+  } catch (err) {
+    logger.error(`Error updating data stream lifecycle: ${(err as Error).message}`);
     throw err;
   }
 }
@@ -344,8 +347,8 @@ export async function updateDataStreamsFailureStore({
         ),
       { logger }
     );
-  } catch (err: any) {
-    logger.error(`Error updating data stream failure store: ${err.message}`);
+  } catch (err) {
+    logger.error(`Error updating data stream failure store: ${(err as Error).message}`);
     throw err;
   }
 }

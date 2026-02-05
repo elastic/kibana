@@ -117,6 +117,7 @@ jest.mock('../../../../hooks/use_kibana', () => ({
       start: {
         licensing: {
           license$: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             subscribe: (observer: any) => {
               const license = { hasAtLeast: () => true };
               if (typeof observer === 'function') observer(license);
@@ -184,6 +185,7 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: true },
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -206,6 +208,7 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: false },
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -226,6 +229,7 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: false },
           significantEvents: { enabled: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -245,6 +249,7 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: false },
           significantEvents: { enabled: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -264,6 +269,7 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: false },
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -285,6 +291,7 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: false },
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -303,6 +310,7 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: false },
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -323,6 +331,7 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: false },
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -341,6 +350,7 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: false },
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -361,6 +371,7 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: true },
           significantEvents: { enabled: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(

@@ -43,6 +43,7 @@ const mockRoutingContext = {
 
 jest.mock('./state_management/stream_routing_state_machine', () => ({
   useStreamsRoutingSelector: (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     selector: (snapshot: { context: typeof mockRoutingContext }) => any
   ) => selector({ context: mockRoutingContext }),
 }));

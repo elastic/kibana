@@ -15,6 +15,7 @@ const renderI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nPr
 
 describe('DslField', () => {
   const makeInitialValue = (retention: string | undefined) =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     retention ? ({ dsl: { data_retention: retention } } as any) : ({} as any);
 
   it('initializes from existing retention value', () => {

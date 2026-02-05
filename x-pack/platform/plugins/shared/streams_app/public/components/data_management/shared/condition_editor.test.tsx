@@ -16,6 +16,7 @@ import { ConditionEditor } from './condition_editor';
 import type { Suggestion } from './autocomplete_selector';
 
 jest.mock('@kbn/code-editor', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   CodeEditor: ({ value, onChange, dataTestSubj }: any) => (
     <textarea
       data-test-subj={dataTestSubj}
@@ -113,6 +114,7 @@ describe('ConditionEditor', () => {
 
   describe('Invalid condition handling', () => {
     it('should show error for invalid condition', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const invalidCondition = { invalid: 'condition' } as any;
 
       renderWithProviders(

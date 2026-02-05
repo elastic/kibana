@@ -73,6 +73,7 @@ describe('IngestionCard', () => {
 
     it('shows dash when stats provided but bytesPerDay missing', () => {
       renderWithI18n(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         <IngestionCard period="daily" hasMonitorPrivileges={true} stats={{ someOther: 1 } as any} />
       );
 

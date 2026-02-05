@@ -17,7 +17,9 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
 
   // Helper to create a stream and verify it was created
   async function createTestStream(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     apiClient: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     cookieHeader: any,
     streamName: string,
     condition: { field: string; eq: string }
@@ -46,9 +48,12 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
 
   // Helper to get a stream and verify it exists
   async function getStream(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     apiClient: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     cookieHeader: any,
     streamName: string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<{ success: boolean; stream?: any; error?: string }> {
     const response = await apiClient.get(`api/streams/${streamName}`, {
       headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
@@ -75,6 +80,7 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
   }
 
   // Helper to extract writeable ingest config (removes read-only fields like 'updated_at')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function getWriteableIngest(streamResponse: any): any {
     const ingest = streamResponse.stream.ingest;
     // Remove 'updated_at' from processing as it's a read-only field

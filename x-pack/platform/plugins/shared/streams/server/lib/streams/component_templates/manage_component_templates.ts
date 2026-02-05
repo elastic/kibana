@@ -28,8 +28,8 @@ export async function deleteComponent({ esClient, name, logger }: DeleteComponen
       () => esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] }),
       { logger }
     );
-  } catch (error: any) {
-    logger.error(`Error deleting component template: ${error.message}`);
+  } catch (error) {
+    logger.error(`Error deleting component template: ${(error as Error).message}`);
     throw error;
   }
 }
@@ -40,8 +40,8 @@ export async function upsertComponent({ esClient, component, logger }: Component
       logger,
     });
     logger.debug(() => `Installed component template: ${JSON.stringify(component)}`);
-  } catch (error: any) {
-    logger.error(`Error updating component template: ${error.message}`);
+  } catch (error) {
+    logger.error(`Error updating component template: ${(error as Error).message}`);
     throw error;
   }
 }

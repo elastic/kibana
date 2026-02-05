@@ -11,9 +11,12 @@ import type { Direction } from '@elastic/eui';
 import { ms } from '@kbn/test/src/functional_test_runner/lib/mocha/reporter/ms';
 
 const createStream = (name: string, retention: string | undefined): ListStreamDetail => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const lifecycle = retention ? { dsl: { data_retention: retention } } : ({} as any);
   return {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stream: { name } as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     effective_lifecycle: lifecycle as any,
     data_stream: undefined,
   } as unknown as ListStreamDetail;

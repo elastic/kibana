@@ -219,7 +219,7 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
 
   return transpiledIngestPipelineProcessors.map((processor) => {
     const type = Object.keys(processor)[0];
-    const processorConfig = (processor as any)[type]; // Safe to use any here due to type structure
+    const processorConfig = (processor as Record<string, Record<string, unknown>>)[type];
 
     return {
       [type]: {
