@@ -38,12 +38,12 @@ export const monitorFiltersSchema = schema.object({
       meta: { description: 'Filter by tags' },
     })
   ),
-  monitor_ids: schema.maybe(
+  monitorIds: schema.maybe(
     schema.arrayOf(monitorOptionSchema, {
       meta: { description: 'Filter by monitor IDs' },
     })
   ),
-  monitor_types: schema.maybe(
+  monitorTypes: schema.maybe(
     schema.arrayOf(monitorOptionSchema, {
       meta: { description: 'Filter by monitor types' },
     })

@@ -70,8 +70,8 @@ describe('Common Schemas', () => {
           { label: 'Project 2', value: 'project-2' },
         ],
         tags: [{ label: 'Tag 1', value: 'tag-1' }],
-        monitor_ids: [{ label: 'Monitor A', value: 'monitor-a' }],
-        monitor_types: [{ label: 'HTTP', value: 'http' }],
+        monitorIds: [{ label: 'Monitor A', value: 'monitor-a' }],
+        monitorTypes: [{ label: 'HTTP', value: 'http' }],
         locations: [{ label: 'US East', value: 'us-east-1' }],
       };
 
@@ -97,18 +97,18 @@ describe('Common Schemas', () => {
       expect(validated).toEqual(input);
     });
 
-    it('validates filters with only monitor_ids', () => {
+    it('validates filters with only monitorIds', () => {
       const input = {
-        monitor_ids: [{ label: 'Monitor A', value: 'monitor-a' }],
+        monitorIds: [{ label: 'Monitor A', value: 'monitor-a' }],
       };
 
       const validated = monitorFiltersSchema.validate(input);
       expect(validated).toEqual(input);
     });
 
-    it('validates filters with only monitor_types', () => {
+    it('validates filters with only monitorTypes', () => {
       const input = {
-        monitor_types: [{ label: 'Browser', value: 'browser' }],
+        monitorTypes: [{ label: 'Browser', value: 'browser' }],
       };
 
       const validated = monitorFiltersSchema.validate(input);
@@ -142,6 +142,7 @@ describe('Common Schemas', () => {
           { label: 'Tag 1', value: 'tag-1' },
           { label: 'Tag 2', value: 'tag-2' },
         ],
+        monitorIds: [{ label: 'Monitor A', value: 'monitor-a' }],
       };
 
       const validated = monitorFiltersSchema.validate(input);
@@ -168,23 +169,23 @@ describe('Common Schemas', () => {
       );
     });
 
-    it('throws on invalid monitor_ids array item', () => {
+    it('throws on invalid monitorIds array item', () => {
       const input = {
-        monitor_ids: [{ label: 123, value: 'monitor-a' }], // invalid label type
+        monitorIds: [{ label: 123, value: 'monitor-a' }], // invalid label type
       };
 
       expect(() => monitorFiltersSchema.validate(input)).toThrow(
-        /\[monitor_ids.0.label\]: expected value of type \[string\]/
+        /\[monitorIds.0.label\]: expected value of type \[string\]/
       );
     });
 
-    it('throws on invalid monitor_types array item', () => {
+    it('throws on invalid monitorTypes array item', () => {
       const input = {
-        monitor_types: [{ label: 'HTTP', value: 123 }], // invalid value type
+        monitorTypes: [{ label: 'HTTP', value: 123 }], // invalid value type
       };
 
       expect(() => monitorFiltersSchema.validate(input)).toThrow(
-        /\[monitor_types.0.value\]: expected value of type \[string\]/
+        /\[monitorTypes.0.value\]: expected value of type \[string\]/
       );
     });
 
@@ -210,8 +211,8 @@ describe('Common Schemas', () => {
       const input = {
         projects: [],
         tags: [],
-        monitor_ids: [],
-        monitor_types: [],
+        monitorIds: [],
+        monitorTypes: [],
         locations: [],
       };
 
@@ -223,7 +224,7 @@ describe('Common Schemas', () => {
       const input = {
         projects: [{ label: 'Project 1', value: 'project-1' }],
         locations: [{ label: 'US East', value: 'us-east-1' }],
-        // tags, monitor_ids, and monitor_types are intentionally omitted
+        // tags, monitorIds, and monitorTypes are intentionally omitted
       };
 
       const validated = monitorFiltersSchema.validate(input);
