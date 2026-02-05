@@ -58,7 +58,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify Agent Builder nav button is visible', async () => {
-        const aiAgentNavControlButton = pageObjects.genAiSettings.getAIAgentNavControlButton();
+        const aiAgentNavControlButton = pageObjects.genAiSettings.getAIAgentNavButton();
         await expect(aiAgentNavControlButton).toBeVisible();
       });
     });

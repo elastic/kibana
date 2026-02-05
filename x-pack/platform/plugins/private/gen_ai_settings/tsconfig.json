@@ -37,7 +37,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/agent-builder-common",
     "@kbn/scout",
-    "@kbn/ai-assistant-management-plugin"
   ],
   "exclude": ["target/**/*"]
 }

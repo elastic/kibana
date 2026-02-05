@@ -30,6 +30,13 @@ export class GenAiSettingsPage {
   }
 
   /**
+   * Get the GenAI Settings page title element
+   */
+  getGenAiSettingsPageTitle() {
+    return this.page.testSubj.locator('genAiSettingsTitle');
+  }
+
+  /**
    * Get the chat experience field row element
    */
   getChatExperienceField() {
@@ -113,7 +120,7 @@ export class GenAiSettingsPage {
   /**
    * Get the AI Agent nav button
    */
-  getAIAgentNavControlButton() {
+  getAIAgentNavButton() {
     return this.page.testSubj.locator('AgentBuilderNavControlButton');
   }
 
@@ -157,6 +164,13 @@ export class GenAiSettingsPage {
    */
   getAIAgentCard() {
     return this.page.testSubj.locator('aiAssistantAgentCard');
+  }
+
+  /**
+   * Get the AI Agent card select button (the actual button inside the card)
+   */
+  getAIAgentCardSelectButton() {
+    return this.page.testSubj.locator('aiAssistantAgentCard').locator('button[role="switch"]');
   }
 
   /**

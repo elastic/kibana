@@ -17,14 +17,21 @@ spaceTest.describe(
       await pageObjects.genAiSettings.navigateTo();
     });
 
-    spaceTest('should display the GenAI Settings page', async ({ pageObjects }) => {
-      const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
-      await expect(chatExperienceField).toBeVisible();
-    });
+    spaceTest('should display correct UI elements', async ({ pageObjects }) => {
+      await spaceTest.step('should display the GenAI Settings page title', async () => {
+        const genAiSettingsPageTitle = pageObjects.genAiSettings.getGenAiSettingsPageTitle();
+        await expect(genAiSettingsPageTitle).toBeVisible();
+      });
 
-    spaceTest('should display AI Assistant nav button in Classic mode', async ({ pageObjects }) => {
-      const aiAssistantNavButton = pageObjects.genAiSettings.getAiAssistantNavButton();
-      await expect(aiAssistantNavButton).toBeVisible();
+      await spaceTest.step('should display the Chat Experience field', async () => {
+        const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
+        await expect(chatExperienceField).toBeVisible();
+      });
+
+      await spaceTest.step('should display AI Assistant nav button', async () => {
+        const aiAssistantNavButton = pageObjects.genAiSettings.getAiAssistantNavButton();
+        await expect(aiAssistantNavButton).toBeVisible();
+      });
     });
   }
 );
