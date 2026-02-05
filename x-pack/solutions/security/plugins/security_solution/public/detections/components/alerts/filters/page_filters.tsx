@@ -109,7 +109,7 @@ export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
       name: SECURITY_ALERT_DATA_VIEW.name,
       allowNoIndex: true,
       title: alertsIndicesTitle,
-      timefield_name: '@timestamp',
+      timeFieldName: '@timestamp',
     }),
     [alertsIndicesTitle]
   );
