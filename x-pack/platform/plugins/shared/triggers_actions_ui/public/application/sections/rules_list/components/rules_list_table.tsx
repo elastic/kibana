@@ -9,11 +9,10 @@ import moment from 'moment';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import useObservable from 'react-use/lib/useObservable';
 import type { EuiTableSortingType, EuiSelectableOption } from '@elastic/eui';
 import {
-  getRuleDetailsRoute,
   getRulesAppDetailsRoute,
+  rulesAppRoute,
   triggersActionsRoute,
 } from '@kbn/rule-data-utils/src/routes/stack_rule_paths';
 import {
@@ -40,8 +39,6 @@ import {
 } from '@kbn/alerting-plugin/common';
 
 import { getRouterLinkProps } from '@kbn/router-utils';
-
-import { useKibana } from '../../../../common/lib/kibana';
 
 import {
   SELECT_ALL_RULES,
@@ -258,11 +255,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const { euiTheme } = useEuiTheme();
 
   // Detect current app to determine the correct path format
-  const {
-    services: { application },
-  } = useKibana();
-  const currentAppId = useObservable(application.currentAppId$, undefined);
-  const isInRulesApp = currentAppId === 'rules';
 
   const ruleRowCss = css`
     .actRulesList__tableRowDisabled {
@@ -430,9 +422,11 @@ export const RulesListTable = (props: RulesListTableProps) => {
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
           const checkEnabledResult = checkRuleTypeEnabled(ruleType);
-          const pathToRuleDetails = isInRulesApp
-            ? `rules${getRulesAppDetailsRoute(rule.id)}`
-            : `${triggersActionsRoute}${getRuleDetailsRoute(rule.id)}`;
+          const pathToRuleDetails = `${
+            getIsExperimentalFeatureEnabled('unifiedRulesPage')
+              ? rulesAppRoute
+              : triggersActionsRoute
+          }${getRulesAppDetailsRoute(rule.id)}`;
 
           const linkProps = getRouterLinkProps({
             href: pathToRuleDetails,
@@ -898,7 +892,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
     config.minimumScheduleInterval,
     isLoadingMap,
     isRuleTypeEditableInContext,
-    isInRulesApp,
     onRuleChanged,
     onRuleClick,
     onRuleDeleteClick,
@@ -1021,6 +1014,12 @@ export const RulesListTable = (props: RulesListTableProps) => {
       </EuiFlexGroup>
       <EuiFlexItem>
         <EuiBasicTable
+          tableCaption={i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.rulesListTable.description',
+            {
+              defaultMessage: 'Displays rule list data',
+            }
+          )}
           loading={isLoading}
           /* Don't display rules until we have the rule types initialized */
           items={items}
