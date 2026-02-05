@@ -20,6 +20,8 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { createStartServicesMock } from '../../../mocks';
 
+jest.mock('../../../hooks/use_kibana');
+
 // Mock Monaco editor
 const createMockEditor = (value: string) => {
   const lines = value.split('\n');

@@ -145,6 +145,9 @@ export {
   type BaseFeature,
   type FeatureStatus,
   DATASET_ANALYSIS_FEATURE_TYPE,
+  LOG_SAMPLES_FEATURE_TYPE,
+  LOG_PATTERNS_FEATURE_TYPE,
+  ERROR_LOGS_FEATURE_TYPE,
   isFeature,
   isComputedFeature,
   featureSchema,
@@ -168,6 +171,11 @@ export {
 
 export { type IngestStreamProcessing } from './src/models/ingest/processing';
 
-export { TaskStatus } from './src/tasks/types';
+export { TaskStatus, type TaskResult } from './src/tasks/types';
+
+export type { GenerateDescriptionResult } from './src/api/description_generation';
+export type { IdentifyFeaturesResult } from './src/api/features';
 
 export type { InsightsResult, Insight, InsightImpactLevel } from './src/insights';
+export type { OnboardingResult } from './src/onboarding';
+export { OnboardingStep } from './src/onboarding';
