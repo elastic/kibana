@@ -89,7 +89,6 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/search-types",
     "@kbn/core-lifecycle-browser",
-    "@kbn/ui-actions-browser",
     "@kbn/presentation-publishing",
     "@kbn/presentation-containers",
     "@kbn/ui-actions-plugin",
