@@ -25,6 +25,7 @@ plugins:
     - streams
     - streams_app
     - transform
+    - dashboard
     - workflows_extensions
   disabled:
 
