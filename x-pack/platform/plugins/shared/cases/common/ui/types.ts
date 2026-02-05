@@ -66,7 +66,6 @@ export interface CasesContextFeatures {
   metrics: SingleCaseMetricsFeature[];
   observables?: { enabled: boolean; autoExtract?: boolean };
   events?: { enabled: boolean };
-  templates?: { enabled: boolean };
 }
 
 export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
@@ -85,6 +84,9 @@ export interface CasesUiConfigType {
     enabled: boolean;
   };
   incrementalId: {
+    enabled: boolean;
+  };
+  templates: {
     enabled: boolean;
   };
 }

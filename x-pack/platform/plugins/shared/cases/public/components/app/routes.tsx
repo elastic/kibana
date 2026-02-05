@@ -33,8 +33,8 @@ import { useReadonlyHeader } from './use_readonly_header';
 import type { CaseViewProps } from '../case_view/types';
 import type { CreateCaseFormProps } from '../create/form';
 import { AllTemplatesPage } from '../templates_v2/pages/all_templates_page';
-import { useCasesFeatures } from '../../common/use_cases_features';
 import { TemplateFormPage } from '../templates_v2/pages/template_form_page';
+import { KibanaServices } from '../../common/lib/kibana/services';
 
 const CaseViewLazy: React.FC<CaseViewProps> = lazy(() => import('../case_view'));
 
@@ -52,7 +52,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   const { basePath, permissions } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { navigateToCaseView } = useCaseViewNavigation();
-  const { isTemplatesEnabled } = useCasesFeatures();
 
   useReadonlyHeader();
 
@@ -60,6 +59,8 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
     async ({ id }) => navigateToCaseView({ detailName: id }),
     [navigateToCaseView]
   );
+  const config = KibanaServices.getConfig();
+  const isTemplatesEnabled = config?.templates?.enabled ?? false;
 
   return (
     <>

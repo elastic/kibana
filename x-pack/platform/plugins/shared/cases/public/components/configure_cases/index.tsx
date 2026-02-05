@@ -32,7 +32,7 @@ import type {
   ActionConnector,
   ObservableTypeConfiguration,
 } from '../../../common/types/domain';
-import { useKibana } from '../../common/lib/kibana';
+import { KibanaServices, useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
@@ -122,7 +122,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const hasMinimumLicensePermissions = license.isAtLeastGold();
   const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
 
-  const { isObservablesFeatureEnabled, isTemplatesEnabled } = useCasesFeatures();
+  const { isObservablesFeatureEnabled } = useCasesFeatures();
+  const config = KibanaServices.getConfig();
+  const isTemplatesEnabled = config?.templates?.enabled ?? false;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [flyOutVisibility, setFlyOutVisibility] = useState<Flyout | null>(null);

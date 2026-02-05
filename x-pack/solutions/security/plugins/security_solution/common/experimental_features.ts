@@ -210,11 +210,6 @@ export const allowedExperimentalValues = Object.freeze({
    * When disabled, DNS field is not added to Linux policies and not shown in UI.
    */
   linuxDnsEvents: false,
-
-  /**
-   * Enables the Cases Templates Page feature.
-   */
-  templates: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
