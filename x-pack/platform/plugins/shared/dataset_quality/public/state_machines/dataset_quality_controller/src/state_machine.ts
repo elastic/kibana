@@ -6,9 +6,9 @@
  */
 
 import type { IToasts } from '@kbn/core/public';
+import { getDateISORange } from '@kbn/timerange';
 import type { DoneInvokeEvent, InterpreterFrom } from 'xstate';
 import { assign, createMachine } from 'xstate';
-import { getSafeDateISORange } from '../../../utils';
 import type {
   DatasetTypesPrivileges,
   DataStreamDocsStat,
@@ -634,16 +634,7 @@ export const createDatasetQualityControllerStateMachine = ({
         (context, _event, { data: { type } }) =>
         async (send) => {
           try {
-            const dateRange = getSafeDateISORange(context.filters.timeRange);
-            if (!dateRange) {
-              // Return empty stats when date range is invalid
-              send({
-                type: 'SAVE_TOTAL_DOCS_STATS',
-                data: [],
-              });
-              return;
-            }
-            const { startDate: start, endDate: end } = dateRange;
+            const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
 
             const totalDocsStats = await (isTypeSelected(type, context)
               ? dataStreamStatsClient.getDataStreamsTotalDocs({
@@ -665,12 +656,7 @@ export const createDatasetQualityControllerStateMachine = ({
           }
         },
       loadDegradedDocs: (context) => {
-        const dateRange = getSafeDateISORange(context.filters.timeRange);
-        if (!dateRange) {
-          // Return empty stats when date range is invalid
-          return Promise.resolve([]);
-        }
-        const { startDate: start, endDate: end } = dateRange;
+        const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
 
         return dataStreamStatsClient.getDataStreamsDegradedStats({
           types: getValidDatasetTypes(context, isDatasetQualityAllSignalsAvailable),
@@ -680,12 +666,7 @@ export const createDatasetQualityControllerStateMachine = ({
         });
       },
       loadFailedDocs: (context) => {
-        const dateRange = getSafeDateISORange(context.filters.timeRange);
-        if (!dateRange) {
-          // Return empty stats when date range is invalid
-          return Promise.resolve([]);
-        }
-        const { startDate: start, endDate: end } = dateRange;
+        const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
 
         return dataStreamStatsClient.getDataStreamsFailedStats({
           types: getValidDatasetTypes(context, isDatasetQualityAllSignalsAvailable),
@@ -695,12 +676,7 @@ export const createDatasetQualityControllerStateMachine = ({
         });
       },
       loadNonAggregatableDatasets: (context) => {
-        const dateRange = getSafeDateISORange(context.filters.timeRange);
-        if (!dateRange) {
-          // Return default value when date range is invalid
-          return Promise.resolve({ aggregatable: true, datasets: [] });
-        }
-        const { startDate: start, endDate: end } = dateRange;
+        const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
 
         return dataStreamStatsClient.getNonAggregatableDatasets({
           types: getValidDatasetTypes(context, isDatasetQualityAllSignalsAvailable),
