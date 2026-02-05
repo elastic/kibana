@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
-import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
-import { useKibana } from '../../hooks/use_kibana';
-import type { AIFeatures } from '../../hooks/use_ai_features';
-import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
-import type { Flow, SaveData } from './add_significant_event_flyout/types';
-import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
+import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
+import { useKibana } from '../../../hooks/use_kibana';
+import type { AIFeatures } from '../../../hooks/use_ai_features';
+import { AddSignificantEventFlyout } from './add_significant_event_flyout';
+import type { Flow, SaveData } from './types';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 
 export const EditSignificantEventFlyout = ({
   queryToEdit,
