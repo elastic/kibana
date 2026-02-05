@@ -28,6 +28,7 @@ export enum VIEW_MODE {
 }
 
 export {
+  Density,
   SavedSearchType,
   SavedSearchTypeDisplayName,
   LATEST_VERSION,
