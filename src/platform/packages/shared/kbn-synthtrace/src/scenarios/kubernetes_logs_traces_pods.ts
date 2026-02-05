@@ -206,9 +206,6 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
               .timestamp(timestamp)
               .duration(1000)
               .defaults({
-                'trace.id': `trace-id-${getTimestampBlock(timestamp, 3 * 60 * 1000)}`,
-                'transaction.id': `transaction-id-${getTimestampBlock(timestamp, 2 * 60 * 1000)}`,
-                'span.id': `span-id-${getTimestampBlock(timestamp, 60 * 1000)}`,
                 'agent.name': agent.name,
                 'cloud.region': cloudRegion,
                 'cloud.provider': getRotatedItem(timestamp, CLOUD_PROVIDERS, 3),
