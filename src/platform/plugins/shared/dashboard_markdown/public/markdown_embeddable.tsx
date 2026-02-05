@@ -222,7 +222,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
                 resetEditingState();
                 markdownStateManager.api.setContent(value);
                 if (savedObjectId) {
-                  await markdownClient.update(savedObjectId!, {
+                  await markdownClient.update(savedObjectId, {
                     content: value,
                     title: titleManager.api.title$!.getValue(),
                     description: titleManager.api.description$!.getValue(),
