@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { MCPAuthType } from '@kbn/connector-schemas/mcp';
-import type { DataSource, ConnectorReference } from '@kbn/data-catalog-plugin';
+import type { DataSource } from '@kbn/data-catalog-plugin';
 import { EARSSupportedOAuthProvider } from '@kbn/data-catalog-plugin';
 import {
   generateGithubSearchIssuesWorkflow,
@@ -23,6 +23,7 @@ export const githubDataSource: DataSource = {
   description: i18n.translate('xpack.dataSources.github.description', {
     defaultMessage: 'Connect to Github to pull data from your repository.',
   }),
+
   iconType: '.github',
 
   oauthConfiguration: {
@@ -32,68 +33,53 @@ export const githubDataSource: DataSource = {
     oauthBaseUrl: 'https://localhost:8052', // update once EARS deploys to QA
   },
 
-  stackConnectors: [
-    {
-      type: '.mcp',
-      config: {
-        serverUrl: 'https://api.githubcopilot.com/mcp/',
-        hasAuth: true,
-        authType: MCPAuthType.Bearer,
-      },
-      importedTools: [
-        'get_commit',
-        'get_file_contents',
-        'get_label',
-        'get_latest_release',
-        'get_me',
-        'get_tag',
-        'get_team_members',
-        'get_teams',
-        'list_branches',
-        'list_commits',
-        'list_issue_types',
-        'list_issues',
-        'list_pull_requests',
-        'list_releases',
-        'list_tags',
-        'pull_request_read',
-      ],
-      role: 'primary',
-      name: 'GitHub',
-      description: i18n.translate('xpack.dataSources.github.connectorDescription', {
-        defaultMessage:
-          'Connect to GitHub to access repositories, issues, pull requests, and more.',
-      }),
+  stackConnector: {
+    type: '.mcp',
+    config: {
+      serverUrl: 'https://api.githubcopilot.com/mcp/',
+      hasAuth: true,
+      authType: MCPAuthType.Bearer,
     },
-  ],
+    importedTools: [
+      'get_commit',
+      'get_file_contents',
+      'get_label',
+      'get_latest_release',
+      'get_me',
+      'get_tag',
+      'get_team_members',
+      'get_teams',
+      'list_branches',
+      'list_commits',
+      'list_issue_types',
+      'list_issues',
+      'list_pull_requests',
+      'list_releases',
+      'list_tags',
+      'pull_request_read',
+    ],
+  },
 
-  generateWorkflows(connectors: ConnectorReference[]) {
-    // GitHub uses MCP connector type
-    const github = connectors.find((c) => c.type === '.mcp');
-
-    if (!github) {
-      throw new Error('GitHub MCP connector is required for GitHub data source');
-    }
-
+  generateWorkflows(stackConnectorId: string) {
     return [
       {
-        content: generateGithubSearchIssuesWorkflow(github.id),
+        content: generateGithubSearchIssuesWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
       {
-        content: generateGithubSearchCodeWorkflow(github.id),
+        content: generateGithubSearchCodeWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
       {
-        content: generateGithubSearchPullRequestsWorkflow(github.id),
+        content: generateGithubSearchPullRequestsWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
       {
-        content: generateGithubSearchRepositoriesWorkflow(github.id),
+        content: generateGithubSearchRepositoriesWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
       {
-        content: generateGithubSearchUsersWorkflow(github.id),
+        content: generateGithubSearchUsersWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
     ];

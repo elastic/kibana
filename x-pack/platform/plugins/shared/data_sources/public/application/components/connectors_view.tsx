@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiFlexGrid,
@@ -27,11 +27,14 @@ import {
 } from '../../../common/constants';
 
 export const DataSourcesView: React.FC = () => {
-  const { connectors, dataSources, isLoading } = useDataSources();
+  const { connectors, isLoading } = useDataSources();
+  const [selectedConnector, setSelectedConnector] = useState<Connector | null>(null);
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
 
-  const { openFlyout, flyout, optionalPrompt } = useAddConnectorFlyout({});
+  const { openFlyout, flyout } = useAddConnectorFlyout({
+    dataSourceType: selectedConnector?.id,
+  });
 
   const paginatedConnectors = useMemo(() => {
     const start = activePage * itemsPerPage;
@@ -47,13 +50,12 @@ export const DataSourcesView: React.FC = () => {
 
   const handleConnectorClick = useCallback(
     (connector: Connector) => {
-      // Find the full DataSource definition
-      const ds = dataSources.find((d) => d.id === connector.id);
-      if (ds) {
-        openFlyout(ds, ds.id);
-      }
+      setSelectedConnector(connector);
+      // Open the flyout with the connector's action type ID
+      // For connectors from registry, this will be the stackConnector.type (e.g., '.notion')
+      openFlyout(connector.type);
     },
-    [dataSources, openFlyout]
+    [openFlyout]
   );
 
   if (isLoading) {
@@ -122,9 +124,6 @@ export const DataSourcesView: React.FC = () => {
 
       {/* Connector creation flyout */}
       {flyout}
-
-      {/* Optional connector prompt */}
-      {optionalPrompt}
     </>
   );
 };

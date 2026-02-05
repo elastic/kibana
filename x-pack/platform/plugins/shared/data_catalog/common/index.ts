@@ -15,8 +15,6 @@ export type {
   EARSOAuthConfiguration,
   CustomOAuthConfiguration,
   WorkflowInfo,
-  ConnectorRole,
-  ConnectorReference,
 } from './data_source_spec';
 
 export { EARSSupportedOAuthProvider } from './data_source_spec';

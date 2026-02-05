@@ -55,48 +55,12 @@ export interface CustomOAuthConfiguration {
 }
 
 /**
- * Role of a connector within a data source:
- * - 'primary': Main connector shown first in UI configuration flow (one per data source)
- * - 'required': Must be configured, shown after primary connector
- * - 'optional': User is prompted with a choice before configuration
- */
-export type ConnectorRole = 'primary' | 'required' | 'optional';
-
-/**
- * Reference to a created stack connector, including its type for reliable matching.
- */
-export interface ConnectorReference {
-  /** The connector type (e.g., '.google_drive', '.jina') */
-  type: string;
-  /** The created connector's ID */
-  id: string;
-}
-
-/**
  * Configuration for a stack connector associated with a data source type
  */
 export interface StackConnectorConfig {
   type: string;
   config: Record<string, unknown>;
   importedTools?: string[];
-  /**
-   * Role of this connector in the data source configuration flow.
-   * - 'primary': Main connector, shown first (default for first connector if not specified)
-   * - 'required': Must be configured, flyout shown directly after primary
-   * - 'optional': User prompted with y/n before showing configuration flyout
-   * @default 'required'
-   */
-  role?: ConnectorRole;
-  /** Display name for this connector (shown in UI) */
-  name?: string;
-  /** Description explaining what this connector does (shown in UI prompts) */
-  description?: string;
-  /**
-   * Description shown when the user is about to skip an optional connector.
-   * Explains what will happen if they skip (e.g., fallback behavior).
-   * Only relevant for connectors with role 'optional'.
-   */
-  skipDescription?: string;
 }
 
 /**
@@ -124,16 +88,14 @@ export interface DataSource {
   /**
    * Generates workflows for interacting with the third-party data source.
    * Workflows are the only model for "taking action" against the third party.
-   * @param connectors - Array of connector references (type + id) for connectors created for this data source
    */
-  generateWorkflows(connectors: ConnectorReference[]): WorkflowInfo[];
+  generateWorkflows(stackConnectorId?: string): WorkflowInfo[];
 
   /**
-   * Stack connector configurations.
+   * Stack connector configuration.
    * Stack connectors are the only model for executing workflow actions against the third party.
-   * This is an array to support composite data sources that use multiple connectors.
    */
-  stackConnectors: StackConnectorConfig[];
+  stackConnector: StackConnectorConfig;
 
   /** OAuth configuration for authentication */
   oauthConfiguration?: EARSOAuthConfiguration | CustomOAuthConfiguration;

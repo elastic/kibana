@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataSource, ConnectorReference } from '@kbn/data-catalog-plugin';
+import type { DataSource } from '@kbn/data-catalog-plugin';
 import { EARSSupportedOAuthProvider } from '@kbn/data-catalog-plugin';
 import {
   generateGetDataSourceWorkflow,
@@ -21,6 +21,7 @@ export const notionDataSource: DataSource = {
   description: i18n.translate('xpack.dataSources.notion.description', {
     defaultMessage: 'Connect to Notion to pull data from your workspace.',
   }),
+
   iconType: '.notion',
 
   oauthConfiguration: {
@@ -30,30 +31,17 @@ export const notionDataSource: DataSource = {
     oauthBaseUrl: 'https://localhost:8052',
   },
 
-  stackConnectors: [
-    {
-      type: '.notion',
-      config: {},
-      role: 'primary',
-      name: 'Notion',
-      description: i18n.translate('xpack.dataSources.notion.connectorDescription', {
-        defaultMessage: 'Connect to Notion to access pages, databases, and workspace content.',
-      }),
-    },
-  ],
+  stackConnector: {
+    type: '.notion',
+    config: {},
+  },
 
-  generateWorkflows(connectors: ConnectorReference[]) {
-    const notion = connectors.find((c) => c.type === '.notion');
-
-    if (!notion) {
-      throw new Error('Notion connector is required for Notion data source');
-    }
-
+  generateWorkflows(stackConnectorId: string) {
     return [
-      { content: generateQueryWorkflow(notion.id), shouldGenerateABTool: true },
-      { content: generateSearchWorkflow(notion.id), shouldGenerateABTool: true },
-      { content: generateGetPageWorkflow(notion.id), shouldGenerateABTool: true },
-      { content: generateGetDataSourceWorkflow(notion.id), shouldGenerateABTool: true },
+      { content: generateQueryWorkflow(stackConnectorId), shouldGenerateABTool: true },
+      { content: generateSearchWorkflow(stackConnectorId), shouldGenerateABTool: true },
+      { content: generateGetPageWorkflow(stackConnectorId), shouldGenerateABTool: true },
+      { content: generateGetDataSourceWorkflow(stackConnectorId), shouldGenerateABTool: true },
     ];
   },
 };

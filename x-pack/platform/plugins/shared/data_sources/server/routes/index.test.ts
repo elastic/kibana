@@ -246,7 +246,7 @@ describe('registerRoutes', () => {
   describe('POST /api/data_sources', () => {
     it('should create a new data source and call the helper with correct params', async () => {
       const mockDataSource = {
-        stackConnectors: [{ type: '.notion', required: true }],
+        stackConnector: { type: '.bearer_connector' },
         generateWorkflows: jest.fn(),
       };
 
@@ -263,7 +263,7 @@ describe('registerRoutes', () => {
         body: {
           name: 'My Notion Data Source',
           type: 'notion',
-          connector_credentials: [{ connector_type: '.notion', credentials: 'secret-token-123' }],
+          credentials: 'secret-token-123',
         },
       });
       const mockResponse = httpServerMock.createResponseFactory();
@@ -274,9 +274,7 @@ describe('registerRoutes', () => {
         expect.objectContaining({
           name: 'My Notion Data Source',
           type: 'notion',
-          stackConnectorCredentials: [
-            { credentials: 'secret-token-123', existingConnectorId: undefined },
-          ],
+          credentials: 'secret-token-123',
           dataSource: mockDataSource,
         })
       );
@@ -300,7 +298,7 @@ describe('registerRoutes', () => {
         body: {
           name: 'Invalid Data Source',
           type: 'invalid-type',
-          connector_credentials: [{ connector_type: '.notion', credentials: 'token' }],
+          credentials: 'token',
         },
       });
       const mockResponse = httpServerMock.createResponseFactory();
@@ -318,7 +316,7 @@ describe('registerRoutes', () => {
 
     it('should handle errors during creation', async () => {
       const mockDataSource = {
-        stackConnectors: [{ type: '.notion', required: true }],
+        stackConnector: { type: '.bearer_connector' },
         generateWorkflows: jest.fn(),
       };
 
@@ -337,7 +335,7 @@ describe('registerRoutes', () => {
         body: {
           name: 'Test Data Source',
           type: 'notion',
-          connector_credentials: [{ connector_type: '.notion', credentials: 'token' }],
+          credentials: 'token',
         },
       });
       const mockResponse = httpServerMock.createResponseFactory();

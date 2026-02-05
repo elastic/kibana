@@ -20,7 +20,7 @@ const transformDataSourceType = (dataSources: DataSource): Connector => {
   return {
     id: dataSources.id,
     name: dataSources.name,
-    type: dataSources.stackConnectors?.[0]?.type, // Already has '.' prefix (e.g., '.notion')
+    type: dataSources.stackConnector.type,
     iconType: dataSources.iconType,
     category: 'popular',
   };
@@ -39,12 +39,10 @@ export const useDataSources = () => {
     queryKeys.connectorTypes.list(),
     async () => {
       const service = new AvailableDataSourcesService({ http });
-      const dataSources = await service.list();
+      const connectorTypes = await service.list();
 
-      // Transform to our internal Connector interface while keeping raw data
-      const connectors = dataSources.map(transformDataSourceType);
-
-      return { dataSources, connectors };
+      // Transform connector types to our internal Connector interface
+      return connectorTypes.map(transformDataSourceType);
     },
     {
       onError: (err: Error) => {
@@ -59,8 +57,7 @@ export const useDataSources = () => {
   );
 
   return {
-    connectors: data?.connectors ?? [],
-    dataSources: data?.dataSources ?? [],
+    connectors: data ?? [],
     isLoading,
     error,
   };

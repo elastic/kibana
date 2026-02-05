@@ -17,7 +17,6 @@ import { schema } from '@kbn/config-schema';
 import {
   createDataSourceAndRelatedResources,
   deleteDataSourceAndRelatedResources,
-  type StackConnectorCredentials,
 } from './data_sources_helpers';
 import type { DataSourceAttributes } from '../saved_objects';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
@@ -152,7 +151,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
       const coreContext = await context.core;
 
       try {
-        const { name, type, connector_credentials } = request.body;
+        const { name, type, credentials, stack_connector_id } = request.body;
         const [, { actions, dataCatalog, agentBuilder }] = await getStartServices();
         const savedObjectsClient = coreContext.savedObjects.client;
 
@@ -168,43 +167,11 @@ export function registerRoutes(dependencies: RouteDependencies) {
           });
         }
 
-        // Build the stack connector credentials array by matching provided credentials
-        // to the stackConnectors defined in the data source
-        const stackConnectorCredentials: StackConnectorCredentials[] = [];
-
-        for (const connectorConfig of dataSource.stackConnectors) {
-          // Find matching credentials from the request
-          const matchingCreds = connector_credentials.find(
-            (cred) => cred.connector_type === connectorConfig.type
-          );
-
-          // Check if this connector is required based on its role
-          // 'primary' and 'required' roles require credentials, 'optional' does not
-          const role = connectorConfig.role ?? 'required';
-          const isRequired = role !== 'optional';
-
-          if (matchingCreds) {
-            // Credentials provided for this connector
-            stackConnectorCredentials.push({
-              credentials: matchingCreds.credentials || '',
-              existingConnectorId: matchingCreds.existing_connector_id,
-            });
-          } else if (isRequired) {
-            // Required connector but no credentials provided
-            return response.badRequest({
-              body: {
-                message: `Missing credentials for required connector type "${connectorConfig.type}"`,
-              },
-            });
-          }
-          // Optional connector with no credentials - skip it
-        }
-
-        // Validate we have a name
-        if (!name && stackConnectorCredentials.length > 0) {
+        // Validate required fields based on pattern
+        if (!stack_connector_id && (!name || !credentials)) {
           return response.badRequest({
             body: {
-              message: 'name is required when creating connectors',
+              message: 'name and token are required when stack_connector_id is not provided',
             },
           });
         }
@@ -212,7 +179,8 @@ export function registerRoutes(dependencies: RouteDependencies) {
         const dataSourceId = await createDataSourceAndRelatedResources({
           name: name || `Data source for ${type}`,
           type,
-          stackConnectorCredentials,
+          credentials: credentials || '',
+          stackConnectorId: stack_connector_id,
           savedObjectsClient,
           request,
           logger,
