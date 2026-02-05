@@ -253,11 +253,7 @@ export const SettingsPage: React.FC<Props> = memo(
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
-              {packageInfo?.deprecated && (
-                <>
-                  <DeprecationCallout packageInfo={packageInfo} />
-                </>
-              )}
+              <DeprecationCallout packageInfo={packageInfo} />
               {installedVersion !== null && (
                 <div>
                   <EuiTitle>

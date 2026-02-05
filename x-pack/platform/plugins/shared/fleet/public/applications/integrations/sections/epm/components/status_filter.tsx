@@ -99,7 +99,7 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
       const newShowDeprecated = deprecatedOption?.checked === 'on';
 
       // Update server settings if beta changed
-      if (newShowBeta !== (showBeta === true)) {
+      if (newShowBeta !== undefined && newShowBeta !== showBeta) {
         updateBetaSettings(newShowBeta);
       }
 

@@ -127,6 +127,22 @@ describe('DeprecationCallout', () => {
     expect(link).toHaveAttribute('href', '/app/integrations/detail/modern-package/overview');
   });
 
+  it('should display deprecation callout within conditions', () => {
+    const packageInfo = {
+      name: 'test-package',
+      conditions: {
+        deprecated: {
+          description: 'This integration is no longer maintained',
+        },
+      },
+    };
+
+    renderDeprecationCallout(packageInfo as PackageInfo);
+
+    expect(screen.getByText('This integration is deprecated')).toBeInTheDocument();
+    expect(screen.getByText('This integration is no longer maintained')).toBeInTheDocument();
+  });
+
   it('should not display "since" section when not provided', () => {
     const packageInfo = {
       name: 'test-package',

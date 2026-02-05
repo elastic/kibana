@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -62,6 +62,7 @@ export const PrereleaseCallout: React.FC<{
           </p>
         )}
       </EuiCallOut>
+      <EuiSpacer size="m" />
     </>
   );
 };
@@ -125,6 +126,7 @@ export const OtelPackageCallout: React.FC<{
           />
         </p>
       </EuiCallOut>
+      <EuiSpacer size="m" />
     </>
   );
 };

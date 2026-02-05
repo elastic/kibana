@@ -83,14 +83,7 @@ export function useBrowseIntegrationHook({
 
     cards = cards.filter((card) => {
       const isDeprecated = 'isDeprecated' in card && card.isDeprecated === true;
-
-      if (showDeprecated === true) {
-        // When showDeprecated is true, return only deprecated integrations
-        return isDeprecated;
-      } else {
-        // By default (undefined or false), return all integrations except deprecated ones
-        return true;
-      }
+      return showDeprecated ? isDeprecated : true;
     });
 
     return cards;

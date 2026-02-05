@@ -133,48 +133,54 @@ const LogsEssentialsCallout: React.FC = () => {
 
 export const DeprecationCallout: React.FC<{ packageInfo: PackageInfo }> = ({ packageInfo }) => {
   const { getHref } = useLink();
+  const deprecated = packageInfo?.conditions?.deprecated || packageInfo?.deprecated;
   return (
     <>
-      <EuiCallOut
-        announceOnMount
-        data-test-subj="deprecationCallout"
-        title={i18n.translate('xpack.fleet.epm.deprecatedIntegrationTitle', {
-          defaultMessage: 'This integration is deprecated',
-        })}
-        color="warning"
-        iconType="warning"
-      >
-        <p>{packageInfo?.deprecated?.description}</p>
-        {packageInfo?.deprecated?.since && (
-          <p>
-            <FormattedMessage
-              id="xpack.fleet.epm.deprecatedSinceVersion"
-              defaultMessage="Deprecated since version {version}"
-              values={{ version: packageInfo?.deprecated?.since }}
-            />
-          </p>
-        )}
-        {packageInfo?.deprecated?.replaced_by?.package && (
-          <p>
-            <FormattedMessage
-              id="xpack.fleet.epm.replacedByPackage"
-              defaultMessage="Please use {link} instead."
-              values={{
-                link: (
-                  <EuiLink
-                    href={getHref('integration_details_overview', {
-                      pkgkey: packageInfo.deprecated.replaced_by.package,
-                    })}
-                  >
-                    {packageInfo.deprecated.replaced_by.package}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        )}
-      </EuiCallOut>
-      <EuiSpacer size="l" />
+      {' '}
+      {deprecated ? (
+        <>
+          <EuiCallOut
+            announceOnMount
+            data-test-subj="deprecationCallout"
+            title={i18n.translate('xpack.fleet.epm.deprecatedIntegrationTitle', {
+              defaultMessage: 'This integration is deprecated',
+            })}
+            color="warning"
+            iconType="warning"
+          >
+            <p>{deprecated?.description}</p>
+            {deprecated?.since && (
+              <p>
+                <FormattedMessage
+                  id="xpack.fleet.epm.deprecatedSinceVersion"
+                  defaultMessage="Deprecated since version {version}"
+                  values={{ version: deprecated?.since }}
+                />
+              </p>
+            )}
+            {deprecated?.replaced_by?.package && (
+              <p>
+                <FormattedMessage
+                  id="xpack.fleet.epm.replacedByPackage"
+                  defaultMessage="Please use {link} instead."
+                  values={{
+                    link: (
+                      <EuiLink
+                        href={getHref('integration_details_overview', {
+                          pkgkey: deprecated.replaced_by.package,
+                        })}
+                      >
+                        {deprecated.replaced_by.package}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            )}
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
     </>
   );
 };
@@ -344,9 +350,8 @@ export const OverviewPage: React.FC<Props> = memo(
           </EuiFlexGroup>
           <BidirectionalIntegrationsBanner integrationPackageName={packageInfo.name} />
           <CloudPostureThirdPartySupportCallout packageInfo={packageInfo} />
-          {packageInfo?.deprecated && <DeprecationCallout packageInfo={packageInfo} />}
+          <DeprecationCallout packageInfo={packageInfo} />
           <PrereleaseCallout packageInfo={packageInfo} latestGAVersion={latestGAVersion} />
-          <EuiSpacer size="l" />
 
           {packageInfo.readme ? (
             <Readme
