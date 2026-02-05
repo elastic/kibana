@@ -151,8 +151,8 @@ describe('Gemini Schema', () => {
       ).not.toThrow();
     });
 
-    it('throws when body is missing', () => {
-      expect(() => RunActionParamsSchema.parse({})).toThrow();
+    it('accepts empty object since body is z.any()', () => {
+      expect(() => RunActionParamsSchema.parse({})).not.toThrow();
     });
 
     it('coerces timeout to number', () => {
@@ -222,8 +222,8 @@ describe('Gemini Schema', () => {
       ).toThrow();
     });
 
-    it('throws when messages is missing', () => {
-      expect(() => InvokeAIActionParamsSchema.parse({})).toThrow();
+    it('accepts empty object since messages is z.any()', () => {
+      expect(() => InvokeAIActionParamsSchema.parse({})).not.toThrow();
     });
 
     it('coerces numeric values', () => {
