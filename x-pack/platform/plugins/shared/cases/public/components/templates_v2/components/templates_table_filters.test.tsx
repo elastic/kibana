@@ -20,6 +20,8 @@ describe('TemplatesTableFilters', () => {
     sortField: 'name',
     sortOrder: 'asc',
     search: '',
+    tags: [],
+    createdBy: [],
   };
 
   const onQueryParamsChange = jest.fn();

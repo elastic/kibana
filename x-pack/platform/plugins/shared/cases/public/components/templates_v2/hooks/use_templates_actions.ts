@@ -58,6 +58,7 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
             solution: template.solution,
             fields: template.fields,
             tags: template.tags,
+            createdBy: template.createdBy,
             isDefault: false,
           },
         },

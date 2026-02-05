@@ -24,6 +24,7 @@ describe('useCreateTemplate', () => {
     solution: 'security',
     fields: 5,
     tags: ['tag1'],
+    createdBy: 'user1',
     isDefault: false,
   };
 

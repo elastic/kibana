@@ -24,6 +24,8 @@ describe('useTemplatesPagination', () => {
     sortField: 'name',
     sortOrder: 'asc',
     search: '',
+    tags: [],
+    createdBy: [],
   };
 
   const setQueryParams = jest.fn();

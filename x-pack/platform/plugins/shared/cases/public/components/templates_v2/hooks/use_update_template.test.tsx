@@ -30,6 +30,7 @@ describe('useUpdateTemplate', () => {
     solution: 'security',
     fields: 5,
     tags: ['tag1'],
+    createdBy: 'user1',
     lastUpdate: '2024-01-02T00:00:00.000Z',
     lastTimeUsed: '2024-01-01T00:00:00.000Z',
     usage: 10,
