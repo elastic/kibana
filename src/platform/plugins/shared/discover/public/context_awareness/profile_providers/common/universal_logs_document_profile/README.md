@@ -41,6 +41,19 @@ The Streams feature and other doc viewer integrations need access to per-documen
 
 All features are checked at runtime - no hard dependencies.
 
+### ES|QL Metadata Requirement
+
+**Important**: For Streams integration to work with ES|QL queries, you must include `METADATA _index`:
+
+```esql
+FROM logs-* METADATA _index
+```
+
+**Why**: The Streams feature uses `doc.raw._index` to resolve stream names. In DSL/KQL mode, this is always available. In ES|QL mode, you must explicitly request it with `METADATA _index`.
+
+**Without metadata**: Stream section shows "-" (no stream name)  
+**With metadata**: Stream section shows clickable stream name link ✅
+
 ## Activation Logic
 
 ```typescript

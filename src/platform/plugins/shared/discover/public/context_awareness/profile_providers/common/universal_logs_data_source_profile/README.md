@@ -137,13 +137,15 @@ When a user is in the Observability solution viewing logs, the O11y profiles act
 
 ### Scenario 1: Security Analyst in Classic (with APM installed)
 **User**: Security analyst investigating an incident  
-**Action**: Switch query from alerts to `FROM logs-nginx.access-*`  
+**Action**: Switch query from alerts to `FROM logs-nginx.access-* METADATA _index`  
 **Result**: 
 - Universal Base Logs Profile activates
 - Table shows: log level badges, service name links to APM, infinite scroll
 - Row controls: degraded docs and stacktrace buttons appear
-- Doc viewer: logs overview tab with APM integration
+- Doc viewer: logs overview tab with APM integration, Streams link
 - User gets **full log-optimized experience** with APM/Streams features
+
+**Note**: `METADATA _index` is required for Streams integration to work in ES|QL mode.
 
 ### Scenario 2: Search User in ES3 (Serverless Search)
 **User**: Developer building search application  
