@@ -76,6 +76,9 @@ paths:
                 originalSource:
                   description: The original source of the samples
                   $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/OriginalSource"
+                langSmithOptions:
+                  description: The LangSmith tracing options
+                  $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"
       responses:
         200:
           description: The samples are uploaded successfully.

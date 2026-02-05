@@ -233,13 +233,14 @@ export class AutomaticImportService {
     request: KibanaRequest
   ): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { authenticatedUser, dataStreamParams, connectorId } = params;
+    const { authenticatedUser, dataStreamParams, connectorId, langSmithOptions } = params;
 
     // Schedule the data stream creation background task
     const dataStreamTaskParams: DataStreamTaskParams = {
       integrationId: dataStreamParams.integrationId,
       dataStreamId: dataStreamParams.dataStreamId,
       connectorId,
+      ...(langSmithOptions ? { langSmithOptions } : {}),
     };
     const { taskId } = await this.taskManagerService.scheduleDataStreamCreationTask(
       dataStreamTaskParams,
