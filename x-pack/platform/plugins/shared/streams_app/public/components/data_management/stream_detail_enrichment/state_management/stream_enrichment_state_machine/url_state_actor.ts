@@ -21,6 +21,7 @@ import type {
   StreamEnrichmentEvent,
   StreamEnrichmentServiceDependencies,
 } from './types';
+import { safeParseSessionStorageItem } from '../utils';
 
 export function createUrlInitializerActor({
   core,
@@ -110,9 +111,8 @@ const retrievePersistedCustomSamplesSources = () => {
   const sources: Record<string, CustomSamplesDataSource> = {};
 
   storedSourcesKeys.forEach((key) => {
-    const dataSource = sessionStorage.getItem(key);
-    if (dataSource) {
-      const parsedDataSource = JSON.parse(dataSource);
+    const parsedDataSource = safeParseSessionStorageItem<CustomSamplesDataSource>(key);
+    if (parsedDataSource) {
       parsedDataSource.enabled = false;
       sources[key] = { ...parsedDataSource, documents: [] };
     }

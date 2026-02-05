@@ -23,6 +23,7 @@ import {
   createDataCollectorActor,
 } from './data_collector_actor';
 import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
+import { safeParseSessionStorageItem } from '../utils';
 
 export type DataSourceActorRef = ActorRefFrom<typeof dataSourceMachine>;
 export type DataSourceActorSnapshot = SnapshotFrom<typeof dataSourceMachine>;
@@ -42,12 +43,14 @@ export const dataSourceMachine = setup({
     notifyDataCollectionFailure: getPlaceholderFor(createDataCollectionFailureNotifier),
     restorePersistedCustomSamplesDocuments: assign(({ context }) => {
       if (context.dataSource.type === 'custom-samples' && context.dataSource.storageKey) {
-        const dataSource = sessionStorage.getItem(context.dataSource.storageKey);
-        if (dataSource) {
+        const parsedDataSource = safeParseSessionStorageItem<EnrichmentDataSourceWithUIAttributes>(
+          context.dataSource.storageKey
+        );
+        if (parsedDataSource && 'documents' in parsedDataSource) {
           return {
             dataSource: {
               ...context.dataSource,
-              documents: JSON.parse(dataSource).documents,
+              documents: parsedDataSource.documents,
             },
           };
         }

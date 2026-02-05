@@ -26,3 +26,26 @@ export function collectDescendantStepIds(
 
   return ids;
 }
+
+/**
+ * Safely parses JSON from sessionStorage, returning undefined on parse failure.
+ * If parsing fails, removes the corrupted entry from sessionStorage and logs a warning.
+ *
+ * @param key The sessionStorage key to read from
+ * @returns The parsed value or undefined if not found or corrupted
+ */
+export function safeParseSessionStorageItem<T>(key: string): T | undefined {
+  const value = sessionStorage.getItem(key);
+  if (!value) {
+    return undefined;
+  }
+  try {
+    return JSON.parse(value) as T;
+  } catch (e) {
+    // Corrupted data - remove from sessionStorage and continue
+    sessionStorage.removeItem(key);
+    // eslint-disable-next-line no-console
+    console.warn(`Removed corrupted sessionStorage entry: ${key}`);
+    return undefined;
+  }
+}

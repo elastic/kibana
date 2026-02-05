@@ -110,5 +110,31 @@ test.describe(
         'Custom SamplesComplete'
       );
     });
+
+    test('should gracefully handle corrupted sessionStorage data', async ({
+      page,
+      pageObjects,
+    }) => {
+      // Inject corrupted JSON into sessionStorage before navigating
+      // Key format: streams:custom-samples__<streamName>__<uuid>
+      const corruptedKey = 'streams:custom-samples__logs-generic-default__corrupted-test-entry';
+      await page.evaluate((key) => {
+        sessionStorage.setItem(key, '{invalid json that will cause parse error');
+      }, corruptedKey);
+
+      // Navigate to processing tab - should not crash
+      await pageObjects.streams.gotoProcessingTab('logs-generic-default');
+
+      // Verify page loads with default "Latest samples" data source (graceful degradation)
+      await expect(pageObjects.streams.getDataSourcesList()).toBeVisible();
+      const dataSourcesSelector = await pageObjects.streams.getDataSourcesSelector();
+      await expect(dataSourcesSelector).toHaveText('Latest samplesPartial');
+
+      // Verify the corrupted entry was removed from sessionStorage
+      const itemExists = await page.evaluate((key) => {
+        return sessionStorage.getItem(key) !== null;
+      }, corruptedKey);
+      expect(itemExists).toBe(false);
+    });
   }
 );

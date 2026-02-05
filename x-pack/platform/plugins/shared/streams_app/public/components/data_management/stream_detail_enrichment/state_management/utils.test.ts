@@ -6,7 +6,7 @@
  */
 
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
-import { collectDescendantStepIds } from './utils';
+import { collectDescendantStepIds, safeParseSessionStorageItem } from './utils';
 
 const makeStep = (
   id: string,
@@ -40,5 +40,75 @@ describe('collectDescendantStepIds', () => {
   it('returns empty set when no descendants exist', () => {
     const ids = Array.from(collectDescendantStepIds(steps, 'leaf'));
     expect(ids).toEqual([]);
+  });
+});
+
+describe('safeParseSessionStorageItem', () => {
+  const testKey = 'test-key';
+
+  beforeEach(() => {
+    sessionStorage.clear();
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('returns undefined when key does not exist', () => {
+    const result = safeParseSessionStorageItem(testKey);
+    expect(result).toBeUndefined();
+  });
+
+  it('returns parsed value for valid JSON', () => {
+    const testData = { name: 'test', documents: ['doc1', 'doc2'] };
+    sessionStorage.setItem(testKey, JSON.stringify(testData));
+
+    const result = safeParseSessionStorageItem<typeof testData>(testKey);
+    expect(result).toEqual(testData);
+  });
+
+  it('returns undefined and removes corrupted entry for invalid JSON', () => {
+    sessionStorage.setItem(testKey, 'invalid json {{{');
+
+    const result = safeParseSessionStorageItem(testKey);
+
+    expect(result).toBeUndefined();
+    expect(sessionStorage.getItem(testKey)).toBeNull();
+    // eslint-disable-next-line no-console
+    expect(console.warn).toHaveBeenCalledWith(`Removed corrupted sessionStorage entry: ${testKey}`);
+  });
+
+  it('returns undefined and removes entry for truncated JSON', () => {
+    sessionStorage.setItem(testKey, '{"name": "test", "docs":');
+
+    const result = safeParseSessionStorageItem(testKey);
+
+    expect(result).toBeUndefined();
+    expect(sessionStorage.getItem(testKey)).toBeNull();
+    // eslint-disable-next-line no-console
+    expect(console.warn).toHaveBeenCalled();
+  });
+
+  it('returns undefined for empty string value', () => {
+    sessionStorage.setItem(testKey, '');
+
+    const result = safeParseSessionStorageItem(testKey);
+    // Empty string is falsy, so it returns undefined without trying to parse
+    expect(result).toBeUndefined();
+  });
+
+  it('handles complex nested objects', () => {
+    const complexData = {
+      type: 'custom-samples',
+      name: 'Test Source',
+      enabled: true,
+      documents: [{ id: 1, data: { nested: true } }],
+      storageKey: 'streams:custom-samples__test__uuid',
+    };
+    sessionStorage.setItem(testKey, JSON.stringify(complexData));
+
+    const result = safeParseSessionStorageItem<typeof complexData>(testKey);
+    expect(result).toEqual(complexData);
   });
 });
