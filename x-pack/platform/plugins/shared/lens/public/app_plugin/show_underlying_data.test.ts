@@ -22,7 +22,7 @@ describe('getLayerMetaInfo', () => {
   it('should return error in case of no data', () => {
     expect(
       getLayerMetaInfo(
-        createMockDatasource('testDatasource'),
+        createMockDatasource('formBased'),
         {},
         createMockVisualization('testVisualization'),
         {},
@@ -71,7 +71,7 @@ describe('getLayerMetaInfo', () => {
   it('should return error in case of missing datasource configuration/state', () => {
     expect(
       getLayerMetaInfo(
-        createMockDatasource('testDatasource'),
+        createMockDatasource('formBased'),
         undefined,
         createMockVisualization('testVisualization'),
         {},
@@ -86,7 +86,7 @@ describe('getLayerMetaInfo', () => {
   it('should return error in case of missing activeVisualization', () => {
     expect(
       getLayerMetaInfo(
-        createMockDatasource('testDatasource'),
+        createMockDatasource('formBased'),
         {},
         undefined,
         {},
@@ -101,7 +101,7 @@ describe('getLayerMetaInfo', () => {
   it('should return error in case of missing visualization configuration/state', () => {
     expect(
       getLayerMetaInfo(
-        createMockDatasource('testDatasource'),
+        createMockDatasource('formBased'),
         {},
         createMockVisualization('testVisualization'),
         undefined,
@@ -116,7 +116,7 @@ describe('getLayerMetaInfo', () => {
   it('should ignore the number of datatables passed, rather check the datasource and visualization configuration', () => {
     expect(
       getLayerMetaInfo(
-        createMockDatasource('testDatasource', {
+        createMockDatasource('formBased', {
           getFilters: jest.fn(() => ({
             enabled: { kuery: [], lucene: [] },
             disabled: { kuery: [], lucene: [] },
@@ -137,7 +137,7 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should return no multiple layers error when non-data layers are used together with a single data layer', () => {
-    const mockDatasource = createMockDatasource('testDatasource', {
+    const mockDatasource = createMockDatasource('formBased', {
       getFilters: jest.fn(() => ({
         enabled: { kuery: [], lucene: [] },
         disabled: { kuery: [], lucene: [] },
@@ -165,7 +165,7 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should return error in case of a timeshift declared in a column', () => {
-    const mockDatasource = createMockDatasource('testDatasource', {
+    const mockDatasource = createMockDatasource('formBased', {
       getOperationForColumnId: jest.fn(() => ({
         dataType: 'number',
         isBucketed: false,
@@ -192,7 +192,7 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should return error in case of getFilters returning errors', () => {
-    const mockDatasource = createMockDatasource('testDatasource', {
+    const mockDatasource = createMockDatasource('formBased', {
       datasourceId: 'formBased',
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
       getFilters: jest.fn(() => ({ error: 'filters error' })),
@@ -214,7 +214,7 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should not be visible if discover is not available', () => {
-    const mockDatasource = createMockDatasource('testDatasource', {
+    const mockDatasource = createMockDatasource('formBased', {
       datasourceId: 'indexpattern',
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
       getFilters: jest.fn(() => ({ error: 'filters error' })),
@@ -257,7 +257,7 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should basically work collecting fields and filters in the visualization', () => {
-    const mockDatasource = createMockDatasource('testDatasource', {
+    const mockDatasource = createMockDatasource('formBased', {
       datasourceId: 'formBased',
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
       getSourceId: jest.fn(() => '1'),
@@ -303,7 +303,7 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should order date fields first', () => {
-    const mockDatasource = createMockDatasource('testDatasource', {
+    const mockDatasource = createMockDatasource('formBased', {
       datasourceId: 'formBased',
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes', 'timestamp'] }]),
       getSourceId: jest.fn(() => '1'),
