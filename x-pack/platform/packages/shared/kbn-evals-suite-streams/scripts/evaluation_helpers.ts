@@ -6,8 +6,6 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import fetch from 'node-fetch';
-import type { Response } from 'node-fetch';
 import { flattenObject } from '@kbn/object-utils';
 import { get } from 'lodash';
 
@@ -38,7 +36,7 @@ export function getKibanaAuthHeaders() {
 /**
  * Parse Server-Sent Events (SSE) stream and return the last event data
  */
-export async function parseSSEStream(response: Response): Promise<any> {
+export async function parseSSEStream(response: globalThis.Response): Promise<any> {
   const text = await response.text();
   const lines = text.split('\n');
   let lastData = null;

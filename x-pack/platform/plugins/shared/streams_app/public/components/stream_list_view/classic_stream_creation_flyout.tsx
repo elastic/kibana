@@ -18,6 +18,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { getFormattedError } from '../../util/errors';
 
 interface ClassicStreamCreationFlyoutProps {
   onClose: () => void;
@@ -115,7 +116,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
 
         onClose();
       } catch (error) {
-        core.notifications.toasts.addError(error as Error, {
+        core.notifications.toasts.addError(getFormattedError(error), {
           title: i18n.translate(
             'xpack.streams.classicStreamCreationFlyout.streamCreationFailedToastTitle',
             {
@@ -162,7 +163,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
 
         return { errorType: null };
       } catch (error) {
-        core.notifications.toasts.addError(error as Error, {
+        core.notifications.toasts.addError(getFormattedError(error), {
           title: i18n.translate(
             'xpack.streams.classicStreamCreationFlyout.streamValidationFailedToastTitle',
             {
