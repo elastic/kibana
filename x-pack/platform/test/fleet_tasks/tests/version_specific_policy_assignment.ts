@@ -44,7 +44,8 @@ export default function (providerContext: FtrProviderContextWithServices) {
   }
 
   describe('Version specific policy assignment', () => {
-    const testPolicyName = 'Version Specific Test Policy';
+    // Use unique name to avoid conflicts from previous failed runs
+    const testPolicyName = `Version Specific Test Policy ${Date.now()}`;
 
     before(async () => {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
@@ -196,27 +197,16 @@ export default function (providerContext: FtrProviderContextWithServices) {
       expect(agent2.policy_id).to.be(policyId);
     });
 
-    it('should handle agents without version gracefully', async () => {
-      // Create an agent without a version (edge case)
-      await createAgentDoc(providerContext, 'agent1', policyId, '8.18.0');
-      const { getService: getEs } = providerContext;
-      const esClient = getEs('es');
-
-      // Update agent to remove version (simulating edge case)
-      await esClient.update({
-        index: '.fleet-agents',
-        id: 'agent1',
-        doc: {
-          agent: { id: 'agent1' }, // version removed
-        },
-        refresh: 'wait_for',
-      });
+    it('should handle agents with unparseable/invalid version gracefully', async () => {
+      // Create an agent with an unparseable version (edge case)
+      // The task uses semver.coerce() which will return null for invalid versions
+      await createAgentDoc(providerContext, 'agent999', policyId, 'invalid-version');
 
       // Task should not throw
       await waitForTask();
 
-      // Agent should remain on parent policy since we can't determine version
-      const agent = await getAgent('agent1');
+      // Agent should remain on parent policy since we can't parse the version
+      const agent = await getAgent('agent999');
       expect(agent.policy_id).to.be(policyId);
     });
 
@@ -243,11 +233,13 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
     it('should handle multiple agent policies with version conditions', async () => {
       // Create a second agent policy with version conditions
+      // Use unique name to avoid conflicts from previous failed runs
+      const uniquePolicyName = `Second Version Specific Test Policy ${Date.now()}`;
       const { body: secondPolicyResponse } = await supertest
         .post('/api/fleet/agent_policies')
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Second Version Specific Test Policy',
+          name: uniquePolicyName,
           namespace: 'default',
           has_agent_version_conditions: true,
         })
@@ -285,11 +277,13 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
     it('should not process agent policies without version conditions', async () => {
       // Create an agent policy without version conditions
+      // Use unique name to avoid conflicts from previous failed runs
+      const uniquePolicyName = `Normal Policy Without Version Conditions ${Date.now()}`;
       const { body: normalPolicyResponse } = await supertest
         .post('/api/fleet/agent_policies')
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Normal Policy Without Version Conditions',
+          name: uniquePolicyName,
           namespace: 'default',
           has_agent_version_conditions: false,
         })
