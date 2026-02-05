@@ -79,6 +79,11 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     // Step 5: Hit run (play) button from the header
     await page.testSubj.click('runWorkflowHeaderButton');
 
+    await page.testSubj.waitForSelector('runWorkflowWithUnsavedChangesConfirmationModal', {
+      state: 'visible',
+    });
+    await page.testSubj.click('confirmModalConfirmButton');
+
     // Wait for execute modal to appear
     await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
 

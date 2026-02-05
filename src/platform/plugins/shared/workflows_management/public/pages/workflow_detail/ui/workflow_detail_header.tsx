@@ -322,6 +322,7 @@ export const WorkflowDetailHeader = React.memo(
         </EuiPageTemplate>
         {showRunConfirmation && (
           <EuiConfirmModal
+            data-test-subj="runWorkflowWithUnsavedChangesConfirmationModal"
             title={Translations.runWithUnsavedChangesQuestion}
             onCancel={handleCancelRun}
             onConfirm={handleConfirmRun}
