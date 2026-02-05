@@ -8,7 +8,9 @@
 import moment from 'moment';
 import { ALERT_ACTIONS_DATA_STREAM } from '../../resources/alert_actions';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
+import { createQueryService } from '../services/query_service/query_service.mock';
 import type { QueryServiceContract } from '../services/query_service/query_service';
+import { createStorageService } from '../services/storage_service/storage_service.mock';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
 import { DispatcherService } from './dispatcher';
@@ -18,12 +20,17 @@ import type { AlertEpisode } from './types';
 
 describe('DispatcherService', () => {
   let dispatcherService: DispatcherService;
-  let queryService: jest.Mocked<QueryServiceContract>;
-  let storageService: jest.Mocked<StorageServiceContract>;
+  let queryService: QueryServiceContract;
+  let storageService: StorageServiceContract;
+  let executeQuerySpy: jest.SpyInstance;
+  let bulkIndexDocsSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    queryService = { executeQuery: jest.fn() };
-    storageService = { bulkIndexDocs: jest.fn() };
+    ({ queryService } = createQueryService());
+    ({ storageService } = createStorageService());
+    executeQuerySpy = jest.spyOn(queryService, 'executeQuery');
+    bulkIndexDocsSpy = jest.spyOn(storageService, 'bulkIndexDocs');
+    bulkIndexDocsSpy.mockResolvedValue(undefined);
 
     const { loggerService } = createLoggerService();
     dispatcherService = new DispatcherService(queryService, loggerService, storageService);
@@ -52,9 +59,7 @@ describe('DispatcherService', () => {
         },
       ];
 
-      queryService.executeQuery.mockResolvedValue(
-        createDispatchableAlertEventsResponse(alertEpisodes)
-      );
+      executeQuerySpy.mockResolvedValue(createDispatchableAlertEventsResponse(alertEpisodes));
 
       const previousStartedAt = new Date('2026-01-22T07:30:00.000Z');
 
@@ -68,7 +73,7 @@ describe('DispatcherService', () => {
         .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
         .toISOString();
 
-      expect(queryService.executeQuery).toHaveBeenCalledWith(
+      expect(executeQuerySpy).toHaveBeenCalledWith(
         expect.objectContaining({
           query: getDispatchableAlertEventsQuery().query,
           filter: {
@@ -81,12 +86,12 @@ describe('DispatcherService', () => {
         })
       );
 
-      expect(storageService.bulkIndexDocs).toHaveBeenCalledWith({
+      expect(bulkIndexDocsSpy).toHaveBeenCalledWith({
         index: ALERT_ACTIONS_DATA_STREAM,
         docs: expect.any(Array),
       });
 
-      const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+      const [{ docs }] = bulkIndexDocsSpy.mock.calls[0];
       expect(docs).toHaveLength(alertEpisodes.length);
 
       expect(docs).toEqual(
@@ -112,14 +117,14 @@ describe('DispatcherService', () => {
     });
 
     it('handles empty alert episode responses', async () => {
-      queryService.executeQuery.mockResolvedValue(createDispatchableAlertEventsResponse([]));
+      executeQuerySpy.mockResolvedValue(createDispatchableAlertEventsResponse([]));
 
       const result = await dispatcherService.run({
         previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
       });
 
       expect(result.startedAt).toBeInstanceOf(Date);
-      expect(storageService.bulkIndexDocs).toHaveBeenCalledWith({
+      expect(bulkIndexDocsSpy).toHaveBeenCalledWith({
         index: ALERT_ACTIONS_DATA_STREAM,
         docs: [],
       });
