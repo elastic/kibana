@@ -260,17 +260,6 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
   }, [title]);
 
   const handleCloseFlyout = useCallback(() => {
-    // Close child flyout first if it's open
-    if (childFlyoutRefA.current) {
-      childFlyoutRefA.current.close();
-      childFlyoutRefA.current = null;
-    }
-    if (childFlyoutRefB.current) {
-      childFlyoutRefB.current.close();
-      childFlyoutRefB.current = null;
-    }
-
-    // Then close main flyout
     if (flyoutRef.current) {
       flyoutRef.current.close();
       flyoutRef.current = null;
