@@ -295,4 +295,77 @@ describe('ScriptsLibraryTable', () => {
       );
     });
   });
+
+  describe('With records and row actions', () => {
+    it('should trigger details flyout when script name is clicked', async () => {
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      render();
+
+      const { getByTestId } = renderResult;
+      const nameButton = getByTestId('test-column-name-script-1-nav-link');
+
+      await userEve.click(nameButton);
+
+      expect(defaultProps.onClickAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          show: 'details',
+          script: expect.objectContaining({ id: 'script-1' }),
+        })
+      );
+    });
+
+    it('should show `edit` and `delete` actions with `canWriteScriptsLibrary` privilege', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: {
+          ...getEndpointAuthzInitialStateMock(),
+          canWriteScriptsLibrary: true,
+        },
+      });
+
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      render();
+
+      const { getByTestId } = renderResult;
+      const actionsButton = getByTestId('test-row-actions-script-1');
+
+      await userEve.click(actionsButton);
+
+      const actionPanel = getByTestId('test-row-actions-script-1-panel');
+      expect(actionPanel).toBeInTheDocument();
+      const actionItems = actionPanel.querySelectorAll('.euiContextMenuItem');
+      expect(actionItems).toHaveLength(4);
+      const actionItemLabels = Array.from(actionItems).map((item) => item.textContent);
+      expect(actionItemLabels).toEqual([
+        'View details',
+        'Edit script',
+        'Download script',
+        'Delete script',
+      ]);
+    });
+
+    it('should not show `edit` and `delete` actions without `canWriteScriptsLibrary` privilege', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: {
+          ...getEndpointAuthzInitialStateMock(),
+          canWriteScriptsLibrary: false,
+        },
+      });
+
+      act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      render();
+
+      const { getByTestId } = renderResult;
+      const actionsButton = getByTestId('test-row-actions-script-1');
+
+      await userEve.click(actionsButton);
+
+      const actionPanel = getByTestId('test-row-actions-script-1-panel');
+      expect(actionPanel).toBeInTheDocument();
+      const actionItems = actionPanel.querySelectorAll('.euiContextMenuItem');
+      expect(actionItems).toHaveLength(2);
+      const actionItemLabels = Array.from(actionItems).map((item) => item.textContent);
+      expect(actionItemLabels).toEqual(['View details', 'Download script']);
+    });
+    //
+  });
 });

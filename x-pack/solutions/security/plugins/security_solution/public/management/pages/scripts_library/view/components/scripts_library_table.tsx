@@ -189,6 +189,7 @@ const getScriptsLibraryTableColumns = ({
               scriptItem={item}
               queryParams={queryParams}
               onClickAction={onClickAction}
+              data-test-subj={getTestId(`row-actions-${item.id}`)}
             />
           ),
         },
