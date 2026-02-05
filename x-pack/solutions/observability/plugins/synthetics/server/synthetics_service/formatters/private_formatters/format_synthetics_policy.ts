@@ -82,7 +82,7 @@ export const formatSyntheticsPolicy = (
 
   // This field is NOT in the monitor config, but needs to be set in the policy
   // so Heartbeat knows to decode the base64-encoded script
-  const encodingVar = dataStream?.vars?.[ConfigKey.SOURCE_INLINE_ENCODING];
+  const encodingVar = dataStream?.vars?.['source.inline.encoding'];
   if (monitorType === 'browser' && encodingVar && config[ConfigKey.SOURCE_INLINE]) {
     encodingVar.value = 'base64';
   }
