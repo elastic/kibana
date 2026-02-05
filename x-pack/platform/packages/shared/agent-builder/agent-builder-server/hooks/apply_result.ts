@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { HookContextByLifecycle } from './types';
 import {
   HookLifecycle,
   type BeforeConversationRoundHookContext,
@@ -20,10 +21,6 @@ function isResultObject(
   return result != null && typeof result === 'object';
 }
 
-/**
- * Apply a beforeConversationRound hook result into context.
- * Only {@link BeforeConversationRoundHookUpdatable.nextInput} is applied.
- */
 export function applyBeforeConversationRoundResult(
   context: BeforeConversationRoundHookContext,
   result: void | HookHandlerResult<HookLifecycle.beforeConversationRound>
@@ -32,10 +29,6 @@ export function applyBeforeConversationRoundResult(
   return { ...context, nextInput: result.nextInput };
 }
 
-/**
- * Apply an afterConversationRound hook result into context.
- * Only {@link AfterConversationRoundHookUpdatable.round} is applied.
- */
 export function applyAfterConversationRoundResult(
   context: AfterConversationRoundHookContext,
   result: void | HookHandlerResult<HookLifecycle.afterConversationRound>
@@ -44,10 +37,6 @@ export function applyAfterConversationRoundResult(
   return { ...context, round: result.round };
 }
 
-/**
- * Apply a beforeToolCall hook result into context.
- * Only {@link BeforeToolCallHookUpdatable.toolParams} is applied.
- */
 export function applyBeforeToolCallResult(
   context: BeforeToolCallHookContext,
   result: void | HookHandlerResult<HookLifecycle.beforeToolCall>
@@ -56,10 +45,6 @@ export function applyBeforeToolCallResult(
   return { ...context, toolParams: result.toolParams };
 }
 
-/**
- * Apply an afterToolCall hook result into context.
- * Only {@link AfterToolCallHookUpdatable.toolReturn} is applied.
- */
 export function applyAfterToolCallResult(
   context: AfterToolCallHookContext,
   result: void | HookHandlerResult<HookLifecycle.afterToolCall>
@@ -68,15 +53,11 @@ export function applyAfterToolCallResult(
   return { ...context, toolReturn: result.toolReturn };
 }
 
-/**
- * Typed map from lifecycle event to its apply function.
- * Use this to merge a hook's return value into context without a switch.
- */
-export const applyHookResultByEvent: {
+export const applyHookResultByLifecycle: {
   [K in HookLifecycle]: (
-    context: import('./types').HookContextByEvent[K],
+    context: HookContextByLifecycle[K],
     result: void | HookHandlerResult<K>
-  ) => import('./types').HookContextByEvent[K];
+  ) => HookContextByLifecycle[K];
 } = {
   [HookLifecycle.beforeConversationRound]: applyBeforeConversationRoundResult,
   [HookLifecycle.afterConversationRound]: applyAfterConversationRoundResult,

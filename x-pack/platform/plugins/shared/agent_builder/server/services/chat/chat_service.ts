@@ -7,18 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { tap } from 'rxjs';
-import {
-  concatMap,
-  filter,
-  finalize,
-  of,
-  defer,
-  shareReplay,
-  share,
-  switchMap,
-  merge,
-  EMPTY,
-} from 'rxjs';
+import { filter, of, defer, shareReplay, switchMap, merge, mergeMap, EMPTY, from } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
@@ -26,16 +15,11 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import {
   type ChatEvent,
+  type ConverseInput,
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
-import type {
-  AfterConversationRoundHookContext,
-  BeforeConversationRoundHookContext,
-  HooksServiceStart,
-} from '@kbn/agent-builder-server';
-import { HookLifecycle } from '@kbn/agent-builder-server';
 import { withConverseSpan } from '../../tracing';
 import type { ConversationService } from '../conversation';
 import type { ConversationClient } from '../conversation';
@@ -54,6 +38,8 @@ import {
 import { createConversationIdSetEvent } from './utils/events';
 import type { ChatService, ChatConverseParams } from './types';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
+import type { HooksServiceStart } from '../hooks';
+import { HookLifecycle } from '../hooks';
 
 interface ChatServiceDeps {
   logger: Logger;
@@ -64,19 +50,12 @@ interface ChatServiceDeps {
   savedObjects: SavedObjectsServiceStart;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
-  hooks: HooksServiceStart;
+  hooks?: HooksServiceStart;
 }
 
 export const createChatService = (options: ChatServiceDeps): ChatService => {
   return new ChatServiceImpl(options);
 };
-
-interface ConversationContext {
-  conversation: ConversationWithOperation;
-  conversationClient: ConversationClient;
-  chatModel: InferenceChatModel;
-  selectedConnectorId: string;
-}
 
 class ChatServiceImpl implements ChatService {
   private readonly dependencies: ChatServiceDeps;
@@ -92,7 +71,7 @@ class ChatServiceImpl implements ChatService {
     capabilities,
     request,
     abortSignal,
-    nextInput,
+    nextInput: initialNextInput,
     autoCreateConversationWithId = false,
     browserApiTools,
   }: ChatConverseParams): Observable<ChatEvent> {
@@ -119,15 +98,22 @@ class ChatServiceImpl implements ChatService {
           conversationClient: services.conversationClient,
         });
 
-        // Build conversation context
-        const context: ConversationContext = {
+        const effectiveNextInput = await runBeforeConversationRoundHook({
+          agentId,
+          request,
+          abortSignal,
+          conversation,
+          nextInput: initialNextInput,
+          hooks: this.dependencies.hooks,
+        });
+
+        return {
           conversation,
           conversationClient: services.conversationClient,
           chatModel: services.chatModel,
           selectedConnectorId: services.selectedConnectorId,
+          effectiveNextInput,
         };
-
-        return context;
       }).pipe(
         switchMap((context) => {
           // Emit conversation ID for new conversations
@@ -136,151 +122,163 @@ class ChatServiceImpl implements ChatService {
               ? of(createConversationIdSetEvent(context.conversation.id))
               : EMPTY;
 
-          const effectiveConversationId = context.conversation.id;
-          const effectiveAbortSignal = abortSignal ?? new AbortController().signal;
-
-          const nextInputWithHooks$ = defer(async () => {
-            const hookContext: BeforeConversationRoundHookContext = {
-              agentId,
-              conversationId: effectiveConversationId,
-              conversation: context.conversation,
-              nextInput,
-              request,
-              abortSignal: effectiveAbortSignal,
-            };
-
-            const updatedHookContext = await this.dependencies.hooks.run(
-              HookLifecycle.beforeConversationRound,
-              hookContext
-            );
-
-            return updatedHookContext.nextInput;
-          });
-
-          return nextInputWithHooks$.pipe(
-            switchMap((effectiveNextInput) => {
-              // Execute agent
-              const rawAgentEvents$ = executeAgent$({
+          // Execute agent
+          const agentEvents$ = executeAgent$({
+            agentId,
+            request,
+            nextInput: context.effectiveNextInput,
+            capabilities,
+            abortSignal,
+            conversation: context.conversation,
+            defaultConnectorId: context.selectedConnectorId,
+            agentService: this.dependencies.agentService,
+            browserApiTools,
+          }).pipe(
+            mergeMap(
+              runAfterConversationRoundHook({
                 agentId,
                 request,
-                nextInput: effectiveNextInput,
-                capabilities,
-                abortSignal: effectiveAbortSignal,
+                abortSignal,
                 conversation: context.conversation,
-                defaultConnectorId: context.selectedConnectorId,
-                agentService: this.dependencies.agentService,
-                browserApiTools,
-              });
+                hooks: this.dependencies.hooks,
+              })
+            )
+          );
 
-              // Gate/augment the round completion event with afterConversationRound hooks.
-              // share() so this stream is multicast: merge() and persistConversation() both
-              // subscribe to agentEvents$; without sharing, hooks would run twice per round.
-              const agentEvents$ = rawAgentEvents$.pipe(
-                concatMap((event) => {
-                  if (!isRoundCompleteEvent(event)) {
-                    return of(event);
+          // Generate title (for CREATE) or use existing title (for UPDATE)
+          const title$ =
+            context.conversation.operation === 'CREATE'
+              ? generateTitle({
+                  chatModel: context.chatModel,
+                  conversation: context.conversation,
+                  nextInput: context.effectiveNextInput,
+                })
+              : of(context.conversation.title);
+
+          // Persist conversation
+          const persistenceEvents$ = persistConversation({
+            agentId,
+            conversation: context.conversation,
+            conversationClient: context.conversationClient,
+            conversationId,
+            title$,
+            agentEvents$,
+          });
+
+          // Merge all event streams
+          const effectiveConversationId =
+            context.conversation.operation === 'CREATE' ? context.conversation.id : conversationId;
+          const modelProvider = getConnectorProvider(context.chatModel.getConnector());
+          return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
+            handleCancellation(abortSignal),
+            convertErrors({
+              agentId,
+              logger: this.dependencies.logger,
+              analyticsService,
+              trackingService,
+              modelProvider,
+              conversationId: effectiveConversationId,
+            }),
+            tap((event) => {
+              // Track round completion and query-to-result time
+              try {
+                if (isRoundCompleteEvent(event)) {
+                  if (requestId) trackingService?.trackQueryEnd(requestId);
+                  const currentRoundCount = (context.conversation.rounds?.length ?? 0) + 1;
+                  if (conversationId) {
+                    trackingService?.trackConversationRound(conversationId, currentRoundCount);
                   }
 
-                  return defer(async () => {
-                    const hookContext: AfterConversationRoundHookContext = {
-                      agentId,
-                      conversationId: effectiveConversationId,
-                      conversation: context.conversation,
-                      round: event.data.round,
-                      request,
-                      abortSignal: effectiveAbortSignal,
-                    };
-
-                    const updated = await this.dependencies.hooks.run(
-                      HookLifecycle.afterConversationRound,
-                      hookContext
-                    );
-
-                    return {
-                      ...event,
-                      data: {
-                        ...event.data,
-                        round: updated.round,
-                      },
-                    };
+                  analyticsService?.reportRoundComplete({
+                    conversationId: effectiveConversationId,
+                    roundCount: currentRoundCount,
+                    agentId,
+                    round: event.data.round,
+                    modelProvider,
                   });
-                }),
-                share()
-              );
-
-              // Generate title (for CREATE) or use existing title (for UPDATE)
-              const title$ =
-                context.conversation.operation === 'CREATE'
-                  ? generateTitle({
-                      chatModel: context.chatModel,
-                      conversation: context.conversation,
-                      nextInput: effectiveNextInput,
-                      modelCallContext: {
-                        agentId,
-                        conversationId: effectiveConversationId,
-                        request,
-                        connectorId: context.selectedConnectorId,
-                        abortSignal: effectiveAbortSignal,
-                      },
-                    })
-                  : of(context.conversation.title);
-
-              // Persist conversation
-              const persistenceEvents$ = persistConversation({
-                agentId,
-                conversation: context.conversation,
-                conversationClient: context.conversationClient,
-                conversationId,
-                title$,
-                agentEvents$,
-              });
-
-              // Merge all event streams
-              const modelProvider = getConnectorProvider(context.chatModel.getConnector());
-              return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
-                handleCancellation(effectiveAbortSignal),
-                convertErrors({
-                  agentId,
-                  logger: this.dependencies.logger,
-                  analyticsService,
-                  trackingService,
-                  modelProvider,
-                  conversationId: effectiveConversationId,
-                }),
-                tap((event) => {
-                  // Track round completion and query-to-result time
-                  try {
-                    if (isRoundCompleteEvent(event)) {
-                      if (requestId) trackingService?.trackQueryEnd(requestId);
-                      const currentRoundCount = (context.conversation.rounds?.length ?? 0) + 1;
-                      if (conversationId) {
-                        trackingService?.trackConversationRound(conversationId, currentRoundCount);
-                      }
-
-                      analyticsService?.reportRoundComplete({
-                        conversationId: effectiveConversationId,
-                        roundCount: currentRoundCount,
-                        agentId,
-                        round: event.data.round,
-                        modelProvider,
-                      });
-                    }
-                  } catch (error) {
-                    this.dependencies.logger.error(error);
-                  }
-                }),
-                finalize(() => {
-                  // No-op: we use the request's abortSignal directly when provided; no listeners to remove.
-                }),
-                shareReplay()
-              );
-            })
+                }
+              } catch (error) {
+                this.dependencies.logger.error(error);
+              }
+            }),
+            shareReplay()
           );
         })
       );
     });
   }
 }
+
+/**
+ * Runs beforeConversationRound hook and returns the effective nextInput (from hook or original).
+ */
+const runBeforeConversationRoundHook = async ({
+  agentId,
+  request,
+  abortSignal,
+  conversation,
+  nextInput,
+  hooks,
+}: {
+  agentId: string;
+  request: ChatConverseParams['request'];
+  abortSignal: AbortSignal | undefined;
+  conversation: ConversationWithOperation;
+  nextInput: ConverseInput;
+  hooks: HooksServiceStart | undefined;
+}): Promise<ConverseInput> => {
+  if (hooks) {
+    const hookContext = await hooks.run(HookLifecycle.beforeConversationRound, {
+      agentId,
+      request,
+      abortSignal,
+      conversation,
+      nextInput,
+    });
+    return hookContext.nextInput ?? nextInput;
+  }
+  return nextInput;
+};
+
+/**
+ * Runs afterConversationRound hook on round-complete events and overwrites the round with the hook result.
+ */
+const runAfterConversationRoundHook =
+  ({
+    agentId,
+    request,
+    abortSignal,
+    conversation,
+    hooks,
+  }: {
+    agentId: string;
+    request: ChatConverseParams['request'];
+    abortSignal: AbortSignal | undefined;
+    conversation: ConversationWithOperation;
+    hooks: HooksServiceStart | undefined;
+  }) =>
+  (event: ChatEvent): Observable<ChatEvent> => {
+    if (isRoundCompleteEvent(event) && hooks) {
+      return from(
+        hooks
+          .run(HookLifecycle.afterConversationRound, {
+            agentId,
+            request,
+            abortSignal,
+            conversation,
+            round: event.data.round,
+          })
+          .then(({ round }) => ({
+            ...event,
+            data: {
+              ...event.data,
+              round,
+            },
+          }))
+      );
+    }
+    return of(event);
+  };
 
 /**
  * Creates events for conversation persistence (create/update)

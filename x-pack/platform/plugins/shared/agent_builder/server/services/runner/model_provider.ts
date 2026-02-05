@@ -18,25 +18,11 @@ import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src
 import type { TrackingService } from '../../telemetry';
 import { MODEL_TELEMETRY_METADATA } from '../../telemetry';
 
-export interface ModelCallContext {
-  agentId: string;
-  conversationId: string;
-  request: KibanaRequest;
-  connectorId: string;
-  model?: string;
-  abortSignal?: AbortSignal;
-}
-
-export interface ModelCallContextRef {
-  current: Partial<ModelCallContext> | null;
-}
-
 export interface CreateModelProviderOpts {
   inference: InferenceServerStart;
   request: KibanaRequest;
   defaultConnectorId?: string;
   trackingService?: TrackingService;
-  modelCallContextRef?: ModelCallContextRef;
 }
 
 export type CreateModelProviderFactoryFn = (
@@ -44,7 +30,7 @@ export type CreateModelProviderFactoryFn = (
 ) => ModelProviderFactoryFn;
 
 export type ModelProviderFactoryFn = (
-  opts: Pick<CreateModelProviderOpts, 'request' | 'defaultConnectorId' | 'modelCallContextRef'>
+  opts: Pick<CreateModelProviderOpts, 'request' | 'defaultConnectorId'>
 ) => ModelProvider;
 
 /**
@@ -65,7 +51,6 @@ export const createModelProvider = ({
   request,
   defaultConnectorId,
   trackingService,
-  modelCallContextRef: _modelCallContextRef,
 }: CreateModelProviderOpts): ModelProvider => {
   const getDefaultConnectorId = async () => {
     if (defaultConnectorId) {

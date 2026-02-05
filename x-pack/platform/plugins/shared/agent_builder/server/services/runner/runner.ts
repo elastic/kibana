@@ -36,7 +36,7 @@ import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
 import type { HooksServiceStart } from '../hooks';
-import type { ModelProviderFactoryFn, ModelCallContextRef } from './model_provider';
+import type { ModelProviderFactoryFn } from './model_provider';
 import type { TrackingService } from '../../telemetry';
 import { createEmptyRunContext, createConversationStateManager } from './utils';
 import { createPromptManager, getAgentPromptStorageState } from './utils/prompts';
@@ -64,8 +64,6 @@ export interface CreateScopedRunnerDeps {
   logger: Logger;
   request: KibanaRequest;
   defaultConnectorId?: string;
-  // context for model call hooks (set when running an agent, used by wrapped chatComplete)
-  modelCallContextRef?: ModelCallContextRef;
   // context-aware deps
   resultStore: WritableToolResultStore;
   attachmentStateManager: AttachmentStateManager;
@@ -171,29 +169,15 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     const stateManager = createConversationStateManager(conversation);
     const promptManager = createPromptManager({ state: promptState });
 
-    const modelCallContextRef: ModelCallContextRef | undefined =
-      agentId !== undefined && conversationId !== undefined
-        ? {
-            current: {
-              agentId,
-              conversationId,
-              request,
-              connectorId: '',
-            },
-          }
-        : undefined;
-
     const modelProvider = modelProviderFactory({
       request,
       defaultConnectorId,
-      modelCallContextRef,
     });
     const allDeps = {
       ...runnerDeps,
       modelProvider,
       request,
       defaultConnectorId,
-      modelCallContextRef,
       resultStore,
       attachmentStateManager,
       stateManager,
@@ -228,7 +212,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
           conversation,
         }),
       });
-      return runner.runAgent(otherParams);
+      return runner.runAgent({ ...otherParams, agentId });
     },
   };
 };

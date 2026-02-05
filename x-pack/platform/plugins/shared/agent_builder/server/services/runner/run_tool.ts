@@ -7,11 +7,7 @@
 
 import type { ZodObject } from '@kbn/zod';
 import type { ToolResult, ToolType } from '@kbn/agent-builder-common';
-import {
-  createBadRequestError,
-  isAgentBuilderError,
-  createRequestAbortedError,
-} from '@kbn/agent-builder-common';
+import { createBadRequestError } from '@kbn/agent-builder-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
   RunContext,
@@ -88,10 +84,8 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   const manager = parentManager.createChild(context);
   const { resultStore, promptManager } = manager.deps;
 
-  const effectiveAbortSignal = new AbortController().signal;
   const hookTracingContext = otelContext.active();
 
-  // allow hooks to mutate tool params (blocking hooks can still throw to abort)
   let toolParams = initialToolParams as unknown as Record<string, unknown>;
   const hooks = manager.deps.hooks;
   if (hooks) {
@@ -103,31 +97,11 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
       toolParams,
       source,
       request: manager.deps.request,
-      abortSignal: effectiveAbortSignal,
       tracingContext: hookTracingContext,
     };
     const updated = await hooks.run(HookLifecycle.beforeToolCall, hookContext);
     toolParams = updated.toolParams;
   }
-
-  const abortPromise = new Promise<never>((_resolve, reject) => {
-    if (effectiveAbortSignal.aborted) {
-      reject(
-        (effectiveAbortSignal as any).reason ??
-          createRequestAbortedError('Tool execution was aborted')
-      );
-      return;
-    }
-    effectiveAbortSignal.addEventListener(
-      'abort',
-      () =>
-        reject(
-          (effectiveAbortSignal as any).reason ??
-            createRequestAbortedError('Tool execution was aborted')
-        ),
-      { once: true }
-    );
-  });
 
   // only perform pre-call confirmation prompt when the agent is calling the tool
   if (tool.confirmation && source === 'agent') {
@@ -153,52 +127,31 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     }
   }
 
-  const schema = await tool.getSchema();
-  const validation = schema.safeParse(toolParams);
-  if (validation.error) {
-    throw createBadRequestError(
-      `Tool ${tool.id} was called with invalid parameters: ${validation.error.message}`
-    );
-  }
-
-  const toolHandlerContext = await createToolHandlerContext<TParams>({
-    toolExecutionParams: {
-      ...toolExecutionParams,
-      toolId: tool.id,
-      toolParams: toolParams as any,
-    },
-    manager,
-  });
-
-  const toolHandler = await tool.getHandler();
-
   const toolReturn = await withExecuteToolSpan(
     tool.id,
-    { tool: { input: toolParams, toolCallId } },
+    { tool: { input: toolParams } },
     async (): Promise<ToolHandlerReturn> => {
-      if (effectiveAbortSignal.aborted) {
-        throw (
-          (effectiveAbortSignal as any).reason ??
-          createRequestAbortedError('Tool execution was aborted')
+      const schema = await tool.getSchema();
+      const validation = schema.safeParse(toolParams);
+      if (validation.error) {
+        throw createBadRequestError(
+          `Tool ${tool.id} was called with invalid parameters: ${validation.error.message}`
         );
       }
 
+      const toolHandlerContext = await createToolHandlerContext<TParams>({
+        toolExecutionParams: {
+          ...toolExecutionParams,
+          toolId: tool.id,
+          toolParams: toolParams as TParams,
+        },
+        manager,
+      });
+
       try {
-        return await Promise.race([
-          Promise.resolve(toolHandler(validation.data as Record<string, any>, toolHandlerContext)),
-          abortPromise,
-        ]);
+        const toolHandler = await tool.getHandler();
+        return await toolHandler(validation.data as Record<string, unknown>, toolHandlerContext);
       } catch (err) {
-        // If cancellation/guardrails triggered, abort the tool call by throwing.
-        if (effectiveAbortSignal.aborted) {
-          throw (
-            (effectiveAbortSignal as any).reason ??
-            createRequestAbortedError('Tool execution was aborted')
-          );
-        }
-        if (isAgentBuilderError(err)) {
-          throw err;
-        }
         return {
           results: [createErrorResult(err.message)],
         };
@@ -206,7 +159,6 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     }
   );
 
-  // Normalize tool handler return into the public RunToolReturn shape.
   let runToolReturn: RunToolReturn;
   if (isToolHandlerStandardReturn(toolReturn)) {
     const resultsWithIds = toolReturn.results.map<ToolResult>(
@@ -221,17 +173,15 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     runToolReturn = { prompt: toolReturn.prompt };
   }
 
-  // afterToolCall hook can block or mutate the final tool return
   if (hooks) {
     const postContext = {
-      agentId: getAgentIdFromRunContext(parentManager.context),
+      agentId: getAgentIdFromRunContext(parentManager.context) ?? '',
       conversationId: manager.context.conversationId,
       toolId: tool.id,
       toolCallId,
       toolParams,
       source,
       request: manager.deps.request,
-      abortSignal: effectiveAbortSignal,
       toolReturn: runToolReturn,
       tracingContext: hookTracingContext,
     };

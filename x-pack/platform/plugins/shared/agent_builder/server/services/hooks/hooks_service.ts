@@ -23,18 +23,15 @@ import {
   HookExecutionMode,
   HookLifecycle,
 } from '@kbn/agent-builder-server';
+import { orderBy } from 'lodash';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 
 export interface HooksServiceSetupDeps {
   logger: Logger;
 }
 
-/** Default maximum execution time for a hook when timeout is not configured (3 minutes). */
-const DEFAULT_HOOK_TIMEOUT_MS = 3 * 60 * 1000;
-
-const sortByPriorityDesc = <R extends { priority?: number }>(a: R, b: R) => {
-  return (b.priority ?? 0) - (a.priority ?? 0);
-};
+/** Default maximum execution time for a hook when timeout is not configured (5 minutes). */
+const DEFAULT_HOOK_TIMEOUT_MS = 5 * 60 * 1000;
 
 /** After hooks run in reverse order so they nest like LangChain (last before = first after). */
 const AFTER_EVENTS: HookLifecycle[] = [
@@ -132,37 +129,36 @@ const normalizeHookError = <E extends HookLifecycle>(
 
 export class HooksService {
   private setupDeps?: HooksServiceSetupDeps;
-  /**
-   * Stored untyped to avoid generic variance issues for function-typed fields (handlers).
-   * Safe to cast back based on the map key (event) when reading.
-   */
-  private readonly registrationsByEvent = new Map<HookLifecycle, unknown[]>();
+
+  private readonly registrationsByEvent = new Map<
+    HookLifecycle,
+    Array<HookRegistration<HookLifecycle>>
+  >();
 
   setup(deps: HooksServiceSetupDeps): HooksServiceSetup {
     this.setupDeps = deps;
 
     return {
       register: (bundle) => {
-        const events = Object.values(HookLifecycle) as HookLifecycle[];
-        for (const event of events) {
-          const entry = (bundle as Record<HookLifecycle, unknown>)[event];
-          if (!entry || typeof entry !== 'object') continue;
+        const lifecycles = Object.values(HookLifecycle);
+        for (const lifecycle of lifecycles) {
+          const entry = bundle[lifecycle];
+          if (entry === undefined) continue;
 
-          const registration = {
-            ...entry,
-            event,
-            id: `${bundle.id}-${event}`,
-            priority: bundle.priority,
-            description: bundle.description,
-          };
+          const lifeCycleId = `${bundle.id}-${lifecycle}`;
 
-          const existing = this.registrationsByEvent.get(event) ?? [];
-          if (existing.some((r) => (r as { id?: unknown }).id === registration.id)) {
+          const existing = this.registrationsByEvent.get(lifecycle) ?? [];
+          if (existing.some((r) => r.id === lifeCycleId)) {
             throw new Error(
-              `Hook with id "${registration.id}" is already registered for event "${event}".`
+              `Hook with id "${lifeCycleId}" is already registered for event "${lifecycle}".`
             );
           }
-          this.registrationsByEvent.set(event, [...existing, registration]);
+
+          existing.push({
+            ...entry,
+            id: lifeCycleId,
+            priority: bundle.priority,
+          } as HookRegistration<HookLifecycle>);
         }
       },
     };
@@ -187,11 +183,12 @@ export class HooksService {
       HookRegistration<E>
     >;
 
-    const list = hooks
-      .filter((h) => h.mode === mode)
-      .slice()
-      .sort(sortByPriorityDesc);
-    return isAfterEvent(lifecycle) ? list.reverse() : list;
+    const direction = isAfterEvent(lifecycle) ? 'asc' : 'desc';
+    return orderBy(
+      hooks.filter((h) => h.mode === mode),
+      [(h) => h.priority ?? 0],
+      [direction]
+    );
   }
 
   start(): HooksServiceStart {
@@ -205,12 +202,6 @@ export class HooksService {
       lifecycle: E,
       context: HookContext<E>
     ): Promise<HookContext<E>> => {
-      if ('abortSignal' in context && context.abortSignal?.aborted) {
-        throw createRequestAbortedError('Request aborted before executing hooks', {
-          hookLifecycle: lifecycle,
-        });
-      }
-
       const hooks = this.getRelevantHooks(lifecycle, HookExecutionMode.blocking, context);
       let currentContext: HookContext<E> = context;
 

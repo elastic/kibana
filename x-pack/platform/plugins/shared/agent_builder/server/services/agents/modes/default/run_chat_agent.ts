@@ -13,7 +13,6 @@ import {
   type ToolIdMapping,
   toolsToLangchain,
 } from '@kbn/agent-builder-genai-utils/langchain';
-import { getConnectorDefaultModel } from '@kbn/inference-common';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
@@ -91,20 +90,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
 
-  const conversationId = conversation?.id ?? '';
-  const modelName =
-    (model.chatModel.identifyingParams?.() as { model_name?: string } | undefined)?.model_name ??
-    getConnectorDefaultModel(model.connector);
-
-  if (context.modelCallContextRef?.current) {
-    context.modelCallContextRef.current = {
-      ...context.modelCallContextRef.current,
-      connectorId: model.connector.connectorId,
-      model: modelName,
-      abortSignal,
-    };
-  }
-
   const manualEvents$ = new Subject<ChatAgentEvent>();
   const eventEmitter: AgentEventEmitterFn = (event) => {
     manualEvents$.next(event);
@@ -163,14 +148,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     structuredOutput,
     outputSchema,
     processedConversation,
-    modelCallContext: {
-      agentId: agentId ?? '',
-      conversationId,
-      request,
-      connectorId: model.connector.connectorId,
-      model: modelName,
-      abortSignal,
-    },
+    abortSignal,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);

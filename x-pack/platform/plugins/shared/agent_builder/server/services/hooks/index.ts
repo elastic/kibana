@@ -7,4 +7,8 @@
 
 export { HooksService } from './hooks_service';
 export { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
-export type { HookRegistration } from '@kbn/agent-builder-server';
+export type {
+  HookRegistration,
+  HooksServiceStart,
+  HooksServiceSetup,
+} from '@kbn/agent-builder-server';

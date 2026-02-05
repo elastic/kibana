@@ -21,8 +21,6 @@ import { getRandomAnsweringMessage } from './i18n';
 import { tags } from './constants';
 import type { StateType } from './state';
 import { processStructuredAnswerResponse } from './action_utils';
-import type { ModelCallContext } from '../../../runner/model_provider';
-
 export const structuredOutputSchema = z.object({
   response: z.string().describe("The response to the user's query"),
   data: z
@@ -44,7 +42,7 @@ export const createAnswerAgentStructured = ({
   events,
   outputSchema,
   attachmentTypes,
-  modelCallContext,
+  abortSignal,
 }: {
   chatModel: InferenceChatModel;
   configuration: ResolvedConfiguration;
@@ -53,7 +51,7 @@ export const createAnswerAgentStructured = ({
   outputSchema?: Record<string, unknown>;
   logger: Logger;
   attachmentTypes: ProcessedAttachmentType[];
-  modelCallContext?: ModelCallContext;
+  abortSignal?: AbortSignal;
 }) => {
   return async (state: StateType) => {
     if (state.answerActions.length === 0 && state.errorCount === 0) {
@@ -84,10 +82,9 @@ export const createAnswerAgentStructured = ({
         attachmentTypes,
       });
 
-      let response = await structuredModel.invoke(
-        prompt,
-        modelCallContext?.abortSignal ? { signal: modelCallContext.abortSignal } : {}
-      );
+      let response = await structuredModel.invoke(prompt, {
+        signal: abortSignal,
+      });
       // unwrap response if schema was wrapped
       if (wrapped && response[wrappedSchemaProp]) {
         response = response[wrappedSchemaProp];

@@ -129,7 +129,7 @@ describe('ChatService', () => {
         request,
         agentService,
         defaultConnectorId: 'test-connector-id',
-        abortSignal: expect.any(Object),
+        abortSignal: undefined,
       })
     );
   });

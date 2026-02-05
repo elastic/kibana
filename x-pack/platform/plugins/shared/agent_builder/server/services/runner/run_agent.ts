@@ -41,7 +41,6 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     logger,
     promptManager,
     stateManager,
-    modelCallContextRef,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
@@ -71,7 +70,6 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     }),
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
     hooks: manager.deps.hooks,
-    modelCallContextRef,
   };
 };
 
