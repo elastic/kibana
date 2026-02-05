@@ -1086,10 +1086,13 @@ describe('AutomaticImportSavedObjectService', () => {
         ],
       };
 
+      const results = [{ foo: 'bar' }, { answer: 42 }];
+
       await savedObjectService.updateDataStreamSavedObjectAttributes({
         integrationId: 'test-update-ds-integration',
         dataStreamId: 'test-update-ds',
         ingestPipeline,
+        results,
         status: TASK_STATUSES.completed,
       });
 
@@ -1101,6 +1104,7 @@ describe('AutomaticImportSavedObjectService', () => {
       expect(updatedDataStream.attributes.job_info.status).toBe(TASK_STATUSES.completed);
       expect(updatedDataStream.attributes.result).toBeDefined();
       expect(updatedDataStream.attributes.result?.ingest_pipeline).toEqual(ingestPipeline);
+      expect(updatedDataStream.attributes.result?.results).toEqual(results);
 
       // Cleanup
       await savedObjectsClient.delete(
