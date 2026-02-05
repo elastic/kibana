@@ -278,24 +278,6 @@ describe('Walker PromQL support', () => {
   });
 
   describe('combined ES|QL and PromQL traversal', () => {
-    // test('can walk both ES|QL and PromQL nodes', () => {
-    //   const query = PromQLParser.parse('bytes_in{job="test"}');
-    //   const commands: ESQLCommand[] = [];
-    //   const promqlQueries: PromQLAstQueryExpression[] = [];
-    //   const promqlSelectors: PromQLSelector[] = [];
-
-    //   PromqlWalker.walk(query.root, {
-    //     visitCommand: (node) => commands.push(node),
-    //     visitPromqlQuery: (node) => promqlQueries.push(node),
-    //     visitPromqlSelector: (node) => promqlSelectors.push(node),
-    //   });
-
-    //   expect(commands.length).toBe(1);
-    //   expect(commands[0].name).toBe('promql');
-    //   expect(promqlQueries.length).toBe(1);
-    //   expect(promqlSelectors.length).toBe(1);
-    // });
-
     test('can walk PromQL query wrapped in ES|QL parens', () => {
       const query = PromQLParser.parse('bytes_in');
       const promqlSelectors: PromQLSelector[] = [];
@@ -318,20 +300,6 @@ describe('Walker PromQL support', () => {
 
       expect(promqlSelectors.length).toBe(1);
     });
-
-    // test('can walk PromQL query with params', () => {
-    //   const query = PromQLParser.parse('bytes_in{job="test"}');
-    //   const commands: ESQLCommand[] = [];
-    //   const promqlSelectors: PromQLSelector[] = [];
-
-    //   PromqlWalker.walk(query.root, {
-    //     visitCommand: (node) => commands.push(node),
-    //     visitPromqlSelector: (node) => promqlSelectors.push(node),
-    //   });
-
-    //   expect(commands.length).toBe(1);
-    //   expect(promqlSelectors.length).toBe(1);
-    // });
   });
 
   describe('visitPromqlAny fallback', () => {
