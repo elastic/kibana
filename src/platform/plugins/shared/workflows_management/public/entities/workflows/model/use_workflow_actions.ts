@@ -272,8 +272,26 @@ export function useWorkflowActions() {
         body: JSON.stringify({ stepId, contextOverride, workflowYaml }),
       });
     },
-    onSuccess: ({ workflowExecutionId }) => {
+    onSuccess: ({ workflowExecutionId }, variables) => {
+      // Report telemetry for successful step test run
+      telemetry.reportWorkflowStepTestRunInitiated({
+        workflowYaml: variables.workflowYaml,
+        stepId: variables.stepId,
+        origin: 'workflow_detail',
+        error: undefined,
+      });
+
       queryClient.invalidateQueries({ queryKey: ['workflows', workflowExecutionId, 'executions'] });
+    },
+    onError: (err, variables) => {
+      // Report telemetry for failed step test run
+      const errorObj = err instanceof Error ? err : new Error(String(err));
+      telemetry.reportWorkflowStepTestRunInitiated({
+        workflowYaml: variables.workflowYaml,
+        stepId: variables.stepId,
+        origin: 'workflow_detail',
+        error: errorObj,
+      });
     },
   });
 

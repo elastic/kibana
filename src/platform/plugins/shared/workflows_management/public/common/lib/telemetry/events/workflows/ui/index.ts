@@ -57,25 +57,12 @@ const workflowListViewedSchema: RootSchema<ReportWorkflowListViewedActionParams>
       optional: false,
     },
   },
-  hasQuery: {
-    type: 'boolean',
-    _meta: {
-      description: 'Whether a search query was provided',
-      optional: false,
-    },
-  },
-  hasFilters: {
-    type: 'boolean',
-    _meta: {
-      description: 'Whether any filters were applied',
-      optional: false,
-    },
-  },
   filterTypes: {
     type: 'array',
-    items: { type: 'keyword' },
+    items: { type: 'keyword', _meta: { description: 'Filter type', optional: false } },
     _meta: {
-      description: 'Types of filters applied (e.g., enabled, createdBy)',
+      description:
+        "Types of filters/search applied (e.g., 'query', 'enabled', 'createdBy'). Includes 'query' when a search query is used.",
       optional: true,
     },
   },
