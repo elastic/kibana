@@ -802,6 +802,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       if (await es.indices.exists({ index: indexTitle })) {
         await es.indices.delete({ index: indexTitle });
+        await kibanaServer.savedObjects.cleanStandardList();
       }
 
       await es.indices.create({
