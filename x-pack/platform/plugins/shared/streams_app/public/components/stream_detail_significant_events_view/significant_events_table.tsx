@@ -20,10 +20,10 @@ import type { SignificantEventItem } from '../../hooks/use_fetch_significant_eve
 import { useKibana } from '../../hooks/use_kibana';
 import { formatChangePoint } from './utils/change_point';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
-import { buildDiscoverParams } from './utils/discover_helpers';
+import { buildDiscoverParams } from '../significant_events_discovery/utils/discover_helpers';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useStreamSystems } from '../stream_detail_systems/stream_systems/hooks/use_stream_systems';
-import { SeverityBadge } from '../significant_events_discovery/components/severity_badge';
+import { SeverityBadge } from '../significant_events_discovery/components/severity_badge/severity_badge';
 
 export function SignificantEventsTable({
   definition,
