@@ -31,7 +31,6 @@ import type {
   MarkdownEmbeddableState,
   MarkdownByValueState,
   MarkdownByReferenceState,
-  MarkdownState,
 } from '../server';
 import { APP_NAME, MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 import type { MarkdownEditorApi } from './types';
@@ -41,6 +40,7 @@ import { MarkdownRenderer } from './components/markdown_renderer';
 import { loadFromLibrary } from './markdown_client/load_from_library';
 import { checkForDuplicateTitle } from './markdown_client/duplicate_title_check';
 import { markdownClient } from './markdown_client/markdown_client';
+import type { MarkdownSavedObjectAttributes } from '../server/markdown_saved_object';
 
 const defaultMarkdownState: MarkdownByValueState = {
   content: '',
@@ -65,14 +65,14 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     const isByReference = savedObjectId !== undefined;
     const initialStoredState = isByReference
       ? await loadFromLibrary(savedObjectId)
-      : ({} as MarkdownState);
+      : ({} as MarkdownSavedObjectAttributes);
 
     const titleManager = initializeTitleManager(initialState);
     const markdownStateManager = initializeStateManager<MarkdownByValueState>(
       {
         content: isByReference
           ? initialStoredState.content
-          : (initialState as MarkdownState).content,
+          : (initialState as MarkdownByValueState).content,
       },
       defaultMarkdownState
     );

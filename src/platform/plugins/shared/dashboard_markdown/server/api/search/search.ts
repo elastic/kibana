@@ -11,14 +11,14 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { MarkdownSearchRequestBody, MarkdownSearchResponseBody } from './types';
 import { getMarkdownMeta } from '../../saved_object_utils';
-import type { StoredMarkdownState } from '../..';
+import type { MarkdownSavedObjectAttributes } from '../../markdown_saved_object';
 
 export async function search(
   requestCtx: RequestHandlerContext,
   searchBody: MarkdownSearchRequestBody
 ): Promise<MarkdownSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
-  const soResponse = await core.savedObjects.client.find<StoredMarkdownState>({
+  const soResponse = await core.savedObjects.client.find<MarkdownSavedObjectAttributes>({
     type: MARKDOWN_SAVED_OBJECT_TYPE,
     searchFields: ['title^3', 'description'],
     fields: ['description', 'title'],

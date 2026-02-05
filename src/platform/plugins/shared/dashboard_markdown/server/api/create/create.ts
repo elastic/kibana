@@ -12,7 +12,7 @@ import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { MarkdownCreateRequestBody } from './types';
 import { getMarkdownCRUResponseBody } from '../../saved_object_utils';
 import type { MarkdownCreateResponseBody } from './types';
-import type { StoredMarkdownState } from '../..';
+import type { MarkdownSavedObjectAttributes } from '../../markdown_saved_object';
 
 export async function create(
   requestCtx: RequestHandlerContext,
@@ -20,7 +20,7 @@ export async function create(
 ): Promise<MarkdownCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
-  const savedObject = await core.savedObjects.client.create<StoredMarkdownState>(
+  const savedObject = await core.savedObjects.client.create<MarkdownSavedObjectAttributes>(
     MARKDOWN_SAVED_OBJECT_TYPE,
     createBody
   );

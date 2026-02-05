@@ -8,10 +8,12 @@
  */
 
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
-import type { StoredMarkdownState } from '.';
+import type { MarkdownSavedObjectAttributes } from './markdown_saved_object';
 
 export function getMarkdownMeta(
-  savedObject: SavedObject<StoredMarkdownState> | SavedObjectsUpdateResponse<StoredMarkdownState>,
+  savedObject:
+    | SavedObject<MarkdownSavedObjectAttributes>
+    | SavedObjectsUpdateResponse<MarkdownSavedObjectAttributes>,
   operation: 'create' | 'read' | 'update' | 'search'
 ) {
   return {
@@ -28,12 +30,14 @@ export function getMarkdownMeta(
 
 // CRU is Create, Read, Update
 export function getMarkdownCRUResponseBody(
-  savedObject: SavedObject<StoredMarkdownState> | SavedObjectsUpdateResponse<StoredMarkdownState>,
+  savedObject:
+    | SavedObject<MarkdownSavedObjectAttributes>
+    | SavedObjectsUpdateResponse<MarkdownSavedObjectAttributes>,
   operation: 'create' | 'read' | 'update' | 'search'
 ) {
   return {
     id: savedObject.id,
-    data: savedObject.attributes as StoredMarkdownState,
+    data: savedObject.attributes as MarkdownSavedObjectAttributes,
     meta: getMarkdownMeta(savedObject, operation),
   };
 }

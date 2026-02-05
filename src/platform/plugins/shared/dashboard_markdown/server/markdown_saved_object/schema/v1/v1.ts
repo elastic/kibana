@@ -11,8 +11,8 @@ import { schema } from '@kbn/config-schema';
 
 export const markdownAttributesSchema = schema.object(
   {
-    title: schema.string(),
-    description: schema.string({ defaultValue: '' }),
+    title: schema.maybe(schema.string()),
+    description: schema.maybe(schema.string({ defaultValue: '' })),
     content: schema.string(),
   },
   { unknowns: 'forbid' }

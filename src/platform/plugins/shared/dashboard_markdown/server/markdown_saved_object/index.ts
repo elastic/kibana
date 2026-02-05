@@ -9,3 +9,4 @@
 
 export { markdownSavedObjectType } from './markdown_saved_object';
 export type { MarkdownSavedObjectAttributes } from './schema';
+export { markdownSavedObjectSchema } from './schema';

@@ -11,7 +11,7 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { getMarkdownCRUResponseBody } from '../../saved_object_utils';
 import type { MarkdownReadResponseBody } from './types';
-import type { StoredMarkdownState } from '../..';
+import type { MarkdownSavedObjectAttributes } from '../../markdown_saved_object';
 
 export async function read(
   requestCtx: RequestHandlerContext,
@@ -25,7 +25,10 @@ export async function read(
     alias_purpose,
 
     alias_target_id,
-  } = await core.savedObjects.client.resolve<StoredMarkdownState>(MARKDOWN_SAVED_OBJECT_TYPE, id);
+  } = await core.savedObjects.client.resolve<MarkdownSavedObjectAttributes>(
+    MARKDOWN_SAVED_OBJECT_TYPE,
+    id
+  );
 
   const response = getMarkdownCRUResponseBody(savedObject, 'read');
   return {

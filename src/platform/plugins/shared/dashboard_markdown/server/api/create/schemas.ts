@@ -8,13 +8,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { markdownByValueEmbeddableSchema } from '../../schemas';
 import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
+import { markdownAttributesSchema } from '../../markdown_saved_object/schema/v1';
 
-export const createRequestBodySchema = markdownByValueEmbeddableSchema;
+export const createRequestBodySchema = markdownAttributesSchema;
 
 export const createResponseBodySchema = schema.object({
   id: schema.string(),
-  data: markdownByValueEmbeddableSchema,
+  data: markdownAttributesSchema,
   meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
 });

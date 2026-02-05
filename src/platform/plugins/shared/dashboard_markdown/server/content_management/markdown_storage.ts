@@ -16,11 +16,16 @@ import type {
 import type { SavedObjectsFindResult } from '@kbn/core/server';
 
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../common/constants';
-import type { MarkdownState } from '..';
 import { type MarkdownItem, savedObjectToItem } from './transform_utils';
+import type { MarkdownSavedObjectAttributes } from '../markdown_saved_object';
 
 export class MarkdownStorage
-  implements ContentStorage<MarkdownItem, MarkdownItem, MSearchConfig<MarkdownItem, MarkdownState>>
+  implements
+    ContentStorage<
+      MarkdownItem,
+      MarkdownItem,
+      MSearchConfig<MarkdownItem, MarkdownSavedObjectAttributes>
+    >
 {
   public async get(
     ctx: StorageContext,
@@ -70,7 +75,9 @@ export class MarkdownStorage
   // only required for populating SavedObjectFinder in AddFromLibrary flyout
   mSearch = {
     savedObjectType: MARKDOWN_SAVED_OBJECT_TYPE,
-    toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult<MarkdownState>) =>
-      savedObjectToItem(savedObject) as MarkdownItem,
+    toItemResult: (
+      ctx: StorageContext,
+      savedObject: SavedObjectsFindResult<MarkdownSavedObjectAttributes>
+    ) => savedObjectToItem(savedObject) as MarkdownItem,
   };
 }
