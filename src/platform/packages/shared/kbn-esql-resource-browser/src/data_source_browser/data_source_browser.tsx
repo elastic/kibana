@@ -36,7 +36,7 @@ interface DataSourceBrowserProps {
   allSources: ESQLSourceResult[];
   selectedSources?: string[];
   onClose: () => void;
-  onSelect: (selectedSources: string[]) => void;
+  onSelect: (sourceName: string, change: 'add' | 'remove') => void;
   position?: { top?: number; left?: number };
 }
 
@@ -187,16 +187,18 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
   const handleSelectionChange = useCallback(
     (changedOption: EuiSelectableOption | undefined) => {
-      let newSelected;
+      if (!changedOption?.key) return;
 
-      if (changedOption?.checked === 'on') {
-        newSelected = [...selectedItems, changedOption.key as string];
-      } else {
-        newSelected = selectedItems.filter((o) => o !== (changedOption?.key as string));
-      }
+      const key = changedOption.key as string;
+      const isAdding = changedOption.checked === 'on';
+      const newSelected = isAdding
+        ? selectedItems.includes(key)
+          ? selectedItems
+          : [...selectedItems, key]
+        : selectedItems.filter((o) => o !== key);
 
       setSelectedItems(newSelected);
-      onSelect(newSelected);
+      onSelect(key, isAdding ? 'add' : 'remove');
     },
     [onSelect, selectedItems]
   );

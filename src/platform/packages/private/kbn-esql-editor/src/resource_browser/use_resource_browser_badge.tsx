@@ -12,12 +12,12 @@ import { useEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { useCallback, useRef } from 'react';
 import type { MutableRefObject } from 'react';
-import { findFirstCommandPosition } from './find_command_positions';
+import { findFirstCommandPosition } from './utils';
 
 interface UseSourcesBadgeParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
-  openIndicesBrowser: () => void;
+  openIndicesBrowser: (options?: { openedFrom?: 'badge' | 'autocomplete' }) => void;
 }
 
 export const useSourcesBadge = ({ editorRef, editorModel, openIndicesBrowser }: UseSourcesBadgeParams) => {
@@ -59,34 +59,28 @@ export const useSourcesBadge = ({ editorRef, editorModel, openIndicesBrowser }: 
     if (!queryText.trim()) return;
 
     const collections: monaco.editor.IModelDeltaDecoration[] = [];
-    let command;
-    let commandPos;
-
+    // Assumption: the query contains either FROM or TS (but not both).
     const fromPos = findFirstCommandPosition(queryText, 'FROM');
-    if (fromPos) {
-      command = 'FROM';
-      commandPos = fromPos;
-    } else {
-      // Assumption: the query contains either FROM or TS (but not both).
-      const tsPos = findFirstCommandPosition(queryText, 'TS');
-      if (tsPos) {
-        command = 'TS';
-        commandPos = tsPos;
-      }
-    }
-    
-    if (commandPos) {
+    const first = fromPos
+      ? ({ length: 4, pos: fromPos } as const)
+      : (() => {
+          const tsPos = findFirstCommandPosition(queryText, 'TS');
+          return tsPos ? ({ length: 2, pos: tsPos } as const) : undefined;
+        })();
+
+    if (first) {
       collections.push({
         range: new monaco.Range(
-          commandPos.lineNumber, 
-          commandPos.startColumn, 
-          commandPos.lineNumber, 
-          commandPos.startColumn + 4),
+          first.pos.lineNumber,
+          first.pos.startColumn,
+          first.pos.lineNumber,
+          first.pos.startColumn + first.length
+        ),
         options: {
           isWholeLine: false,
           stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-          inlineClassName: sourcesBadgeClassName
-        }
+          inlineClassName: sourcesBadgeClassName,
+        },
       });
     }
 
@@ -125,7 +119,7 @@ export const useSourcesBadge = ({ editorRef, editorModel, openIndicesBrowser }: 
         );
         editor.setPosition(positionAfterCommand);
         editor.revealPosition(positionAfterCommand);
-        openIndicesBrowser();
+        openIndicesBrowser({ openedFrom: 'badge' });
       }
     },
     [editorModel, editorRef, openIndicesBrowser]
