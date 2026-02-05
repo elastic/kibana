@@ -42,8 +42,9 @@ const getDurationInString = (duration: number): string => {
   }
 
   const durationInSeconds = moment.duration(duration, 'milliseconds').asSeconds();
-  if (durationInSeconds % 60 === 0) {
-    return `${durationInSeconds / 60}m`;
+  const durationInMinutes = durationInSeconds / 60;
+  if (Number.isInteger(durationInMinutes)) {
+    return `${durationInMinutes}m`;
   } else if (Number.isInteger(durationInSeconds)) {
     return `${durationInSeconds}s`;
   }

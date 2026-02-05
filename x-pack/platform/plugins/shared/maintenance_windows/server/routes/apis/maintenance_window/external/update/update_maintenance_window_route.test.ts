@@ -157,6 +157,7 @@ describe('updateMaintenanceWindowRoute', () => {
           custom: {
             duration: '10d',
             recurring: {
+              every: '1w',
               occurrences: 2,
               every: '1w',
             },

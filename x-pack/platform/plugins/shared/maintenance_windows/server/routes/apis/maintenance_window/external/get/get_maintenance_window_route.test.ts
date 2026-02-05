@@ -84,6 +84,7 @@ describe('getMaintenanceWindowRoute', () => {
           custom: {
             duration: '1h',
             recurring: {
+              every: '1w',
               occurrences: 2,
               every: '1w',
             },

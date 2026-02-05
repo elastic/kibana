@@ -1,0 +1,35 @@
+# TBUCKET
+
+The TBUCKET function creates groups of values, known as buckets, from a `@timestamp` attribute. You must specify the size of each bucket directly, using a time duration or date period.
+
+## Syntax
+
+`TBUCKET(buckets)`
+
+### Parameters
+
+#### buckets
+
+The desired bucket size. This must be provided as a time duration or date period, either directly or as a string (for example, `1 hour` or `"1 hour"`). The reference point for bucketing is the epoch, which starts at `0001-01-01T00:00:00Z`.
+
+## Examples
+
+Groups the `@timestamp` values into hourly buckets and calculates the minimum and maximum timestamp in each bucket, then sorts the results by the minimum timestamp.
+
+```esql
+FROM sample_data
+| STATS min = MIN(@timestamp), max = MAX(@timestamp) BY bucket = TBUCKET(1 hour)
+| SORT min
+```
+
+Groups the `@timestamp` values into hourly buckets using a string for the bucket size, calculates the minimum and maximum timestamp in each bucket, and sorts the results by the minimum timestamp.
+
+```esql
+FROM sample_data
+| STATS min = MIN(@timestamp), max = MAX(@timestamp) BY bucket = TBUCKET("1 hour")
+| SORT min
+```
+
+## Limitations
+
+The bucket size must be a time duration or date period, either as a direct value or a string. The reference for bucketing is the epoch (`0001-01-01T00:00:00Z`).
