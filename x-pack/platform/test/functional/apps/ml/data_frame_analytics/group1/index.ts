@@ -40,5 +40,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./classification_creation'));
     loadTestFile(require.resolve('./cloning'));
     loadTestFile(require.resolve('./results_view_content'));
+    loadTestFile(require.resolve('./custom_urls'));
   });
 }
