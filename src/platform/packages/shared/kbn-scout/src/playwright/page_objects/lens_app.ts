@@ -199,4 +199,8 @@ export class LensApp {
   getConvertToEsqModalConfirmButton() {
     return this.page.getByTestId('confirmModalConfirmButton');
   }
+
+  getApplyFlyoutButton() {
+    return this.page.getByTestId('applyFlyoutButton');
+  }
 }
