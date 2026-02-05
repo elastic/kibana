@@ -301,20 +301,15 @@ describe('Discover flyout', function () {
 
     it('should render custom header when provided by document profile', async () => {
       const services = getServices();
-      const CustomHeader = () => <div data-test-subj="customDocViewerHeader">Custom Header</div>;
-
-      // Mock the profile to return a custom header
-      const mockProfile = {
-        getDocViewer: () => () => ({
-          title: 'Test Document',
-          docViewsRegistry: (registry: any) => registry,
-          renderCustomHeader: () => <CustomHeader />,
-        }),
-      };
-
-      jest.spyOn(services.profilesManager, 'resolveDocumentProfile').mockReturnValue(mockProfile);
-
-      const { component } = await mountComponent({ services });
+      const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
+        scopedEbtManager: services.ebtManager.createScopedEBTManager(),
+      });
+      const records = buildDataTableRecordList({
+        records: esHitsMock as EsHitRecord[],
+        dataView: dataViewMock,
+        processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
+      });
+      const { component } = await mountComponent({ services, records });
 
       // The custom header should be rendered in the flyout
       const customHeader = findTestSubject(component, 'customDocViewerHeader');
