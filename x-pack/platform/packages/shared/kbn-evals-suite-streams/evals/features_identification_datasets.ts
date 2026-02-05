@@ -5,6 +5,23 @@
  * 2.0.
  */
 
+/**
+ * Expected feature for ground truth comparison in precision/recall calculations.
+ * Properties define the key characteristics that must be matched.
+ */
+export interface ExpectedFeature {
+  /** Feature type category */
+  type: 'infrastructure' | 'technology' | 'dependency';
+  /** Feature subtype (e.g., 'programming_language', 'database', 'cloud_provider') */
+  subtype: string;
+  /** Key properties that must be present in the matched feature */
+  properties: Record<string, string>;
+  /** Minimum expected confidence for this feature (default: 30) */
+  min_confidence?: number;
+  /** Maximum expected confidence for this feature (default: 100) */
+  max_confidence?: number;
+}
+
 export interface FeatureIdentificationEvaluationExample {
   input: {
     sample_documents: Array<Record<string, any>>;
@@ -16,6 +33,13 @@ export interface FeatureIdentificationEvaluationExample {
   metadata: {
     description?: string;
   };
+  /**
+   * Optional ground truth features for precision/recall metrics.
+   * When present, evaluators can calculate:
+   * - Precision: what fraction of detected features are correct
+   * - Recall: what fraction of expected features were detected
+   */
+  expected_features?: ExpectedFeature[];
 }
 
 export interface FeatureIdentificationEvaluationDataset {
@@ -110,6 +134,56 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     metadata: {
       description: 'Go microservice on AWS/K8s with explicit version strings for all components',
     },
+    expected_features: [
+      {
+        type: 'technology',
+        subtype: 'programming_language',
+        properties: { language: 'go', version: '1.22.1' },
+        min_confidence: 90,
+      },
+      {
+        type: 'technology',
+        subtype: 'database',
+        properties: { database: 'postgresql', version: '16.1' },
+        min_confidence: 90,
+      },
+      {
+        type: 'technology',
+        subtype: 'cache',
+        properties: { cache: 'redis', version: '7.2.5' },
+        min_confidence: 90,
+      },
+      {
+        type: 'infrastructure',
+        subtype: 'cloud_provider',
+        properties: { provider: 'aws', region: 'us-east-1' },
+        min_confidence: 90,
+      },
+      {
+        type: 'infrastructure',
+        subtype: 'orchestrator',
+        properties: { orchestrator: 'kubernetes' },
+        min_confidence: 85,
+      },
+      {
+        type: 'infrastructure',
+        subtype: 'operating_system',
+        properties: { os: 'ubuntu', version: '22.04.3' },
+        min_confidence: 90,
+      },
+      {
+        type: 'dependency',
+        subtype: 'service',
+        properties: { service: 'fraud-service' },
+        min_confidence: 85,
+      },
+      {
+        type: 'dependency',
+        subtype: 'external_api',
+        properties: { service: 'stripe' },
+        min_confidence: 85,
+      },
+    ],
   },
 
   {
@@ -197,6 +271,50 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     metadata: {
       description: 'Java Spring Boot microservice on GCP with MySQL and Kafka',
     },
+    expected_features: [
+      {
+        type: 'technology',
+        subtype: 'programming_language',
+        properties: { language: 'java', version: '21.0.2' },
+        min_confidence: 90,
+      },
+      {
+        type: 'technology',
+        subtype: 'framework',
+        properties: { framework: 'spring_boot', version: '3.2.1' },
+        min_confidence: 90,
+      },
+      {
+        type: 'technology',
+        subtype: 'database',
+        properties: { database: 'mysql', version: '8.0.35' },
+        min_confidence: 90,
+      },
+      {
+        type: 'technology',
+        subtype: 'message_queue',
+        properties: { queue: 'kafka', version: '3.6.1' },
+        min_confidence: 90,
+      },
+      {
+        type: 'infrastructure',
+        subtype: 'cloud_provider',
+        properties: { provider: 'gcp', region: 'us-central1' },
+        min_confidence: 90,
+      },
+      {
+        type: 'infrastructure',
+        subtype: 'operating_system',
+        properties: { os: 'centos_stream', version: '9' },
+        min_confidence: 85,
+      },
+      {
+        type: 'dependency',
+        subtype: 'service',
+        properties: { service: 'inventory-service' },
+        min_confidence: 85,
+      },
+    ],
   },
 
   {
@@ -280,6 +398,44 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     metadata: {
       description: 'Rust service on Azure with MongoDB and NATS',
     },
+    expected_features: [
+      {
+        type: 'technology',
+        subtype: 'programming_language',
+        properties: { language: 'rust', version: '1.75.0' },
+        min_confidence: 90,
+      },
+      {
+        type: 'technology',
+        subtype: 'database',
+        properties: { database: 'mongodb', version: '7.0.4' },
+        min_confidence: 90,
+      },
+      {
+        type: 'technology',
+        subtype: 'message_queue',
+        properties: { queue: 'nats', version: '2.10.7' },
+        min_confidence: 90,
+      },
+      {
+        type: 'infrastructure',
+        subtype: 'cloud_provider',
+        properties: { provider: 'azure', region: 'westus2' },
+        min_confidence: 90,
+      },
+      {
+        type: 'infrastructure',
+        subtype: 'operating_system',
+        properties: { os: 'debian', version: '12' },
+        min_confidence: 90,
+      },
+      {
+        type: 'dependency',
+        subtype: 'service',
+        properties: { service: 'metrics-aggregator' },
+        min_confidence: 85,
+      },
+    ],
   },
 
   {
