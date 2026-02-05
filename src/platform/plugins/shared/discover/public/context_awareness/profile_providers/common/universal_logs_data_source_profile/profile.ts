@@ -17,6 +17,8 @@ import {
   getPaginationConfig,
   getColumnsConfiguration,
   createRecommendedFields,
+  createGetDocViewer,
+  getRowAdditionalLeadingControls,
 } from './accessors';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
@@ -26,33 +28,58 @@ const UNIVERSAL_LOGS_DATA_SOURCE_PROFILE_ID = 'universal-logs-data-source-profil
 
 /**
  * Creates the universal base logs profile provider that works across all solution contexts
- * This profile activates based solely on data characteristics, not solution context
+ * 
+ * Key Features:
+ * - Activates based solely on data characteristics (not solution context)
+ * - Uses capability-based feature detection (not deployment exclusions)
+ * - Works in ALL deployments including ES3
+ * - Features gracefully degrade based on available apps:
+ *   - Streams integration (if Streams app exists)
+ *   - APM traces (if APM exists)
+ *   - SLO creation (if SLO capabilities exist)
+ * 
+ * This approach eliminates the need for separate variants and ensures
+ * the profile works universally while adapting to the environment.
  */
 export const createUniversalLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
-): UniversalLogsDataSourceProfileProvider => ({
-  profileId: UNIVERSAL_LOGS_DATA_SOURCE_PROFILE_ID,
-  profile: {
-    getDefaultAppState: createGetDefaultAppState(),
-    getCellRenderers,
-    getRowIndicatorProvider,
-    getPaginationConfig,
-    getColumnsConfiguration,
-    getRecommendedFields: createRecommendedFields({}),
-  },
-  resolve: (params) => {
+): UniversalLogsDataSourceProfileProvider => {
+  const provider = {
+    profileId: UNIVERSAL_LOGS_DATA_SOURCE_PROFILE_ID,
+    profile: {
+      getDefaultAppState: createGetDefaultAppState(),
+      getCellRenderers,
+      getRowIndicatorProvider,
+      getRowAdditionalLeadingControls,
+      getPaginationConfig,
+      getColumnsConfiguration,
+      getRecommendedFields: createRecommendedFields({}),
+      getDocViewer: createGetDocViewer(services),
+    },
+    resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);
 
+    // Debug logging
+    // eslint-disable-next-line no-console
+    console.log('[Universal Logs Profile] Checking index pattern:', indexPattern);
+    // eslint-disable-next-line no-console
+    console.log('[Universal Logs Profile] Solution Nav ID:', params.rootContext.solutionNavId);
+
     // Check if this is a logs data source using the same logic as Observability
-    if (!services.logsContextService.isLogsIndexPattern(indexPattern)) {
+    const isLogsPattern = services.logsContextService.isLogsIndexPattern(indexPattern);
+    // eslint-disable-next-line no-console
+    console.log('[Universal Logs Profile] Is logs pattern?', isLogsPattern);
+
+    if (!isLogsPattern) {
       return { isMatch: false };
     }
 
-    // Check deployment model restrictions (exclude ES3 for Phase 1)
-    const isES3 = params.rootContext.solutionNavId === 'es';
-    if (isES3) {
-      return { isMatch: false };
-    }
+    // No longer excluding ES3 - instead we'll check for app capabilities at render time
+    // eslint-disable-next-line no-console
+    console.log('[Universal Logs Profile] Using capability-based rendering');
+
+    // eslint-disable-next-line no-console
+    console.log('[Universal Logs Profile] ✅ ACTIVATED!');
 
     return {
       isMatch: true,
@@ -61,4 +88,10 @@ export const createUniversalLogsDataSourceProfileProvider = (
       },
     };
   },
-});
+  };
+  
+  // eslint-disable-next-line no-console
+  console.log('[Universal Logs Profile] Profile created with extension points:', Object.keys(provider.profile));
+  
+  return provider;
+};

@@ -48,14 +48,22 @@ A data source is identified as "logs" if it matches **any** of:
 3. **OpenTelemetry**: `event.dataset` ends with `.otel`
 4. **Field heuristics**: Presence of log-specific fields (via `LogsContextService`)
 
-## Deployment Model Restrictions
+## Capability-Based Feature Detection
 
-**Phase 1 (Current Implementation):**
-- ✅ Enabled: Security, Observability, Search, Classic/Default
-- ❌ Disabled: ES3 (Elasticsearch Serverless projects with `solutionNavId: 'es'`)
+**Universal Across All Deployments:**
+- ✅ Works in: Security, Observability, Search, Classic/Default, **and ES3**
+- ✅ Adapts automatically based on available capabilities
 
-**Phase 2 (Future):**
-- Extend to ES3 after validation in other contexts
+**How It Works:**
+- Checks if Streams app exists → Shows "View in Streams" if available
+- Checks if APM exists → Shows "View in APM" if available  
+- Checks if SLO exists → Shows "Create SLO" if available
+- Always shows "Logs overview" tab, but features adapt to environment
+
+**Result:**
+- Full-featured environments (O11y with all apps) → All features available
+- Limited environments (ES3) → Gracefully degrades, core log UX still works
+- Single codebase → No per-deployment variants needed
 
 ## Relationship with Observability Logs Profile
 
