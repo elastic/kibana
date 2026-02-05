@@ -26,6 +26,7 @@ import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
+import { RedactPatternDefinition } from './redact_pattern_definition';
 import type { RedactFormState } from '../../../../types';
 
 // Common Grok patterns useful for redaction with human-readable labels
@@ -120,6 +121,8 @@ export const RedactProcessorForm = () => {
       </EuiFormRow>
       <EuiSpacer size="m" />
       <FieldsAccordion>
+        <RedactPatternDefinition />
+        <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <EuiFormRow
