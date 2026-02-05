@@ -1,19 +1,20 @@
 {
-  "lastModified": "2026-01-30T09:08:27.701Z",
-  "sha1": "2cc21468fa435f3cd7e85ac37ecaed5a82ea602d",
+  "lastModified": "2026-02-05T15:13:05.630Z",
+  "sha1": "5d28737075e3698105d1ad677bc645e11bda241a",
   "tests": [
     {
-      "id": "2255affe2a24223-6edec65fe06717b",
+      "id": "a01812d3d8d03d1-6edec65fe06717b",
       "title": "Infrastructure Inventory - Onboarding Renders no data page and redirects to onboarding page when no data is present",
       "expectedStatus": "passed",
       "tags": [
         "@ess",
-        "@svlOblt"
+        "@svlOblt",
+        "@cleanEnv"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory.spec.ts",
-        "line": 18,
-        "column": 7
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/no_data_inventory.spec.ts",
+        "line": 21,
+        "column": 9
       }
     }
   ]

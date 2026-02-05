@@ -29,11 +29,15 @@ const DEPLOYMENT_AGNOSTIC = [
 ];
 const PERFORMANCE = ['@perf'];
 
+// to filter tests that require a clean environment before running
+const CLEAN_ENV = ['@cleanEnv'];
+
 export const tags = {
   ESS_ONLY,
   SERVERLESS_ONLY,
   DEPLOYMENT_AGNOSTIC,
   PERFORMANCE,
+  CLEAN_ENV,
 };
 
 export const tagsByMode = {

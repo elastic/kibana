@@ -487,6 +487,53 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(configLogCall![0]).not.toContain('@svlSecurity');
   });
 
+  it('keeps clean env tag after target filtering', () => {
+    flagsReader.enum.mockReturnValue('ech'); // ESS_ONLY = ['@ess']
+    flagsReader.boolean.mockReturnValue(false);
+
+    mockTestableModules.modules = [
+      {
+        name: 'pluginCleanEnv',
+        group: 'groupClean',
+        type: 'plugin' as const,
+        visibility: 'private' as const,
+        root: 'x-pack/platform/plugins/private/pluginCleanEnv',
+        configs: [
+          {
+            path: 'pluginCleanEnv/config.playwright.config.ts',
+            category: 'ui',
+            type: 'playwright',
+            manifest: {
+              path: 'pluginCleanEnv/config.playwright.config.ts',
+              exists: true,
+              lastModified: '2024-01-01T00:00:00Z',
+              sha1: 'clean123',
+              tests: [
+                {
+                  id: 'cleanEnvTest',
+                  title: 'Clean env test',
+                  expectedStatus: 'passed',
+                  location: { file: 'clean.spec.ts', line: 1, column: 1 },
+                  tags: ['@ess', '@cleanEnv', '@svlOblt'],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    const infoCalls = log.info.mock.calls;
+    const configLogCall = infoCalls.find((call) => call[0].includes('config.playwright.config.ts'));
+
+    expect(configLogCall).toBeDefined();
+    expect(configLogCall![0]).toContain('@ess');
+    expect(configLogCall![0]).toContain('@cleanEnv');
+    expect(configLogCall![0]).not.toContain('@svlOblt');
+  });
+
   it('logs found configs with tags when they exist and "save" flag is false', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
@@ -1027,6 +1074,55 @@ describe('runDiscoverPlaywrightConfigs', () => {
       expect(log.info).toHaveBeenCalledWith(
         expect.stringContaining('Scout configs flattened and saved')
       );
+    });
+
+    it('orders clean env configs first within flattened groups', () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.boolean.mockImplementation((flag) => {
+        if (flag === 'flatten') return true;
+        if (flag === 'save') return true;
+        return false;
+      });
+
+      (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue([
+        {
+          name: 'pluginCleanEnv',
+          group: 'observability',
+          type: 'plugin',
+          visibility: 'private',
+          configs: [
+            {
+              path: 'pluginCleanEnv/regular.playwright.config.ts',
+              hasTests: true,
+              tags: ['@ess'],
+              serverRunFlags: ['--stateful'],
+              usesParallelWorkers: false,
+            },
+            {
+              path: 'pluginCleanEnv/clean.playwright.config.ts',
+              hasTests: true,
+              tags: ['@ess', '@cleanEnv'],
+              serverRunFlags: ['--stateful'],
+              usesParallelWorkers: false,
+            },
+          ],
+        },
+      ]);
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const writeCall = (fs.writeFileSync as jest.Mock).mock.calls[0];
+      const savedData = JSON.parse(writeCall[1]);
+
+      const statefulGroup = savedData.find(
+        (g: any) =>
+          g.mode === 'stateful' &&
+          g.group === 'observability' &&
+          g.scoutCommand === 'node scripts/scout run-tests --stateful --testTarget=cloud'
+      );
+      expect(statefulGroup).toBeDefined();
+      expect(statefulGroup.configs[0]).toBe('pluginCleanEnv/clean.playwright.config.ts');
+      expect(statefulGroup.configs[1]).toBe('pluginCleanEnv/regular.playwright.config.ts');
     });
 
     it('groups configs correctly by mode, group, and scout command', () => {
