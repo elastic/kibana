@@ -136,8 +136,11 @@ export async function ensureOtelDemo({
 
   // Read Kibana configuration to get Elasticsearch and Kibana server credentials
   const kibanaConfig = readKibanaConfig(log, configPath);
-  const elasticsearchConfig = kibanaConfig.elasticsearch;
-  const serverConfig = kibanaConfig.server;
+  const {
+    elasticsearch: elasticsearchConfig,
+    server: serverConfig,
+    kibanaCredentials,
+  } = kibanaConfig;
 
   const elasticsearchHost = normalizeElasticsearchHost(elasticsearchConfig.hosts);
   const elasticsearchUsername = elasticsearchConfig.username;
@@ -155,18 +158,19 @@ export async function ensureOtelDemo({
   log.info(`Logs index: ${logsIndex}`);
 
   // Enable streams in Kibana (sets up the logs index)
+  // Uses Kibana credentials (defaults to elastic superuser) which has required manage_stream privilege
   await enableStreams({
     kibanaUrl,
-    username: elasticsearchUsername,
-    password: elasticsearchPassword,
+    username: kibanaCredentials.username,
+    password: kibanaCredentials.password,
     log,
   });
 
   // Create a data view for logs (useful for Discover and dashboards)
   await createDataView({
     kibanaUrl,
-    username: elasticsearchUsername,
-    password: elasticsearchPassword,
+    username: kibanaCredentials.username,
+    password: kibanaCredentials.password,
     log,
   });
 
