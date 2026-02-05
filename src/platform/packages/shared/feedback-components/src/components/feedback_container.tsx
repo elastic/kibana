@@ -128,6 +128,7 @@ export const FeedbackContainer = ({
       gutterSize="m"
       data-test-subj="feedbackContainer"
       css={containerCss}
+      data-app-id={appId}
     >
       <FeedbackHeader />
       <FeedbackBody
