@@ -87,8 +87,7 @@ describe('generateEsqlQuery', () => {
         esql: `FROM myIndexPattern
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)
-  | SORT order_date ASC`,
+        BY order_date = BUCKET(order_date, 30 minutes)`,
       })
     );
   });
@@ -205,8 +204,7 @@ describe('generateEsqlQuery', () => {
         esql: `FROM myIndexPattern
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)
-  | SORT order_date ASC`,
+        BY order_date = BUCKET(order_date, 30 minutes)`,
       })
     );
   });
@@ -258,8 +256,7 @@ describe('generateEsqlQuery', () => {
         success: true,
         esql: `FROM myIndexPattern
   | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)
-  | SORT order_date ASC`,
+        BY order_date = BUCKET(order_date, 30 minutes)`,
       })
     );
   });
@@ -357,8 +354,7 @@ describe('generateEsqlQuery', () => {
         esql: `FROM myIndexPattern
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)
-  | SORT order_date ASC`,
+        BY order_date = BUCKET(order_date, 30 minutes)`,
       })
     );
   });
@@ -534,8 +530,7 @@ describe('generateEsqlQuery', () => {
         esql: `FROM myIndexPattern
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*) WHERE KQL("geo.src:\\"US\\"")
-        BY order_date = BUCKET(order_date, 30 minutes)
-  | SORT order_date ASC`,
+        BY order_date = BUCKET(order_date, 30 minutes)`,
       })
     );
   });

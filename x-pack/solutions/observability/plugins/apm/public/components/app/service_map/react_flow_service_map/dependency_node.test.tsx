@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { DependencyNode } from './dependency_node';
 import type { DependencyNodeData } from '../../../../../common/service_map/react_flow_types';
+import { MOCK_EUI_THEME } from './constants';
 
 // Mock EUI theme
 jest.mock('@elastic/eui', () => {
@@ -19,14 +20,14 @@ jest.mock('@elastic/eui', () => {
     useEuiTheme: () => ({
       euiTheme: {
         colors: {
-          emptyShade: '#fff',
-          mediumShade: '#98A2B3',
-          primary: '#0077CC',
-          primaryText: '#0077CC',
-          textPrimary: '#0077CC',
-          textParagraph: '#343741',
-          text: '#343741',
-          backgroundBasePlain: '#fff',
+          emptyShade: MOCK_EUI_THEME.colors.emptyShade,
+          mediumShade: MOCK_EUI_THEME.colors.mediumShade,
+          primary: MOCK_EUI_THEME.colors.primary,
+          primaryText: MOCK_EUI_THEME.colors.primaryText,
+          textPrimary: MOCK_EUI_THEME.colors.textPrimary,
+          textParagraph: MOCK_EUI_THEME.colors.textParagraph,
+          text: MOCK_EUI_THEME.colors.text,
+          backgroundBasePlain: MOCK_EUI_THEME.colors.backgroundBasePlain,
         },
         size: {
           xs: '4px',
