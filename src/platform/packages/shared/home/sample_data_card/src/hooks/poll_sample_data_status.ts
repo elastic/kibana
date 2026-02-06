@@ -123,19 +123,27 @@ export async function pollForRemoval(
 }
 
 /**
- * Poll using a custom status check function until the dataset shows as installed.
+ * Poll using a custom status check function until the dataset reaches the desired status.
  */
-export async function pollForCustomInstallation(
+async function pollCustomStatus(
+  pollFor: 'installation' | 'removal',
   customStatusCheck: () => Promise<InstalledStatus>,
   options: PollOptions = {}
 ): Promise<void> {
+  const defaultOptions =
+    pollFor === 'installation'
+      ? { maxAttempts: 60, initialDelayMs: 2000, minTimeout: 2000, factor: 1.2 }
+      : { maxAttempts: 20, initialDelayMs: 500, minTimeout: 500, factor: 1.5 };
+
   const {
-    maxAttempts = 60,
-    initialDelayMs = 2000,
-    minTimeout = 2000,
-    factor = 1.2,
+    maxAttempts = defaultOptions.maxAttempts,
+    initialDelayMs = defaultOptions.initialDelayMs,
+    minTimeout = defaultOptions.minTimeout,
+    factor = defaultOptions.factor,
     onFailedAttempt,
   } = options;
+
+  const targetStatus = pollFor === 'installation' ? 'installed' : 'not_installed';
 
   await new Promise((resolve) => setTimeout(resolve, initialDelayMs));
 
@@ -143,12 +151,16 @@ export async function pollForCustomInstallation(
     async () => {
       const status = await customStatusCheck();
 
-      if (status === 'installed') {
+      if (status === targetStatus) {
         return;
       }
 
-      // Continue polling for 'installing' or 'not_installed' status
-      throw new Error(`Sample data set not yet installed (status: ${status})`);
+      const statusMessage =
+        pollFor === 'installation'
+          ? `Sample data set not yet installed (status: ${status})`
+          : `Sample data set still installed (status: ${status})`;
+
+      throw new Error(statusMessage);
     },
     {
       retries: maxAttempts,
@@ -166,43 +178,21 @@ export async function pollForCustomInstallation(
 }
 
 /**
+ * Poll using a custom status check function until the dataset shows as installed.
+ */
+export async function pollForCustomInstallation(
+  customStatusCheck: () => Promise<InstalledStatus>,
+  options: PollOptions = {}
+): Promise<void> {
+  return pollCustomStatus('installation', customStatusCheck, options);
+}
+
+/**
  * Poll using a custom status check function until the dataset shows as uninstalled.
  */
 export async function pollForCustomRemoval(
   customStatusCheck: () => Promise<InstalledStatus>,
   options: PollOptions = {}
 ): Promise<void> {
-  const {
-    maxAttempts = 20,
-    initialDelayMs = 500,
-    minTimeout = 500,
-    factor = 1.5,
-    onFailedAttempt,
-  } = options;
-
-  await new Promise((resolve) => setTimeout(resolve, initialDelayMs));
-
-  await pRetry(
-    async () => {
-      const status = await customStatusCheck();
-
-      if (status === 'not_installed') {
-        return;
-      }
-
-      throw new Error(`Sample data set still installed (status: ${status})`);
-    },
-    {
-      retries: maxAttempts,
-      minTimeout,
-      factor,
-      onFailedAttempt: (error) => {
-        if (onFailedAttempt) {
-          onFailedAttempt(error, error.attemptNumber);
-        }
-        // eslint-disable-next-line no-console
-        console.debug(`Custom poll attempt ${error.attemptNumber}/${maxAttempts}:`, error.message);
-      },
-    }
-  );
+  return pollCustomStatus('removal', customStatusCheck, options);
 }

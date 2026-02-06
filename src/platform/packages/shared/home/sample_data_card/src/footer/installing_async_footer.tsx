@@ -35,6 +35,7 @@ export const InstallingAsyncFooter = ({ id, name, customStatusCheck, onInstall }
   const { fetchSampleDataSets, notifyError, notifySuccess } = useServices();
   const [isInstalling, setIsInstalling] = useState(true);
   const hasStartedPolling = useRef(false);
+  const cancelledRef = useRef(false);
 
   const installingAriaLabel = i18n.translate(
     'homePackages.sampleDataCard.installingButtonAriaLabel',
@@ -67,6 +68,11 @@ export const InstallingAsyncFooter = ({ id, name, customStatusCheck, onInstall }
           });
         }
 
+        // Bail out if component unmounted during polling
+        if (cancelledRef.current) {
+          return;
+        }
+
         setIsInstalling(false);
 
         notifySuccess({
@@ -79,6 +85,11 @@ export const InstallingAsyncFooter = ({ id, name, customStatusCheck, onInstall }
 
         onInstall(id);
       } catch (e) {
+        // Bail out if component unmounted during polling
+        if (cancelledRef.current) {
+          return;
+        }
+
         setIsInstalling(false);
         notifyError({
           title: i18n.translate('homePackages.sampleDataSet.unableToInstallErrorMessage', {
@@ -91,6 +102,10 @@ export const InstallingAsyncFooter = ({ id, name, customStatusCheck, onInstall }
     };
 
     pollForCompletion();
+
+    return () => {
+      cancelledRef.current = true;
+    };
   }, [id, name, customStatusCheck, fetchSampleDataSets, notifySuccess, notifyError, onInstall]);
 
   return (
