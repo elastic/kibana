@@ -67,7 +67,10 @@ export const runAgentStepDefinition = createPublicStepDefinition({
   editorHandlers: {
     config: {
       'connector-id': {
-        connectorIdSelection: { actionTypeIds: ['.gen-ai', '.inference'], enableCreation: false },
+        connectorIdSelection: {
+          connectorTypes: ['inference.completion', 'bedrock', 'gen-ai', 'gemini'],
+          enableCreation: false,
+        },
       },
     },
     dynamicSchema: {

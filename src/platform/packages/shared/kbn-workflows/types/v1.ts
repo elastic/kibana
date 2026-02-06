@@ -385,6 +385,11 @@ export interface ConnectorInstance {
   name: string;
   isPreconfigured: boolean;
   isDeprecated: boolean;
+  config?: ConnectorInstanceConfig;
+}
+
+export interface ConnectorInstanceConfig {
+  taskType?: string;
 }
 
 export interface ConnectorTypeInfo {
@@ -536,11 +541,11 @@ export interface ConnectorIdSelectionHandler {
   /**
    * The action type IDs to search for.
    */
-  actionTypeIds: string[];
+  connectorTypes: string[];
   /**
    * Whether to disable creation of a new connector from the connector ID selection.
    * If false (default), creation from the connector ID selection will be disabled.
-   * If true, creation from the connector ID selection will be enabled for the first action type ID in the `actionTypeIds` list.
+   * If true, creation from the connector ID selection will be enabled for the first type in the `connectorTypes` list.
    */
   enableCreation?: boolean;
 }

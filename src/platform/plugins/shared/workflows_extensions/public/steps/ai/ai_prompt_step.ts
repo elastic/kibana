@@ -117,7 +117,10 @@ See this [JSON Schema reference](https://json-schema.org/learn/getting-started-s
   editorHandlers: {
     config: {
       'connector-id': {
-        connectorIdSelection: { actionTypeIds: ['.gen-ai', '.inference'], enableCreation: false },
+        connectorIdSelection: {
+          connectorTypes: ['inference.completion', 'bedrock', 'gen-ai', 'gemini'],
+          enableCreation: false,
+        },
       },
     },
     dynamicSchema: {

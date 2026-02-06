@@ -9,7 +9,6 @@
 
 import type { ConnectorIdSelectionHandler } from '@kbn/workflows/types/v1';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { getActionTypeIdFromStepType } from './action_type_utils';
 import { stepSchemas } from '../../../common/step_schemas';
 
 export function getCustomStepConnectorIdSelectionHandler(
@@ -23,9 +22,9 @@ export function getCustomStepConnectorIdSelectionHandler(
   return undefined;
 }
 
-export function getActionTypeIdsFromStepType(stepType: string): string[] {
+export function getConnectorTypesFromStepType(stepType: string): string[] {
   const customStepSelectionHandler = getCustomStepConnectorIdSelectionHandler(stepType);
-  return customStepSelectionHandler?.actionTypeIds ?? [getActionTypeIdFromStepType(stepType)];
+  return customStepSelectionHandler?.connectorTypes ?? [stepType];
 }
 
 export function isCreateConnectorEnabledForStepType(stepType: string): boolean {
@@ -36,4 +35,18 @@ export function isCreateConnectorEnabledForStepType(stepType: string): boolean {
   }
   // If customStepSelectionHandler defined (custom step with connector-id property), the default is to disable connector creation, unless enableCreation is explicitly set to true
   return customStepSelectionHandler.enableCreation ?? false;
+}
+
+export function getInferenceConnectorTaskTypeFromSubAction(subAction: string): string | undefined {
+  switch (subAction) {
+    case 'completion':
+      return 'chat_completion';
+    case 'rerank':
+      return 'rerank';
+
+    // extend this as needed
+
+    default:
+      return undefined;
+  }
 }

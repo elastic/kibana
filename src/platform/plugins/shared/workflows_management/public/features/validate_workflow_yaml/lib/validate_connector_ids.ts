@@ -9,9 +9,12 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
-import { getActionTypeDisplayNameFromStepType } from '../../../shared/lib/action_type_utils';
 import {
-  getActionTypeIdsFromStepType,
+  getActionTypeDisplayNameFromStepType,
+  getActionTypeIdFromStepType,
+} from '../../../shared/lib/action_type_utils';
+import {
+  getConnectorTypesFromStepType,
   isCreateConnectorEnabledForStepType,
 } from '../../../shared/lib/connectors_utils';
 import { getConnectorInstancesForType } from '../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
@@ -81,10 +84,10 @@ export function validateConnectorIds(
     if (!instance) {
       const actions: string[] = [];
       if (isCreateConnectorEnabledForStepType(stepType)) {
-        const actionType = getActionTypeIdsFromStepType(stepType)[0];
+        const resolvedConnectorType = getConnectorTypesFromStepType(stepType)[0];
         const createConnectorLink = getCreateConnectorHoverCommandLink({
           text: TRANSLATIONS.createConnector,
-          connectorType: actionType,
+          connectorType: getActionTypeIdFromStepType(resolvedConnectorType),
           insertPosition,
         });
         actions.push(createConnectorLink);
