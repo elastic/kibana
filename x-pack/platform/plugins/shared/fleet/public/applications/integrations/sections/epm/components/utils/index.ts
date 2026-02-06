@@ -31,7 +31,9 @@ export const wrapTitle = ({
     !!packageInfo?.conditions?.deprecated ||
     !!integrationInfo?.deprecated ||
     false;
-  return isDeprecated && !titleToWrap.match(/ \(deprecated\)$/)
+  return isDeprecated &&
+    !titleToWrap.match(/ \(deprecated\)$/) &&
+    !titleToWrap.match(/ \(Deprecated\)$/)
     ? `${titleToWrap} (Deprecated)`
     : titleToWrap;
 };

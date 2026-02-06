@@ -22,15 +22,14 @@ describe('wrapTitle', () => {
     });
 
     it('should not add (Deprecated) suffix twice if already present', () => {
-      expect(wrapTitle({ title: 'My Integration (deprecated)', deprecated: true })).toBe(
-        'My Integration (deprecated)'
+      expect(wrapTitle({ title: 'My Integration (Deprecated)', deprecated: true })).toBe(
+        'My Integration (Deprecated)'
       );
     });
 
-    it('should add suffix if capitalized (Deprecated) is present since regex only checks lowercase', () => {
-      // The regex checks for lowercase "(deprecated)" only, so capitalized version gets suffix added
-      expect(wrapTitle({ title: 'My Integration (Deprecated)', deprecated: true })).toBe(
-        'My Integration (Deprecated) (Deprecated)'
+    it('should not add (Deprecated) suffix if lowercase (deprecated) is present', () => {
+      expect(wrapTitle({ title: 'My Integration (deprecated)', deprecated: true })).toBe(
+        'My Integration (deprecated)'
       );
     });
   });
