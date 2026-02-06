@@ -27,7 +27,12 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
     },
   },
   handler: async (routeContext): Promise<any> => {
-    const { request, syntheticsMonitorClient, monitorConfigRepository } = routeContext;
+    const {
+      request,
+      syntheticsMonitorClient,
+      monitorConfigRepository,
+      syntheticsPrivateLocationClient,
+    } = routeContext;
     const totalCountQuery = async () => {
       if (isMonitorsQueryFiltered(request.query)) {
         return monitorConfigRepository.find({
@@ -40,7 +45,7 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
 
     const { filtersStr } = await getMonitorFilters(routeContext);
 
-    const [queryResultSavedObjects, totalCount] = await Promise.all([
+    const [queryResultSavedObjects, totalCount, allSpacesWithMonitors] = await Promise.all([
       monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
         perPage: queryParams.perPage ?? 50,
         page: queryParams.page ?? 1,
@@ -53,7 +58,11 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
         ...(queryParams.showFromAllSpaces && { namespaces: ['*'] }),
       }),
       totalCountQuery(),
+      // TODO: Remove this after testing - temporary call to test getAllSpacesWhereMonitorsExist
+      syntheticsPrivateLocationClient.getAllSpacesWhereMonitorsExist(),
     ]);
+
+    console.log('allSpacesWithMonitors', allSpacesWithMonitors);
 
     const absoluteTotal = totalCount?.total ?? queryResultSavedObjects.total;
 
@@ -75,6 +84,8 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
       absoluteTotal,
       perPage: perPageT,
       syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,
+      // TODO: Remove after testing - temporary field to test getAllSpacesWhereMonitorsExist
+      allSpacesWithMonitors,
     };
   },
 });

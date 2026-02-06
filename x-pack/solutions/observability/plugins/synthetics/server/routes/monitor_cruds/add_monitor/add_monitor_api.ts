@@ -113,6 +113,9 @@ export class AddEditMonitorAPI {
         })
       );
 
+      console.log('monitorSavedObject', { monitorSavedObject });
+      console.log('errorws', { syncErrors });
+
       return {
         errors: syncErrors,
         newMonitor: {
@@ -121,6 +124,7 @@ export class AddEditMonitorAPI {
         },
       };
     } catch (e) {
+      console.log('error', e);
       e.message = `${e.message}, monitor name: ${monitorWithNamespace[ConfigKey.NAME]}`;
       await this.revertMonitorIfCreated({
         newMonitorId,
@@ -327,6 +331,7 @@ export class AddEditMonitorAPI {
         });
       }
     } catch (error) {
+      console.log('error', error);
       // ignore errors here
       server.logger.error(
         `Unable to revert monitor with id ${newMonitorId}, Error: ${error.message}`,
