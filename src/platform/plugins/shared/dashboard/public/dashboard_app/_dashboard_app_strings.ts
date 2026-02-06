@@ -253,6 +253,9 @@ export const topNavStrings = {
     scheduleExportLabel: i18n.translate('dashboard.topNave.scheduleExportButtonAriaLabel', {
       defaultMessage: 'Schedule export',
     }),
+    jsonLabel: i18n.translate('dashboard.topNave.exportJsonButtonAriaLabel', {
+      defaultMessage: 'JSON',
+    }),
   },
   share: {
     label: i18n.translate('dashboard.topNave.shareButtonAriaLabel', {

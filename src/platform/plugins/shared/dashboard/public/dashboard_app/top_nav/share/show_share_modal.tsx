@@ -11,7 +11,6 @@ import type { ReactElement } from 'react';
 import React, { useState } from 'react';
 import { EuiCheckbox, EuiFlexGrid, EuiFlexItem, EuiFormFieldset } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
-import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 
@@ -27,7 +26,8 @@ import { shareService, coreServices, spacesService } from '../../../services/kib
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
-import { buildDashboardShareOptions } from './share_options_utils';
+import type { DashboardApi } from '../../../dashboard_api/types';
+import { buildDashboardShareOptions, buildExportSharingData } from './share_options_utils';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -42,6 +42,7 @@ export interface ShowShareModalProps {
   accessControlClient: AccessControlClient;
   saveDashboard: () => Promise<void>;
   changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
+  dashboardApi: DashboardApi;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -63,6 +64,7 @@ export function ShowShareModal({
   accessControlClient,
   saveDashboard,
   changeAccessMode,
+  dashboardApi,
 }: ShowShareModalProps) {
   if (!shareService) return;
 
@@ -199,11 +201,7 @@ export function ShowShareModal({
       },
     },
     sharingData: {
-      title,
-      locatorParams: {
-        id: DASHBOARD_APP_LOCATOR,
-        params: locatorParams,
-      },
+      ...buildExportSharingData(title, locatorParams, dashboardApi),
       accessModeContainer: showAccessContainer ? (
         <AccessModeContainer
           accessControl={accessControl}

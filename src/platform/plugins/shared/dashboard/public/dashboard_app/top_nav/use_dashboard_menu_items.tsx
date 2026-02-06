@@ -182,6 +182,7 @@ export const useDashboardMenuItems = ({
       accessControlClient,
       saveDashboard: saveFromShareModal,
       changeAccessMode: dashboardApi.changeAccessMode,
+      dashboardApi,
     });
   }, [
     dashboardTitle,
@@ -195,6 +196,7 @@ export const useDashboardMenuItems = ({
     dashboardApi.createdBy,
     accessControlClient,
     dashboardApi.isManaged,
+    dashboardApi,
   ]);
 
   const getEditTooltip = useCallback(() => {
