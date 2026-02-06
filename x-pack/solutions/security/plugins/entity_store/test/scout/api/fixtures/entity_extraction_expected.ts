@@ -474,7 +474,7 @@ export const expectedUserEntities = [
       'entity.EngineMetadata.Type': 'user',
       'user.name': '',
       'user.id': 'user-202',
-      'entity.name': '',
+      'entity.name': 'user-202',
       'entity.type': 'Identity',
       '@timestamp': '2026-01-20T12:05:08.000Z',
       'entity.EngineMetadata.UntypedId': 'user-202',

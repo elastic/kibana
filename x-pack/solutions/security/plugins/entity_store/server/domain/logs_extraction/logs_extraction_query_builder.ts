@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { esqlIsNullOrEmpty } from '../../../common/esql/strings';
 import {
   type EntityDefinition,
   type EntityField,
@@ -145,7 +146,9 @@ function fieldsToKeep(fields: EntityField[]) {
 function customFieldEvalLogic(type: EntityType, entityTypeFallback?: string) {
   const evals = [
     `${TIMESTAMP_FIELD} = ${recentData('timestamp')}`,
-    `${ENTITY_NAME_FIELD} = COALESCE(${ENTITY_NAME_FIELD}, ${ENGINE_METADATA_UNTYPED_ID_FIELD})`,
+    `${ENTITY_NAME_FIELD} = CASE(${esqlIsNullOrEmpty(
+      ENTITY_NAME_FIELD
+    )}, ${ENGINE_METADATA_UNTYPED_ID_FIELD}, ${ENTITY_NAME_FIELD})`,
     `${ENGINE_METADATA_TYPE_FIELD} = "${type}"`,
   ];
 
