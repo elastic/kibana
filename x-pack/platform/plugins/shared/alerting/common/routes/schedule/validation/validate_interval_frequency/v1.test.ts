@@ -23,13 +23,9 @@ describe('validateIntervalAndFrequency', () => {
     expect(validateIntervalAndFrequency('1y')).toBeUndefined();
   });
 
-  it('validates frequency in hours correctly', () => {
-    expect(validateIntervalAndFrequency('1h')).toBeUndefined();
-  });
-
   it('throws error when invalid frequency', () => {
-    expect(validateIntervalAndFrequency('10s')).toEqual(
-      `'every' string of recurring schedule is not valid : 10s`
+    expect(validateIntervalAndFrequency('1h')).toEqual(
+      `'every' string of recurring schedule is not valid : 1h`
     );
   });
 
