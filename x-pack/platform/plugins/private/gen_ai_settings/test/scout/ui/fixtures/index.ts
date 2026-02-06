@@ -12,65 +12,19 @@ import type {
   ScoutWorkerFixtures,
   BrowserAuthFixture,
   ScoutTestFixtures,
-  KibanaRole,
 } from '@kbn/scout';
 import { test as baseTest, spaceTest as spaceBaseTest } from '@kbn/scout';
 
 import type { GenAiSettingsPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
+import {
+  getAgentBuilderNoneRole,
+  getAIAssistantsNoneRole,
+  getFullAIPrivilegesRole,
+} from './services';
 
-/**
- * Role definition for a user without Agent Builder privileges.
- * Has AI Assistants (Observability & Security) but no Agent Builder.
- */
-const getAgentBuilderNoneRole = (): KibanaRole => ({
-  elasticsearch: {
-    cluster: ['all'],
-    indices: [
-      {
-        names: ['*'],
-        privileges: ['all'],
-      },
-    ],
-  },
-  kibana: [
-    {
-      base: [],
-      feature: {
-        securitySolutionAssistant: ['all'],
-        actions: ['all'],
-        observabilityAIAssistant: ['all'],
-      },
-      spaces: ['*'],
-    },
-  ],
-});
-
-/**
- * Role definition for a user without AI Assistants privileges.
- * Has Agent Builder but no AI Assistants (Observability & Security).
- */
-const getAIAssistantsNoneRole = (): KibanaRole => ({
-  elasticsearch: {
-    cluster: ['all'],
-    indices: [
-      {
-        names: ['*'],
-        privileges: ['all'],
-      },
-    ],
-  },
-  kibana: [
-    {
-      base: [],
-      feature: {
-        agentBuilder: ['all'],
-        actions: ['all'],
-      },
-      spaces: ['*'],
-    },
-  ],
-});
+// Re-export services for convenient access
+export * from './services';
 
 /**
  * Extended browser auth fixture with custom login methods
@@ -78,6 +32,7 @@ const getAIAssistantsNoneRole = (): KibanaRole => ({
 export interface GenAiSettingsBrowserAuthFixture extends BrowserAuthFixture {
   loginAsNonAgentBuilderUser: () => Promise<void>;
   loginAsNonAssistantUser: () => Promise<void>;
+  loginAsFullAIPrivilegesUser: () => Promise<void>;
 }
 
 export interface GenAiSettingsTestFixtures extends ScoutTestFixtures {
@@ -112,11 +67,14 @@ export const test = baseTest.extend<GenAiSettingsTestFixtures, ScoutWorkerFixtur
       browserAuth.loginWithCustomRole(getAgentBuilderNoneRole());
     const loginAsNonAssistantUser = async () =>
       browserAuth.loginWithCustomRole(getAIAssistantsNoneRole());
+    const loginAsFullAIPrivilegesUser = async () =>
+      browserAuth.loginWithCustomRole(getFullAIPrivilegesRole());
 
     await use({
       ...browserAuth,
       loginAsNonAgentBuilderUser,
       loginAsNonAssistantUser,
+      loginAsFullAIPrivilegesUser,
     });
   },
 });
@@ -137,11 +95,14 @@ export const spaceTest = spaceBaseTest.extend<
       browserAuth.loginWithCustomRole(getAgentBuilderNoneRole());
     const loginAsNonAssistantUser = async () =>
       browserAuth.loginWithCustomRole(getAIAssistantsNoneRole());
+    const loginAsFullAIPrivilegesUser = async () =>
+      browserAuth.loginWithCustomRole(getFullAIPrivilegesRole());
 
     await use({
       ...browserAuth,
       loginAsNonAgentBuilderUser,
       loginAsNonAssistantUser,
+      loginAsFullAIPrivilegesUser,
     });
   },
 });

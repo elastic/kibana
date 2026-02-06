@@ -17,8 +17,7 @@ export class GenAiSettingsPage {
    * Navigate to the GenAI Settings page in Stack Management
    */
   async navigateTo() {
-    await this.page.gotoApp('management');
-    await this.page.testSubj.click('genAiSettings');
+    await this.page.gotoApp('management/ai/genAiSettings');
     await this.waitForPageToLoad();
   }
 

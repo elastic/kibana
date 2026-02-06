@@ -15,7 +15,7 @@ spaceTest.describe(
   { tag: ['@ess', '@svlOblt', '@svlSecurity'] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsPrivilegedUser();
+      await browserAuth.loginAsFullAIPrivilegesUser();
       await pageObjects.genAiSettings.navigateTo();
     });
 

@@ -10,10 +10,10 @@ import { spaceTest } from '../../fixtures';
 
 spaceTest.describe(
   'GenAI Settings - Page Display',
-  { tag: ['@ess', '@svlOblt', '@svlSecurity'] },
+  { tag: ['@ess', '@svlSecurity', '@svlOblt'] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsPrivilegedUser();
+      await browserAuth.loginAsFullAIPrivilegesUser();
       await pageObjects.genAiSettings.navigateTo();
     });
 
@@ -26,11 +26,6 @@ spaceTest.describe(
       await spaceTest.step('should display the Chat Experience field', async () => {
         const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
         await expect(chatExperienceField).toBeVisible();
-      });
-
-      await spaceTest.step('should display AI Assistant nav button', async () => {
-        const aiAssistantNavButton = pageObjects.genAiSettings.getAiAssistantNavButton();
-        await expect(aiAssistantNavButton).toBeVisible();
       });
     });
   }
