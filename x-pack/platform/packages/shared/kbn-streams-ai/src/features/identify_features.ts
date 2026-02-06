@@ -7,12 +7,14 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
+import type { Streams } from '@kbn/streams-schema';
 import { type BaseFeature, baseFeatureSchema } from '@kbn/streams-schema';
 import { withSpan } from '@kbn/apm-utils';
 import { createIdentifyFeaturesPrompt } from './prompt';
 import { sumTokens } from '../helpers/sum_tokens';
 
 export interface IdentifyFeaturesOptions {
+  stream: Streams.all.Definition;
   sampleDocuments: Array<Record<string, any>>;
   inferenceClient: BoundInferenceClient;
   systemPrompt: string;
@@ -21,6 +23,7 @@ export interface IdentifyFeaturesOptions {
 }
 
 export async function identifyFeatures({
+  stream,
   sampleDocuments,
   systemPrompt,
   inferenceClient,
