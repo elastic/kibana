@@ -16,7 +16,10 @@ import {
   deleteIndexTemplate,
   deleteComponentTemplate,
 } from '../../infra/elasticsearch';
-import type { EntityDefinition, ManagedEntityDefinition } from '../../../common/domain/definitions/entity_schema';
+import type {
+  EntityDefinition,
+  ManagedEntityDefinition,
+} from '../../../common/domain/definitions/entity_schema';
 import {
   getLatestEntityIndexTemplateConfig,
   getLatestIndexTemplateId,
