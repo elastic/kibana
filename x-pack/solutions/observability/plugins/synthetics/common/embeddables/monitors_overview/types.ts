@@ -30,19 +30,21 @@ export interface MonitorFiltersSnakeCase {
   locations: Option[];
 }
 
-export interface OverviewStatsEmbeddableCustomState {
+export interface OverviewMonitorsEmbeddableCustomState {
   filters?: MonitorFilters;
+  view?: 'cardView' | 'compactView';
 }
 
 // Snake_case version for REST API serialization
-export interface OverviewStatsEmbeddableCustomStateSnakeCase {
+export interface OverviewMonitorsEmbeddableCustomStateSnakeCase {
   filters?: MonitorFiltersSnakeCase;
+  view?: 'cardView' | 'compactView';
 }
 
-export type OverviewStatsEmbeddableState = SerializedTitles &
+export type OverviewMonitorsEmbeddableState = SerializedTitles &
   DynamicActionsSerializedState &
-  OverviewStatsEmbeddableCustomState;
+  OverviewMonitorsEmbeddableCustomState;
 
-export type OverviewStatsEmbeddableStateSnakeCase = SerializedTitles &
+export type OverviewMonitorsEmbeddableStateSnakeCase = SerializedTitles &
   DynamicActionsSerializedState &
-  OverviewStatsEmbeddableCustomStateSnakeCase;
+  OverviewMonitorsEmbeddableCustomStateSnakeCase;

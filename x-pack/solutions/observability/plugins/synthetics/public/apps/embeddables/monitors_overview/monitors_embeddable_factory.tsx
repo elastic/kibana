@@ -64,18 +64,69 @@ export const getMonitorsEmbeddableFactory = (
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const titleManager = initializeTitleManager(initialState);
+      // Convert snake_case keys to camelCase for frontend compatibility
+      // The state might come with snake_case keys from saved objects
+      type StateWithSnakeCase = Omit<OverviewMonitorsEmbeddableState, 'filters'> & {
+        filters?: {
+          projects: Array<{ label: string; value: string }>;
+          tags: Array<{ label: string; value: string }>;
+          locations: Array<{ label: string; value: string }>;
+          monitor_ids?: Array<{ label: string; value: string }>;
+          monitorIds?: Array<{ label: string; value: string }>;
+          monitor_types?: Array<{ label: string; value: string }>;
+          monitorTypes?: Array<{ label: string; value: string }>;
+        };
+      };
+
+      const stateWithPossibleSnakeCase = initialState as unknown as StateWithSnakeCase;
+      const deserializedState: OverviewMonitorsEmbeddableState = (
+        stateWithPossibleSnakeCase.filters
+          ? {
+              ...stateWithPossibleSnakeCase,
+              filters: {
+                projects: stateWithPossibleSnakeCase.filters.projects,
+                tags: stateWithPossibleSnakeCase.filters.tags,
+                locations: stateWithPossibleSnakeCase.filters.locations,
+                monitorIds:
+                  stateWithPossibleSnakeCase.filters.monitor_ids ??
+                  stateWithPossibleSnakeCase.filters.monitorIds ??
+                  [],
+                monitorTypes:
+                  stateWithPossibleSnakeCase.filters.monitor_types ??
+                  stateWithPossibleSnakeCase.filters.monitorTypes ??
+                  [],
+              },
+            }
+          : stateWithPossibleSnakeCase
+      ) as OverviewMonitorsEmbeddableState;
+
+      const titleManager = initializeTitleManager(deserializedState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
-      const filters$ = new BehaviorSubject(initialState.filters);
-      const view$ = new BehaviorSubject(initialState.view);
+      const filters$ = new BehaviorSubject(deserializedState.filters);
+      const view$ = new BehaviorSubject(deserializedState.view);
 
-      function serializeState() {
-        return {
+      function serializeState(): OverviewMonitorsEmbeddableState {
+        const state = {
           ...titleManager.getLatestState(),
           filters: filters$.getValue(),
           view: view$.getValue(),
         };
+
+        // Convert camelCase keys to snake_case for REST API compatibility
+        if (state.filters) {
+          const { monitorIds, monitorTypes, ...restFilters } = state.filters;
+          return {
+            ...state,
+            filters: {
+              ...restFilters,
+              monitor_ids: monitorIds,
+              monitor_types: monitorTypes,
+            },
+          } as unknown as OverviewMonitorsEmbeddableState;
+        }
+
+        return state;
       }
 
       const unsavedChangesApi = initializeUnsavedChanges<OverviewMonitorsEmbeddableState>({

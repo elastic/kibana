@@ -9,20 +9,23 @@ import type { Reference } from '@kbn/content-management-utils/src/types';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { flow } from 'lodash';
-import type { OverviewStatsEmbeddableState, OverviewStatsEmbeddableStateSnakeCase } from './types';
+import type {
+  OverviewMonitorsEmbeddableState,
+  OverviewMonitorsEmbeddableStateSnakeCase,
+} from './types';
 
 export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
   function transformOut(
-    storedState: OverviewStatsEmbeddableStateSnakeCase,
+    storedState: OverviewMonitorsEmbeddableStateSnakeCase,
     references?: Reference[]
   ) {
     const transformsFlow = flow(
-      transformTitlesOut<OverviewStatsEmbeddableStateSnakeCase>,
-      (state: OverviewStatsEmbeddableStateSnakeCase) => {
+      transformTitlesOut<OverviewMonitorsEmbeddableStateSnakeCase>,
+      (state: OverviewMonitorsEmbeddableStateSnakeCase) => {
         // Convert snake_case keys back to camelCase for frontend
         if (state.filters) {
           const { monitor_ids, monitor_types, ...restFilters } = state.filters;
-          const stateWithCamelCaseKeys: OverviewStatsEmbeddableState = {
+          const stateWithCamelCaseKeys: OverviewMonitorsEmbeddableState = {
             ...state,
             filters: {
               ...restFilters,
