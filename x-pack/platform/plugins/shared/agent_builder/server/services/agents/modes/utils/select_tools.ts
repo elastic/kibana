@@ -74,7 +74,7 @@ export const selectTools = async ({
   });
 
   // create tools for filesystem (only if feature is enabled)
-  const convertedFsTools = experimentalFeatures.filestore
+  const filestoreTools = experimentalFeatures.filestore
     ? getStoreTools({ filestore }).map((tool) => builtinToolToExecutable({ tool, runner }))
     : [];
 
@@ -89,7 +89,7 @@ export const selectTools = async ({
     ...versionedAttachmentBoundTools,
     ...versionedAttachmentTools,
     ...staticRegistryTools,
-    ...convertedFsTools,
+    ...filestoreTools,
   ];
 
   const dedupedStaticTools = new Map<string, ExecutableTool>();
