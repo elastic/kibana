@@ -83,10 +83,9 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
         <EuiFlexGroup
           alignItems="center"
           gutterSize="s"
-          justifyContent="spaceBetween"
           {...(dataTestSubj ? { 'data-test-subj': dataTestSubj } : {})}
         >
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={css`min-width: 190px;`}>
             <EuiText size="xs">
               <strong>
                 {i18n.translate(`metricsExperience.overviewTab.strong.${titleKey}`, {
