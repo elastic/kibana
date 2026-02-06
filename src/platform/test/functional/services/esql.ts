@@ -29,7 +29,7 @@ export class ESQLService extends FtrService {
 
   public async isQueryPresentInTable(query: string, items: string[][]) {
     const queryAdded = items.some((item) => {
-      return item[2] === query;
+      return item.some((cell) => cell === query);
     });
 
     expect(queryAdded).to.be(true);

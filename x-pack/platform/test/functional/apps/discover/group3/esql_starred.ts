@@ -81,7 +81,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('ESQLEditor-toggle-query-history-icon');
       const historyItem = await esql.getHistoryItem(0);
-      await testSubjects.moveMouseTo('~ESQLFavoriteButton');
       const button = await historyItem.findByTestSubject('ESQLFavoriteButton');
       await button.click();
 
