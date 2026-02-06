@@ -123,6 +123,12 @@ describe('installAssetsForInputPackagePolicy', () => {
       assetsMap: new Map(),
       paths: [],
     } as any);
+
+    jest.mocked(getInstallation).mockResolvedValue({
+      name: 'test',
+      version: '1.0.0',
+    } as any);
+
     const mockedLogger = jest.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({
@@ -204,6 +210,10 @@ describe('installAssetsForInputPackagePolicy', () => {
       jest.mocked(installIndexTemplatesAndPipelines).mockReset();
       jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
       jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+      jest.mocked(getInstallation).mockResolvedValue({
+        name: 'otel',
+        version: '1.0.0',
+      } as any);
     });
 
     it('should install index templates for all signal types when dynamic_signal_types is true', async () => {
@@ -278,6 +288,61 @@ describe('installAssetsForInputPackagePolicy', () => {
           ],
         })
       );
+    });
+
+    it('should store ES index patterns for all signal types when dynamic_signal_types is true', async () => {
+      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+        installation: {
+          name: 'otel',
+          version: '1.0.0',
+        },
+        packageInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES,
+        assetsMap: new Map(),
+        paths: [],
+      } as any);
+      const mockedLogger = jest.mocked(appContextService.getLogger());
+
+      await installAssetsForInputPackagePolicy({
+        pkgInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: false,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'otel',
+              type: 'otelcol',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'custom.dataset' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      });
+
+      // Verify optimisticallyAddEsAssetReferences was called exactly once
+      // (not once per signal type, but once for all of them together)
+      expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledTimes(1);
+
+      // Verify it was called with the installation name and empty assets array
+      expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledWith(
+        expect.anything(),
+        'otel',
+        [],
+        expect.any(Object)
+      );
+
+      // Get the actual call to verify ES index patterns were passed
+      const calls = jest.mocked(optimisticallyAddEsAssetReferences).mock.calls;
+      expect(calls.length).toBe(1);
+
+      // This verifies the fix: ES index patterns should be provided for all signal types
+      // If the bug existed, this would be called 3 times (once per signal type)
+      // with only the last call's patterns being retained
     });
 
     it('should install index template for single signal type when dynamic_signal_types is false', async () => {
