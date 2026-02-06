@@ -37,7 +37,6 @@ dependsOn:
   - '@kbn/deeplinks-agent-builder'
   - '@kbn/deeplinks-data-sources'
   - '@kbn/core-chrome-navigation'
-  - '@kbn/core-chrome-sidebar'
 tags:
   - shared-browser
   - package
