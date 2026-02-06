@@ -17,6 +17,8 @@ import {
   EuiToken,
   useEuiTheme,
   EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
@@ -75,15 +77,21 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
     const hasIcon = iconMap.has(dimension.type);
     return {
       label: (
-        <div style={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.xs }}>
-          {hasIcon && <EuiToken iconType={iconMap.get(dimension.type)!} size="s" />}
-          <EuiText size="s">{dimension.name}</EuiText>
-          {!hasIcon && (
-            <EuiBadge color="hollow" style={{ marginLeft: euiTheme.size.xs }}>
-              {dimension.type}
-            </EuiBadge>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          {hasIcon && (
+            <EuiFlexItem grow={false}>
+              <EuiToken iconType={iconMap.get(dimension.type)!} size="s" />
+            </EuiFlexItem>
           )}
-        </div>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{dimension.name}</EuiText>
+          </EuiFlexItem>
+          {!hasIcon && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{dimension.type}</EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       ),
     };
   });
@@ -206,6 +214,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
               wrapText={false}
               css={css`
                 .euiListGroupItem__text {
+                  padding: ${euiTheme.size.s} ${euiTheme.size.xs} ;
                 }
                 gap: 0px;
               `}
