@@ -25,7 +25,6 @@
       "kibanaUtils",
       "visTypeHeatmap",
       "visTypeGauge",
-      "embeddable",
       "uiActions"
     ]
   }

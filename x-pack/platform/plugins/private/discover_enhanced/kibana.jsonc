@@ -24,7 +24,6 @@
     ],
     "requiredBundles": [
       "kibanaUtils",
-      "data",
       "lens"
     ]
   }

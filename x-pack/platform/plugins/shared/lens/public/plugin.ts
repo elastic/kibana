@@ -73,7 +73,6 @@ import {
   LENS_CONTENT_TYPE,
   LENS_ITEM_LATEST_VERSION,
 } from '@kbn/lens-common/content_management/constants';
-<<<<<<< HEAD
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
@@ -84,10 +83,7 @@ import {
   VISUALIZE_EDITOR_TRIGGER,
   VISUALIZE_FIELD_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
-||||||| 636b7747b619
-=======
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
->>>>>>> upstream/main
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
