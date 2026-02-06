@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout';
-import { spaceTest } from '../../fixtures';
+import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'GenAI Settings - Page Display without Agent Builder Privileges',

@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { spaceTest, setSpaceSolution } from '../../fixtures';
+import { spaceTest, setSpaceSolution } from '../fixtures';
 
 /**
  * Tests that the Chat Experience can be changed to Classic mode

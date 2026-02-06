@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { spaceTest } from '../../fixtures';
+import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'GenAI Settings - Agent Mode Complete Flow',

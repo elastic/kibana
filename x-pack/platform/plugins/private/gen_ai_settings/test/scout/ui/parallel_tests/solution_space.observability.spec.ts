@@ -8,18 +8,18 @@
 import { expect } from '@kbn/scout';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { spaceTest, setSpaceSolution } from '../../fixtures';
+import { spaceTest, setSpaceSolution } from '../fixtures';
 
 /**
  * Tests that the Chat Experience can be changed to Agent mode
- * in a Security solution space.
+ * in a Observability solution space.
  */
 spaceTest.describe(
-  'GenAI Settings - Change Chat Experience to Agent in Security Space',
+  'GenAI Settings - Change Chat Experience to Agent in Observability Space',
   { tag: ['@ess'] },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
-      await setSpaceSolution(kbnClient, scoutSpace.id, 'security');
+      await setSpaceSolution(kbnClient, scoutSpace.id, 'oblt');
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -39,13 +39,12 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify AI Assistant nav button is visible', async () => {
-        const aiAssistantNavButton = pageObjects.genAiSettings.getAiAssistantNavButtonSecurity();
+        const aiAssistantNavButton = pageObjects.genAiSettings.getAIAssistantNavButtonObltSearch();
         await expect(aiAssistantNavButton).toBeVisible();
       });
 
       await spaceTest.step('verify AI Assistants side nav setting is visible', async () => {
-        const aiAssistantSideNavSetting =
-          pageObjects.genAiSettings.getAIAssistantSideNavButtonSecurity();
+        const aiAssistantSideNavSetting = pageObjects.genAiSettings.getAIAssistantSideNavSetting();
         await expect(aiAssistantSideNavSetting).toBeVisible();
       });
 
@@ -53,6 +52,12 @@ spaceTest.describe(
         const agentSideNavButton = pageObjects.genAiSettings.getAgentSideNavButton();
         await pageObjects.genAiSettings.getMoreMenuButton().click();
         await expect(agentSideNavButton).toBeHidden();
+      });
+
+      await spaceTest.step('verify AI Assistants side nav button is visible', async () => {
+        const aiAssistantSideNavButton =
+          pageObjects.genAiSettings.getAIAssistantSideNavButtonObservability();
+        await expect(aiAssistantSideNavButton).toBeVisible();
       });
 
       await spaceTest.step('switch to Agent mode', async () => {

@@ -6,11 +6,11 @@
  */
 
 import { expect } from '@kbn/scout';
-import { spaceTest } from '../../fixtures';
-import { AIAssistantType } from '../../fixtures/constants';
+import { spaceTest } from '../fixtures';
+import { AIAssistantType } from '../fixtures/constants';
 
 spaceTest.describe(
-  'GenAI Settings - AI Selection Modal Changes No Agent Builder Privileges',
+  'GenAI Settings - Selection Modal without Agent Builder Privileges',
   { tag: ['@ess'] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {

@@ -10,8 +10,8 @@ import {
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
   AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
-import { spaceTest } from '../../fixtures';
-import { AIAssistantType } from '../../fixtures/constants';
+import { spaceTest } from '../fixtures';
+import { AIAssistantType } from '../fixtures/constants';
 
 spaceTest.describe(
   'GenAI Settings - AI Assistant Visibility without AI Assistants Privileges',

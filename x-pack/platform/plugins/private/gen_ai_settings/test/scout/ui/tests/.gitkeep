@@ -1,2 +1,0 @@
-# This folder will contain standard/sequential Scout UI tests
-# Use this for tests that require a clean Elasticsearch state or cannot run in parallel

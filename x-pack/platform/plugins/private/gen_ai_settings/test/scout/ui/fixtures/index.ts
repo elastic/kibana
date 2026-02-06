@@ -6,14 +6,11 @@
  */
 
 import type {
-  ScoutPage,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
-  ScoutWorkerFixtures,
   BrowserAuthFixture,
-  ScoutTestFixtures,
 } from '@kbn/scout';
-import { test as baseTest, spaceTest as spaceBaseTest } from '@kbn/scout';
+import { spaceTest as spaceBaseTest } from '@kbn/scout';
 
 import type { GenAiSettingsPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
@@ -23,7 +20,6 @@ import {
   getFullAIPrivilegesRole,
 } from './services';
 
-// Re-export services for convenient access
 export * from './services';
 
 /**
@@ -35,49 +31,10 @@ export interface GenAiSettingsBrowserAuthFixture extends BrowserAuthFixture {
   loginAsFullAIPrivilegesUser: () => Promise<void>;
 }
 
-export interface GenAiSettingsTestFixtures extends ScoutTestFixtures {
-  pageObjects: GenAiSettingsPageObjects;
-  browserAuth: GenAiSettingsBrowserAuthFixture;
-}
-
 export interface GenAiSettingsParallelTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: GenAiSettingsPageObjects;
   browserAuth: GenAiSettingsBrowserAuthFixture;
 }
-
-export const test = baseTest.extend<GenAiSettingsTestFixtures, ScoutWorkerFixtures>({
-  pageObjects: async (
-    {
-      pageObjects,
-      page,
-    }: {
-      pageObjects: GenAiSettingsPageObjects;
-      page: ScoutPage;
-    },
-    use: (pageObjects: GenAiSettingsPageObjects) => Promise<void>
-  ) => {
-    const extendedPageObjects = extendPageObjects(pageObjects, page);
-    await use(extendedPageObjects);
-  },
-  browserAuth: async (
-    { browserAuth }: { browserAuth: BrowserAuthFixture },
-    use: (browserAuth: GenAiSettingsBrowserAuthFixture) => Promise<void>
-  ) => {
-    const loginAsNonAgentBuilderUser = async () =>
-      browserAuth.loginWithCustomRole(getAgentBuilderNoneRole());
-    const loginAsNonAssistantUser = async () =>
-      browserAuth.loginWithCustomRole(getAIAssistantsNoneRole());
-    const loginAsFullAIPrivilegesUser = async () =>
-      browserAuth.loginWithCustomRole(getFullAIPrivilegesRole());
-
-    await use({
-      ...browserAuth,
-      loginAsNonAgentBuilderUser,
-      loginAsNonAssistantUser,
-      loginAsFullAIPrivilegesUser,
-    });
-  },
-});
 
 export const spaceTest = spaceBaseTest.extend<
   GenAiSettingsParallelTestFixtures,

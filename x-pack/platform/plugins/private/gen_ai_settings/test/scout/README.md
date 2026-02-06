@@ -2,65 +2,164 @@
 
 This directory contains Scout (Playwright-based) functional tests for the GenAI Settings plugin.
 
-## Test Organization
+## Directory Structure
 
-- **`ui/tests/`** - Standard/sequential UI tests (for tests requiring clean state)
-- **`ui/parallel_tests/`** - Fast, parallelizable UI tests that can run independently
-- **`ui/fixtures/`** - Shared test fixtures, page objects, and helpers
-- **`ui/playwright.config.ts`** - Playwright configuration for standard test execution
-- **`ui/parallel.playwright.config.ts`** - Playwright configuration for parallel test execution
+```
+ui/
+├── fixtures/
+│   ├── index.ts                 # Test fixtures with custom auth methods
+│   ├── constants.ts             # Shared test constants
+│   ├── page_objects/
+│   │   ├── index.ts             # Page objects export
+│   │   └── gen_ai_settings_page.ts  # GenAI Settings page object
+│   └── services/
+│       ├── index.ts             # Services export
+│       ├── roles.ts             # Custom KibanaRole definitions
+│       └── spaces.ts            # Space solution helpers
+├── parallel_tests/
+│   ├── page_display.spec.ts
+│   ├── page_display.no_ab_privilege.spec.ts
+│   ├── page_display.no_assistant_privilege.spec.ts
+│   ├── ai_assistant_visibility.spec.ts
+│   ├── ai_assistant_visibility.no_assistant_privilege.spec.ts
+│   ├── selection_modal.spec.ts
+│   ├── selection_modal.no_ab_privilege.spec.ts
+│   ├── selection_modal.no_assistant_privilege.spec.ts
+│   ├── confirmation_modal.spec.ts
+│   ├── documentation_section.spec.ts
+│   ├── agent_nav_button.no_ab_privilege.spec.ts
+│   ├── agent_mode_complete_flow.spec.ts
+│   ├── solution_space.security.spec.ts
+│   ├── solution_space.observability.spec.ts
+│   └── solution_space.search.spec.ts
+└── parallel.playwright.config.ts  # Playwright configuration
+```
+
+## Naming Conventions
+
+- **Feature prefix**: `page_display`, `selection_modal`, `ai_assistant_visibility`, `solution_space`
+- **Dot notation for variants**: `.no_ab_privilege`, `.no_assistant_privilege`, `.security`, `.observability`
+- **Pattern**: `feature_name.variant.spec.ts`
+
+This follows the convention used in other Scout tests (e.g., `rules_page_header.admin.spec.ts`, `rule_details_page.viewer.spec.ts`).
 
 ## Running Tests
 
 ```bash
-# Run standard/sequential tests
-node scripts/scout test \
-  --serverUrl=http://localhost:5620 \
-  --tag @ess \
-  x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/playwright.config.ts
+# Start Kibana locally first, then run tests
 
-# Run parallel tests
-node scripts/scout test \
-  --serverUrl=http://localhost:5620 \
-  --tag @ess \
-  x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel.playwright.config.ts
+# Run all parallel tests
+node scripts/scout run-tests \
+  --stateful \
+  --config x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel.playwright.config.ts
 
-# Run specific test file
-node scripts/scout test \
-  --serverUrl=http://localhost:5620 \
-  --tag @ess \
-  x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel.playwright.config.ts \
-  --grep "chat experience"
+# Run tests with specific tag
+npx playwright test \
+  --config x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel.playwright.config.ts \
+  --grep "@ess"
 ```
+
+## Test Fixtures
+
+### `spaceTest` (Parallel Tests)
+Use `spaceTest` for parallel tests that run in isolated Kibana spaces:
+
+```typescript
+import { spaceTest } from '../fixtures';
+
+spaceTest.describe('My Test Suite', { tag: ['@ess'] }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsPrivilegedUser();
+    await pageObjects.genAiSettings.navigateTo();
+  });
+
+  spaceTest('should do something', async ({ pageObjects }) => {
+    // test implementation
+  });
+});
+```
+
+### Custom Login Methods
+
+The fixtures provide custom authentication methods for testing different privilege scenarios:
+
+- `browserAuth.loginAsPrivilegedUser()` - Full privileges (from Scout)
+- `browserAuth.loginAsNonAgentBuilderUser()` - Has AI Assistants, no Agent Builder
+- `browserAuth.loginAsNonAssistantUser()` - Has Agent Builder, no AI Assistants
+- `browserAuth.loginAsFullAIPrivilegesUser()` - Has both AI Assistants and Agent Builder
+
+## Services
+
+### `setSpaceSolution`
+Sets the solution view for a space (Security, Observability, Search, Classic):
+
+```typescript
+import { spaceTest, setSpaceSolution } from '../fixtures';
+
+spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
+  await setSpaceSolution(kbnClient, scoutSpace.id, 'security');
+});
+
+spaceTest.afterAll(async ({ scoutSpace, kbnClient }) => {
+  await setSpaceSolution(kbnClient, scoutSpace.id, 'classic');
+});
+```
+
+Available solution values: `'security'`, `'oblt'`, `'es'`, `'classic'`
 
 ## Test Coverage
 
-### Chat Experience Flow
-- Switching between Classic and Agent chat experiences
-- Confirmation modal behavior when selecting Agent mode
-- UI changes based on selected experience:
-  - Navigation control visibility
-  - Side navigation items
-  - Documentation section visibility
-  - AI Assistant Visibility setting visibility
+| Test File | Tags | Description |
+|-----------|------|-------------|
+| `page_display.spec.ts` | `@ess`, `@svl*` | Page title and nav button visibility |
+| `page_display.no_ab_privilege.spec.ts` | `@ess` | Page display without Agent Builder privilege |
+| `page_display.no_assistant_privilege.spec.ts` | `@ess` | Page display without AI Assistant privilege |
+| `ai_assistant_visibility.spec.ts` | `@ess` | AI Assistant Visibility setting behavior |
+| `ai_assistant_visibility.no_assistant_privilege.spec.ts` | `@ess` | AI Assistant Visibility without AI Assistant privilege |
+| `selection_modal.spec.ts` | `@ess` | Selection modal interactions |
+| `selection_modal.no_ab_privilege.spec.ts` | `@ess` | Selection modal without Agent Builder privilege |
+| `selection_modal.no_assistant_privilege.spec.ts` | `@ess` | Selection modal without AI Assistant privilege |
+| `confirmation_modal.spec.ts` | `@ess`, `@svl*` | Confirmation modal when switching to Agent mode |
+| `documentation_section.spec.ts` | `@ess`, `@svl*` | Documentation section visibility in Agent mode |
+| `agent_nav_button.no_ab_privilege.spec.ts` | `@ess` | Agent nav button without Agent Builder privilege |
+| `agent_mode_complete_flow.spec.ts` | `@ess`, `@svl*` | Complete Agent mode switching flow |
+| `solution_space.security.spec.ts` | `@ess` | Agent mode in Security solution space |
+| `solution_space.observability.spec.ts` | `@ess` | Agent mode in Observability solution space |
+| `solution_space.search.spec.ts` | `@ess` | Classic mode in Search solution space |
 
-### Documentation Management (Agent Mode)
-- Documentation section visibility in Agent mode
-- Installing/uninstalling documentation (with proper permissions)
-- Update availability and actions
+## Page Object Methods
 
-### Permissions
-- Feature visibility based on user capabilities
-- Read-only vs edit permissions
+Key methods in `GenAiSettingsPage`:
 
-## Page Objects
-
-- **GenAiSettingsPage** - Main GenAI Settings page interactions
-- **ChatExperienceComponent** - Chat experience dropdown and modal interactions
+| Method | Description |
+|--------|-------------|
+| `navigateTo()` | Navigate to GenAI Settings page (works in any space) |
+| `getChatExperienceField()` | Get the Chat Experience dropdown |
+| `getAIAgentNavButton()` | Get the AI Agent nav button |
+| `getAiAssistantNavButton()` | Get the AI Assistant nav button (classic) |
+| `getAiAssistantNavButtonSecurity()` | Get the AI Assistant nav button (Security) |
+| `getAIAssistantNavButtonObservability()` | Get the AI Assistant nav button (Observability) |
+| `getConfirmModalConfirmButton()` | Get confirm button in Agent mode modal |
+| `getSaveButton()` | Get the save button |
+| `getDocumentationSection()` | Get the documentation section (Agent mode only) |
 
 ## Adding New Tests
 
-1. Create a new test file in `ui/parallel_tests/`
-2. Import the test fixture from `../fixtures`
-3. Use page objects for UI interactions
-4. Add appropriate test tags (`@ess`, `@serverless`)
+1. Create a new test file in `ui/parallel_tests/` with descriptive naming:
+   - Feature tests: `feature_name.spec.ts`
+   - Privilege variants: `feature_name.no_ab_privilege.spec.ts`
+   - Solution space tests: `solution_space.solution_name.spec.ts`
+
+2. Import fixtures:
+   ```typescript
+   import { expect } from '@kbn/scout';
+   import { spaceTest, setSpaceSolution } from '../fixtures';
+   ```
+
+3. Use appropriate tags:
+   - `@ess` - ESS/Stateful deployments
+   - `@svlSecurity` - Serverless Security
+   - `@svlOblt` - Serverless Observability
+   - `@svlSearch` - Serverless Search
+
+4. Follow the existing patterns for setup/teardown and test organization

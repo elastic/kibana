@@ -8,8 +8,8 @@
 import { expect } from '@kbn/scout';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { spaceTest } from '../../fixtures';
-import { AIAssistantType } from '../../fixtures/constants';
+import { spaceTest } from '../fixtures';
+import { AIAssistantType } from '../fixtures/constants';
 
 spaceTest.describe('GenAI Settings - AI Selection Modal Changes', { tag: ['@ess'] }, () => {
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
