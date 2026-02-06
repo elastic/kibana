@@ -34,6 +34,10 @@ import * as i18n from './translations';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100, 200];
 
+const tableRowProps = {
+  'data-test-subj': 'executionEventsTableRow',
+};
+
 interface ExecutionEventsTableProps {
   ruleId: string;
 }
@@ -113,12 +117,14 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
             end={filters.state.dateRange.end}
             onTimeChange={filters.setDateRange}
             showUpdateButton={false}
+            data-test-subj="executionEventsTable-datePicker"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
 
       {/* Table with items */}
       <EuiBasicTable
+        data-test-subj="executionEventsTable"
         columns={columns}
         items={items}
         itemId={getItemId}
@@ -128,6 +134,7 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
         pagination={pagination.state}
         onChange={handleTableChange}
         tableCaption={i18n.TABLE_SUBTITLE}
+        rowProps={tableRowProps}
       />
     </EuiPanel>
   );

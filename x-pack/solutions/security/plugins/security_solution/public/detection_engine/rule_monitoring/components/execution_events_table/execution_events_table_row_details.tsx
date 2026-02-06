@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { EuiDescriptionList } from '@elastic/eui';
-import type { RuleExecutionEvent } from '../../../../../common/api/detection_engine/rule_monitoring';
-import { TextBlock } from '../basic/text/text_block';
+import { EuiCodeBlock, EuiDescriptionList } from '@elastic/eui';
+import { type RuleExecutionEvent } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 import * as i18n from './translations';
 
@@ -19,19 +18,49 @@ interface ExecutionEventsTableRowDetailsProps {
 const ExecutionEventsTableRowDetailsComponent: React.FC<ExecutionEventsTableRowDetailsProps> = ({
   item,
 }) => {
+  const listItems = [];
+
+  if (item.message) {
+    listItems.push({
+      title: i18n.EVENT_MESSAGE,
+      description: (
+        <EuiCodeBlock
+          isCopyable={true}
+          language="text"
+          overflowHeight={200}
+          paddingSize="s"
+          data-test-subj="executionEventsTable-eventMessage"
+        >
+          {item.message}
+        </EuiCodeBlock>
+      ),
+    });
+  }
+
+  if (item?.details?.metrics) {
+    listItems.push({
+      title: i18n.METRICS,
+      description: (
+        <EuiCodeBlock isCopyable={true} language="text" paddingSize="s">
+          {JSON.stringify(item.details.metrics, null, 2)}
+        </EuiCodeBlock>
+      ),
+    });
+  }
+
+  listItems.push({
+    title: i18n.RULE_EXECUTION_ID,
+    description: (
+      <EuiCodeBlock isCopyable={true} language="text" paddingSize="s">
+        {item.execution_id}
+      </EuiCodeBlock>
+    ),
+  });
   return (
     <EuiDescriptionList
+      data-test-subj="executionEventsTable-eventDetails"
       className="eui-fullWidth"
-      listItems={[
-        {
-          title: i18n.ROW_DETAILS_MESSAGE,
-          description: <TextBlock text={item.message} />,
-        },
-        {
-          title: i18n.ROW_DETAILS_JSON,
-          description: <TextBlock text={JSON.stringify(item, null, 2)} />,
-        },
-      ]}
+      listItems={listItems}
     />
   );
 };

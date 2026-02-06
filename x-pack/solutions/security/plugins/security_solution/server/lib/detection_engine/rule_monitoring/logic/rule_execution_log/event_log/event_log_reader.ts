@@ -219,9 +219,10 @@ const normalizeEvent = (rawEvent: IValidatedEvent): RuleExecutionEvent => {
   const level = normalizeLogLevel(rawEvent);
   const type = normalizeEventType(rawEvent);
   const executionId = normalizeExecutionId(rawEvent);
-  const message = normalizeEventMessage(rawEvent, type);
+  const message = rawEvent.message || '';
+  const details = normalizeEventDetails(rawEvent, type);
 
-  return { timestamp, sequence, level, type, message, execution_id: executionId };
+  return { timestamp, sequence, level, type, message, details, execution_id: executionId };
 };
 
 type RawEvent = NonNullable<IValidatedEvent>;
@@ -261,20 +262,11 @@ const normalizeEventType = (event: RawEvent): RuleExecutionEventType => {
 };
 
 const normalizeEventMessage = (event: RawEvent, type: RuleExecutionEventType): string => {
-  if (type === RuleExecutionEventTypeEnum.message) {
+  if (
+    type === RuleExecutionEventTypeEnum.message ||
+    type === RuleExecutionEventTypeEnum['status-change']
+  ) {
     return event.message || '';
-  }
-
-  if (type === RuleExecutionEventTypeEnum['status-change']) {
-    invariant(
-      event.kibana?.alert?.rule?.execution?.status,
-      'Required "kibana.alert.rule.execution.status" field is not found'
-    );
-
-    const status = event.kibana?.alert?.rule?.execution?.status;
-    const message = event.message || '';
-
-    return `Rule changed status to "${status}". ${message}`;
   }
 
   if (type === RuleExecutionEventTypeEnum['execution-metrics']) {
@@ -288,6 +280,29 @@ const normalizeEventMessage = (event: RawEvent, type: RuleExecutionEventType): s
 
   assertUnreachable(type);
   return '';
+};
+
+const normalizeEventDetails = (
+  event: RawEvent,
+  type: RuleExecutionEventType
+): Record<string, unknown> | undefined => {
+  if (type === RuleExecutionEventTypeEnum['status-change']) {
+    invariant(
+      event.kibana?.alert?.rule?.execution?.status,
+      'Required "kibana.alert.rule.execution.status" field is not found'
+    );
+    return { status: event.kibana.alert.rule.execution.status };
+  }
+
+  if (type === RuleExecutionEventTypeEnum['execution-metrics']) {
+    invariant(
+      event.kibana?.alert?.rule?.execution?.metrics,
+      'Required "kibana.alert.rule.execution.metrics" field is not found'
+    );
+    return { metrics: event.kibana.alert.rule.execution.metrics };
+  }
+
+  return undefined;
 };
 
 const normalizeExecutionId = (event: RawEvent): string => {
