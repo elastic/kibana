@@ -19,7 +19,12 @@ import { firstValueFrom } from 'rxjs';
 
 export interface GetFavoritesResponse<Metadata extends object | void = void>
   extends GetFavoritesResponseServer {
-  favoriteMetadata: Metadata extends object ? Record<string, Metadata> : never;
+  /**
+   * When the client is instantiated without metadata (`Metadata = void`), we still return an empty
+   * record for `favoriteMetadata` so callers can treat the response shape consistently, while
+   * preventing access to values.
+   */
+  favoriteMetadata: Metadata extends object ? Record<string, Metadata> : Record<string, never>;
 }
 
 type AddFavoriteRequest<Metadata extends object | void> = Metadata extends object
@@ -54,18 +59,26 @@ export class FavoritesClient<Metadata extends object | void = void>
     return firstValueFrom(this.deps.userProfile.getEnabled$());
   }
 
-  private async ifAvailablePreCheck() {
-    if (!(await this.isAvailable()))
-      throw new Error('Favorites service is not available for current user');
+  private async ifAvailablePreCheck(): Promise<boolean> {
+    return await this.isAvailable();
+  }
+
+  private getUnavailableFavoritesResponse(): GetFavoritesResponse<Metadata> {
+    const favoriteMetadata = {} as GetFavoritesResponse<Metadata>['favoriteMetadata'];
+    return { favoriteIds: [], favoriteMetadata };
   }
 
   public async getFavorites(): Promise<GetFavoritesResponse<Metadata>> {
-    await this.ifAvailablePreCheck();
+    if (!(await this.ifAvailablePreCheck())) {
+      return this.getUnavailableFavoritesResponse();
+    }
     return this.deps.http.get(`/internal/content_management/favorites/${this.favoriteObjectType}`);
   }
 
   public async addFavorite(params: AddFavoriteRequest<Metadata>): Promise<AddFavoriteResponse> {
-    await this.ifAvailablePreCheck();
+    if (!(await this.ifAvailablePreCheck())) {
+      return { favoriteIds: [] };
+    }
     return this.deps.http.post(
       `/internal/content_management/favorites/${this.favoriteObjectType}/${params.id}/favorite`,
       { body: 'metadata' in params ? JSON.stringify({ metadata: params.metadata }) : undefined }
@@ -73,7 +86,9 @@ export class FavoritesClient<Metadata extends object | void = void>
   }
 
   public async removeFavorite({ id }: { id: string }): Promise<RemoveFavoriteResponse> {
-    await this.ifAvailablePreCheck();
+    if (!(await this.ifAvailablePreCheck())) {
+      return { favoriteIds: [] };
+    }
     return this.deps.http.post(
       `/internal/content_management/favorites/${this.favoriteObjectType}/${id}/unfavorite`
     );
