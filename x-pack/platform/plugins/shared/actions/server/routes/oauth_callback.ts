@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { escapeQuotes } from '@kbn/es-query';
+import { escape } from 'lodash';
 import type { ActionsPluginsStart } from '../plugin';
 import type { ILicenseState } from '../lib';
 import { BASE_ACTION_API_PATH } from '../../common';
@@ -105,10 +105,10 @@ function generateOAuthCallbackPage({
 }): string {
   const iconColor = isSuccess ? '#00BFB3' : '#BD271E';
   const icon = isSuccess ? '✓' : '✕';
-  const sanitisedTitle = escapeQuotes(title);
-  const sanitisedHeading = escapeQuotes(heading);
-  const sanitisedMessage = escapeQuotes(message);
-  const sanitisedDetails = details ? escapeQuotes(details) : '';
+  const sanitisedTitle = escape(title);
+  const sanitisedHeading = escape(heading);
+  const sanitisedMessage = escape(message);
+  const sanitisedDetails = details ? escape(details) : '';
 
   return `
     <!DOCTYPE html>
