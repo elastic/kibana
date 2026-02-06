@@ -11,6 +11,7 @@ import { getMicrosoftDefenderEndpointConnectorType } from './microsoft_defender_
 import { getCasesWebhookConnectorType } from './cases_webhook';
 import { getEmailConnectorType } from './email';
 import { getIndexConnectorType } from './es_index';
+import { getJiraConnectorType } from './jira';
 import { getOpenAIConnectorType } from './openai';
 import { getBedrockConnectorType } from './bedrock';
 import { getGeminiConnectorType } from './gemini';
@@ -36,7 +37,6 @@ import { getSentinelOneConnectorType } from './sentinelone';
 import { getTheHiveConnectorType } from './thehive';
 import { getCrowdStrikeConnectorType } from './crowdstrike';
 import { getXSOARConnectorType } from './xsoar';
-import { getJiraConnectorType } from './jira';
 import { getJiraServiceManagementConnectorType } from './jira-service-management';
 import { getMcpConnectorType } from './mcp';
 
