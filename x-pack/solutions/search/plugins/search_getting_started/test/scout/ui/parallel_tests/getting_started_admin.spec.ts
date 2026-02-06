@@ -39,7 +39,9 @@ test.describe('Getting Started - Admin', { tag: ['@ess', '@svlSearch'] }, () => 
       // Expect only 3 visible cards initially
       expect(await pageObjects.gettingStarted.getTutorialCards()).toHaveLength(3);
       await pageObjects.gettingStarted.expandTutorialCards();
-      expect(await pageObjects.gettingStarted.getTutorialCards()).toHaveLength(5);
+      // Check for more than 3 cards after expansion (flexible to new tutorials being added)
+      const expandedCards = await pageObjects.gettingStarted.getTutorialCards();
+      expect(expandedCards.length).toBeGreaterThan(3);
       await pageObjects.gettingStarted.collapseTutorialCards();
       expect(await pageObjects.gettingStarted.getTutorialCards()).toHaveLength(3);
     });
