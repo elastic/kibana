@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useSetUrlParams } from '../../../../../components/artifact_list_page/hooks/use_set_url_params';
@@ -16,7 +16,7 @@ import {
   type ScriptsLibraryUrlParams,
 } from '../scripts_library_url_params';
 import { EndpointScriptFlyoutLoading } from './script_flyout_loading';
-import { useGetEndpointScript, usePatchEndpointScript } from '../../../../../hooks/script_library';
+import { useGetEndpointScript } from '../../../../../hooks/script_library';
 import type { EndpointScript } from '../../../../../../../common/endpoint/types';
 import type { UseScriptActionItemsProps } from '../../hooks/use_script_action_items';
 import { EndpointScriptDetailsFlyout } from '../details';
@@ -47,7 +47,6 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
     onSuccess,
     'data-test-subj': dataTestSubj,
   }) => {
-
     const toasts = useToasts();
     const isMounted = useIsMounted();
     const { selectedScriptId } = useScriptsLibraryUrlParams();
@@ -56,8 +55,7 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
       createFormState(scriptItem)
     );
 
-    const isViewingOrEditing = useMemo(() => show === 'edit' || show === 'details', [show]);
-    // const isEditForm = useMemo(() => show === 'edit', [show]);
+    const isViewingOrEditing = useMemo(() => show === 'details', [show]);
 
     const hasItemForViewOrEdit = useMemo(
       () => !!scriptItem && !!(formState.scriptItem as EndpointScript),
@@ -103,13 +101,9 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
     useEffect(() => {
       if (isViewingOrEditing && fetchScriptError) {
         toasts.addWarning(
-          show === 'edit'
-            ? flyoutLabels.flyout.flyoutEditItemFetchError(
-                fetchScriptError?.body?.message || fetchScriptError.message
-              )
-            : flyoutLabels.flyout.flyoutViewItemFetchError(
-                fetchScriptError?.body?.message || fetchScriptError.message
-              )
+          flyoutLabels.flyout.flyoutViewItemFetchError(
+            fetchScriptError?.body?.message || fetchScriptError.message
+          )
         );
         if (isMounted()) {
           setUrlParams({
@@ -125,7 +119,6 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
       queryParams,
       isMounted,
       setUrlParams,
-      show,
       toasts.addWarning,
       toasts,
     ]);
@@ -152,7 +145,6 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
             data-test-subj={dataTestSubj}
           />
         )}
-
       </EuiFlyout>
     );
   }

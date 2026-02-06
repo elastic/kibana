@@ -23,7 +23,6 @@ export const EndpointScriptDetailsFlyoutFooter = memo<EndpointScriptDetailsFlyou
       <EuiFlyoutFooter className="eui-textRight" data-test-subj={dataTestSubj}>
         <EndpointScriptDetailsActions
           data-test-subj={dataTestSubj}
-          queryParams={queryParams}
           scriptItem={scriptItem}
           onClickAction={onClickAction}
         />
