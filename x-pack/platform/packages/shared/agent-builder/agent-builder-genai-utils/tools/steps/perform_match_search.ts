@@ -34,7 +34,6 @@ export const performMatchSearch = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<PerformMatchSearchResponse> => {
-  
   // should replace `any` with `SearchRequest` type when the simplified retriever syntax is supported in @elastic/elasticsearch`
   const searchRequest: any = {
     index,

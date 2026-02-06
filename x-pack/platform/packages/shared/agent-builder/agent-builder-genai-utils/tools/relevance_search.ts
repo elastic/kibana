@@ -38,9 +38,7 @@ export const relevanceSearch = async ({
 }): Promise<RelevanceSearchResponse> => {
   const { fields } = await resolveResource({ resourceName: target, esClient });
 
-  const selectedFields = fields.filter((field) =>
-    SEARCHABLE_TEXT_FIELD_TYPES.has(field.type)
-  );
+  const selectedFields = fields.filter((field) => SEARCHABLE_TEXT_FIELD_TYPES.has(field.type));
 
   if (selectedFields.length === 0) {
     throw new Error('No searchable text fields found, aborting search.');
