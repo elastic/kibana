@@ -26,154 +26,11 @@ describe('BackgroundSearchNotifier', () => {
     jest.useRealTimers();
   });
 
-  describe('when startPolling is called', () => {
-    it('should request the in-progress sessions', async () => {
-      // Given
-      const sessionsClientMock = getSessionsClientMock({
-        find: jest.fn().mockResolvedValue({ statuses: {} }),
-        status: jest.fn().mockResolvedValue({ statuses: {} }),
-      });
-      const coreStartMock = coreMock.createStart();
-      const backgroundSearchNotifier = new BackgroundSearchNotifier(
-        sessionsClientMock,
-        coreStartMock
-      );
-      mockGetInProgressSessionIds.mockReturnValue([]);
-
-      // When
-      await backgroundSearchNotifier.startPolling(0);
-
-      // Then
-      expect(sessionsClientMock.find).toHaveBeenCalledWith({
-        filter: 'search-session.attributes.status: "in_progress"',
-      });
-    });
-
-    describe('when there are no local sessions and no server sessions', () => {
-      it('should set empty array', async () => {
-        // Given
-        const sessionsClientMock = getSessionsClientMock({
-          find: jest.fn().mockResolvedValue({ statuses: {} }),
-          status: jest.fn().mockResolvedValue({ statuses: {} }),
-        });
-        const coreStartMock = coreMock.createStart();
-        const backgroundSearchNotifier = new BackgroundSearchNotifier(
-          sessionsClientMock,
-          coreStartMock
-        );
-        mockGetInProgressSessionIds.mockReturnValue([]);
-
-        // When
-        await backgroundSearchNotifier.startPolling(0);
-
-        // Then
-        expect(mockSetInProgressSessionIds).toHaveBeenCalledWith([]);
-        expect(coreStartMock.notifications.toasts.addSuccess).not.toHaveBeenCalled();
-        expect(coreStartMock.notifications.toasts.addDanger).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('when there are no local sessions but server has in-progress sessions', () => {
-      it('should add server sessions to local tracking', async () => {
-        // Given
-        const sessionsClientMock = getSessionsClientMock({
-          find: jest.fn().mockResolvedValue({
-            statuses: {
-              'session-1': { status: 'in_progress' },
-              'session-2': { status: 'in_progress' },
-            },
-          }),
-          status: jest.fn().mockResolvedValue({ statuses: {} }),
-        });
-        const coreStartMock = coreMock.createStart();
-        const backgroundSearchNotifier = new BackgroundSearchNotifier(
-          sessionsClientMock,
-          coreStartMock
-        );
-        mockGetInProgressSessionIds.mockReturnValue([]);
-
-        // When
-        await backgroundSearchNotifier.startPolling(0);
-
-        // Then
-        expect(mockSetInProgressSessionIds).toHaveBeenCalledWith(['session-1', 'session-2']);
-        expect(coreStartMock.notifications.toasts.addSuccess).not.toHaveBeenCalled();
-        expect(coreStartMock.notifications.toasts.addDanger).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('when server has sessions including some locally tracked', () => {
-      it('should merge local and server in-progress sessions', async () => {
-        // Given
-        const sessionsClientMock = getSessionsClientMock({
-          find: jest.fn().mockResolvedValue({
-            statuses: {
-              'session-2': { status: 'in_progress' },
-              'session-3': { status: 'in_progress' },
-            },
-          }),
-          status: jest.fn().mockResolvedValue({ statuses: {} }),
-        });
-        const coreStartMock = coreMock.createStart();
-        const backgroundSearchNotifier = new BackgroundSearchNotifier(
-          sessionsClientMock,
-          coreStartMock
-        );
-        mockGetInProgressSessionIds.mockReturnValue(['session-1', 'session-2']);
-
-        // When
-        await backgroundSearchNotifier.startPolling(0);
-
-        // Then
-        expect(mockSetInProgressSessionIds).toHaveBeenCalledWith([
-          'session-1',
-          'session-2',
-          'session-3',
-        ]);
-        expect(coreStartMock.notifications.toasts.addSuccess).not.toHaveBeenCalled();
-        expect(coreStartMock.notifications.toasts.addDanger).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('when local sessions exist but are not on server', () => {
-      it('should keep local sessions for status checking', async () => {
-        // Given
-        const sessionsClientMock = getSessionsClientMock({
-          find: jest.fn().mockResolvedValue({
-            statuses: {
-              'session-3': { status: 'in_progress' },
-            },
-          }),
-          status: jest.fn().mockResolvedValue({ statuses: {} }),
-        });
-        const coreStartMock = coreMock.createStart();
-        const backgroundSearchNotifier = new BackgroundSearchNotifier(
-          sessionsClientMock,
-          coreStartMock
-        );
-        mockGetInProgressSessionIds.mockReturnValue(['session-1', 'session-2']);
-
-        // When
-        await backgroundSearchNotifier.startPolling(0);
-
-        // Then
-        expect(mockSetInProgressSessionIds).toHaveBeenCalledWith([
-          'session-1',
-          'session-2',
-          'session-3',
-        ]);
-        expect(coreStartMock.notifications.toasts.addSuccess).not.toHaveBeenCalled();
-        expect(coreStartMock.notifications.toasts.addDanger).not.toHaveBeenCalled();
-      });
-    });
-  });
-
   describe('during polling', () => {
     describe('when there are no in-progress sessions', () => {
       it('should not call status endpoint', async () => {
         // Given
         const sessionsClientMock = getSessionsClientMock({
-          find: jest.fn().mockResolvedValue({ statuses: {} }),
           status: jest.fn().mockResolvedValue({ statuses: {} }),
         });
         const coreStartMock = coreMock.createStart();
@@ -196,7 +53,6 @@ describe('BackgroundSearchNotifier', () => {
       it('should keep tracking them', async () => {
         // Given
         const sessionsClientMock = getSessionsClientMock({
-          find: jest.fn().mockResolvedValue({ statuses: {} }),
           status: jest.fn().mockResolvedValue({
             statuses: {
               'session-1': { status: 'in_progress' },
@@ -213,8 +69,7 @@ describe('BackgroundSearchNotifier', () => {
 
         // When
         await backgroundSearchNotifier.startPolling(1000);
-        jest.advanceTimersByTime(1000);
-        await Promise.resolve(); // Flush promises
+        await jest.advanceTimersByTimeAsync(1000);
 
         // Then
         expect(sessionsClientMock.status).toHaveBeenCalledWith(['session-1', 'session-2']);
@@ -228,7 +83,6 @@ describe('BackgroundSearchNotifier', () => {
       it('should show success notifications and remove from tracking', async () => {
         // Given
         const sessionsClientMock = getSessionsClientMock({
-          find: jest.fn().mockResolvedValue({ statuses: {} }),
           status: jest.fn().mockResolvedValue({
             statuses: {
               'session-1': { status: 'complete' },
@@ -241,11 +95,10 @@ describe('BackgroundSearchNotifier', () => {
           sessionsClientMock,
           coreStartMock
         );
-        // First call is for initial load, second call is during first poll, third call before second poll
+        // First call is for the initial poll, second call is for the next interval
         mockGetInProgressSessionIds
-          .mockReturnValueOnce([])
           .mockReturnValueOnce(['session-1', 'session-2'])
-          .mockReturnValue([]);
+          .mockReturnValueOnce([]);
 
         // When
         await backgroundSearchNotifier.startPolling(1000);
@@ -255,14 +108,6 @@ describe('BackgroundSearchNotifier', () => {
         // Then
         expect(mockSetInProgressSessionIds).toHaveBeenCalledWith([]);
         expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalledTimes(2);
-        expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-          title: 'Background search completed',
-          text: 'Search session session-1 has completed successfully.',
-        });
-        expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-          title: 'Background search completed',
-          text: 'Search session session-2 has completed successfully.',
-        });
         expect(coreStartMock.notifications.toasts.addDanger).not.toHaveBeenCalled();
       });
     });
@@ -271,7 +116,6 @@ describe('BackgroundSearchNotifier', () => {
       it('should show error notifications and remove from tracking', async () => {
         // Given
         const sessionsClientMock = getSessionsClientMock({
-          find: jest.fn().mockResolvedValue({ statuses: {} }),
           status: jest.fn().mockResolvedValue({
             statuses: {
               'session-1': { status: 'error' },
@@ -284,11 +128,10 @@ describe('BackgroundSearchNotifier', () => {
           sessionsClientMock,
           coreStartMock
         );
-        // First call is for initial load, second call is during first poll, third call before second poll
+        // First call is for the initial poll, second call is for the next interval
         mockGetInProgressSessionIds
-          .mockReturnValueOnce([])
           .mockReturnValueOnce(['session-1', 'session-2'])
-          .mockReturnValue([]);
+          .mockReturnValueOnce([]);
 
         // When
         await backgroundSearchNotifier.startPolling(1000);
@@ -298,14 +141,6 @@ describe('BackgroundSearchNotifier', () => {
         // Then
         expect(mockSetInProgressSessionIds).toHaveBeenCalledWith([]);
         expect(coreStartMock.notifications.toasts.addDanger).toHaveBeenCalledTimes(2);
-        expect(coreStartMock.notifications.toasts.addDanger).toHaveBeenCalledWith({
-          title: 'Background search failed',
-          text: 'Search session session-1 has failed.',
-        });
-        expect(coreStartMock.notifications.toasts.addDanger).toHaveBeenCalledWith({
-          title: 'Background search failed',
-          text: 'Search session session-2 has failed.',
-        });
         expect(coreStartMock.notifications.toasts.addSuccess).not.toHaveBeenCalled();
       });
     });
@@ -314,7 +149,6 @@ describe('BackgroundSearchNotifier', () => {
       it('should handle each status appropriately', async () => {
         // Given
         const sessionsClientMock = getSessionsClientMock({
-          find: jest.fn().mockResolvedValue({ statuses: {} }),
           status: jest.fn().mockResolvedValue({
             statuses: {
               'session-1': { status: 'in_progress' },
@@ -329,11 +163,10 @@ describe('BackgroundSearchNotifier', () => {
           sessionsClientMock,
           coreStartMock
         );
-        // First call is for initial load, second call is during first poll, third call before second poll
+        // First call is for the initial poll, second call is for the next interval
         mockGetInProgressSessionIds
-          .mockReturnValueOnce([])
           .mockReturnValueOnce(['session-1', 'session-2', 'session-3', 'session-4'])
-          .mockReturnValue(['session-1', 'session-4']);
+          .mockReturnValueOnce(['session-1', 'session-4']);
 
         // When
         await backgroundSearchNotifier.startPolling(1000);
@@ -343,15 +176,7 @@ describe('BackgroundSearchNotifier', () => {
         // Then
         expect(mockSetInProgressSessionIds).toHaveBeenCalledWith(['session-1', 'session-4']);
         expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
-        expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-          title: 'Background search completed',
-          text: 'Search session session-2 has completed successfully.',
-        });
         expect(coreStartMock.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
-        expect(coreStartMock.notifications.toasts.addDanger).toHaveBeenCalledWith({
-          title: 'Background search failed',
-          text: 'Search session session-3 has failed.',
-        });
       });
     });
 
@@ -359,7 +184,6 @@ describe('BackgroundSearchNotifier', () => {
       it('should treat them as still in-progress', async () => {
         // Given
         const sessionsClientMock = getSessionsClientMock({
-          find: jest.fn().mockResolvedValue({ statuses: {} }),
           status: jest.fn().mockResolvedValue({
             statuses: {
               'session-1': { status: 'in_progress' },
@@ -376,8 +200,7 @@ describe('BackgroundSearchNotifier', () => {
 
         // When
         await backgroundSearchNotifier.startPolling(1000);
-        jest.advanceTimersByTime(1000);
-        await Promise.resolve(); // Flush promises
+        await jest.advanceTimersByTimeAsync(1000);
 
         // Then
         expect(mockSetInProgressSessionIds).toHaveBeenCalledWith([

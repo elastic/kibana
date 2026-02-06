@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { filter, map, takeUntil, timer, mergeMap, Subject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { SearchSessionStatus, type SearchSessionStatusResponse } from '../../../common';
 import type { ISessionsClient } from '../..';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { getInProgressSessionIds, setInProgressSessionIds } from './in_progress_session';
 
 export class BackgroundSearchNotifier {
@@ -21,12 +26,6 @@ export class BackgroundSearchNotifier {
 
   public async startPolling(interval: number) {
     this.stop$ = new Subject();
-
-    const serverInProgressSession = await this.loadInProgressSessions();
-    const localInProgressSessions = getInProgressSessionIds();
-    this.updateSessions(
-      this.initializeSessions(serverInProgressSession.statuses, localInProgressSessions)
-    );
 
     timer(0, interval)
       .pipe(
@@ -47,22 +46,6 @@ export class BackgroundSearchNotifier {
 
   public stopPolling() {
     this.stop$?.next();
-  }
-
-  private loadInProgressSessions() {
-    return this.sessionsClient.find({
-      filter: 'search-session.attributes.status: "in_progress"',
-    });
-  }
-
-  private initializeSessions(
-    loadedSessions: Record<string, SearchSessionStatusResponse>,
-    localSessionIds: string[]
-  ) {
-    // Merge server in-progress sessions with local sessions (removing duplicates)
-    const serverSessionIds = Object.keys(loadedSessions);
-    const mergedSessionIds = Array.from(new Set([...localSessionIds, ...serverSessionIds]));
-    return { inProgressIds: mergedSessionIds, completedIds: [], failedIds: [] };
   }
 
   private groupSessions(
@@ -94,28 +77,52 @@ export class BackgroundSearchNotifier {
   }
 
   private showNotifications(completedIds: string[], failedIds: string[]) {
-    for (const id of completedIds) {
+    const managementUrl = this.core.application.getUrlForApp('management', {
+      deepLinkId: SEARCH_SESSIONS_MANAGEMENT_ID,
+    });
+
+    completedIds.forEach(() => {
       this.core.notifications.toasts.addSuccess({
         title: i18n.translate('data.search.sessions.backgroundSearch.completedToastTitle', {
           defaultMessage: 'Background search completed',
         }),
-        text: i18n.translate('data.search.sessions.backgroundSearch.completedToastText', {
-          defaultMessage: 'Search session {id} has completed successfully.',
-          values: { id },
-        }),
+        text: toMountPoint(
+          <FormattedMessage
+            id="data.search.sessions.backgroundSearch.completedToastText"
+            defaultMessage="Background search completed. <link>View results in Search Sessions</link>"
+            values={{
+              link: (chunks: React.ReactNode) => (
+                <EuiLink href={managementUrl} data-test-subj="backgroundSearchCompletedToastLink">
+                  {chunks}
+                </EuiLink>
+              ),
+            }}
+          />,
+          this.core
+        ),
       });
-    }
+    });
 
-    for (const id of failedIds) {
+    failedIds.forEach(() => {
       this.core.notifications.toasts.addDanger({
         title: i18n.translate('data.search.sessions.backgroundSearch.failedToastTitle', {
           defaultMessage: 'Background search failed',
         }),
-        text: i18n.translate('data.search.sessions.backgroundSearch.failedToastText', {
-          defaultMessage: 'Search session {id} has failed.',
-          values: { id },
-        }),
+        text: toMountPoint(
+          <FormattedMessage
+            id="data.search.sessions.backgroundSearch.failedToastText"
+            defaultMessage="A background search has failed. <link>Check Search Sessions</link>"
+            values={{
+              link: (chunks: React.ReactNode) => (
+                <EuiLink href={managementUrl} data-test-subj="backgroundSearchFailedToastLink">
+                  {chunks}
+                </EuiLink>
+              ),
+            }}
+          />,
+          this.core
+        ),
       });
-    }
+    });
   }
 }
