@@ -31,18 +31,18 @@ export async function run(options: CliOptions, logger: ToolingLog) {
   );
 
   // Output private location ID for use with synthetics_forge
-  logger.info('');
-  logger.info('════════════════════════════════════════════════════════════════');
-  logger.info('  SYNTHETICS PRIVATE LOCATION CREATED');
-  logger.info('════════════════════════════════════════════════════════════════');
-  logger.info(`  Private Location ID:    ${privateLocationResponse.id}`);
-  logger.info(`  Private Location Label: ${privateLocationResponse.label}`);
-  logger.info(`  Agent Policy ID:        ${agentPolicyId}`);
-  logger.info('');
-  logger.info('  To use with synthetics_forge:');
-  logger.info(`  PRIVATE_LOCATION_ID="${privateLocationResponse.id}"`);
-  logger.info('════════════════════════════════════════════════════════════════');
-  logger.info('');
+  logger.info(`
+════════════════════════════════════════════════════════════════
+  SYNTHETICS PRIVATE LOCATION CREATED
+════════════════════════════════════════════════════════════════
+  Private Location ID:    ${privateLocationResponse.id}
+  Private Location Label: ${privateLocationResponse.label}
+  Agent Policy ID:        ${agentPolicyId}
+
+  To use with synthetics_forge:
+  PRIVATE_LOCATION_ID="${privateLocationResponse.id}"
+════════════════════════════════════════════════════════════════
+`);
 
   const { list } = await fetchAgentPolicyEnrollmentToken(
     options,

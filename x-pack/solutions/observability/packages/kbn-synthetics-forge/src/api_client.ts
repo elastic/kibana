@@ -183,7 +183,7 @@ export class SyntheticsApiClient {
         return found;
       } else {
         this.log.warning(
-          `Private location ${found.id} has orphaned agent policy (${found.agentPolicyId}), deleting...`
+          `Private location ${found.id} references a deleted agent policy (${found.agentPolicyId}), recreating...`
         );
         try {
           await this.deletePrivateLocation(found.id, spaceId);

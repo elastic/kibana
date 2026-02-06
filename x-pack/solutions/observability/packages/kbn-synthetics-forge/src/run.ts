@@ -156,14 +156,15 @@ export async function cleanup(config: ForgeConfig, log: ToolingLog): Promise<Cle
     log.info('No agent policies to delete');
   }
 
-  log.info('=== CLEANUP SUMMARY ===');
-  log.info(`  Monitors deleted: ${result.monitorsDeleted}`);
-  log.info(`  Package policies deleted: ${result.packagePoliciesDeleted}`);
-  log.info(`  Private locations deleted: ${result.privateLocationsDeleted}`);
-  log.info(`  Agents unenrolled: ${result.agentsUnenrolled}`);
-  log.info(`  Agent policies deleted: ${result.agentPoliciesDeleted}`);
-
-  log.success('=== CLEANUP COMPLETE ===');
+  log.info(`
+=== CLEANUP SUMMARY ===
+  Monitors deleted: ${result.monitorsDeleted}
+  Package policies deleted: ${result.packagePoliciesDeleted}
+  Private locations deleted: ${result.privateLocationsDeleted}
+  Agents unenrolled: ${result.agentsUnenrolled}
+  Agent policies deleted: ${result.agentPoliciesDeleted}
+=== CLEANUP COMPLETE ===
+`);
   return result;
 }
 
