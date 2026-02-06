@@ -114,10 +114,10 @@ export class SyntheticsPrivateLocation {
         fields: [],
         aggs: {
           namespaces: {
-            terms: { field: `${syntheticsMonitorSavedObjectType}.namespace`, size: 1000 },
+            terms: { field: `${syntheticsMonitorSavedObjectType}.namespaces`, size: 1000 },
           },
           legacyNamespaces: {
-            terms: { field: `${legacySyntheticsMonitorTypeSingle}.namespace`, size: 1000 },
+            terms: { field: `${legacySyntheticsMonitorTypeSingle}.namespaces`, size: 1000 },
           },
         },
       });
