@@ -35,7 +35,7 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     );
     const checkEnabled = async () => {
       for (const workflow of workflows) {
-        const toggle = await pageObjects.workflowList.getWorkflowEnabledToggle(workflow.name);
+        const toggle = await pageObjects.workflowList.getWorkflowStateToggle(workflow.name);
         await expect(toggle).toBeChecked();
       }
     };
@@ -64,7 +64,7 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     );
     const checkDisabled = async () => {
       for (const workflow of workflows) {
-        const toggle = await pageObjects.workflowList.getWorkflowEnabledToggle(workflow.name);
+        const toggle = await pageObjects.workflowList.getWorkflowStateToggle(workflow.name);
         await expect(toggle).not.toBeChecked();
       }
     };
