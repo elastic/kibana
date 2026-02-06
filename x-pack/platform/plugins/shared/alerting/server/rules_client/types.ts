@@ -88,6 +88,7 @@ export interface RulesClientContext {
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
   readonly isServerless?: boolean;
+  readonly isUiamEnabled?: boolean;
 }
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;

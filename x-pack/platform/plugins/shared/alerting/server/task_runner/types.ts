@@ -158,6 +158,7 @@ export interface RuleTypeRunnerContext {
   ruleRunMetricsStore: RuleRunMetricsStore;
   spaceId: string;
   isServerless: boolean;
+  isUiamEnabled?: boolean;
 }
 
 export interface RuleRunnerErrorStackTraceLog {
@@ -192,6 +193,7 @@ export interface TaskRunnerContext {
   usageCounter?: UsageCounter;
   getEventLogClient: (request: KibanaRequest) => IEventLogClient;
   isServerless: boolean;
+  isUiamEnabled?: boolean;
 }
 
 export interface AsyncSearchClient<T extends AsyncSearchParams> {

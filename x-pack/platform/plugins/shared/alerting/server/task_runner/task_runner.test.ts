@@ -203,6 +203,7 @@ describe('Task Runner', () => {
     usageCounter: mockUsageCounter,
     isServerless: false,
     getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+    isUiamEnabled: false,
   };
 
   beforeEach(() => {

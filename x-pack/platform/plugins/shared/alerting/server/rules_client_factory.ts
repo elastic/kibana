@@ -60,6 +60,7 @@ export interface RulesClientFactoryOpts {
   uiSettings: CoreStart['uiSettings'];
   securityService: CoreStart['security'];
   isServerless: boolean;
+  isUiamEnabled: boolean;
 }
 
 export class RulesClientFactory {
@@ -87,6 +88,7 @@ export class RulesClientFactory {
   private uiSettings!: CoreStart['uiSettings'];
   private securityService!: CoreStart['security'];
   private isServerless: boolean = false;
+  private isUiamEnabled: boolean = false;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -116,6 +118,7 @@ export class RulesClientFactory {
     this.uiSettings = options.uiSettings;
     this.securityService = options.securityService;
     this.isServerless = options.isServerless;
+    this.isUiamEnabled = options.isUiamEnabled;
   }
 
   /**
@@ -203,6 +206,7 @@ export class RulesClientFactory {
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: this.uiSettings,
       isServerless: this.isServerless,
+      isUiamEnabled: this.isUiamEnabled,
 
       async getUserName() {
         const user = securityService.authc.getCurrentUser(request);
@@ -216,41 +220,31 @@ export class RulesClientFactory {
         // API key for the user, instead of having the user create it themselves, which requires api_key
         // privileges
         let createUiamApiKeyResult;
-        if (this.isServerless) {
-          try {
-            createUiamApiKeyResult = await securityService.authc.apiKeys.uiam?.grant(request, {
-              name: `uiam-${name}`,
-            });
-          } catch (err) {
-            this.logger.error(
-              `Failed to create UIAM API key for alerting rule : ${name} with error: ${err}`
-            );
-          }
+        const shouldCreateUiamApiKey = this.isServerless && this.isUiamEnabled;
+
+        if (shouldCreateUiamApiKey) {
+          createUiamApiKeyResult = await securityService.authc.apiKeys.uiam?.grant(request, {
+            name: `uiam-${name}`,
+          });
         }
 
-        let createAPIKeyResult;
-        try {
-          createAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(request, {
+        const createAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(
+          request,
+          {
             name,
             role_descriptors: {},
             metadata: { managed: true, kibana: { type: 'alerting_rule' } },
-          });
-        } catch (err) {
-          this.logger.error(
-            `Failed to create API key for alerting rule : ${name} with error: ${err}`
-          );
-        }
+          }
+        );
 
-        // TODO should we return partial success  here  if one  of the two  creations fail?
-        // we may need to check if uiam service is enabled too
-        if (!createAPIKeyResult && !createUiamApiKeyResult) {
+        if (!createAPIKeyResult || (shouldCreateUiamApiKey && !createUiamApiKeyResult)) {
           this.logger.error(`Failed to create API key for alerting rule : ${name}`);
           return { apiKeysEnabled: false };
         }
 
         return {
           apiKeysEnabled: true,
-          ...(createAPIKeyResult ? { result: createAPIKeyResult } : {}),
+          result: createAPIKeyResult,
           ...(createUiamApiKeyResult ? { uiamResult: createUiamApiKeyResult } : {}),
         };
       },

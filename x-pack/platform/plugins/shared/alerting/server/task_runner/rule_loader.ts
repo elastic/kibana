@@ -158,7 +158,7 @@ export function getFakeKibanaRequest(
 ) {
   const requestHeaders: Headers = {};
 
-  if (uiamApiKey && apiKeyTypeConfig === 'uiam') {
+  if (context.isUiamEnabled && uiamApiKey && apiKeyTypeConfig === 'uiam') {
     const [_, uiamApiKeyValue] = Buffer.from(uiamApiKey, 'base64').toString().split(':');
     requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
   } else if (apiKey) {

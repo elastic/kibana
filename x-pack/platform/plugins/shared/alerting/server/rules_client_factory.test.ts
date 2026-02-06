@@ -106,6 +106,7 @@ beforeEach(() => {
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
     isServerless: false,
+    isUiamEnabled: false,
   };
 
   rulesClientFactoryParams.actions = actionsMock.createStart();
@@ -186,6 +187,7 @@ test('creates a rules client with proper constructor arguments when security is 
     backfillClient,
     uiSettings: rulesClientFactoryParams.uiSettings,
     isServerless: false,
+    isUiamEnabled: false,
   });
 });
 
@@ -244,6 +246,7 @@ test('creates a rules client with proper constructor arguments', async () => {
     backfillClient,
     uiSettings: rulesClientFactoryParams.uiSettings,
     isServerless: false,
+    isUiamEnabled: false,
   });
 });
 
