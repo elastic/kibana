@@ -295,6 +295,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.run', {
               defaultMessage: 'Run',
             }),
+            'data-test-subj': 'runWorkflowAction',
             icon: 'play',
             description: (item: WorkflowListItemDto) =>
               getRunTooltipContent({
@@ -317,6 +318,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.edit', {
               defaultMessage: 'Edit',
             }),
+            'data-test-subj': 'editWorkflowAction',
             icon: 'pencil',
             description: i18n.translate('workflows.workflowList.edit', {
               defaultMessage: 'Edit workflow',
@@ -330,6 +332,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.clone', {
               defaultMessage: 'Clone',
             }),
+            'data-test-subj': 'cloneWorkflowAction',
             icon: 'copy',
             description: i18n.translate('workflows.workflowList.clone', {
               defaultMessage: 'Clone workflow',
@@ -345,6 +348,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.export', {
               defaultMessage: 'Export',
             }),
+            'data-test-subj': 'exportWorkflowAction',
             icon: 'export',
             description: i18n.translate('workflows.workflowList.export', {
               defaultMessage: 'Export workflow',
@@ -357,6 +361,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.delete', {
               defaultMessage: 'Delete',
             }),
+            'data-test-subj': 'deWorkflowAction',
             icon: 'trash',
             description: i18n.translate('workflows.workflowList.delete', {
               defaultMessage: 'Delete workflow',
