@@ -46,7 +46,7 @@ export const getAppDetails = (core: CoreStart) => {
   const category = match?.category;
 
   if (category) {
-    title = `[${category.label}] ${match?.title}`;
+    title = `${category.label} - ${match?.title}`;
   }
 
   return {

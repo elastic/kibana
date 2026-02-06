@@ -107,7 +107,7 @@ describe('getAppDetails', () => {
     const result = getAppDetails(coreStartMock);
 
     expect(result).toEqual({
-      title: '[Analytics] Discover',
+      title: 'Analytics - Discover',
       id: 'discover',
       url: '/app/discover',
     });
