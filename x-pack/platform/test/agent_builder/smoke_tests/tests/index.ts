@@ -40,7 +40,8 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('EIS Models', function () {
-      this.timeout(3000000); // 50 min for all EIS model tests - this won't scale well (the timeout for the CI pipeline is 50 minutes)
+      // 12 min timeout (10 min base + 20% buffer). Currently ~7 min for 13 models. Manually increase if models grow.
+      this.timeout(720000);
 
       if (eisModels.length === 0) {
         it('should skip - no EIS models discovered', function () {
