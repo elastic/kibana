@@ -238,76 +238,54 @@ export async function run(config: ForgeConfig, log: ToolingLog): Promise<ForgeOu
 
   const monitorIds: string[] = [];
 
-  if (monitorCounts.http > 0) {
-    log.info(`Creating ${monitorCounts.http} HTTP monitor(s) with concurrency ${concurrency}`);
-    const httpIndices = Array.from({ length: monitorCounts.http }, (_, i) => i);
-    const httpIds = await createMonitorsInBatches(httpIndices, concurrency, async (i) => {
-      const monitor = await client.createHttpMonitor(
-        `Scalability HTTP Monitor ${i + 1}`,
-        'https://www.elastic.co',
-        privateLocation,
-        config.spaceId,
-        [resourcePrefix]
-      );
-      return monitor.id;
-    });
-    monitorIds.push(...httpIds);
-    log.success(`Created ${httpIds.length} HTTP monitor(s)`);
-  }
+  const monitorCreationTasks = [
+    {
+      type: 'HTTP',
+      count: monitorCounts.http,
+      creator: client.createHttpMonitor.bind(client),
+      getArg: () => 'https://www.elastic.co',
+    },
+    {
+      type: 'TCP',
+      count: monitorCounts.tcp,
+      creator: client.createTcpMonitor.bind(client),
+      getArg: () => 'elastic.co:443',
+    },
+    {
+      type: 'ICMP',
+      count: monitorCounts.icmp,
+      creator: client.createIcmpMonitor.bind(client),
+      getArg: (i: number) => ICMP_HOSTS[i % ICMP_HOSTS.length],
+      extraLog: `Distributing across ${ICMP_HOSTS.length} hosts to avoid rate limiting`,
+    },
+    {
+      type: 'Browser',
+      count: monitorCounts.browser,
+      creator: client.createBrowserMonitor.bind(client),
+      getArg: () => BROWSER_SCRIPT,
+    },
+  ];
 
-  if (monitorCounts.tcp > 0) {
-    log.info(`Creating ${monitorCounts.tcp} TCP monitor(s) with concurrency ${concurrency}`);
-    const tcpIndices = Array.from({ length: monitorCounts.tcp }, (_, i) => i);
-    const tcpIds = await createMonitorsInBatches(tcpIndices, concurrency, async (i) => {
-      const monitor = await client.createTcpMonitor(
-        `Scalability TCP Monitor ${i + 1}`,
-        'elastic.co:443',
-        privateLocation,
-        config.spaceId,
-        [resourcePrefix]
-      );
-      return monitor.id;
-    });
-    monitorIds.push(...tcpIds);
-    log.success(`Created ${tcpIds.length} TCP monitor(s)`);
-  }
-
-  if (monitorCounts.icmp > 0) {
-    log.info(`Creating ${monitorCounts.icmp} ICMP monitor(s) with concurrency ${concurrency}`);
-    log.info(`Distributing across ${ICMP_HOSTS.length} hosts to avoid rate limiting`);
-    const icmpIndices = Array.from({ length: monitorCounts.icmp }, (_, i) => i);
-    const icmpIds = await createMonitorsInBatches(icmpIndices, concurrency, async (i) => {
-      const host = ICMP_HOSTS[i % ICMP_HOSTS.length];
-      const monitor = await client.createIcmpMonitor(
-        `Scalability ICMP Monitor ${i + 1}`,
-        host,
-        privateLocation,
-        config.spaceId,
-        [resourcePrefix]
-      );
-      return monitor.id;
-    });
-    monitorIds.push(...icmpIds);
-    log.success(`Created ${icmpIds.length} ICMP monitor(s)`);
-  }
-
-  if (monitorCounts.browser > 0) {
-    log.info(
-      `Creating ${monitorCounts.browser} Browser monitor(s) with concurrency ${concurrency}`
-    );
-    const browserIndices = Array.from({ length: monitorCounts.browser }, (_, i) => i);
-    const browserIds = await createMonitorsInBatches(browserIndices, concurrency, async (i) => {
-      const monitor = await client.createBrowserMonitor(
-        `Scalability Browser Monitor ${i + 1}`,
-        BROWSER_SCRIPT,
-        privateLocation,
-        config.spaceId,
-        [resourcePrefix]
-      );
-      return monitor.id;
-    });
-    monitorIds.push(...browserIds);
-    log.success(`Created ${browserIds.length} Browser monitor(s)`);
+  for (const task of monitorCreationTasks) {
+    if (task.count > 0) {
+      log.info(`Creating ${task.count} ${task.type} monitor(s) with concurrency ${concurrency}`);
+      if (task.extraLog) {
+        log.info(task.extraLog);
+      }
+      const indices = Array.from({ length: task.count }, (_, i) => i);
+      const ids = await createMonitorsInBatches(indices, concurrency, async (i) => {
+        const monitor = await task.creator(
+          `Scalability ${task.type} Monitor ${i + 1}`,
+          task.getArg(i),
+          privateLocation,
+          config.spaceId,
+          [resourcePrefix]
+        );
+        return monitor.id;
+      });
+      monitorIds.push(...ids);
+      log.success(`Created ${ids.length} ${task.type} monitor(s)`);
+    }
   }
 
   const monitors = await client.getMonitors(config.spaceId);
