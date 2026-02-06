@@ -139,6 +139,36 @@ export const datasetTypeSchema = schema.oneOf([
   ),
 ]);
 
+const dataTableLimitsSchema = schema.object(
+  {
+    rows_per_page: schema.oneOf(
+      [
+        schema.literal(10),
+        schema.literal(25),
+        schema.literal(50),
+        schema.literal(100),
+        schema.literal(250),
+        schema.literal(500),
+      ],
+      {
+        defaultValue: 100,
+        meta: {
+          description: 'The number of rows to display per page in the data table.',
+        },
+      }
+    ),
+    sample_size: schema.number({
+      min: 10,
+      max: 10000,
+      defaultValue: 500,
+      meta: {
+        description: 'The number of documents to sample for the data table.',
+      },
+    }),
+  },
+  { meta: { id: 'discoverSessionEmbeddableDataTableLimitsSchema' } }
+);
+
 const dataTableSchema = schema.object(
   {
     columns: schema.arrayOf(columnSchema, {
@@ -211,36 +241,13 @@ const dataTableSchema = schema.object(
         },
       }
     ),
-    rows_per_page: schema.oneOf(
-      [
-        schema.literal(10),
-        schema.literal(25),
-        schema.literal(50),
-        schema.literal(100),
-        schema.literal(250),
-        schema.literal(500),
-      ],
-      {
-        defaultValue: 100,
-        meta: {
-          description: 'The number of rows to display per page in the data table.',
-        },
-      }
-    ),
-    sample_size: schema.number({
-      min: 10,
-      max: 10000,
-      defaultValue: 500,
-      meta: {
-        description: 'The number of documents to sample for the data table.',
-      },
-    }),
   },
   { meta: { id: 'discoverSessionEmbeddableDataTableSchema' } }
 );
 
 const classicTabSchema = schema.allOf([
   dataTableSchema,
+  dataTableLimitsSchema,
   schema.object({
     query: schema.maybe(querySchema),
     filters: schema.arrayOf(asCodeFilterSchema, {
