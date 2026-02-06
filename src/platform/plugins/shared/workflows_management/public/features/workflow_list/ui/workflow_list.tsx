@@ -361,7 +361,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.delete', {
               defaultMessage: 'Delete',
             }),
-            'data-test-subj': 'deWorkflowAction',
+            'data-test-subj': 'deleteWorkflowAction',
             icon: 'trash',
             description: i18n.translate('workflows.workflowList.delete', {
               defaultMessage: 'Delete workflow',
