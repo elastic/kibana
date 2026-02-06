@@ -24,12 +24,14 @@ export const dataViewSpecSchema = schema.object({
   id: schema.maybe(schema.string()),
   type: schema.maybe(schema.string()),
   timeFieldName: schema.maybe(schema.string()),
+  // maxSize: 100 - aligns with filter patterns in kbn-lens-embeddable-utils config_builder schemas
   sourceFilters: schema.maybe(
     schema.arrayOf(
       schema.object({
         value: schema.string(),
         clientId: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-      })
+      }),
+      { maxSize: 100 }
     )
   ),
   fields: schema.maybe(schema.recordOf(schema.string(), fieldSpecSchema)),
@@ -52,14 +54,16 @@ export const dataViewSpecSchema = schema.object({
   allowNoIndex: schema.maybe(schema.boolean()),
   runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSchema)),
   name: schema.maybe(schema.string()),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  // maxSize: 100 - aligns with namespaces in fleet/server/types and visualizations cm_services.ts
+  namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   allowHidden: schema.maybe(schema.boolean()),
 });
 
 export const dataViewsRuntimeResponseSchema = () =>
   schema.object({
     [SERVICE_KEY]: dataViewSpecSchema,
-    fields: schema.arrayOf(schema.object(fieldSpecSchemaFields)),
+    // maxSize: 10000 - data views can have many fields; aligns with fleet/server/types items patterns
+    fields: schema.arrayOf(schema.object(fieldSpecSchemaFields), { maxSize: 10000 }),
   });
 
 export const indexPatternsRuntimeResponseSchema = () =>

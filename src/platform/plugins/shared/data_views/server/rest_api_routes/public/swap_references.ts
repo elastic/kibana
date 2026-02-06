@@ -90,7 +90,8 @@ export const swapReferencesRoute =
                 fromId: idSchema,
                 fromType: schema.maybe(schema.string()),
                 toId: idSchema,
-                forId: schema.maybe(schema.oneOf([idSchema, schema.arrayOf(idSchema)])),
+                // maxSize: 100 - batch operation IDs; aligns with reference patterns in content management
+                forId: schema.maybe(schema.oneOf([idSchema, schema.arrayOf(idSchema, { maxSize: 100 })])),
                 forType: schema.maybe(schema.string()),
                 delete: schema.maybe(schema.boolean()),
               }),
@@ -99,7 +100,8 @@ export const swapReferencesRoute =
               200: {
                 body: () =>
                   schema.object({
-                    result: schema.arrayOf(schema.object({ id: idSchema, type: schema.string() })),
+                    // maxSize: 10000 - result list; aligns with fleet/server/types items patterns
+                    result: schema.arrayOf(schema.object({ id: idSchema, type: schema.string() }), { maxSize: 10000 }),
                     deleteStatus: schema.maybe(
                       schema.object({
                         remainingRefs: schema.number(),

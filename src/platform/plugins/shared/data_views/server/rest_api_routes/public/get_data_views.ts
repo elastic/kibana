@@ -50,17 +50,20 @@ const getDataViewsRouteFactory =
     usageCollection?: UsageCounter
   ) => {
     const responseValidation = () => {
+      // maxSize: 10000 - list of all data views; aligns with fleet/server/types items patterns
       const dataViewListSchema = schema.arrayOf(
         schema.object({
           id: schema.string(),
-          namespaces: schema.maybe(schema.arrayOf(schema.string())),
+          // maxSize: 100 - aligns with namespaces in fleet/server/types and visualizations cm_services.ts
+          namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
           title: schema.string(),
           type: schema.maybe(schema.string()),
           typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           name: schema.maybe(schema.string()),
           timeFieldName: schema.maybe(schema.string()),
           managed: schema.maybe(schema.boolean()),
-        })
+        }),
+        { maxSize: 10000 }
       );
       return schema.object({ [serviceKey]: dataViewListSchema });
     };

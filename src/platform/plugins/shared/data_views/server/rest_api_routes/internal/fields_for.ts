@@ -84,17 +84,20 @@ export interface IQuery {
 
 export const querySchema = schema.object({
   pattern: schema.string(),
-  meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+  // maxSize: 50 - metadata fields; aligns with fields pattern in kbn-cloud-security-posture rules
+  meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 50 })], {
     defaultValue: [],
   }),
   type: schema.maybe(schema.string()),
   rollup_index: schema.maybe(schema.string()),
   allow_no_index: schema.maybe(schema.boolean()),
   include_unmapped: schema.maybe(schema.boolean()),
-  fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  // maxSize: 10000 - field names can be numerous in large data views
+  fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 10000 })])),
   allow_hidden: schema.maybe(schema.boolean()),
+  // maxSize: 20 - field type filters; small enum of ES field types
   field_types: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 20 })], {
       defaultValue: [],
     })
   ),
@@ -112,11 +115,14 @@ const FieldDescriptorSchema = schema.object({
   readFromDocValues: schema.boolean(),
   searchable: schema.boolean(),
   type: schema.string(),
-  esTypes: schema.maybe(schema.arrayOf(schema.string())),
+  // maxSize: 20 - ES types per field; typically 1-3
+  esTypes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
   subType: fieldSubTypeSchema,
   metadata_field: schema.maybe(schema.boolean()),
-  fixedInterval: schema.maybe(schema.arrayOf(schema.string())),
-  timeZone: schema.maybe(schema.arrayOf(schema.string())),
+  // maxSize: 10 - histogram intervals; very small array
+  fixedInterval: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+  // maxSize: 10 - time zones; very small array
+  timeZone: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
   timeSeriesMetric: schema.maybe(
     schema.oneOf([
       schema.literal('histogram'),
@@ -127,8 +133,9 @@ const FieldDescriptorSchema = schema.object({
     ])
   ),
   timeSeriesDimension: schema.maybe(schema.boolean()),
+  // maxSize: 100 for values - conflict descriptions per index; aligns with reference patterns
   conflictDescriptions: schema.maybe(
-    schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
+    schema.recordOf(schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 }))
   ),
   defaultFormatter: schema.maybe(schema.string()),
 });
@@ -143,8 +150,10 @@ export const validate: VersionedRouteValidation<any, any, any> = {
     200: {
       body: () =>
         schema.object({
-          fields: schema.arrayOf(FieldDescriptorSchema),
-          indices: schema.arrayOf(schema.string()),
+          // maxSize: 10000 - field descriptors; data views can have many fields
+          fields: schema.arrayOf(FieldDescriptorSchema, { maxSize: 10000 }),
+          // maxSize: 10000 - index names; aligns with fleet/server/types items patterns
+          indices: schema.arrayOf(schema.string(), { maxSize: 10000 }),
         }),
     },
   },

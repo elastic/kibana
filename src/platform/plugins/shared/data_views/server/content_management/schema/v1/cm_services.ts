@@ -26,15 +26,18 @@ const dataViewAttributesSchema = schema.object(
     title: schema.string(),
     type: schema.maybe(schema.literal(DataViewType.ROLLUP)),
     timeFieldName: schema.maybe(schema.string()),
+    // maxSize: 100 - aligns with filter patterns in kbn-lens-embeddable-utils config_builder schemas
     sourceFilters: schema.maybe(
       schema.arrayOf(
         schema.object({
           value: schema.string(),
           clientId: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-        })
+        }),
+        { maxSize: 100 }
       )
     ),
-    fields: schema.maybe(schema.arrayOf(fieldSpecSchema)),
+    // maxSize: 10000 - data views can have many fields; aligns with fleet/server/types items patterns
+    fields: schema.maybe(schema.arrayOf(fieldSpecSchema, { maxSize: 10000 })),
     typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     fieldFormatMap: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),
     fieldAttrs: schema.maybe(

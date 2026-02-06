@@ -35,8 +35,10 @@ const savedSearchUpdateOptionsSchema = schema.maybe(
 );
 const savedSearchSearchOptionsSchema = schema.maybe(
   schema.object({
-    searchFields: schema.maybe(schema.arrayOf(schema.string())),
-    fields: schema.maybe(schema.arrayOf(schema.string())),
+    // maxSize: 100 - aligns with searchFields in visualizations/server/content_management and event_annotation cm_services.ts
+    searchFields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+    // maxSize: 100 - aligns with fields pattern in content management schemas
+    fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   })
 );
 

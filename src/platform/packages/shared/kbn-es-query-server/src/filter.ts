@@ -145,11 +145,12 @@ const oneOfConditionSchema = conditionFieldSchema.extends({
   operator: schema.oneOf([schema.literal('is_one_of'), schema.literal('is_not_one_of')], {
     meta: { description: 'Array value comparison operators' },
   }),
+  // maxSize: 1000 - filter values; generous limit for large enums or multi-select filters
   value: schema.oneOf(
     [
-      schema.arrayOf(schema.string()),
-      schema.arrayOf(schema.number()),
-      schema.arrayOf(schema.boolean()),
+      schema.arrayOf(schema.string(), { maxSize: 1000 }),
+      schema.arrayOf(schema.number(), { maxSize: 1000 }),
+      schema.arrayOf(schema.boolean(), { maxSize: 1000 }),
     ],
     { meta: { description: 'Homogeneous array of values' } }
   ),
@@ -205,11 +206,13 @@ export const asCodeGroupFilterSchema = basePropertiesSchema.extends(
     group: schema.object(
       {
         type: schema.oneOf([schema.literal('and'), schema.literal('or')]),
+        // maxSize: 100 - nested conditions; aligns with filter patterns in kbn-lens-embeddable-utils and bounds recursion depth
         conditions: schema.arrayOf(
           schema.oneOf([
             conditionSchema,
             schema.lazy(GROUP_FILTER_ID), // Recursive reference for nested groups
-          ])
+          ]),
+          { maxSize: 100 }
         ),
       },
       { meta: { description: 'Condition or nested group filter', id: GROUP_FILTER_ID } }

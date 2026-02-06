@@ -130,7 +130,8 @@ export const fieldSpecSchemaFields = {
     })
   ),
   format: schema.maybe(serializedFieldFormatSchema),
-  esTypes: schema.maybe(schema.arrayOf(schema.string())),
+  // maxSize: 20 - Elasticsearch field types per field; typically 1-3, rarely more than a few
+  esTypes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
   scripted: schema.maybe(schema.boolean()),
   subType: schema.maybe(
     schema.object({

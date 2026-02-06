@@ -69,12 +69,14 @@ export const registerExistingIndicesPath = (router: IRouter): void => {
         validate: {
           request: {
             query: schema.object({
-              indices: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+              // maxSize: 100 - index patterns to check; aligns with fleet/server/types indices pattern
+              indices: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })]),
             }),
           },
           response: {
             200: {
-              body: () => schema.arrayOf(schema.string()),
+              // maxSize: 10000 - existing indices list; aligns with fleet/server/types items patterns
+              body: () => schema.arrayOf(schema.string(), { maxSize: 10000 }),
             },
           },
         },
