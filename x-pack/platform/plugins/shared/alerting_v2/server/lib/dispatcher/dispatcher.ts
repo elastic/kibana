@@ -44,21 +44,42 @@ export class DispatcherService implements DispatcherServiceContract {
     const startedAt = new Date();
 
     const alertEpisodes = await this.fetchAlertEpisodes(previousStartedAt);
-
     const suppressions = await this.fetchAlertEpisodeSuppressions(alertEpisodes);
 
+    const suppressedEpisodes = alertEpisodes.filter((episode) =>
+      suppressions.some(
+        (s) =>
+          s.should_suppress &&
+          s.rule_id === episode.rule_id &&
+          s.group_hash === episode.group_hash &&
+          (s.episode_id == null || s.episode_id === episode.episode_id)
+      )
+    );
+    const nonSuppressedEpisodes = alertEpisodes.filter(
+      (episode) => !suppressedEpisodes.includes(episode)
+    );
+
+    this.logger.info({
+      message: `Dispatcher processed ${alertEpisodes.length} alert episodes: ${suppressedEpisodes.length} suppressed, ${nonSuppressedEpisodes.length} not suppressed`,
+    });
+
     const now = new Date().toISOString();
+    const toFireEventAction = (alertEpisode: AlertEpisode, isSuppressed: boolean): AlertAction => ({
+      '@timestamp': now,
+      group_hash: alertEpisode.group_hash,
+      last_series_event_timestamp: alertEpisode.last_event_timestamp,
+      actor: 'system',
+      action_type: isSuppressed ? 'suppress' : 'fire',
+      rule_id: alertEpisode.rule_id,
+      source: 'internal',
+    });
+
     await this.storageService.bulkIndexDocs<AlertAction>({
       index: ALERT_ACTIONS_DATA_STREAM,
-      docs: alertEpisodes.map((alertEpisode) => ({
-        '@timestamp': now,
-        group_hash: alertEpisode.group_hash,
-        last_series_event_timestamp: alertEpisode.last_event_timestamp,
-        actor: 'system',
-        action_type: 'fire-event',
-        rule_id: alertEpisode.rule_id,
-        source: 'internal',
-      })),
+      docs: [
+        ...suppressedEpisodes.map((episode) => toFireEventAction(episode, true)),
+        ...nonSuppressedEpisodes.map((episode) => toFireEventAction(episode, false)),
+      ],
     });
 
     return { startedAt };
@@ -67,11 +88,15 @@ export class DispatcherService implements DispatcherServiceContract {
   private async fetchAlertEpisodeSuppressions(
     alertEpisodes: AlertEpisode[]
   ): Promise<AlertEpisodeSuppression[]> {
-    return queryResponseToRecords<AlertEpisodeSuppression>(
-      await this.queryService.executeQuery({
-        query: getAlertEpisodeSuppressionsQuery(alertEpisodes).query,
-      })
-    );
+    if (alertEpisodes.length === 0) {
+      return [];
+    }
+
+    const result = await this.queryService.executeQuery({
+      query: getAlertEpisodeSuppressionsQuery(alertEpisodes).query,
+    });
+
+    return queryResponseToRecords<AlertEpisodeSuppression>(result);
   }
 
   private async fetchAlertEpisodes(previousStartedAt: Date): Promise<AlertEpisode[]> {

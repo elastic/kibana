@@ -27,7 +27,7 @@ export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
           episode_id = COALESCE(episode.id, episode_id),
           episode_status = episode.status
       | DROP episode.id, rule.id, episode.status
-      | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE _index LIKE ${ALERT_ACTIONS_BACKING_INDEX} AND action_type == "fire-event" BY rule_id, group_hash
+      | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE _index LIKE ${ALERT_ACTIONS_BACKING_INDEX} AND (action_type == "fire" OR action_type == "suppress") BY rule_id, group_hash
       | WHERE (last_fired IS NULL OR last_fired < @timestamp) or (_index LIKE ${ALERT_ACTIONS_BACKING_INDEX})
       | STATS
           last_event_timestamp = MAX(@timestamp) WHERE _index LIKE ${ALERT_EVENTS_BACKING_INDEX}
@@ -38,28 +38,34 @@ export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
       | LIMIT 10000`.toRequest();
 };
 
-// expiry > now() to be adjusted to expiry > min(alertEpisodes.last_event_timestamp)
 export const getAlertEpisodeSuppressionsQuery = (alertEpisodes: AlertEpisode[]): EsqlRequest => {
-  let whereClause = esql.exp`TRUE`;
+  const minLastEventTimestamp = alertEpisodes.reduce(
+    (min, ep) => (ep.last_event_timestamp < min ? ep.last_event_timestamp : min),
+    alertEpisodes[0].last_event_timestamp
+  );
 
+  let whereClause = esql.exp`FALSE`;
   for (const alertEpisode of alertEpisodes) {
     whereClause = esql.exp`${whereClause} OR (rule_id == ${alertEpisode.rule_id} AND group_hash == ${alertEpisode.group_hash})`;
   }
 
   return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
       | WHERE ${whereClause}
-      | WHERE action_type IN ("snooze", "unsnooze", "ack", "unack", "activate", "deactivate")
-      | WHERE action_type != "snooze" OR expiry > now()
+      | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
+      | WHERE action_type != "snooze" OR expiry > ${minLastEventTimestamp}::datetime
+      | INLINE STATS
+          last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze")
+          BY rule_id, group_hash
       | STATS
-          last_snooze_action_type = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
-          last_ack_action_type = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
-          last_deactivate_action_type = LAST(action_type, @timestamp) WHERE action_type IN ("activate", "deactivate")
+          last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
+          last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
+          last_snooze_action = MAX(last_snooze_action)
         BY rule_id, group_hash, episode_id
       | EVAL should_suppress = CASE(
-          last_snooze_action_type == "snooze", true,
-          last_ack_action_type == "ack", true,
-          last_deactivate_action_type == "deactivate", true,
+          last_snooze_action == "snooze", true,
+          last_ack_action == "ack", true,
+          last_deactivate_action == "deactivate", true,
           false
-      )
+        )
       | KEEP rule_id, group_hash, episode_id, should_suppress`.toRequest();
 };
