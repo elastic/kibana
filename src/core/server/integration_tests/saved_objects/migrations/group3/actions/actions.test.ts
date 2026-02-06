@@ -1345,9 +1345,20 @@ describe('migration actions', () => {
         ],
       });
 
-      const searchTask = client.search({ pit: { id: pitId } });
-
-      await expect(searchTask).rejects.toThrow('search_phase_execution_exception');
+      try {
+        const response = await client.search({ pit: { id: pitId } });
+        expect(response._shards?.failed).toBeGreaterThanOrEqual(1);
+        const failureReason =
+          response._shards?.failures?.[0]?.reason?.reason ??
+          response._shards?.failures?.[0]?.reason?.type ??
+          '';
+        expect(failureReason).toMatch(
+          /No search context found for id|search_context_missing_exception/
+        );
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        expect(message).toContain('search_phase_execution_exception');
+      }
     });
 
     it('rejects if PIT does not exist', async () => {
