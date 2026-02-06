@@ -340,6 +340,7 @@ src/core/packages/user-settings/server-mocks @elastic/kibana-security
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
+src/platform/packages/private/kbn_mock_idp_utils @elastic/kibana-security
 src/platform/packages/private/kbn-ambient-common-types @elastic/kibana-operations
 src/platform/packages/private/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
@@ -372,7 +373,6 @@ src/platform/packages/private/kbn-lens-formula-docs @elastic/kibana-visualizatio
 src/platform/packages/private/kbn-managed-content-badge @elastic/kibana-visualizations
 src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-presentation
 src/platform/packages/private/kbn-migrator-test-kit @elastic/kibana-core
-src/platform/packages/private/kbn-mock-idp-utils @elastic/kibana-security
 src/platform/packages/private/kbn-node-libs-browser-webpack-plugin @elastic/kibana-operations
 src/platform/packages/private/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 src/platform/packages/private/kbn-panel-loader @elastic/kibana-presentation

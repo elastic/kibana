@@ -11,7 +11,7 @@ Decodes tokens that have been encoded with the `essu_dev_` prefix and CRC32 chec
 Run the script directly with Node.js:
 
 ```bash
-node src/platform/packages/private/kbn-mock-idp-utils/scripts/decode_token.js "essu_dev_YOUR_TOKEN_HERE"
+node src/platform/packages/private/kbn_mock_idp_utils/scripts/decode_token.js "essu_dev_YOUR_TOKEN_HERE"
 ```
 
 

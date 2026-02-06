@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/kibana-security'
   metadata:
-    sourceRoot: src/platform/packages/private/kbn-mock-idp-utils
+    sourceRoot: src/platform/packages/private/kbn_mock_idp_utils
 dependsOn:
   - '@kbn/dev-utils'
 tags:

@@ -2138,7 +2138,7 @@ module.exports = {
         'src/platform/test/interactive_setup_functional/**/*.{js,mjs,ts,tsx}',
 
         'packages/kbn-mock-idp-plugin/**/*.{js,mjs,ts,tsx}',
-        'src/platform/packages/private/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/private/kbn_mock_idp_utils/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-security-hardening/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
 
@@ -2201,7 +2201,7 @@ module.exports = {
         'src/platform/test/interactive_setup_functional/**/*.{ts,tsx}',
 
         'packages/kbn-mock-idp-plugin/**/*.{ts,tsx}',
-        'src/platform/packages/private/kbn-mock-idp-utils/**/*.{ts,tsx}',
+        'src/platform/packages/private/kbn_mock_idp_utils/**/*.{ts,tsx}',
         'src/platform/packages/shared/kbn-security-hardening/**/*.{ts,tsx}',
         'src/platform/packages/shared/kbn-user-profile-components/**/*.{ts,tsx}',
 

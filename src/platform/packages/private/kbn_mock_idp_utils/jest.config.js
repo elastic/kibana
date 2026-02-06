@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/private/kbn-mock-idp-utils'],
+  roots: ['<rootDir>/src/platform/packages/private/kbn_mock_idp_utils'],
 };

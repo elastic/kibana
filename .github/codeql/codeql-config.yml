@@ -92,7 +92,7 @@ paths-ignore:
   - src/platform/packages/private/kbn-get-repo-files
   - src/platform/packages/private/kbn-import-resolver
   - src/platform/packages/private/kbn-journeys
-  - src/platform/packages/private/kbn-mock-idp-utils
+  - src/platform/packages/private/kbn_mock_idp_utils
   - src/platform/packages/private/kbn-node-libs-browser-webpack-plugin
   - src/platform/packages/private/kbn-optimizer-webpack-helpers
   - src/platform/packages/private/kbn-reporting/mocks_server
