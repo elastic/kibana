@@ -12,8 +12,9 @@ import type { Observable } from 'rxjs';
 
 export type NavigationProps = Omit<
   ChromeNavigationProps,
-  'isCollapsed' | 'setWidth' | 'showLabels' | 'showSecondaryPanel'
+  'isCollapsed' | 'setWidth' | 'showLabels' | 'showSecondaryPanel' | 'userMenu'
 > & {
   showLabels$: Observable<boolean>;
   showSecondaryPanel$: Observable<boolean>;
+  userMenu$: Observable<React.ReactNode | undefined>;
 };

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { FC } from 'react';
-import { EuiButtonIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiTitle, useEuiTheme, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -19,12 +19,17 @@ import { useNestedMenu } from './use_nested_menu';
 export interface HeaderProps {
   title?: string;
   'aria-describedby'?: string;
+  showSecondaryPanel?: boolean;
+  onToggleSecondaryPanel?: (show: boolean) => void;
 }
 
-export const Header: FC<HeaderProps> = ({ title, 'aria-describedby': ariaDescribedBy }) => {
-  const { goBack } = useNestedMenu();
+export const Header: FC<HeaderProps> = ({ title, 'aria-describedby': ariaDescribedBy, showSecondaryPanel, onToggleSecondaryPanel }) => {
+  const { goBack, panelStackDepth } = useNestedMenu();
   const { euiTheme } = useEuiTheme();
   const headerStyle = useMenuHeaderStyle();
+  
+  // Only show toggle in nested panels (not root) when panel is OFF
+  const shouldShowToggle = panelStackDepth > 0 && !showSecondaryPanel && onToggleSecondaryPanel;
 
   const titleStyle = css`
     align-items: center;
@@ -34,6 +39,32 @@ export const Header: FC<HeaderProps> = ({ title, 'aria-describedby': ariaDescrib
     gap: ${euiTheme.size.s};
     ${headerStyle}
   `;
+
+  const headerContainerStyles = css`
+    display: flex;
+    align-items: center;
+    gap: ${euiTheme.size.s};
+    flex: 1;
+    min-width: 0;
+  `;
+
+  const titleWrapperStyles = css`
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  `;
+
+  const titleTextStyles = css`
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  `;
+
+  const handleToggle = () => {
+    if (onToggleSecondaryPanel) {
+      onToggleSecondaryPanel(true);
+    }
+  };
 
   return (
     <div css={titleStyle}>
@@ -46,11 +77,37 @@ export const Header: FC<HeaderProps> = ({ title, 'aria-describedby': ariaDescrib
         iconType="arrowLeft"
         onClick={goBack}
       />
-      {title && (
-        <EuiTitle size="xs">
-          <h4>{title}</h4>
-        </EuiTitle>
-      )}
+      <div css={headerContainerStyles}>
+        {title && (
+          <div css={titleWrapperStyles}>
+            <EuiTitle size="xs">
+              <h4 css={titleTextStyles}>{title}</h4>
+            </EuiTitle>
+          </div>
+        )}
+        {shouldShowToggle && (
+          <EuiToolTip
+            content={i18n.translate('core.ui.chrome.sideNavigation.toggleSecondaryPanelTooltip', {
+              defaultMessage: 'Show secondary navigation',
+            })}
+            position="right"
+          >
+            <EuiButtonIcon
+              iconType="transitionLeftIn"
+              onClick={handleToggle}
+              aria-label={i18n.translate('core.ui.chrome.sideNavigation.toggleSecondaryPanelLabel', {
+                defaultMessage: 'Show secondary navigation',
+              })}
+              size="s"
+              color="text"
+              data-test-subj="secondaryNavToggleFromPopover"
+              css={css`
+                flex-shrink: 0;
+              `}
+            />
+          </EuiToolTip>
+        )}
+      </div>
     </div>
   );
 };

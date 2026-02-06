@@ -288,14 +288,6 @@ export const SideNavCollapseButton: FC<Props> = ({
               checked={showLabels}
               onChange={(e) => onSetShowLabels(e.target.checked)}
             />
-            <EuiSpacer size="m" />
-            <EuiSwitch
-              label={i18n.translate('core.ui.chrome.sideNavigation.showSecondaryNavigationLabel', {
-                defaultMessage: 'Show secondary navigation',
-              })}
-              checked={showSecondaryPanel}
-              onChange={(e) => onSetShowSecondaryPanel(e.target.checked)}
-            />
             <EuiSpacer size="l" />
             <EuiTitle size="xs">
               <h3>

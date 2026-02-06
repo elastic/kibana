@@ -57,6 +57,9 @@ export interface ChromeNavigationProps {
   onToggleCollapsed: (isCollapsed: boolean) => void;
   onSetShowLabels: (showLabels: boolean) => void;
   onSetShowSecondaryPanel: (showSecondaryPanel: boolean) => void;
+
+  // user menu
+  userMenu$: Observable<React.ReactNode | undefined>;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
@@ -64,6 +67,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
   const dataTestSubj = useObservable(props.dataTestSubj$ ?? EMPTY, undefined);
   const feedbackUrlParams = useObservable(props.feedbackUrlParams$ ?? EMPTY, undefined);
   const isFeedbackEnabled = useObservable(props.isFeedbackEnabled$ ?? EMPTY, true);
+  const userMenu = useObservable(props.userMenu$, undefined);
 
   if (!state) {
     return null;
@@ -91,6 +95,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         onSetShowLabels={props.onSetShowLabels}
         onSetShowSecondaryPanel={props.onSetShowSecondaryPanel}
         activeItemId={activeItemId}
+        userMenu={userMenu}
         data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
       />
     </KibanaSectionErrorBoundary>

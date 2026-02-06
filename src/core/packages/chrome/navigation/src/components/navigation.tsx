@@ -86,6 +86,10 @@ export interface NavigationProps {
    */
   sidePanelFooter?: ReactNode;
   /**
+   * (optional) User menu component to display in the navigation footer.
+   */
+  userMenu?: ReactNode;
+  /**
    * (optional) data-test-subj attribute for testing purposes.
    */
   'data-test-subj'?: string;
@@ -104,6 +108,7 @@ export const Navigation = ({
   onSetShowSecondaryPanel,
   setWidth,
   sidePanelFooter,
+  userMenu,
   ...rest
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -298,7 +303,12 @@ export const Navigation = ({
                     }
                   >
                     {(closePopover, ids) => (
-                      <SideNav.SecondaryMenu title={item.label} badgeType={item.badgeType}>
+                      <SideNav.SecondaryMenu
+                        title={item.label}
+                        badgeType={item.badgeType}
+                        showSecondaryPanel={showSecondaryPanel}
+                        onToggleSecondaryPanel={!showSecondaryPanel ? onSetShowSecondaryPanel : undefined}
+                      >
                         {sections?.map((section, sectionIndex) => {
                           const firstNonEmptySectionIndex = item.sections?.findIndex(
                             (s) => s.items.length > 0
@@ -381,6 +391,8 @@ export const Navigation = ({
                           'core.ui.chrome.sideNavigation.nestedSecondaryMenuMoreTitle',
                           { defaultMessage: 'More' }
                         )}
+                        showSecondaryPanel={showSecondaryPanel}
+                        onToggleSecondaryPanel={onSetShowSecondaryPanel}
                       >
                         {({ panelNavigationInstructionsId, panelEnterSubmenuInstructionsId }) => (
                           <SideNav.NestedSecondaryMenu.Section>
@@ -418,12 +430,19 @@ export const Navigation = ({
                         )}
                       </SideNav.NestedSecondaryMenu.Panel>
                       {overflowMenuItems.filter(getHasSubmenu).map((item) => (
-                        <SideNav.NestedSecondaryMenu.Panel key={`submenu-${item.id}`} id={item.id}>
+                        <SideNav.NestedSecondaryMenu.Panel
+                          key={`submenu-${item.id}`}
+                          id={item.id}
+                          showSecondaryPanel={showSecondaryPanel}
+                          onToggleSecondaryPanel={onSetShowSecondaryPanel}
+                        >
                           {({ panelNavigationInstructionsId }) => (
                             <>
                               <SideNav.NestedSecondaryMenu.Header
                                 title={item.label}
                                 aria-describedby={panelNavigationInstructionsId}
+                                showSecondaryPanel={showSecondaryPanel}
+                                onToggleSecondaryPanel={onSetShowSecondaryPanel}
                               />
                               {item.sections?.map((section) => (
                                 <SideNav.NestedSecondaryMenu.Section
@@ -459,7 +478,7 @@ export const Navigation = ({
           )}
         </SideNav.PrimaryMenu>
 
-        <SideNav.Footer isCollapsed={!showLabels} collapseButton={collapseButton}>
+        <SideNav.Footer isCollapsed={!showLabels} collapseButton={collapseButton} userMenu={userMenu}>
           {({ footerNavigationInstructionsId }) => (
             <>
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
@@ -487,7 +506,12 @@ export const Navigation = ({
                     }
                   >
                     {(closePopover, ids) => (
-                      <SideNav.SecondaryMenu title={item.label} badgeType={item.badgeType}>
+                      <SideNav.SecondaryMenu
+                        title={item.label}
+                        badgeType={item.badgeType}
+                        showSecondaryPanel={showSecondaryPanel}
+                        onToggleSecondaryPanel={!showSecondaryPanel ? onSetShowSecondaryPanel : undefined}
+                      >
                         {sections?.map((section, sectionIndex) => {
                           const firstNonEmptySectionIndex = item.sections?.findIndex(
                             (s) => s.items.length > 0
@@ -545,6 +569,8 @@ export const Navigation = ({
                 badgeType={openerNode.badgeType}
                 isPanel
                 title={openerNode.label}
+                showSecondaryPanel={showSecondaryPanel}
+                onToggleSecondaryPanel={onSetShowSecondaryPanel}
               >
                 {openerNode.sections?.map((section, sectionIndex) => (
                   <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
@@ -576,6 +602,7 @@ export const Navigation = ({
           }}
         </SideNav.SidePanel>
       )}
+
     </div>
   );
 };

@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { SecondaryMenu } from '../secondary_menu';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { useNestedMenu } from './use_nested_menu';
-import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
+import { MAIN_PANEL_ID, NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
 export interface PanelIds {
   panelNavigationInstructionsId: string;
@@ -28,9 +28,11 @@ export interface PanelProps {
   children: PanelChildren;
   id: string;
   title?: string;
+  showSecondaryPanel?: boolean;
+  onToggleSecondaryPanel?: (show: boolean) => void;
 }
 
-export const Panel: FC<PanelProps> = ({ children, id, title }) => {
+export const Panel: FC<PanelProps> = ({ children, id, title, showSecondaryPanel, onToggleSecondaryPanel }) => {
   const { currentPanel, panelStackDepth, returnFocusId } = useNestedMenu();
   const nestedPanelTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-nestedPanel-${id}`;
   const panelNavigationInstructionsId = useGeneratedHtmlId({
@@ -93,12 +95,16 @@ export const Panel: FC<PanelProps> = ({ children, id, title }) => {
   if (currentPanel !== id) return null;
 
   if (title) {
+    // Don't show toggle in the first level "More" popover
+    const shouldShowToggle = id !== MAIN_PANEL_ID && !showSecondaryPanel;
     return (
       <SecondaryMenu
         data-test-subj={nestedPanelTestSubj}
         ref={panelRef}
         title={title}
         isPanel={false}
+        showSecondaryPanel={showSecondaryPanel}
+        onToggleSecondaryPanel={shouldShowToggle ? onToggleSecondaryPanel : undefined}
       >
         <EuiScreenReaderOnly>
           <p id={panelNavigationInstructionsId}>{navigationInstructions}</p>

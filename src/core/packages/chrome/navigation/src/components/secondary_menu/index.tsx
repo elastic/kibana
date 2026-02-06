@@ -9,8 +9,9 @@
 
 import React, { forwardRef } from 'react';
 import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
-import { EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiTitle, useEuiTheme, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 import type { BadgeType } from '../../../types';
 import { BetaBadge } from '../beta_badge';
@@ -23,6 +24,8 @@ export interface SecondaryMenuProps {
   children: ReactNode;
   isPanel?: boolean;
   title: string;
+  showSecondaryPanel?: boolean;
+  onToggleSecondaryPanel?: (show: boolean) => void;
 }
 
 interface SecondaryMenuComponent
@@ -32,7 +35,7 @@ interface SecondaryMenuComponent
 }
 
 const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
-  ({ badgeType, children, title }, ref) => {
+  ({ badgeType, children, title, isPanel, showSecondaryPanel, onToggleSecondaryPanel }, ref) => {
     const { euiTheme } = useEuiTheme();
     const headerStyle = useMenuHeaderStyle();
 
@@ -40,6 +43,22 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
       display: flex;
       align-items: center;
       gap: ${euiTheme.size.xs};
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    `;
+
+    const titleTextStyles = css`
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    `;
+
+    const headerContainerStyles = css`
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
+      width: 100%;
     `;
 
     const titleStyles = css`
@@ -48,12 +67,49 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
       border-radius: ${euiTheme.border.radius.medium};
     `;
 
+    const handleToggle = () => {
+      if (onToggleSecondaryPanel) {
+        onToggleSecondaryPanel(!showSecondaryPanel);
+      }
+    };
+
     return (
       <div ref={ref}>
         <EuiTitle css={titleStyles} size="xs">
-          <div css={titleWithBadgeStyles}>
-            <h4>{title}</h4>
-            {badgeType && <BetaBadge type={badgeType} alignment="text-bottom" />}
+          <div css={headerContainerStyles}>
+            <div css={titleWithBadgeStyles}>
+              <h4 css={titleTextStyles}>{title}</h4>
+              {badgeType && <BetaBadge type={badgeType} alignment="text-bottom" />}
+            </div>
+            {onToggleSecondaryPanel && (
+              // Show toggle in panel when panel is ON, or in popover when panel is OFF
+              ((isPanel && showSecondaryPanel) || (!isPanel && !showSecondaryPanel)) && (
+                <EuiToolTip
+                  content={i18n.translate('core.ui.chrome.sideNavigation.toggleSecondaryPanelTooltip', {
+                    defaultMessage: showSecondaryPanel
+                      ? 'Hide secondary navigation'
+                      : 'Show secondary navigation',
+                  })}
+                  position={isPanel ? 'left' : 'right'}
+                >
+                  <EuiButtonIcon
+                    iconType={showSecondaryPanel ? 'transitionLeftOut' : 'transitionLeftIn'}
+                    onClick={handleToggle}
+                    aria-label={i18n.translate('core.ui.chrome.sideNavigation.toggleSecondaryPanelLabel', {
+                      defaultMessage: showSecondaryPanel
+                        ? 'Hide secondary navigation'
+                        : 'Show secondary navigation',
+                    })}
+                    size="s"
+                    color="text"
+                    data-test-subj={isPanel ? 'secondaryNavToggle' : 'secondaryNavToggleFromPopover'}
+                    css={css`
+                      flex-shrink: 0;
+                    `}
+                  />
+                </EuiToolTip>
+              )
+            )}
           </div>
         </EuiTitle>
         {children}

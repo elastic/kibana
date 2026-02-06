@@ -1,0 +1,269 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import {
+  EuiContextMenu,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
+import type { FunctionComponent, ReactNode } from 'react';
+import React, { Fragment, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { UserMenuLink } from '@kbn/security-plugin-types-public';
+import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-components';
+
+import { getUserDisplayName, isUserAnonymous } from '../../common/model';
+import { useCurrentUser, useUserProfile } from '../components';
+
+// Import tooltip hook - we'll need to create a simple version or use inline logic
+const TOOLTIP_OFFSET = 4;
+
+type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'content'> & {
+  content?: ReactNode | ((args: { closePopover: () => void }) => ReactNode);
+};
+
+interface ContextMenuProps {
+  items: ContextMenuItem[];
+  closePopover: () => void;
+}
+
+const ContextMenuContent = ({ items, closePopover }: ContextMenuProps) => {
+  return (
+    <>
+      <EuiContextMenuPanel>
+        {items.map((item, i) => {
+          if (item.content) {
+            return (
+              <Fragment key={i}>
+                {typeof item.content === 'function' ? item.content({ closePopover }) : item.content}
+              </Fragment>
+            );
+          }
+          return (
+            <EuiContextMenuItem
+              key={i}
+              icon={item.icon}
+              size="s"
+              href={item.href}
+              data-test-subj={item['data-test-subj']}
+            >
+              {item.name}
+            </EuiContextMenuItem>
+          );
+        })}
+      </EuiContextMenuPanel>
+    </>
+  );
+};
+
+interface FooterUserMenuProps {
+  editProfileUrl: string;
+  logoutUrl: string;
+  userMenuLinks$: Observable<UserMenuLink[]>;
+}
+
+/**
+ * Footer version of the user menu component.
+ * Uses EuiButtonIcon instead of EuiHeaderSectionItemButton for consistency with footer items.
+ */
+export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
+  editProfileUrl,
+  logoutUrl,
+  userMenuLinks$,
+}) => {
+  const userMenuLinks = useObservable(userMenuLinks$, []);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { euiTheme } = useEuiTheme();
+
+  const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar,userSettings');
+  const currentUser = useCurrentUser();
+
+  const displayName = currentUser.value ? getUserDisplayName(currentUser.value) : '';
+
+  const wrapperStyles = css`
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  `;
+
+  const buttonStyles = css`
+    --high-contrast-hover-indicator-color: ${euiTheme.colors.textParagraph};
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: ${euiTheme.size.xl};
+    height: ${euiTheme.size.xl};
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: ${euiTheme.colors.text};
+    cursor: pointer;
+    border-radius: ${euiTheme.border.radius.medium};
+    transition: filter ${euiTheme.animation.fast} ease-in;
+
+    &:hover:not(:disabled) {
+      filter: brightness(0.9);
+    }
+
+    &:focus {
+      outline: solid 2px ${euiTheme.focus.color};
+      outline-offset: -2px;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  `;
+
+  const avatarContent =
+    userProfile.value ? (
+      <UserAvatar
+        user={userProfile.value.user}
+        avatar={userProfile.value.data.avatar}
+        size="m"
+        data-test-subj="footerUserMenuAvatar"
+      />
+    ) : currentUser.value && userProfile.error ? (
+      <UserAvatar user={currentUser.value} size="m" data-test-subj="footerUserMenuAvatar" />
+    ) : (
+      <EuiLoadingSpinner size="m" />
+    );
+
+  const button = (
+    <button
+      type="button"
+      aria-controls="footerUserMenu"
+      aria-expanded={isPopoverOpen}
+      aria-haspopup="true"
+      aria-label={i18n.translate('xpack.security.navControlComponent.accountMenuAriaLabel', {
+        defaultMessage: 'Account menu',
+      })}
+      onClick={() => setIsPopoverOpen((value) => (currentUser.value ? !value : false))}
+      data-test-subj="footerUserMenuButton"
+      css={buttonStyles}
+      disabled={!currentUser.value}
+    >
+      {avatarContent}
+    </button>
+  );
+
+  const items: ContextMenuItem[] = [];
+  if (userMenuLinks.length) {
+    const userMenuLinkMenuItems = userMenuLinks
+      .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
+      .map(({ label, iconType, href, content }: UserMenuLink) => ({
+        name: label,
+        icon: <EuiIcon type={iconType} size="m" />,
+        href,
+        'data-test-subj': `footerUserMenuLink__${label}`,
+        content,
+      }));
+    items.push(...userMenuLinkMenuItems);
+  }
+
+  const isAnonymous = currentUser.value ? isUserAnonymous(currentUser.value) : false;
+  const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
+
+  if (!isAnonymous && !hasCustomProfileLinks) {
+    const profileMenuItem: EuiContextMenuPanelItemDescriptor = {
+      name: (
+        <FormattedMessage
+          id="xpack.security.navControlComponent.editProfileLinkText"
+          defaultMessage="Edit profile"
+        />
+      ),
+      icon: <EuiIcon type="user" size="m" />,
+      href: editProfileUrl,
+      onClick: () => {
+        setIsPopoverOpen(false);
+      },
+      'data-test-subj': 'footerProfileLink',
+    };
+
+    items.unshift(profileMenuItem);
+  }
+
+  items.push({
+    name: isAnonymous ? (
+      <FormattedMessage
+        id="xpack.security.navControlComponent.loginLinkText"
+        defaultMessage="Log in"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.security.navControlComponent.logoutLinkText"
+        defaultMessage="Log out"
+      />
+    ),
+    icon: <EuiIcon type="exit" size="m" />,
+    href: logoutUrl,
+    'data-test-subj': 'footerLogoutLink',
+  });
+
+  const tooltipContent = i18n.translate('xpack.security.navControlComponent.accountMenuAriaLabel', {
+    defaultMessage: 'Account menu',
+  });
+
+  // Wrap button in tooltip only when popover is closed
+  const buttonWithTooltip = !isPopoverOpen ? (
+    <EuiToolTip
+      anchorProps={{
+        css: wrapperStyles,
+      }}
+      content={tooltipContent}
+      disableScreenReaderOutput
+      position="right"
+      repositionOnScroll
+      offset={TOOLTIP_OFFSET}
+    >
+      {button}
+    </EuiToolTip>
+  ) : (
+    <div css={wrapperStyles}>{button}</div>
+  );
+
+  return (
+      <EuiPopover
+        id="footerUserMenu"
+        ownFocus
+        button={buttonWithTooltip}
+        isOpen={isPopoverOpen}
+        anchorPosition="rightUp"
+        repositionOnScroll
+        closePopover={() => setIsPopoverOpen(false)}
+        panelPaddingSize="none"
+        offset={5}
+      >
+      <EuiContextMenu
+        className="chrNavControl__userMenu"
+        initialPanelId={0}
+        panels={[
+          {
+            id: 0,
+            title: displayName,
+            content: (
+              <ContextMenuContent items={items} closePopover={() => setIsPopoverOpen(false)} />
+            ),
+          },
+        ]}
+        data-test-subj="footerUserMenu"
+      />
+    </EuiPopover>
+  );
+};

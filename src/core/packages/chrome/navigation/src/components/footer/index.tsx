@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { FooterItem } from './item';
+import { FooterUserMenu } from './user_menu';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
@@ -60,6 +61,7 @@ export interface FooterProps {
   children: FooterChildren;
   isCollapsed: boolean;
   collapseButton?: ReactNode;
+  userMenu?: ReactNode;
 }
 
 interface FooterComponent
@@ -68,7 +70,7 @@ interface FooterComponent
 }
 
 const FooterBase = forwardRef<HTMLElement, FooterProps>(
-  ({ children, isCollapsed, collapseButton }, ref) => {
+  ({ children, isCollapsed, collapseButton, userMenu }, ref) => {
     const euiThemeContext = useEuiTheme();
     const isSmall = useIsWithinBreakpoints(['xs', 's']);
     const footerNavigationInstructionsId = useGeneratedHtmlId({
@@ -122,6 +124,7 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
           data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-footer`}
         >
           {renderChildren()}
+          {userMenu && !isSmall && <FooterUserMenu>{userMenu}</FooterUserMenu>}
           {!isSmall && (
             <>
               <EuiHorizontalRule margin="xs" css={wrapperStyles.collapseDivider} />

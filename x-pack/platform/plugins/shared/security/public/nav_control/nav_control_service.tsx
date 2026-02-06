@@ -21,7 +21,7 @@ import type {
 } from '@kbn/security-plugin-types-public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
-import { SecurityNavControl } from './nav_control_component';
+import { FooterUserMenu } from './footer_user_menu';
 import type { SecurityLicense } from '../../common';
 import type { SecurityApiClients } from '../components';
 import { AuthenticationProvider, SecurityApiClientsProvider } from '../components';
@@ -106,25 +106,39 @@ export class SecurityNavControlService {
   }
 
   private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
-    core.chrome.navControls.registerRight({
-      order: 4000,
-      mount: (element: HTMLElement) => {
-        ReactDOM.render(
-          core.rendering.addContext(
-            <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
-              <SecurityNavControl
-                editProfileUrl={core.http.basePath.prepend('/security/account')}
-                logoutUrl={this.logoutUrl}
-                userMenuLinks$={this.userMenuLinks$}
-              />
-            </Providers>
-          ),
-          element
-        );
+    // Register footer user menu in the navigation
+    core.chrome.sideNav.setFooterUserMenu(
+      core.rendering.addContext(
+        <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
+          <FooterUserMenu
+            editProfileUrl={core.http.basePath.prepend('/security/account')}
+            logoutUrl={this.logoutUrl}
+            userMenuLinks$={this.userMenuLinks$}
+          />
+        </Providers>
+      )
+    );
 
-        return () => ReactDOM.unmountComponentAtNode(element);
-      },
-    });
+    // Header user menu removed - profile no longer displayed in top right corner
+    // core.chrome.navControls.registerRight({
+    //   order: 4000,
+    //   mount: (element: HTMLElement) => {
+    //     ReactDOM.render(
+    //       core.rendering.addContext(
+    //         <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
+    //           <SecurityNavControl
+    //             editProfileUrl={core.http.basePath.prepend('/security/account')}
+    //             logoutUrl={this.logoutUrl}
+    //             userMenuLinks$={this.userMenuLinks$}
+    //           />
+    //         </Providers>
+    //       ),
+    //       element
+    //     );
+
+    //     return () => ReactDOM.unmountComponentAtNode(element);
+    //   },
+    // });
 
     this.navControlRegistered = true;
   }

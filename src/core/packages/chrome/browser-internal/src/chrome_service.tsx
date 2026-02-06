@@ -124,6 +124,7 @@ export class ChromeService {
     localStorage.getItem(SHOW_SECONDARY_PANEL_KEY) !== 'false'
   );
   private readonly isFeedbackBtnVisible$ = new BehaviorSubject(false);
+  private readonly footerUserMenu$ = new BehaviorSubject<ReactNode | undefined>(undefined);
   private logger: Logger;
   private isServerless = false;
 
@@ -454,6 +455,7 @@ export class ChromeService {
       showLabels$: this.showLabels$.asObservable(),
       showSecondaryPanel$: this.showSecondaryPanel$.asObservable(),
       isFeedbackEnabled$: isFeedbackEnabled,
+      userMenu$: this.footerUserMenu$.asObservable(),
     };
 
     const getProjectHeader = () => (
@@ -631,6 +633,8 @@ export class ChromeService {
             map(([isVisible, isCollapsed]) => isVisible && !isCollapsed)
           ),
         setIsFeedbackBtnVisible: (isVisible: boolean) => this.isFeedbackBtnVisible$.next(isVisible),
+        setFooterUserMenu: (userMenu: ReactNode | undefined) => this.footerUserMenu$.next(userMenu),
+        getFooterUserMenu$: () => this.footerUserMenu$.asObservable(),
       },
       getActiveSolutionNavId$: () => projectNavigation.getActiveSolutionNavId$(),
       project: {
