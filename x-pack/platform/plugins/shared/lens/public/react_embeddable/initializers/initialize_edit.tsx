@@ -229,6 +229,8 @@ export function initializeEditApi(
       closeFlyout: noop,
     }
   ) => {
+    // prevent serializing incomplete state during editing
+    internalApi.updateEditingState(true);
     // save the initial state in case it needs to revert later on
     const firstState = getState();
     const ConfigPanel = await getInlineEditor({
@@ -290,8 +292,6 @@ export function initializeEditApi(
           );
           return navigateFn();
         }
-
-        internalApi.updateEditingState(true);
 
         mountInlinePanel({
           core: startDependencies.coreStart,
