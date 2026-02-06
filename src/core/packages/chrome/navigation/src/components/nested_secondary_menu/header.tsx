@@ -98,7 +98,7 @@ export const Header: FC<HeaderProps> = ({ title, 'aria-describedby': ariaDescrib
               aria-label={i18n.translate('core.ui.chrome.sideNavigation.toggleSecondaryPanelLabel', {
                 defaultMessage: 'Show secondary navigation',
               })}
-              size="s"
+              size="xs"
               color="text"
               data-test-subj="secondaryNavToggleFromPopover"
               css={css`

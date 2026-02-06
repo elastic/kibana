@@ -100,7 +100,7 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
                         ? 'Hide secondary navigation'
                         : 'Show secondary navigation',
                     })}
-                    size="s"
+                    size="xs"
                     color="text"
                     data-test-subj={isPanel ? 'secondaryNavToggle' : 'secondaryNavToggleFromPopover'}
                     css={css`
