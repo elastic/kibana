@@ -310,6 +310,10 @@
         {
           "id": "kibDevDocsChromeAppMenu",
           "label": "App Menu"
+        },
+        {
+          "id": "kibDevDocsChromeSidebar",
+          "label": "Chrome Sidebar"
         }
       ]
     },
