@@ -33,6 +33,7 @@ import type {
   UserMessage,
   DatasourceStates,
   VisualizationState,
+  SupportedDatasourceId,
   TriggerEvent,
 } from '@kbn/lens-common';
 import {
@@ -92,13 +93,17 @@ export function getTimeZone(uiSettings: IUiSettingsClient) {
 
   return configuredTimeZone;
 }
-export function getActiveDatasourceIdFromDoc(doc?: LensDocument) {
+
+export function getActiveDatasourceIdFromDoc(doc?: LensDocument): SupportedDatasourceId | null {
   if (!doc) {
     return null;
   }
 
   const [firstDatasourceFromDoc] = Object.keys(doc.state.datasourceStates);
-  return firstDatasourceFromDoc || null;
+  if (firstDatasourceFromDoc === 'formBased' || firstDatasourceFromDoc === 'textBased') {
+    return firstDatasourceFromDoc;
+  }
+  return null;
 }
 
 export function getActiveVisualizationIdFromDoc(doc?: LensDocument) {
