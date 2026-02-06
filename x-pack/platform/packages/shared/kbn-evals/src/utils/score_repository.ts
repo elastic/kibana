@@ -316,8 +316,14 @@ export class EvaluationScoreRepository {
         const stats = await this.esClient.helpers.bulk({
           datasource: enrichedDocuments,
           onDocument: (doc) => {
+            // Documents are exported from multiple suites *and* multiple task models/connectors.
+            // Keep IDs unique across that matrix while maintaining deterministic IDs for re-runs.
+            const suiteIdPart = doc.suite?.id ?? 'unknown-suite';
+            const taskModelIdPart = doc.task.model.id;
             const docId = [
               doc.run_id,
+              suiteIdPart,
+              taskModelIdPart,
               doc.example.dataset.id,
               doc.example.id,
               doc.evaluator.name,
@@ -325,7 +331,9 @@ export class EvaluationScoreRepository {
             ].join('-');
 
             return {
-              create: {
+              // Use `index` to keep exports idempotent (Buildkite retries / reruns of the same
+              // `run_id` should not fail due to existing documents).
+              index: {
                 _index: EVALUATIONS_DATA_STREAM_ALIAS,
                 _id: docId,
               },
@@ -352,12 +360,26 @@ export class EvaluationScoreRepository {
     }
   }
 
-  async getStatsByRunId(runId: string): Promise<RunStats | null> {
+  async getStatsByRunId(
+    runId: string,
+    options?: { taskModelId?: string; suiteId?: string }
+  ): Promise<RunStats | null> {
     try {
-      const runQuery = { term: { run_id: runId } };
+      const must: Array<Record<string, unknown>> = [{ term: { run_id: runId } }];
+      if (options?.taskModelId) {
+        must.push({ term: { 'task.model.id': options.taskModelId } });
+      }
+      if (options?.suiteId) {
+        must.push({ term: { 'suite.id': options.suiteId } });
+      }
+
+      const runQuery = { bool: { must } };
 
       const metadataResponse = await this.esClient.search<EvaluationScoreDocument>({
         index: EVALUATIONS_DATA_STREAM_WILDCARD,
+        // The evaluations data stream is hidden; wildcard expansion does not include hidden
+        // indices/data streams unless explicitly requested.
+        expand_wildcards: ['open', 'hidden'],
         query: runQuery,
         size: 1,
       });
@@ -370,6 +392,7 @@ export class EvaluationScoreRepository {
 
       const aggResponse = await this.esClient.search({
         index: EVALUATIONS_DATA_STREAM_WILDCARD,
+        expand_wildcards: ['open', 'hidden'],
         size: 0,
         query: runQuery,
         aggs: {
@@ -429,16 +452,23 @@ export class EvaluationScoreRepository {
     }
   }
 
-  async getScoresByRunId(runId: string): Promise<EvaluationScoreDocument[]> {
+  async getScoresByRunId(
+    runId: string,
+    options?: { taskModelId?: string; suiteId?: string }
+  ): Promise<EvaluationScoreDocument[]> {
     try {
-      const query = {
-        bool: {
-          must: [{ term: { run_id: runId } }],
-        },
-      };
+      const must: Array<Record<string, unknown>> = [{ term: { run_id: runId } }];
+      if (options?.taskModelId) {
+        must.push({ term: { 'task.model.id': options.taskModelId } });
+      }
+      if (options?.suiteId) {
+        must.push({ term: { 'suite.id': options.suiteId } });
+      }
+      const query = { bool: { must } };
 
       const response = await this.esClient.search<EvaluationScoreDocument>({
         index: EVALUATIONS_DATA_STREAM_WILDCARD,
+        expand_wildcards: ['open', 'hidden'],
         query,
         sort: [
           { 'example.dataset.name': { order: 'asc' as const } },

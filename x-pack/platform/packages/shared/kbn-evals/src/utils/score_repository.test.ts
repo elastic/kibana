@@ -117,7 +117,7 @@ describe('EvaluationScoreRepository', () => {
     ];
 
     it('should successfully export scores when index template and datastream exist', async () => {
-      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(true as any);
+      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
       mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
       mockEsClient.helpers.bulk.mockResolvedValue({
         total: 2,
@@ -127,7 +127,7 @@ describe('EvaluationScoreRepository', () => {
 
       await repository.exportScores(mockDocuments);
 
-      expect(mockEsClient.indices.existsIndexTemplate).toHaveBeenCalled();
+      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalled();
       expect(mockEsClient.indices.getDataStream).toHaveBeenCalled();
       expect(mockEsClient.helpers.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -140,8 +140,7 @@ describe('EvaluationScoreRepository', () => {
       );
     });
 
-    it('should create index template if it does not exist', async () => {
-      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(false as any);
+    it('should upsert index template', async () => {
       mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
       mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
       mockEsClient.helpers.bulk.mockResolvedValue({
@@ -159,12 +158,12 @@ describe('EvaluationScoreRepository', () => {
         })
       );
       expect(mockLog.debug).toHaveBeenCalledWith(
-        'Created Elasticsearch index template for evaluation scores'
+        'Upserted Elasticsearch index template for evaluation scores'
       );
     });
 
     it('should create datastream if it does not exist', async () => {
-      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(true as any);
+      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
       mockEsClient.indices.getDataStream.mockRejectedValue({ statusCode: 404 });
       mockEsClient.indices.createDataStream.mockResolvedValue({} as any);
       mockEsClient.helpers.bulk.mockResolvedValue({
@@ -182,7 +181,7 @@ describe('EvaluationScoreRepository', () => {
     });
 
     it('should handle empty dataset scores', async () => {
-      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(true as any);
+      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
       mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
 
       await repository.exportScores([]);
@@ -192,7 +191,7 @@ describe('EvaluationScoreRepository', () => {
     });
 
     it('should throw error if bulk indexing fails', async () => {
-      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(true as any);
+      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
       mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
       mockEsClient.helpers.bulk.mockResolvedValue({
         total: 2,
@@ -209,7 +208,6 @@ describe('EvaluationScoreRepository', () => {
 
     it('should handle index template creation errors', async () => {
       const error = new Error('Template creation failed');
-      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(false as any);
       mockEsClient.indices.putIndexTemplate.mockRejectedValue(error);
 
       await expect(repository.exportScores(mockDocuments)).rejects.toThrow(
@@ -221,7 +219,7 @@ describe('EvaluationScoreRepository', () => {
 
     it('should handle datastream creation errors', async () => {
       const error = new Error('Datastream creation failed');
-      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(true as any);
+      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
       mockEsClient.indices.getDataStream.mockRejectedValue({ statusCode: 404 });
       mockEsClient.indices.createDataStream.mockRejectedValue(error);
 
@@ -236,7 +234,7 @@ describe('EvaluationScoreRepository', () => {
     });
 
     it('should export multiple documents for multiple evaluators', async () => {
-      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(true as any);
+      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
       mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
       mockEsClient.helpers.bulk.mockResolvedValue({
         total: 2,
@@ -251,9 +249,9 @@ describe('EvaluationScoreRepository', () => {
       expect(bulkCall.datasource[0].evaluator.name).toBe('Correctness');
       expect(bulkCall.datasource[1].evaluator.name).toBe('Groundedness');
       expect(bulkCall.onDocument(mockDocuments[0])).toEqual({
-        create: {
+        index: {
           _index: '.kibana-evaluations',
-          _id: 'run-123-dataset-1-example-1-Correctness-0',
+          _id: 'run-123-unknown-suite-llm-gateway/gpt-5.2-dataset-1-example-1-Correctness-0',
         },
       });
     });
