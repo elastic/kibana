@@ -49,13 +49,13 @@ Follow existing patterns in the target area first; below are common defaults.
 - Prefer const arrow functions
 - Prefer explicit import/exports over "*"
 - Prefer destructuring of variables, rather than property access
-- Never suppress errors with `@ts-ignore`, `@ts-expect-error`; fix the root cause.
+- Never suppress type errors with `@ts-ignore`, `@ts-expect-error`; fix the root cause.
 
 ### Linting
 `node scripts/eslint --fix $(git diff --name-only)`
+- Never suppress linting errors with `eslint-disable`; fix the root cause.
 
 ### Formatting
-- Never suppress errors with `eslint-disable`; fix the root cause.
 - Follow existing formatting in the file; do not reformat unrelated code.
 - Prefer single quotes in TS/JS unless the file uses double quotes.
 
