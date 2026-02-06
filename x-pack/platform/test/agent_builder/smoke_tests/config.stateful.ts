@@ -9,13 +9,19 @@ import { getPreconfiguredConnectorConfig } from '@kbn/gen-ai-functional-testing'
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { createStatefulTestConfig } from '../../api_integration_deployment_agnostic/default_configs/stateful.config.base';
 import { agentBuilderApiServices } from '../services/api';
+import { buildEisPreconfiguredConnectors } from './tests/eis_helpers';
 
 // EIS QA environment URL for Cloud Connected Mode
 const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
 
 // eslint-disable-next-line import/no-default-export
 export default async function (ftrContext: FtrConfigProviderContext) {
-  const preconfiguredConnectors = getPreconfiguredConnectorConfig();
+  // Merge existing preconfigured connectors with EIS model connectors
+  const preconfiguredConnectors = {
+    ...getPreconfiguredConnectorConfig(),
+    ...buildEisPreconfiguredConnectors(),
+  };
+
   const eisServerArg = `xpack.inference.elastic.url=${EIS_QA_URL}`;
 
   return createStatefulTestConfig({

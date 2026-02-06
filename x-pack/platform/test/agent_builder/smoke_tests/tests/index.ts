@@ -8,12 +8,7 @@
 import { getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { converseApiSuite } from './converse';
-import {
-  getPreDiscoveredEisModels,
-  createEisConnectors,
-  cleanupEisConnectors,
-  enableCcm,
-} from './eis_helpers';
+import { getPreDiscoveredEisModels, enableCcm } from './eis_helpers';
 
 // Environment variable for EIS CCM API key (set by CI from Vault)
 const EIS_CCM_API_KEY_ENV = 'KIBANA_EIS_CCM_API_KEY';
@@ -23,13 +18,12 @@ const eisCcmApiKey = process.env[EIS_CCM_API_KEY_ENV];
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const log = getService('log');
-  const supertest = getService('supertest');
   const es = getService('es');
 
   const eisModels = getPreDiscoveredEisModels();
 
   describe('Agent Builder - LLM Smoke tests', function () {
-    describe('Preconfigured Connectors', function () {
+    describe('Static Preconfigured Connectors (from Vault)', function () {
       this.timeout(300000);
 
       const connectors = getAvailableConnectors();
@@ -39,7 +33,7 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
-    describe('EIS Models', function () {
+    describe('EIS Models (dynamically configured)', function () {
       // 12 min timeout (10 min base + 20% buffer). Currently ~7 min for 13 models. Manually increase if models grow.
       this.timeout(720000);
 
@@ -50,8 +44,6 @@ export default function (providerContext: FtrProviderContext) {
           this.skip();
         });
       } else {
-        const connectorMap = new Map<string, string>();
-
         before(async function () {
           if (!eisCcmApiKey) {
             throw new Error(
@@ -59,31 +51,14 @@ export default function (providerContext: FtrProviderContext) {
                 `For local dev: export ${EIS_CCM_API_KEY_ENV}="$(vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"`
             );
           }
+          // Enable CCM to provision EIS endpoints - preconfigured connectors will then work
           await enableCcm(es, eisCcmApiKey, log);
-
-          // Create connectors for pre-discovered models
-          const { connectors } = await createEisConnectors(eisModels, supertest, log);
-
-          // Populate connector map for tests to use
-          for (const connector of connectors) {
-            connectorMap.set(connector.modelId, connector.connectorId);
-          }
         });
 
-        after(async function () {
-          await cleanupEisConnectors([...connectorMap.values()], supertest, log);
-        });
-
-        // Create test suites for each model using getter function for dynamic connectorId lookup
+        // Test each model using its preconfigured connector (created in config.stateful.ts)
         for (const model of eisModels) {
-          const getConnectorId = () => {
-            const connectorId = connectorMap.get(model.modelId);
-            if (!connectorId) {
-              throw new Error(`Connector not created for model ${model.modelId}`);
-            }
-            return connectorId;
-          };
-          converseApiSuite(model.modelId, getConnectorId, providerContext);
+          const connectorId = `eis-${model.modelId}`;
+          converseApiSuite(model.modelId, connectorId, providerContext);
         }
       }
     });

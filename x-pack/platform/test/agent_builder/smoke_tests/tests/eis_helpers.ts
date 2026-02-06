@@ -10,7 +10,6 @@ import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type SuperTest from 'supertest';
 
 // Path to pre-discovered EIS models JSON file (created by CI "Discover EIS Models" step)
 const EIS_MODELS_PATH = resolve(REPO_ROOT, 'target/eis_models.json');
@@ -20,10 +19,7 @@ export interface DiscoveredModel {
   modelId: string;
 }
 
-export interface EisModel extends DiscoveredModel {
-  connectorId: string;
-}
-
+// Reads pre-discovered EIS models from JSON file. Returns empty array if file doesn't exist.
 export const getPreDiscoveredEisModels = (): DiscoveredModel[] => {
   if (!existsSync(EIS_MODELS_PATH)) {
     return [];
@@ -36,11 +32,37 @@ export const getPreDiscoveredEisModels = (): DiscoveredModel[] => {
   }
 };
 
+/**
+ * Builds preconfigured connectors for EIS models.
+ * These connectors reference EIS inference endpoints that will exist once CCM is enabled.
+ */
+export const buildEisPreconfiguredConnectors = (): Record<string, unknown> => {
+  const models = getPreDiscoveredEisModels();
+  const connectors: Record<string, unknown> = {};
+
+  for (const model of models) {
+    const connectorId = `eis-${model.modelId}`;
+    connectors[connectorId] = {
+      name: `EIS ${model.modelId}`,
+      actionTypeId: '.inference',
+      exposeConfig: true,
+      config: {
+        provider: 'elastic',
+        taskType: 'chat_completion',
+        inferenceId: model.inferenceId,
+      },
+      secrets: {},
+    };
+  }
+
+  return connectors;
+};
+
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
  * Enables Cloud Connected Mode (CCM) for EIS and waits for endpoints to be available.
- * This makes EIS inference endpoints available in Elasticsearch.
+ * Once CCM is enabled, EIS auto-provisions inference endpoints that preconfigured connectors reference.
  */
 export const enableCcm = async (es: Client, apiKey: string, log: ToolingLog): Promise<void> => {
   log.info('[EIS] Enabling Cloud Connected Mode...');
@@ -73,67 +95,5 @@ export const enableCcm = async (es: Client, apiKey: string, log: ToolingLog): Pr
     }
   }
 
-  log.warning('[EIS] ⚠️ No EIS endpoints found after waiting - connector creation may fail');
-};
-
-// Creates inference connectors for discovered EIS models
-export const createEisConnectors = async (
-  models: Array<{ inferenceId: string; modelId: string }>,
-  supertest: SuperTest.Agent,
-  log: ToolingLog
-): Promise<{ connectors: EisModel[]; connectorIds: string[] }> => {
-  log.info(`[EIS] Creating connectors for ${models.length} models...`);
-
-  const connectors: EisModel[] = [];
-  const connectorIds: string[] = [];
-
-  for (const model of models) {
-    try {
-      const { body } = await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'true')
-        .send({
-          name: `eis-${model.modelId}`,
-          connector_type_id: '.inference',
-          config: {
-            provider: 'elastic',
-            taskType: 'chat_completion',
-            inferenceId: model.inferenceId,
-          },
-          secrets: {},
-        })
-        .expect(200);
-
-      connectorIds.push(body.id);
-      connectors.push({
-        inferenceId: model.inferenceId,
-        modelId: model.modelId,
-        connectorId: body.id,
-      });
-    } catch (error) {
-      log.error(`[EIS] Failed to create connector for ${model.modelId}: ${error}`);
-    }
-  }
-
-  log.info(`[EIS] ✅ Created ${connectors.length}/${models.length} connectors`);
-  return { connectors, connectorIds };
-};
-
-// Deletes connectors created during test setup
-export const cleanupEisConnectors = async (
-  connectorIds: string[],
-  supertest: SuperTest.Agent,
-  log: ToolingLog
-): Promise<void> => {
-  if (connectorIds.length === 0) return;
-
-  log.info(`[EIS] Cleaning up ${connectorIds.length} connectors...`);
-  for (const id of connectorIds) {
-    try {
-      await supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'true');
-    } catch {
-      // ignore cleanup errors
-    }
-  }
-  log.info('[EIS] ✅ Cleanup complete');
+  log.warning('[EIS] ⚠️ No EIS endpoints found after waiting');
 };
