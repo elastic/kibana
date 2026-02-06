@@ -85,7 +85,7 @@ export const HelpPopover: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [actions.currentQuery, data.dataViews, http]);
+  }, [actions?.currentQuery, data.dataViews, http]);
 
   const { queryForRecommendedQueries, timeFieldName, categorizationField } = useMemo(() => {
     if (adHocDataview) {
