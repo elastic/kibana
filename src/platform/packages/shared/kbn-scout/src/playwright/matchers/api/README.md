@@ -106,6 +106,9 @@ expect(exists).toBe(true); // ✅ be explicit
 
 expect(response.apiKey).not.toBeDefined(); // ❌ not available
 expect(response.apiKey).toBeUndefined(); // ✅ preferred by playwright
+
+expect(value).not.toBeNull(); // ❌ not available
+expect(value).toBe(true); // ✅ be explicit
 ```
 
 **UI-specific matchers** like `toBeVisible`, `toBeEnabled`, `toHaveAttribute`, etc. are not available for API tests.

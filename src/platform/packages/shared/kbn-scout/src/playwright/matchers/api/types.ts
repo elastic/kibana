@@ -65,7 +65,7 @@ export interface GenericMatchers {
     toThrow(expected?: unknown): Promise<void>;
   };
 
-  not: Omit<GenericMatchers, 'not' | 'toBeDefined' | 'rejects'>;
+  not: Omit<GenericMatchers, 'not' | 'toBeDefined' | 'toBeNull' | 'rejects'>;
 }
 
 /**
@@ -87,7 +87,7 @@ export interface ResponseMatchers {
  */
 export type Matchers = GenericMatchers &
   ResponseMatchers & {
-    not: Omit<GenericMatchers, 'not' | 'toBeDefined' | 'rejects'>;
+    not: Omit<GenericMatchers, 'not' | 'toBeDefined' | 'toBeNull' | 'rejects'>;
   };
 
 /**

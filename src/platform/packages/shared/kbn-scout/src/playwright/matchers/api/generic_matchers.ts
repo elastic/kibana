@@ -54,7 +54,6 @@ export function createGenericMatchers(actual: unknown, options?: ExpectOptions):
         base.not.toMatchObject(expected)
       ),
       toMatch: wrapMatcher((expected: string | RegExp) => base.not.toMatch(expected)),
-      toBeNull: wrapMatcher(() => base.not.toBeNull()),
       toBeCloseTo: wrapMatcher((expected: number, precision?: number) =>
         base.not.toBeCloseTo(expected, precision)
       ),
