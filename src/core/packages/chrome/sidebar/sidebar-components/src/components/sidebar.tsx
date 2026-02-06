@@ -39,7 +39,7 @@ export function Sidebar(props: SidebarProps) {
   }
 
   return (
-    <SidebarPanel>
+    <SidebarPanel resetKey={currentAppId}>
       <SidebarAppRenderer
         key={currentAppId}
         appId={currentAppId}
