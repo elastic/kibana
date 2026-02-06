@@ -22,7 +22,7 @@ spec:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-fips'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       repository: elastic/kibana
-      branch_configuration: main 9.1 8.19
+      branch_configuration: main 8.19
       default_branch: main
       pipeline_file: .buildkite/pipelines/fips/fips_pipeline.sh
       skip_intermediate_builds: false
