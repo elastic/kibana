@@ -12,7 +12,6 @@ import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react'
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiHorizontalRule,
   EuiScreenReaderOnly,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -39,12 +38,6 @@ const getFooterWrapperStyles = (euiThemeContext: UseEuiTheme, isCollapsed: boole
       gap: ${theme.size.xs};
       justify-content: center;
       padding-top: ${isCollapsed ? theme.size.s : theme.size.m};
-
-      ${getHighContrastSeparator(euiThemeContext, { side: 'top' })}
-    `,
-    collapseDivider: css`
-      position: relative;
-      background-color: transparent;
 
       ${getHighContrastSeparator(euiThemeContext, { side: 'top' })}
     `,
@@ -125,12 +118,6 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
         >
           {renderChildren()}
           {userMenu && !isSmall && <FooterUserMenu>{userMenu}</FooterUserMenu>}
-          {!isSmall && (
-            <>
-              <EuiHorizontalRule margin="xs" css={wrapperStyles.collapseDivider} />
-              {collapseButton}
-            </>
-          )}
         </footer>
       </>
     );

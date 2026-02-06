@@ -60,6 +60,7 @@ const ContextMenuContent = ({ items, closePopover }: ContextMenuProps) => {
               icon={item.icon}
               size="s"
               href={item.href}
+              onClick={item.onClick}
               data-test-subj={item['data-test-subj']}
             >
               {item.name}
@@ -164,22 +165,42 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
   );
 
   const items: ContextMenuItem[] = [];
-  if (userMenuLinks.length) {
-    const userMenuLinkMenuItems = userMenuLinks
-      .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
-      .map(({ label, iconType, href, content }: UserMenuLink) => ({
-        name: label,
-        icon: <EuiIcon type={iconType} size="m" />,
-        href,
-        'data-test-subj': `footerUserMenuLink__${label}`,
-        content,
-      }));
-    items.push(...userMenuLinkMenuItems);
-  }
+  
+  // Add Navigation preferences menu item first
+  items.push({
+    name: (
+      <FormattedMessage
+        id="xpack.security.navControlComponent.navigationPreferencesLinkText"
+        defaultMessage="Navigation preferences"
+      />
+    ),
+    icon: <EuiIcon type="brush" size="m" />,
+    onClick: () => {
+      setIsPopoverOpen(false);
+      // Use requestAnimationFrame to ensure DOM is ready, then try multiple approaches
+      requestAnimationFrame(() => {
+        // First try: call global function directly
+        if (typeof (window as any).__openNavigationPreferencesModal === 'function') {
+          try {
+            (window as any).__openNavigationPreferencesModal();
+            return;
+          } catch (e) {
+            // If direct call fails, try event
+          }
+        }
+        // Fallback: dispatch custom event
+        const event = new CustomEvent('openNavigationPreferencesModal', { bubbles: true });
+        window.dispatchEvent(event);
+        document.dispatchEvent(event);
+      });
+    },
+    'data-test-subj': 'footerNavigationPreferencesLink',
+  });
 
   const isAnonymous = currentUser.value ? isUserAnonymous(currentUser.value) : false;
   const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
 
+  // Add Edit profile as second item
   if (!isAnonymous && !hasCustomProfileLinks) {
     const profileMenuItem: EuiContextMenuPanelItemDescriptor = {
       name: (
@@ -196,7 +217,21 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
       'data-test-subj': 'footerProfileLink',
     };
 
-    items.unshift(profileMenuItem);
+    items.push(profileMenuItem);
+  }
+
+  // Add user menu links after Navigation preferences and Edit profile
+  if (userMenuLinks.length) {
+    const userMenuLinkMenuItems = userMenuLinks
+      .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
+      .map(({ label, iconType, href, content }: UserMenuLink) => ({
+        name: label,
+        icon: <EuiIcon type={iconType} size="m" />,
+        href,
+        'data-test-subj': `footerUserMenuLink__${label}`,
+        content,
+      }));
+    items.push(...userMenuLinkMenuItems);
   }
 
   items.push({

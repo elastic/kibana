@@ -29,7 +29,7 @@ import {
 import type { DropResult } from '@hello-pangea/dnd';
 import { css } from '@emotion/react';
 import type { FC } from 'react';
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PRIMARY_NAVIGATION_ID, TOOLTIP_OFFSET } from '../constants';
 import type { MenuItem } from '../../types';
@@ -142,7 +142,7 @@ export const SideNavCollapseButton: FC<Props> = ({
   });
 
   const closeModal = () => setIsModalOpen(false);
-  const openModal = () => {
+  const openModal = useCallback(() => {
     // Sync state when opening modal - load current preferences
     const NAV_ITEMS_ORDER_KEY = 'core.chrome.sideNav.itemsOrder';
     const NAV_ITEMS_VISIBILITY_KEY = 'core.chrome.sideNav.itemsVisibility';
@@ -184,7 +184,30 @@ export const SideNavCollapseButton: FC<Props> = ({
 
     setNavItemsConfig([...lockedItems, ...sortedUnlocked]);
     setIsModalOpen(true);
-  };
+  }, [primaryItems, isLocked]);
+
+  // Expose openModal function globally and listen for custom event
+  useEffect(() => {
+    // Set the global function immediately
+    (window as any).__openNavigationPreferencesModal = openModal;
+    
+    const handleOpenModalEvent = (e?: Event) => {
+      e?.preventDefault();
+      e?.stopPropagation();
+      openModal();
+    };
+    
+    // Listen for custom event on window (capture phase to catch early)
+    window.addEventListener('openNavigationPreferencesModal', handleOpenModalEvent, true);
+    // Also listen on document as fallback
+    document.addEventListener('openNavigationPreferencesModal', handleOpenModalEvent, true);
+    
+    return () => {
+      delete (window as any).__openNavigationPreferencesModal;
+      window.removeEventListener('openNavigationPreferencesModal', handleOpenModalEvent, true);
+      document.removeEventListener('openNavigationPreferencesModal', handleOpenModalEvent, true);
+    };
+  }, [openModal]);
 
   const handleDragEnd = useCallback(
     ({ source, destination }: DropResult) => {

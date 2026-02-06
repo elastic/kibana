@@ -478,7 +478,7 @@ export const Navigation = ({
           )}
         </SideNav.PrimaryMenu>
 
-        <SideNav.Footer isCollapsed={!showLabels} collapseButton={collapseButton} userMenu={userMenu}>
+        <SideNav.Footer isCollapsed={!showLabels} userMenu={userMenu}>
           {({ footerNavigationInstructionsId }) => (
             <>
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
@@ -603,6 +603,10 @@ export const Navigation = ({
         </SideNav.SidePanel>
       )}
 
+      {/* Mount collapse button hidden to keep modal functionality available */}
+      {collapseButton && (
+        <div style={{ display: 'none' }}>{collapseButton}</div>
+      )}
     </div>
   );
 };
