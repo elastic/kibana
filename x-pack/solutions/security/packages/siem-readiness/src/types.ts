@@ -87,3 +87,9 @@ export interface SiemReadinessPackageInfo {
   status: string;
   categories?: string[];
 }
+export interface CasesSearchResponse {
+  total: number;
+  countOpenCases: number;
+  countClosedCases: number;
+  countInProgressCases: number;
+}

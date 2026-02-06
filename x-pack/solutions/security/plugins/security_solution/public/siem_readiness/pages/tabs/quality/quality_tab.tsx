@@ -29,12 +29,11 @@ import {
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { QualityWarningPrompt } from './quality_warning_prompt';
-import {
-  buildQualityCaseDescription,
-  getQualityCaseTitle,
-  getQualityCaseTags,
-} from './quality_add_case_details';
+import { buildQualityCaseDescription, getQualityCaseTitle } from './quality_add_case_details';
+import { ViewCasesButton } from '../../components/view_cases_button';
 import type { SiemReadinessTabSelectedCategoriesProps } from '../../components/configuration_panel';
+
+const DATA_QUALITY_CASE_TAGS = ['siem-readiness', 'data-quality', 'ecs-compatibility'];
 
 // Extended IndexInfo with computed fields
 interface IndexInfoWithStatus extends IndexInfo, Record<string, unknown> {
@@ -103,7 +102,7 @@ export const QualityTab: React.FC<SiemReadinessTabSelectedCategoriesProps> = ({
     openNewCaseFlyout({
       title: getQualityCaseTitle(),
       description: caseDescription,
-      tags: getQualityCaseTags(),
+      tags: DATA_QUALITY_CASE_TAGS,
     });
   }, [openNewCaseFlyout, caseDescription]);
 
@@ -368,19 +367,24 @@ export const QualityTab: React.FC<SiemReadinessTabSelectedCategoriesProps> = ({
           </EuiText>
         </EuiFlexItem>
         {hasIncompatibleIndices && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconSide="right"
-              size="s"
-              iconType="plusInCircle"
-              onClick={handleCreateCase}
-              data-test-subj="createNewCaseButton"
-            >
-              {i18n.translate('xpack.securitySolution.siemReadiness.quality.createCase', {
-                defaultMessage: 'Create new case',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          <>
+            <EuiFlexItem grow={false}>
+              <ViewCasesButton caseTagsArray={DATA_QUALITY_CASE_TAGS} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconSide="right"
+                size="s"
+                iconType="plusInCircle"
+                onClick={handleCreateCase}
+                data-test-subj="createNewCaseButton"
+              >
+                {i18n.translate('xpack.securitySolution.siemReadiness.quality.createCase', {
+                  defaultMessage: 'Create new case',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </>
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
