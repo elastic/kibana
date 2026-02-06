@@ -10,8 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { Matcher } from '../../../../../common/api/entity_analytics';
-import { getMatchersFor, INTEGRATION_TYPES } from '../data_sources';
-import type { IntegrationType } from '../data_sources';
+import { areMatchersEqual, getDefaultMatchersForIntegration } from '../data_sources/matchers';
 
 export const monitoringEntitySourceTypeName = 'entity-analytics-monitoring-entity-source';
 
@@ -83,23 +82,6 @@ const baseEntitySourceSchemaV2 = {
   matchersModifiedByUser: schema.boolean({ defaultValue: false }),
   managedVersion: schema.maybe(schema.number()),
 };
-
-const isIntegrationType = (value?: string): value is IntegrationType =>
-  Boolean(value && INTEGRATION_TYPES.includes(value as IntegrationType));
-
-const normalizeMatchers = (matchers: Matcher[] = []) =>
-  matchers
-    .map((m) => ({
-      fields: [...(m.fields ?? [])].sort(),
-      values: [...(m.values ?? [])].sort(),
-    }))
-    .sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
-
-const getDefaultMatchersForIntegration = (integrationName?: string): Matcher[] | undefined =>
-  isIntegrationType(integrationName) ? getMatchersFor(integrationName) : undefined;
-
-const areMatchersEqual = (a?: Matcher[], b?: Matcher[]) =>
-  JSON.stringify(normalizeMatchers(a)) === JSON.stringify(normalizeMatchers(b));
 
 const monitoringEntitySourceModelVersion1: SavedObjectsModelVersion = {
   changes: [],
