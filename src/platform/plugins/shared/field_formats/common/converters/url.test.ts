@@ -27,11 +27,45 @@ describe('UrlFormat', () => {
     );
   });
 
+  test('preserves ampersands in URLs', () => {
+    const url = new UrlFormat({});
+
+    expect(url.convert('https://example.com/?test=1&test2&test3', HTML_CONTEXT_TYPE)).toBe(
+      '<a href="https://example.com/?test=1&test2&test3" target="_blank" rel="noopener noreferrer">https://example.com/?test=1&test2&test3</a>'
+    );
+  });
+
+  test('preserves ampersands in URLs with url template using rawValue', () => {
+    const url = new UrlFormat({
+      urlTemplate: 'https://example.com/{{rawValue}}',
+    });
+
+    expect(url.convert('test=1&test2&test3', HTML_CONTEXT_TYPE)).toBe(
+      '<a href="https://example.com/test=1&test2&test3" target="_blank" rel="noopener noreferrer">https://example.com/test=1&test2&test3</a>'
+    );
+  });
+
+  test('preserves ampersands in URLs while still escaping other HTML entities', () => {
+    const url = new UrlFormat({});
+
+    expect(url.convert('https://example.com/?test=1&test2=<script>', HTML_CONTEXT_TYPE)).toBe(
+      '<a href="https://example.com/?test=1&test2=&lt;script&gt;" target="_blank" rel="noopener noreferrer">https://example.com/?test=1&test2=&lt;script&gt;</a>'
+    );
+  });
+
   test('outputs an <audio> if type === "audio"', () => {
     const url = new UrlFormat({ type: 'audio' });
 
     expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
       '<audio controls preload="none" src="http://elastic.co">'
+    );
+  });
+
+  test('preserves ampersands in audio URLs', () => {
+    const url = new UrlFormat({ type: 'audio' });
+
+    expect(url.convert('https://example.com/audio.mp3?test=1&test2', HTML_CONTEXT_TYPE)).toBe(
+      '<audio controls preload="none" src="https://example.com/audio.mp3?test=1&test2">'
     );
   });
 
@@ -101,6 +135,15 @@ describe('UrlFormat', () => {
       expect(url2.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
         '<img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
           'style="width:auto; height:auto; max-width:none; max-height:123px;">'
+      );
+    });
+
+    test('preserves ampersands in image URLs', () => {
+      const url = new UrlFormat({ type: 'img' });
+
+      expect(url.convert('https://example.com/image.png?test=1&test2', HTML_CONTEXT_TYPE)).toBe(
+        '<img src="https://example.com/image.png?test=1&test2" alt="A dynamically-specified image located at https://example.com/image.png?test=1&test2" ' +
+          'style="width:auto; height:auto; max-width:none; max-height:none;">'
       );
     });
   });
