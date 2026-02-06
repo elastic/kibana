@@ -31,7 +31,7 @@
         "signature": [
           "() => Promise<string[]>"
         ],
-        "path": "packages/kbn_check_saved_objects_cli/src/migrations/removed_types/get_removed_types.ts",
+        "path": "packages/kbn-check-saved-objects-cli/src/migrations/removed_types/get_removed_types.ts",
         "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
@@ -52,7 +52,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/kbn_check_saved_objects_cli/src/commands/run_check_mappings_update_cli.ts",
+        "path": "packages/kbn-check-saved-objects-cli/src/commands/run_check_mappings_update_cli.ts",
         "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
@@ -71,7 +71,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/kbn_check_saved_objects_cli/src/commands/run_check_saved_objects_cli.ts",
+        "path": "packages/kbn-check-saved-objects-cli/src/commands/run_check_saved_objects_cli.ts",
         "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,

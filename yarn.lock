@@ -5057,7 +5057,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/check-saved-objects-cli@link:packages/kbn_check_saved_objects_cli":
+"@kbn/check-saved-objects-cli@link:packages/kbn-check-saved-objects-cli":
   version "0.0.0"
   uid ""
 

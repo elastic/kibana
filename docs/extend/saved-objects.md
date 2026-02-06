@@ -1332,7 +1332,7 @@ Once a Saved Object type has been registered and used in production, its name be
 * **Migration conflicts**: Old documents with the removed type name could interfere with new documents using the same name
 * **Upgrade failures**: Users upgrading from older versions could experience migration failures if type names are reused
 
-To prevent these issues, {{kib}} maintains a list of all removed type names in `packages/kbn_check_saved_objects_cli/removed_types.json`. This ensures type names are never reused.
+To prevent these issues, {{kib}} maintains a list of all removed type names in `packages/kbn-check-saved-objects-cli/removed_types.json`. This ensures type names are never reused.
 
 ### How to remove a Saved Object type
 
@@ -1379,7 +1379,7 @@ Include both your code changes and the updated `removed_types.json` file in your
 
 If you prefer to update `removed_types.json` manually, you can:
 
-1. Open `packages/kbn_check_saved_objects_cli/removed_types.json`
+1. Open `packages/kbn-check-saved-objects-cli/removed_types.json`
 2. Add your removed type name to the array in alphabetical order
 3. Save the file
 
@@ -1486,4 +1486,4 @@ These errors are pretty obvious. Model versions must be defined as consecutive n
 ```
 
 **Problem:** You're trying to create a new Saved Object type using a name that was previously used and removed. Type names cannot be reused to prevent migration conflicts.
-**Solution:** Choose a different name for your Saved Object type. Once a type name is added to `packages/kbn_check_saved_objects_cli/removed_types.json`, it's permanently reserved and cannot be reused.
+**Solution:** Choose a different name for your Saved Object type. Once a type name is added to `packages/kbn-check-saved-objects-cli/removed_types.json`, it's permanently reserved and cannot be reused.

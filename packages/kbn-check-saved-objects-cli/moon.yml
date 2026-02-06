@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   metadata:
-    sourceRoot: packages/kbn_check_saved_objects_cli
+    sourceRoot: packages/kbn-check-saved-objects-cli
 dependsOn:
   - '@kbn/some-dev-log'
   - '@kbn/dev-cli-errors'

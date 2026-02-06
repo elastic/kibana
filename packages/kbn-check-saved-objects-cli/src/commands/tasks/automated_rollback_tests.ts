@@ -22,7 +22,7 @@ export const automatedRollbackTests: Task = (ctx, task) => {
       title: 'Fetch baseline mappings',
       task: async () =>
         (ctx.baselineMappings = await getFileFromKibanaRepo({
-          path: 'packages/kbn_check_saved_objects_cli/current_mappings.json',
+          path: 'packages/kbn-check-saved-objects-cli/current_mappings.json',
           ref: ctx.gitRev,
         })),
       retry: { tries: 5, delay: 2_000 },

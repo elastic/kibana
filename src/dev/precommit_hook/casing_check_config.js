@@ -130,7 +130,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   'packages/*',
   'packages/kbn-check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules/*',
-  'packages/kbn_check_saved_objects_cli/src/migrations/__fixtures__/*',
+  'packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/*',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
   'src/babel-*',
   'typings/*',

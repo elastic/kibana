@@ -9011,11 +9011,11 @@
           },
           {
             "plugin": "@kbn/check-saved-objects-cli",
-            "path": "packages/kbn_check_saved_objects_cli/src/migrations/fixtures/create_fixture_template.ts"
+            "path": "packages/kbn-check-saved-objects-cli/src/migrations/fixtures/create_fixture_template.ts"
           },
           {
             "plugin": "@kbn/check-saved-objects-cli",
-            "path": "packages/kbn_check_saved_objects_cli/src/migrations/fixtures/create_fixture_template.ts"
+            "path": "packages/kbn-check-saved-objects-cli/src/migrations/fixtures/create_fixture_template.ts"
           }
         ],
         "children": [
@@ -11747,7 +11747,7 @@
               },
               {
                 "plugin": "@kbn/check-saved-objects-cli",
-                "path": "packages/kbn_check_saved_objects_cli/src/commands/test/types/migrations.ts"
+                "path": "packages/kbn-check-saved-objects-cli/src/commands/test/types/migrations.ts"
               }
             ]
           },
