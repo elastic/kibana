@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "8.19.11",
+  "version": "8.19.12",
   "branch": "8.19",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -105,7 +105,8 @@
     "@types/react-dom": "18.2.25",
     "@xstate5/react/**/xstate": "5.19.2",
     "apache-arrow": "20.x - 21.x",
-    "globby/fast-glob": "3.3.2"
+    "globby/fast-glob": "3.3.2",
+    "lodash": "4.17.23"
   },
   "dependencies": {
     "@ai-sdk/langchain": "1.0.102",
@@ -1224,7 +1225,7 @@
     "langsmith": "0.3.87",
     "launchdarkly-js-client-sdk": "3.9.0",
     "load-json-file": "6.2.0",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "lru-cache": "11.2.4",
     "lz-string": "1.5.0",
     "magic-bytes.js": "1.12.1",

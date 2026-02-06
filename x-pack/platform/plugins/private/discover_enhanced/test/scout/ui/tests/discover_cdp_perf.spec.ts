@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { test, tags, expect, CDPSession } from '@kbn/scout';
+import { test, tags, CDPSession } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { testData } from '../fixtures';
 
 test.describe(
