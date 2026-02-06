@@ -7,6 +7,7 @@
 
 import { resolveSelectedConnectorId } from './resolve_selected_connector_id';
 import { type InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
+import { PREFERRED_DEFAULT_CONNECTOR_ID } from '../../../../common/constants';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -132,6 +133,32 @@ describe('resolveSelectedConnectorId', () => {
     expect(result).toBe('inference-default-id');
     expect(inference.getDefaultConnector).toHaveBeenCalledTimes(1);
     expect(inference.getConnectorList).not.toHaveBeenCalled();
+  });
+
+  it('prefers Anthropic-Claude-Sonnet-4-5 when available in connector list', async () => {
+    const { savedObjects, uiSettings, request } = setupCoreMocks({
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'NO_DEFAULT_CONNECTOR',
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
+    });
+    const inference = inferenceMock.createStartContract();
+    (inference.getDefaultConnector as jest.Mock).mockRejectedValue(new Error('no default'));
+    (inference.getConnectorList as jest.Mock).mockResolvedValue([
+      { connectorId: 'inference-id', type: InferenceConnectorType.Inference } as InferenceConnector,
+      {
+        connectorId: PREFERRED_DEFAULT_CONNECTOR_ID,
+        type: InferenceConnectorType.Inference,
+      } as InferenceConnector,
+      { connectorId: 'openai-id', type: InferenceConnectorType.OpenAI } as InferenceConnector,
+    ]);
+
+    const result = await resolveSelectedConnectorId({
+      uiSettings,
+      savedObjects,
+      request,
+      inference,
+    });
+
+    expect(result).toBe(PREFERRED_DEFAULT_CONNECTOR_ID);
   });
 
   it('selects Inference connector over OpenAI when falling back to connector list', async () => {

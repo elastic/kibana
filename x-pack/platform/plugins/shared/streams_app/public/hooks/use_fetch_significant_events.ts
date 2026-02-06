@@ -29,7 +29,8 @@ type SignificantEventsFetchResult =
     };
 
 export const useFetchSignificantEvents = (
-  options: { name?: string; query?: string } | undefined = {}
+  options: { name?: string; query?: string } | undefined = {},
+  deps: unknown[] = []
 ) => {
   const { name, query } = options;
   const {
@@ -114,7 +115,7 @@ export const useFetchSignificantEvents = (
   };
 
   return useQuery<SignificantEventsFetchResult, Error>({
-    queryKey: ['significantEvents', name, timeState.start, timeState.end, query],
+    queryKey: ['significantEvents', name, timeState.start, timeState.end, query, ...deps],
     queryFn: fetchSignificantEvents,
     onError: showFetchErrorToast,
   });
