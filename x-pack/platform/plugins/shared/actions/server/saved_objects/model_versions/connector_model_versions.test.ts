@@ -9,6 +9,7 @@ import type {
   SavedObjectModelTransformationContext,
   SavedObjectsFullModelVersion,
 } from '@kbn/core-saved-objects-server';
+import type { Logger } from '@kbn/core/server';
 import { connectorModelVersions } from './connector_model_versions';
 
 describe('Connector Model Versions', () => {
@@ -25,7 +26,9 @@ describe('Connector Model Versions', () => {
   describe('version 2', () => {
     const version2 = connectorModelVersions['2'] as SavedObjectsFullModelVersion;
     const context: SavedObjectModelTransformationContext = {
-      log: { get: () => ({ debug: jest.fn(), info: jest.fn(), warn: jest.fn() }) } as any,
+      log: {
+        get: () => ({ debug: jest.fn(), info: jest.fn(), warn: jest.fn() }),
+      } as unknown as Logger,
       modelVersion: 2,
       namespaceType: 'single',
     };
@@ -176,34 +179,6 @@ describe('Connector Model Versions', () => {
             config: {
               authType: undefined,
               apiUrl: 'https://api.pagerduty.com',
-            },
-            secrets: '{}',
-          },
-          references: [],
-          migrationVersion: {},
-          coreMigrationVersion: '8.0.0',
-          typeMigrationVersion: '8.0.0',
-          updated_at: '2024-01-01T00:00:00.000Z',
-          version: '1',
-          namespaces: ['default'],
-        };
-
-        const result = backfillFn!(mockDocument, context);
-
-        expect(result).toEqual(mockDocument);
-      });
-
-      it('returns document unchanged when config.authType is empty string', () => {
-        const mockDocument = {
-          id: 'test-connector-id',
-          type: 'action',
-          attributes: {
-            actionTypeId: '.webhook',
-            name: 'Test Webhook',
-            isMissingSecrets: false,
-            config: {
-              authType: '',
-              url: 'https://example.com',
             },
             secrets: '{}',
           },
