@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDuration } from './parse-duration';
+import { parseDuration } from './parse_duration';
 
 describe('parseDuration', () => {
   describe('valid duration formats', () => {

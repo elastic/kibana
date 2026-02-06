@@ -52,7 +52,7 @@ import {
   ExitFallbackPathNodeImpl,
   ExitNormalPathNodeImpl,
   ExitTryBlockNodeImpl,
-} from './on_failure/fallback-step';
+} from './on_failure/fallback_step';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
 import {
   EnterStepTimeoutZoneNodeImpl,
