@@ -87,6 +87,8 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
     setIsChildFlyoutBOpen(false);
 
     // Return focus to main trigger button after closing main flyout
+    // TODO: clean this up if EUI adds internal support for returning focus to the trigger element on close
+    // https://github.com/elastic/eui/issues/9365
     setTimeout(() => {
       mainTriggerRef.current?.focus();
     }, 100);
