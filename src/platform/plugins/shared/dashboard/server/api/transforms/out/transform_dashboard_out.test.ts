@@ -23,8 +23,8 @@ jest.mock('../../../kibana_services', () => ({
 }));
 
 describe('transformDashboardOut', () => {
-  const controlGroupInputControlsSo = {
-    explicitInput: { anyKey: 'some value' },
+  const pinnedPanelSo = {
+    config: { anyKey: 'some value' },
     type: 'type1',
     order: 0,
   };
@@ -60,7 +60,7 @@ describe('transformDashboardOut', () => {
   test('should not supply defaults for optional nested properties', () => {
     const input: DashboardSavedObjectAttributes = {
       controlGroupInput: {
-        panelsJSON: JSON.stringify({ foo: controlGroupInputControlsSo }),
+        panelsJSON: JSON.stringify({ foo: pinnedPanelSo }),
       },
       panelsJSON: JSON.stringify(panelsSo),
       optionsJSON: JSON.stringify({
@@ -103,7 +103,7 @@ describe('transformDashboardOut', () => {
       pinned_panels: {
         panels: {
           foo: {
-            ...controlGroupInputControlsSo,
+            ...pinnedPanelSo,
             grow: false,
             width: 'small',
           },
@@ -202,7 +202,7 @@ describe('transformDashboardOut', () => {
       controlGroupInput: {
         panelsJSON: JSON.stringify({
           foo: {
-            ...controlGroupInputControlsSo,
+            ...pinnedPanelSo,
             grow: false,
             width: 'small',
           },
