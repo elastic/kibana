@@ -100,11 +100,7 @@ describe('dimensions_selector_helpers', () => {
   });
 
   describe('sortDimensionOptions', () => {
-    const createOption = (
-      value: string,
-      checked?: 'on',
-      disabled?: boolean
-    ): SelectableEntry => ({
+    const createOption = (value: string, checked?: 'on', disabled?: boolean): SelectableEntry => ({
       value,
       label: value,
       checked,
@@ -220,10 +216,7 @@ describe('dimensions_selector_helpers', () => {
     });
 
     it('handles empty selectedDimensions array', () => {
-      const options: SelectableEntry[] = [
-        createOption('option1', 'on'),
-        createOption('option2'),
-      ];
+      const options: SelectableEntry[] = [createOption('option1', 'on'), createOption('option2')];
 
       const result = sortDimensionOptions(options, []);
 
@@ -233,11 +226,7 @@ describe('dimensions_selector_helpers', () => {
     });
 
     it('maintains stable sort for options with same priority', () => {
-      const options: SelectableEntry[] = [
-        createOption('b'),
-        createOption('a'),
-        createOption('c'),
-      ];
+      const options: SelectableEntry[] = [createOption('b'), createOption('a'), createOption('c')];
 
       const result1 = sortDimensionOptions(options, []);
       const result2 = sortDimensionOptions(options, []);
@@ -282,4 +271,3 @@ describe('dimensions_selector_helpers', () => {
     });
   });
 });
-

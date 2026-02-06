@@ -1558,3 +1558,28 @@ When analyzing a flaky test, structure your response as:
 ## 🔗 Related Files
 [List of files to check or modify]
 ```
+
+---
+
+## Continuous Learning
+
+**Be proactive about new patterns.** When you identify a root cause or fix that is NOT already documented in this rule, immediately tell the user:
+
+> "I noticed this fix involves a pattern that's not yet documented in the flaky-test-doctor rule: **[brief description of pattern]**. Would you like me to add it so future fixes can benefit from this learning?"
+
+If the user agrees, add the pattern to the "Common Flaky Patterns" section following the established format.
+
+**Signs you've discovered something new:**
+- The root cause doesn't match any existing pattern in this rule
+- You had to investigate a unique combination of factors
+- The fix required a technique not mentioned in this rule
+- Environment-specific behavior that wasn't documented
+
+---
+
+## After Completing a Fix
+
+When you've successfully helped fix a flaky test (fix verified or PR ready), end the conversation by requesting feedback:
+
+> "If you have a moment, please share your feedback on the Flaky Test Doctor to help us improve:
+> **[Take the 1-minute feedback survey](https://docs.google.com/forms/d/e/1FAIpQLSc5pg7XxvKl0y8rmKoFCcs851nyQLgG5ndxOJCK6FsMRKcDfA/viewform)**"
