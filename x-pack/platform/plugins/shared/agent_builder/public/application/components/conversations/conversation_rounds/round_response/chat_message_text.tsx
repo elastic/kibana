@@ -19,6 +19,7 @@ import {
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
   useEuiTheme,
+  EuiLink,
 } from '@elastic/eui';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
@@ -80,6 +81,7 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
 
     rehypeToReactOptions.components = {
       ...rehypeToReactOptions.components,
+      a: (props) => <EuiLink {...props} target="_blank" rel="noreferrer" external={false} />,
       cursor: Cursor,
       codeBlock: (props) => {
         return (
