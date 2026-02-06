@@ -3,9 +3,34 @@ id: kibTroubleshooting
 slug: /kibana-dev-docs/getting-started/troubleshooting
 title: Troubleshooting
 description: A collection of tips for working around strange issues.
-date: 2021-09-08
+date: 2026-02-06
 tags: ['kibana', 'onboarding', 'dev', 'troubleshooting']
 ---
+
+### Bootstrap failures
+
+If `yarn kbn bootstrap` fails, try the following in order:
+
+1. Clear caches and force reinstall dependencies:
+
+```bash
+yarn cache clean && yarn kbn clean
+yarn kbn bootstrap --force-install
+```
+
+2. If running as root (e.g. in a container):
+
+```bash
+yarn kbn bootstrap --allow-root
+```
+
+3. Full repository reset (last resort):
+
+```bash
+git clean -fdx
+yarn kbn reset
+yarn kbn bootstrap --force-install
+```
 
 ### Typescript issues
 
