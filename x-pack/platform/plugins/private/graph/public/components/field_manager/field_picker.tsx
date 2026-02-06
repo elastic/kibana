@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { EuiPopover, EuiSelectable, EuiBadge, type UseEuiTheme, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
@@ -46,6 +46,14 @@ export function FieldPicker({
     }
   }, [fieldMap, open]);
 
+  const onClickCallback = useMemo(() => {
+    return hasFields
+      ? () => {
+          setOpen(!open);
+        }
+      : undefined;
+  }, [hasFields, open, setOpen]);
+
   const badgeDescription = i18n.translate('xpack.graph.bar.pickFieldsLabel', {
     defaultMessage: 'Add fields',
   });
@@ -62,11 +70,7 @@ export function FieldPicker({
           color="hollow"
           iconType="plusInCircleFilled"
           aria-disabled={!hasFields}
-          onClick={() => {
-            if (hasFields) {
-              setOpen(!open);
-            }
-          }}
+          onClick={onClickCallback}
           onClickAriaLabel={badgeDescription}
           css={[
             gphFieldBadgeSizeStyles(euiThemeContext),
