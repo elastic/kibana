@@ -6,7 +6,6 @@
  */
 
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityDefinition } from '../definitions/entity_schema';
 import {
   ENTITY_UPDATES,
   ENTITY_BASE_PREFIX,
@@ -16,15 +15,16 @@ import {
   getEntitiesAliasPattern,
 } from '../constants';
 import { getUpdatesComponentTemplateName } from './component_templates';
+import { ALL_ENTITY_TYPES } from '../../../common/domain/definitions/entity_schema';
 
 const DATA_RETENTION_PERIOD = '1d';
-export const getUpdatesIndexTemplateId = (definition: EntityDefinition) =>
-  `.${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_UPDATES}_${definition.id}_index_template` as const;
+export const getUpdatesIndexTemplateId = (namespace: string) =>
+  `.${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_UPDATES}_security_${namespace}_index_template` as const;
 
 export const getUpdatesEntityIndexTemplateConfig = (
-  definition: EntityDefinition
+  namespace: string
 ): IndicesPutIndexTemplateRequest => ({
-  name: getUpdatesIndexTemplateId(definition),
+  name: getUpdatesIndexTemplateId(namespace),
   _meta: {
     description:
       'Index template for data streams managed by the Elastic Entity Store ' +
@@ -34,12 +34,18 @@ export const getUpdatesEntityIndexTemplateConfig = (
     managed: true,
     managed_by: 'security_context_core_analysis',
   },
-  composed_of: [ECS_MAPPINGS_COMPONENT_TEMPLATE, getUpdatesComponentTemplateName(definition.id)],
+  composed_of: [
+    ECS_MAPPINGS_COMPONENT_TEMPLATE,
+    ...ALL_ENTITY_TYPES.map((t) => getUpdatesComponentTemplateName(t, namespace)),
+  ],
+  ignore_missing_component_templates: [
+    ...ALL_ENTITY_TYPES.map((t) => getUpdatesComponentTemplateName(t, namespace)),
+  ],
   index_patterns: [
     getEntityIndexPattern({
       schemaVersion: ENTITY_SCHEMA_VERSION_V2,
       dataset: ENTITY_UPDATES,
-      definitionId: definition.id,
+      namespace,
     }),
   ],
   priority: 200,
@@ -49,7 +55,7 @@ export const getUpdatesEntityIndexTemplateConfig = (
       data_retention: DATA_RETENTION_PERIOD,
     },
     aliases: {
-      [getEntitiesAliasPattern({ type: definition.type, dataset: ENTITY_UPDATES })]: {},
+      [getEntitiesAliasPattern({ dataset: ENTITY_UPDATES })]: {},
     },
     mappings: {
       _meta: { n: '1.6.0' },

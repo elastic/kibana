@@ -20,6 +20,8 @@ import {
   type SavedObjectsUpdateResponse,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IntegrationAttributes, DataStreamAttributes } from './schemas/types';
 import {
   DATA_STREAM_SAVED_OBJECT_TYPE,
@@ -32,7 +34,8 @@ import { IntegrationAlreadyExistsError } from '../../errors';
 export interface UpdateDataStreamParams {
   integrationId: string;
   dataStreamId: string;
-  ingestPipeline: string;
+  ingestPipeline: Pipeline;
+  pipelineDocs?: Array<estypes.IngestSimulateDocumentResult>;
   status: keyof typeof TASK_STATUSES;
 }
 
@@ -547,7 +550,8 @@ export class AutomaticImportSavedObjectService {
   public async updateDataStreamSavedObjectAttributes(
     updateDataStreamParams: UpdateDataStreamParams
   ): Promise<void> {
-    const { integrationId, dataStreamId, ingestPipeline, status } = updateDataStreamParams;
+    const { integrationId, dataStreamId, ingestPipeline, pipelineDocs, status } =
+      updateDataStreamParams;
 
     if (!integrationId) {
       throw new Error('Integration ID is required');
@@ -563,10 +567,15 @@ export class AutomaticImportSavedObjectService {
         throw new Error(`Data stream ${dataStreamId} not found`);
       }
 
+      this.logger.debug(
+        `Updating data stream ${dataStreamId} with pipeline docs: ${JSON.stringify(pipelineDocs)}`
+      );
+
       const updatedDataStreamData: DataStreamAttributes = {
         ...dataStream.attributes,
         result: {
           ingest_pipeline: ingestPipeline,
+          ...(pipelineDocs ? { pipeline_docs: pipelineDocs } : {}),
         },
         job_info: {
           ...dataStream.attributes.job_info,

@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { parseClientOptions } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
-import { createTransport } from './create_transport';
+import { createTransport, type OnRequestHandler } from './create_transport';
 import type { AgentFactoryProvider } from './agent_manager';
 import { patchElasticsearchClient } from './patch_client';
 
@@ -30,6 +30,7 @@ export const configureClient = (
     getExecutionContext = noop,
     agentFactoryProvider,
     kibanaVersion,
+    onRequest,
   }: {
     logger: Logger;
     type: string;
@@ -37,10 +38,11 @@ export const configureClient = (
     getExecutionContext?: () => string | undefined;
     agentFactoryProvider: AgentFactoryProvider;
     kibanaVersion: string;
+    onRequest?: OnRequestHandler;
   }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped, kibanaVersion);
-  const KibanaTransport = createTransport({ getExecutionContext });
+  const KibanaTransport = createTransport({ scoped, getExecutionContext, onRequest });
   const client = new Client({
     ...clientOptions,
     agent: agentFactoryProvider.getAgentFactory(clientOptions.agent),
