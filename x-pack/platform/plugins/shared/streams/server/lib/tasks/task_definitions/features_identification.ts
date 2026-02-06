@@ -10,21 +10,28 @@ import { isInferenceProviderError } from '@kbn/inference-common';
 import type { IdentifyFeaturesResult } from '@kbn/streams-schema';
 import { isComputedFeature, type BaseFeature } from '@kbn/streams-schema';
 import { identifyFeatures, generateAllComputedFeatures } from '@kbn/streams-ai';
-import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
+import { discoverMessagePatterns } from '../../../routes/utils/discover_message_patterns';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
 import { MAX_FEATURE_AGE_MS } from '../../streams/feature/feature_client';
 
+export interface DiscoveredPattern {
+  pattern: string;
+  discoveredAt: number;
+}
+
 export interface FeaturesIdentificationTaskParams {
   connectorId: string;
   start: number;
   end: number;
   streamName: string;
+  discoveredPatterns: DiscoveredPattern[];
 }
 
 export const FEATURES_IDENTIFICATION_TASK_TYPE = 'streams_features_identification';
@@ -32,6 +39,63 @@ export const FEATURES_IDENTIFICATION_TASK_TYPE = 'streams_features_identificatio
 export function getFeaturesIdentificationTaskId(streamName: string) {
   return `${FEATURES_IDENTIFICATION_TASK_TYPE}_${streamName}`;
 }
+
+const MIN_NEW_PATTERNS = 2;
+
+const getSampleDocuments = async ({
+  esClient,
+  index,
+  start,
+  end,
+  excludePatterns,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  start: number;
+  end: number;
+  excludePatterns: DiscoveredPattern[];
+}) => {
+  let resetPatterns = false;
+  // Discover message patterns, excluding previously found ones
+  let categories = await discoverMessagePatterns({
+    esClient,
+    index,
+    start,
+    end,
+    excludePatterns: excludePatterns.map((p) => p.pattern),
+  });
+
+  const now = Date.now();
+
+  const existingPatternSet = new Set(excludePatterns.map((p) => p.pattern));
+  const newPatterns: DiscoveredPattern[] = categories
+    .filter((c) => !existingPatternSet.has(c.pattern))
+    .map((c) => ({
+      pattern: c.pattern,
+      discoveredAt: now,
+    }));
+
+  // If we didn't find enough new patterns, try again without excluding patterns
+  if (newPatterns.length < MIN_NEW_PATTERNS) {
+    resetPatterns = true;
+    categories = await discoverMessagePatterns({
+      esClient,
+      index,
+      start,
+      end,
+    });
+  }
+
+  const updatedPatterns = [
+    ...(excludePatterns && !resetPatterns ? excludePatterns : []),
+    ...newPatterns,
+  ];
+
+  return {
+    updatedPatterns,
+    sampleDocuments: categories.flatMap((c) => c.sampleDocuments),
+  };
+};
 
 export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext) {
   return {
@@ -44,8 +108,14 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, start, end, streamName, _task } = runContext.taskInstance
-                .params as TaskParams<FeaturesIdentificationTaskParams>;
+              const {
+                connectorId,
+                start,
+                end,
+                streamName,
+                discoveredPatterns: previousPatterns,
+                _task,
+              } = runContext.taskInstance.params as TaskParams<FeaturesIdentificationTaskParams>;
 
               const {
                 taskClient,
@@ -69,13 +139,12 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
-
-                const { hits: sampleDocuments } = await getSampleDocuments({
+                const { sampleDocuments, updatedPatterns } = await getSampleDocuments({
                   esClient,
                   index: stream.name,
                   start,
                   end,
-                  size: 20,
+                  excludePatterns: previousPatterns,
                 });
 
                 const [{ features: inferredBaseFeatures }, computedFeatures] = await Promise.all([
@@ -134,7 +203,13 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 await taskClient.complete<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
                   _task,
-                  { connectorId, start, end, streamName },
+                  {
+                    connectorId,
+                    start,
+                    end,
+                    streamName,
+                    discoveredPatterns: updatedPatterns,
+                  },
                   { features }
                 );
               } catch (error) {
@@ -159,7 +234,13 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 await taskClient.fail<FeaturesIdentificationTaskParams>(
                   _task,
-                  { connectorId, start, end, streamName },
+                  {
+                    connectorId,
+                    start,
+                    end,
+                    streamName,
+                    discoveredPatterns: previousPatterns,
+                  },
                   errorMessage
                 );
 

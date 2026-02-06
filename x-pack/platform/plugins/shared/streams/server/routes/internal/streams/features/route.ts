@@ -301,11 +301,20 @@ export const featuresTaskRoute = createServerRoute({
                   uiSettingsClient,
                   logger,
                 });
+
+                // Carry forward non-expired discovered patterns from the previous task run
+                const previousTask = await taskClient.get<FeaturesIdentificationTaskParams>(taskId);
+                const now = Date.now();
+                const validPatterns = (previousTask.task.params.discoveredPatterns ?? []).filter(
+                  (p) => now - p.discoveredAt < 24 * 60 * 60 * 1000 // 24 hours
+                );
+
                 return {
                   connectorId,
                   start: body.from.getTime(),
                   end: body.to.getTime(),
                   streamName: name,
+                  discoveredPatterns: validPatterns,
                 };
               })(),
               request,
