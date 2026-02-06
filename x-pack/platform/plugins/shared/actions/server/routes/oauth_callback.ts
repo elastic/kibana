@@ -424,7 +424,7 @@ export const oauthCallbackRoute = (
           const errorMessage = err instanceof Error ? err.message : String(err);
           routeLogger.error(`OAuth callback failed: ${errorMessage}`);
           if (err instanceof Error && err.stack) {
-            routeLogger.info(`OAuth callback error stack: ${err.stack}`);
+            routeLogger.debug(`OAuth callback error stack: ${err.stack}`);
           }
           return res.ok({
             headers: { 'content-type': 'text/html' },
