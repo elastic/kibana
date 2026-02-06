@@ -302,10 +302,10 @@ describe('HooksService', () => {
       },
     });
 
-    start.run(HookLifecycle.beforeToolCall, baseToolCallContext);
+    await start.run(HookLifecycle.beforeToolCall, baseToolCallContext);
     await flushEventLoop();
 
-    start.run(HookLifecycle.afterToolCall, afterContext);
+    await start.run(HookLifecycle.afterToolCall, afterContext);
     await flushEventLoop();
 
     expect(hookCalls).toEqual([

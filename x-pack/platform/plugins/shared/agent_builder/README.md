@@ -154,51 +154,53 @@ export const registerAgentBuilderHooks = (agentBuilder?: AgentBuilderPluginSetup
 
   agentBuilder.hooks.register({
     id: 'example-hooks',
-    [HookLifecycle.beforeConversationRound]: {
-      mode: HookExecutionMode.blocking,
-      handler: (context) => {
-        console.log('beforeConversationRound');
-        return {
-          nextInput: {
-            ...context.nextInput,
-            message: context.nextInput.message
-              ? `${context.nextInput.message} (hooked)`
-              : undefined,
-          },
-        };
+    hooks: {
+      [HookLifecycle.beforeConversationRound]: {
+        mode: HookExecutionMode.blocking,
+        handler: (context) => {
+          console.log('beforeConversationRound');
+          return {
+            nextInput: {
+              ...context.nextInput,
+              message: context.nextInput.message
+                ? `${context.nextInput.message} (hooked)`
+                : undefined,
+            },
+          };
+        },
       },
-    },
-    [HookLifecycle.afterConversationRound]: {
-      mode: HookExecutionMode.blocking,
-      handler: (context) => {
-        console.log('afterConversationRound');
+      [HookLifecycle.afterConversationRound]: {
+        mode: HookExecutionMode.blocking,
+        handler: (context) => {
+          console.log('afterConversationRound');
+        },
       },
-    },
-    [HookLifecycle.beforeToolCall]: {
-      mode: HookExecutionMode.blocking,
-      handler: (context) => {
-        console.log('beforeToolCall');
-        return {
-          toolParams: {
-            ...context.toolParams,
-            _hooked: true,
-          },
-        };
+      [HookLifecycle.beforeToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: (context) => {
+          console.log('beforeToolCall');
+          return {
+            toolParams: {
+              ...context.toolParams,
+              _hooked: true,
+            },
+          };
+        },
       },
-    },
-    [HookLifecycle.afterToolCall]: {
-      mode: HookExecutionMode.blocking,
-      handler: (context) => {
-        console.log('afterToolCall');
+      [HookLifecycle.afterToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: (context) => {
+          console.log('afterToolCall');
+        },
       },
-    },
+    }
   });
 };
 ```
 
 
 ### Execution order
-The hook execution respect the priority field  and after that the registration order.
+The hook execution respects the priority field  and after that the registration order.
 
 * before* hooks: First to last
 * after* hooks: Last to first (reverse)

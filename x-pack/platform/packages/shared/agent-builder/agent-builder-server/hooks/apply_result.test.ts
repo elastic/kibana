@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { HookLifecycle, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import {
   applyBeforeConversationRoundResult,
   applyAfterConversationRoundResult,
   applyBeforeToolCallResult,
   applyAfterToolCallResult,
-  applyHookResultByLifecycle,
 } from './apply_result';
 import type {
   BeforeConversationRoundHookContext,
@@ -19,6 +19,7 @@ import type {
   BeforeToolCallHookContext,
   AfterToolCallHookContext,
 } from './types';
+import type { RunToolReturn } from '../runner/runner';
 
 const createMockRequest = () => ({ headers: {} } as BeforeConversationRoundHookContext['request']);
 
@@ -27,7 +28,7 @@ describe('apply_result', () => {
     const baseContext: BeforeConversationRoundHookContext = {
       request: createMockRequest(),
       agentId: 'agent-1',
-      conversation: { id: 'conv-1', rounds: [] },
+      conversation: { id: 'conv-1', rounds: [] } as unknown as Conversation,
       nextInput: { message: 'original' },
     };
 
@@ -35,18 +36,11 @@ describe('apply_result', () => {
       expect(applyBeforeConversationRoundResult(baseContext, undefined)).toBe(baseContext);
     });
 
-    it('returns context unchanged when result is null', () => {
-      expect(applyBeforeConversationRoundResult(baseContext, null)).toBe(baseContext);
-    });
-
-    it('returns context unchanged when result is a non-object', () => {
-      expect(applyBeforeConversationRoundResult(baseContext, 'string')).toBe(baseContext);
-      expect(applyBeforeConversationRoundResult(baseContext, 42)).toBe(baseContext);
-    });
-
     it('returns context unchanged when result object has no nextInput', () => {
       expect(applyBeforeConversationRoundResult(baseContext, {})).toBe(baseContext);
-      expect(applyBeforeConversationRoundResult(baseContext, { round: {} })).toBe(baseContext);
+      expect(applyBeforeConversationRoundResult(baseContext, { nextInput: undefined })).toBe(
+        baseContext
+      );
     });
 
     it('returns new context with nextInput when result has nextInput', () => {
@@ -62,21 +56,17 @@ describe('apply_result', () => {
     const baseContext: AfterConversationRoundHookContext = {
       request: createMockRequest(),
       agentId: 'agent-1',
-      conversation: { id: 'conv-1', rounds: [] },
+      conversation: { id: 'conv-1', rounds: [] } as unknown as Conversation,
       round: {
         id: 'round-1',
         status: ConversationRoundStatus.inProgress,
         input: { message: 'hi' },
         steps: [],
-      },
+      } as unknown as ConversationRound,
     };
 
     it('returns context unchanged when result is undefined', () => {
       expect(applyAfterConversationRoundResult(baseContext, undefined)).toBe(baseContext);
-    });
-
-    it('returns context unchanged when result is null', () => {
-      expect(applyAfterConversationRoundResult(baseContext, null)).toBe(baseContext);
     });
 
     it('returns context unchanged when result object has no round', () => {
@@ -89,7 +79,7 @@ describe('apply_result', () => {
         status: ConversationRoundStatus.completed,
         input: { message: 'hi' },
         steps: [],
-      };
+      } as unknown as ConversationRound;
       const result = applyAfterConversationRoundResult(baseContext, { round: newRound });
       expect(result).not.toBe(baseContext);
       expect(result.round).toEqual(newRound);
@@ -108,10 +98,6 @@ describe('apply_result', () => {
 
     it('returns context unchanged when result is undefined', () => {
       expect(applyBeforeToolCallResult(baseContext, undefined)).toBe(baseContext);
-    });
-
-    it('returns context unchanged when result is null', () => {
-      expect(applyBeforeToolCallResult(baseContext, null)).toBe(baseContext);
     });
 
     it('returns context unchanged when result object has no toolParams', () => {
@@ -141,87 +127,16 @@ describe('apply_result', () => {
       expect(applyAfterToolCallResult(baseContext, undefined)).toBe(baseContext);
     });
 
-    it('returns context unchanged when result is null', () => {
-      expect(applyAfterToolCallResult(baseContext, null)).toBe(baseContext);
-    });
-
     it('returns context unchanged when result object has no toolReturn', () => {
       expect(applyAfterToolCallResult(baseContext, {})).toBe(baseContext);
     });
 
     it('returns new context with toolReturn when result has toolReturn', () => {
-      const newReturn = { results: [{ content: 'ok' }] };
+      const newReturn = { results: [{ content: 'ok' }] } as unknown as RunToolReturn;
       const result = applyAfterToolCallResult(baseContext, { toolReturn: newReturn });
       expect(result).not.toBe(baseContext);
       expect(result.toolReturn).toEqual(newReturn);
       expect(result.toolId).toBe(baseContext.toolId);
-    });
-  });
-
-  describe('applyHookResultByLifecycle', () => {
-    it('delegates beforeConversationRound to applyBeforeConversationRoundResult', () => {
-      const context: BeforeConversationRoundHookContext = {
-        request: createMockRequest(),
-        agentId: 'a',
-        conversation: { id: 'c', rounds: [] },
-        nextInput: { message: 'x' },
-      };
-      const nextInput = { message: 'y' };
-      const fn = applyHookResultByLifecycle[HookLifecycle.beforeConversationRound];
-      const result = fn(context, { nextInput });
-      expect(result.nextInput).toEqual(nextInput);
-    });
-
-    it('delegates afterConversationRound to applyAfterConversationRoundResult', () => {
-      const context: AfterConversationRoundHookContext = {
-        request: createMockRequest(),
-        agentId: 'a',
-        conversation: { id: 'c', rounds: [] },
-        round: {
-          id: 'r1',
-          status: ConversationRoundStatus.inProgress,
-          input: { message: 'x' },
-          steps: [],
-        },
-      };
-      const round = {
-        id: 'r2',
-        status: ConversationRoundStatus.completed,
-        input: { message: 'x' },
-        steps: [],
-      };
-      const fn = applyHookResultByLifecycle[HookLifecycle.afterConversationRound];
-      const result = fn(context, { round });
-      expect(result.round).toEqual(round);
-    });
-
-    it('delegates beforeToolCall to applyBeforeToolCallResult', () => {
-      const context: BeforeToolCallHookContext = {
-        request: createMockRequest(),
-        toolId: 't',
-        toolCallId: 'c',
-        toolParams: {},
-        source: 'agent',
-      };
-      const toolParams = { x: 1 };
-      const fn = applyHookResultByLifecycle[HookLifecycle.beforeToolCall];
-      const result = fn(context, { toolParams });
-      expect(result.toolParams).toEqual(toolParams);
-    });
-
-    it('delegates afterToolCall to applyAfterToolCallResult', () => {
-      const context: AfterToolCallHookContext = {
-        request: createMockRequest(),
-        toolId: 't',
-        toolCallId: 'c',
-        toolParams: {},
-        source: 'agent',
-        toolReturn: { results: [] },
-      };
-      const toolReturn = { results: [{ content: 'done' }] };
-      const fn = applyHookResultByLifecycle[HookLifecycle.afterToolCall];
-      const result = fn(context, { toolReturn });
-      expect(result.toolReturn).toEqual(toolReturn);
     });
   });
 });
