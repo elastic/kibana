@@ -11,8 +11,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('machine learning basic license - data visualizer - group 2', function () {
-    this.tags(['skipFirefox', 'ml', 'skipFIPS']);
+  describe('machine learning - data frame analytics - group 2', function () {
+    this.tags(['ml']);
 
     before(async () => {
       await ml.securityCommon.createMlRoles();
@@ -20,28 +20,23 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     after(async () => {
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+      await ml.securityUI.logout();
+
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
 
-      await ml.testResources.deleteSavedSearches();
-
-      await ml.testResources.deleteDataViewByTitle('ft_farequote');
-      await ml.testResources.deleteDataViewByTitle('ft_module_sample_ecommerce');
-
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote_small');
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
-      await esArchiver.unload(
-        'x-pack/platform/test/fixtures/es_archives/ml/module_sample_ecommerce'
-      );
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/bm_classification');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/egs_regression');
 
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    // The data visualizer should work the same as with a trial license, except the missing create actions
-    // That's why the 'basic' version of 'index_data_visualizer_actions_panel' is loaded here
-    loadTestFile(
-      require.resolve(
-        '../../../../../functional/apps/ml/data_visualizer/group1/index_data_visualizer'
-      )
-    );
+    loadTestFile(require.resolve('./regression_creation_saved_search'));
+    loadTestFile(require.resolve('./classification_creation_saved_search'));
+    loadTestFile(require.resolve('./outlier_detection_creation_saved_search'));
   });
 }
