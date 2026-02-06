@@ -49,6 +49,8 @@ dependsOn:
   - '@kbn/content-management-table-list-view-common'
   - '@kbn/test-eui-helpers'
   - '@kbn/kql'
+  - '@kbn/dashboard-plugin'
+  - '@kbn/embeddable-plugin'
 tags:
   - plugin
   - prod
