@@ -58,7 +58,11 @@ import { getMaxPackageName } from '../../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
 import { detectTargetCsp } from '../../../../../../../../common/services/cloud_connectors';
-import { validatePackagePolicy, validationHasErrors } from '../../services';
+import {
+  validatePackagePolicy,
+  validationHasErrors,
+  isInputVisibleForVarGroupSelections,
+} from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 import type { PackagePolicyFormState } from '../../types';
 import type { RegistryVarGroup } from '../../../../../types';
@@ -519,28 +523,51 @@ export function useOnSubmit({
     isAgentlessIntegration(packageInfo) && selectedSetupTechnology === SetupTechnology.AGENTLESS;
 
   const newInputs = useMemo(() => {
-    return packagePolicy.inputs.map((input, i) => {
-      if (
-        isInputAllowedForDeploymentMode(
-          input,
-          isAgentlessSelected ? 'agentless' : 'default',
-          packageInfo
-        )
-      ) {
+    const varGroupSelections = packagePolicy.var_group_selections ?? {};
+    return packagePolicy.inputs.map((input) => {
+      const allowedForDeploymentMode = isInputAllowedForDeploymentMode(
+        input,
+        isAgentlessSelected ? 'agentless' : 'default',
+        packageInfo
+      );
+      const visibleForVarGroup = isInputVisibleForVarGroupSelections(
+        input,
+        packageInfo,
+        varGroupSelections
+      );
+      if (allowedForDeploymentMode && visibleForVarGroup) {
         return input;
-      } else {
-        return { ...input, enabled: false };
       }
+      return { ...input, enabled: false };
     });
-  }, [packagePolicy.inputs, isAgentlessSelected, packageInfo]);
+  }, [packagePolicy.inputs, packagePolicy.var_group_selections, isAgentlessSelected, packageInfo]);
+
+  // Compare current vs desired input enabled states so the effect below only fires
+  // when a var_group selection actually hides or reveals an input, preventing
+  // infinite update loops from new array references.
+  const inputsEnablingDiffer = useMemo(() => {
+    if (packagePolicy.inputs.length !== newInputs.length) return true;
+    return packagePolicy.inputs.some((input, i) => input.enabled !== newInputs[i]?.enabled);
+  }, [packagePolicy.inputs, newInputs]);
 
   useEffect(() => {
-    if (prevSetupTechnology !== selectedSetupTechnology) {
+    const shouldApplyInputs =
+      prevSetupTechnology !== selectedSetupTechnology ||
+      (packageInfo?.var_groups?.length && inputsEnablingDiffer);
+    if (shouldApplyInputs) {
       updatePackagePolicy({
         inputs: newInputs,
       });
     }
-  }, [newInputs, prevSetupTechnology, selectedSetupTechnology, updatePackagePolicy, packagePolicy]);
+  }, [
+    newInputs,
+    prevSetupTechnology,
+    selectedSetupTechnology,
+    updatePackagePolicy,
+    packagePolicy,
+    inputsEnablingDiffer,
+    packageInfo?.var_groups?.length,
+  ]);
 
   updateAgentlessCloudConnectorConfig(
     packagePolicy,

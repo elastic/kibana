@@ -13,12 +13,9 @@ import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { NewPackagePolicy, PackageInfo } from '../../../../../types';
 
-import { validatePackagePolicy } from '../../services';
+import { validatePackagePolicy, isInputCompatibleWithVarGroupSelections } from '../../services';
 
-import {
-  StepConfigurePackagePolicy,
-  isInputCompatibleWithVarGroupSelections,
-} from './step_configure_package';
+import { StepConfigurePackagePolicy } from './step_configure_package';
 
 describe('StepConfigurePackage', () => {
   let packageInfo: PackageInfo;

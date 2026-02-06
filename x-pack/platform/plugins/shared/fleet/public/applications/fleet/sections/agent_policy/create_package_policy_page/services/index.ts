@@ -16,6 +16,8 @@ export {
   isVarRequiredByVarGroup,
   isVarInSelectedVarGroupOption,
   getSelectedOption,
+  isInputCompatibleWithVarGroupSelections,
+  isInputVisibleForVarGroupSelections,
 } from './var_group_helpers';
 export type { VarGroupSelection } from './var_group_helpers';
 export {
