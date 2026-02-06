@@ -143,7 +143,7 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
     await expect(page.testSubj.locator('workflowYamlEditor')).toBeVisible();
   });
 
-  test('should clone workflow via three dots menu', async ({ page, pageObjects }) => {
+  test('should clone workflow via three dots menu', async ({ pageObjects }) => {
     const workflow = {
       name: 'Clone Action Test Workflow',
       description: 'This workflow should be cloned',
