@@ -13,16 +13,37 @@ import type {
   ClusterPutComponentTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 
-export const createIndex = (esClient: EsClient, index: IndexName) =>
-  esClient.indices.create({ index });
+export interface CreateOptions {
+  throwIfExists?: boolean;
+}
+
+export const createIndex = async (
+  esClient: EsClient,
+  index: IndexName,
+  options: CreateOptions = { throwIfExists: true }
+) => {
+  try {
+    await esClient.indices.create({ index });
+  } catch (error) {
+    if (
+      !options.throwIfExists &&
+      error?.meta?.body?.error?.type === 'resource_already_exists_exception'
+    ) {
+      return;
+    }
+    throw error;
+  }
+};
 
 export const deleteIndex = (esClient: EsClient, index: IndexName) =>
   esClient.indices.delete({ index }, { ignore: [404] });
 
-export const putComponentTemplate = (
+export const putComponentTemplate = async (
   esClient: EsClient,
   request: ClusterPutComponentTemplateRequest
-) => esClient.cluster.putComponentTemplate(request);
+) => {
+  await esClient.cluster.putComponentTemplate(request);
+};
 
 export const deleteComponentTemplate = (esClient: EsClient, name: Names) =>
   esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
@@ -33,8 +54,23 @@ export const putIndexTemplate = (esClient: EsClient, template: IndicesPutIndexTe
 export const deleteIndexTemplate = (esClient: EsClient, name: Names) =>
   esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
 
-export const createDataStream = (esClient: EsClient, name: IndexName) =>
-  esClient.indices.createDataStream({ name });
+export const createDataStream = async (
+  esClient: EsClient,
+  name: IndexName,
+  options: CreateOptions = { throwIfExists: true }
+) => {
+  try {
+    await esClient.indices.createDataStream({ name });
+  } catch (error) {
+    if (
+      !options.throwIfExists &&
+      error?.meta?.body?.error?.type === 'resource_already_exists_exception'
+    ) {
+      return;
+    }
+    throw error;
+  }
+};
 
 export const deleteDataStream = (esClient: EsClient, name: IndexName) =>
   esClient.indices.deleteDataStream({ name }, { ignore: [404] });

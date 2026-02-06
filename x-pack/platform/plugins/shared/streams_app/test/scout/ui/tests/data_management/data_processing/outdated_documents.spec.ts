@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import moment from 'moment';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
@@ -121,6 +121,7 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
     await pageObjects.datePicker.typeAbsoluteRange({
       from: oldDocumentsDateRange.from,
       to: oldDocumentsDateRange.to,
+      containerLocator: kqlDataSourceCard,
     });
     await pageObjects.datePicker.waitToBeHidden();
     await pageObjects.streams.closeFlyout();
@@ -155,6 +156,7 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
     await pageObjects.datePicker.typeAbsoluteRange({
       from: oldDocumentsDateRange.from,
       to: oldDocumentsDateRange.to,
+      containerLocator: kqlDataSourceCard,
     });
     await pageObjects.datePicker.waitToBeHidden();
     await pageObjects.streams.closeFlyout();
