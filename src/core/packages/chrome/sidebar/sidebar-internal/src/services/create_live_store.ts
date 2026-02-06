@@ -48,10 +48,7 @@ export function createLiveStore<TState, TActions>(
 
   if (!parsed.success && isDev) {
     // eslint-disable-next-line no-console
-    console.warn(
-      `[Sidebar] Invalid stored state for '${appId}', using defaults:`,
-      parsed.error
-    );
+    console.warn(`[Sidebar] Invalid stored state for '${appId}', using defaults:`, parsed.error);
   }
 
   const subject = new BehaviorSubject<TState>(initial);

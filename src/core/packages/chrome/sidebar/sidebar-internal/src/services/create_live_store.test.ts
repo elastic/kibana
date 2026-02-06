@@ -9,10 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { createSidebarStore, type SidebarContext } from '@kbn/core-chrome-sidebar';
-import {
-  createLiveStore,
-  type SidebarStorage,
-} from './create_live_store';
+import { createLiveStore, type SidebarStorage } from './create_live_store';
 
 const createMockStorage = (
   initial: Record<string, unknown> = {}

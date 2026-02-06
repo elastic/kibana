@@ -188,7 +188,10 @@ describe('SidebarService (integration)', () => {
       const start = service.start();
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
 
-      expect(start.getApp<TestState, TestActions>(APP_ID_A).getState()).toEqual({ count: 0, name: '' });
+      expect(start.getApp<TestState, TestActions>(APP_ID_A).getState()).toEqual({
+        count: 0,
+        name: '',
+      });
       expect(warnSpy).toHaveBeenCalled();
 
       warnSpy.mockRestore();
