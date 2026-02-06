@@ -7,77 +7,53 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser, type ESQLSource } from '@kbn/esql-language';
+import { Parser, isSource } from '@kbn/esql-language';
 
-export interface CommandPosition {
-  lineNumber: number;
-  startColumn: number;
+export interface CommandRange {
+  lineNumber: number; // 1-based, assumes the command is on a single line
+  startColumn: number; // 1-based
+  endColumn: number; // 1-based, inclusive
 }
 
 /**
- * Returns true when `char` should be treated as a boundary between words.
+ * Returns the first command in the query that matches one of the `supportedCommands`.
  *
- * This is intentionally simple because we only need to detect `FROM`/`TS` as standalone
- * command keywords for the badge (not as part of another token).
- */
-function isEmptyChar(char: string): boolean {
-  return char === ' ' || char === '\n' || char === '\t';
-}
-
-/**
- * Checks if the position is at a word boundary (before or after a token).
+ * We use the ESQL AST to find the command and its `location.min` (a 0-based character offset
+ * into the full query string). That offset is then converted to a Monaco-style range
+ * (1-based line/column) so we can decorate the exact command keyword without relying on
+ * brittle string searches.
  *
- * Example: in `FROM index`, `FROM` has boundaries on both sides.
- * Example: in `_tstart`, `ts` is not at a boundary and must not match.
+ * For incomplete/invalid queries, parsing may fail; in that case this returns `undefined`.
  */
-function isWordBoundary(text: string, index: number, isBefore: boolean): boolean {
-  if (isBefore) {
-    if (index === 0) return true;
-    const charBefore = text[index - 1];
-    return isEmptyChar(charBefore);
-  }
-
-  if (index >= text.length) return true;
-  const charAfter = text[index];
-  return isEmptyChar(charAfter);
-}
-
-/**
- * Finds the first occurrence of a command keyword (`FROM`/`TS`) in the query.
- *
- * - Case-insensitive
- * - Requires word boundaries so we don't match inside other tokens (e.g. `ts` in `?_tstart`)
- * - Returns the Monaco-style 1-based line/column start position
- */
-export function findFirstCommandPosition(
+export const getFirstSupportedCommandFromQuery = (
   query: string,
-  command: string
-): CommandPosition | undefined {
-  if (!query || !command) return;
+  supportedCommands: string[]
+): { command: string; range?: CommandRange } | undefined => {
+  try {
+    const { root } = Parser.parse(query, { withFormatting: true });
+    const cmd = root.commands.find((c) => supportedCommands.includes(c.name.toLowerCase()));
+    if (!cmd) return;
 
-  const lines = query.split('\n');
-  const searchString = command.toLowerCase();
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const lowerCaseLine = line.toLowerCase();
-    let searchIndex = 0;
-
-    while (searchIndex < lowerCaseLine.length) {
-      const cmdIndex = lowerCaseLine.indexOf(searchString, searchIndex);
-      if (cmdIndex === -1) break;
-
-      const beforeBoundary = isWordBoundary(line, cmdIndex, true);
-      const afterBoundary = isWordBoundary(line, cmdIndex + searchString.length, false);
-
-      if (beforeBoundary && afterBoundary) {
-        return { lineNumber: i + 1, startColumn: cmdIndex + 1 }; // Monaco-style 1-based line/column start position
-      }
-
-      searchIndex = cmdIndex + 1;
+    const min = cmd.location?.min;
+    if (typeof min !== 'number') {
+      return { command: cmd.name };
     }
+
+    const safeMin = Math.max(0, Math.min(min, query.length));
+    const textBefore = query.slice(0, safeMin);
+    const lines = textBefore.split('\n');
+    const lineNumber = lines.length;
+    const startColumn = lines[lineNumber - 1].length + 1;
+    const endColumn = startColumn + cmd.name.length;
+
+    return {
+      command: cmd.name,
+      range: { lineNumber, startColumn, endColumn },
+    };
+  } catch {
+    return undefined;
   }
-}
+};
 
 export interface LocatedSourceItem {
   min: number;
@@ -98,21 +74,14 @@ export const getLocatedSourceItemsFromQuery = (query: string): LocatedSourceItem
     const { root } = Parser.parse(query, { withFormatting: true });
     const sourceCommand = root.commands.find(({ name }) => name === 'from' || name === 'ts');
 
-    const sources = (sourceCommand?.args ?? []).filter((arg): arg is ESQLSource =>
-      Boolean(
-        arg &&
-          typeof arg === 'object' &&
-          !Array.isArray(arg) &&
-          (arg as ESQLSource).type === 'source'
-      )
-    );
+    const sources = (sourceCommand?.args ?? []).filter(isSource);
 
     return sources
       .map((s) => ({
         min: s.location.min,
         max: s.location.max,
-        type: (s as any).type as string | undefined,
-        name: (s as any).name as string | undefined,
+        type: s.type as string | undefined,
+        name: s.name as string | undefined,
       }))
       .sort((a, b) => a.min - b.min);
   } catch {

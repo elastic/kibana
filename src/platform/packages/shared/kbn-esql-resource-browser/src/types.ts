@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  BrowserPopoverWrapper,
-  BROWSER_POPOVER_WIDTH,
-  BROWSER_POPOVER_HEIGHT,
-} from './browser_popover_wrapper';
-export type { BrowserPopoverWrapperProps } from './browser_popover_wrapper';
-export { DataSourceBrowser } from './data_source_browser';
-export { FieldsBrowser } from './fields_browser';
-export { DataSourceSelectionChange } from './types';
+/**
+ * Single-toggle selection change emitted by the data source browser.
+ *
+ * The UI behaves like a list of options: each click adds/removes one item and
+ * immediately applies the corresponding change in the editor.
+ */
+export enum DataSourceSelectionChange {
+  Add = 'add',
+  Remove = 'remove',
+}
+

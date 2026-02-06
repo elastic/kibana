@@ -20,6 +20,7 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import type { ESQLEditorDeps } from './types';
 import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
+import { IndicesBrowserOpenMode } from './resource_browser/open_mode';
 
 export interface MonacoCommandDependencies {
   application?: CoreStart['application'];
@@ -31,7 +32,7 @@ export interface MonacoCommandDependencies {
   controlsContext: React.RefObject<ESQLControlsContext | undefined>;
   openTimePickerPopover: () => void;
   openIndicesBrowser?: (options?: {
-    openedFrom?: 'badge' | 'autocomplete';
+    openedFrom?: IndicesBrowserOpenMode;
     preloadedSources?: ESQLSourceResult[];
     preloadedTimeSeriesSources?: IndexAutocompleteItem[];
   }) => void;
@@ -117,7 +118,7 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
         }
 
         openIndicesBrowser({
-          openedFrom: 'autocomplete',
+          openedFrom: IndicesBrowserOpenMode.Autocomplete,
           preloadedSources,
           preloadedTimeSeriesSources,
         });

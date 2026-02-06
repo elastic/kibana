@@ -25,6 +25,7 @@ import type { ESQLSourceResult } from '@kbn/esql-types';
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
 import { getSourceTypeKey, getSourceTypeLabel } from './utils';
 import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
+import { DataSourceSelectionChange } from '../types';
 
 // Filter panel size constants
 const FILTER_PANEL_WIDTH = 250; // Width in pixels for the filter panel lists
@@ -36,7 +37,7 @@ interface DataSourceBrowserProps {
   allSources: ESQLSourceResult[];
   selectedSources?: string[];
   onClose: () => void;
-  onSelect: (sourceName: string, change: 'add' | 'remove') => void;
+  onSelect: (sourceName: string, change: DataSourceSelectionChange) => void;
   position?: { top?: number; left?: number };
 }
 
@@ -198,7 +199,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
         : selectedItems.filter((o) => o !== key);
 
       setSelectedItems(newSelected);
-      onSelect(key, isAdding ? 'add' : 'remove');
+      onSelect(key, isAdding ? DataSourceSelectionChange.Add : DataSourceSelectionChange.Remove);
     },
     [onSelect, selectedItems]
   );

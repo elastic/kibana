@@ -15,10 +15,12 @@ import type {
   IndexAutocompleteItem,
 } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
-import { Parser, type ESQLSource } from '@kbn/esql-language';
+import { Parser, isSource } from '@kbn/esql-language';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { BROWSER_POPOVER_WIDTH } from '@kbn/esql-resource-browser';
+import { DataSourceSelectionChange } from '@kbn/esql-resource-browser';
 import { computeInsertionText, computeRemovalRange, getLocatedSourceItemsFromQuery } from './utils';
+import { IndicesBrowserOpenMode } from './open_mode';
 
 interface UseDataSourceBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -30,6 +32,8 @@ interface BrowserPopoverPosition {
   top?: number;
   left?: number;
 }
+
+const BROWSER_POPOVER_VERTICAL_OFFSET = 20; // 20px to account for the line height
 
 const normalizeTimeseriesIndices = (result: IndicesAutocompleteResult): ESQLSourceResult[] => {
   return (
@@ -70,7 +74,7 @@ export function useDataSourceBrowser({
 
   const sourcesRangeRef = useRef<monaco.IRange | undefined>(undefined);
   const isTSCommandRef = useRef(false);
-  const openModeRef = useRef<'badge' | 'autocomplete'>('autocomplete');
+  const openModeRef = useRef<IndicesBrowserOpenMode>(IndicesBrowserOpenMode.Autocomplete);
   const openCursorOffsetRef = useRef<number | undefined>(undefined);
   const insertionOffsetRef = useRef<number | undefined>(undefined);
   const selectedSourcesRef = useRef<string[]>([]);
@@ -86,7 +90,8 @@ export function useDataSourceBrowser({
     const editorPosition = editor.getScrolledVisiblePosition(cursorPosition);
     if (!editorCoords || !editorPosition) return;
 
-    const absoluteTop = editorCoords.top + (editorPosition.top ?? 0) + 20; // 20px to account for the line height
+    const absoluteTop =
+      editorCoords.top + (editorPosition.top ?? 0) + BROWSER_POPOVER_VERTICAL_OFFSET;
     let absoluteLeft = editorCoords.left + (editorPosition.left ?? 0);
 
     if (absoluteLeft > editorCoords.width) {
@@ -111,7 +116,7 @@ export function useDataSourceBrowser({
 
   const openIndicesBrowser = useCallback(
     async (options?: {
-      openedFrom?: 'badge' | 'autocomplete';
+      openedFrom?: IndicesBrowserOpenMode;
       preloadedSources?: ESQLSourceResult[];
       preloadedTimeSeriesSources?: IndexAutocompleteItem[];
     }) => {
@@ -119,7 +124,7 @@ export function useDataSourceBrowser({
       const editor = editorRef.current;
       if (!model || !editor) return;
 
-      openModeRef.current = options?.openedFrom ?? 'autocomplete';
+      openModeRef.current = options?.openedFrom ?? IndicesBrowserOpenMode.Autocomplete;
 
       const fullText = model.getValue() || '';
       const indexPattern = getIndexPatternFromESQLQuery(fullText);
@@ -136,16 +141,14 @@ export function useDataSourceBrowser({
         const sourceCommand = root.commands.find(({ name }) => name === 'from' || name === 'ts');
         isTSCommandRef.current = sourceCommand?.name === 'ts';
 
-        const sources = (sourceCommand?.args ?? []).filter((arg): arg is ESQLSource =>
-          Boolean(arg && typeof arg === 'object' && (arg as ESQLSource).type === 'source')
-        );
+        const sources = (sourceCommand?.args ?? []).filter(isSource);
 
         if (sources.length > 0) {
           const startOffset = Math.min(...sources.map((s) => s.location.min));
           const endOffset = Math.max(...sources.map((s) => s.location.max)) + 1;
           sourcesRangeRef.current = getRangeFromOffsets(model, startOffset, endOffset);
           // If opened from the badge, we always insert at the beginning of the sources list.
-          if (openModeRef.current === 'badge') {
+          if (openModeRef.current === IndicesBrowserOpenMode.Badge) {
             insertionOffsetRef.current = startOffset;
           }
         } else {
@@ -201,14 +204,14 @@ export function useDataSourceBrowser({
   );
 
   const handleDataSourceBrowserSelect = useCallback(
-    (sourceName: string, change: 'add' | 'remove') => {
+    (sourceName: string, change: DataSourceSelectionChange) => {
       const editor = editorRef.current;
       const model = editorModel.current;
       const insertAtOffset = insertionOffsetRef.current;
 
       const previous = selectedSourcesRef.current;
       const newSelectedSources =
-        change === 'add'
+        change === DataSourceSelectionChange.Add
           ? previous.includes(sourceName)
             ? previous
             : [...previous, sourceName]
@@ -244,18 +247,17 @@ export function useDataSourceBrowser({
           },
         ]);
 
-        if (openModeRef.current === 'autocomplete') {
+        if (openModeRef.current === IndicesBrowserOpenMode.Autocomplete) {
           insertionOffsetRef.current = at + text.length;
         }
       };
 
-      if (change === 'remove') {
+      if (change === DataSourceSelectionChange.Remove) {
         const currentText = model.getValue() || '';
         const currentItems = getLocatedSourceItemsFromQuery(currentText);
         const range = computeRemovalRange(currentText, currentItems, sourceName);
         if (!range) return;
         applyDelete(range.start, range.end);
-        return;
       } else {
         const currentText = model.getValue() || '';
         const at = insertionOffsetRef.current ?? insertAtOffset;
@@ -266,7 +268,10 @@ export function useDataSourceBrowser({
         const { at: insertAt, text } = computeInsertionText({
           query: currentText,
           items: currentItems,
-          at: openModeRef.current === 'badge' ? openCursorOffsetRef.current ?? at : at,
+          at:
+            openModeRef.current === IndicesBrowserOpenMode.Badge
+              ? openCursorOffsetRef.current ?? at
+              : at,
           sourceName,
           mode: openModeRef.current,
         });

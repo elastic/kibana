@@ -671,12 +671,7 @@ const ESQLEditorInternal = function ESQLEditor({
     esqlCallbacks,
   });
 
-  const {
-    addSourcesDecorator,
-    sourcesBadgeStyle,
-    sourcesLabelClickHandler,
-    sourcesLabelKeyDownHandler,
-  } = useSourcesBadge({
+  const { addSourcesDecorator, sourcesBadgeStyle, sourcesLabelClickHandler } = useSourcesBadge({
     editorRef,
     editorModel,
     openIndicesBrowser,
@@ -1177,12 +1172,6 @@ const ESQLEditorInternal = function ESQLEditor({
                   editor.onMouseDown((e) => {
                     if (enableResourceBrowser) {
                       sourcesLabelClickHandler(e);
-                    }
-                  });
-
-                  editor.onKeyDown((e) => {
-                    if (enableResourceBrowser) {
-                      sourcesLabelKeyDownHandler(e);
                     }
                   });
 
