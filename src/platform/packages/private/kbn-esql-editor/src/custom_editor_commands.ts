@@ -14,6 +14,8 @@ import {
   type ESQLControlsContext,
   ControlTriggerSource,
   type ESQLControlVariable,
+  type ESQLSourceResult,
+  type IndexAutocompleteItem,
 } from '@kbn/esql-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { ESQLEditorDeps } from './types';
@@ -28,7 +30,11 @@ export interface MonacoCommandDependencies {
   esqlVariables: React.RefObject<ESQLControlVariable[] | undefined>;
   controlsContext: React.RefObject<ESQLControlsContext | undefined>;
   openTimePickerPopover: () => void;
-  openIndicesBrowser?: (options?: { openedFrom?: 'badge' | 'autocomplete' }) => void;
+  openIndicesBrowser?: (options?: {
+    openedFrom?: 'badge' | 'autocomplete';
+    preloadedSources?: ESQLSourceResult[];
+    preloadedTimeSeriesSources?: IndexAutocompleteItem[];
+  }) => void;
 }
 
 const triggerControl = async (
@@ -88,7 +94,33 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
   if (openIndicesBrowser) {
     commandDisposables.push(
       monaco.editor.registerCommand('esql.indicesBrowser.open', (...args) => {
-        openIndicesBrowser({ openedFrom: 'autocomplete' });
+        const [, payload] = args;
+        let preloadedSources: ESQLSourceResult[] | undefined;
+        let preloadedTimeSeriesSources: IndexAutocompleteItem[] | undefined;
+
+        if (payload?.sources) {
+          try {
+            preloadedSources = JSON.parse(payload.sources) as ESQLSourceResult[];
+          } catch {
+            preloadedSources = undefined;
+          }
+        }
+
+        if (payload?.timeSeriesSources) {
+          try {
+            preloadedTimeSeriesSources = JSON.parse(
+              payload.timeSeriesSources
+            ) as IndexAutocompleteItem[];
+          } catch {
+            preloadedTimeSeriesSources = undefined;
+          }
+        }
+
+        openIndicesBrowser({
+          openedFrom: 'autocomplete',
+          preloadedSources,
+          preloadedTimeSeriesSources,
+        });
       })
     );
   }

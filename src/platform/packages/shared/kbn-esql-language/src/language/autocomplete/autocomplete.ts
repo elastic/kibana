@@ -297,7 +297,21 @@ async function getSuggestionsWithinCommandExpression(
     const insertText = rangeToReplace
       ? fullText.substring(rangeToReplace.start, rangeToReplace.end)
       : '';
-    suggestions.unshift(createIndicesBrowserSuggestion(rangeToReplace, filterText, insertText));
+    const commandArgs: Record<string, string> = {};
+    if (context.sources) {
+      commandArgs.sources = JSON.stringify(context.sources);
+    }
+    if (context.timeSeriesSources) {
+      commandArgs.timeSeriesSources = JSON.stringify(context.timeSeriesSources);
+    }
+    suggestions.unshift(
+      createIndicesBrowserSuggestion(
+        rangeToReplace,
+        filterText,
+        insertText,
+        Object.keys(commandArgs).length ? commandArgs : undefined
+      )
+    );
   }
 
   // Apply context-aware ordering

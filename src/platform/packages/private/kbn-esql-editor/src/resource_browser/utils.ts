@@ -49,7 +49,10 @@ function isWordBoundary(text: string, index: number, isBefore: boolean): boolean
  * - Requires word boundaries so we don't match inside other tokens (e.g. `ts` in `?_tstart`)
  * - Returns the Monaco-style 1-based line/column start position
  */
-export function findFirstCommandPosition(query: string, command: string): CommandPosition | undefined {
+export function findFirstCommandPosition(
+  query: string,
+  command: string
+): CommandPosition | undefined {
   if (!query || !command) return;
 
   const lines = query.split('\n');
@@ -95,9 +98,13 @@ export const getLocatedSourceItemsFromQuery = (query: string): LocatedSourceItem
     const { root } = Parser.parse(query, { withFormatting: true });
     const sourceCommand = root.commands.find(({ name }) => name === 'from' || name === 'ts');
 
-    const sources = (sourceCommand?.args ?? []).filter(
-      (arg): arg is ESQLSource =>
-        Boolean(arg && typeof arg === 'object' && !Array.isArray(arg) && (arg as ESQLSource).type === 'source')
+    const sources = (sourceCommand?.args ?? []).filter((arg): arg is ESQLSource =>
+      Boolean(
+        arg &&
+          typeof arg === 'object' &&
+          !Array.isArray(arg) &&
+          (arg as ESQLSource).type === 'source'
+      )
     );
 
     return sources
@@ -239,4 +246,3 @@ export const computeInsertionText = ({
     text: `${needsLeadingComma ? ',' : ''}${sourceName}${needsTrailingComma ? ',' : ''}`,
   };
 };
-

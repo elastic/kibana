@@ -671,12 +671,16 @@ const ESQLEditorInternal = function ESQLEditor({
     esqlCallbacks,
   });
 
-  const { addSourcesDecorator, sourcesBadgeStyle, sourcesLabelClickHandler, sourcesLabelKeyDownHandler } =
-    useSourcesBadge({
-      editorRef,
-      editorModel,
-      openIndicesBrowser,
-    });
+  const {
+    addSourcesDecorator,
+    sourcesBadgeStyle,
+    sourcesLabelClickHandler,
+    sourcesLabelKeyDownHandler,
+  } = useSourcesBadge({
+    editorRef,
+    editorModel,
+    openIndicesBrowser,
+  });
 
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {

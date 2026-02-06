@@ -8,16 +8,17 @@
  */
 
 import { useCallback, useRef, useState, type MutableRefObject } from 'react';
-import type { ESQLCallbacks, ESQLSourceResult, IndicesAutocompleteResult } from '@kbn/esql-types';
+import type {
+  ESQLCallbacks,
+  ESQLSourceResult,
+  IndicesAutocompleteResult,
+  IndexAutocompleteItem,
+} from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { Parser, type ESQLSource } from '@kbn/esql-language';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { BROWSER_POPOVER_WIDTH } from '@kbn/esql-resource-browser';
-import {
-  computeInsertionText,
-  computeRemovalRange,
-  getLocatedSourceItemsFromQuery,
-} from './utils';
+import { computeInsertionText, computeRemovalRange, getLocatedSourceItemsFromQuery } from './utils';
 
 interface UseDataSourceBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -56,7 +57,11 @@ const getRangeFromOffsets = (
   };
 };
 
-export function useDataSourceBrowser({ editorRef, editorModel, esqlCallbacks }: UseDataSourceBrowserParams) {
+export function useDataSourceBrowser({
+  editorRef,
+  editorModel,
+  esqlCallbacks,
+}: UseDataSourceBrowserParams) {
   const [isDataSourceBrowserOpen, setIsDataSourceBrowserOpen] = useState(false);
   const [browserPopoverPosition, setBrowserPopoverPosition] = useState<BrowserPopoverPosition>({});
 
@@ -104,73 +109,96 @@ export function useDataSourceBrowser({ editorRef, editorModel, esqlCallbacks }: 
     return (await getSources?.()) ?? [];
   }, [esqlCallbacks]);
 
-  const openIndicesBrowser = useCallback(async (options?: { openedFrom?: 'badge' | 'autocomplete' }) => {
-    const model = editorModel.current;
-    const editor = editorRef.current;
-    if (!model || !editor) return;
+  const openIndicesBrowser = useCallback(
+    async (options?: {
+      openedFrom?: 'badge' | 'autocomplete';
+      preloadedSources?: ESQLSourceResult[];
+      preloadedTimeSeriesSources?: IndexAutocompleteItem[];
+    }) => {
+      const model = editorModel.current;
+      const editor = editorRef.current;
+      if (!model || !editor) return;
 
-    openModeRef.current = options?.openedFrom ?? 'autocomplete';
+      openModeRef.current = options?.openedFrom ?? 'autocomplete';
 
-    const fullText = model.getValue() || '';
-    const indexPattern = getIndexPatternFromESQLQuery(fullText);
-    const currentSelectedSources = indexPattern ? indexPattern.split(',').filter(Boolean) : [];
-    selectedSourcesRef.current = currentSelectedSources;
+      const fullText = model.getValue() || '';
+      const indexPattern = getIndexPatternFromESQLQuery(fullText);
+      const currentSelectedSources = indexPattern ? indexPattern.split(',').filter(Boolean) : [];
+      selectedSourcesRef.current = currentSelectedSources;
 
-    const cursorPosition = editor.getPosition();
-    openCursorOffsetRef.current = cursorPosition ? model.getOffsetAt(cursorPosition) : undefined;
-    insertionOffsetRef.current = openCursorOffsetRef.current;
+      const cursorPosition = editor.getPosition();
+      openCursorOffsetRef.current = cursorPosition ? model.getOffsetAt(cursorPosition) : undefined;
+      insertionOffsetRef.current = openCursorOffsetRef.current;
 
-    // Get the range of the sources
-    try {
-      const { root } = Parser.parse(fullText, { withFormatting: true });
-      const sourceCommand = root.commands.find(({ name }) => name === 'from' || name === 'ts');
-      isTSCommandRef.current = sourceCommand?.name === 'ts';
+      // Get the range of the sources
+      try {
+        const { root } = Parser.parse(fullText, { withFormatting: true });
+        const sourceCommand = root.commands.find(({ name }) => name === 'from' || name === 'ts');
+        isTSCommandRef.current = sourceCommand?.name === 'ts';
 
-      const sources = (sourceCommand?.args ?? []).filter(
-        (arg): arg is ESQLSource => Boolean(arg && typeof arg === 'object' && (arg as ESQLSource).type === 'source')
-      );
+        const sources = (sourceCommand?.args ?? []).filter((arg): arg is ESQLSource =>
+          Boolean(arg && typeof arg === 'object' && (arg as ESQLSource).type === 'source')
+        );
 
-      if (sources.length > 0) {
-        const startOffset = Math.min(...sources.map((s) => s.location.min));
-        const endOffset = Math.max(...sources.map((s) => s.location.max)) + 1;
-        sourcesRangeRef.current = getRangeFromOffsets(model, startOffset, endOffset);
-        // If opened from the badge, we always insert at the beginning of the sources list.
-        if (openModeRef.current === 'badge') {
-          insertionOffsetRef.current = startOffset;
+        if (sources.length > 0) {
+          const startOffset = Math.min(...sources.map((s) => s.location.min));
+          const endOffset = Math.max(...sources.map((s) => s.location.max)) + 1;
+          sourcesRangeRef.current = getRangeFromOffsets(model, startOffset, endOffset);
+          // If opened from the badge, we always insert at the beginning of the sources list.
+          if (openModeRef.current === 'badge') {
+            insertionOffsetRef.current = startOffset;
+          }
+        } else {
+          const offset = openCursorOffsetRef.current;
+          if (offset) {
+            sourcesRangeRef.current = getRangeFromOffsets(model, offset, offset);
+            insertionOffsetRef.current = offset;
+          }
         }
-      } else {
+      } catch {
+        // If parsing fails, fall back to inserting at the current cursor position.
         const offset = openCursorOffsetRef.current;
-        if (offset) {
+        if (typeof offset === 'number') {
           sourcesRangeRef.current = getRangeFromOffsets(model, offset, offset);
           insertionOffsetRef.current = offset;
         }
+        isTSCommandRef.current = false;
       }
-    } catch {
-      // If parsing fails, fall back to inserting at the current cursor position.
-      const offset = openCursorOffsetRef.current;
-      if (typeof offset === 'number') {
-        sourcesRangeRef.current = getRangeFromOffsets(model, offset, offset);
-        insertionOffsetRef.current = offset;
+
+      const preloadedSources = options?.preloadedSources;
+      const preloadedTimeSeriesSources = options?.preloadedTimeSeriesSources;
+      const shouldUsePreloaded = Boolean(
+        (isTSCommandRef.current && preloadedTimeSeriesSources?.length) ||
+          (!isTSCommandRef.current && preloadedSources?.length)
+      );
+
+      if (shouldUsePreloaded) {
+        const normalized =
+          isTSCommandRef.current && preloadedTimeSeriesSources
+            ? normalizeTimeseriesIndices({ indices: preloadedTimeSeriesSources })
+            : preloadedSources ?? [];
+        setAllSources(normalized);
+        setIsLoadingSources(false);
+      } else {
+        // Fetch the sources
+        setIsLoadingSources(true);
+        try {
+          const fetched = await fetchSources();
+          setAllSources(fetched);
+        } catch {
+          setAllSources([]);
+        } finally {
+          setIsLoadingSources(false);
+        }
       }
-      isTSCommandRef.current = false;
-    }
 
-    // Fetch the sources
-    setIsLoadingSources(true);
-    try {
-      const fetched = await fetchSources();
-      setAllSources(fetched);
-    } catch {
-      setAllSources([]);
-    } finally {
-      setIsLoadingSources(false);
-    }
+      // Update the popover position
+      updatePopoverPosition();
 
-    // Update the popover position
-    updatePopoverPosition();
-
-    setIsDataSourceBrowserOpen(true);
-  }, [editorModel, editorRef, updatePopoverPosition, fetchSources]);
+      setIsDataSourceBrowserOpen(true);
+    },
+    [editorModel, editorRef, updatePopoverPosition, fetchSources]
+  );
 
   const handleDataSourceBrowserSelect = useCallback(
     (sourceName: string, change: 'add' | 'remove') => {
@@ -231,7 +259,10 @@ export function useDataSourceBrowser({ editorRef, editorModel, esqlCallbacks }: 
       } else {
         const currentText = model.getValue() || '';
         const at = insertionOffsetRef.current ?? insertAtOffset;
-        const currentItems = getLocatedSourceItemsFromQuery(currentText).map(({ min, max }) => ({ min, max }));
+        const currentItems = getLocatedSourceItemsFromQuery(currentText).map(({ min, max }) => ({
+          min,
+          max,
+        }));
         const { at: insertAt, text } = computeInsertionText({
           query: currentText,
           items: currentItems,
@@ -256,4 +287,3 @@ export function useDataSourceBrowser({ editorRef, editorModel, esqlCallbacks }: 
     handleDataSourceBrowserSelect,
   };
 }
-

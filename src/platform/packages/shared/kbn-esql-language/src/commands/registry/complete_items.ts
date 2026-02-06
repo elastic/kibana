@@ -582,6 +582,7 @@ export function createResourceBrowserSuggestion(options: {
   rangeToReplace?: { start: number; end: number };
   filterText?: string;
   insertText?: string;
+  commandArgs?: Record<string, string>;
 }): ISuggestionItem {
   // TODO: The Timeseries suggestion still appears before the Resource Browser suggestion
   // We should fix this
@@ -593,6 +594,7 @@ export function createResourceBrowserSuggestion(options: {
     command: {
       title: options.label,
       id: options.commandId,
+      ...(options.commandArgs && { arguments: [options.commandArgs] }),
     },
     asSnippet: false,
     filterText: options.filterText || '',
@@ -603,7 +605,8 @@ export function createResourceBrowserSuggestion(options: {
 export function createIndicesBrowserSuggestion(
   rangeToReplace?: { start: number; end: number },
   filterText?: string,
-  insertText?: string
+  insertText?: string,
+  commandArgs?: Record<string, string>
 ): ISuggestionItem {
   return createResourceBrowserSuggestion({
     label: i18n.translate('kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionLabel', {
@@ -619,5 +622,6 @@ export function createIndicesBrowserSuggestion(
     rangeToReplace,
     filterText,
     insertText,
+    commandArgs,
   });
 }
