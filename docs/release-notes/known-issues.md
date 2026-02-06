@@ -12,6 +12,7 @@ For Elastic Security known issues, refer to [Elastic Security known issues](docs
 :subsections:
 :type: known-issue
 :config: /changelog.yml
+:product: kibana
 :::
 
 ## Older content
