@@ -33,7 +33,7 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             params: buildRouteValidationWithZod(paramsSchema),

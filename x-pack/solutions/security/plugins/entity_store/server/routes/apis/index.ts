@@ -8,3 +8,7 @@
 export { registerInstall } from './install';
 export { registerStop } from './stop';
 export { registerForceLogExtraction } from './force_log_extraction';
+export { registerUninstall } from './uninstall';
+export { registerCRUDUpsert } from './crud_upsert';
+export { registerCRUDUpsertBulk } from './crud_upsert_bulk';
+export { registerCRUDDelete } from './crud_delete';

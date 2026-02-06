@@ -5,13 +5,23 @@
  * 2.0.
  */
 
-import { registerInstall, registerStop, registerForceLogExtraction } from './apis';
+import {
+  registerInstall,
+  registerStop,
+  registerForceLogExtraction,
+  registerUninstall,
+  registerCRUDUpsert,
+  registerCRUDUpsertBulk,
+  registerCRUDDelete,
+} from './apis';
 import type { EntityStorePluginRouter } from '../types';
-import { registerUninstall } from './apis/uninstall';
 
 export function registerRoutes(router: EntityStorePluginRouter) {
   registerInstall(router);
   registerStop(router);
   registerUninstall(router);
   registerForceLogExtraction(router);
+  registerCRUDUpsert(router);
+  registerCRUDUpsertBulk(router);
+  registerCRUDDelete(router);
 }

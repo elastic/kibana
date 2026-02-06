@@ -28,7 +28,7 @@ export function registerCRUDUpsertBulk(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(bodySchema),
