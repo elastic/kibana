@@ -552,7 +552,7 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
-    const { size = 100, page = 1, enabled, createdBy, query } = params;
+    const { size = 100, page = 1, enabled, createdBy, tags, query } = params;
     const from = (page - 1) * size;
 
     const must: estypes.QueryDslQueryContainer[] = [];
@@ -575,6 +575,10 @@ export class WorkflowsService {
 
     if (createdBy && createdBy.length > 0) {
       must.push({ terms: { createdBy } });
+    }
+
+    if (tags && tags.length > 0) {
+      must.push({ terms: { tags } });
     }
 
     if (query) {

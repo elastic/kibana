@@ -118,11 +118,11 @@ describe('lensSlice', () => {
       const newDatasourceState = {};
       store.dispatch(
         updateDatasourceState({
-          datasourceId: 'testDatasource',
+          datasourceId: 'formBased',
           newDatasourceState,
         })
       );
-      expect(store.getState().lens.datasourceStates.testDatasource.state).toStrictEqual(
+      expect(store.getState().lens.datasourceStates.formBased.state).toStrictEqual(
         newDatasourceState
       );
     });
@@ -151,25 +151,25 @@ describe('lensSlice', () => {
             newVisualizationId: 'testVis2',
             visualizationState: newVisState,
             datasourceState: newDatasourceState,
-            datasourceId: 'testDatasource',
+            datasourceId: 'formBased',
           },
           clearStagedPreview: true,
         })
       );
 
       expect(store.getState().lens.visualization.state).toBe(newVisState);
-      expect(store.getState().lens.datasourceStates.testDatasource.state).toBe(newDatasourceState);
+      expect(store.getState().lens.datasourceStates.formBased.state).toBe(newDatasourceState);
     });
 
     it('should switch active datasource and initialize new state', () => {
       store.dispatch(
         switchDatasource({
-          newDatasourceId: 'testDatasource2',
+          newDatasourceId: 'textBased',
         })
       );
 
-      expect(store.getState().lens.activeDatasourceId).toEqual('testDatasource2');
-      expect(store.getState().lens.datasourceStates.testDatasource2.isLoading).toEqual(true);
+      expect(store.getState().lens.activeDatasourceId).toEqual('textBased');
+      expect(store.getState().lens.datasourceStates.textBased.isLoading).toEqual(true);
     });
 
     it('should not initialize already initialized datasource on switch', () => {
@@ -177,11 +177,11 @@ describe('lensSlice', () => {
       const { store: customStore } = makeLensStore({
         preloadedState: {
           datasourceStates: {
-            testDatasource: {
+            formBased: {
               state: {},
               isLoading: false,
             },
-            testDatasource2: {
+            textBased: {
               state: datasource2State,
               isLoading: false,
             },
@@ -191,28 +191,26 @@ describe('lensSlice', () => {
 
       customStore.dispatch(
         switchDatasource({
-          newDatasourceId: 'testDatasource2',
+          newDatasourceId: 'textBased',
         })
       );
 
-      expect(customStore.getState().lens.activeDatasourceId).toEqual('testDatasource2');
-      expect(customStore.getState().lens.datasourceStates.testDatasource2.isLoading).toEqual(false);
-      expect(customStore.getState().lens.datasourceStates.testDatasource2.state).toBe(
-        datasource2State
-      );
+      expect(customStore.getState().lens.activeDatasourceId).toEqual('textBased');
+      expect(customStore.getState().lens.datasourceStates.textBased.isLoading).toEqual(false);
+      expect(customStore.getState().lens.datasourceStates.textBased.state).toBe(datasource2State);
     });
 
     describe('switching to a new datasource and modify the state', () => {
       it('should switch active datasource and initialize new state', () => {
         store.dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'testDatasource2',
+            newDatasourceId: 'textBased',
             visualizationId: 'testVis',
             currentIndexPatternId: 'testIndexPatternId',
           })
         );
-        expect(store.getState().lens.activeDatasourceId).toEqual('testDatasource2');
-        expect(store.getState().lens.datasourceStates.testDatasource2.isLoading).toEqual(false);
+        expect(store.getState().lens.activeDatasourceId).toEqual('textBased');
+        expect(store.getState().lens.datasourceStates.textBased.isLoading).toEqual(false);
         expect(store.getState().lens.visualization.activeId).toEqual('testVis');
       });
 
@@ -223,11 +221,11 @@ describe('lensSlice', () => {
         const { store: customStore } = makeLensStore({
           preloadedState: {
             datasourceStates: {
-              testDatasource: {
+              formBased: {
                 state: {},
                 isLoading: false,
               },
-              testDatasource2: {
+              textBased: {
                 state: datasource2State,
                 isLoading: false,
               },
@@ -237,24 +235,20 @@ describe('lensSlice', () => {
 
         customStore.dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'testDatasource2',
+            newDatasourceId: 'textBased',
             visualizationId: 'testVis',
             currentIndexPatternId: 'testIndexPatternId',
           })
         );
 
-        expect(customStore.getState().lens.activeDatasourceId).toEqual('testDatasource2');
-        expect(customStore.getState().lens.datasourceStates.testDatasource2.isLoading).toEqual(
-          false
-        );
-        expect(customStore.getState().lens.datasourceStates.testDatasource2.state).toStrictEqual(
-          {}
-        );
+        expect(customStore.getState().lens.activeDatasourceId).toEqual('textBased');
+        expect(customStore.getState().lens.datasourceStates.textBased.isLoading).toEqual(false);
+        expect(customStore.getState().lens.datasourceStates.textBased.state).toStrictEqual({});
       });
     });
 
     describe('adding or removing layer', () => {
-      const testDatasource = (datasourceId: string) => {
+      const formBased = (datasourceId: string) => {
         return {
           id: datasourceId,
           getPublicAPI: () => ({
@@ -283,18 +277,18 @@ describe('lensSlice', () => {
         };
       };
       const datasourceStates = {
-        testDatasource: {
+        formBased: {
           isLoading: false,
           state: ['layer1'],
         },
-        testDatasource2: {
+        textBased: {
           isLoading: false,
           state: ['layer2'],
         },
       };
       const datasourceMap = {
-        testDatasource: testDatasource('testDatasource'),
-        testDatasource2: testDatasource('testDatasource2'),
+        formBased: formBased('formBased'),
+        textBased: formBased('textBased'),
       };
 
       const activeVisId = 'testVis';
@@ -318,7 +312,7 @@ describe('lensSlice', () => {
       beforeEach(() => {
         customStore = makeLensStore({
           preloadedState: {
-            activeDatasourceId: 'testDatasource',
+            activeDatasourceId: 'formBased',
             datasourceStates,
             visualization: {
               activeId: activeVisId,
@@ -352,12 +346,12 @@ describe('lensSlice', () => {
         const state = customStore.getState().lens;
 
         expect(state.visualization.state).toEqual(['layer1', 'layer2', 'foo']);
-        expect(state.datasourceStates.testDatasource.state).toEqual([
+        expect(state.datasourceStates.formBased.state).toEqual([
           'layer1',
           'foo',
           'linked-layer-id',
         ]);
-        expect(state.datasourceStates.testDatasource2.state).toEqual(['layer2']);
+        expect(state.datasourceStates.textBased.state).toEqual(['layer2']);
         expect(state.stagedPreview).not.toBeDefined();
       });
 
@@ -382,7 +376,7 @@ describe('lensSlice', () => {
           groups: [{ groupId: 'to-group' } as VisualizationDimensionGroupConfig],
         }));
         activeVisualization.onDrop = jest.fn(({ prevState }) => prevState);
-        (datasourceMap.testDatasource as unknown as Datasource).syncColumns = jest.fn(
+        (datasourceMap.formBased as unknown as Datasource).syncColumns = jest.fn(
           ({ state }) => state
         );
 
@@ -396,7 +390,7 @@ describe('lensSlice', () => {
 
         expect(
           (
-            (datasourceMap.testDatasource as unknown as Datasource).syncColumns as jest.Mock<
+            (datasourceMap.formBased as unknown as Datasource).syncColumns as jest.Mock<
               Datasource['syncColumns']
             >
           ).mock.calls[0][0]
@@ -466,15 +460,15 @@ describe('lensSlice', () => {
       describe('setLayerDefaultDimension', () => {
         it('should not call initializeDimension when layer has noDatasource: true', () => {
           const activeVisualization = visualizationMap[activeVisId] as Visualization;
-          const testDatasourceWithInit = {
-            ...datasourceMap.testDatasource,
+          const formBasedWithInit = {
+            ...datasourceMap.formBased,
             initializeDimension: jest.fn((state) => state),
           };
           const setDimensionMock = jest.fn(({ prevState }) => prevState);
 
           const customStoreWithInit = makeLensStore({
             preloadedState: {
-              activeDatasourceId: 'testDatasource',
+              activeDatasourceId: 'formBased',
               datasourceStates,
               visualization: {
                 activeId: activeVisId,
@@ -506,7 +500,7 @@ describe('lensSlice', () => {
                 },
               } as unknown as VisualizationMap,
               datasourceMap: {
-                testDatasource: testDatasourceWithInit,
+                formBased: formBasedWithInit,
               } as unknown as DatasourceMap,
             }),
           }).store;
@@ -519,20 +513,20 @@ describe('lensSlice', () => {
             })
           );
 
-          expect(testDatasourceWithInit.initializeDimension).not.toHaveBeenCalled();
+          expect(formBasedWithInit.initializeDimension).not.toHaveBeenCalled();
           expect(setDimensionMock).toHaveBeenCalled();
         });
 
         it('should call initializeDimension when layer does not have noDatasource flag', () => {
           const activeVisualization = visualizationMap[activeVisId] as Visualization;
-          const testDatasourceWithInit = {
-            ...datasourceMap.testDatasource,
+          const formBasedWithInit = {
+            ...datasourceMap.formBased,
             initializeDimension: jest.fn((state) => state),
           };
 
           const customStoreWithInit = makeLensStore({
             preloadedState: {
-              activeDatasourceId: 'testDatasource',
+              activeDatasourceId: 'formBased',
               datasourceStates,
               visualization: {
                 activeId: activeVisId,
@@ -563,7 +557,7 @@ describe('lensSlice', () => {
                 },
               } as unknown as VisualizationMap,
               datasourceMap: {
-                testDatasource: testDatasourceWithInit,
+                formBased: formBasedWithInit,
               } as unknown as DatasourceMap,
             }),
           }).store;
@@ -576,19 +570,19 @@ describe('lensSlice', () => {
             })
           );
 
-          expect(testDatasourceWithInit.initializeDimension).toHaveBeenCalled();
+          expect(formBasedWithInit.initializeDimension).toHaveBeenCalled();
         });
 
         it('should not initialize dimension when no initialDimensions are specified', () => {
           const activeVisualization = visualizationMap[activeVisId] as Visualization;
-          const testDatasourceWithInit = {
-            ...datasourceMap.testDatasource,
+          const formBasedWithInit = {
+            ...datasourceMap.formBased,
             initializeDimension: jest.fn((state) => state),
           };
 
           const customStoreWithInit = makeLensStore({
             preloadedState: {
-              activeDatasourceId: 'testDatasource',
+              activeDatasourceId: 'formBased',
               datasourceStates,
               visualization: {
                 activeId: activeVisId,
@@ -613,7 +607,7 @@ describe('lensSlice', () => {
                 },
               } as unknown as VisualizationMap,
               datasourceMap: {
-                testDatasource: testDatasourceWithInit,
+                formBased: formBasedWithInit,
               } as unknown as DatasourceMap,
             }),
           }).store;
@@ -626,7 +620,7 @@ describe('lensSlice', () => {
             })
           );
 
-          expect(testDatasourceWithInit.initializeDimension).not.toHaveBeenCalled();
+          expect(formBasedWithInit.initializeDimension).not.toHaveBeenCalled();
         });
       });
 
@@ -641,26 +635,27 @@ describe('lensSlice', () => {
         const state = customStore.getState().lens;
 
         expect(state.visualization.state).toEqual(['layer2']);
-        expect(state.datasourceStates.testDatasource.state).toEqual([]);
-        expect(state.datasourceStates.testDatasource2.state).toEqual(['layer2']);
+        expect(state.datasourceStates.formBased.state).toEqual([]);
+        expect(state.datasourceStates.textBased.state).toEqual(['layer2']);
         expect(state.stagedPreview).not.toBeDefined();
       });
 
       it('removeLayer: should remove all layers from visualization that were removed by datasource', () => {
         const removedLayerId = 'other-removed-layer';
 
-        const testDatasource3 = testDatasource('testDatasource3');
-        testDatasource3.removeLayer = (layerIds: unknown, layerId: string) => ({
+        // formBased3 is an artificial test datasource. Production only supports formBased and textBased.
+        const formBased3 = formBased('formBased3');
+        formBased3.removeLayer = (layerIds: unknown, layerId: string) => ({
           newState: (layerIds as string[]).filter((id: string) => id !== layerId),
           removedLayerIds: [layerId, removedLayerId],
         });
 
         const localStore = makeLensStore({
           preloadedState: {
-            activeDatasourceId: 'testDatasource',
+            activeDatasourceId: 'formBased',
             datasourceStates: {
               ...datasourceStates,
-              testDatasource3: {
+              formBased3: {
                 isLoading: false,
                 state: [],
               },
@@ -681,7 +676,7 @@ describe('lensSlice', () => {
           },
           storeDeps: mockStoreDeps({
             visualizationMap: visualizationMap as unknown as VisualizationMap,
-            datasourceMap: { ...datasourceMap, testDatasource3 } as unknown as DatasourceMap,
+            datasourceMap: { ...datasourceMap, formBased3 } as unknown as DatasourceMap,
           }),
         }).store;
 
@@ -700,7 +695,7 @@ describe('lensSlice', () => {
     describe('removing a dimension', () => {
       const colToRemove = 'col-id';
       const otherCol = 'other-col-id';
-      const datasourceId = 'testDatasource';
+      const datasourceId = 'formBased';
 
       interface DatasourceState {
         cols: string[];

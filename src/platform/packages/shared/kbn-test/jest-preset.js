@@ -96,7 +96,6 @@ module.exports = {
   snapshotSerializers: [
     '<rootDir>/src/platform/packages/shared/react/kibana_mount/test_helpers/react_mount_serializer.ts',
     'enzyme-to-json/serializer',
-    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/enzyme_emotion_serializer.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/emotion.js',
   ],
 
