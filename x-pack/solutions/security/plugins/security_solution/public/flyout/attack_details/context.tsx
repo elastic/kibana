@@ -38,6 +38,10 @@ export interface AttackDetailsContext {
    * Field-browser-friendly representation of the event
    */
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  /**
+   * Refetches the attack document from the server
+   */
+  refetch: () => Promise<void>;
 }
 
 /**
@@ -55,7 +59,7 @@ export type AttackDetailsProviderProps = {
 export const AttackDetailsProvider = memo(
   ({ attackId, indexName, children }: AttackDetailsProviderProps) => {
     // data view side: browserFields + field-browser data
-    const { browserFields, dataFormattedForFieldBrowser, searchHit, getFieldsData, loading } =
+    const { browserFields, dataFormattedForFieldBrowser, searchHit, getFieldsData, loading, refetch } =
       useAttackDetails({
         attackId,
         indexName,
@@ -71,9 +75,18 @@ export const AttackDetailsProvider = memo(
               searchHit,
               getFieldsData,
               dataFormattedForFieldBrowser,
+              refetch,
             }
           : undefined,
-      [attackId, browserFields, indexName, dataFormattedForFieldBrowser, searchHit, getFieldsData]
+      [
+        attackId,
+        browserFields,
+        indexName,
+        dataFormattedForFieldBrowser,
+        searchHit,
+        getFieldsData,
+        refetch,
+      ]
     );
 
     if (loading) {

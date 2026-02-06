@@ -21,3 +21,7 @@ export const HEADER_ALERTS_BLOCK_TEST_ID =
 export const HEADER_STATUS_BLOCK_TEST_ID =
   `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-status-block` as const;
 export const HEADER_BADGE_TEST_ID = `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-badge` as const;
+export const HEADER_ASSIGNEES_BLOCK_TEST_ID =
+  `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-assignees-block` as const;
+export const HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID =
+  `${ATTACK_DETAILS_FLYOUT_PREFIX}-header-assignees-add-button` as const;

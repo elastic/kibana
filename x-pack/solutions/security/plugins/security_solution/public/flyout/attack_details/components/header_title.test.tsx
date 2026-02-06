@@ -11,7 +11,11 @@ import { render, screen } from '@testing-library/react';
 import { HeaderTitle } from './header_title';
 import { TestProviders } from '../../../common/mock';
 import { useHeaderData } from '../hooks/use_header_data';
-import { HEADER_ALERTS_BLOCK_TEST_ID, HEADER_BADGE_TEST_ID } from '../constants/test_ids';
+import {
+  HEADER_ALERTS_BLOCK_TEST_ID,
+  HEADER_ASSIGNEES_BLOCK_TEST_ID,
+  HEADER_BADGE_TEST_ID,
+} from '../constants/test_ids';
 
 jest.mock('../hooks/use_header_data', () => ({
   useHeaderData: jest.fn(),
@@ -29,6 +33,10 @@ jest.mock('../../../common/components/formatted_date', () => ({
 
 jest.mock('./status', () => ({
   Status: () => <div data-test-subj="status" />,
+}));
+
+jest.mock('./assignees', () => ({
+  Assignees: () => <div data-test-subj="assignees" />,
 }));
 
 jest.mock('../../shared/components/alert_header_block', () => ({
@@ -110,5 +118,16 @@ describe('HeaderTitle', () => {
     );
 
     expect(screen.queryByTestId('formatted-date')).not.toBeInTheDocument();
+  });
+
+  it('renders the assignees block next to the alerts block', () => {
+    render(
+      <TestProviders>
+        <HeaderTitle />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId(HEADER_ASSIGNEES_BLOCK_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId('assignees')).toBeInTheDocument();
   });
 });

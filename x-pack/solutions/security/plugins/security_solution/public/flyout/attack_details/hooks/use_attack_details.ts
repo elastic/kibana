@@ -48,6 +48,10 @@ export interface UseAttackEventDetailsResult {
    * Whether the data is loading
    */
   loading: boolean;
+  /**
+   * Refetches the attack document from the server
+   */
+  refetch: () => Promise<void>;
 }
 
 export const useAttackDetails = ({
@@ -63,7 +67,7 @@ export const useAttackDetails = ({
 
   const runtimeMappings = dataView?.getRuntimeMappings() as RunTimeMappings;
 
-  const [loading, dataFormattedForFieldBrowser, searchHit] = useTimelineEventsDetails({
+  const [loading, dataFormattedForFieldBrowser, searchHit, , refetch] = useTimelineEventsDetails({
     indexName: indexName || '',
     eventId: attackId || '',
     runtimeMappings,
@@ -78,5 +82,6 @@ export const useAttackDetails = ({
     searchHit,
     getFieldsData,
     loading,
+    refetch,
   };
 };
