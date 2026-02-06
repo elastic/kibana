@@ -170,21 +170,21 @@ export function getConnectorType(
 }
 
 function getToFields(actionParams: EmailActionParams): string[] {
-  if (!(actionParams.to instanceof Array)) return [];
+  if (!Array.isArray(actionParams.to)) return [];
   return actionParams.to;
 }
 
 function getCcFields(actionParams: EmailActionParams): string[] {
-  if (!(actionParams.cc instanceof Array)) return [];
+  if (!Array.isArray(actionParams.cc)) return [];
   return actionParams.cc;
 }
 
 function getBccFields(actionParams: EmailActionParams): string[] {
-  if (!(actionParams.bcc instanceof Array)) return [];
+  if (!Array.isArray(actionParams.bcc)) return [];
   return actionParams.bcc;
 }
 
 function getReplyToFields(actionParams: EmailActionParams): string[] {
-  if (!(actionParams.replyTo instanceof Array)) return [];
+  if (!Array.isArray(actionParams.replyTo)) return [];
   return actionParams.replyTo;
 }
