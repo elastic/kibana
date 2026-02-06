@@ -42,7 +42,6 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
   describe('document conflicts during rule execution', () => {
     before(async () => {
-      await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
     });
 

@@ -12,15 +12,9 @@ import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integrati
 import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
-import {
-  createDataStream,
-  deleteDataStream,
-  createEsDocumentsWithGroups,
-} from '../create_test_data';
+import { createEsDocumentsWithGroups } from '../create_test_data';
 
 const alertsAsDataIndex = `.internal.alerts-${STACK_AAD_INDEX_NAME}.alerts-default-000001`;
-const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-output`;
-const ES_TEST_DATA_STREAM_NAME = 'test-data-stream';
 
 const RULE_INTERVALS_TO_WRITE = 5;
 const RULE_INTERVAL_SECONDS = 3;
@@ -31,8 +25,6 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
   const retry = getService('retry');
   const supertest = getService('supertest');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
-  const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
-  const esTestIndexToolAAD = new ESTestIndexTool(es, retry, alertsAsDataIndex);
 
   describe('bulkDisable', () => {
     let endDate: string;
@@ -137,20 +129,13 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
     before(async () => {
       await esTestIndexTool.setup();
 
-      await esTestIndexToolOutput.setup();
-
       const endDateMillis = Date.now() + (RULE_INTERVALS_TO_WRITE - 1) * RULE_INTERVAL_MILLIS;
       endDate = new Date(endDateMillis).toISOString();
-
-      await createDataStream(es, ES_TEST_DATA_STREAM_NAME);
     });
 
     after(async () => {
       await objectRemover.removeAll();
       await esTestIndexTool.destroy();
-      await esTestIndexToolOutput.destroy();
-      await deleteDataStream(es, ES_TEST_DATA_STREAM_NAME);
-      await esTestIndexToolAAD.removeAll();
     });
 
     it('should bulk disable and untrack', async () => {

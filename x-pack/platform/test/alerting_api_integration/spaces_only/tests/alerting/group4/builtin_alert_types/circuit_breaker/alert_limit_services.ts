@@ -21,13 +21,15 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
   describe('rule that hits max alerts circuit breaker', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    beforeEach(async () => {
-      await esTestIndexTool.destroy();
+    before(async () => {
       await esTestIndexTool.setup();
     });
 
     afterEach(async () => {
       await objectRemover.removeAll();
+    });
+
+    after(async () => {
       await esTestIndexTool.destroy();
     });
 
