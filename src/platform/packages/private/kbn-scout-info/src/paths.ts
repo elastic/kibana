@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import path from 'node:path';
 
 export const SCOUT_OUTPUT_ROOT = path.resolve(REPO_ROOT, '.scout');
 
@@ -33,7 +33,7 @@ export const SCOUT_PLAYWRIGHT_CONFIGS_PATH = path.resolve(
 );
 
 export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB =
-  '{src/platform,x-pack/**}/{plugins,packages}/**/test/scout';
+  '{src/platform,x-pack/**}/{plugins,packages}/**/test/scout{_*,}';
 
 export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX = new RegExp(
   `(?:src|x-pack)` +

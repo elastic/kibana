@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { createDashboardJourney } from '../utils/dashboard_journey';
+import { Journey } from '@kbn/journeys';
+import { setupDashboardJourney } from '../utils/dashboard_journey';
 
-export const journey = createDashboardJourney({
-  esArchives: ['x-pack/performance/es_archives/sample_data_logs_many_fields'],
-  kbnArchives: ['x-pack/performance/kbn_archives/logs_no_map_dashboard_esql'],
+export const journey = setupDashboardJourney({
+  // call the journey constructor in this file so the name is set correctly
+  journey: new Journey({
+    esArchives: ['x-pack/performance/es_archives/sample_data_logs_many_fields'],
+    kbnArchives: ['x-pack/performance/kbn_archives/logs_no_map_dashboard_esql'],
+  }),
   dashboardName: 'Web Logs Dashboard',
   dashboardLinkSubj: 'dashboardListingTitleLink-Logs-dashboard-with-ES|QL',
   visualizationCount: 11,
