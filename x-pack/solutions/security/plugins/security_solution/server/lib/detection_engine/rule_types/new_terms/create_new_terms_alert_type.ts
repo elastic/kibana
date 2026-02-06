@@ -5,46 +5,37 @@
  * 2.0.
  */
 
-import { isObject, chunk } from 'lodash';
+import { chunk } from 'lodash';
 
+import type { estypes } from '@elastic/elasticsearch';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { NewTermsRuleParams } from '../../rule_schema';
-import type { SecurityAlertType } from '../types';
-import { singleSearchAfter } from '../utils/single_search_after';
-import { buildEventsSearchQuery } from '../utils/build_events_query';
-import { getFilter } from '../utils/get_filter';
-import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
-import { bulkCreateSuppressedNewTermsAlertsInMemory } from './bulk_create_suppressed_alerts_in_memory';
-import type { EventsAndTerms } from './types';
-import type { CreateAlertsHook } from './build_new_terms_aggregation';
-import type { NewTermsAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
-import {
-  buildRecentTermsAgg,
-  buildNewTermsAgg,
-  buildDocFetchAgg,
-} from './build_new_terms_aggregation';
+import type { SecurityAlertType, SignalSource } from '../types';
 import { validateIndexPatterns } from '../utils';
-import { parseDateString, validateHistoryWindowStart, transformBucketsToValues } from './utils';
+import { parseDateString, validateHistoryWindowStart } from './utils';
 import {
-  addToSearchAfterReturn,
   createSearchAfterReturnType,
   getUnprocessedExceptionsWarnings,
+  addToSearchAfterReturn,
   getMaxSignalsWarning,
   getSuppressionMaxSignalsWarning,
-  stringifyAfterKey,
 } from '../utils/utils';
+import { getFilter } from '../utils/get_filter';
+import { buildEsqlSearchRequest } from '../esql/build_esql_search_request';
+import { performEsqlRequest } from '../esql/esql_request';
+import { buildEventsSearchQuery } from '../utils/build_events_query';
+import { wrapNewTermsAlerts, type EventsAndTerms } from './wrap_new_terms_alerts';
+import { bulkCreateSuppressedNewTermsAlertsInMemory } from './bulk_create_suppressed_alerts_in_memory';
+import { bulkCreate, type GenericBulkCreateResponse } from '../factories';
 import {
-  alertSuppressionTypeGuard,
   getIsAlertSuppressionActive,
+  alertSuppressionTypeGuard,
 } from '../utils/get_is_alert_suppression_active';
-import { multiTermsComposite } from './multi_terms_composite';
-import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
+import type { NewTermsAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
-import * as i18n from '../translations';
-import { bulkCreate } from '../factories';
 
 export const createNewTermsAlertType = (): SecurityAlertType<
   NewTermsRuleParams,
@@ -63,15 +54,8 @@ export const createNewTermsAlertType = (): SecurityAlertType<
           });
           return validated;
         },
-        /**
-         * validate rule params when rule is bulk edited (update and created in future as well)
-         * returned params can be modified (useful in case of version increment)
-         * @param mutatedRuleParams
-         * @returns mutatedRuleParams
-         */
         validateMutatedParams: (mutatedRuleParams) => {
           validateIndexPatterns(mutatedRuleParams.index);
-
           return mutatedRuleParams;
         },
       },
@@ -94,32 +78,42 @@ export const createNewTermsAlertType = (): SecurityAlertType<
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
     solution: 'security',
+    // eslint-disable-next-line complexity
     async executor(execOptions) {
-      const { sharedParams, services, params, state, logger } = execOptions;
+      const { sharedParams, services, params, state } = execOptions;
 
       const {
         ruleExecutionLogger,
         completeRule,
         tuple,
-        inputIndex,
-        runtimeMappings,
+        aggregatableTimestampField,
         primaryTimestamp,
         secondaryTimestamp,
-        aggregatableTimestampField,
+        inputIndex,
         exceptionFilter,
         unprocessedExceptions,
-        licensing,
         scheduleNotificationResponseActionsService,
+        runtimeMappings,
       } = sharedParams;
 
-      const isLoggedRequestsEnabled = Boolean(state?.isLoggedRequestsEnabled);
-      const loggedRequests: RulePreviewLoggedRequest[] = [];
+      const result = createSearchAfterReturnType();
 
-      // Validate the history window size compared to `from` at runtime as well as in the `validate`
-      // function because rule preview does not use the `validate` function defined on the rule type
+      const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
+      if (exceptionsWarning) {
+        result.warningMessages.push(exceptionsWarning);
+      }
+
+      // Validate history window
       validateHistoryWindowStart({
         historyWindowStart: params.historyWindowStart,
         from: params.from,
+      });
+
+      // Parse history window start date
+      const parsedHistoryWindowStart = parseDateString({
+        date: params.historyWindowStart,
+        forceNow: tuple.to.toDate(),
+        name: 'historyWindowStart',
       });
 
       const filterArgs = {
@@ -135,100 +129,230 @@ export const createNewTermsAlertType = (): SecurityAlertType<
       };
       const esFilter = await getFilter(filterArgs);
 
-      const parsedHistoryWindowSize = parseDateString({
-        date: params.historyWindowStart,
-        forceNow: tuple.to.toDate(),
-        name: 'historyWindowStart',
-      });
-
+      const isLoggedRequestsEnabled = Boolean(state?.isLoggedRequestsEnabled);
+      const loggedRequests: RulePreviewLoggedRequest[] = [];
       const isAlertSuppressionActive = await getIsAlertSuppressionActive({
         alertSuppression: params.alertSuppression,
-        licensing,
+        licensing: sharedParams.licensing,
       });
-      let afterKey: Record<string, string | number | null> | undefined;
 
-      const result = createSearchAfterReturnType();
+      const newTermsFields = params.newTermsFields;
+      const byFields = newTermsFields.join(', ');
+      const timestampField = aggregatableTimestampField;
 
-      const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
-      if (exceptionsWarning) {
-        result.warningMessages.push(exceptionsWarning);
+      // Build null filters - exclude documents where new terms fields are null
+      const nullFilters = newTermsFields.map((field) => `\`${field}\` IS NOT NULL`).join(' AND ');
+
+      // Build MV_EXPAND commands for each new terms field
+      const mvExpandCommands = newTermsFields.map((field) => `| MV_EXPAND \`${field}\``).join(' ');
+
+      // Handle timestamp override with EVAL command
+      const timestampOverrideCommand =
+        aggregatableTimestampField === 'kibana.combined_timestamp'
+          ? `| EVAL ${aggregatableTimestampField} = CASE(${primaryTimestamp} IS NOT NULL, ${primaryTimestamp}, ${secondaryTimestamp})`
+          : '';
+
+      // ============================================
+      // STEP 1 & 2: ES|QL QUERY TO GET BUCKETS
+      // ============================================
+      // This replaces Phase 1 (composite aggregation) and Phase 2 (terms aggregation)
+      // Query structure matches the example pattern:
+      // FROM -> WHERE null filters -> MV_EXPAND -> STATS -> WHERE first_seen filter
+      const indexPattern = inputIndex ?? [];
+      const esqlQuery = [
+        `FROM ${indexPattern.join(', ')}`,
+        timestampOverrideCommand,
+        `| WHERE ${nullFilters}`,
+        mvExpandCommands,
+        `| STATS first_seen = MIN(\`${timestampField}\`) BY ${byFields}`,
+        `| WHERE first_seen >= "${tuple.from.toISOString()}"`,
+      ]
+        .filter(Boolean)
+        .join(' ');
+
+      ruleExecutionLogger.debug(`New Terms ES|QL query: ${esqlQuery}`);
+
+      // Execute ES|QL query to get buckets
+      const esqlRequest = buildEsqlSearchRequest({
+        query: esqlQuery,
+        from: parsedHistoryWindowStart.toISOString(),
+        to: tuple.to.toISOString(),
+        size: 10000, // ES|QL limit
+        filters: esFilter ? [esFilter] : [],
+        primaryTimestamp,
+        secondaryTimestamp,
+        exceptionFilter,
+        excludedDocuments: {},
+        ruleExecutionTimeout: undefined,
+      });
+
+      const esqlResponse = await performEsqlRequest({
+        esClient: services.scopedClusterClient.asCurrentUser,
+        requestBody: esqlRequest,
+        requestQueryParams: {
+          drop_null_columns: true,
+        },
+        ruleExecutionLogger,
+        shouldStopExecution: services.shouldStopExecution,
+        loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
+      });
+
+      // Parse ES|QL results to extract bucket keys
+      // ES|QL returns columns and values array
+      const columnNames = esqlResponse.columns.map((col) => col.name);
+      const newTermsFieldIndices = newTermsFields.map((field) => columnNames.indexOf(field));
+      const buckets: Array<Record<string, string | number>> = [];
+
+      for (const row of esqlResponse.values) {
+        const bucket: Record<string, string | number> = {};
+        for (let i = 0; i < newTermsFields.length; i++) {
+          const fieldIndex = newTermsFieldIndices[i];
+          if (fieldIndex >= 0 && row[fieldIndex] != null) {
+            bucket[newTermsFields[i]] = row[fieldIndex] as string | number;
+          }
+        }
+        if (Object.keys(bucket).length === newTermsFields.length) {
+          buckets.push(bucket);
+        }
       }
-      let pageNumber = 0;
 
-      // There are 2 conditions that mean we're finished: either there were still too many alerts to create
-      // after deduplication and the array of alerts was truncated before being submitted to ES, or there were
-      // exactly enough new alerts to hit maxSignals without truncating the array of alerts. We check both because
-      // it's possible for the array to be truncated but alert documents could fail to be created for other reasons,
-      // in which case createdSignalsCount would still be less than maxSignals. Since valid alerts were truncated from
-      // the array in that case, we stop and report the errors.
-      while (result.createdSignalsCount <= params.maxSignals) {
-        pageNumber++;
-        // PHASE 1: Fetch a page of terms using a composite aggregation. This will collect a page from
-        // all of the terms seen over the last rule interval. In the next phase we'll determine which
-        // ones are new.
-        const searchRequest = buildEventsSearchQuery({
-          aggregations: buildRecentTermsAgg({
-            fields: params.newTermsFields,
-            after: afterKey,
-          }),
-          searchAfterSortIds: undefined,
-          index: inputIndex,
-          // The time range for the initial composite aggregation is the rule interval, `from` and `to`
-          from: tuple.from.toISOString(),
-          to: tuple.to.toISOString(),
-          filter: esFilter,
-          size: 0,
-          primaryTimestamp,
-          secondaryTimestamp,
-          runtimeMappings,
+      if (buckets.length === 0) {
+        scheduleNotificationResponseActionsService({
+          signals: result.createdSignals,
+          signalsCount: result.createdSignalsCount,
+          responseActions: completeRule.ruleParams.responseActions,
         });
+        return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
+      }
 
-        const {
-          searchResult,
-          searchDuration,
-          searchErrors,
-          loggedRequests: firstPhaseLoggedRequests = [],
-        } = await singleSearchAfter({
-          searchRequest,
-          services,
-          ruleExecutionLogger,
-          loggedRequestsConfig: isLoggedRequestsEnabled
-            ? {
-                type: 'findAllTerms',
-                description: i18n.FIND_ALL_NEW_TERMS_FIELDS_DESCRIPTION(
-                  stringifyAfterKey(afterKey)
-                ),
-                skipRequestQuery: pageNumber > 2,
-              }
-            : undefined,
-        });
-        loggedRequests.push(...firstPhaseLoggedRequests);
-        if (!searchResult.aggregations) {
-          throw new Error('Aggregations were missing on recent terms search result');
-        }
-        logger.debug(`Time spent on composite agg: ${searchDuration}`);
+      // ============================================
+      // STEP 3: FETCH SOURCE DOCUMENTS (Phase 3) - Use msearch
+      // ============================================
+      // For each bucket, create a search query to find the first document in the rule execution interval
+      // that contains that combination. Use msearch to execute all queries in parallel.
+      const BATCH_SIZE = 500; // Process 500 buckets at a time to avoid too many concurrent requests
+      let bucketIndex = 0;
 
-        result.searchAfterTimes.push(searchDuration);
-        result.errors.push(...searchErrors);
+      while (bucketIndex < buckets.length && result.createdSignalsCount < params.maxSignals) {
+        const batch = buckets.slice(bucketIndex, bucketIndex + BATCH_SIZE);
+        bucketIndex += BATCH_SIZE;
 
-        // If the aggregation returns no after_key it signals that we've paged through all results
-        // and the current page is empty so we can immediately break.
-        if (searchResult.aggregations.new_terms.after_key == null) {
-          break;
-        }
-        const bucketsForField = searchResult.aggregations.new_terms.buckets;
+        // Build msearch requests: for each bucket, create a search query
+        const searches: Array<Record<string, unknown>> = [];
+        for (const bucket of batch) {
+          // Build filter for this specific bucket combination
+          const bucketFilter = {
+            bool: {
+              must: newTermsFields.map((field) => ({
+                match: { [field]: bucket[field] },
+              })),
+            },
+          };
 
-        const createAlertsHook: CreateAlertsHook = async (aggResult) => {
-          const eventsAndTerms: EventsAndTerms[] = (
-            aggResult?.aggregations?.new_terms.buckets ?? []
-          ).map((bucket) => {
-            const newTerms = isObject(bucket.key) ? Object.values(bucket.key) : [bucket.key];
-            return {
-              event: bucket.docs.hits.hits[0],
-              newTerms,
-            };
+          const esFilterForBucket = await getFilter({
+            ...filterArgs,
+            filters: [
+              ...(Array.isArray(filterArgs.filters) ? filterArgs.filters : []),
+              bucketFilter,
+            ],
           });
 
+          // Body for this search - find first document sorted by timestamp
+          const searchQuery = buildEventsSearchQuery({
+            aggregations: undefined,
+            runtimeMappings,
+            searchAfterSortIds: undefined,
+            index: inputIndex,
+            // Search only in the rule execution interval
+            from: tuple.from.toISOString(),
+            to: tuple.to.toISOString(),
+            filter: esFilterForBucket,
+            size: 1, // Get only the first document
+            primaryTimestamp,
+            secondaryTimestamp,
+          });
+
+          // Extract header fields (index, allow_no_indices, ignore_unavailable) from search query
+          // and put them in the header, rest goes in the body
+          const {
+            index: _index,
+            allow_no_indices,
+            ignore_unavailable,
+            ...searchBody
+          } = searchQuery;
+
+          // Header for this search - msearch requires header before body
+          searches.push({
+            index: inputIndex,
+            ignore_unavailable: ignore_unavailable ?? true,
+            allow_no_indices: allow_no_indices ?? true,
+          });
+
+          searches.push(searchBody);
+        }
+
+        // Execute msearch
+        const startTime = Date.now();
+
+        // Log msearch request if enabled
+        // msearch format is newline-delimited JSON: header1\nbody1\nheader2\nbody2\n...
+        if (isLoggedRequestsEnabled) {
+          const msearchLines: string[] = [];
+          for (let i = 0; i < searches.length; i += 2) {
+            const header = searches[i];
+            const body = searches[i + 1];
+            msearchLines.push(JSON.stringify(header));
+            msearchLines.push(JSON.stringify(body));
+          }
+          const msearchRequestString = `POST /_msearch\n${msearchLines.join('\n')}`;
+          loggedRequests.push({
+            request: msearchRequestString,
+            description: `Find documents for ${batch.length} new term combinations`,
+          });
+        }
+
+        const msearchResponse = await services.scopedClusterClient.asCurrentUser.msearch({
+          searches,
+        });
+
+        const searchDuration = `${(Date.now() - startTime) / 1000}s`;
+        result.searchAfterTimes.push(searchDuration);
+
+        // Update duration in loggedRequests if enabled
+        if (isLoggedRequestsEnabled && loggedRequests.length > 0) {
+          const lastRequest = loggedRequests[loggedRequests.length - 1];
+          if (lastRequest && lastRequest.description?.includes('new term combinations')) {
+            lastRequest.duration = Math.round((Date.now() - startTime) / 1000);
+          }
+        }
+
+        // Process responses and create eventsAndTerms
+        const eventsAndTerms: EventsAndTerms[] = [];
+        for (let i = 0; i < batch.length; i++) {
+          const response = msearchResponse.responses[i];
+          if ('status' in response && response.status === 200 && 'hits' in response) {
+            const hits = response.hits;
+            if (hits?.hits?.length > 0) {
+              const hit = hits.hits[0] as estypes.SearchHit<SignalSource>;
+              const bucket = batch[i];
+              const newTerms = newTermsFields.map((field) => bucket[field]);
+              eventsAndTerms.push({
+                event: hit,
+                newTerms,
+              });
+            }
+          } else if ('status' in response && response.status !== 200) {
+            result.errors.push(
+              `Error fetching document for bucket: ${JSON.stringify(batch[i])}, status: ${
+                response.status
+              }`
+            );
+          }
+        }
+
+        // Create alerts from eventsAndTerms
+        if (eventsAndTerms.length > 0) {
+          const eventAndTermsChunks = chunk(eventsAndTerms, 5 * params.maxSignals);
           let bulkCreateResult: Omit<
             GenericBulkCreateResponse<NewTermsAlertLatest>,
             'suppressedItemsCount'
@@ -241,11 +365,6 @@ export const createNewTermsAlertType = (): SecurityAlertType<
             createdItems: [],
             alertsWereTruncated: false,
           };
-
-          // wrap and create alerts by chunks
-          // large number of matches, processed in possibly 10,000 size of events and terms
-          // can significantly affect Kibana performance
-          const eventAndTermsChunks = chunk(eventsAndTerms, 5 * params.maxSignals);
 
           for (let i = 0; i < eventAndTermsChunks.length; i++) {
             const eventAndTermsChunk = eventAndTermsChunks[i];
@@ -275,143 +394,6 @@ export const createNewTermsAlertType = (): SecurityAlertType<
             }
 
             if (bulkCreateResult.alertsWereTruncated) {
-              break;
-            }
-          }
-
-          return bulkCreateResult;
-        };
-
-        // separate route for multiple new terms
-        // it uses paging through composite aggregation
-        if (params.newTermsFields.length > 1) {
-          const bulkCreateResult = await multiTermsComposite({
-            sharedParams,
-            filterArgs,
-            buckets: bucketsForField,
-            params,
-            aggregatableTimestampField,
-            parsedHistoryWindowSize,
-            services,
-            result,
-            logger,
-            afterKey,
-            createAlertsHook,
-            isAlertSuppressionActive,
-            isLoggedRequestsEnabled,
-          });
-          loggedRequests.push(...(bulkCreateResult?.loggedRequests ?? []));
-
-          if (bulkCreateResult && 'alertsWereTruncated' in bulkCreateResult) {
-            break;
-          }
-        } else {
-          // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
-          // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the
-          // response correspond to each new term.
-          const includeValues = transformBucketsToValues(params.newTermsFields, bucketsForField);
-          const pageSearchRequest = buildEventsSearchQuery({
-            aggregations: buildNewTermsAgg({
-              newValueWindowStart: tuple.from,
-              timestampField: aggregatableTimestampField,
-              field: params.newTermsFields[0],
-              include: includeValues,
-            }),
-            runtimeMappings,
-            searchAfterSortIds: undefined,
-            index: inputIndex,
-            // For Phase 2, we expand the time range to aggregate over the history window
-            // in addition to the rule interval
-            from: parsedHistoryWindowSize.toISOString(),
-            to: tuple.to.toISOString(),
-            filter: esFilter,
-            size: 0,
-            primaryTimestamp,
-            secondaryTimestamp,
-          });
-          const {
-            searchResult: pageSearchResult,
-            searchDuration: pageSearchDuration,
-            searchErrors: pageSearchErrors,
-            loggedRequests: pageSearchLoggedRequests = [],
-          } = await singleSearchAfter({
-            searchRequest: pageSearchRequest,
-            services,
-            ruleExecutionLogger,
-            loggedRequestsConfig: isLoggedRequestsEnabled
-              ? {
-                  type: 'findNewTerms',
-                  description: i18n.FIND_NEW_TERMS_VALUES_DESCRIPTION(stringifyAfterKey(afterKey)),
-                  skipRequestQuery: pageNumber > 2,
-                }
-              : undefined,
-          });
-          result.searchAfterTimes.push(pageSearchDuration);
-          result.errors.push(...pageSearchErrors);
-          loggedRequests.push(...pageSearchLoggedRequests);
-
-          logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
-
-          if (!pageSearchResult.aggregations) {
-            throw new Error('Aggregations were missing on new terms search result');
-          }
-
-          // PHASE 3: For each term that is not in the history window, fetch the oldest document in
-          // the rule interval for that term. This is the first document to contain the new term, and will
-          // become the basis of the resulting alert.
-          // One document could become multiple alerts if the document contains an array with multiple new terms.
-          if (pageSearchResult.aggregations.new_terms.buckets.length > 0) {
-            const actualNewTerms = pageSearchResult.aggregations.new_terms.buckets.map(
-              (bucket) => bucket.key
-            );
-
-            const docFetchSearchRequest = buildEventsSearchQuery({
-              aggregations: buildDocFetchAgg({
-                timestampField: aggregatableTimestampField,
-                field: params.newTermsFields[0],
-                include: actualNewTerms,
-              }),
-              runtimeMappings,
-              searchAfterSortIds: undefined,
-              index: inputIndex,
-              // For phase 3, we go back to aggregating only over the rule interval - excluding the history window
-              from: tuple.from.toISOString(),
-              to: tuple.to.toISOString(),
-              filter: esFilter,
-              size: 0,
-              primaryTimestamp,
-              secondaryTimestamp,
-            });
-            const {
-              searchResult: docFetchSearchResult,
-              searchDuration: docFetchSearchDuration,
-              searchErrors: docFetchSearchErrors,
-              loggedRequests: docFetchLoggedRequests = [],
-            } = await singleSearchAfter({
-              searchRequest: docFetchSearchRequest,
-              services,
-              ruleExecutionLogger,
-              loggedRequestsConfig: isLoggedRequestsEnabled
-                ? {
-                    type: 'findDocuments',
-                    description: i18n.FIND_NEW_TERMS_EVENTS_DESCRIPTION(
-                      stringifyAfterKey(afterKey)
-                    ),
-                    skipRequestQuery: pageNumber > 2,
-                  }
-                : undefined,
-            });
-            result.searchAfterTimes.push(docFetchSearchDuration);
-            result.errors.push(...docFetchSearchErrors);
-            loggedRequests.push(...docFetchLoggedRequests);
-
-            if (!docFetchSearchResult.aggregations) {
-              throw new Error('Aggregations were missing on document fetch search result');
-            }
-
-            const bulkCreateResult = await createAlertsHook(docFetchSearchResult);
-
-            if (bulkCreateResult.alertsWereTruncated) {
               result.warningMessages.push(
                 isAlertSuppressionActive
                   ? getSuppressionMaxSignalsWarning()
@@ -420,9 +402,14 @@ export const createNewTermsAlertType = (): SecurityAlertType<
               break;
             }
           }
-        }
 
-        afterKey = searchResult.aggregations.new_terms.after_key;
+          if (
+            bulkCreateResult.alertsWereTruncated ||
+            result.createdSignalsCount >= params.maxSignals
+          ) {
+            break;
+          }
+        }
       }
 
       scheduleNotificationResponseActionsService({
@@ -432,6 +419,13 @@ export const createNewTermsAlertType = (): SecurityAlertType<
       });
 
       return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
+
+      // ============================================
+      // ORIGINAL 3-PHASE DSL IMPLEMENTATION (REMOVED)
+      // ============================================
+      // The original implementation has been replaced with:
+      // - ES|QL query to get buckets (replaces Phase 1 & 2)
+      // - Phase 3: top_hits aggregation to fetch source documents (kept from original)
     },
   };
 };

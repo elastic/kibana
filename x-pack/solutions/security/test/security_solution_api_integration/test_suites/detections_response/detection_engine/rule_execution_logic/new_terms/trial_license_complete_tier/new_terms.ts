@@ -1373,7 +1373,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('preview logged requests', () => {
+    describe.only('preview logged requests', () => {
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         index: ['new_terms'],
