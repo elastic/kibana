@@ -66,7 +66,29 @@ describe('EvaluationScoreRepository', () => {
   let mockLog: jest.Mocked<SomeDevLog>;
   let repository: EvaluationScoreRepository;
 
+  const ENV_KEYS_THAT_AFFECT_EXPORT = [
+    'BUILDKITE_BUILD_ID',
+    'BUILDKITE_JOB_ID',
+    'BUILDKITE_BUILD_URL',
+    'BUILDKITE_PIPELINE_SLUG',
+    'BUILDKITE_PULL_REQUEST',
+    'BUILDKITE_BRANCH',
+    'BUILDKITE_COMMIT',
+    'EVAL_SUITE_ID',
+  ] as const;
+
+  let savedEnv: Partial<Record<(typeof ENV_KEYS_THAT_AFFECT_EXPORT)[number], string | undefined>>;
+
   beforeEach(() => {
+    // Make these unit tests deterministic. On CI, Buildkite env vars are present and will cause
+    // score export to enrich documents with `ci.buildkite`/`suite`. That behavior is tested
+    // elsewhere; here we keep assertions stable by clearing those env vars.
+    savedEnv = {};
+    for (const key of ENV_KEYS_THAT_AFFECT_EXPORT) {
+      savedEnv[key] = process.env[key];
+      delete process.env[key];
+    }
+
     mockEsClient = {
       indices: {
         existsIndexTemplate: jest.fn(),
@@ -90,6 +112,17 @@ describe('EvaluationScoreRepository', () => {
     } as any;
 
     repository = new EvaluationScoreRepository(mockEsClient, mockLog);
+  });
+
+  afterEach(() => {
+    for (const key of ENV_KEYS_THAT_AFFECT_EXPORT) {
+      const prev = savedEnv?.[key];
+      if (typeof prev === 'string') {
+        process.env[key] = prev;
+      } else {
+        delete process.env[key];
+      }
+    }
   });
 
   describe('exportScores', () => {
@@ -283,7 +316,7 @@ describe('EvaluationScoreRepository', () => {
       expect(bulkCall.onDocument(mockDocuments[0])).toEqual({
         create: {
           _index: '.kibana-evaluations',
-          _id: 'run-123-unknown-suite-llm-gateway/gpt-5.2-dataset-1-example-1-Correctness-0',
+          _id: 'run-123-unknown-suite-gpt-4-dataset-1-example-1-Correctness-0',
         },
       });
     });
