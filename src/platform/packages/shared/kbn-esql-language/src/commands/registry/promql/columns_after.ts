@@ -59,7 +59,7 @@ function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedCol
 
   return {
     name: target.name,
-    type: 'double',
+    type: 'unknown', // TODO: infer type once PROMQL query AST is available,
     location: target.location,
     userDefined: true,
   };
