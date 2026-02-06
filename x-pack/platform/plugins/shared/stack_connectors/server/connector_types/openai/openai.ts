@@ -316,7 +316,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             ...this.headers,
             ...axiosOptions.headers,
           },
-          timeout,
+          // Default to the same request timeout as non-streamed requests to avoid the implicit
+          // 60s client timeout (which is too low for slower models).
+          timeout: timeout ?? DEFAULT_TIMEOUT_MS,
           sslOverrides: this.sslOverrides,
         },
         connectorUsageCollector
@@ -428,10 +430,15 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         model,
       };
 
+      // `invokeAsyncIterator` bypasses the JSON-body sanitization path (`sanitizeRequest` /
+      // `getRequestWithStreamOption`). Ensure we never send tool-calling params without tools,
+      // to keep strict OpenAI-compatible providers (e.g. Anthropic via LiteLLM) happy.
+      stripToolCallingParamsIfNoTools(requestBody as unknown as Record<string, unknown>);
+
       connectorUsageCollector.addRequestBodyBytes(undefined, requestBody);
       const stream = await this.openAI.chat.completions.create(requestBody, {
         signal,
-        timeout, // do not default if not provided
+        ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
       });
       // splits the stream in two, teed[0] is used for the UI and teed[1] for token tracking
       const teed = stream.tee();
