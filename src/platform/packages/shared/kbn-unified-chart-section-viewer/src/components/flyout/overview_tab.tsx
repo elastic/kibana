@@ -213,6 +213,9 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
               gutterSize="s"
               wrapText={false}
               css={css`
+                .euiListGroupItem {
+                  border-bottom: ${euiTheme.border.thin};
+                }
                 .euiListGroupItem__text {
                   padding: ${euiTheme.size.s} ${euiTheme.size.xs} ;
                 }
