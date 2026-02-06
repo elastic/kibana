@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { JsonModelShapeSchema } from '@kbn/workflows/spec/json_model_shape_schema';
+import { JsonModelShapeSchema } from '@kbn/workflows/spec/schema/common/json_model_shape_schema';
 
 /**
  * Step type ID for the agentBuilder run agent step.
