@@ -1,0 +1,219 @@
+{
+  "@timestamp": "2026-02-06T10:51:40.791Z",
+  "event": {
+    "id": "16Ii5UJKjcf_Yhc6OLcN",
+    "dataset": "alerting-rules",
+    "type": "change",
+    "outcome": "success",
+    "module": "security",
+    "action": "rule-update"
+  },
+  "kibana": {
+    "space_id": "default",
+    "version": "9.4.0"
+  },
+  "user": {
+    "id": "elastic"
+  },
+  "object": {
+    "changes": [
+      "name",
+      "updatedAt",
+      "revision"
+    ],
+    "oldvalues": {
+      "name": "AWS EFS File System Deleted (test6)",
+      "updatedAt": "2026-02-06T10:34:13.686Z",
+      "revision": 5
+    },
+    "id": "774e359f-009a-41cf-a258-a0fc67286c72",
+    "type": "alert",
+    "hash": "1a0a3f31407a325dbb92ba4295576651fd5d4d0c280a2dc3d9c67071af67c0ea",
+    "snapshot": {
+      "name": "AWS EFS File System Deleted (test7)",
+      "tags": [
+        "Domain: Cloud",
+        "Data Source: AWS",
+        "Data Source: Amazon Web Services",
+        "Data Source: AWS EFS",
+        "Tactic: Impact",
+        "Resources: Investigation Guide"
+      ],
+      "enabled": false,
+      "alertTypeId": "siem.queryRule",
+      "consumer": "siem",
+      "legacyId": null,
+      "schedule": {
+        "interval": "5m"
+      },
+      "actions": [],
+      "params": {
+        "author": [
+          "Austin Songer",
+          "Elastic"
+        ],
+        "description": "Identifies the deletion of an Amazon EFS file system using the \"DeleteFileSystem\" API operation. Deleting an EFS file system permanently removes all stored data and cannot be reversed. This action is rare in most environments and typically limited to controlled teardown workflows. Adversaries with sufficient permissions may delete a file system to destroy evidence, disrupt workloads, or impede recovery efforts.",
+        "note": "## Triage and analysis\n\n### Investigating AWS EFS File System Deleted\n\nAmazon Elastic File System (EFS) provides scalable, shared file storage used by EC2, container workloads, analytics jobs, and other persistent applications. Deleting an EFS file system (`DeleteFileSystem`) permanently removes all stored data and cannot be recovered. Mount targets must already be deleted, but those operations are common and do not themselves indicate malicious behavior. This rule focuses exclusively on the irreversible destructive event, which may signal intentional data destruction, ransomware preparation, or a post-compromise cleanup effort.\n\n#### Possible investigation steps\n\n- **Identify the actor and calling context**\n  - Review `aws.cloudtrail.user_identity.arn` and `aws.cloudtrail.user_identity.access_key_id`.\n  - Check `source.ip`, `user_agent.original`, and whether the call originated via console, IAM role, STS session, or long-lived IAM key.\n  - Verify whether this principal typically manages EFS resources or teardown activities.\n\n- **Determine what was deleted**\n  - Inspect `aws.cloudtrail.request_parameters` to identify the deleted file system ID.\n  - Map the resource to:\n    - Application or owner team\n    - Environment classification (prod / dev / test)\n    - Dependency surfaces (EC2 instances, ECS tasks, Lambda, analytics pipelines)\n\n- **Reconstruct timeline and intent**\n  - Use `@timestamp` to correlate with:\n    - Recent `UpdateFileSystem` events (e.g., deletion protection, lifecycle policies)\n    - IAM policy or trust policy changes\n    - EC2 or container runtime disruption shortly before deletion\n    - Unexpected regional activity or off-hours execution\n  - Determine if mount target deletions occurred immediately beforehand (expected lifecycle) or unexpectedly earlier (possibly suspicious when paired with other anomalies).\n\n- **Correlate with broader account activity**\n  - Pivot in CloudTrail on:\n    - The same access key or session\n    - The same EFS file system ID\n  - Look for:\n    - Privilege escalation (new policy attachments, role assumptions)\n    - Lateral movement (SSM sessions, unusual EC2 access)\n    - Signs of cleanup or anti-forensics (CloudWatch log group deletions, RDS snapshot deletions)\n    - Network isolation actions (security-group or NACL updates)\n\n- **Validate with owners**\n  - Confirm with application or infrastructure teams:\n    - Whether the deletion was planned, approved, or part of an environment teardown\n    - Whether a migration or infrastructure rotation is in progress\n    - Whether the deleted file system contained production or sensitive workloads\n\n### False positive analysis\n\n- **Expected teardown activity**\n  - Some pipelines (Terraform, CloudFormation, CDK, custom IaC) delete file systems as part of environment rotation or decommissioning.\n  - Add exceptions for known automation roles or environment tags (e.g., `Environment=Dev`).\n\n- **Ephemeral test environments**\n  - Development, QA, or integration test accounts may routinely create and destroy EFS file systems.\n  - Suppress events for non-production accounts where destructive operations are normal.\n\n- **Automated housekeeping**\n  - Internal tooling or lifecycle processes may remove unused EFS resources.\n  - Identify automation roles and use exceptions based on `aws.cloudtrail.user_identity.arn` or `user_agent.original`.\n\n### Response and remediation\n\n- **Contain and secure**\n  - If unauthorized, revoke or disable the credentials used for the deletion.\n  - Review CloudTrail for additional destructive or privilege-escalating operations from the same actor.\n  - Validate whether any associated compute workloads (EC2, ECS, Lambda) show compromise indicators.\n\n- **Assess impact**\n  - Identify workloads impacted by the file system deletion.\n  - Determine whether alternate backups exist (EFS-to-EFS Backup, AWS Backup vaults).\n  - Evaluate operational disruption and data-loss implications, especially for compliance-bound data.\n\n- **Recover (if possible)**\n  - Restore from AWS Backup if a protected resource existed.\n  - Rebuild infrastructure dependencies that relied on the deleted file system.\n\n- **Hardening and prevention**\n  - Restrict use of `elasticfilesystem:DeleteFileSystem` to tightly controlled IAM roles.\n  - Use IAM conditions (e.g., `aws:PrincipalArn`, `aws:SourceIp`, `aws:RequestedRegion`) to limit destructive operations.\n  - Ensure AWS Backup policies include EFS resources with sufficient retention.\n  - Use AWS Config or Security Hub controls to detect:\n    - EFS file systems without backup plans\n    - Unexpected changes to file system policies\n\n### Additional information\n- **[AWS IR Playbooks](https://github.com/aws-samples/aws-incident-response-playbooks/blob/c151b0dc091755fffd4d662a8f29e2f6794da52c/playbooks/)** \n- **[AWS Customer Playbook Framework](https://github.com/aws-samples/aws-customer-playbook-framework/tree/a8c7b313636b406a375952ac00b2d68e89a991f2/docs)** \n- **Security Best Practices:** [AWS Knowledge Center – Security Best Practices](https://aws.amazon.com/premiumsupport/knowledge-center/security-best-practices/).\n",
+        "falsePositives": [
+          "Legitimate teardown or environment decommissioning processes may delete EFS file systems. Verify whether the calling user, role, automation system, or CI/CD workflow is expected to perform destructive actions in the affected account. File system deletions by unfamiliar identities, from unusual IP addresses, or occurring outside approved change windows should be carefully reviewed. If known automation routinely deletes ephemeral test file systems, consider adding scoped exceptions."
+        ],
+        "from": "now-6m",
+        "ruleId": "536997f7-ae73-447d-a12d-bff1e8f5f0a0",
+        "investigationFields": {
+          "field_names": [
+            "@timestamp",
+            "user.name",
+            "user_agent.original",
+            "source.ip",
+            "aws.cloudtrail.user_identity.arn",
+            "aws.cloudtrail.user_identity.type",
+            "aws.cloudtrail.user_identity.access_key_id",
+            "event.action",
+            "event.outcome",
+            "cloud.account.id",
+            "cloud.region",
+            "aws.cloudtrail.request_parameters"
+          ]
+        },
+        "immutable": true,
+        "ruleSource": {
+          "type": "external",
+          "isCustomized": true,
+          "customizedFields": [
+            {
+              "fieldName": "name"
+            }
+          ],
+          "hasBaseVersion": true
+        },
+        "license": "Elastic License v2",
+        "outputIndex": "",
+        "meta": {
+          "kibana_siem_app_url": ""
+        },
+        "maxSignals": 100,
+        "riskScore": 47,
+        "riskScoreMapping": [],
+        "severity": "medium",
+        "severityMapping": [],
+        "timestampOverride": "event.ingested",
+        "timestampOverrideFallbackDisabled": false,
+        "threat": [
+          {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+              "id": "TA0040",
+              "name": "Impact",
+              "reference": "https://attack.mitre.org/tactics/TA0040/"
+            },
+            "technique": [
+              {
+                "id": "T1485",
+                "name": "Data Destruction",
+                "reference": "https://attack.mitre.org/techniques/T1485/"
+              }
+            ]
+          }
+        ],
+        "to": "now",
+        "references": [
+          "https://docs.aws.amazon.com/efs/latest/ug/API_DeleteFileSystem.html",
+          "https://docs.aws.amazon.com/efs/latest/ug/API_DeleteMountTarget.html"
+        ],
+        "version": 211,
+        "exceptionsList": [],
+        "relatedIntegrations": [
+          {
+            "package": "aws",
+            "version": "^5.0.0",
+            "integration": "cloudtrail"
+          }
+        ],
+        "requiredFields": [
+          {
+            "name": "event.action",
+            "type": "keyword",
+            "ecs": true
+          },
+          {
+            "name": "event.dataset",
+            "type": "keyword",
+            "ecs": true
+          },
+          {
+            "name": "event.outcome",
+            "type": "keyword",
+            "ecs": true
+          },
+          {
+            "name": "event.provider",
+            "type": "keyword",
+            "ecs": true
+          }
+        ],
+        "setup": "",
+        "type": "query",
+        "language": "kuery",
+        "index": [
+          "filebeat-*",
+          "logs-aws.cloudtrail-*"
+        ],
+        "query": "event.dataset: \"aws.cloudtrail\" \n    and event.provider: \"elasticfilesystem.amazonaws.com\" \n    and event.action: \"DeleteFileSystem\" \n    and event.outcome: \"success\"\n",
+        "filters": []
+      },
+      "mapped_params": {
+        "risk_score": 47,
+        "severity": "40-medium"
+      },
+      "createdBy": "elastic",
+      "updatedBy": "elastic",
+      "createdAt": "2026-02-03T14:09:59.822Z",
+      "updatedAt": "2026-02-06T10:51:07.088Z",
+      "apiKey": null,
+      "apiKeyOwner": null,
+      "apiKeyCreatedByUser": null,
+      "throttle": null,
+      "notifyWhen": null,
+      "muteAll": false,
+      "mutedInstanceIds": [],
+      "executionStatus": {
+        "status": "warning",
+        "lastDuration": 138,
+        "lastExecutionDate": "2026-02-06T09:29:34.882Z",
+        "error": null,
+        "warning": {
+          "reason": "ruleExecution",
+          "message": "This rule is attempting to query data from Elasticsearch indices listed in the \"Index patterns\" section of the rule definition, however no index matching: [\"filebeat-*\",\"logs-aws.cloudtrail-*\"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.,This rule is attempting to query data from Elasticsearch indices listed in the \"Index patterns\" section of the rule definition, however no index matching: [\"filebeat-*\",\"logs-aws.cloudtrail-*\"] was found. This warning will continue to appear until a matching index is created or this rule is disabled."
+        }
+      },
+      "snoozeSchedule": [],
+      "revision": 6,
+      "running": false,
+      "artifacts": {
+        "dashboards": [],
+        "investigation_guide": {
+          "blob": ""
+        }
+      },
+      "meta": {
+        "versionApiKeyLastmodified": "9.4.0"
+      },
+      "scheduledTaskId": "774e359f-009a-41cf-a258-a0fc67286c72",
+      "lastRun": {
+        "outcomeOrder": 10,
+        "alertsCount": {
+          "new": 0,
+          "ignored": 0,
+          "recovered": 0,
+          "active": 0
+        },
+        "outcomeMsg": [
+          "This rule is attempting to query data from Elasticsearch indices listed in the \"Index patterns\" section of the rule definition, however no index matching: [\"filebeat-*\",\"logs-aws.cloudtrail-*\"] was found. This warning will continue to appear until a matching index is created or this rule is disabled."
+        ],
+        "warning": null,
+        "outcome": "warning"
+      },
+      "nextRun": "2026-02-06T09:34:34.827Z"
+    }
+  }
+}

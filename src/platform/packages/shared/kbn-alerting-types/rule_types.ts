@@ -15,10 +15,38 @@ import type {
 import type { Filter } from '@kbn/es-query';
 import type { RuleNotifyWhenType, RRuleParams } from '.';
 
-export type RuleTypeSolution = 'observability' | 'security' | 'stack';
+export enum RuleTypeSolutions {
+  observability = 'observability',
+  security = 'security',
+  stack = 'stack',
+}
+
+export type RuleTypeSolution =
+  | RuleTypeSolutions.observability
+  | RuleTypeSolutions.security
+  | RuleTypeSolutions.stack;
+
 export type RuleTypeParams = Record<string, unknown>;
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
+
+export enum SecurityRuleChangeTrackingAction {
+  ruleInstall = 'rule-install',
+  ruleDuplicate = 'rule-duplicate',
+  ruleUpgrade = 'rule-upgrade',
+}
+
+export enum RuleChangeTrackingAction {
+  ruleCreate = 'rule-create',
+  ruleUpdate = 'rule-update',
+  ruleEnable = 'rule-enable',
+  ruleDisable = 'rule-disable',
+  ruleSnooze = 'rule-snooze',
+  ruleUnsnooze = 'rule-unsnooze',
+  ruleDelete = 'rule-delete',
+}
+
+export type ChangeTrackingAction = RuleChangeTrackingAction | SecurityRuleChangeTrackingAction;
 
 export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
 export type IsoWeekday = (typeof ISO_WEEKDAYS)[number];

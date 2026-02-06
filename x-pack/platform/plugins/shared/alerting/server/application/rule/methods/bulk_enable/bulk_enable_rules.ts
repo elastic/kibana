@@ -19,6 +19,8 @@ import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
+import { type RuleData } from '../../../../rules_client/lib/change_tracking';
 import { bulkCreateRulesSo } from '../../../../data/rule';
 import type { RawRule } from '../../../../types';
 import type { RuleDomain, RuleParams } from '../../types';
@@ -332,6 +334,18 @@ const bulkEnableRulesWithOCC = async (
     );
   }
 
+  // 1. Track changes
+  const trackChangeHistoryRuleData = rulesToEnable.map((rule) => {
+    const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
+    return {
+      id: rule.id,
+      type: rule.type,
+      next: rule.attributes,
+      module: type.solution,
+      references: rule.references,
+    } as RuleData;
+  });
+
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
@@ -345,6 +359,17 @@ const bulkEnableRulesWithOCC = async (
           overwrite: true,
         },
       })
+  );
+
+  // Track history
+  // TODO: Remove items that failed
+  context.changeTrackingService?.logBulkChange(
+    RuleChangeTrackingAction.ruleEnable,
+    username ?? 'unknown',
+    trackChangeHistoryRuleData,
+    context.spaceId,
+    context.kibanaVersion,
+    { metadata: { bulkCount: rulesToEnable.length } }
   );
 
   // Get a map of all rules that failed to enable so we do not clear their flapping

@@ -465,6 +465,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       }),
     };
 
+    // here
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
 
     plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType()));

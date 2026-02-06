@@ -12,6 +12,7 @@ import { withSpan } from '@kbn/apm-utils';
 import pMap from 'p-map';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
@@ -39,6 +40,7 @@ import { ruleDomainSchema } from '../../schemas';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { RuleParams, RuleDomain } from '../../types';
 import { bulkDisableRulesSo } from '../../../../data/rule';
+import { type RuleData } from '../../../../rules_client/lib/change_tracking';
 
 export const bulkDisableRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -223,6 +225,22 @@ const bulkDisableRulesWithOCC = async (
     }
   );
 
+  // 1. Track changes
+  const trackChangeHistoryRuleData = rulesToDisable
+    .map((rule) => {
+      const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
+      return type.trackChanges
+        ? ({
+            id: rule.id,
+            type: rule.type,
+            next: rule.attributes,
+            module: type.solution,
+            references: rule.references,
+          } as RuleData)
+        : undefined;
+    })
+    .filter((rule) => rule !== undefined);
+
   // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
   // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
   // bulk_disable, bulk_enable, etc. to fix this cast
@@ -235,6 +253,17 @@ const bulkDisableRulesWithOCC = async (
         bulkDisableRuleAttributes: rulesToDisable as Array<SavedObjectsBulkCreateObject<RawRule>>,
         savedObjectsBulkCreateOptions: { overwrite: true },
       })
+  );
+
+  // Track history
+  // TODO: Remove items that failed
+  context.changeTrackingService?.logBulkChange(
+    RuleChangeTrackingAction.ruleDisable,
+    username ?? 'unknown',
+    trackChangeHistoryRuleData,
+    context.spaceId,
+    context.kibanaVersion,
+    { metadata: { bulkCount: rulesToDisable.length } }
   );
 
   const taskIdsToDisable: string[] = [];

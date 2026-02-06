@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { isEqual, omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { SanitizedRule, RawRule } from '../../../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
@@ -330,6 +331,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   let updatedRuleSavedObject: SavedObject<RawRule>;
 
   const { id, version } = originalRuleSavedObject;
+
   try {
     updatedRuleSavedObject = await createRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
@@ -341,6 +343,22 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
         references: extractedReferences,
       },
     });
+
+    // Success? Track changes
+    context.changeTrackingService?.logChange(
+      RuleChangeTrackingAction.ruleUpdate,
+      username ?? 'unknown',
+      {
+        id,
+        type: RULE_SAVED_OBJECT_TYPE,
+        current: originalRuleSavedObject.attributes,
+        next: updatedRuleAttributes,
+        references: extractedReferences,
+        module: ruleType.solution,
+      },
+      context.spaceId,
+      context.kibanaVersion
+    );
   } catch (e) {
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(

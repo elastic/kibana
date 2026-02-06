@@ -118,6 +118,7 @@ import {
 } from '../../../common/components/rule_execution_status';
 import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
+import { ChangeHistoryTable } from './change_history_table/change_history_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
 import { RuleGaps } from '../../../rule_gaps/components/rule_gaps';
 
@@ -271,6 +272,7 @@ export const RuleDetailsPage = connector(
     const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
       useSourcererDataView(PageScope.alerts);
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+    const isRuleChangeHistoryEnabled = useIsExperimentalFeatureEnabled('ruleChangeHistoryEnabled');
     const { dataView: experimentalDataView, status } = useDataView(PageScope.alerts);
     const isLoadingIndexPattern = newDataViewPickerEnabled
       ? status !== 'ready'
@@ -880,6 +882,11 @@ export const RuleDetailsPage = connector(
                     >
                       <ExecutionEventsTable ruleId={ruleId} />
                     </Route>
+                    {isRuleChangeHistoryEnabled && (
+                      <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.history})`}>
+                        <ChangeHistoryTable ruleId={ruleId} rule={rule} />
+                      </Route>
+                    )}
                   </Routes>
                 </StyledMinHeightTabContainer>
               </SecuritySolutionPageWrapper>

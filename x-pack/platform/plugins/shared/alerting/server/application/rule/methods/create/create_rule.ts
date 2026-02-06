@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { type ChangeTrackingAction, RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -43,6 +44,7 @@ import { validateScheduleLimit } from '../get_schedule_frequency';
 
 export interface CreateRuleOptions {
   id?: string;
+  action?: ChangeTrackingAction;
 }
 
 export interface CreateRuleParams<Params extends RuleParams = never> {
@@ -238,6 +240,21 @@ export async function createRule<Params extends RuleParams = never>(
         options,
         returnRuleAttributes: true,
       })
+  );
+
+  // Success? Track changes
+  context.changeTrackingService?.logChange(
+    createParams.options?.action ?? RuleChangeTrackingAction.ruleCreate,
+    username ?? 'unknown',
+    {
+      id,
+      type: RULE_SAVED_OBJECT_TYPE,
+      next: ruleAttributes,
+      references,
+      module: ruleType.solution,
+    },
+    context.spaceId,
+    context.kibanaVersion
   );
 
   // Convert ES RawRule back to domain rule object

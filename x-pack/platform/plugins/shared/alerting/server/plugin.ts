@@ -114,6 +114,8 @@ import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
 import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_fill_scheduler_task';
+import type { IChangeTrackingService } from './rules_client/lib/change_tracking';
+import { ChangeTrackingService } from './rules_client/lib/change_tracking';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -248,6 +250,7 @@ export class AlertingPlugin {
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
+  private changeTrackingService: IChangeTrackingService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -266,6 +269,10 @@ export class AlertingPlugin {
     this.disabledRuleTypes = new Set(this.config.disabledRuleTypes || []);
     this.enabledRuleTypes =
       this.config.enabledRuleTypes != null ? new Set(this.config.enabledRuleTypes) : null;
+    this.changeTrackingService = new ChangeTrackingService({
+      logger: this.logger,
+      kibanaVersion: this.kibanaVersion,
+    });
   }
 
   public setup(
@@ -550,6 +557,16 @@ export class AlertingPlugin {
               ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
           }
 
+          // There are many alert types but they all belong to a specific solution
+          // (security, stack, observability) which in turn determines the business
+          // domain. We register the desire for each business domain to track historical
+          // changes separately. Then we initialize one data stream per domain during
+          // plugin start() phase (once esClient.asInternalUser becomes available).
+          if (ruleType.trackChanges) {
+            const module = ruleType.solution;
+            this.changeTrackingService.register(module);
+          }
+
           ruleTypeRegistry.register(ruleType);
         }
       },
@@ -592,6 +609,7 @@ export class AlertingPlugin {
       logger,
       taskRunnerFactory,
       ruleTypeRegistry,
+      changeTrackingService,
       rulesClientFactory,
       alertingAuthorizationClientFactory,
       rulesSettingsClientFactory,
@@ -624,6 +642,11 @@ export class AlertingPlugin {
       features: plugins.features,
     });
 
+    // This is where we initialize the change tracking service using
+    // the priviledged elasticsearch client (one data stream per business domain)
+    // In reality, only security rules have "opted-in" to change tracking
+    // via a feature flag so only this data stream will get created.
+    changeTrackingService.initialize(core.elasticsearch.client.asInternalUser);
     rulesClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
       logger,
@@ -642,6 +665,7 @@ export class AlertingPlugin {
       },
       actions: plugins.actions,
       eventLog: plugins.eventLog,
+      changeTrackingService: this.changeTrackingService,
       kibanaVersion: this.kibanaVersion,
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
