@@ -103,6 +103,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
             <EuiFlexItem grow={false}>
               <FlyoutTypeSwitch
                 // switch for flyout type: push or overlay
+                title={title}
                 flyoutType={flyoutType}
                 onChange={setFlyoutType}
               />
@@ -110,6 +111,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
             <EuiFlexItem grow={false}>
               <FlyoutOwnFocusSwitch
                 // switch for ownFocus behavior
+                title={title}
                 flyoutOwnFocus={flyoutOwnFocus}
                 onChange={setFlyoutOwnFocus}
                 disabled={flyoutType === 'push'}
@@ -364,6 +366,7 @@ const NonSessionFlyout: React.FC = React.memo(() => {
             <EuiFlexItem grow={false}>
               <FlyoutTypeSwitch
                 // switch for flyout type: push or overlay
+                title="Non-session flyout"
                 flyoutType={flyoutType}
                 onChange={setFlyoutType}
               />
@@ -371,6 +374,7 @@ const NonSessionFlyout: React.FC = React.memo(() => {
             <EuiFlexItem grow={false}>
               <FlyoutOwnFocusSwitch
                 // switch for ownFocus behavior
+                title="Non-session flyout"
                 flyoutOwnFocus={flyoutOwnFocus}
                 onChange={setFlyoutOwnFocus}
                 disabled={flyoutType === 'push'}
