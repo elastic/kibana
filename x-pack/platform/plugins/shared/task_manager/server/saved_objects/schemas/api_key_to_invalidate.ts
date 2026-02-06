@@ -13,11 +13,4 @@ export const apiKeyToInvalidateSchemaV1 = schema.object({
   createdAt: schema.string(),
 });
 
-// Added here as well because alerting and task_manager invalidate tasks are sharing the same saved object type
-export const apiKeyToInvalidateSchemaV2 = schema.object({
-  apiKeyId: schema.string(),
-  createdAt: schema.string(),
-  uiamApiKey: schema.maybe(schema.string()),
-});
-
-export type ApiKeyToInvalidate = TypeOf<typeof apiKeyToInvalidateSchemaV2>;
+export type ApiKeyToInvalidate = TypeOf<typeof apiKeyToInvalidateSchemaV1>;

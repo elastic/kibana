@@ -273,7 +273,7 @@ export function setupSavedObjects(
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: API_KEY_PENDING_INVALIDATION_TYPE,
-    attributesToEncrypt: new Set(['apiKeyId, uiamApiKey']),
+    attributesToEncrypt: new Set(['apiKeyId', 'uiamApiKey']),
     attributesToIncludeInAAD: new Set(['createdAt']),
   });
 

@@ -88,6 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
             `/api/hidden_saved_objects/get-decrypted-as-internal-user/api_key_pending_invalidation/e67824d0-b428-47c7-be46-fd4e2021519f`
           )
           .expect(200);
+        console.log('decryptResponse.text', decryptResponse.text);
 
         const decryptedObject = JSON.parse(decryptResponse.text);
         expect(decryptedObject.attributes.apiKeyId).to.eql(
