@@ -502,24 +502,6 @@ export class APIKeys implements NativeAPIKeysType {
 
     return roleDescriptors;
   }
-
-  private getScopedClient(request: KibanaRequest) {
-    // If we're not in UIAM mode or if the request is not a fake request, use request scope directly.
-    if (!this.uiam || request.isFakeRequest === false) {
-      return this.clusterClient.asScoped(request);
-    }
-
-    // In UIAM mode and for fake requests, it's still possible that the request is authenticated with non-UIAM credentials.
-    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-    if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
-      return this.clusterClient.asScoped(request);
-    }
-
-    // For UIAM credentials, we need to add the UIAM authentication header to the scoped client.
-    return this.clusterClient.asScoped({
-      headers: { ...request.headers, ...this.uiam.getEsClientAuthenticationHeader() },
-    });
-  }
 }
 
 export class CreateApiKeyValidationError extends Error {
