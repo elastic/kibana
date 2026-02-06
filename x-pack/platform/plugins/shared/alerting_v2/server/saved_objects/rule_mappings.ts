@@ -14,6 +14,7 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
     name: { type: 'text' },
+    kind: { type: 'keyword' },
     tags: { type: 'keyword' },
     enabled: { type: 'boolean' },
     schedule: {

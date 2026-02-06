@@ -33,9 +33,14 @@ const scheduleSchema = z
   .strict()
   .describe('Schedule configuration for the rule.');
 
+export const ruleKindSchema = z.enum(['alert', 'signal']).describe('The kind of rule.');
+
+export type RuleKind = z.infer<typeof ruleKindSchema>;
+
 export const createRuleDataSchema = z
   .object({
     name: z.string().min(1).max(64).describe('Human-readable rule name.'),
+    kind: ruleKindSchema,
     tags: z
       .array(z.string().max(64).describe('Rule tag.'))
       .max(100)

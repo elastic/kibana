@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { ObjectType } from '@kbn/config-schema';
 import type { CoreDiServiceStart } from '@kbn/core-di';
-import { Request } from '@kbn/core-di-server';
 import { Global } from '@kbn/core-di-internal';
+import { Request } from '@kbn/core-di-server';
 import type {
   RunContext,
   RunResult,
@@ -24,35 +25,77 @@ export interface AlertingTaskRunner {
   }): Promise<RunResult>;
 }
 
+/**
+ * Task definition interface for alerting tasks.
+ * Similar to Route definitions, task definitions are bound to the TaskDefinition token
+ * and automatically registered with Task Manager on setup.
+ */
+export interface AlertingTaskDefinition<TRunner extends AlertingTaskRunner = AlertingTaskRunner> {
+  taskType: string;
+  title: string;
+  timeout: string;
+  paramsSchema: ObjectType;
+  maxAttempts?: number;
+  taskRunnerClass: TaskRunnerConstructor<TRunner>;
+  /**
+   * Whether this task requires a fakeRequest from Task Manager.
+   * Tasks scheduled with API keys have a fakeRequest that enables request-scoped services.
+   * Set to false for tasks that only use internal/singleton-scoped services.
+   * @default true
+   */
+  requiresFakeRequest?: boolean;
+}
+
+export const TaskDefinition = Symbol.for(
+  'alerting_v2.TaskDefinition'
+) as ServiceIdentifier<AlertingTaskDefinition>;
+
 export type TaskRunnerFactory = <TRunner extends AlertingTaskRunner>(params: {
   taskRunnerClass: TaskRunnerConstructor<TRunner>;
   taskType: string;
+  requiresFakeRequest?: boolean;
 }) => TaskRunCreatorFunction;
 
 export const TaskRunnerFactoryToken = Symbol.for(
   'alerting_v2.TaskRunnerFactory'
 ) as ServiceIdentifier<TaskRunnerFactory>;
 
-// Factory for task runners that depend on Task Manager fakeRequest.
-// It forks the DI container and overrides Request scope with the fake request.
+/**
+ * Factory for task runners that creates scoped DI containers for each task execution.
+ *
+ * For tasks with `requiresFakeRequest: true` (default):
+ * - Forks the DI container and binds the fakeRequest to Request scope
+ * - Enables request-scoped services (e.g., scoped ES clients)
+ * - Throws if no fakeRequest is available (task must be scheduled with API key)
+ *
+ * For tasks with `requiresFakeRequest: false`:
+ * - Forks the DI container for isolation
+ * - Does not bind Request scope
+ * - Task runner can only use internal/singleton-scoped services
+ */
 export function createTaskRunnerFactory({
   getInjection,
 }: {
   getInjection: () => CoreDiServiceStart;
 }): TaskRunnerFactory {
-  return ({ taskRunnerClass, taskType }) => {
+  return ({ taskRunnerClass, taskType, requiresFakeRequest = true }) => {
     return ({ taskInstance, abortController, fakeRequest }: RunContext) => ({
       run: async () => {
-        if (!fakeRequest) {
+        if (requiresFakeRequest && !fakeRequest) {
           throw new Error(
             `Cannot execute ${taskType} task without Task Manager fakeRequest. Ensure the task is scheduled with an API key (task id: ${taskInstance.id})`
           );
         }
 
         const scope = getInjection().fork();
-        scope.bind(Request).toConstantValue(fakeRequest);
-        scope.bind(Global).toConstantValue(Request);
-        scope.bind(taskRunnerClass).toSelf().inRequestScope();
+
+        if (fakeRequest) {
+          scope.bind(Request).toConstantValue(fakeRequest);
+          scope.bind(Global).toConstantValue(Request);
+          scope.bind(taskRunnerClass).toSelf().inRequestScope();
+        } else {
+          scope.bind(taskRunnerClass).toSelf().inTransientScope();
+        }
 
         try {
           const runner = scope.get(taskRunnerClass);

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export function getAlertEventESQLResponse(overrides?: {
   '@timestamp'?: string;
   group_hash?: string;
   episode_id?: string;
   rule_id?: string;
-}): ESQLSearchResponse {
+}): EsqlQueryResponse {
   return {
     columns: [
       { name: '@timestamp', type: 'date' },
@@ -31,7 +31,7 @@ export function getAlertEventESQLResponse(overrides?: {
   };
 }
 
-export function getEmptyESQLResponse(): ESQLSearchResponse {
+export function getEmptyESQLResponse(): EsqlQueryResponse {
   return {
     columns: [],
     values: [],
@@ -45,7 +45,7 @@ export function getBulkAlertEventsESQLResponse(
     episode_id?: string;
     rule_id?: string;
   }>
-): ESQLSearchResponse {
+): EsqlQueryResponse {
   return {
     columns: [
       { name: '@timestamp', type: 'date' },

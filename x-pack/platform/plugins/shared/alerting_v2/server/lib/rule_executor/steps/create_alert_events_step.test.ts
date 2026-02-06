@@ -6,7 +6,6 @@
  */
 
 import { CreateAlertEventsStep } from './create_alert_events_step';
-import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/alert_events';
 import {
   createRuleExecutionInput,
   createRuleResponse,
@@ -14,46 +13,32 @@ import {
   createRulePipelineState,
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { createStorageService } from '../../services/storage_service/storage_service.mock';
 
 describe('CreateAlertEventsStep', () => {
   let step: CreateAlertEventsStep;
-  let mockEsClient: ReturnType<typeof createStorageService>['mockEsClient'];
 
   beforeEach(() => {
     const { loggerService } = createLoggerService();
-    const { storageService, mockEsClient: esClient } = createStorageService();
-    mockEsClient = esClient;
-    step = new CreateAlertEventsStep(loggerService, storageService);
+    step = new CreateAlertEventsStep(loggerService);
   });
 
-  it('builds alert events and stores them correctly', async () => {
+  it('builds alert events correctly', async () => {
     const input = createRuleExecutionInput();
     const rule = createRuleResponse();
     const esqlResponse = createEsqlResponse();
 
-    mockEsClient.bulk.mockResolvedValue({
-      items: [],
-      errors: false,
-      took: 1,
-    });
-
     const state = createRulePipelineState({ input, rule, esqlResponse });
     const result = await step.execute(state);
 
-    expect(result).toEqual({ type: 'continue' });
-    expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
+    expect(result.type).toBe('continue');
+    expect(result).toHaveProperty('data.alertEvents');
 
-    const bulkCall = mockEsClient.bulk.mock.calls[0][0];
-    const operations = bulkCall.operations as Array<Record<string, unknown>>;
+    // @ts-expect-error: the above check ensures the alertEvents exists
+    const { alertEvents } = result.data;
 
-    expect(operations).toHaveLength(4);
+    expect(alertEvents).toHaveLength(2);
 
-    expect(operations[0]).toEqual({
-      create: { _index: ALERT_EVENTS_DATA_STREAM, _id: expect.any(String) },
-    });
-
-    expect(operations[1]).toEqual({
+    expect(alertEvents[0]).toEqual({
       '@timestamp': expect.any(String),
       scheduled_timestamp: input.scheduledAt,
       rule: { id: rule.id, version: 1 },
@@ -64,11 +49,7 @@ describe('CreateAlertEventsStep', () => {
       type: 'signal',
     });
 
-    expect(operations[2]).toEqual({
-      create: { _index: ALERT_EVENTS_DATA_STREAM, _id: expect.any(String) },
-    });
-
-    expect(operations[3]).toEqual({
+    expect(alertEvents[1]).toEqual({
       '@timestamp': expect.any(String),
       scheduled_timestamp: input.scheduledAt,
       rule: { id: rule.id, version: 1 },
@@ -94,16 +75,5 @@ describe('CreateAlertEventsStep', () => {
     const result = await step.execute(state);
 
     expect(result).toEqual({ type: 'halt', reason: 'state_not_ready' });
-  });
-
-  it('propagates storage service errors', async () => {
-    mockEsClient.bulk.mockRejectedValue(new Error('Bulk index failed'));
-
-    const state = createRulePipelineState({
-      rule: createRuleResponse(),
-      esqlResponse: createEsqlResponse(),
-    });
-
-    await expect(step.execute(state)).rejects.toThrow('Bulk index failed');
   });
 });

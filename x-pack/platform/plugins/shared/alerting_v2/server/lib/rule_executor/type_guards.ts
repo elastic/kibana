@@ -7,24 +7,15 @@
 
 import type { RulePipelineState } from './types';
 
-export type StateWithRule = RulePipelineState & {
-  rule: NonNullable<RulePipelineState['rule']>;
+type OptionalStateKey = keyof Omit<RulePipelineState, 'input'>;
+
+export type StateWith<K extends OptionalStateKey> = RulePipelineState & {
+  [P in K]: NonNullable<RulePipelineState[P]>;
 };
 
-export type StateWithEsqlResponse = RulePipelineState & {
-  esqlResponse: NonNullable<RulePipelineState['esqlResponse']>;
-};
-
-export function hasRule(state: RulePipelineState): state is StateWithRule {
-  return state.rule !== undefined;
-}
-
-export function hasEsqlResponse(state: RulePipelineState): state is StateWithEsqlResponse {
-  return state.esqlResponse !== undefined;
-}
-
-export function hasRuleAndEsqlResponse(
-  state: RulePipelineState
-): state is StateWithRule & StateWithEsqlResponse {
-  return hasRule(state) && hasEsqlResponse(state);
+export function hasState<K extends OptionalStateKey>(
+  state: RulePipelineState,
+  keys: readonly K[]
+): state is StateWith<K> {
+  return keys.every((key) => state[key] !== undefined);
 }
