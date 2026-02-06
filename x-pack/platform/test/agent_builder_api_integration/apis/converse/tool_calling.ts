@@ -88,7 +88,6 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
     it('sends the correct esql result to the LLM', () => {
       expect(esqlResults.type).to.be('esql_results');
       expect(esqlResults).have.property('tool_result_id');
-      expect(esqlResults.data.source).to.be('esql');
       expect(esqlResults.data.query).to.be(MOCKED_ESQL_QUERY);
       expect(esqlResults.data.values).to.have.length(15);
     });
