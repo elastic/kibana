@@ -366,6 +366,100 @@ describe('useKeyboardNavigation', () => {
 
       expect(result.current.screenReaderAnnouncement).toBe('');
     });
+
+    it('announces when a node is selected via Enter', () => {
+      const nodes = [createNode('test-node', 100, 100, 'Test Service')];
+      const nodeElement = document.createElement('div');
+      nodeElement.setAttribute('data-id', 'test-node');
+      nodeElement.tabIndex = 0;
+      document.body.appendChild(nodeElement);
+
+      const { result } = renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes,
+          onNodeSelect: jest.fn(),
+        })
+      );
+
+      nodeElement.focus();
+
+      act(() => {
+        const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
+        document.dispatchEvent(event);
+      });
+
+      expect(result.current.screenReaderAnnouncement).toBe(
+        'Selected Test Service. Press Escape to close.'
+      );
+
+      document.body.removeChild(nodeElement);
+    });
+
+    it('announces when a node is selected via Space', () => {
+      const nodes = [createNode('test-node', 100, 100, 'Test Service')];
+      const nodeElement = document.createElement('div');
+      nodeElement.setAttribute('data-id', 'test-node');
+      nodeElement.tabIndex = 0;
+      document.body.appendChild(nodeElement);
+
+      const { result } = renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes,
+          onNodeSelect: jest.fn(),
+        })
+      );
+
+      nodeElement.focus();
+
+      act(() => {
+        const event = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
+        document.dispatchEvent(event);
+      });
+
+      expect(result.current.screenReaderAnnouncement).toBe(
+        'Selected Test Service. Press Escape to close.'
+      );
+
+      document.body.removeChild(nodeElement);
+    });
+
+    it('announces when navigating to a node via Arrow keys', () => {
+      const nodes = [
+        createNode('node-a', 0, 100, 'Service A'),
+        createNode('node-b', 200, 100, 'Service B'),
+      ];
+
+      const nodeElementA = document.createElement('div');
+      nodeElementA.setAttribute('data-id', 'node-a');
+      nodeElementA.tabIndex = 0;
+      document.body.appendChild(nodeElementA);
+
+      const nodeElementB = document.createElement('div');
+      nodeElementB.setAttribute('data-id', 'node-b');
+      nodeElementB.tabIndex = 0;
+      document.body.appendChild(nodeElementB);
+
+      const { result } = renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes,
+        })
+      );
+
+      nodeElementA.focus();
+
+      act(() => {
+        const event = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true });
+        document.dispatchEvent(event);
+      });
+
+      expect(result.current.screenReaderAnnouncement).toBe('Focused on Service B');
+
+      document.body.removeChild(nodeElementA);
+      document.body.removeChild(nodeElementB);
+    });
   });
 
   describe('keyboard event handling', () => {
