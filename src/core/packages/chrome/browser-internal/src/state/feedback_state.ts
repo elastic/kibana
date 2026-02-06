@@ -17,10 +17,10 @@ export interface FeedbackStateDeps {
 }
 
 export interface FeedbackState {
-  isFeedbackEnabled$: Observable<boolean>;
-  feedbackUrlParams$: Observable<URLSearchParams | undefined>;
-  isFeedbackBtnVisible$: Observable<boolean>;
-  setIsFeedbackBtnVisible: (isVisible: boolean) => void;
+  isEnabled$: Observable<boolean>;
+  urlParams$: Observable<URLSearchParams | undefined>;
+  isBtnVisible$: Observable<boolean>;
+  setIsBtnVisible: (isVisible: boolean) => void;
 }
 
 export const createFeedbackState = ({
@@ -30,7 +30,7 @@ export const createFeedbackState = ({
 }: FeedbackStateDeps): FeedbackState => {
   const feedbackBtnVisible = createState(false);
 
-  const isFeedbackBtnVisible$ = combineLatest([
+  const isBtnVisible$ = combineLatest([
     feedbackBtnVisible.$,
     isSideNavCollapsed$,
     isEnabled$,
@@ -43,9 +43,9 @@ export const createFeedbackState = ({
   );
 
   return {
-    isFeedbackEnabled$: isEnabled$,
-    feedbackUrlParams$: urlParams$,
-    isFeedbackBtnVisible$,
-    setIsFeedbackBtnVisible: feedbackBtnVisible.set,
+    isEnabled$,
+    urlParams$,
+    isBtnVisible$,
+    setIsBtnVisible: feedbackBtnVisible.set,
   };
 };

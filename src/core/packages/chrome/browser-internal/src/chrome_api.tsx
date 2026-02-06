@@ -168,8 +168,8 @@ export function createChromeApi({
     sideNav: {
       getIsCollapsed$: () => state.sideNav.collapsed.$,
       setIsCollapsed: state.sideNav.collapsed.set,
-      getIsFeedbackBtnVisible$: () => state.feedback.isFeedbackBtnVisible$,
-      setIsFeedbackBtnVisible: state.feedback.setIsFeedbackBtnVisible,
+      getIsFeedbackBtnVisible$: () => state.feedback.isBtnVisible$,
+      setIsFeedbackBtnVisible: state.feedback.setIsBtnVisible,
     },
 
     // Project Navigation

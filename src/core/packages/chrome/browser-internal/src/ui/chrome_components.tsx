@@ -29,66 +29,68 @@ import { GridLayoutProjectSideNav } from './project/sidenav/grid_layout_sidenav'
 import type { NavigationProps } from './project/sidenav/types';
 import type { ChromeState } from '../state/chrome_state';
 
-export interface ChromeComponentsDeps {
+interface ChromeComponentsConfig {
   isServerless: boolean;
+  kibanaVersion: string;
+  homeHref: string;
+  kibanaDocLink: string;
+}
+
+interface NavControlsObservables {
+  left$: Observable<ChromeNavControl[]>;
+  center$: Observable<ChromeNavControl[]>;
+  right$: Observable<ChromeNavControl[]>;
+  extension$: Observable<ChromeNavControl[]>;
+}
+
+interface ProjectNavigationObservables {
+  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  homeHref$: Observable<string>;
+  navigationTree$: Observable<NavigationTreeDefinitionUI>;
+  activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
+  activeDataTestSubj$?: Observable<string | undefined>;
+}
+
+export interface ChromeComponentsDeps {
+  config: ChromeComponentsConfig;
+  state: ChromeState;
   application: InternalApplicationStart;
   basePath: InternalHttpStart['basePath'];
   docLinks: DocLinksStart;
-  kibanaVersion: string;
-  state: ChromeState;
+  navControls: NavControlsObservables;
+  projectNavigation: ProjectNavigationObservables;
   loadingCount$: Observable<number>;
   helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
   forceAppSwitcherNavigation$: Observable<boolean>;
   navLinks$: Observable<ChromeNavLink[]>;
   recentlyAccessed$: Observable<RecentlyAccessedHistoryItem[]>;
-  navControlsLeft$: Observable<ChromeNavControl[]>;
-  navControlsCenter$: Observable<ChromeNavControl[]>;
-  navControlsRight$: Observable<ChromeNavControl[]>;
-  navControlsExtension$: Observable<ChromeNavControl[]>;
   customBranding$: CustomBrandingStart['customBranding$'];
   appMenuActions$: InternalApplicationStart['currentActionMenu$'];
-  projectBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  projectHomeHref$: Observable<string>;
   prependBasePath: InternalHttpStart['basePath']['prepend'];
   reportEvent: (eventType: string, eventData: object) => void;
-  navigationTree$: Observable<NavigationTreeDefinitionUI>;
-  activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
-  activeDataTestSubj$?: Observable<string | undefined>;
-  homeHref: string;
-  kibanaDocLink: string;
 }
 
 export const createChromeComponents = ({
-  isServerless,
+  config,
   application,
   basePath,
   docLinks,
-  kibanaVersion,
   state,
   loadingCount$,
   helpMenuLinks$,
   forceAppSwitcherNavigation$,
   navLinks$,
   recentlyAccessed$,
-  navControlsLeft$,
-  navControlsCenter$,
-  navControlsRight$,
-  navControlsExtension$,
+  navControls,
   customBranding$,
   appMenuActions$,
-  projectBreadcrumbs$,
-  projectHomeHref$,
+  projectNavigation,
   prependBasePath,
   reportEvent,
-  navigationTree$,
-  activeNodes$,
-  activeDataTestSubj$,
-  homeHref,
-  kibanaDocLink,
 }: ChromeComponentsDeps) => {
   const getClassicHeader = () => (
     <Header
-      isServerless={isServerless}
+      isServerless={config.isServerless}
       loadingCount$={loadingCount$}
       application={application}
       badge$={state.badge.$}
@@ -96,21 +98,21 @@ export const createChromeComponents = ({
       breadcrumbs$={state.breadcrumbs.classic.$}
       breadcrumbsAppendExtensions$={state.breadcrumbs.appendExtensionsWithBadges$}
       customNavLink$={state.customNavLink.$}
-      kibanaDocLink={kibanaDocLink}
+      kibanaDocLink={config.kibanaDocLink}
       docLinks={docLinks}
       forceAppSwitcherNavigation$={forceAppSwitcherNavigation$}
       globalHelpExtensionMenuLinks$={state.help.globalMenuLinks.$}
       helpExtension$={state.help.extension.$}
       helpSupportUrl$={state.help.supportUrl.$}
       helpMenuLinks$={helpMenuLinks$}
-      homeHref={homeHref}
-      kibanaVersion={kibanaVersion}
+      homeHref={config.homeHref}
+      kibanaVersion={config.kibanaVersion}
       navLinks$={navLinks$}
       recentlyAccessed$={recentlyAccessed$}
-      navControlsLeft$={navControlsLeft$}
-      navControlsCenter$={navControlsCenter$}
-      navControlsRight$={navControlsRight$}
-      navControlsExtension$={navControlsExtension$}
+      navControlsLeft$={navControls.left$}
+      navControlsCenter$={navControls.center$}
+      navControlsRight$={navControls.right$}
+      navControlsExtension$={navControls.extension$}
       customBranding$={customBranding$}
       appMenu$={state.appMenu.$}
     />
@@ -118,22 +120,22 @@ export const createChromeComponents = ({
 
   const getProjectHeader = () => (
     <ProjectHeader
-      isServerless={isServerless}
+      isServerless={config.isServerless}
       application={application}
       globalHelpExtensionMenuLinks$={state.help.globalMenuLinks.$}
-      breadcrumbs$={projectBreadcrumbs$}
+      breadcrumbs$={projectNavigation.breadcrumbs$}
       breadcrumbsAppendExtensions$={state.breadcrumbs.appendExtensionsWithBadges$}
       customBranding$={customBranding$}
       helpExtension$={state.help.extension.$}
       helpSupportUrl$={state.help.supportUrl.$}
       helpMenuLinks$={helpMenuLinks$}
-      navControlsLeft$={navControlsLeft$}
-      navControlsCenter$={navControlsCenter$}
-      navControlsRight$={navControlsRight$}
+      navControlsLeft$={navControls.left$}
+      navControlsCenter$={navControls.center$}
+      navControlsRight$={navControls.right$}
       loadingCount$={loadingCount$}
-      homeHref$={projectHomeHref$}
+      homeHref$={projectNavigation.homeHref$}
       docLinks={docLinks}
-      kibanaVersion={kibanaVersion}
+      kibanaVersion={config.kibanaVersion}
       prependBasePath={prependBasePath}
     />
   );
@@ -143,13 +145,13 @@ export const createChromeComponents = ({
       basePath,
       application,
       reportEvent,
-      navigationTree$,
-      activeNodes$,
+      navigationTree$: projectNavigation.navigationTree$,
+      activeNodes$: projectNavigation.activeNodes$,
       navLinks$,
-      dataTestSubj$: activeDataTestSubj$,
-      feedbackUrlParams$: state.feedback.feedbackUrlParams$,
+      dataTestSubj$: projectNavigation.activeDataTestSubj$,
+      feedbackUrlParams$: state.feedback.urlParams$,
       onToggleCollapsed: state.sideNav.collapsed.set,
-      isFeedbackEnabled$: state.feedback.isFeedbackEnabled$,
+      isFeedbackEnabled$: state.feedback.isEnabled$,
     };
 
     return (

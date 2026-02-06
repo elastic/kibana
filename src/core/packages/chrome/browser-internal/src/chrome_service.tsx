@@ -182,32 +182,38 @@ export class ChromeService {
 
     // 7. Create chrome components
     const components = createChromeComponents({
-      isServerless: this.isServerless,
+      config: {
+        isServerless: this.isServerless,
+        kibanaVersion,
+        homeHref,
+        kibanaDocLink: docLinks.links.kibana.guide,
+      },
       application,
       basePath: http.basePath,
       docLinks,
-      kibanaVersion,
       state,
+      navControls: {
+        left$: navControls.getLeft$(),
+        center$: navControls.getCenter$(),
+        right$: navControls.getRight$(),
+        extension$: navControls.getExtension$(),
+      },
+      projectNavigation: {
+        breadcrumbs$: projectNavigation.getProjectBreadcrumbs$(),
+        homeHref$: projectNavigation.getProjectHome$(),
+        navigationTree$: navigationTreeUi$,
+        activeNodes$,
+        activeDataTestSubj$,
+      },
       loadingCount$,
       helpMenuLinks$,
       forceAppSwitcherNavigation$: navLinks.getForceAppSwitcherNavigation$(),
       navLinks$,
       recentlyAccessed$,
-      navControlsLeft$: navControls.getLeft$(),
-      navControlsCenter$: navControls.getCenter$(),
-      navControlsRight$: navControls.getRight$(),
-      navControlsExtension$: navControls.getExtension$(),
       customBranding$: customBranding.customBranding$,
       appMenuActions$: application.currentActionMenu$,
-      projectBreadcrumbs$: projectNavigation.getProjectBreadcrumbs$(),
-      projectHomeHref$: projectNavigation.getProjectHome$(),
       prependBasePath: http.basePath.prepend,
       reportEvent: analytics.reportEvent,
-      navigationTree$: navigationTreeUi$,
-      activeNodes$,
-      activeDataTestSubj$,
-      homeHref,
-      kibanaDocLink: docLinks.links.kibana.guide,
     });
 
     // 8. Return chrome API
