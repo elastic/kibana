@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingsDefinition } from '@kbn/es-mappings';
 import { z } from '@kbn/zod';
 import type { ResourceDefinition } from './types';
 
@@ -28,7 +28,7 @@ export const ALERT_ACTIONS_ILM_POLICY: IlmPolicy = {
   },
 };
 
-const mappings: estypes.MappingTypeMapping = {
+const mappings: MappingsDefinition = {
   dynamic: false,
   properties: {
     '@timestamp': { type: 'date' },

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingsDefinition } from '@kbn/es-mappings';
 import { z } from '@kbn/zod';
 import type { ResourceDefinition } from './types';
 
@@ -28,13 +28,14 @@ export const ALERT_EVENTS_ILM_POLICY: IlmPolicy = {
   },
 };
 
-const mappings: estypes.MappingTypeMapping = {
+const mappings: MappingsDefinition = {
   dynamic: false,
   properties: {
     // Document '_id' is used as the unique alert event identifier
     '@timestamp': { type: 'date' },
     scheduled_timestamp: { type: 'date' },
     rule: {
+      type: 'object',
       properties: {
         id: { type: 'keyword' },
         version: { type: 'long' },
@@ -46,6 +47,7 @@ const mappings: estypes.MappingTypeMapping = {
     source: { type: 'keyword' },
     type: { type: 'keyword' }, // signal | alert
     episode: {
+      type: 'object',
       properties: {
         id: { type: 'keyword' },
         status: { type: 'keyword' }, // inactive | pending | active | recovering
