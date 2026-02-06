@@ -742,7 +742,7 @@ export const enrichProcessorSchema = processorBaseWithWhereSchema.extend({
  * User agent processor - Extract details from browser user agent strings
  */
 
-const userAgentProperties = ['name', 'os', 'device', 'original', 'version'] as const;
+export const userAgentProperties = ['name', 'os', 'device', 'original', 'version'] as const;
 
 export type UserAgentProperty = (typeof userAgentProperties)[number];
 

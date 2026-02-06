@@ -130,6 +130,8 @@ const PRIORITIZED_DATE_FIELDS = [
   'attributes.custom.timestamp',
 ];
 
+const PRIORITIZED_USER_AGENT_FIELDS = ['user_agent.original', 'http.request.headers.user-agent'];
+
 /**
  * Checks if the sample documents have valid message fields with actual content
  * that can be used for pipeline suggestion generation.
@@ -316,7 +318,7 @@ const defaultJsonExtractProcessorFormState = (
 
 const defaultUserAgentProcessorFormState = (sampleDocs: FlattenRecord[]): UserAgentFormState => ({
   action: 'user_agent' as const,
-  from: getDefaultTextField(sampleDocs, ['user_agent.original', 'http.request.headers.user-agent']),
+  from: getDefaultTextField(sampleDocs, PRIORITIZED_USER_AGENT_FIELDS),
   to: 'user_agent',
   ignore_failure: true,
   ignore_missing: true,
@@ -445,8 +447,8 @@ export const getFormStateFromActionStep = (
     step.action === 'sort' ||
     step.action === 'concat' ||
     step.action === 'json_extract' ||
-    step.action === 'enrich'
-    step.action === 'concat' ||
+    step.action === 'network_direction' ||
+    step.action === 'enrich' ||
     step.action === 'user_agent'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;

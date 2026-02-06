@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useController } from 'react-hook-form';
-import type { UserAgentProperty } from '@kbn/streamlang';
+import { userAgentProperties, type UserAgentProperty } from '@kbn/streamlang';
 import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
@@ -30,13 +30,11 @@ import type {
   UserAgentFormState,
 } from '../../../../types';
 
-const userAgentPropertyOptions: Array<EuiComboBoxOptionOption<UserAgentProperty>> = [
-  { label: 'name', value: 'name' },
-  { label: 'os', value: 'os' },
-  { label: 'device', value: 'device' },
-  { label: 'original', value: 'original' },
-  { label: 'version', value: 'version' },
-];
+const userAgentPropertyOptions: Array<EuiComboBoxOptionOption<UserAgentProperty>> =
+  userAgentProperties.map((prop) => ({
+    label: prop,
+    value: prop,
+  }));
 
 const TargetFieldSelector = () => {
   const { register } = useFormContext<UserAgentFormState>();
