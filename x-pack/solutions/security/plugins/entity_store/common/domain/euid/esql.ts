@@ -43,26 +43,24 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
     .join(' OR ');
 }
 
-export function getEuidEsqlEvaluation(entityType: EntityType) {
+export function getEuidEsqlEvaluation(
+  entityType: EntityType,
+  { withTypeId = true }: { withTypeId?: boolean } = {}
+) {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
 
   if (identityField.euidFields.length === 0) {
     throw new Error('No euid fields found, invalid euid logic definition');
   }
 
-  if (identityField.euidFields.length > 0) {
-    if (isEuidSeparator(identityField.euidFields[0][0])) {
-      throw new Error('Separator found in single field, invalid euid logic definition');
-    }
-  }
-
   // If only one field is defined, it must exist, no CASE logic is needed
   if (identityField.euidFields.length === 1) {
-    if (isEuidSeparator(identityField.euidFields[0][0])) {
+    const firstField = identityField.euidFields[0][0];
+    if (isEuidSeparator(firstField)) {
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
 
-    return `CONCAT("${entityType}:", ${identityField.euidFields[0][0].field})`;
+    return appendTypeId(entityType, firstField.field, withTypeId);
   }
 
   const euidLogic = identityField.euidFields.map((composedField) => {
@@ -94,5 +92,13 @@ export function getEuidEsqlEvaluation(entityType: EntityType) {
     return `(${caseBooleanOp}), ${concatLogic}`;
   });
 
-  return `CONCAT("${entityType}:", CASE(${euidLogic.join(',\n')}, NULL))`;
+  const idLogic = `CASE(${euidLogic.join(',\n')}, NULL)`;
+  return appendTypeId(entityType, idLogic, withTypeId);
+}
+
+function appendTypeId(entityType: EntityType, euidLogic: string, withTypeId: boolean) {
+  if (withTypeId) {
+    return `CONCAT("${entityType}:", ${euidLogic})`;
+  }
+  return euidLogic;
 }
