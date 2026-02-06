@@ -33,7 +33,12 @@ export function findSubquery(
       const isForkBranch = parent?.type === 'command' && parent.name === 'fork';
 
       if (isSubQuery(node) && within(offset, node) && !isForkBranch) {
-        subQuery = node.child;
+        const candidate = node.child;
+
+        // Skip non-ES|QL subqueries (e.g. PromQL nodes) which don't have commands.
+        if (candidate?.commands && candidate.commands.length > 0) {
+          subQuery = candidate;
+        }
       }
     },
   });
