@@ -28,7 +28,6 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
 import { FAVORITES_LIMIT as ESQL_STARRED_QUERIES_LIMIT } from '@kbn/content-management-favorites-common';
 import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
@@ -103,22 +102,9 @@ export const getTableColumns = (
   width: number,
   isOnReducedSpaceLayout: boolean,
   actions: Array<CustomItemAction<QueryHistoryItem>>,
-  isStarredTab = false,
-  starredQueriesService?: EsqlStarredQueriesService,
-  starredQueries?: StarredQueryItem[] // Add this parameter
+  isStarredTab = false
 ): Array<EuiBasicTableColumn<QueryHistoryItem>> => {
   const columnsArray = [
-    {
-      'data-test-subj': 'favoriteBtn',
-      render: (item: QueryHistoryItem) => {
-        const StarredQueryButton = starredQueriesService?.renderStarredButton(item);
-        if (!StarredQueryButton) {
-          return null;
-        }
-        return StarredQueryButton;
-      },
-      width: isOnReducedSpaceLayout ? 'auto' : '40px',
-    },
     {
       field: 'status',
       name: '',
@@ -247,6 +233,7 @@ export function QueryList({
   const scrollBarStyles = euiScrollBarStyles(theme);
   const [isDiscardQueryModalVisible, setIsDiscardQueryModalVisible] = useState(false);
   const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
+  const starredQueriesCount = starredQueries.length;
 
   // Subscribe to starred queries changes to force re-render
   useEffect(() => {
@@ -285,11 +272,17 @@ export function QueryList({
     return [
       {
         render: (item: QueryHistoryItem) => {
+          const StarredQueryButton = starredQueriesService?.renderStarredButton(item);
           const isStarred =
             starredQueriesService?.checkIfQueryIsStarred(getTrimmedQuery(item.queryString)) ??
             false;
           return (
-            <EuiFlexGroup gutterSize="xs" responsive={false}>
+            <EuiFlexGroup
+              gutterSize="xs"
+              responsive={false}
+              data-has-starred={starredQueriesCount > 0}
+            >
+              {StarredQueryButton && <EuiFlexItem grow={false}>{StarredQueryButton}</EuiFlexItem>}
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="top"
@@ -345,31 +338,15 @@ export function QueryList({
         },
       },
     ];
-  }, [onUpdateAndSubmit, starredQueriesService]);
+  }, [onUpdateAndSubmit, starredQueriesCount, starredQueriesService]);
 
   const isOnReducedSpaceLayout = containerWidth < 560;
   const columns = useMemo(() => {
-    return getTableColumns(
-      containerWidth,
-      isOnReducedSpaceLayout,
-      actions,
-      isStarredTab,
-      starredQueriesService,
-      starredQueries // Pass starredQueries to force re-render when they change
-    );
-  }, [
-    containerWidth,
-    isOnReducedSpaceLayout,
-    actions,
-    isStarredTab,
-    starredQueriesService,
-    starredQueries,
-  ]);
+    return getTableColumns(containerWidth, isOnReducedSpaceLayout, actions, isStarredTab);
+  }, [containerWidth, isOnReducedSpaceLayout, actions, isStarredTab]);
 
   const { euiTheme } = theme;
   const extraStyling = isOnReducedSpaceLayout ? getReducedSpaceStyling() : '';
-
-  const starredQueriesCellStyling = cssFavoriteHoverWithinEuiTableRow(theme.euiTheme);
 
   const tableStyling = css`
     .euiTableRowCell {
@@ -382,7 +359,6 @@ export function QueryList({
     overflow-y: auto;
     ${scrollBarStyles}
     ${extraStyling}
-    ${starredQueriesCellStyling}
   `;
 
   starredQueriesService?.discardModalVisibility$.subscribe((nextVisibility) => {

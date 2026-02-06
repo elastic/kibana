@@ -95,11 +95,6 @@ describe('Starred and History queries components', () => {
       const columns = getTableColumns(50, false, []);
       expect(columns).toEqual([
         {
-          'data-test-subj': 'favoriteBtn',
-          render: expect.anything(),
-          width: '40px',
-        },
-        {
           css: {
             height: '100%',
           },
@@ -137,11 +132,6 @@ describe('Starred and History queries components', () => {
     it('should get the table columns correctly for the starred list', async () => {
       const columns = getTableColumns(50, false, [], true);
       expect(columns).toEqual([
-        {
-          'data-test-subj': 'favoriteBtn',
-          render: expect.anything(),
-          width: '40px',
-        },
         {
           css: {
             height: '100%',
@@ -182,11 +172,6 @@ describe('Starred and History queries components', () => {
     const columns = getTableColumns(50, true, []);
     expect(columns).toEqual([
       {
-        'data-test-subj': 'favoriteBtn',
-        render: expect.anything(),
-        width: 'auto',
-      },
-      {
         css: {
           height: '100%',
         },
@@ -195,14 +180,6 @@ describe('Starred and History queries components', () => {
         name: '',
         render: expect.anything(),
         sortable: false,
-        width: 'auto',
-      },
-      {
-        'data-test-subj': 'timeRan',
-        field: 'timeRan',
-        name: 'Time ran',
-        render: expect.anything(),
-        sortable: true,
         width: 'auto',
       },
       {
@@ -216,6 +193,14 @@ describe('Starred and History queries components', () => {
         actions: [],
         'data-test-subj': 'actions',
         name: '',
+        width: 'auto',
+      },
+      {
+        'data-test-subj': 'timeRan',
+        field: 'timeRan',
+        name: 'Time ran',
+        render: expect.anything(),
+        sortable: true,
         width: 'auto',
       },
     ]);
