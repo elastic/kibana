@@ -13,13 +13,10 @@ import { setupKibana, startElasticsearch, stopElasticsearch, stopKibana } from '
 import type { TaskContext } from './types';
 import {
   automatedRollbackTests,
-  checkRemovedTypes,
-  fallbackToTestMode,
   getSnapshots,
-  validateNewTypes,
-  validateUpdatedTypes,
+  validateSOChanges,
+  validateTestFlow,
 } from './tasks';
-import { getTestSnapshots, TEST_TYPES } from './test';
 
 export function runCheckSavedObjectsCli() {
   let globalTask: Listr<TaskContext, 'default', 'simple'>;
@@ -91,56 +88,30 @@ export function runCheckSavedObjectsCli() {
           },
           /**
            * ==================================================================
-           * The following tasks only run in "--test mode".
+           * Validate SO changes.
            *
-           * Instead of starting Kibana and getting the actual typeRegistry
-           * we use a test registry with a bunch of fake SO types.
+           * Checks for removed types, new types, and updated types.
            * ==================================================================
            */
           {
-            title: 'Obtain type registry (test mode)',
-            task: async (ctx) => (ctx.registeredTypes = TEST_TYPES),
-            enabled: !server && test,
-          },
-          {
-            title: 'Get type registry snapshots (test mode)',
-            task: getTestSnapshots,
-            enabled: !server && test,
-          },
-          /**
-           * ==================================================================
-           * The following tasks run systematically
-           * ==================================================================
-           */
-          {
-            title: 'Check removed SO types',
-            task: checkRemovedTypes,
-            enabled: !server,
-          },
-          {
-            title: 'Validate new SO types',
-            task: validateNewTypes,
-            enabled: !server,
-          },
-          {
-            title: 'Validate existing SO types',
-            task: validateUpdatedTypes,
-            enabled: !server,
-          },
-          /**
-           * ==================================================================
-           * Fallback to test mode when no real SO types have been updated.
-           *
-           * This provides a smoke test for the migration logic on every PR,
-           * ensuring no regressions in the migration code even when no SO
-           * type definitions have changed.
-           * ==================================================================
-           */
-          {
-            title: 'Fallback to test mode (no updated types detected)',
-            task: fallbackToTestMode,
+            title: 'Validate SO changes',
+            task: validateSOChanges,
             enabled: !server && !test,
-            skip: (ctx) => ctx.updatedTypes.length > 0 || globalTask.errors.length > 0,
+            skip: test,
+          },
+          /**
+           * ==================================================================
+           * Validate test flow (runs in test mode or after fallback).
+           *
+           * Sets up a test type registry and test snapshots, then runs
+           * the same validation pipeline with test data.
+           * ==================================================================
+           */
+          {
+            title: 'Validate test flow',
+            task: validateTestFlow,
+            enabled: !server,
+            skip: (ctx) => !ctx.test,
           },
           {
             title: 'Automated rollback tests',

@@ -17,9 +17,6 @@ import { fileToJson, getFileFromKibanaRepo } from '../../util';
 import { BASELINE_MAPPINGS_TEST } from '../test';
 
 export const automatedRollbackTests: Task = (ctx, task) => {
-  // Use test baseline mappings in test mode OR fallback mode
-  const useTestBaseline = ctx.test || ctx.fallbackToTestMode === true;
-
   const subtasks: ListrTask<TaskContext>[] = [
     {
       title: 'Fetch baseline mappings',
@@ -29,7 +26,7 @@ export const automatedRollbackTests: Task = (ctx, task) => {
           ref: ctx.gitRev,
         })),
       retry: { tries: 5, delay: 2_000 },
-      enabled: () => !useTestBaseline,
+      enabled: () => !ctx.test,
     },
     {
       title: 'Fetch baseline mappings (test mode)',
@@ -37,7 +34,7 @@ export const automatedRollbackTests: Task = (ctx, task) => {
         (ctx.baselineMappings = (await fileToJson(
           BASELINE_MAPPINGS_TEST
         )) as SavedObjectsTypeMappingDefinitions),
-      enabled: () => useTestBaseline,
+      enabled: () => ctx.test,
     },
     {
       title: 'Create baseline',
