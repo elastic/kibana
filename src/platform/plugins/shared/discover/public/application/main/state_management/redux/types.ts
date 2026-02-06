@@ -138,22 +138,25 @@ export interface TabState extends TabItem {
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
-    visContext?: UnifiedHistogramVisContext | {};
-    controlGroupJson?: string;
     searchSessionId?: string;
+  };
+
+  // Persistable attributes of the tab (stored in Discover Session and in local storage).
+  attributes: {
+    visContext: UnifiedHistogramVisContext | {} | undefined;
+    controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
   };
 
   // The following properties are used to manage the tab's state after it has been initialized.
   globalState: TabStateGlobalState;
   appState: DiscoverAppState;
   previousAppState: DiscoverAppState;
-  controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
   cascadedDocumentsState: CascadedDocumentsState;
   esqlVariables: ESQLControlVariable[] | undefined;
   forceFetchOnSelect: boolean;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
-  overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
+  overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
   resetDefaultProfileState: {
     resetId: string;
     columns: boolean;

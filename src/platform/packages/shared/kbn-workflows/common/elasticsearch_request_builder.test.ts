@@ -44,6 +44,107 @@ describe('buildElasticsearchRequest', () => {
     expect(result.bulkBody).toEqual([{ index: { _index: 'test-index' } }, { message: 'test' }]);
   });
 
+  it('should support bulk operations in old format with just documents in operations', () => {
+    const result = buildElasticsearchRequest('elasticsearch.bulk', {
+      index: 'test-index',
+      operations: [{ message: 'test' }, { field1: 'value1' }, { field2: 'value2' }],
+    });
+    expect(result.method).toBe('POST');
+    expect(result.path).toBe('/test-index/_bulk');
+    expect(result.bulkBody).toEqual([
+      { index: {} },
+      { message: 'test' },
+      { index: {} },
+      { field1: 'value1' },
+      { index: {} },
+      { field2: 'value2' },
+    ]);
+  });
+
+  it('should handle complex bulk operations with index, create, update, delete, script, upsert', () => {
+    const result = buildElasticsearchRequest('elasticsearch.bulk', {
+      index: 'test-index',
+      operations: [
+        { index: { _index: 'test-index' } },
+        { message: 'test' },
+        { create: { _index: 'test-index' } },
+        { message: 'test' },
+        { update: { _index: 'test-index' } },
+        { doc: { message: 'test' } },
+        { delete: { _index: 'test-index' } },
+        { update: { _id: '0', _index: 'index1', retry_on_conflict: 3 } },
+        {
+          script: {
+            source: 'ctx._source.counter += params.param1',
+            lang: 'painless',
+            params: { param1: 1 },
+          },
+          upsert: { counter: 1 },
+        },
+      ],
+    });
+    expect(result.method).toBe('POST');
+    expect(result.path).toBe('/test-index/_bulk');
+    expect(result.bulkBody).toEqual([
+      { index: { _index: 'test-index' } },
+      { message: 'test' },
+      { create: { _index: 'test-index' } },
+      { message: 'test' },
+      { update: { _index: 'test-index' } },
+      { doc: { message: 'test' } },
+      { delete: { _index: 'test-index' } },
+      { update: { _id: '0', _index: 'index1', retry_on_conflict: 3 } },
+      {
+        script: {
+          source: 'ctx._source.counter += params.param1',
+          lang: 'painless',
+          params: { param1: 1 },
+        },
+        upsert: { counter: 1 },
+      },
+    ]);
+  });
+
+  it('should handle complex bulk operations with update, script, upsert', () => {
+    const result = buildElasticsearchRequest('elasticsearch.bulk', {
+      index: 'test-index',
+      operations: [
+        { update: { _id: '0', _index: 'index1', retry_on_conflict: 3 } },
+        {
+          script: {
+            source: 'ctx._source.counter += params.param1',
+            lang: 'painless',
+            params: { param1: 1 },
+          },
+          upsert: { counter: 1 },
+        },
+      ],
+    });
+    expect(result.method).toBe('POST');
+    expect(result.path).toBe('/test-index/_bulk');
+    expect(result.bulkBody).toEqual([
+      { update: { _id: '0', _index: 'index1', retry_on_conflict: 3 } },
+      {
+        script: {
+          source: 'ctx._source.counter += params.param1',
+          lang: 'painless',
+          params: { param1: 1 },
+        },
+        upsert: { counter: 1 },
+      },
+    ]);
+  });
+
+  it('should wrap the document in an index operation even if it has an operation key', () => {
+    const result = buildElasticsearchRequest('elasticsearch.bulk', {
+      index: 'test-index',
+      operations: [{ message: 'test', index: 'custom-field' }],
+    });
+    expect(result.method).toBe('POST');
+    expect(result.path).toBe('/test-index/_bulk');
+    expect(result.bulkBody).toEqual([{ index: {} }, { message: 'test', index: 'custom-field' }]);
+  });
+
   it('should return document as a body for elasticsearch.index step', () => {
     const result = buildElasticsearchRequest('elasticsearch.index', {
       index: 'test-index',

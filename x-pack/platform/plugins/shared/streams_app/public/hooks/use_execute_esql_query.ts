@@ -16,6 +16,7 @@ interface ExecuteEsqlParams {
   search: ISearchGeneric;
   signal?: AbortSignal;
   filter?: estypes.QueryDslQueryContainer;
+  timezone?: string;
   kuery?: string;
   start?: number;
   end?: number;
@@ -35,6 +36,7 @@ export async function executeEsqlQuery({
   signal,
   dropNullColumns,
   filter,
+  timezone,
   kuery,
   start,
   end,
@@ -47,6 +49,7 @@ export async function executeEsqlQuery({
     search,
     signal,
     filter: combinedFilter,
+    timezone,
     timeRange:
       start !== undefined && end !== undefined
         ? {
