@@ -136,7 +136,7 @@ export class UserProfileService {
             grant_type: 'access_token',
             access_token: grant.accessToken,
             ...(grant.type === 'uiamAccessToken'
-              ? { client_authentication: { scheme: 'SharedSecret', value: grant.sharedSecret } }
+              ? { client_authentication: grant.clientAuthentication }
               : {}),
           };
 

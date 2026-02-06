@@ -17,9 +17,8 @@ import type {
 import type { SecurityLicense } from '../../../../common';
 import { getDetailedErrorMessage } from '../../../errors';
 import type { UiamServicePublic } from '../../../uiam';
+import { isUiamCredential } from '../../../uiam';
 import { HTTPAuthorizationHeader } from '../../http_authentication';
-
-const UIAM_CREDENTIALS_PREFIX = 'essu_';
 
 /**
  * Options required to construct a UiamAPIKeys instance.
@@ -72,7 +71,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     let result: GrantAPIKeyResult;
 
     // Provided credential must be a UIAM credential with appropriate prefix
-    if (!UiamAPIKeys.isUiamCredential(authorization)) {
+    if (!isUiamCredential(authorization)) {
       const nonUiamCredentialError =
         'Cannot grant API key: provided credential is not compatible with UIAM';
       this.logger.error(nonUiamCredentialError);
@@ -118,7 +117,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
 
     this.logger.debug(`Trying to invalidate API key ${id}`);
 
-    if (!UiamAPIKeys.isUiamCredential(authorization)) {
+    if (!isUiamCredential(authorization)) {
       const uiamCredentialError = 'Cannot invalidate API key: not a UIAM API key';
       this.logger.error(uiamCredentialError);
       throw new Error(uiamCredentialError);
@@ -167,21 +166,9 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     return this.clusterClient.asScoped({
       headers: {
         authorization: authorization.toString(),
-        ...(UiamAPIKeys.isUiamCredential(authorization)
-          ? this.uiam.getEsClientAuthenticationHeader()
-          : {}),
+        ...(isUiamCredential(authorization) ? this.uiam.getEsClientAuthenticationHeader() : {}),
       },
     });
-  }
-
-  /**
-   * Checks if the given authorization credentials are UIAM credentials.
-   *
-   * @param authorization The HTTP authorization header to check.
-   * @returns True if the credentials start with UIAM_CREDENTIALS_PREFIX, false otherwise.
-   */
-  static isUiamCredential(authorization: HTTPAuthorizationHeader) {
-    return authorization.credentials.startsWith(UIAM_CREDENTIALS_PREFIX);
   }
 
   /**
