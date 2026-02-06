@@ -2610,7 +2610,7 @@ groups:
         default: es
         options:
           - option: es
-            description: ElasticSearch api key
+            description: Elasticsearch API key
           - option: uiam
             description: UIAM api key
         applies_to:
