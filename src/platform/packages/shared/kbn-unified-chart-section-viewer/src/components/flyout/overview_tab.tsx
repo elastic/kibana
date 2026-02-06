@@ -11,7 +11,6 @@ import {
   EuiBadge,
   EuiText,
   EuiSpacer,
-  EuiDescriptionList,
   EuiListGroup,
   EuiTablePagination,
   EuiToken,
@@ -76,68 +75,94 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
   const descriptionListItems = useMemo(
     () => [
       {
-        title: (
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
-                defaultMessage: 'Data stream',
-              })}
-            </strong>
-          </EuiText>
-        ),
-        description: (
-          <EuiText color="primary" size="s">
-            {metric.index}
-          </EuiText>
+        label: (
+          <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">
+                <strong>
+                  {i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
+                    defaultMessage: 'Data stream',
+                  })}
+                </strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText color="primary" size="s">
+                {metric.index}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       },
       {
-        title: (
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
-                defaultMessage: 'Field type',
-              })}
-            </strong>
-          </EuiText>
+        label: (
+          <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">
+                <strong>
+                  {i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
+                    defaultMessage: 'Field type',
+                  })}
+                </strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge>{metric.type}</EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
-        description: <EuiBadge>{metric.type}</EuiBadge>,
       },
       ...(unitLabel
         ? [
             {
-              title: (
-                <EuiText
-                  size="s"
+              label: (
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="s"
+                  justifyContent="spaceBetween"
                   data-test-subj="metricsExperienceFlyoutOverviewTabMetricUnitLabel"
                 >
-                  <strong>
-                    {i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
-                      defaultMessage: 'Metric unit',
-                    })}
-                  </strong>
-                </EuiText>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs">
+                      <strong>
+                        {i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
+                          defaultMessage: 'Metric unit',
+                        })}
+                      </strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge>{unitLabel}</EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               ),
-              description: <EuiBadge>{unitLabel}</EuiBadge>,
             },
           ]
         : []),
       ...(metric.instrument
         ? [
             {
-              title: (
-                <EuiText
-                  size="s"
+              label: (
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="s"
+                  justifyContent="spaceBetween"
                   data-test-subj="metricsExperienceFlyoutOverviewTabMetricTypeLabel"
                 >
-                  <strong>
-                    {i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
-                      defaultMessage: 'Metric type',
-                    })}
-                  </strong>
-                </EuiText>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs">
+                      <strong>
+                        {i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
+                          defaultMessage: 'Metric type',
+                        })}
+                      </strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge>{metric.instrument}</EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               ),
-              description: <EuiBadge>{metric.instrument}</EuiBadge>,
             },
           ]
         : []),
@@ -180,13 +205,21 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
           padding: ${euiTheme.size.xs} ${euiTheme.size.m};
         `}
       >
-        <EuiDescriptionList
-          type="responsiveColumn"
-          rowGutterSize="m"
+        <EuiListGroup
           data-test-subj="metricsExperienceFlyoutOverviewTabDescriptionList"
           listItems={descriptionListItems}
-          columnGutterSize='s'
-          columnWidths={['190px', 'auto']}
+          flush
+          gutterSize="none"
+          wrapText={false}
+          maxWidth={false}
+          css={css`
+            .euiListGroupItem:not(:last-child) {
+              border-bottom: ${euiTheme.border.thin};
+            }
+            .euiListGroupItem__text {
+              padding: ${euiTheme.size.s} ${euiTheme.size.xs};
+            }
+          `}
         />
       </EuiPanel>
       {metric.dimensions && metric.dimensions.length > 0 && (
