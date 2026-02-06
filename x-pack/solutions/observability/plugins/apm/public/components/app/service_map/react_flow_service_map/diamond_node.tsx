@@ -97,22 +97,8 @@ export const DiamondNode = memo(
         );
       }
 
-      if (selected) {
-        parts.push(
-          i18n.translate('xpack.apm.serviceMap.dependencyNode.selected', {
-            defaultMessage: 'Selected',
-          })
-        );
-      }
-
-      parts.push(
-        i18n.translate('xpack.apm.serviceMap.dependencyNode.instructions', {
-          defaultMessage: 'Press Enter or Space to view details',
-        })
-      );
-
       return parts.join('. ');
-    }, [customAriaLabel, label, spanType, spanSubtype, selected, groupedCount]);
+    }, [customAriaLabel, label, spanType, spanSubtype, groupedCount]);
 
     const containerStyles = css`
       position: relative;

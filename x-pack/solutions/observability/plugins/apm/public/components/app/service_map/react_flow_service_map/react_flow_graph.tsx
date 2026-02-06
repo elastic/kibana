@@ -20,7 +20,7 @@ import {
   type NodeMouseHandler,
   type EdgeMouseHandler,
 } from '@xyflow/react';
-import { useEuiTheme, EuiScreenReaderOnly } from '@elastic/eui';
+import { useEuiTheme, EuiScreenReaderOnly, EuiScreenReaderLive } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
@@ -224,6 +224,7 @@ function ReactFlowGraphInner({
     () => ({
       height,
       width: '100%',
+      overflow: 'auto',
       background: `linear-gradient(
         90deg,
         ${euiTheme.colors.backgroundBasePlain}
@@ -248,7 +249,10 @@ function ReactFlowGraphInner({
       background-color: ${euiTheme.colors.backgroundBasePlain};
       border-radius: ${euiTheme.border.radius.medium};
       border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
-      box-shadow: none;
+      box-shadow: 0 ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.colors.shadow};
+      z-index: ${euiTheme.levels.content};
+      position: relative;
+      margin: ${euiTheme.size.s};
 
       button {
         background-color: ${euiTheme.colors.backgroundBasePlain};
@@ -272,6 +276,16 @@ function ReactFlowGraphInner({
 
         svg {
           fill: currentColor;
+        }
+      }
+
+      /* Scale down controls when viewport is constrained (happens at 200% zoom) */
+      @media (max-width: 960px) {
+        margin: ${euiTheme.size.xxs} !important;
+        overflow: auto;
+        button {
+          min-width: 24px;
+          min-height: 24px;
         }
       }
     `,
@@ -307,13 +321,11 @@ function ReactFlowGraphInner({
       aria-describedby="service-map-instructions"
     >
       <EuiScreenReaderOnly>
-        <div>
-          <div id="service-map-instructions">{screenReaderInstructions}</div>
-          <div role="status" aria-live="polite" aria-atomic="true">
-            {screenReaderAnnouncement}
-          </div>
-        </div>
+        <div id="service-map-instructions">{screenReaderInstructions}</div>
       </EuiScreenReaderOnly>
+      <EuiScreenReaderLive aria-live="polite" aria-atomic="true">
+        {screenReaderAnnouncement}
+      </EuiScreenReaderLive>
       <ReactFlow
         nodes={nodes}
         edges={edges}
