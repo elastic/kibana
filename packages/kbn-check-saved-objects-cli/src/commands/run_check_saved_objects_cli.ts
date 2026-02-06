@@ -11,12 +11,7 @@ import { Listr, PRESET_TIMER } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
 import { setupKibana, startElasticsearch, stopElasticsearch, stopKibana } from '../util';
 import type { TaskContext } from './types';
-import {
-  automatedRollbackTests,
-  getSnapshots,
-  validateSOChanges,
-  validateTestFlow,
-} from './tasks';
+import { automatedRollbackTests, getSnapshots, validateSOChanges, validateTestFlow } from './tasks';
 
 export function runCheckSavedObjectsCli() {
   let globalTask: Listr<TaskContext, 'default', 'simple'>;
