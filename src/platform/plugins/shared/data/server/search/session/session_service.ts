@@ -23,17 +23,21 @@ import type { AuthenticatedUser } from '@kbn/core/server';
 import { defer } from '@kbn/kibana-utils-plugin/common';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
 import { debounce } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type {
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
   SearchSessionsFindResponse,
+  SearchSessionStatusesResponse,
   SearchSessionStatusResponse,
 } from '../../../common';
-import { ENHANCED_ES_SEARCH_STRATEGY, SEARCH_SESSION_TYPE } from '../../../common';
+import { ENHANCED_ES_SEARCH_STRATEGY, SEARCH_SESSION_TYPE, SearchStatus } from '../../../common';
 import type { ISearchSessionService } from '../..';
 import { NoSearchIdInSessionError } from '../..';
 import type { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
-import { getSessionStatus } from './get_session_status';
+import { getSessionStatus } from './status/get_session_status';
+import { updateSessionStatus } from './status/update_session_status';
+import type { SessionStatus } from './types';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
@@ -189,27 +193,20 @@ export class SearchSessionService implements ISearchSessionService {
 
     const sessionStatuses = await Promise.all(
       findResponse.saved_objects.map(async (so) => {
-        const sessionStatus = await getSessionStatus(
+        const status = await getSessionStatus(
           {
             esClient: asCurrentUserElasticsearchClient,
           },
           so.attributes,
-          this.sessionConfig
+          { preferCachedStatus: true }
         );
-
-        return sessionStatus;
+        return { ...status, id: so.id };
       })
     );
 
     return {
       ...findResponse,
-      statuses: sessionStatuses.reduce<Record<string, SearchSessionStatusResponse>>(
-        (res, { status, errors }, index) => {
-          res[findResponse.saved_objects[index].id] = { status, errors };
-          return res;
-        },
-        {}
-      ),
+      statuses: this.mapSessionStatusesToResponse(sessionStatuses),
     };
   };
 
@@ -377,11 +374,48 @@ export class SearchSessionService implements ISearchSessionService {
         esClient: deps.asCurrentUserElasticsearchClient,
       },
       session.attributes,
-      this.sessionConfig
+      { preferCachedStatus: true }
     );
 
-    return { status: sessionStatus.status, errors: sessionStatus.errors };
+    return this.mapSessionStatusToResponse(sessionStatus);
   }
+
+  public async updateStatuses(
+    deps: SearchSessionStatusDependencies,
+    user: AuthenticatedUser | null,
+    sessionIds: string[]
+  ): Promise<SearchSessionStatusesResponse> {
+    this.logger.debug(`SearchSessionService: updateStatus | ${sessionIds}`);
+    const sessions = await this.bulkGet(deps, user, sessionIds);
+
+    const sessionStatuses = await Promise.all(
+      sessions.map(async (so) => {
+        const status = await updateSessionStatus(
+          {
+            esClient: deps.asCurrentUserElasticsearchClient,
+            savedObjectsClient: deps.savedObjectsClient,
+          },
+          so
+        );
+        return { ...status, id: so.id };
+      })
+    );
+
+    return { statuses: this.mapSessionStatusesToResponse(sessionStatuses) };
+  }
+
+  private bulkGet = async (
+    { savedObjectsClient }: SearchSessionDependencies,
+    user: AuthenticatedUser | null,
+    sessionIds: string[]
+  ) => {
+    this.logger.debug(`bulkGet | ${sessionIds}`);
+    const sessions = await savedObjectsClient.bulkGet<SearchSessionSavedObjectAttributes>(
+      sessionIds.map((id) => ({ id, type: SEARCH_SESSION_TYPE }))
+    );
+    sessions.saved_objects.forEach((session) => this.throwOnUserConflict(user, session));
+    return sessions.saved_objects;
+  };
 
   /**
    * Look up an existing search ID that matches the given request in the given session so that the
@@ -446,6 +480,7 @@ export class SearchSessionService implements ISearchSessionService {
         cancel: this.cancel.bind(this, deps, user),
         delete: this.delete.bind(this, deps, user),
         status: this.status.bind(this, deps, user),
+        updateStatuses: this.updateStatuses.bind(this, deps, user),
         getConfig: () => this.config.search.sessions,
       };
     };
@@ -467,4 +502,44 @@ export class SearchSessionService implements ISearchSessionService {
       throw notFound();
     }
   };
+
+  private mapSessionStatusesToResponse(
+    sessionStatuses: Array<SessionStatus & { id: string }>
+  ): SearchSessionStatusesResponse['statuses'] {
+    const statuses: Record<string, SearchSessionStatusResponse> = {};
+
+    sessionStatuses.forEach((sessionStatus) => {
+      statuses[sessionStatus.id] = this.mapSessionStatusToResponse(sessionStatus);
+    });
+
+    return statuses;
+  }
+
+  private mapSessionStatusToResponse(sessionStatus: SessionStatus): SearchSessionStatusResponse {
+    const erroresSearches = sessionStatus.searchStatuses?.filter(
+      (search) => search.status === SearchStatus.ERROR && search.error
+    );
+
+    return {
+      status: sessionStatus.status,
+      errors: erroresSearches?.map((search) => this.mapSearchError(search.id, search.error!)) || [],
+    };
+  }
+
+  private mapSearchError(searchId: string, error: NonNullable<SearchSessionRequestInfo['error']>) {
+    if (error.message)
+      return i18n.translate('data.search.statusThrow', {
+        defaultMessage: `Search status for search with id {searchId} threw an error {message} (statusCode: {errorCode})`,
+        values: {
+          message: error.message,
+          errorCode: error.code,
+          searchId,
+        },
+      });
+
+    return i18n.translate('data.search.statusError', {
+      defaultMessage: `Search {searchId} completed with a {errorCode} status`,
+      values: { searchId, errorCode: error.code },
+    });
+  }
 }

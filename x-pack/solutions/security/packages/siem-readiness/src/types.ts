@@ -70,6 +70,7 @@ export interface DataQualityResultDocument {
 
 export interface RelatedIntegrationRuleResponse {
   related_integrations?: Array<RelatedIntegration>;
+  enabled: boolean;
 }
 
 export interface RelatedIntegration {
@@ -85,4 +86,10 @@ export interface SiemReadinessPackageInfo {
   version: string;
   status: string;
   categories?: string[];
+}
+export interface CasesSearchResponse {
+  total: number;
+  countOpenCases: number;
+  countClosedCases: number;
+  countInProgressCases: number;
 }

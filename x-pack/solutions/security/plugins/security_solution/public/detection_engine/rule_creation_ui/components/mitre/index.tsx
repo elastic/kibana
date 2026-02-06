@@ -18,7 +18,7 @@ import { threatDefault } from '../step_about_rule/default_value';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackTechniqueFields } from './technique_fields';
-import type { MitreTactic } from '../../../../detections/mitre/types';
+import type { MitreTactic } from '../../../../../common/detection_engine/mitre/types';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -27,7 +27,7 @@ const lazyMitreConfiguration = () => {
    */
   return import(
     /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../detections/mitre/mitre_tactics_techniques'
+    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
   );
 };
 

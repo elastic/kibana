@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import type { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { apiIsOfType } from '@kbn/presentation-publishing';
 import type { LensApi } from '@kbn/lens-common-2';
-import { DOC_TYPE } from '../../common/constants';
+import { DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS, DOC_TYPE } from '../../common/constants';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
 
 export const getDiscoverHelpersAsync = async () => await import('../async_services');
@@ -62,7 +62,7 @@ export class OpenInDiscoverDrilldown
   public readonly euiIcon = 'discoverApp';
 
   supportedTriggers(): OpenInDiscoverTrigger[] {
-    return [APPLY_FILTER_TRIGGER];
+    return DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS as OpenInDiscoverTrigger[];
   }
 
   private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({ config, onConfig }) => {
