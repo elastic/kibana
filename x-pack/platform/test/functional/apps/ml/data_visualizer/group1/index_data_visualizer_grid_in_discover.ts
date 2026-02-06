@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
-import type { TestData, MetricFieldVisConfig } from './types';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { TestData, MetricFieldVisConfig } from '../types';
 
 const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 import {
@@ -16,7 +16,7 @@ import {
   farequoteKQLFiltersSearchTestData,
   farequoteLuceneSearchTestData,
   sampleLogTestData,
-} from './index_test_data';
+} from '../index_test_data';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

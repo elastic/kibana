@@ -10,8 +10,8 @@ import {
   type DiscoverUrlConfig,
   type DashboardUrlConfig,
   type OtherUrlConfig,
-} from '../../../services/ml/data_frame_analytics_edit';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+} from '../../../../services/ml/data_frame_analytics_edit';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const testDiscoverCustomUrl: DiscoverUrlConfig = {
   label: 'Show data',

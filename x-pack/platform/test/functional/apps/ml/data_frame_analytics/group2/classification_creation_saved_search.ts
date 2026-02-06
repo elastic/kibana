@@ -5,24 +5,29 @@
  * 2.0.
  */
 
-import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { AnalyticsTableRowDetails } from '../../../../services/ml/data_frame_analytics_table';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FieldStatsType } from '../../common/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const testSubjects = getService('testSubjects');
   const editedDescription = 'Edited description';
 
-  describe('regression saved search creation', function () {
+  describe('classification saved search creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote_small');
       await ml.testResources.createDataViewIfNeeded('ft_farequote_small', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded('ft_farequote_small');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded('ft_farequote_small');
-      await ml.testResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded(
+      // Need to use the saved searches with filters that match multiple airlines
+      await ml.testResources.createSavedSearchFarequoteFilterTwoAndLuceneIfNeeded(
         'ft_farequote_small'
       );
-      await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded('ft_farequote_small');
+      await ml.testResources.createSavedSearchFarequoteFilterTwoAndKueryIfNeeded(
+        'ft_farequote_small'
+      );
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -54,32 +59,57 @@ export default function ({ getService }: FtrProviderContext) {
       'inference',
       '100%',
     ];
+    const fieldStatsEntries = [
+      {
+        fieldName: 'airline',
+        type: 'keyword' as FieldStatsType,
+        isDependentVariableInput: true,
+        isIncludeFieldInput: true,
+      },
+      {
+        fieldName: '@version',
+        type: 'keyword' as FieldStatsType,
+        isIncludeFieldInput: true,
+      },
+    ];
+
     const testDataList = [
       {
         suiteTitle: 'with lucene query',
-        jobType: 'regression',
+        jobType: 'classification',
         jobId: `fq_saved_search_2_${dateNow}`,
-        jobDescription: 'Regression job based on a saved search with lucene query',
+        jobDescription: 'Classification job based on a saved search with lucene query',
         source: 'ft_farequote_lucene',
         get destinationIndex(): string {
           return `user-${this.jobId}`;
         },
+        fieldStatsEntries,
         runtimeFields: {
           uppercase_airline: {
             type: 'keyword',
             script: 'emit(params._source.airline.toUpperCase())',
           },
         },
-        dependentVariable: 'responsetime',
+        dependentVariable: 'airline',
         trainingPercent: 20,
         modelMemory: '20mb',
         createDataView: true,
         expected: {
+          fieldStatsValues: { airline: ['AAL', 'AWE', 'ASA', 'ACA', 'AMX'] } as Record<
+            string,
+            string[]
+          >,
           source: 'ft_farequote_small',
+          rocCurveColorState: [
+            // tick/grid/axis
+            { color: '#DDDDDD', percentage: 38 },
+            // line
+            { color: '#98A2B3', percentage: 7 },
+          ],
           runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
           row: {
             memoryStatus: 'ok',
-            type: 'regression',
+            type: 'classification',
             status: 'stopped',
             progress: '100',
           },
@@ -93,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
                   'stopped',
                   'Create time',
                   'Model memory limit',
-                  '10mb',
+                  '20mb',
                   'Version',
                 ],
               },
@@ -122,21 +152,22 @@ export default function ({ getService }: FtrProviderContext) {
                 section: 'analysisStats',
                 expectedEntries: {
                   '': '',
-                  timestamp: 'February 28th 2023, 22:20:30',
-                  timing_stats: '{"elapsed_time":0,"iteration_time":0}',
-                  alpha: '0.0001097308602104853',
-                  downsample_factor: '1',
-                  eta: '0.020888927310242174',
-                  eta_growth_rate_per_tree: '1.010444463655121',
-                  feature_bag_fraction: '0.6317118309501533',
-                  gamma: '0.0000023617026632010964',
-                  lambda: '2.668084016785013',
-                  max_attempts_to_add_tree: '0',
+                  timestamp: 'February 24th 2023, 22:47:21',
+                  timing_stats: '{"elapsed_time":106,"iteration_time":75}',
+                  class_assignment_objective: 'maximize_minimum_recall',
+                  alpha: '7.472711200701066',
+                  downsample_factor: '0.3052602404313446',
+                  eta: '0.5195489124616268',
+                  eta_growth_rate_per_tree: '1.2597744562308133',
+                  feature_bag_fraction: '0.2828427124746191',
+                  gamma: '2.02003625000462',
+                  lambda: '0.5454579969846399',
+                  max_attempts_to_add_tree: '3',
                   max_optimization_rounds_per_hyperparameter: '2',
-                  max_trees: '272',
-                  num_folds: '0',
-                  num_splits_per_feature: '0',
-                  soft_tree_depth_limit: '2',
+                  max_trees: '5',
+                  num_folds: '5',
+                  num_splits_per_feature: '75',
+                  soft_tree_depth_limit: '8.425554156072732',
                   soft_tree_depth_tolerance: '0.15',
                 },
               },
@@ -146,29 +177,40 @@ export default function ({ getService }: FtrProviderContext) {
       },
       {
         suiteTitle: 'with kuery query',
-        jobType: 'regression',
+        jobType: 'classification',
         jobId: `fq_saved_search_3_${dateNow}`,
-        jobDescription: 'Regression job based on a saved search with kuery query',
+        jobDescription: 'Classification job based on a saved search with kuery query',
         source: 'ft_farequote_kuery',
         get destinationIndex(): string {
           return `user-${this.jobId}`;
         },
+        fieldStatsEntries,
         runtimeFields: {
           uppercase_airline: {
             type: 'keyword',
             script: 'emit(params._source.airline.toUpperCase())',
           },
         },
-        dependentVariable: 'responsetime',
+        dependentVariable: 'airline',
         trainingPercent: 20,
         modelMemory: '20mb',
         createDataView: true,
         expected: {
+          fieldStatsValues: { airline: ['AAL', 'AWE', 'ASA', 'ACA', 'AMX'] } as Record<
+            string,
+            string[]
+          >,
           source: 'ft_farequote_small',
+          rocCurveColorState: [
+            // tick/grid/axis
+            { color: '#DDDDDD', percentage: 38 },
+            // line
+            { color: '#98A2B3', percentage: 7 },
+          ],
           runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
           row: {
             memoryStatus: 'ok',
-            type: 'regression',
+            type: 'classification',
             status: 'stopped',
             progress: '100',
           },
@@ -182,7 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
                   'stopped',
                   'Create time',
                   'Model memory limit',
-                  '10mb',
+                  '20mb',
                   'Version',
                 ],
               },
@@ -211,110 +253,22 @@ export default function ({ getService }: FtrProviderContext) {
                 section: 'analysisStats',
                 expectedEntries: {
                   '': '',
-                  timestamp: 'February 28th 2023, 22:20:30',
-                  timing_stats: '{"elapsed_time":0,"iteration_time":0}',
-                  alpha: '0.0001097308602104853',
-                  downsample_factor: '1',
-                  eta: '0.020888927310242174',
-                  eta_growth_rate_per_tree: '1.010444463655121',
-                  feature_bag_fraction: '0.6317118309501533',
-                  gamma: '0.0000023617026632010964',
-                  lambda: '2.668084016785013',
-                  max_attempts_to_add_tree: '0',
+                  timestamp: 'February 24th 2023, 22:47:21',
+                  timing_stats: '{"elapsed_time":106,"iteration_time":75}',
+                  class_assignment_objective: 'maximize_minimum_recall',
+                  alpha: '7.472711200701066',
+                  downsample_factor: '0.3052602404313446',
+                  eta: '0.5195489124616268',
+                  eta_growth_rate_per_tree: '1.2597744562308133',
+                  feature_bag_fraction: '0.2828427124746191',
+                  gamma: '2.02003625000462',
+                  lambda: '0.5454579969846399',
+                  max_attempts_to_add_tree: '3',
                   max_optimization_rounds_per_hyperparameter: '2',
-                  max_trees: '272',
-                  num_folds: '0',
-                  num_splits_per_feature: '0',
-                  soft_tree_depth_limit: '2',
-                  soft_tree_depth_tolerance: '0.15',
-                },
-              },
-            ],
-          } as AnalyticsTableRowDetails,
-        },
-      },
-      {
-        suiteTitle: 'with filter and kuery query',
-        jobType: 'regression',
-        jobId: `fq_saved_search_4_${dateNow}`,
-        jobDescription: 'Regression job based on a saved search with filter and kuery query',
-        source: 'ft_farequote_filter_and_kuery',
-        get destinationIndex(): string {
-          return `user-${this.jobId}`;
-        },
-        runtimeFields: {
-          uppercase_airline: {
-            type: 'keyword',
-            script: 'emit(params._source.airline.toUpperCase())',
-          },
-        },
-        dependentVariable: 'responsetime',
-        trainingPercent: 20,
-        modelMemory: '20mb',
-        createDataView: true,
-        expected: {
-          source: 'ft_farequote_small',
-          runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
-          row: {
-            memoryStatus: 'ok',
-            type: 'regression',
-            status: 'stopped',
-            progress: '100',
-          },
-          rowDetails: {
-            jobDetails: [
-              {
-                section: 'state',
-                // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: [
-                  'Status',
-                  'stopped',
-                  'Create time',
-                  'Model memory limit',
-                  '5mb',
-                  'Version',
-                ],
-              },
-              {
-                section: 'stats',
-                // Don't include the 'timestamp' or 'peak usage bytes' value entries as it's not stable.
-                expectedEntries: ['Memory usage', 'Timestamp', 'Peak usage bytes', 'Status', 'ok'],
-              },
-              {
-                section: 'counts',
-                expectedEntries: [
-                  'Data counts',
-                  'Training docs',
-                  '58',
-                  'Test docs',
-                  '232',
-                  'Skipped docs',
-                  '0',
-                ],
-              },
-              {
-                section: 'progress',
-                expectedEntries: completedJobProgressEntries,
-              },
-              {
-                section: 'analysisStats',
-                expectedEntries: {
-                  '': '',
-                  timestamp: 'February 28th 2023, 22:20:30',
-                  timing_stats: '{"elapsed_time":0,"iteration_time":0}',
-                  alpha: '0.0001097308602104853',
-                  downsample_factor: '1',
-                  eta: '0.020888927310242174',
-                  eta_growth_rate_per_tree: '1.010444463655121',
-                  feature_bag_fraction: '0.6317118309501533',
-                  gamma: '0.0000023617026632010964',
-                  lambda: '2.668084016785013',
-                  max_attempts_to_add_tree: '0',
-                  max_optimization_rounds_per_hyperparameter: '2',
-                  max_trees: '272',
-                  num_folds: '0',
-                  num_splits_per_feature: '0',
-                  soft_tree_depth_limit: '2',
+                  max_trees: '5',
+                  num_folds: '5',
+                  num_splits_per_feature: '75',
+                  soft_tree_depth_limit: '8.425554156072732',
                   soft_tree_depth_tolerance: '0.15',
                 },
               },
@@ -324,29 +278,39 @@ export default function ({ getService }: FtrProviderContext) {
       },
       {
         suiteTitle: 'with filter and lucene query',
-        jobType: 'regression',
-        jobId: `fq_saved_search_5_${dateNow}`,
-        jobDescription: 'Regression job based on a saved search with filter and lucene query',
-        source: 'ft_farequote_filter_and_lucene',
+        jobType: 'classification',
+        jobId: `fq_saved_search_4_${dateNow}`,
+        jobDescription: 'Classification job based on a saved search with filter and lucene query',
+        source: 'ft_farequote_filter_two_and_lucene',
         get destinationIndex(): string {
           return `user-${this.jobId}`;
         },
+        fieldStatsEntries,
         runtimeFields: {
           uppercase_airline: {
             type: 'keyword',
             script: 'emit(params._source.airline.toUpperCase())',
           },
         },
-        dependentVariable: 'responsetime',
+        dependentVariable: 'airline',
         trainingPercent: 20,
         modelMemory: '20mb',
         createDataView: true,
         expected: {
+          fieldStatsValues: {
+            airline: ['AAL', 'ASA'],
+          } as Record<string, string[]>,
           source: 'ft_farequote_small',
+          rocCurveColorState: [
+            // tick/grid/axis
+            { color: '#DDDDDD', percentage: 38 },
+            // line
+            { color: '#98A2B3', percentage: 7 },
+          ],
           runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
           row: {
             memoryStatus: 'ok',
-            type: 'regression',
+            type: 'classification',
             status: 'stopped',
             progress: '100',
           },
@@ -360,7 +324,7 @@ export default function ({ getService }: FtrProviderContext) {
                   'stopped',
                   'Create time',
                   'Model memory limit',
-                  '5mb',
+                  '7mb',
                   'Version',
                 ],
               },
@@ -374,9 +338,9 @@ export default function ({ getService }: FtrProviderContext) {
                 expectedEntries: [
                   'Data counts',
                   'Training docs',
-                  '58',
+                  '135',
                   'Test docs',
-                  '232',
+                  '544',
                   'Skipped docs',
                   '0',
                 ],
@@ -389,21 +353,119 @@ export default function ({ getService }: FtrProviderContext) {
                 section: 'analysisStats',
                 expectedEntries: {
                   '': '',
-                  timestamp: 'February 28th 2023, 22:20:30',
-                  timing_stats: '{"elapsed_time":0,"iteration_time":0}',
-                  alpha: '0.0001097308602104853',
-                  downsample_factor: '1',
-                  eta: '0.020888927310242174',
-                  eta_growth_rate_per_tree: '1.010444463655121',
-                  feature_bag_fraction: '0.6317118309501533',
-                  gamma: '0.0000023617026632010964',
-                  lambda: '2.668084016785013',
-                  max_attempts_to_add_tree: '0',
+                  timestamp: 'February 24th 2023, 22:47:21',
+                  timing_stats: '{"elapsed_time":106,"iteration_time":75}',
+                  class_assignment_objective: 'maximize_minimum_recall',
+                  alpha: '7.472711200701066',
+                  downsample_factor: '0.3052602404313446',
+                  eta: '0.5195489124616268',
+                  eta_growth_rate_per_tree: '1.2597744562308133',
+                  feature_bag_fraction: '0.2828427124746191',
+                  gamma: '2.02003625000462',
+                  lambda: '0.5454579969846399',
+                  max_attempts_to_add_tree: '3',
                   max_optimization_rounds_per_hyperparameter: '2',
-                  max_trees: '272',
-                  num_folds: '0',
-                  num_splits_per_feature: '0',
-                  soft_tree_depth_limit: '2',
+                  max_trees: '5',
+                  num_folds: '5',
+                  num_splits_per_feature: '75',
+                  soft_tree_depth_limit: '8.425554156072732',
+                  soft_tree_depth_tolerance: '0.15',
+                },
+              },
+            ],
+          } as AnalyticsTableRowDetails,
+        },
+      },
+      {
+        suiteTitle: 'with filter and kuery query',
+        jobType: 'classification',
+        jobId: `fq_saved_search_5_${dateNow}`,
+        jobDescription: 'Classification job based on a saved search with filter and kuery query',
+        source: 'ft_farequote_filter_two_and_kuery',
+        get destinationIndex(): string {
+          return `user-${this.jobId}`;
+        },
+        runtimeFields: {
+          uppercase_airline: {
+            type: 'keyword',
+            script: 'emit(params._source.airline.toUpperCase())',
+          },
+        },
+        dependentVariable: 'airline',
+        trainingPercent: 20,
+        modelMemory: '20mb',
+        createDataView: true,
+        expected: {
+          fieldStatsValues: { airline: ['ASA', 'FFT'] } as Record<string, string[]>,
+          source: 'ft_farequote_small',
+          rocCurveColorState: [
+            // tick/grid/axis
+            { color: '#DDDDDD', percentage: 38 },
+            // line
+            { color: '#98A2B3', percentage: 7 },
+          ],
+          runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
+          row: {
+            memoryStatus: 'ok',
+            type: 'classification',
+            status: 'stopped',
+            progress: '100',
+          },
+          rowDetails: {
+            jobDetails: [
+              {
+                section: 'state',
+                // Don't include the 'Create time' value entry as it's not stable.
+                expectedEntries: [
+                  'Status',
+                  'stopped',
+                  'Create time',
+                  'Model memory limit',
+                  '6mb',
+                  'Version',
+                ],
+              },
+              {
+                section: 'stats',
+                // Don't include the 'timestamp' or 'peak usage bytes' value entries as it's not stable.
+                expectedEntries: ['Memory usage', 'Timestamp', 'Peak usage bytes', 'Status', 'ok'],
+              },
+              {
+                section: 'counts',
+                expectedEntries: [
+                  'Data counts',
+                  'Training docs',
+                  '109',
+                  'Test docs',
+                  '436',
+                  'Skipped docs',
+                  '0',
+                ],
+              },
+              {
+                section: 'progress',
+                expectedEntries: completedJobProgressEntries,
+              },
+              {
+                section: 'analysisStats',
+                expectedEntries: {
+                  '': '',
+                  timestamp: 'February 24th 2023, 22:47:21',
+                  timing_stats: '{"elapsed_time":106,"iteration_time":75}',
+                  class_assignment_objective: 'maximize_minimum_recall',
+                  alpha: '7.472711200701066',
+                  downsample_factor: '0.3052602404313446',
+                  eta: '0.5195489124616268',
+                  eta_growth_rate_per_tree: '1.2597744562308133',
+                  feature_bag_fraction: '0.2828427124746191',
+                  gamma: '2.02003625000462',
+                  lambda: '0.5454579969846399',
+                  max_attempts_to_add_tree: '3',
+                  max_optimization_rounds_per_hyperparameter: '2',
+                  max_trees: '5',
+                  num_folds: '5',
+                  num_splits_per_feature: '75',
+                  soft_tree_depth_limit: '8.425554156072732',
                   soft_tree_depth_tolerance: '0.15',
                 },
               },
@@ -458,9 +520,23 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent(
             testData.expected.runtimeFieldsEditorContent
           );
+          await ml.testExecution.logTestStep(
+            'opens field stats flyout from dependent variable input'
+          );
+          await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
+          for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
+            (e) => e.isDependentVariableInput
+          )) {
+            await ml.dataFrameAnalyticsCreation.assertFieldStatsFlyoutContentFromDependentVariableInputTrigger(
+              fieldName,
+              fieldType,
+              testData.expected.fieldStatsValues && fieldName in testData.expected.fieldStatsValues
+                ? (testData.expected.fieldStatsValues[fieldName] as string[])
+                : undefined
+            );
+          }
 
           await ml.testExecution.logTestStep('inputs the dependent variable');
-          await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
           await ml.dataFrameAnalyticsCreation.selectDependentVariable(testData.dependentVariable);
 
           await ml.testExecution.logTestStep('inputs the training percent');
@@ -472,6 +548,19 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep('opens field stats flyout from include fields input');
+          for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
+            (e) => e.isIncludeFieldInput
+          )) {
+            await ml.dataFrameAnalyticsCreation.assertFieldStatFlyoutContentFromIncludeFieldTrigger(
+              fieldName,
+              fieldType,
+              testData.expected.fieldStatsValues && fieldName in testData.expected.fieldStatsValues
+                ? (testData.expected.fieldStatsValues[fieldName] as string[])
+                : undefined
+            );
+          }
 
           await ml.testExecution.logTestStep('continues to the additional options step');
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
@@ -511,7 +600,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('checks validation callouts exist');
           await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
-          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(3);
+          // Expect the follow callouts:
+          // - ✓ Dependent variable
+          // - ✓ Training percent
+          // - ✓ Top classes
+          // - ⚠ Analysis fields
+          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(4);
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
@@ -550,6 +644,7 @@ export default function ({ getService }: FtrProviderContext) {
             status: testData.expected.row.status,
             progress: testData.expected.row.progress,
           });
+
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowDetails(
             testData.jobId,
             testData.expected.rowDetails
@@ -597,11 +692,16 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the results view for created job');
           await ml.dataFrameAnalyticsTable.openResultsView(testData.jobId);
-          await ml.dataFrameAnalyticsResults.assertRegressionEvaluatePanelElementsExists();
-          await ml.dataFrameAnalyticsResults.assertRegressionTablePanelExists();
+          await ml.dataFrameAnalyticsResults.assertClassificationEvaluatePanelElementsExists();
+          await ml.dataFrameAnalyticsResults.assertClassificationTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+
+          await ml.testExecution.logTestStep('displays the ROC curve chart');
+
+          // This is a basic check that the chart exists since the returned colors vary quite a bit on each run and cause flakiness.
+          await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationRocCurveChart');
 
           await ml.commonUI.resetAntiAliasing();
         });

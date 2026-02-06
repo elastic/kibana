@@ -6,15 +6,15 @@
  */
 
 import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
-import type { TestData, MetricFieldVisConfig } from './types';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { TestData, MetricFieldVisConfig } from '../types';
 import {
   farequoteDataViewTestData,
   farequoteKQLFiltersSearchTestData,
   farequoteKQLSearchTestData,
   farequoteLuceneSearchTestData,
   sampleLogTestData,
-} from './index_test_data_random_sampler';
+} from '../index_test_data_random_sampler';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
