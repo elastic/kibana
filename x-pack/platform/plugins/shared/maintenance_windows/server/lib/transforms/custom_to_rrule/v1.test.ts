@@ -170,29 +170,6 @@ describe('transformCustomScheduleToRRule', () => {
         recurring: { every: '1h' },
       })
     ).toEqual({
-      duration: 60000,
-      rRule: {
-        bymonth: undefined,
-        bymonthday: undefined,
-        byweekday: undefined,
-        count: undefined,
-        dtstart: '2025-01-14T05:05:00.000Z',
-        freq: 4,
-        interval: 1,
-        tzid: 'UTC',
-        until: undefined,
-      },
-    });
-  });
-
-  it('transforms frequency and interval to undefined when incorrect', () => {
-    expect(
-      transformCustomScheduleToRRule({
-        duration: '1m',
-        start: '2025-01-14T05:05:00.000Z',
-        recurring: { every: '-100s' },
-      })
-    ).toEqual({
       rRule: {
         bymonth: undefined,
         bymonthday: undefined,

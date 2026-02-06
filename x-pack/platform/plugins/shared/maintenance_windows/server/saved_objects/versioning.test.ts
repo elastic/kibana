@@ -64,7 +64,7 @@ describe('Maintenance Window Model Version Migrations', () => {
       });
     });
 
-    it('scope backfill scopedQuery from v3 to v4', () => {
+    it('should backfill scopedQuery to scope when upgrading from v3 to v4', () => {
       const doc = {
         id: 'test-id',
         type: 'maintenance-window',

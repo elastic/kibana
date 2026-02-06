@@ -159,7 +159,6 @@ describe('updateMaintenanceWindowRoute', () => {
             recurring: {
               every: '1w',
               occurrences: 2,
-              every: '1w',
             },
             start: '2023-02-26T00:00:00.000Z',
             timezone: 'UTC',
