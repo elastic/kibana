@@ -109,7 +109,7 @@ describe('OpenChartInDiscoverLink', () => {
         to: 'now',
       },
       query: {
-        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${SERVICE_ENVIRONMENT} == "production"\n  | WHERE ${TRANSACTION_TYPE} == "${transactionType}"`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE \`${SERVICE_NAME}\` == "${serviceName}"\n  | WHERE \`${SERVICE_ENVIRONMENT}\` == "production"\n  | WHERE \`${TRANSACTION_TYPE}\` == "${transactionType}"`,
       },
     });
   });
@@ -131,7 +131,7 @@ describe('OpenChartInDiscoverLink', () => {
         to: 'now',
       },
       query: {
-        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${SERVICE_ENVIRONMENT} == "production"\n  | WHERE ${TRANSACTION_NAME} == "GET /api/users"\n  | WHERE ${TRANSACTION_TYPE} == "${transactionType}"`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE \`${SERVICE_NAME}\` == "${serviceName}"\n  | WHERE \`${SERVICE_ENVIRONMENT}\` == "production"\n  | WHERE \`${TRANSACTION_NAME}\` == "GET /api/users"\n  | WHERE \`${TRANSACTION_TYPE}\` == "${transactionType}"`,
       },
     });
   });
@@ -153,7 +153,7 @@ describe('OpenChartInDiscoverLink', () => {
         to: 'now',
       },
       query: {
-        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${SERVICE_ENVIRONMENT} == "production"\n  | WHERE ${TRANSACTION_TYPE} == "${transactionType}"\n  | WHERE KQL("user.id: \\"123\\"")`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE \`${SERVICE_NAME}\` == "${serviceName}"\n  | WHERE \`${SERVICE_ENVIRONMENT}\` == "production"\n  | WHERE \`${TRANSACTION_TYPE}\` == "${transactionType}"\n  | WHERE KQL("user.id: \\"123\\"")`,
       },
     });
   });
@@ -171,7 +171,7 @@ describe('OpenChartInDiscoverLink', () => {
         to: 'now',
       },
       query: {
-        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${TRANSACTION_TYPE} == "${transactionType}"`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE \`${SERVICE_NAME}\` == "${serviceName}"\n  | WHERE \`${TRANSACTION_TYPE}\` == "${transactionType}"`,
       },
     });
   });
@@ -189,7 +189,7 @@ describe('OpenChartInDiscoverLink', () => {
         to: 'now',
       },
       query: {
-        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${TRANSACTION_TYPE} == "${transactionType}"`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE \`${SERVICE_NAME}\` == "${serviceName}"\n  | WHERE \`${TRANSACTION_TYPE}\` == "${transactionType}"`,
       },
     });
   });
@@ -260,7 +260,7 @@ describe('OpenChartInDiscoverLink', () => {
         to: 'now',
       },
       query: {
-        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${SERVICE_ENVIRONMENT} == "production"`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE \`${SERVICE_NAME}\` == "${serviceName}"\n  | WHERE \`${SERVICE_ENVIRONMENT}\` == "production"`,
       },
     });
   });
