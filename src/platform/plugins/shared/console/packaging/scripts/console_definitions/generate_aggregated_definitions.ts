@@ -9,16 +9,74 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const fs = require('fs');
-const path = require('path');
-const { merge } = require('lodash');
-const globby = require('globby');
+/* eslint-disable no-console */
+
+import * as fs from 'fs';
+import * as path from 'path';
+import { merge } from 'lodash';
+import globby = require('globby');
+
+type EndpointsAvailability = 'stack' | 'serverless';
+
+interface EndpointAvailability {
+  stack?: boolean;
+  serverless?: boolean;
+}
+
+type UrlParamsValue = '__flag__' | string[];
+type UrlParamsDef = Record<string, UrlParamsValue>;
+
+interface EndpointDescription {
+  availability?: EndpointAvailability;
+  documentation?: string;
+  id?: string;
+  methods?: string[];
+  patterns?: string[];
+  url_params?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+interface SpecDefinitionsJson {
+  name: string;
+  globals: Record<string, unknown>;
+  endpoints: Record<string, EndpointDescription>;
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const parseJsonDefinitionFile = (filePath: string): Record<string, EndpointDescription> => {
+  const parsed: unknown = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+
+  if (!isRecord(parsed)) {
+    throw new Error(`Invalid console definition JSON at ${filePath} (expected an object)`);
+  }
+
+  const definitions: Record<string, EndpointDescription> = {};
+  for (const [endpointName, endpointDescription] of Object.entries(parsed)) {
+    if (!isRecord(endpointDescription)) {
+      throw new Error(
+        `Invalid console definition for "${endpointName}" in ${filePath} (expected an object)`
+      );
+    }
+
+    definitions[endpointName] = endpointDescription;
+  }
+
+  return definitions;
+};
 
 /**
  * Standalone version of SpecDefinitionsService for aggregation script
  */
 class StandaloneSpecDefinitionsService {
-  constructor(versionPath) {
+  name: string;
+  versionPath: string;
+  globalRules: Record<string, unknown>;
+  endpoints: Record<string, EndpointDescription>;
+  hasLoadedDefinitions: boolean;
+
+  constructor(versionPath: string) {
     this.name = 'es';
     this.versionPath = versionPath;
     this.globalRules = {};
@@ -26,17 +84,21 @@ class StandaloneSpecDefinitionsService {
     this.hasLoadedDefinitions = false;
   }
 
-  addGlobalAutocompleteRules(parentNode, rules) {
+  addGlobalAutocompleteRules(parentNode: string, rules: unknown) {
     this.globalRules[parentNode] = rules;
   }
 
-  addEndpointDescription(endpoint, description = {}, docsLinkToApiReference = false) {
-    let copiedDescription = {};
+  addEndpointDescription(
+    endpoint: string,
+    description: EndpointDescription = {},
+    docsLinkToApiReference = false
+  ) {
+    let copiedDescription: EndpointDescription = {};
     if (this.endpoints[endpoint]) {
       copiedDescription = { ...this.endpoints[endpoint] };
     }
 
-    let urlParamsDef;
+    let urlParamsDef: UrlParamsDef | undefined;
     if (description.patterns) {
       description.patterns.forEach((p) => {
         if (p.indexOf('{index}') >= 0) {
@@ -51,7 +113,7 @@ class StandaloneSpecDefinitionsService {
     if (urlParamsDef) {
       description.url_params = Object.assign(
         description.url_params || {},
-        copiedDescription.url_params
+        copiedDescription.url_params || {}
       );
       Object.assign(description.url_params, urlParamsDef);
     }
@@ -71,7 +133,7 @@ class StandaloneSpecDefinitionsService {
     this.endpoints[endpoint] = copiedDescription;
   }
 
-  asJson() {
+  asJson(): SpecDefinitionsJson {
     return {
       name: this.name,
       globals: this.globalRules,
@@ -79,7 +141,7 @@ class StandaloneSpecDefinitionsService {
     };
   }
 
-  loadDefinitions(endpointsAvailability = 'stack') {
+  loadDefinitions(endpointsAvailability: EndpointsAvailability = 'stack'): SpecDefinitionsJson {
     if (!this.hasLoadedDefinitions) {
       this.loadJsonDefinitions(endpointsAvailability);
       this.loadJSDefinitions();
@@ -88,7 +150,7 @@ class StandaloneSpecDefinitionsService {
     return this.asJson();
   }
 
-  loadJsonDefinitions(endpointsAvailability) {
+  loadJsonDefinitions(endpointsAvailability: EndpointsAvailability) {
     const result = this.loadJSONDefinitionsFiles();
 
     Object.keys(result).forEach((endpoint) => {
@@ -96,15 +158,15 @@ class StandaloneSpecDefinitionsService {
       const addEndpoint =
         // If the 'availability' property doesn't exist, display the endpoint by default
         !description.availability ||
-        (endpointsAvailability === 'stack' && description.availability.stack) ||
-        (endpointsAvailability === 'serverless' && description.availability.serverless);
+        (endpointsAvailability === 'stack' && description.availability.stack === true) ||
+        (endpointsAvailability === 'serverless' && description.availability.serverless === true);
       if (addEndpoint) {
         this.addEndpointDescription(endpoint, description, endpointsAvailability === 'serverless');
       }
     });
   }
 
-  loadJSONDefinitionsFiles() {
+  loadJSONDefinitionsFiles(): Record<string, EndpointDescription> {
     const jsonPath = path.join(this.versionPath, 'json');
     const generatedPath = path.join(jsonPath, 'generated');
     const overridesPath = path.join(jsonPath, 'overrides');
@@ -115,28 +177,35 @@ class StandaloneSpecDefinitionsService {
     const overrideFiles = globby.sync(path.join(overridesPath, '*.json'));
     const manualFiles = globby.sync(path.join(manualPath, '*.json'));
 
-    const jsonDefinitions = {};
+    const jsonDefinitions: Record<string, EndpointDescription> = {};
 
     // Load generated files with overrides
     generatedFiles.forEach((file) => {
       const overrideFile = overrideFiles.find((f) => path.basename(f) === path.basename(file));
-      const loadedDefinition = JSON.parse(fs.readFileSync(file, 'utf8'));
+      const loadedDefinition = parseJsonDefinitionFile(file);
       if (overrideFile) {
-        merge(loadedDefinition, JSON.parse(fs.readFileSync(overrideFile, 'utf8')));
+        const overrideDefinition = parseJsonDefinitionFile(overrideFile);
+        merge(loadedDefinition, overrideDefinition);
       }
       this.addToJsonDefinitions({ loadedDefinition, jsonDefinitions });
     });
 
     // Load manual files
     manualFiles.forEach((file) => {
-      const loadedDefinition = JSON.parse(fs.readFileSync(file, 'utf8'));
+      const loadedDefinition = parseJsonDefinitionFile(file);
       this.addToJsonDefinitions({ loadedDefinition, jsonDefinitions });
     });
 
     return jsonDefinitions;
   }
 
-  addToJsonDefinitions({ loadedDefinition, jsonDefinitions }) {
+  addToJsonDefinitions({
+    loadedDefinition,
+    jsonDefinitions,
+  }: {
+    loadedDefinition: Record<string, EndpointDescription>;
+    jsonDefinitions: Record<string, EndpointDescription>;
+  }) {
     Object.entries(loadedDefinition).forEach(([endpointName, endpointDescription]) => {
       if (jsonDefinitions[endpointName]) {
         // add timestamp to create a unique key
@@ -159,12 +228,15 @@ class StandaloneSpecDefinitionsService {
 
     try {
       // Register TypeScript loader
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@kbn/babel-register').install();
 
       // Load the JS spec loaders
       // Dynamic require is necessary here because the path is determined at runtime based on version directories
-      // eslint-disable-next-line import/no-dynamic-require
-      const { jsSpecLoaders } = require(jsIndexPath);
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const loadedModule: unknown = require(jsIndexPath);
+      const jsSpecLoaders = isRecord(loadedModule) ? loadedModule.jsSpecLoaders : undefined;
 
       if (!jsSpecLoaders || !Array.isArray(jsSpecLoaders)) {
         console.log(`Invalid jsSpecLoaders export in: ${jsIndexPath}`);
@@ -180,8 +252,10 @@ class StandaloneSpecDefinitionsService {
 
       console.log(`✓ Loaded ${jsSpecLoaders.length} JS definition loaders`);
     } catch (error) {
-      console.error(`Error loading JS definitions from ${jsIndexPath}:`, error.message);
-      console.error('Stack:', error.stack);
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      console.error(`Error loading JS definitions from ${jsIndexPath}:`, message);
+      console.error('Stack:', stack);
     }
   }
 }
@@ -215,7 +289,7 @@ async function generateAggregatedDefinitions() {
 
   console.log('Found versions:', versionDirs);
 
-  const aggregatedResponse = {};
+  const aggregatedResponse: Record<string, { es: SpecDefinitionsJson }> = {};
 
   for (const version of versionDirs) {
     const versionPath = path.join(consoleDefinitionsDir, version);
@@ -235,13 +309,14 @@ async function generateAggregatedDefinitions() {
         } endpoints`
       );
     } catch (error) {
-      console.error(`✗ Error processing version ${version}:`, error.message);
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`✗ Error processing version ${version}:`, message);
     }
   }
 
   // Write individual versioned files to the target directory
   const outputDir = path.join(scriptDir, '..', '..', 'console_definitions_target');
-  const generatedFiles = [];
+  const generatedFiles: string[] = [];
 
   Object.entries(aggregatedResponse).forEach(([version, versionData]) => {
     const outputPath = path.join(outputDir, `${version}.json`);
@@ -259,7 +334,8 @@ async function generateAggregatedDefinitions() {
         fs.rmSync(versionPath, { recursive: true, force: true });
         console.log(`Removed version folder: ${version}/`);
       } catch (error) {
-        console.warn(`Warning: Could not remove version folder ${version}:`, error.message);
+        const message = error instanceof Error ? error.message : String(error);
+        console.warn(`Warning: Could not remove version folder ${version}:`, message);
       }
     }
   });

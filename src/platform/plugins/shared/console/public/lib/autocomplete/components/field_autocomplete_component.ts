@@ -10,18 +10,64 @@
 import _ from 'lodash';
 import { getAutocompleteInfo, ENTITIES } from '../../../services';
 import { ListComponent } from './list_component';
+import type { AutoCompleteContext } from '../types';
+import type { AutocompleteTermDefinition } from './autocomplete_component';
+import type { SharedComponent } from './shared_component';
+import { isRecord } from '../../../../common/utils/record_utils';
 
-function FieldGenerator(context) {
-  return _.map(getAutocompleteInfo().getEntityProvider(ENTITIES.FIELDS, context), function (field) {
-    return { name: field.name, meta: field.type };
+const isString = (value: unknown): value is string => typeof value === 'string';
+
+function FieldGenerator(context?: AutoCompleteContext): AutocompleteTermDefinition[] {
+  if (!context) {
+    return [];
+  }
+
+  const indicesValue = context.indices;
+  const typesValue = context.types;
+
+  const indices = isString(indicesValue)
+    ? [indicesValue]
+    : Array.isArray(indicesValue)
+    ? indicesValue.filter(isString)
+    : [];
+
+  const types = isString(typesValue)
+    ? [typesValue]
+    : Array.isArray(typesValue)
+    ? typesValue.filter(isString)
+    : [];
+
+  const entityContext = Object.assign(Object.create(Object.getPrototypeOf(context)), {
+    indices,
+    types,
   });
+
+  const fields = getAutocompleteInfo().getEntityProvider(ENTITIES.FIELDS, entityContext);
+  if (!Array.isArray(fields)) {
+    return [];
+  }
+
+  return fields.reduce<AutocompleteTermDefinition[]>((acc, field) => {
+    if (!isRecord(field)) {
+      return acc;
+    }
+
+    const name = field.name;
+    const type = field.type;
+
+    if (typeof name === 'string' && typeof type === 'string') {
+      acc.push({ name, meta: type });
+    }
+
+    return acc;
+  }, []);
 }
 
 export class FieldAutocompleteComponent extends ListComponent {
-  constructor(name, parent, multiValued) {
+  constructor(name: string, parent?: SharedComponent, multiValued?: boolean) {
     super(name, FieldGenerator, parent, multiValued);
   }
-  validateTokens(tokens) {
+  validateTokens(tokens: string[]) {
     if (!this.multiValued && tokens.length > 1) {
       return false;
     }

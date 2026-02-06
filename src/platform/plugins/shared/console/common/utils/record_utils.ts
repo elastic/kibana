@@ -7,21 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConstantComponent } from './constant_component';
-import type { SharedComponent } from './shared_component';
-
-export class FullRequestComponent extends ConstantComponent {
-  readonly name: string;
-  constructor(
-    name: string,
-    parent: SharedComponent | undefined,
-    private readonly template: string
-  ) {
-    super(name, parent);
-    this.name = name;
-  }
-
-  getTerms() {
-    return [{ name: this.name, snippet: this.template }];
-  }
-}
+/**
+ * Type guard for indexable records. Excludes arrays and null.
+ */
+export const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);

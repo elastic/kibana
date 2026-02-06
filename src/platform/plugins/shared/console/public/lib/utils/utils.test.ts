@@ -8,6 +8,8 @@
  */
 
 import * as utils from '.';
+import type { DevToolsVariable } from '../../application/components';
+import type { RequestResult } from '../../application/hooks/use_send_current_request/send_request';
 
 describe('Utils class', () => {
   test('extract deprecation messages', function () {
@@ -117,7 +119,12 @@ describe('Utils class', () => {
   });
 
   describe('hasComments', function () {
-    const runCommentTests = (tests) => {
+    interface CommentTest {
+      source: string;
+      assert: boolean;
+    }
+
+    const runCommentTests = (tests: CommentTest[]) => {
       tests.forEach(({ source, assert }) => {
         test(`\n${source}`, () => {
           const hasComments = utils.hasComments(source);
@@ -176,36 +183,58 @@ describe('Utils class', () => {
   });
 
   test('get response with most severe status code', () => {
-    expect(
-      utils.getResponseWithMostSevereStatusCode([
-        { response: { statusCode: 500 } },
-        { response: { statusCode: 400 } },
-        { response: { statusCode: 200 } },
-      ])
-    ).toEqual({ response: { statusCode: 500 } });
+    const createRequestResult = (statusCode: number): RequestResult => ({
+      request: { data: '', method: 'GET', path: '' },
+      response: {
+        statusCode,
+        statusText: 'error',
+        timeMs: 0,
+        contentType: 'unknown',
+        value: '',
+      },
+    });
 
     expect(
       utils.getResponseWithMostSevereStatusCode([
-        { response: { statusCode: 0 } },
-        { response: { statusCode: 100 } },
-        { response: { statusCode: 201 } },
+        createRequestResult(500),
+        createRequestResult(400),
+        createRequestResult(200),
       ])
-    ).toEqual({ response: { statusCode: 201 } });
+    ).toEqual(createRequestResult(500));
+
+    expect(
+      utils.getResponseWithMostSevereStatusCode([
+        createRequestResult(0),
+        createRequestResult(100),
+        createRequestResult(201),
+      ])
+    ).toEqual(createRequestResult(201));
 
     expect(utils.getResponseWithMostSevereStatusCode(undefined)).toBe(undefined);
   });
 
   describe('replaceVariables', () => {
-    function testVariables(data, variables, expected) {
-      const result = utils.replaceVariables([data], [variables]);
+    interface ReplaceRequest {
+      url: string;
+      method: string;
+      data: string[];
+    }
+
+    function testVariables(
+      data: ReplaceRequest,
+      variable: DevToolsVariable,
+      expected: ReplaceRequest
+    ) {
+      const result = utils.replaceVariables([data], [variable]);
       expect(result).toEqual([expected]);
     }
 
     it('should replace variables in url and body', () => {
       testVariables(
-        { url: '${v1}/search', data: ['{\n  "f": "${v1}"\n}'] },
-        { name: 'v1', value: 'test' },
+        { method: 'GET', url: '${v1}/search', data: ['{\n  "f": "${v1}"\n}'] },
+        { id: 'v1', name: 'v1', value: 'test' },
         {
+          method: 'GET',
           url: 'test/search',
           data: ['{\n  "f": "test"\n}'],
         }
@@ -214,9 +243,10 @@ describe('Utils class', () => {
 
     describe('with booleans as field value', () => {
       testVariables(
-        { url: 'test', data: ['{\n  "f": "${v2}"\n}'] },
-        { name: 'v2', value: 'true' },
+        { method: 'GET', url: 'test', data: ['{\n  "f": "${v2}"\n}'] },
+        { id: 'v2', name: 'v2', value: 'true' },
         {
+          method: 'GET',
           url: 'test',
           data: ['{\n  "f": true\n}'],
         }
@@ -225,25 +255,25 @@ describe('Utils class', () => {
 
     describe('with objects as field values', () => {
       testVariables(
-        { url: 'test', data: ['{\n  "f": "${v3}"\n}'] },
-        { name: 'v3', value: '{"f": "test"}' },
-        { url: 'test', data: ['{\n  "f": {"f": "test"}\n}'] }
+        { method: 'GET', url: 'test', data: ['{\n  "f": "${v3}"\n}'] },
+        { id: 'v3', name: 'v3', value: '{"f": "test"}' },
+        { method: 'GET', url: 'test', data: ['{\n  "f": {"f": "test"}\n}'] }
       );
     });
 
     describe('with arrays as field values', () => {
       testVariables(
-        { url: 'test', data: ['{\n  "f": "${v5}"\n}'] },
-        { name: 'v5', value: '[{"t": "test"}]' },
-        { url: 'test', data: ['{\n  "f": [{"t": "test"}]\n}'] }
+        { method: 'GET', url: 'test', data: ['{\n  "f": "${v5}"\n}'] },
+        { id: 'v5', name: 'v5', value: '[{"t": "test"}]' },
+        { method: 'GET', url: 'test', data: ['{\n  "f": [{"t": "test"}]\n}'] }
       );
     });
 
     describe('with numbers as field values', () => {
       testVariables(
-        { url: 'test', data: ['{\n  "f": "${v6}"\n}'] },
-        { name: 'v6', value: '1' },
-        { url: 'test', data: ['{\n  "f": 1\n}'] }
+        { method: 'GET', url: 'test', data: ['{\n  "f": "${v6}"\n}'] },
+        { id: 'v6', name: 'v6', value: '1' },
+        { method: 'GET', url: 'test', data: ['{\n  "f": 1\n}'] }
       );
     });
 
@@ -251,25 +281,30 @@ describe('Utils class', () => {
       // Currently, variables embedded in other variables' values aren't replaced.
       // Once we build this feature, this test will fail and need to be updated.
       testVariables(
-        { url: 'test', data: ['{\n  "f": "${v4}"\n}'] },
-        { name: 'v4', value: '{"v1": "${v1}", "v6": "${v6}"}' },
-        { url: 'test', data: ['{\n  "f": {"v1": "${v1}", "v6": "${v6}"}\n}'] }
+        { method: 'GET', url: 'test', data: ['{\n  "f": "${v4}"\n}'] },
+        { id: 'v4', name: 'v4', value: '{"v1": "${v1}", "v6": "${v6}"}' },
+        { method: 'GET', url: 'test', data: ['{\n  "f": {"v1": "${v1}", "v6": "${v6}"}\n}'] }
       );
     });
 
     describe('with uuids as field values', () => {
       testVariables(
-        { url: 'test', data: ['{\n  "f": "${v7}"\n}'] },
-        { name: 'v7', value: '9893617a-a08f-4e5c-bc41-95610dc2ded8' },
-        { url: 'test', data: ['{\n  "f": "9893617a-a08f-4e5c-bc41-95610dc2ded8"\n}'] }
+        { method: 'GET', url: 'test', data: ['{\n  "f": "${v7}"\n}'] },
+        { id: 'v7', name: 'v7', value: '9893617a-a08f-4e5c-bc41-95610dc2ded8' },
+        {
+          method: 'GET',
+          url: 'test',
+          data: ['{\n  "f": "9893617a-a08f-4e5c-bc41-95610dc2ded8"\n}'],
+        }
       );
     });
 
     it('with illegal double quotes should not replace variables in body', () => {
       testVariables(
-        { url: 'test/_doc/${v8}', data: ['{\n  "f": ""${v8}""\n}'] },
-        { name: 'v8', value: '0' },
+        { method: 'GET', url: 'test/_doc/${v8}', data: ['{\n  "f": ""${v8}""\n}'] },
+        { id: 'v8', name: 'v8', value: '0' },
         {
+          method: 'GET',
           url: 'test/_doc/0',
           data: ['{\n  "f": ""${v8}""\n}'],
         }
@@ -278,9 +313,10 @@ describe('Utils class', () => {
 
     it('with heredoc triple quotes should replace variables as strings in body', () => {
       testVariables(
-        { url: 'test/_doc/${v9}', data: ['{\n  "f": """${v9}"""\n}'] },
-        { name: 'v9', value: '0' },
+        { method: 'GET', url: 'test/_doc/${v9}', data: ['{\n  "f": """${v9}"""\n}'] },
+        { id: 'v9', name: 'v9', value: '0' },
         {
+          method: 'GET',
           url: 'test/_doc/0',
           data: ['{\n  "f": """0"""\n}'],
         }
@@ -289,9 +325,10 @@ describe('Utils class', () => {
 
     it('with illegal quadruple quotes should not replace variables in body', () => {
       testVariables(
-        { url: 'test/_doc/${v10}', data: ['{\n  "f": """"${v10}""""\n}'] },
-        { name: 'v10', value: '0' },
+        { method: 'GET', url: 'test/_doc/${v10}', data: ['{\n  "f": """"${v10}""""\n}'] },
+        { id: 'v10', name: 'v10', value: '0' },
         {
+          method: 'GET',
           url: 'test/_doc/0',
           data: ['{\n  "f": """"${v10}""""\n}'],
         }
@@ -300,9 +337,10 @@ describe('Utils class', () => {
 
     it('with escaped pre quote should not replace variables in body', () => {
       testVariables(
-        { url: 'test/_doc/${v11}', data: ['{\n  "f": "\\"${v11}"\n}'] },
-        { name: 'v11', value: '0' },
+        { method: 'GET', url: 'test/_doc/${v11}', data: ['{\n  "f": "\\"${v11}"\n}'] },
+        { id: 'v11', name: 'v11', value: '0' },
         {
+          method: 'GET',
           url: 'test/_doc/0',
           data: ['{\n  "f": "\\"${v11}"\n}'],
         }
@@ -311,9 +349,10 @@ describe('Utils class', () => {
 
     it('with escaped pre triple quotes should not replace variables in body', () => {
       testVariables(
-        { url: 'test/_doc/${v12}', data: ['{\n  "f": "\\"""${v12}"""\n}'] },
-        { name: 'v12', value: '0' },
+        { method: 'GET', url: 'test/_doc/${v12}', data: ['{\n  "f": "\\"""${v12}"""\n}'] },
+        { id: 'v12', name: 'v12', value: '0' },
         {
+          method: 'GET',
           url: 'test/_doc/0',
           data: ['{\n  "f": "\\"""${v12}"""\n}'],
         }
@@ -323,6 +362,7 @@ describe('Utils class', () => {
     it('should replace variables in bulk request', () => {
       testVariables(
         {
+          method: 'POST',
           url: '${v13}/_bulk',
           data: [
             '{"index": {"_id": "0"}}',
@@ -331,8 +371,9 @@ describe('Utils class', () => {
             '{\n  "f": "${v13}"\n}',
           ],
         },
-        { name: 'v13', value: 'test' },
+        { id: 'v13', name: 'v13', value: 'test' },
         {
+          method: 'POST',
           url: 'test/_bulk',
           data: [
             '{"index": {"_id": "0"}}',

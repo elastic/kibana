@@ -9,15 +9,13 @@
 
 import { ListComponent } from './list_component';
 import { getAutocompleteInfo, ENTITIES } from '../../../services';
+import type { SharedComponent } from './shared_component';
 
 export class DataStreamAutocompleteComponent extends ListComponent {
-  constructor(name, parent, multiValued) {
-    super(
-      name,
-      getAutocompleteInfo().getEntityProvider(ENTITIES.DATA_STREAMS),
-      parent,
-      multiValued
-    );
+  constructor(name: string, parent?: SharedComponent, multiValued?: boolean) {
+    const provider = getAutocompleteInfo().getEntityProvider(ENTITIES.DATA_STREAMS);
+    const listGenerator = typeof provider === 'function' ? provider : () => [];
+    super(name, listGenerator, parent, multiValued);
   }
 
   getContextKey() {

@@ -8,14 +8,29 @@
  */
 
 import { SharedComponent } from './shared_component';
+import type {
+  AutocompleteComponent,
+  AutocompleteMatch,
+  AutocompleteTermDefinition,
+} from './autocomplete_component';
+import type { AutoCompleteContext } from '../types';
 export class ConditionalProxy extends SharedComponent {
-  constructor(predicate, delegate) {
+  predicate: (context: AutoCompleteContext, editor: unknown) => boolean;
+  delegate: AutocompleteComponent;
+
+  constructor(
+    predicate: (context: AutoCompleteContext, editor: unknown) => boolean,
+    delegate: AutocompleteComponent
+  ) {
     super('__condition');
     this.predicate = predicate;
     this.delegate = delegate;
   }
 
-  getTerms(context, editor) {
+  getTerms(
+    context: AutoCompleteContext,
+    editor: unknown
+  ): AutocompleteTermDefinition[] | null | undefined {
     if (this.predicate(context, editor)) {
       return this.delegate.getTerms(context, editor);
     } else {
@@ -23,7 +38,7 @@ export class ConditionalProxy extends SharedComponent {
     }
   }
 
-  match(token, context, editor) {
+  match(token: unknown, context: AutoCompleteContext, editor: unknown): AutocompleteMatch {
     if (this.predicate(context, editor)) {
       return this.delegate.match(token, context, editor);
     } else {

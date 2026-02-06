@@ -7,16 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable max-classes-per-file */
+
 import _ from 'lodash';
 import { ConstantComponent, ListComponent, SharedComponent } from './components';
+import type { AutocompleteComponent } from './components/autocomplete_component';
+import type { ResultTerm } from './types';
 
 export class ParamComponent extends ConstantComponent {
-  constructor(name, parent, description) {
+  private readonly description: UrlParamValue;
+
+  constructor(name: string, parent: SharedComponent, description: UrlParamValue) {
     super(name, parent);
     this.description = description;
   }
   getTerms() {
-    const t = { name: this.name };
+    const t: ResultTerm = { name: this.name };
     if (this.description === '__flag__') {
       t.meta = 'flag';
     } else {
@@ -27,8 +33,13 @@ export class ParamComponent extends ConstantComponent {
   }
 }
 
+type UrlParamValue = '__flag__' | string[] | string;
+type UrlParamsDescription = Record<string, UrlParamValue>;
+
 export class UrlParams {
-  constructor(description, defaults) {
+  private readonly rootComponent: SharedComponent;
+
+  constructor(description?: UrlParamsDescription, defaults?: UrlParamsDescription) {
     // This is not really a component, just a handy container to make iteration logic simpler
     this.rootComponent = new SharedComponent('ROOT');
     if (_.isUndefined(defaults)) {
@@ -38,9 +49,9 @@ export class UrlParams {
         filter_path: '',
       };
     }
-    description = _.clone(description || {});
-    _.defaults(description, defaults);
-    _.each(description, (pDescription, param) => {
+    const mergedDescription: UrlParamsDescription = _.clone(description || {});
+    _.defaults(mergedDescription, defaults);
+    _.each(mergedDescription, (pDescription, param) => {
       const component = new ParamComponent(param, this.rootComponent, pDescription);
       if (Array.isArray(pDescription)) {
         new ListComponent(param, pDescription, component);
@@ -49,7 +60,7 @@ export class UrlParams {
       }
     });
   }
-  getTopLevelComponents() {
-    return this.rootComponent.next;
+  getTopLevelComponents(): AutocompleteComponent[] {
+    return this.rootComponent.next ?? [];
   }
 }

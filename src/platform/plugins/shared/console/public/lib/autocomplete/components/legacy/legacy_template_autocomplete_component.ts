@@ -9,12 +9,15 @@
 
 import { getAutocompleteInfo } from '../../../../services';
 import { ListComponent } from '../list_component';
+import type { SharedComponent } from '../shared_component';
 
 export class LegacyTemplateAutocompleteComponent extends ListComponent {
-  constructor(name, parent) {
-    super(name, getAutocompleteInfo().getEntityProvider('legacyTemplates'), parent, true, true);
+  constructor(name: string, parent?: SharedComponent) {
+    const provider = getAutocompleteInfo().getEntityProvider('legacyTemplates');
+    const listGenerator = typeof provider === 'function' ? provider : () => [];
+    super(name, listGenerator, parent, true, true);
   }
-  getContextKey() {
+  getContextKey(): string {
     return 'template';
   }
 }

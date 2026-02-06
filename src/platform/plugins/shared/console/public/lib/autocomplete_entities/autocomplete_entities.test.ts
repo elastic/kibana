@@ -12,8 +12,9 @@ import { expandAliases } from './expand_aliases';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { SettingsMock } from '../../services/settings.mock';
 import { StorageMock } from '../../services/storage.mock';
+import type { AutoCompleteContext } from '../autocomplete/types';
 
-function fc(f1, f2) {
+function fc(f1: { name: string }, f2: { name: string }) {
   if (f1.name < f2.name) {
     return -1;
   }
@@ -23,20 +24,20 @@ function fc(f1, f2) {
   return 0;
 }
 
-function f(name, type) {
+function f(name: string, type?: string) {
   return { name, type: type || 'string' };
 }
 
 describe('Autocomplete entities', () => {
-  let mapping;
-  let alias;
-  let legacyTemplate;
-  let indexTemplate;
-  let componentTemplate;
-  let dataStream;
-  let autocompleteInfo;
-  let settingsMock;
-  let httpMock;
+  let mapping: AutocompleteInfo['mapping'];
+  let alias: AutocompleteInfo['alias'];
+  let legacyTemplate: AutocompleteInfo['legacyTemplate'];
+  let indexTemplate: AutocompleteInfo['indexTemplate'];
+  let componentTemplate: AutocompleteInfo['componentTemplate'];
+  let dataStream: AutocompleteInfo['dataStream'];
+  let autocompleteInfo: AutocompleteInfo | null;
+  let settingsMock: SettingsMock;
+  let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
 
   beforeEach(() => {
     autocompleteInfo = new AutocompleteInfo();
@@ -44,7 +45,7 @@ describe('Autocomplete entities', () => {
     mapping = autocompleteInfo.mapping;
 
     httpMock = httpServiceMock.createSetupContract();
-    const storage = new StorageMock({}, 'test');
+    const storage = new StorageMock(window.localStorage, 'test');
     settingsMock = new SettingsMock(storage);
 
     mapping.setup(httpMock, settingsMock);
@@ -56,7 +57,7 @@ describe('Autocomplete entities', () => {
     dataStream = autocompleteInfo.dataStream;
   });
   afterEach(() => {
-    autocompleteInfo.clear();
+    autocompleteInfo?.clear();
     autocompleteInfo = null;
   });
 
@@ -98,25 +99,25 @@ describe('Autocomplete entities', () => {
       });
 
       test('attempts to fetch mappings if not loaded', async () => {
-        const autoCompleteContext = {};
-        let loadingIndicator;
+        const autoCompleteContext: AutoCompleteContext = {};
+        let loadingIndicator: boolean | undefined;
 
-        mapping.isLoading$.subscribe((v) => {
+        mapping.isLoading$.subscribe((v: boolean) => {
           loadingIndicator = v;
         });
 
         // act
         mapping.getMappings('index', [], autoCompleteContext);
 
-        expect(autoCompleteContext.asyncResultsState.isLoading).toBe(true);
+        expect(autoCompleteContext.asyncResultsState!.isLoading).toBe(true);
         expect(loadingIndicator).toBe(true);
 
         expect(httpMock.get).toHaveBeenCalled();
 
-        const fields = await autoCompleteContext.asyncResultsState.results;
+        const fields = await autoCompleteContext.asyncResultsState!.results;
 
         expect(loadingIndicator).toBe(false);
-        expect(autoCompleteContext.asyncResultsState.isLoading).toBe(false);
+        expect(autoCompleteContext.asyncResultsState!.isLoading).toBe(false);
         expect(fields).toEqual([{ name: '@timestamp', type: 'date' }]);
       });
 
@@ -130,11 +131,11 @@ describe('Autocomplete entities', () => {
           })
         );
 
-        const autoCompleteContext = {};
+        const autoCompleteContext: AutoCompleteContext = {};
 
         mapping.getMappings('my-index*', [], autoCompleteContext);
 
-        const fields = await autoCompleteContext.asyncResultsState.results;
+        const fields = await autoCompleteContext.asyncResultsState!.results;
 
         const expectedResult = [
           {
@@ -428,7 +429,7 @@ describe('Autocomplete entities', () => {
   });
 
   describe('Templates', function () {
-    test('legacy templates, index templates, component templates', function () {
+    test('templates, index templates, component templates', function () {
       legacyTemplate.loadTemplates({
         test_index1: { order: 0 },
         test_index2: { order: 0 },

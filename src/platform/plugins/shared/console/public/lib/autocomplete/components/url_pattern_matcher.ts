@@ -17,6 +17,8 @@ import {
 } from '.';
 
 import { FullRequestComponent } from './full_request_component';
+import type { AutocompleteComponent } from './autocomplete_component';
+import { isRecord } from '../../../../common/utils/record_utils';
 
 /**
  * @param parametrizedComponentFactories a dict of the following structure
@@ -30,23 +32,53 @@ import { FullRequestComponent } from './full_request_component';
  */
 export class UrlPatternMatcher {
   // This is not really a component, just a handy container to make iteration logic simpler
-  constructor(parametrizedComponentFactories) {
+  private readonly byMethod: Record<HttpMethod, MethodRoot>;
+
+  constructor(parametrizedComponentFactories?: ParametrizedComponentFactories) {
     // We'll group endpoints by the methods which are attached to them,
-    //to avoid suggesting endpoints that are incompatible with the
-    //method that the user has entered.
-    ['HEAD', 'GET', 'PUT', 'POST', 'DELETE', 'PATCH'].forEach((method) => {
-      this[method] = {
+    // to avoid suggesting endpoints that are incompatible with the
+    // method that the user has entered.
+    const defaultFactories: ParametrizedComponentFactories = {
+      getComponent: () => undefined,
+    };
+
+    const factories = parametrizedComponentFactories ?? defaultFactories;
+
+    this.byMethod = {
+      HEAD: {
         rootComponent: new SharedComponent('ROOT'),
-        parametrizedComponentFactories: parametrizedComponentFactories || {
-          getComponent: () => {},
-        },
-      };
-    });
+        parametrizedComponentFactories: factories,
+      },
+      GET: {
+        rootComponent: new SharedComponent('ROOT'),
+        parametrizedComponentFactories: factories,
+      },
+      PUT: {
+        rootComponent: new SharedComponent('ROOT'),
+        parametrizedComponentFactories: factories,
+      },
+      POST: {
+        rootComponent: new SharedComponent('ROOT'),
+        parametrizedComponentFactories: factories,
+      },
+      DELETE: {
+        rootComponent: new SharedComponent('ROOT'),
+        parametrizedComponentFactories: factories,
+      },
+      PATCH: {
+        rootComponent: new SharedComponent('ROOT'),
+        parametrizedComponentFactories: factories,
+      },
+    };
   }
-  addEndpoint(pattern, endpoint) {
+
+  addEndpoint(pattern: string, endpoint: EndpointLike) {
     endpoint.methods.forEach((method) => {
-      let c;
-      let activeComponent = this[method].rootComponent;
+      if (!isHttpMethod(method)) {
+        return;
+      }
+
+      let activeComponent = this.byMethod[method].rootComponent;
       if (endpoint.template) {
         new FullRequestComponent(pattern + '[body]', activeComponent, endpoint.template);
       }
@@ -57,33 +89,54 @@ export class UrlPatternMatcher {
           part = part.substr(1, part.length - 2);
           if (activeComponent.getComponent(part)) {
             // we already have something for this, reuse
-            activeComponent = activeComponent.getComponent(part);
+            const existing = activeComponent.getComponent(part);
+            if (existing) {
+              activeComponent = existing;
+            }
             return;
           }
           // a new path, resolve.
 
-          if ((c = endpointComponents[part])) {
+          let c: SharedComponent;
+          const endpointComponent = endpointComponents[part];
+
+          if (endpointComponent) {
             // endpoint specific. Support list
-            if (Array.isArray(c)) {
-              c = new ListComponent(part, c, activeComponent);
-            } else if (_.isObject(c) && c.type === 'list') {
+            if (Array.isArray(endpointComponent)) {
+              c = new ListComponent(part, endpointComponent, activeComponent);
+            } else if (
+              isRecord(endpointComponent) &&
+              endpointComponent.type === 'list' &&
+              Array.isArray(endpointComponent.list)
+            ) {
+              const multiValued =
+                typeof endpointComponent.multiValued === 'boolean'
+                  ? endpointComponent.multiValued
+                  : undefined;
+              const allowNonValid =
+                typeof endpointComponent.allow_non_valid === 'boolean'
+                  ? endpointComponent.allow_non_valid
+                  : undefined;
               c = new ListComponent(
                 part,
-                c.list,
+                endpointComponent.list,
                 activeComponent,
-                c.multiValued,
-                c.allow_non_valid
+                multiValued,
+                allowNonValid
               );
             } else {
+              // eslint-disable-next-line no-console
               console.warn('incorrectly configured url component ', part, ' in endpoint', endpoint);
               c = new SharedComponent(part);
             }
-          } else if ((c = this[method].parametrizedComponentFactories.getComponent(part))) {
-            // c is a f
-            c = c(part, activeComponent);
           } else {
-            // just accept whatever with not suggestions
-            c = new SimpleParamComponent(part, activeComponent);
+            const factory = this.byMethod[method].parametrizedComponentFactories.getComponent(part);
+            if (typeof factory === 'function') {
+              c = factory(part, activeComponent);
+            } else {
+              // just accept whatever with not suggestions
+              c = new SimpleParamComponent(part, activeComponent);
+            }
           }
 
           activeComponent = c;
@@ -102,10 +155,15 @@ export class UrlPatternMatcher {
 
           if (activeComponent.getComponent(part)) {
             // we already have something for this, reuse
-            activeComponent = activeComponent.getComponent(part);
-            activeComponent.addOption(lookAhead);
+            const existing = activeComponent.getComponent(part);
+            if (existing) {
+              activeComponent = existing;
+              if (existing instanceof ConstantComponent) {
+                existing.addOption(lookAhead);
+              }
+            }
           } else {
-            c = new ConstantComponent(part, activeComponent, lookAhead);
+            const c = new ConstantComponent(part, activeComponent, lookAhead);
             activeComponent = c;
           }
         }
@@ -115,11 +173,44 @@ export class UrlPatternMatcher {
     });
   }
 
-  getTopLevelComponents = function (method) {
-    const methodRoot = this[method];
-    if (!methodRoot) {
+  getTopLevelComponents(method?: string | null): AutocompleteComponent[] {
+    if (!method) {
       return [];
     }
-    return methodRoot.rootComponent.next;
-  };
+
+    if (!isHttpMethod(method)) {
+      return [];
+    }
+
+    return this.byMethod[method].rootComponent.next ?? [];
+  }
 }
+
+type HttpMethod = 'HEAD' | 'GET' | 'PUT' | 'POST' | 'DELETE' | 'PATCH';
+
+interface MethodRoot {
+  rootComponent: SharedComponent;
+  parametrizedComponentFactories: ParametrizedComponentFactories;
+}
+
+interface ParametrizedComponentFactories {
+  getComponent: (
+    part: string
+  ) => ((part: string, parent: SharedComponent) => SharedComponent) | undefined;
+}
+
+interface EndpointLike {
+  id: string;
+  methods: string[];
+  template?: string;
+  url_components?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+const isHttpMethod = (value: string): value is HttpMethod =>
+  value === 'HEAD' ||
+  value === 'GET' ||
+  value === 'PUT' ||
+  value === 'POST' ||
+  value === 'DELETE' ||
+  value === 'PATCH';

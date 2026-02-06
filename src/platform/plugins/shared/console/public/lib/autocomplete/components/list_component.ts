@@ -10,8 +10,26 @@
 import _ from 'lodash';
 import { SharedComponent } from './shared_component';
 /** A component that suggests one of the give options, but accepts anything */
+import type { AutocompleteMatch, AutocompleteTermDefinition } from './autocomplete_component';
+import type { AutoCompleteContext } from '../types';
+
+type ListGenerator = (
+  context?: AutoCompleteContext,
+  editor?: unknown
+) => AutocompleteTermDefinition[];
+
 export class ListComponent extends SharedComponent {
-  constructor(name, list, parent, multiValued, allowNonValidValues) {
+  listGenerator: ListGenerator;
+  multiValued: boolean;
+  allowNonValidValues: boolean;
+
+  constructor(
+    name: string,
+    list: AutocompleteTermDefinition[] | ListGenerator,
+    parent?: SharedComponent,
+    multiValued?: boolean,
+    allowNonValidValues?: boolean
+  ) {
     super(name, parent);
     this.listGenerator = Array.isArray(list)
       ? function () {
@@ -21,16 +39,21 @@ export class ListComponent extends SharedComponent {
     this.multiValued = _.isUndefined(multiValued) ? true : multiValued;
     this.allowNonValidValues = _.isUndefined(allowNonValidValues) ? false : allowNonValidValues;
   }
-  getTerms(context, editor) {
+  getTerms(context: AutoCompleteContext, editor: unknown): AutocompleteTermDefinition[] {
     if (!this.multiValued && context.otherTokenValues) {
       // already have a value -> no suggestions
       return [];
     }
-    let alreadySet = context.otherTokenValues || [];
-    if (_.isString(alreadySet)) {
-      alreadySet = [alreadySet];
-    }
-    let ret = _.difference(this.listGenerator(context, editor), alreadySet);
+    const alreadySet = context.otherTokenValues
+      ? Array.isArray(context.otherTokenValues)
+        ? context.otherTokenValues
+        : [context.otherTokenValues]
+      : [];
+
+    let ret: AutocompleteTermDefinition[] = _.difference(
+      this.listGenerator(context, editor),
+      alreadySet
+    );
 
     if (this.getDefaultTermMeta()) {
       const meta = this.getDefaultTermMeta();
@@ -38,14 +61,14 @@ export class ListComponent extends SharedComponent {
         if (_.isString(term)) {
           term = { name: term };
         }
-        return _.defaults(term, { meta: meta });
+        return _.defaults(term, { meta });
       });
     }
 
     return ret;
   }
 
-  validateTokens(tokens) {
+  validateTokens(tokens: string[]) {
     if (!this.multiValued && tokens.length > 1) {
       return false;
     }
@@ -70,17 +93,21 @@ export class ListComponent extends SharedComponent {
     return this.name;
   }
 
-  match(token, context, editor) {
-    if (!Array.isArray(token)) {
-      token = [token];
-    }
-    if (!this.allowNonValidValues && !this.validateTokens(token, context, editor)) {
+  match(
+    token: string | string[],
+    context: AutoCompleteContext,
+    editor: unknown
+  ): AutocompleteMatch {
+    const tokens = Array.isArray(token) ? token : [token];
+    if (!this.allowNonValidValues && !this.validateTokens(tokens)) {
       return null;
     }
-
-    const result = super.match(token, context, editor);
+    const result = super.match(tokens, context, editor);
+    if (!result) {
+      return result;
+    }
     result.context_values = result.context_values || {};
-    result.context_values[this.getContextKey()] = token;
+    result.context_values[this.getContextKey()] = tokens;
     return result;
   }
 }

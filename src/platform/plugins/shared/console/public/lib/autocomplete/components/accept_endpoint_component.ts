@@ -9,14 +9,25 @@
 
 import _ from 'lodash';
 import { SharedComponent } from './shared_component';
+import type { AutocompleteMatch } from './autocomplete_component';
+import type { AutoCompleteContext } from '../types';
 export const URL_PATH_END_MARKER = '__url_path_end__';
 
+interface EndpointLike {
+  id: string;
+  methods?: string[];
+  priority?: number;
+  [key: string]: unknown;
+}
+
 export class AcceptEndpointComponent extends SharedComponent {
-  constructor(endpoint, parent) {
+  endpoint: EndpointLike;
+
+  constructor(endpoint: EndpointLike, parent?: SharedComponent) {
     super(endpoint.id, parent);
     this.endpoint = endpoint;
   }
-  match(token, context, editor) {
+  match(token: unknown, context: AutoCompleteContext, editor: unknown): AutocompleteMatch {
     if (token !== URL_PATH_END_MARKER) {
       return null;
     }
@@ -24,6 +35,9 @@ export class AcceptEndpointComponent extends SharedComponent {
       return null;
     }
     const r = super.match(token, context, editor);
+    if (!r) {
+      return r;
+    }
     r.context_values = r.context_values || {};
     r.context_values.endpoint = this.endpoint;
     if (_.isNumber(this.endpoint.priority)) {

@@ -141,7 +141,9 @@ export function normalizeUrl(url: string): string {
  *  Sorts the request data by statusCode in increasing order and
  *  returns the last one which will be rendered in network request status bar
  */
-export const getResponseWithMostSevereStatusCode = (requestData: RequestResult[] | null) => {
+export const getResponseWithMostSevereStatusCode = (
+  requestData: RequestResult[] | null | undefined
+) => {
   if (requestData) {
     return requestData
       .slice()

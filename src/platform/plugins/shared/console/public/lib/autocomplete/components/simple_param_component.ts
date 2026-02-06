@@ -8,12 +8,17 @@
  */
 
 import { SharedComponent } from './shared_component';
+import type { AutocompleteMatch } from './autocomplete_component';
+import type { AutoCompleteContext } from '../types';
 export class SimpleParamComponent extends SharedComponent {
-  constructor(name, parent) {
+  constructor(name: string, parent?: SharedComponent) {
     super(name, parent);
   }
-  match(token, context, editor) {
+  match(token: unknown, context: AutoCompleteContext, editor: unknown): AutocompleteMatch {
     const result = super.match(token, context, editor);
+    if (!result) {
+      return result;
+    }
     result.context_values = result.context_values || {};
     result.context_values[this.name] = token;
     return result;

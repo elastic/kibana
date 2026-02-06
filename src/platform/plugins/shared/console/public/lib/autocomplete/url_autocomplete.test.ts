@@ -9,69 +9,117 @@
 
 import _ from 'lodash';
 import { URL_PATH_END_MARKER, UrlPatternMatcher, ListComponent } from './components';
+import type { SharedComponent } from './components';
 import { populateContext } from './engine';
+import type { AutoCompleteContext, ResultTerm } from './types';
+import { isRecord } from '../../../common/utils/record_utils';
 
 describe('Url autocomplete', () => {
-  function patternsTest(name, endpoints, tokenPath, expectedContext, globalUrlComponentFactories) {
+  type TokenPath = Array<string | string[]>;
+
+  interface ExpectedContext {
+    method?: string;
+    endpoint?: string;
+    autoCompleteSet?: Array<string | ResultTerm>;
+    [key: string]: unknown;
+  }
+
+  type EndpointsById = Record<
+    string,
+    {
+      id?: string;
+      patterns: string[];
+      methods: string[];
+      url_components?: Record<string, unknown>;
+      priority?: number;
+      template?: string;
+      [key: string]: unknown;
+    }
+  >;
+
+  const normalizeTerm = (term: string | ResultTerm): ResultTerm =>
+    _.isString(term) ? { name: term } : term;
+
+  const isResultTerm = (value: unknown): value is ResultTerm => isRecord(value) && 'name' in value;
+
+  const normalizeAnyTerm = (term: unknown): ResultTerm => {
+    if (_.isString(term)) {
+      return { name: term };
+    }
+    if (isResultTerm(term)) {
+      return term;
+    }
+    return { name: String(term) };
+  };
+
+  function patternsTest(
+    name: string,
+    endpoints: EndpointsById,
+    tokenPath: string | TokenPath,
+    expectedContext: ExpectedContext,
+    globalUrlComponentFactories?: ConstructorParameters<typeof UrlPatternMatcher>[0]
+  ) {
     test(name, function () {
       const patternMatcher = new UrlPatternMatcher(globalUrlComponentFactories);
       _.each(endpoints, function (e, id) {
-        e.id = id;
-        _.each(e.patterns, function (p) {
-          patternMatcher.addEndpoint(p, e);
+        const endpoint = { ...e, id };
+        _.each(endpoint.patterns, function (p) {
+          patternMatcher.addEndpoint(p, endpoint);
         });
       });
       if (typeof tokenPath === 'string') {
         if (tokenPath[tokenPath.length - 1] === '$') {
           tokenPath = tokenPath.substr(0, tokenPath.length - 1) + '/' + URL_PATH_END_MARKER;
         }
-        tokenPath = _.map(tokenPath.split('/'), function (p) {
-          p = p.split(',');
-          if (p.length === 1) {
-            return p[0];
+        tokenPath = _.map(tokenPath.split('/'), function (part) {
+          const parts = part.split(',');
+          if (parts.length === 1) {
+            return parts[0];
           }
-          return p;
+          return parts;
         });
       }
 
       if (expectedContext.autoCompleteSet) {
-        expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (t) {
-          if (_.isString(t)) {
-            t = { name: t };
-          }
-          return t;
-        });
+        expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, normalizeTerm);
         expectedContext.autoCompleteSet = _.sortBy(expectedContext.autoCompleteSet, 'name');
       }
 
-      const context = {};
+      const context: AutoCompleteContext = {};
       if (expectedContext.method) {
         context.method = expectedContext.method;
       }
+
+      const includeAutoComplete = expectedContext.autoCompleteSet !== undefined;
       populateContext(
         tokenPath,
         context,
         null,
-        expectedContext.autoCompleteSet,
+        includeAutoComplete,
         patternMatcher.getTopLevelComponents(context.method)
       );
 
-      // override context to just check on id
-      if (context.endpoint) {
-        context.endpoint = context.endpoint.id;
+      const actualContext: Record<string, unknown> = { ...context };
+
+      // override endpoint to just check on id
+      if (isRecord(actualContext.endpoint) && typeof actualContext.endpoint.id === 'string') {
+        actualContext.endpoint = actualContext.endpoint.id;
       }
 
-      if (context.autoCompleteSet) {
-        context.autoCompleteSet = _.sortBy(context.autoCompleteSet, 'name');
+      if (Array.isArray(actualContext.autoCompleteSet)) {
+        actualContext.autoCompleteSet = _.sortBy(
+          _.map(actualContext.autoCompleteSet, normalizeAnyTerm),
+          'name'
+        );
       }
 
-      expect(context).toEqual(expectedContext);
+      expect(actualContext).toEqual(expectedContext);
     });
   }
 
-  function t(name, meta) {
+  function t(name: string, meta?: string): string | ResultTerm {
     if (meta) {
-      return { name: name, meta: meta };
+      return { name, meta };
     }
     return name;
   }
@@ -239,11 +287,11 @@ describe('Url autocomplete', () => {
       },
     };
     const globalFactories = {
-      p: function (name, parent) {
-        return new ListComponent(name, ['g1', 'g2'], parent);
-      },
-      getComponent(name) {
-        return this[name];
+      getComponent(name: string) {
+        if (name === 'p') {
+          return (part: string, parent: SharedComponent) =>
+            new ListComponent(part, ['g1', 'g2'], parent);
+        }
       },
     };
 
@@ -329,7 +377,7 @@ describe('Url autocomplete', () => {
   })();
 
   (function () {
-    const endpoints = {
+    const endpoints: EndpointsById = {
       '1_param': {
         patterns: ['a/{p}'],
         methods: ['GET'],
@@ -340,7 +388,7 @@ describe('Url autocomplete', () => {
       },
     };
 
-    let e = _.cloneDeep(endpoints);
+    let e: EndpointsById = _.cloneDeep(endpoints);
     e['1_param'].priority = 1;
     patternsTest('Competing endpoints - priority 1', e, 'a/b$', {
       method: 'GET',

@@ -9,43 +9,75 @@
 
 import _ from 'lodash';
 import { SharedComponent } from '.';
+import type {
+  AutocompleteComponent,
+  AutocompleteMatch,
+  AutocompleteMatchResult,
+  AutocompleteTermDefinition,
+} from './autocomplete_component';
+import type { AutoCompleteContext } from '../types';
 /**
  * @param constants list of components that represent constant keys
  * @param patternsAndWildCards list of components that represent patterns and should be matched only if
  * there is no constant matches
  */
+type ObjectComponentContext = AutoCompleteContext & {
+  globalComponentResolver: (
+    token: unknown,
+    nested: boolean
+  ) => AutocompleteComponent[] | undefined | null;
+};
+
+type MatchResultWithNextArray = AutocompleteMatchResult & { next: AutocompleteComponent[] };
+
 export class ObjectComponent extends SharedComponent {
-  constructor(name, constants, patternsAndWildCards) {
+  constants: AutocompleteComponent[];
+  patternsAndWildCards: AutocompleteComponent[];
+
+  constructor(
+    name: string,
+    constants: AutocompleteComponent[],
+    patternsAndWildCards: AutocompleteComponent[]
+  ) {
     super(name);
     this.constants = constants;
     this.patternsAndWildCards = patternsAndWildCards;
   }
-  getTerms(context, editor) {
-    const options = [];
+  getTerms(context: ObjectComponentContext, editor: unknown): AutocompleteTermDefinition[] {
+    const options: AutocompleteTermDefinition[] = [];
     _.each(this.constants, function (component) {
-      options.push.apply(options, component.getTerms(context, editor));
+      const terms = component.getTerms(context, editor);
+      if (terms) {
+        options.push(...terms);
+      }
     });
     _.each(this.patternsAndWildCards, function (component) {
-      options.push.apply(options, component.getTerms(context, editor));
+      const terms = component.getTerms(context, editor);
+      if (terms) {
+        options.push(...terms);
+      }
     });
     return options;
   }
 
-  match(token, context, editor) {
-    const result = {
+  match(token: unknown, context: ObjectComponentContext, editor: unknown): AutocompleteMatch {
+    const result: MatchResultWithNextArray = {
       next: [],
     };
     _.each(this.constants, function (component) {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
-        result.next.push.apply(result.next, componentResult.next);
+        const next = Array.isArray(componentResult.next)
+          ? componentResult.next
+          : [componentResult.next];
+        result.next.push(...next);
       }
     });
 
     // try to link to GLOBAL rules
     const globalRules = context.globalComponentResolver(token, false);
     if (globalRules) {
-      result.next.push.apply(result.next, globalRules);
+      result.next.push(...globalRules);
     }
 
     if (result.next.length) {
@@ -54,7 +86,10 @@ export class ObjectComponent extends SharedComponent {
     _.each(this.patternsAndWildCards, function (component) {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
-        result.next.push.apply(result.next, componentResult.next);
+        const next = Array.isArray(componentResult.next)
+          ? componentResult.next
+          : [componentResult.next];
+        result.next.push(...next);
       }
     });
 
