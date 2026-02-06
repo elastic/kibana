@@ -21,4 +21,7 @@ export const INCLUDED_OPERATIONS = [
   'addCaseCommentDefaultSpace',
   'SetAlertsStatus',
   'SetAlertTags',
+  'get-streams',
+  'get-streams-name',
+  'get-streams-name-significant-events',
 ];

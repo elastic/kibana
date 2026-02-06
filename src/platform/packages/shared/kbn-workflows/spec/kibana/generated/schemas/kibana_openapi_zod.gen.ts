@@ -1047,3 +1047,44 @@ export const set_alert_tags_request = z.object({
 export const set_alert_tags_response = z.record(z.string(), z.unknown()).register(z.globalRegistry, {
     description: 'Elasticsearch update by query response'
 });
+
+export const get_streams_request = z.object({
+    body: z.optional(z.union([
+        z.record(z.string(), z.never()),
+        z.enum(['null']),
+        z.unknown()
+    ])),
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+export const get_streams_name_request = z.object({
+    body: z.optional(z.union([
+        z.record(z.string(), z.never()),
+        z.enum(['null']),
+        z.unknown()
+    ])),
+    path: z.object({
+        name: z.string()
+    }),
+    query: z.optional(z.never())
+});
+
+export const get_streams_name_significant_events_request = z.object({
+    body: z.optional(z.union([
+        z.record(z.string(), z.never()),
+        z.enum(['null']),
+        z.unknown()
+    ])),
+    path: z.object({
+        name: z.string()
+    }),
+    query: z.object({
+        from: z.string(),
+        to: z.string(),
+        bucketSize: z.string(),
+        query: z.optional(z.string().register(z.globalRegistry, {
+            description: 'Query string to filter significant events on metadata fields'
+        }))
+    })
+});
