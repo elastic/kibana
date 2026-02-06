@@ -78,7 +78,7 @@ const baseEntitySourceSchema = {
 const baseEntitySourceSchemaV2 = {
   ...baseEntitySourceSchema,
   matchersModifiedByUser: schema.boolean({ defaultValue: false }),
-  managedVersion: schema.maybe(schema.number()), // or schema.number({ defaultValue: MANAGED_SOURCES_VERSION })
+  managedVersion: schema.maybe(schema.number()),
 };
 
 const monitoringEntitySourceModelVersion1: SavedObjectsModelVersion = {
@@ -111,7 +111,7 @@ const monitoringEntitySourceModelVersion2: SavedObjectsModelVersion = {
   ],
   schemas: {
     forwardCompatibility: schema.object(baseEntitySourceSchemaV2, { unknowns: 'ignore' }),
-    create: schema.object(baseEntitySourceSchemaV2),
+    create: schema.object(baseEntitySourceSchemaV2, { unknowns: 'ignore' }),
   },
 };
 
