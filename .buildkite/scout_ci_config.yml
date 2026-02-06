@@ -26,8 +26,9 @@ plugins:
     - transform
     - fleet
     - entity_store
-    - workflows_management
+    - dashboard    
     - workflows_extensions
+    - workflows_management
   disabled:
 
 packages:
