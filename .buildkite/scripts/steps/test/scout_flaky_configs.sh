@@ -20,14 +20,13 @@ if [[ -z "$SCOUT_CONFIG" ]]; then
   exit 1
 fi
 
-config_path="$SCOUT_CONFIG"
 if [[ -z "$SCOUT_SERVER_RUN_FLAGS" ]]; then
-  echo "⚠️ SCOUT_SERVER_RUN_FLAGS not set; defaulting to --stateful"
-  config_run_modes="--stateful"
-else
-  config_run_modes="$SCOUT_SERVER_RUN_FLAGS"
+  echo "Missing SCOUT_SERVER_RUN_FLAGS env var"
+  exit 1
 fi
 
+config_path="$SCOUT_CONFIG"
+config_run_modes="$SCOUT_SERVER_RUN_FLAGS"
 passed_count=0
 failedModes=()
 
