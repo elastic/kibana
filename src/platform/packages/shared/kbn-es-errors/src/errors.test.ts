@@ -9,11 +9,13 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
 import {
   isResponseError,
   isUnauthorizedError,
   isRequestAbortedError,
   isMaximumResponseSizeExceededError,
+  getDetailedErrorMessage,
 } from './errors';
 
 const createApiResponseError = ({
@@ -106,5 +108,65 @@ describe('isMaximumResponseSizeExceededError', () => {
         new errors.ResponseError(createApiResponseError({ statusCode: 500 }))
       )
     ).toBe(false);
+  });
+});
+
+describe('#getDetailedErrorMessage', () => {
+  it('extracts body payload from Boom error', () => {
+    expect(getDetailedErrorMessage(Boom.badRequest())).toBe(
+      JSON.stringify({ statusCode: 400, error: 'Bad Request', message: 'Bad Request' })
+    );
+    expect(getDetailedErrorMessage(Boom.unauthorized())).toBe(
+      JSON.stringify({ statusCode: 401, error: 'Unauthorized', message: 'Unauthorized' })
+    );
+
+    const customBoomError = Boom.unauthorized();
+    customBoomError.output.payload = {
+      statusCode: 401,
+      error: 'some-weird-error',
+      message: 'some-weird-message',
+    };
+    expect(getDetailedErrorMessage(customBoomError)).toBe(
+      JSON.stringify({
+        statusCode: 401,
+        error: 'some-weird-error',
+        message: 'some-weird-message',
+      })
+    );
+  });
+
+  it('extracts body from Elasticsearch client response error', () => {
+    expect(
+      getDetailedErrorMessage(
+        new errors.ResponseError(
+          createApiResponseError({
+            statusCode: 401,
+            body: { field1: 'value-1', field2: 'value-2' },
+          })
+        )
+      )
+    ).toBe(JSON.stringify({ field1: 'value-1', field2: 'value-2' }));
+  });
+
+  it('extracts `cause` property', () => {
+    expect(getDetailedErrorMessage(new Error('some-message', { cause: 'oops' }))).toBe(
+      'some-message (cause: oops)'
+    );
+
+    expect(getDetailedErrorMessage(new Error('some-message', { cause: { oh: 'no' } }))).toBe(
+      `some-message (cause: { oh: 'no' })`
+    );
+
+    expect(
+      getDetailedErrorMessage(
+        new TypeError('fetch failed', {
+          cause: new Error('unable to get local issuer certificate'),
+        })
+      )
+    ).toBe('fetch failed (cause: unable to get local issuer certificate)');
+  });
+
+  it('extracts `message` property', () => {
+    expect(getDetailedErrorMessage(new Error('some-message'))).toBe('some-message');
   });
 });

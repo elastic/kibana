@@ -14,5 +14,6 @@ export {
   isNotFoundError,
   isRequestAbortedError,
   isMaximumResponseSizeExceededError,
+  getDetailedErrorMessage,
 } from './src/errors';
 export type { UnauthorizedError } from './src/errors';

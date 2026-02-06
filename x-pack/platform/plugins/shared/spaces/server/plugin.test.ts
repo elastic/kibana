@@ -39,6 +39,7 @@ describe('Spaces plugin', () => {
               "_subscribe": [Function],
             },
           },
+          "registerOnSpaceDelete": [Function],
           "spacesClient": Object {
             "registerClientWrapper": [Function],
             "setClientRepositoryFactory": [Function],

@@ -19,3 +19,10 @@ export type SpacesRequestHandlerContext = CustomRequestHandlerContext<{
  * @internal
  */
 export type SpacesRouter = IRouter<SpacesRequestHandlerContext>;
+
+/**
+ * Callback invoked when a space is deleted.
+ * This is a synchronous, fire-and-forget callback - errors are caught and logged,
+ * and do not prevent the space deletion from succeeding.
+ */
+export type OnSpaceDeleteCallback = (spaceId: string) => void;

@@ -12,6 +12,7 @@ import type {
 import pLimit from 'p-limit';
 
 import type { IClusterClient, Logger } from '@kbn/core/server';
+import { getDetailedErrorMessage } from '@kbn/es-errors';
 import type {
   CheckUserProfilesPrivilegesResponse,
   UserProfileBulkGetParams,
@@ -30,7 +31,7 @@ import type {
   UserProfileWithSecurity,
 } from '../../common';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
-import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import { getErrorStatusCode } from '../errors';
 import { getPrintableSessionId, type Session } from '../session_management';
 
 const KIBANA_DATA_ROOT = 'kibana';

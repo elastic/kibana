@@ -19,6 +19,7 @@ import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { ISpacesClient } from './spaces_client';
 import { SpacesClient } from './spaces_client';
 import type { ConfigType } from '../config';
+import type { OnSpaceDeleteCallback } from '../types';
 
 /**
  * For consumption by the security plugin only.
@@ -67,6 +68,12 @@ interface SetupDeps {
   config$: Observable<ConfigType>;
 }
 
+interface StartDeps {
+  coreStart: CoreStart;
+  features: FeaturesPluginStart;
+  onSpaceDeleteCallbacks: OnSpaceDeleteCallback[];
+}
+
 export class SpacesClientService {
   private repositoryFactory?: SpacesClientRepositoryFactory;
 
@@ -76,6 +83,7 @@ export class SpacesClientService {
 
   constructor(
     private readonly debugLogger: (message: string) => void,
+    private readonly errorLogger: (message: string) => void,
     private readonly buildFlavour: BuildFlavor
   ) {}
 
@@ -100,7 +108,11 @@ export class SpacesClientService {
     };
   }
 
-  public start(coreStart: CoreStart, features: FeaturesPluginStart): SpacesClientServiceStart {
+  public start({
+    coreStart,
+    features,
+    onSpaceDeleteCallbacks,
+  }: StartDeps): SpacesClientServiceStart {
     const nonGlobalTypes = coreStart.savedObjects
       .getTypeRegistry()
       .getAllTypes()
@@ -120,11 +132,13 @@ export class SpacesClientService {
         }
         const baseClient = new SpacesClient(
           this.debugLogger,
+          this.errorLogger,
           this.config,
           this.repositoryFactory!(request, coreStart.savedObjects),
           nonGlobalTypeNames,
           this.buildFlavour,
-          features
+          features,
+          onSpaceDeleteCallbacks
         );
         if (this.clientWrapper) {
           return this.clientWrapper(request, baseClient);

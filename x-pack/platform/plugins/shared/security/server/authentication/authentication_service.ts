@@ -17,6 +17,7 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import type { APIKeysType } from '@kbn/core-security-server';
+import { getDetailedErrorMessage } from '@kbn/es-errors';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { i18n as i18nLib } from '@kbn/i18n';
 import type {
@@ -36,7 +37,7 @@ import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
 import type { ConfigType } from '../config';
-import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { createRedirectHtmlPage } from '../lib/html_page_utils';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';

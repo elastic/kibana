@@ -34,7 +34,7 @@ import type { SpacesClientRepositoryFactory, SpacesClientWrapper } from './space
 import { SpacesClientService } from './spaces_client';
 import type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
 import { SpacesService } from './spaces_service';
-import type { SpacesRequestHandlerContext } from './types';
+import type { OnSpaceDeleteCallback, SpacesRequestHandlerContext } from './types';
 import { getUiSettings } from './ui_settings';
 import { registerSpacesUsageCollector } from './usage_collection';
 import { UsageStatsService } from './usage_stats';
@@ -84,6 +84,13 @@ export interface SpacesPluginSetup {
    * When `xpack.spaces.maxSpaces` is set to 1 Kibana only supports the default space and any spaces related UI can safely be hidden.
    */
   hasOnlyDefaultSpace$: Observable<boolean>;
+
+  /**
+   * Registers a callback to be invoked when a space is deleted.
+   * Callbacks are invoked synchronously in a fire-and-forget manner after the space is deleted.
+   * Errors thrown by callbacks are caught and logged, and do not prevent the deletion from succeeding.
+   */
+  registerOnSpaceDelete: (callback: OnSpaceDeleteCallback) => void;
 }
 
 /**
@@ -116,6 +123,8 @@ export class SpacesPlugin
 
   private readonly hasOnlyDefaultSpace$: Observable<boolean>;
 
+  private readonly onSpaceDeleteCallbacks: OnSpaceDeleteCallback[] = [];
+
   private spacesServiceStart?: SpacesServiceStart;
 
   private defaultSpaceService?: DefaultSpaceService;
@@ -127,6 +136,7 @@ export class SpacesPlugin
     this.spacesService = new SpacesService();
     this.spacesClientService = new SpacesClientService(
       (message) => this.log.debug(message),
+      (message) => this.log.error(message),
       initializerContext.env.packageInfo.buildFlavor
     );
   }
@@ -223,11 +233,18 @@ export class SpacesPlugin
       spacesClient: spacesClientSetup,
       spacesService: spacesServiceSetup,
       hasOnlyDefaultSpace$: this.hasOnlyDefaultSpace$,
+      registerOnSpaceDelete: (callback: OnSpaceDeleteCallback) => {
+        this.onSpaceDeleteCallbacks.push(callback);
+      },
     };
   }
 
   public start(core: CoreStart, plugins: PluginsStart) {
-    const spacesClientStart = this.spacesClientService.start(core, plugins.features);
+    const spacesClientStart = this.spacesClientService.start({
+      coreStart: core,
+      features: plugins.features,
+      onSpaceDeleteCallbacks: this.onSpaceDeleteCallbacks,
+    });
 
     this.spacesServiceStart = this.spacesService.start({
       basePath: core.http.basePath,

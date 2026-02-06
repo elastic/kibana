@@ -10,6 +10,7 @@ import type { CapabilitiesStart } from '@kbn/core-capabilities-server';
 import type { IClusterClient } from '@kbn/core-elasticsearch-server';
 import type { FakeRawRequest, IBasePath, KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { getDetailedErrorMessage } from '@kbn/es-errors';
 import type { Logger } from '@kbn/logging';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
@@ -18,7 +19,7 @@ import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../common/constant
 import type { HTTPAuthorizationHeader } from '../authentication';
 import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
-import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import { getErrorStatusCode } from '../errors';
 
 export interface AnonymousAccessServiceStart {
   readonly isAnonymousAccessEnabled: boolean;

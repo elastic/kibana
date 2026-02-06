@@ -43,7 +43,7 @@ describe('get shareable references', () => {
     const { savedObjects, savedObjectsClient } = createMockSavedObjectsService(spaces);
     coreStart.savedObjects = savedObjects;
 
-    const clientService = new SpacesClientService(jest.fn(), 'traditional');
+    const clientService = new SpacesClientService(jest.fn(), jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -55,7 +55,11 @@ describe('get shareable references', () => {
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
+    const clientServiceStart = clientService.start({
+      coreStart,
+      features: featuresPluginMock.createStart(),
+      onSpaceDeleteCallbacks: [],
+    });
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,

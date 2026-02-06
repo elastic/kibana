@@ -18,6 +18,7 @@ import type {
 import semver from 'semver';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { getDetailedErrorMessage } from '@kbn/es-errors';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 
@@ -25,7 +26,7 @@ import type { AuthenticationProvider } from '../../common';
 import { sessionCleanupConcurrentLimitEvent, sessionCleanupEvent } from '../audit';
 import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
-import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import { getErrorStatusCode } from '../errors';
 
 export interface SessionIndexOptions {
   readonly elasticsearchClient: ElasticsearchClient;
