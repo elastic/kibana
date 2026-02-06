@@ -26,7 +26,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10786
-  core: 558848
+  core: 556473
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -139,7 +139,7 @@ pageLoadAssetSize:
   reporting: 46602
   rollup: 12692
   runtimeFields: 11828
-  sampleDataIngest: 2640
+  sampleDataIngest: 4596
   savedObjects: 11735
   savedObjectsFinder: 4319
   savedObjectsManagement: 22390
