@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React, { type PropsWithChildren } from 'react';
-import { css } from '@emotion/css';
-import type { CSSInterpolation } from '@emotion/serialize';
+import { css, type CSSInterpolation } from '@emotion/css';
 import { EuiText, useEuiTheme, type EuiTextProps } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
