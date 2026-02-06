@@ -11,7 +11,6 @@ export interface TraceSequence {
   correlation_identifier: Correlation;
   traceItems: Record<string, unknown>[];
   logs: Record<string, unknown>[];
-  errorItems: Record<string, unknown>[];
   isTruncated?: boolean;
 }
 

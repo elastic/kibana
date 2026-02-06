@@ -124,7 +124,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(sequence.correlation_identifier.value).to.be(DEFAULT_TRACE_CONFIGS[0].traceId);
         expect(sequence.traceItems.length).to.be.greaterThan(0);
         expect(sequence.logs.length).to.be.greaterThan(0);
-        expect(sequence.errorItems.length).to.be.greaterThan(0);
       });
 
       it('returns an empty sequence if the trace does not exist', async () => {
@@ -137,13 +136,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        const { correlation_identifier, traceItems, logs, errorItems } =
-          results[0].data.sequences[0];
+        const { correlation_identifier, traceItems, logs } = results[0].data.sequences[0];
         expect(correlation_identifier.field).to.be('trace.id');
         expect(correlation_identifier.value).to.be('trace-does-not-exist');
         expect(traceItems).to.have.length(0);
         expect(logs).to.have.length(0);
-        expect(errorItems).to.have.length(0);
       });
 
       it('does not return sequences that do not match the specified terms', async () => {

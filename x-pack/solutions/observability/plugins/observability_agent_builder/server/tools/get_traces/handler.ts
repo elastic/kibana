@@ -7,17 +7,13 @@
 
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { SearchHit } from '@kbn/es-types';
-import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { getObservabilityDataSources } from '../../utils/get_observability_data_sources';
 import { parseDatemath } from '../../utils/time';
-import { buildApmResources } from '../../utils/build_apm_resources';
 import { timeRangeFilter, termFilter } from '../../utils/dsl_filters';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import {
@@ -29,97 +25,32 @@ import {
 import { getCorrelationIdentifiers } from './get_correlation_identifiers/get_correlation_identifiers';
 import type { Correlation, TraceSequence } from './types';
 
-export function getApmTraceError({
-  apmEventClient,
-  correlationIdentifier,
-  startTime,
-  endTime,
-}: {
-  apmEventClient: APMEventClient;
-  correlationIdentifier: Correlation;
-  startTime: number;
-  endTime: number;
-}) {
-  const excludedLogLevels = ['debug', 'info', 'warning'];
-  const ERROR_LOG_LEVEL = 'error.log.level';
-  return apmEventClient.search('get_errors_docs', {
-    apm: {
-      sources: [
-        {
-          documentType: ApmDocumentType.ErrorEvent,
-          rollupInterval: RollupInterval.None,
-        },
-      ],
-    },
-    track_total_hits: false,
-    size: 1000,
-    query: {
-      bool: {
-        filter: [
-          ...timeRangeFilter('@timestamp', { start: startTime, end: endTime }),
-          ...termFilter(correlationIdentifier.field, correlationIdentifier.value),
-        ],
-        must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
-      },
-    },
-    fields: DEFAULT_TRACE_FIELDS,
-    _source: false,
-  });
-}
-
-export function getTraceDocs({
-  apmEventClient,
-  correlationIdentifier,
-  startTime,
-  endTime,
-}: {
-  apmEventClient: APMEventClient;
-  correlationIdentifier: Correlation;
-  startTime: number;
-  endTime: number;
-}) {
-  return apmEventClient.search('observability_agent_builder_get_trace_docs', {
-    apm: {
-      events: [ProcessorEvent.transaction, ProcessorEvent.span, ProcessorEvent.error],
-    },
-    track_total_hits: true,
-    size: DEFAULT_MAX_APM_EVENTS,
-    sort: [{ '@timestamp': { order: 'asc' } }],
-    _source: false,
-    fields: DEFAULT_TRACE_FIELDS,
-    query: {
-      bool: {
-        filter: [
-          ...timeRangeFilter('@timestamp', { start: startTime, end: endTime }),
-          ...termFilter(correlationIdentifier.field, correlationIdentifier.value),
-        ],
-      },
-    },
-  });
-}
-
-export function getCorrelatedLogs({
+export async function getDocuments({
   esClient,
   correlationIdentifier,
   index,
   startTime,
   endTime,
+  size,
+  fields,
 }: {
   esClient: IScopedClusterClient;
   correlationIdentifier: Correlation;
   index: string[];
   startTime: number;
   endTime: number;
+  size: number;
+  fields: string[];
 }) {
   const search = getTypedSearch(esClient.asCurrentUser);
 
-  return search({
+  const searchResult = await search({
     index,
     track_total_hits: true,
-    size: DEFAULT_MAX_LOG_EVENTS,
+    size,
     sort: [{ '@timestamp': { order: 'asc' } }],
     _source: false,
-    fields: DEFAULT_LOG_SOURCE_FIELDS,
+    fields,
     query: {
       bool: {
         filter: [
@@ -129,6 +60,7 @@ export function getCorrelatedLogs({
       },
     },
   });
+  return searchResult.hits.hits;
 }
 
 export async function getToolHandler({
@@ -158,19 +90,18 @@ export async function getToolHandler({
 }) {
   const dataSources = await getObservabilityDataSources({ core, plugins, logger });
   const logsIndices = index?.split(',') ?? dataSources.logIndexPatterns;
-
+  const apmIndexPatterns = [
+    dataSources.apmIndexPatterns.transaction,
+    dataSources.apmIndexPatterns.span,
+    dataSources.apmIndexPatterns.error,
+  ];
   const startTime = parseDatemath(start);
   const endTime = parseDatemath(end, { roundUp: true });
-  const { apmEventClient } = await buildApmResources({ core, plugins, request, logger });
 
   const correlationIdentifiers = await getCorrelationIdentifiers({
     esClient,
     logsIndices,
-    apmIndexPatterns: [
-      dataSources.apmIndexPatterns.transaction,
-      dataSources.apmIndexPatterns.span,
-      dataSources.apmIndexPatterns.error,
-    ],
+    apmIndexPatterns,
     startTime,
     endTime,
     kqlFilter,
@@ -182,36 +113,29 @@ export async function getToolHandler({
   // For each correlation identifier, find the full distributed trace (transactions, spans, errors, and logs)
   const sequences: TraceSequence[] = await Promise.all(
     correlationIdentifiers.map(async (correlationIdentifier) => {
-      const apmResponse = await getTraceDocs({
-        apmEventClient,
+      const apmHits = await getDocuments({
+        esClient,
         correlationIdentifier,
+        index: apmIndexPatterns,
         startTime,
         endTime,
-      });
-      const apmHits = apmResponse.hits.hits;
-
-      const errorResponse = await getApmTraceError({
-        apmEventClient,
-        correlationIdentifier,
-        startTime,
-        endTime,
+        size: DEFAULT_MAX_APM_EVENTS,
+        fields: DEFAULT_TRACE_FIELDS,
       });
 
-      const errorHits = errorResponse.hits.hits;
-
-      const logsResponse = await getCorrelatedLogs({
+      const logHits = await getDocuments({
         esClient,
         correlationIdentifier,
         index: logsIndices,
         startTime,
         endTime,
+        size: DEFAULT_MAX_LOG_EVENTS,
+        fields: DEFAULT_LOG_SOURCE_FIELDS,
       });
-      const logHits = logsResponse?.hits.hits ?? [];
 
       return {
         correlation_identifier: correlationIdentifier,
         traceItems: mapHitsToEntries(apmHits),
-        errorItems: mapHitsToEntries(errorHits),
         logs: mapHitsToEntries(logHits),
       };
     })
