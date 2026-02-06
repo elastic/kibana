@@ -11,7 +11,7 @@ import { from, map, catchError } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import { createSSEInternalError } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
-import { type FlattenRecord, flattenRecord } from '@kbn/streams-schema';
+import { Streams, type FlattenRecord, flattenRecord } from '@kbn/streams-schema';
 import { type StreamlangDSL, type GrokProcessor, type DissectProcessor } from '@kbn/streamlang';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { IScopedClusterClient } from '@kbn/core/server';
@@ -31,6 +31,7 @@ import {
 import { STREAMS_TIERED_ML_FEATURE } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
+import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
 import { simulateProcessing } from '../processing/simulation_handler';
 import { handleProcessingGrokSuggestions } from '../processing/grok_suggestions_handler';
@@ -140,6 +141,12 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           await getScopedClients({ request });
 
         const stream = await streamsClient.getStream(params.path.name);
+        if (!Streams.ingest.all.Definition.is(stream)) {
+          throw new StatusError(
+            'Processing suggestions are only available for ingest streams',
+            400
+          );
+        }
 
         const abortController = new AbortController();
         let parsingProcessor: GrokProcessor | DissectProcessor | undefined;

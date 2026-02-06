@@ -38,7 +38,7 @@ export function ExportContentPackFlyout({
   onExport,
   onClose,
 }: {
-  definition: Streams.WiredStream.GetResponse;
+  definition: Streams.all.GetResponse;
   onClose: () => void;
   onExport: () => void;
 }) {

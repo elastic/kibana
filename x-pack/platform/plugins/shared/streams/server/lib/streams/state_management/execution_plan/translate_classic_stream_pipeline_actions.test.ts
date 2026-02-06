@@ -1050,5 +1050,7 @@ function emptyActionsByType(): ActionsByType {
     unlink_features: [],
     update_ingest_settings: [],
     update_failure_store: [],
+    upsert_esql_view: [],
+    delete_esql_view: [],
   };
 }

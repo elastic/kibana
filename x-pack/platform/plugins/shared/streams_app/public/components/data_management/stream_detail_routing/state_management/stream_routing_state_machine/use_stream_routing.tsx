@@ -53,6 +53,13 @@ export const useStreamRoutingEvents = () => {
     }, DEBOUNCE_DELAY);
 
     return {
+      changeChildStreamsMode: (mode: 'ingestMode' | 'queryMode') => {
+        if (mode === 'ingestMode') {
+          service.send({ type: 'childStreams.mode.changeToIngestMode' });
+        } else {
+          service.send({ type: 'childStreams.mode.changeToQueryMode' });
+        }
+      },
       cancelChanges: () => {
         debouncedChangeRule.cancel();
         debouncedChangeSuggestionName.cancel();
@@ -72,7 +79,7 @@ export const useStreamRoutingEvents = () => {
       },
       removeRule: async () => {
         service.send({ type: 'routingRule.remove' });
-        await waitFor(service, (snapshot) => snapshot.matches({ ready: 'idle' }));
+        await waitFor(service, (snapshot) => snapshot.matches({ ready: { ingestMode: 'idle' } }));
       },
       reorderRules: (routing: RoutingDefinitionWithUIAttributes[]) => {
         service.send({ type: 'routingRule.reorder', routing });
@@ -86,13 +93,13 @@ export const useStreamRoutingEvents = () => {
         await waitFor(
           service,
           (snapshot) =>
-            snapshot.matches({ ready: 'idle' }) ||
-            snapshot.matches({ ready: { reviewSuggestedRule: 'reviewing' } })
+            snapshot.matches({ ready: { ingestMode: 'idle' } }) ||
+            snapshot.matches({ ready: { ingestMode: { reviewSuggestedRule: 'reviewing' } } })
         );
 
         const finalSnapshot = service.getSnapshot();
         return {
-          success: finalSnapshot.matches({ ready: 'idle' }),
+          success: finalSnapshot.matches({ ready: { ingestMode: 'idle' } }),
         };
       },
       saveChanges: () => {
@@ -121,6 +128,16 @@ export const useStreamRoutingEvents = () => {
       },
       saveEditedSuggestion: () => {
         service.send({ type: 'suggestion.saveSuggestion' });
+      },
+      // Query stream events
+      createQueryStream: () => {
+        service.send({ type: 'queryStream.create' });
+      },
+      cancelQueryStreamCreation: () => {
+        service.send({ type: 'queryStream.cancel' });
+      },
+      saveQueryStream: ({ name, esqlQuery }: { name: string; esqlQuery: string }) => {
+        service.send({ type: 'queryStream.save', name, esqlQuery });
       },
     };
   }, [service]);

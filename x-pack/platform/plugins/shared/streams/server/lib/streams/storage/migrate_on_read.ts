@@ -170,6 +170,16 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     hasBeenMigrated = true;
   }
 
+  // Initialize query_streams as empty array for ingest streams (WiredStream and ClassicStream)
+  // that don't have this field yet
+  if (isObject(migratedDefinition.ingest) && !('query_streams' in migratedDefinition)) {
+    migratedDefinition = {
+      ...migratedDefinition,
+      query_streams: [],
+    };
+    hasBeenMigrated = true;
+  }
+
   if (hasBeenMigrated) {
     Streams.all.Definition.asserts(migratedDefinition as unknown as BaseStream.Definition);
   }

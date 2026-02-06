@@ -85,6 +85,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...emptyAssets,
               stream: {
                 description: '',
+                query_streams: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   settings: {},
@@ -136,6 +137,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: TEST_STREAM_NAME,
           description: '',
           updated_at: stream.updated_at,
+          query_streams: [],
           ingest: {
             lifecycle: { inherit: {} },
             settings: {},
@@ -215,6 +217,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...emptyAssets,
               stream: {
                 description: '',
+                query_streams: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: { steps: [] },
@@ -246,6 +249,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -287,6 +291,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...emptyAssets,
               stream: {
                 description: '',
+                query_streams: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: { steps: [] },
@@ -330,6 +335,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: 'Should cause a failure due to invalid ingest pipeline',
+            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               settings: {},
@@ -376,6 +382,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               settings: {},

@@ -119,6 +119,36 @@ export function createDeleteStreamActor({
 }
 
 /**
+ * Create query stream actor factory
+ * This actor is used to create a new query stream
+ */
+export type CreateQueryStreamResponse = APIReturnType<'PUT /api/streams/{name}/_query 2023-10-31'>;
+export interface CreateQueryStreamInput {
+  name: string;
+  esqlQuery: string;
+}
+
+export function createQueryStreamActor({
+  streamsRepositoryClient,
+}: Pick<StreamRoutingServiceDependencies, 'streamsRepositoryClient'>) {
+  return fromPromise<CreateQueryStreamResponse, CreateQueryStreamInput>(({ input, signal }) => {
+    return streamsRepositoryClient.fetch('PUT /api/streams/{name}/_query 2023-10-31', {
+      signal,
+      params: {
+        path: {
+          name: input.name,
+        },
+        body: {
+          query: {
+            esql: input.esqlQuery,
+          },
+        },
+      },
+    });
+  });
+}
+
+/**
  * Notifier factories
  */
 
@@ -128,6 +158,17 @@ export const createStreamSuccessNofitier =
     toasts.addSuccess({
       title: i18n.translate('xpack.streams.streamDetailRouting.saved', {
         defaultMessage: 'Stream saved',
+      }),
+      toastLifeTimeMs: 3000,
+    });
+  };
+
+export const createQueryStreamSuccessNotifier =
+  ({ toasts }: { toasts: IToasts }) =>
+  () => {
+    toasts.addSuccess({
+      title: i18n.translate('xpack.streams.streamDetailRouting.queryStreamCreated', {
+        defaultMessage: 'Query stream created',
       }),
       toastLifeTimeMs: 3000,
     });
