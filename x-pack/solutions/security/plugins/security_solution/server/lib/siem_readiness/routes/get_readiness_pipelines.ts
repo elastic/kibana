@@ -76,7 +76,7 @@ export const getReadinessPipelinesRoute = (
 
           // Step 2: Get index settings to find which indices use which pipelines
           const settingsResponse = await esClient.indices.getSettings({
-            index: '*',
+            index: ['logs-*', 'metrics-*', '.ds-logs-*', '.ds-metrics-*'],
             filter_path: ['*.settings.index.default_pipeline', '*.settings.index.final_pipeline'],
             allow_no_indices: true,
             ignore_unavailable: true,

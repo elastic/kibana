@@ -68,7 +68,7 @@ export const ContinuityTab: React.FC = () => {
   const categorizedPipelines: Array<CategoryData<PipelineInfoWithStatus>> = useMemo(() => {
     if (!pipelinesData?.length) return [];
 
-    const categoryMap = new Map<string, PipelineInfoWithStatus[]>();
+    const categoryPipelinesMap = new Map<string, PipelineInfoWithStatus[]>();
 
     pipelinesData.forEach((pipeline) => {
       const failureRate =
@@ -82,21 +82,25 @@ export const ContinuityTab: React.FC = () => {
         status: Number(failureRate) > 1 ? 'critical' : 'healthy',
       };
 
-      // Find all categories this pipeline belongs to based on its indices
+      // Get unique categories for this pipeline
+      const uniqueCategories = new Set<string>();
       pipeline.indices.forEach((indexName) => {
         const category = indexToCategoryMap.get(indexName);
-        if (!category) return;
+        if (category) uniqueCategories.add(category);
+      });
 
-        const pipelinesInCategory = categoryMap.get(category) || [];
+      // Add pipeline to each category (once per category)
+      uniqueCategories.forEach((category) => {
+        const pipelinesInCategory = categoryPipelinesMap.get(category) || [];
         pipelinesInCategory.push(pipelineWithStats);
-        categoryMap.set(category, pipelinesInCategory);
+        categoryPipelinesMap.set(category, pipelinesInCategory);
       });
     });
 
     // Build result in category order, sorted by count descending
     const result: Array<CategoryData<PipelineInfoWithStatus>> = [];
     CATEGORY_ORDER.forEach((category) => {
-      const items = categoryMap.get(category);
+      const items = categoryPipelinesMap.get(category);
       if (!items) return;
 
       result.push({
@@ -203,7 +207,7 @@ export const ContinuityTab: React.FC = () => {
         render: (pipelineName: string, item: PipelineInfoWithStatus) => (
           <EuiButtonEmpty
             size="s"
-            href={`/app/management/ingest/ingest_pipelines?pipeline=${encodeURIComponent(
+            href={`${basePath}/app/management/ingest/ingest_pipelines?pipeline=${encodeURIComponent(
               pipelineName
             )}`}
             target="_blank"
@@ -226,7 +230,7 @@ export const ContinuityTab: React.FC = () => {
         width: '20%',
       },
     ],
-    []
+    [basePath]
   );
 
   // Render function for accordion extra action (right side badges/stats)
