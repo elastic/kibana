@@ -267,6 +267,68 @@ export class EvaluationScoreRepository {
     }
   }
 
+  /**
+   * Fail-fast check that the evaluations export destination is writable and compatible.
+   * This runs before expensive eval execution so we don't burn tokens only to fail at export time.
+   */
+  async preflightWriteTarget({
+    taskModel,
+    evaluatorModel,
+    runId,
+  }: {
+    taskModel: Model;
+    evaluatorModel: Model;
+    runId?: string;
+  }): Promise<void> {
+    const preflightRunId = `__preflight__-${runId ?? String(Date.now())}`;
+
+    const canaryDocument: EvaluationScoreDocument = {
+      '@timestamp': new Date().toISOString(),
+      run_id: preflightRunId,
+      experiment_id: '__preflight__',
+      // Keep preflight docs out of suite-level dashboards/queries by giving them a dedicated suite id.
+      suite: { id: '__preflight__' },
+      example: {
+        id: '__preflight__',
+        index: 0,
+        dataset: {
+          id: '__preflight__',
+          name: '__preflight__',
+        },
+      },
+      task: {
+        trace_id: null,
+        repetition_index: 0,
+        model: taskModel,
+      },
+      evaluator: {
+        name: '__preflight__',
+        score: null,
+        label: null,
+        explanation: null,
+        metadata: null,
+        trace_id: null,
+        model: evaluatorModel,
+      },
+      run_metadata: {
+        git_branch: null,
+        git_commit_sha: null,
+        total_repetitions: 0,
+      },
+      environment: {
+        hostname: '__preflight__',
+      },
+    };
+
+    try {
+      await this.exportScores([canaryDocument]);
+    } catch (error) {
+      throw new Error('Evals preflight failed: cannot write evaluation results to Elasticsearch', {
+        cause: error,
+      });
+    }
+  }
+
   async exportScores(documents: EvaluationScoreDocument[]): Promise<void> {
     try {
       await this.ensureIndexTemplate();

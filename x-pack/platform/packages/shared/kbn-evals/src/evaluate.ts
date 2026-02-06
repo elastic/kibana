@@ -196,6 +196,13 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       const usePhoenixExecutor = process.env.KBN_EVALS_EXECUTOR === 'phoenix';
 
+      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
+      await scoreRepository.preflightWriteTarget({
+        taskModel: model,
+        evaluatorModel,
+        runId: process.env.TEST_RUN_ID,
+      });
+
       const executorClient = usePhoenixExecutor
         ? new KibanaPhoenixClient({
             config: getPhoenixConfig(),
@@ -228,7 +235,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         runId: currentRunId,
         totalRepetitions: repetitions,
       });
-      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
 
       try {
         await exportEvaluations(documents, scoreRepository, log);

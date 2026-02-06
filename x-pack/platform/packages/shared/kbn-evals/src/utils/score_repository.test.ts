@@ -392,6 +392,7 @@ describe('EvaluationScoreRepository', () => {
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           index: '.kibana-evaluations*',
+          expand_wildcards: ['open', 'hidden'],
           query: {
             bool: {
               must: [{ term: { run_id: 'run-123' } }],

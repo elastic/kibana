@@ -149,8 +149,6 @@ EOF
           automatic:
             - exit_status: "-1"
               limit: 3
-            - exit_status: "*"
-              limit: 1
 EOF
       done <<<"$CONNECTOR_IDS"
 
