@@ -7,7 +7,14 @@
 
 import type { ReactNode } from 'react';
 import React, { useState, useEffect, useMemo } from 'react';
-import { EuiPopover, EuiSelectable, EuiBadge, type UseEuiTheme, useEuiTheme } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiSelectable,
+  EuiBadge,
+  type EuiBadgeProps,
+  type UseEuiTheme,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
@@ -46,7 +53,7 @@ export function FieldPicker({
     }
   }, [fieldMap, open]);
 
-  const onClickCallback = useMemo(() => {
+  const onClickCallback: EuiBadgeProps['onClick'] = useMemo(() => {
     return hasFields
       ? () => {
           setOpen(!open);
