@@ -16,7 +16,6 @@ process.env.NODE_OPTIONS = [process.env.NODE_OPTIONS, `--require ${requireArg}`]
   .join(' ');
 
 export default function globalSetup() {
-  // we export a dummy function so playwright doesn't complain
-  // and we put it inside the function body to prevent
-  // unfixable lint errors (I love software)
+  // Record the start time for elapsed time calculation in globalTeardown
+  process.env.EVAL_START_TIME = String(Date.now());
 }
