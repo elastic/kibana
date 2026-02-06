@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-search-api-panels'],
+  roots: ['<rootDir>/src/platform/packages/shared/kbn_search_api_panels'],
 };

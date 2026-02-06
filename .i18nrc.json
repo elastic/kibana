@@ -126,7 +126,7 @@
       "src/platform/packages/private/shared-ux/"
     ],
     "searchApiKeysComponents": "x-pack/solutions/search/packages/kbn-search-api-keys-components",
-    "searchApiPanels": "src/platform/packages/shared/kbn-search-api-panels/",
+    "searchApiPanels": "src/platform/packages/shared/kbn_search_api_panels/",
     "searchErrors": "src/platform/packages/shared/kbn-search-errors",
     "searchIndexDocuments": "x-pack/solutions/search/packages/kbn-search-index-documents",
     "searchResponseWarnings": "src/platform/packages/shared/kbn-search-response-warnings",

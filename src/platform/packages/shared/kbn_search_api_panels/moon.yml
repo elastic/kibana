@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/search-kibana'
   metadata:
-    sourceRoot: src/platform/packages/shared/kbn-search-api-panels
+    sourceRoot: src/platform/packages/shared/kbn_search_api_panels
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/core-application-browser'

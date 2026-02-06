@@ -8541,7 +8541,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-api-panels@link:src/platform/packages/shared/kbn-search-api-panels":
+"@kbn/search-api-panels@link:src/platform/packages/shared/kbn_search_api_panels":
   version "0.0.0"
   uid ""
 
