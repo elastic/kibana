@@ -2122,7 +2122,7 @@ export class CstToAstConverter {
 
     this.parseMmrOnOption(ctx, command);
     this.parseMmrLimitOption(ctx, command);
-    console.log('command', command);
+    this.parseMmrWithOption(ctx, command);
 
     return command;
   }
@@ -2142,6 +2142,7 @@ export class CstToAstConverter {
     onOption.location.min = onToken.symbol.start;
     onOption.location.max = diversifyField.location.max;
 
+    command.diversifyField = diversifyField.args[0];
     command.args.push(onOption);
   }
 
@@ -2159,7 +2160,36 @@ export class CstToAstConverter {
     limitOption.location.min = limitToken.symbol.start;
     limitOption.location.max = limitValueCtx.stop?.stop ?? limitToken.symbol.stop;
 
+    command.limit = limitOption.args[0];
+    command.incomplete = limitOption.incomplete;
     command.args.push(limitOption);
+  }
+
+  private parseMmrWithOption(ctx: cst.MmrCommandContext, command: ast.ESQLAstMmrCommand): void {
+    const namedParametersCtx = ctx.commandNamedParameters();
+
+    if (!namedParametersCtx) {
+      return;
+    }
+
+    const withOption = this.fromCommandNamedParameters(namedParametersCtx);
+    if (!withOption) {
+      return;
+    }
+
+    const mapArg = withOption.args[0] as ast.ESQLMap | undefined;
+
+    if (mapArg) {
+      const incomplete =
+        mapArg.entries.some((entry) => entry.incomplete) || mapArg.entries.length === 0;
+      withOption.incomplete = incomplete;
+      command.incomplete = incomplete;
+
+      if (!withOption.incomplete) {
+        command.lambda = withOption.args[0];
+        command.args.push(withOption);
+      }
+    }
   }
 
   // -------------------------------------------------------------- expressions
