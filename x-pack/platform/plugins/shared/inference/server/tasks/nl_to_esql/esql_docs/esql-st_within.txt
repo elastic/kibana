@@ -1,6 +1,6 @@
 # ST_WITHIN
 
-Determines whether the first geometry is within the second geometry. This is the inverse of the `ST_CONTAINS` function.
+Returns whether the first geometry is within the second geometry. This is the inverse of the ST_CONTAINS function.
 
 ## Syntax
 
@@ -8,22 +8,19 @@ Determines whether the first geometry is within the second geometry. This is the
 
 ### Parameters
 
-#### `geomA`
+#### geomA
 
-Expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If `null`, the function returns `null`.
+Expression of type `geo_point`, `cartesian_point`, `geo_shape` or `cartesian_shape`. If `null`, the function returns `null`.
 
-#### `geomB`
+#### geomB
 
-Expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If `null`, the function returns `null`. The second parameter must have the same coordinate system as the first. Combining `geo_*` and `cartesian_*` parameters is not allowed.
+Expression of type `geo_point`, `cartesian_point`, `geo_shape` or `cartesian_shape`. If `null`, the function returns `null`. The second parameter must also have the same coordinate system as the first. It is not possible to combine `geo_*` and `cartesian_*` parameters.
 
 ## Examples
-
-Filtering rows where a city boundary is within a specified polygon
 
 ```esql
 FROM airport_city_boundaries
 | WHERE ST_WITHIN(city_boundary, TO_GEOSHAPE("POLYGON((109.1 18.15, 109.6 18.15, 109.6 18.65, 109.1 18.65, 109.1 18.15))"))
 | KEEP abbrev, airport, region, city, city_location
 ```
-
-This example filters rows where the `city_boundary` geometry is entirely within the specified polygon. It then keeps only the `abbrev`, `airport`, `region`, `city`, and `city_location` columns.
+Filter airport city boundaries to only those within a specified polygon.
