@@ -1,0 +1,220 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useGroupedData should group endpoints by model_id 1`] = `
+Object {
+  "data": Object {
+    ".elser_model_2": Object {
+      "endpoints": Array [
+        Object {
+          "inference_id": "my-elser-model-04",
+          "service": "elasticsearch",
+          "service_settings": Object {
+            "model_id": ".elser_model_2",
+            "num_allocations": 1,
+            "num_threads": 1,
+          },
+          "task_settings": Object {},
+          "task_type": "sparse_embedding",
+        },
+        Object {
+          "inference_id": "my-elser-model-01",
+          "service": "elasticsearch",
+          "service_settings": Object {
+            "model_id": ".elser_model_2",
+            "num_allocations": 1,
+            "num_threads": 1,
+          },
+          "task_settings": Object {},
+          "task_type": "sparse_embedding",
+        },
+      ],
+      "groupId": ".elser_model_2",
+      "groupLabel": ".elser_model_2",
+    },
+    "amazon.titan-embed-text-v1": Object {
+      "endpoints": Array [
+        Object {
+          "inference_id": "my-amazonbedrock-model",
+          "service": "amazonbedrock",
+          "service_settings": Object {
+            "access_key": "test-access-key",
+            "model": "amazon.titan-embed-text-v1",
+            "provider": "amazontitan",
+            "region": "us-east-1",
+            "secret_key": "test-secret-key",
+          },
+          "task_settings": Object {},
+          "task_type": "text_embedding",
+        },
+      ],
+      "groupId": "amazon.titan-embed-text-v1",
+      "groupLabel": "amazon.titan-embed-text-v1",
+    },
+    "embed-english-v3.0": Object {
+      "endpoints": Array [
+        Object {
+          "inference_id": "my-cohere-model",
+          "service": "cohere",
+          "service_settings": Object {
+            "dimensions": "1024",
+            "embedding_type": "float",
+            "model_id": "embed-english-v3.0",
+            "similarity": "cosine",
+          },
+          "task_settings": Object {},
+          "task_type": "text_embedding",
+        },
+      ],
+      "groupId": "embed-english-v3.0",
+      "groupLabel": "embed-english-v3.0",
+    },
+    "gpt-4": Object {
+      "endpoints": Array [
+        Object {
+          "inference_id": "endpoint-06",
+          "service": "openai",
+          "service_settings": Object {
+            "api_key": "test-api-key",
+            "model_id": "gpt-4",
+            "organization_id": "test-org",
+            "url": "https://api.openai.com/v1",
+          },
+          "task_settings": Object {},
+          "task_type": "rerank",
+        },
+      ],
+      "groupId": "gpt-4",
+      "groupLabel": "gpt-4",
+    },
+    "ibm/slate-125m-english-rtrvr": Object {
+      "endpoints": Array [
+        Object {
+          "inference_id": "my-watsonx-model",
+          "service": "watsonxai",
+          "service_settings": Object {
+            "api_key": "test-api-key",
+            "api_version": "2024-01-01",
+            "model_id": "ibm/slate-125m-english-rtrvr",
+            "project_id": "test-project",
+            "url": "https://us-south.ml.cloud.ibm.com",
+          },
+          "task_settings": Object {},
+          "task_type": "text_embedding",
+        },
+      ],
+      "groupId": "ibm/slate-125m-english-rtrvr",
+      "groupLabel": "ibm/slate-125m-english-rtrvr",
+    },
+    "mistral-embed": Object {
+      "endpoints": Array [
+        Object {
+          "inference_id": "my-mistral-model",
+          "service": "mistral",
+          "service_settings": Object {
+            "api_key": "test-api-key",
+            "max_input_tokens": "512",
+            "model": "mistral-embed",
+            "rate_limit": Object {
+              "requests_per_minute": 100,
+            },
+          },
+          "task_settings": Object {},
+          "task_type": "text_embedding",
+        },
+      ],
+      "groupId": "mistral-embed",
+      "groupLabel": "mistral-embed",
+    },
+    "text-embedding-004": Object {
+      "endpoints": Array [
+        Object {
+          "inference_id": "my-googleaistudio-model",
+          "service": "googleaistudio",
+          "service_settings": Object {
+            "model_id": "text-embedding-004",
+            "rate_limit": Object {
+              "requests_per_minute": 100,
+            },
+          },
+          "task_settings": Object {},
+          "task_type": "text_embedding",
+        },
+      ],
+      "groupId": "text-embedding-004",
+      "groupLabel": "text-embedding-004",
+    },
+    "text-embedding-ada-002": Object {
+      "endpoints": Array [
+        Object {
+          "inference_id": "my-openai-model-05",
+          "service": "openai",
+          "service_settings": Object {
+            "api_key": "test-api-key",
+            "model_id": "text-embedding-ada-002",
+            "organization_id": "test-org",
+            "url": "https://api.openai.com/v1",
+          },
+          "task_settings": Object {},
+          "task_type": "text_embedding",
+        },
+      ],
+      "groupId": "text-embedding-ada-002",
+      "groupLabel": "text-embedding-ada-002",
+    },
+    "unknown_model": Object {
+      "endpoints": Array [
+        Object {
+          "inference_id": "my-azureaistudio-model",
+          "service": "azureaistudio",
+          "service_settings": Object {
+            "embedding_type": "float",
+            "provider": "openai",
+            "target": "https://test.azureaistudio.com",
+          },
+          "task_settings": Object {},
+          "task_type": "text_embedding",
+        },
+        Object {
+          "inference_id": "my-azureopenai-model",
+          "service": "azureopenai",
+          "service_settings": Object {
+            "api_version": "2023-05-15",
+            "deployment_id": "test-deployment",
+            "resource_name": "test-resource",
+          },
+          "task_settings": Object {},
+          "task_type": "text_embedding",
+        },
+        Object {
+          "inference_id": "my-huggingface-model",
+          "service": "hugging_face",
+          "service_settings": Object {
+            "api_key": "test-api-key",
+            "url": "https://api-inference.huggingface.co",
+          },
+          "task_settings": Object {},
+          "task_type": "text_embedding",
+        },
+        Object {
+          "inference_id": "my-alibabacloud-model",
+          "service": "alibabacloud-ai-search",
+          "service_settings": Object {
+            "api_key": "test-api-key",
+            "host": "test-host.aliyuncs.com",
+            "http_schema": "https",
+            "rate_limit": Object {
+              "requests_per_minute": 100,
+            },
+            "service_id": "test-service",
+            "workspace": "default",
+          },
+          "task_settings": Object {},
+          "task_type": "text_embedding",
+        },
+      ],
+      "groupId": "unknown_model",
+      "groupLabel": "unknown_model",
+    },
+  },
+}
+`;
