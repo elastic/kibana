@@ -75,6 +75,10 @@ export class EntityManager {
     }
   }
 
+  public async upsertEntitiesBulk(documents: Entity[]) {
+    await Promise.all(documents.map((document) => this.upsertEntity(document)));
+  }
+
   public async deleteEntity(id: string) {
     const resp = await this.esClient.deleteByQuery({
       // TODO: remove entity type after single index merge
