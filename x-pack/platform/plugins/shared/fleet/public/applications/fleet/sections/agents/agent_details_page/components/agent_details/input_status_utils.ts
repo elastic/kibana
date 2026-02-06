@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { PackagePolicy } from '../../../../../types';
 import type {
   FleetServerAgentComponent,
   FleetServerAgentComponentStatus,
@@ -46,9 +45,9 @@ export class InputStatusFormatter {
 
 export const getInputUnitsByPackage = (
   agentComponents: FleetServerAgentComponent[],
-  packagePolicy: PackagePolicy
+  inputOrPackagePolicyId: string
 ): FleetServerAgentComponentUnit[] => {
-  const re = new RegExp(packagePolicy.id);
+  const re = new RegExp(inputOrPackagePolicyId);
 
   return agentComponents
     .map((c) => c?.units || [])

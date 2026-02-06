@@ -111,6 +111,8 @@ export interface EsWorkflowExecution {
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
   queueMetrics?: QueueMetrics; // Queue delay metrics for observability
+  /** IDs of all step executions, enables O(1) mget lookup instead of search */
+  stepExecutionIds?: string[];
 }
 
 export interface ProviderInput {
