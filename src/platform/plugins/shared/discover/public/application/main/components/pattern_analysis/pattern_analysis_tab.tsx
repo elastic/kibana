@@ -48,11 +48,7 @@ export const PatternAnalysisTab: FC<Omit<PatternAnalysisTableProps, 'query' | 'f
       }
     }, [appState, globalState, props.dataView, services, searchSourceRef]);
 
-    const savedSearch = useMemo(() => {
-      const newSavedSearch = services.savedSearch.getNew();
-      newSavedSearch.searchSource = searchSource;
-      return newSavedSearch;
-    }, [services.savedSearch, searchSource]);
+    const savedSearch = useMemo(() => ({ searchSource }), [searchSource]);
 
     return (
       <PatternAnalysisTable
