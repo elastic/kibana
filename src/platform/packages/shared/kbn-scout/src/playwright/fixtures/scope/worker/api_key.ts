@@ -11,7 +11,11 @@ import { coreWorkerFixtures } from './core_fixtures';
 import type { ApiClientFixture } from './api_client';
 import type { DefaultRolesFixture } from './default_roles';
 import type { ElasticsearchRoleDescriptor, KibanaRole } from '../../../../common';
-import { measurePerformanceAsync, isElasticsearchRole } from '../../../../common';
+import {
+  measurePerformanceAsync,
+  isElasticsearchRole,
+  PROJECT_DEFAULT_ROLES,
+} from '../../../../common';
 
 export interface ApiKey {
   id: string;
@@ -34,6 +38,9 @@ export interface RequestAuthFixture {
   getApiKeyForCustomRole: (
     role: KibanaRole | ElasticsearchRoleDescriptor
   ) => Promise<RoleApiCredentials>;
+  getApiKeyForAdmin: () => Promise<RoleApiCredentials>;
+  getApiKeyForViewer: () => Promise<RoleApiCredentials>;
+  getApiKeyForPrivilegedUser: () => Promise<RoleApiCredentials>;
 }
 
 export const requestAuthFixture = coreWorkerFixtures.extend<
@@ -45,7 +52,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
   }
 >({
   requestAuth: [
-    async ({ log, samlAuth, defaultRoles, apiClient }, use, workerInfo) => {
+    async ({ log, config, samlAuth, defaultRoles, apiClient }, use, workerInfo) => {
       const generatedApiKeys: ApiKey[] = [];
 
       const createApiKeyPayload = (
@@ -153,7 +160,31 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         return result;
       };
 
-      await use({ getApiKey, getApiKeyForCustomRole });
+      const getApiKeyForAdmin = () => getApiKey('admin');
+      const getApiKeyForViewer = () => getApiKey('viewer');
+
+      const getApiKeyForPrivilegedUser = async (): Promise<RoleApiCredentials> => {
+        if (!config.serverless) {
+          return getApiKey('editor');
+        }
+
+        const roleName = PROJECT_DEFAULT_ROLES.get(config.projectType!);
+        if (!roleName) {
+          throw new Error(
+            `No default privileged role defined for serverless project type: '${config.projectType}'`
+          );
+        }
+
+        return getApiKey(roleName);
+      };
+
+      await use({
+        getApiKey,
+        getApiKeyForCustomRole,
+        getApiKeyForAdmin,
+        getApiKeyForViewer,
+        getApiKeyForPrivilegedUser,
+      });
 
       // Invalidate all API Keys after tests
       await measurePerformanceAsync(log, `Delete all API Keys`, async () => {
