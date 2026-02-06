@@ -445,6 +445,7 @@ export async function fetchAllAgentsByKuery(
   options: ListWithKuery & {
     spaceId?: string;
     runtimeFields?: estypes.SearchRequest['runtime_mappings'];
+    showInactive?: boolean;
   }
 ): Promise<AsyncIterable<Agent[]>> {
   const {
@@ -453,11 +454,15 @@ export async function fetchAllAgentsByKuery(
     sortField = 'enrolled_at',
     sortOrder = 'desc',
     spaceId,
+    showInactive = true,
   } = options;
 
   const filters = await _getSpaceAwarenessFilter(spaceId);
   if (kuery && kuery !== '') {
     filters.push(kuery);
+  }
+  if (showInactive === false) {
+    filters.push(ACTIVE_AGENT_CONDITION);
   }
   const kueryNode = _joinFilters(filters);
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};

@@ -131,8 +131,6 @@ export const selectTabRuntimeInternalState = (
 
   return {
     serializedSearchSource: savedSearch.searchSource.getSerializedFields(),
-    visContext: savedSearch.visContext,
-    controlGroupJson: savedSearch.controlGroupJson,
     ...(dataRequestParams.isSearchSessionRestored
       ? { searchSessionId: dataRequestParams.searchSessionId }
       : {}),
