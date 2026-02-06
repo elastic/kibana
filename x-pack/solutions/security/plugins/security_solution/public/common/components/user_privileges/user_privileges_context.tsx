@@ -73,9 +73,13 @@ export const UserPrivilegesProvider = ({
   );
 
   const shouldFetchListPrivileges = read || rulesPrivileges.rules.read;
+  const shouldFetchDetectionEnginePrivileges =
+    read || rulesPrivileges.rules.read || alertsPrivileges.alerts.read;
 
   const listPrivileges = useFetchListPrivileges(shouldFetchListPrivileges);
-  const detectionEnginePrivileges = useFetchDetectionEnginePrivileges();
+  const detectionEnginePrivileges = useFetchDetectionEnginePrivileges(
+    shouldFetchDetectionEnginePrivileges
+  );
   const endpointPrivileges = useEndpointPrivileges();
 
   const siemPrivileges = useMemo(
