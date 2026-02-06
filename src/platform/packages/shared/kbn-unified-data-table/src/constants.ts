@@ -8,6 +8,7 @@
  */
 
 import type { EuiDataGridStyle } from '@elastic/eui';
+export { DataGridDensity } from '@kbn/discover-utils';
 
 export const DEFAULT_CONTROL_COLUMN_WIDTH = 24;
 
@@ -62,9 +63,3 @@ export const toolbarVisibility = {
     allowReorder: true,
   },
 };
-
-export enum DataGridDensity {
-  COMPACT = 'compact',
-  NORMAL = 'normal',
-  EXPANDED = 'expanded',
-}

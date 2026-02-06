@@ -9,14 +9,15 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { DataGridDensity } from '@kbn/discover-utils';
 import {
-  querySchema,
-  timeRangeSchema,
   aggregateQuerySchema,
   asCodeFilterSchema,
+  querySchema,
+  timeRangeSchema,
 } from '@kbn/es-query-server';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
-import { VIEW_MODE, Density } from '@kbn/saved-search-plugin/common';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 
 const columnSchema = schema.object({
   name: schema.string({
@@ -169,12 +170,12 @@ const dataTableSchema = schema.object(
     ),
     density: schema.oneOf(
       [
-        schema.literal(Density.COMPACT),
-        schema.literal(Density.EXPANDED),
-        schema.literal(Density.NORMAL),
+        schema.literal(DataGridDensity.COMPACT),
+        schema.literal(DataGridDensity.EXPANDED),
+        schema.literal(DataGridDensity.NORMAL),
       ],
       {
-        defaultValue: Density.COMPACT,
+        defaultValue: DataGridDensity.COMPACT,
         meta: {
           description: 'The density setting for the data table: compact, expanded, or normal.',
         },
