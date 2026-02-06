@@ -97,37 +97,37 @@ export const triggers: { [key: string]: Trigger } = {
   },
   [IMAGE_CLICK_TRIGGER]: {
     id: IMAGE_CLICK_TRIGGER,
-    title: i18n.translate('imageEmbeddable.triggers.imageClickTriggerTitle', {
+    title: i18n.translate('uiActions.triggers.imageClickTriggerTitle', {
       defaultMessage: 'Image click',
     }),
-    description: i18n.translate('imageEmbeddable.triggers.imageClickDescription', {
+    description: i18n.translate('uiActions.triggers.imageClickDescription', {
       defaultMessage: 'Clicking the image will trigger the action',
     }),
   },
   [CONTROL_MENU_TRIGGER]: {
     id: CONTROL_MENU_TRIGGER,
-    title: i18n.translate('controls.uiActions.triggers.controls.typeMenu.title', {
+    title: i18n.translate('uiActions.triggers.controls.typeMenu.title', {
       defaultMessage: 'Control type in control menu',
     }),
-    description: i18n.translate('controls.uiActions.triggers.controls.typeMenu.description', {
+    description: i18n.translate('uiActions.triggers.controls.typeMenu.description', {
       defaultMessage: 'A new action will appear in the control type menu',
     }),
   },
   [CONTROL_HOVER_TRIGGER_ID]: {
     id: CONTROL_HOVER_TRIGGER_ID,
-    title: i18n.translate('controls.hoverTrigger.title', {
+    title: i18n.translate('uiActions.triggers.controls.hoverTrigger.title', {
       defaultMessage: 'Control hover',
     }),
-    description: i18n.translate('controls.hoverTrigger.description', {
+    description: i18n.translate('uiActions.triggers.controls.hoverTrigger.description', {
       defaultMessage: "Add action to controls's hover menu",
     }),
   },
   [APPLY_FILTER_TRIGGER]: {
     id: APPLY_FILTER_TRIGGER,
-    title: i18n.translate('data.triggers.applyFilterTitle', {
+    title: i18n.translate('uiActions.triggers.applyFilterTitle', {
       defaultMessage: 'Apply filter',
     }),
-    description: i18n.translate('data.triggers.applyFilterDescription', {
+    description: i18n.translate('uiActions.triggers.applyFilterDescription', {
       defaultMessage: 'When kibana filter is applied. Could be a single value or a range filter.',
     }),
   },
@@ -139,91 +139,91 @@ export const triggers: { [key: string]: Trigger } = {
   },
   [CONTEXT_MENU_TRIGGER]: {
     id: CONTEXT_MENU_TRIGGER,
-    title: i18n.translate('embeddableApi.contextMenuTrigger.title', {
+    title: i18n.translate('uiActions.triggers.contextMenuTrigger.title', {
       defaultMessage: 'Context menu',
     }),
-    description: i18n.translate('embeddableApi.contextMenuTrigger.description', {
+    description: i18n.translate('uiActions.triggers.contextMenuTrigger.description', {
       defaultMessage: "A new action will be added to the panel's context menu",
     }),
   },
   [PANEL_BADGE_TRIGGER]: {
     id: PANEL_BADGE_TRIGGER,
-    title: i18n.translate('embeddableApi.panelBadgeTrigger.title', {
+    title: i18n.translate('uiActions.triggers.panelBadgeTrigger.title', {
       defaultMessage: 'Panel badges',
     }),
-    description: i18n.translate('embeddableApi.panelBadgeTrigger.description', {
+    description: i18n.translate('uiActions.triggers.panelBadgeTrigger.description', {
       defaultMessage: 'Actions appear in title bar when an embeddable loads in a panel.',
     }),
   },
   [PANEL_NOTIFICATION_TRIGGER]: {
     id: PANEL_NOTIFICATION_TRIGGER,
-    title: i18n.translate('embeddableApi.panelNotificationTrigger.title', {
+    title: i18n.translate('uiActions.triggers.panelNotificationTrigger.title', {
       defaultMessage: 'Panel notifications',
     }),
-    description: i18n.translate('embeddableApi.panelNotificationTrigger.description', {
+    description: i18n.translate('uiActions.triggers.panelNotificationTrigger.description', {
       defaultMessage: 'Actions appear in top-right corner of a panel.',
     }),
   },
   [SELECT_RANGE_TRIGGER]: {
     id: SELECT_RANGE_TRIGGER,
-    title: i18n.translate('embeddableApi.selectRangeTrigger.title', {
+    title: i18n.translate('uiActions.triggers.selectRangeTrigger.title', {
       defaultMessage: 'Range selection',
     }),
-    description: i18n.translate('embeddableApi.selectRangeTrigger.description', {
+    description: i18n.translate('uiActions.triggers.selectRangeTrigger.description', {
       defaultMessage: 'A range of values on the visualization',
     }),
   },
   [VALUE_CLICK_TRIGGER]: {
     id: VALUE_CLICK_TRIGGER,
-    title: i18n.translate('embeddableApi.valueClickTrigger.title', {
+    title: i18n.translate('uiActions.triggers.valueClickTrigger.title', {
       defaultMessage: 'Single click',
     }),
-    description: i18n.translate('embeddableApi.valueClickTrigger.description', {
+    description: i18n.translate('uiActions.triggers.valueClickTrigger.description', {
       defaultMessage: 'A data point click on the visualization',
     }),
   },
   [MULTI_VALUE_CLICK_TRIGGER]: {
     id: MULTI_VALUE_CLICK_TRIGGER,
-    title: i18n.translate('embeddableApi.multiValueClickTrigger.title', {
+    title: i18n.translate('uiActions.triggers.multiValueClickTrigger.title', {
       defaultMessage: 'Multi click',
     }),
-    description: i18n.translate('embeddableApi.multiValueClickTrigger.description', {
+    description: i18n.translate('uiActions.triggers.multiValueClickTrigger.description', {
       defaultMessage: 'Selecting multiple values of a single dimension on the visualization',
     }),
   },
   [CELL_VALUE_TRIGGER]: {
     id: CELL_VALUE_TRIGGER,
-    title: i18n.translate('embeddableApi.cellValueTrigger.title', {
+    title: i18n.translate('uiActions.triggers.cellValueTrigger.title', {
       defaultMessage: 'Cell value',
     }),
-    description: i18n.translate('embeddableApi.cellValueTrigger.description', {
+    description: i18n.translate('uiActions.triggers.cellValueTrigger.description', {
       defaultMessage: 'Actions appear in the cell value options on the visualization',
     }),
   },
   [ESQL_CONTROL_TRIGGER]: {
     id: ESQL_CONTROL_TRIGGER,
-    title: i18n.translate('esql.triggers.esqlControlTigger', {
+    title: i18n.translate('uiActions.triggers.esqlControlTigger', {
       defaultMessage: 'Create an ES|QL control',
     }),
-    description: i18n.translate('esql.triggers.esqlControlTiggerDescription', {
+    description: i18n.translate('uiActions.triggers.esqlControlTiggerDescription', {
       defaultMessage: 'Create an ES|QL control to interact with the charts',
     }),
   },
   [UPDATE_ESQL_QUERY_TRIGGER]: {
     id: UPDATE_ESQL_QUERY_TRIGGER,
-    title: i18n.translate('esql.triggers.updateEsqlQueryTrigger', {
+    title: i18n.translate('uiActions.triggers.updateEsqlQueryTrigger', {
       defaultMessage: 'Update ES|QL query',
     }),
-    description: i18n.translate('esql.triggers.updateEsqlQueryTriggerDescription', {
+    description: i18n.translate('uiActions.triggers.updateEsqlQueryTriggerDescription', {
       defaultMessage: 'Update ES|QL query with a new one',
     }),
   },
   [UPDATE_FILTER_REFERENCES_TRIGGER]: {
     id: UPDATE_FILTER_REFERENCES_TRIGGER,
-    title: i18n.translate('unifiedSearch.triggers.updateFilterReferencesTrigger', {
+    title: i18n.translate('uiActions.triggers.updateFilterReferencesTrigger', {
       defaultMessage: 'Update filter references',
     }),
-    description: i18n.translate('unifiedSearch.triggers.updateFilterReferencesTriggerDescription', {
+    description: i18n.translate('uiActions.triggers.updateFilterReferencesTriggerDescription', {
       defaultMessage: 'Update filter references',
     }),
   },
@@ -244,46 +244,46 @@ export const triggers: { [key: string]: Trigger } = {
   },
   [ADD_CANVAS_ELEMENT_TRIGGER]: {
     id: ADD_CANVAS_ELEMENT_TRIGGER,
-    title: i18n.translate('xpack.canvas.addCanvasElementTrigger.title', {
+    title: i18n.translate('uiActions.triggers.addCanvasElementTrigger.title', {
       defaultMessage: 'Add panel menu',
     }),
-    description: i18n.translate('xpack.canvas.addCanvasElementTrigger.description', {
+    description: i18n.translate('uiActions.triggers.addCanvasElementTrigger.description', {
       defaultMessage: 'A new action will appear in the Canvas add panel menu',
     }),
   },
   [OPEN_FILE_UPLOAD_LITE_TRIGGER]: {
     id: OPEN_FILE_UPLOAD_LITE_TRIGGER,
-    title: i18n.translate('xpack.fileUpload.lite.actions.triggerTitle', {
+    title: i18n.translate('uiActions.triggers.fileUpload.lite.actions.triggerTitle', {
       defaultMessage: 'Open file upload UI',
     }),
-    description: i18n.translate('xpack.fileUpload.lite.actions.triggerDescription', {
+    description: i18n.translate('uiActions.triggers.fileUpload.lite.actions.triggerDescription', {
       defaultMessage: 'Open file upload UI',
     }),
   },
   [CATEGORIZE_FIELD_TRIGGER]: {
     id: CATEGORIZE_FIELD_TRIGGER,
-    title: i18n.translate('xpack.ml.actions.runPatternAnalysis.title', {
+    title: i18n.translate('uiActions.triggers.ml.actions.runPatternAnalysis.title', {
       defaultMessage: 'Run pattern analysis',
     }),
-    description: i18n.translate('xpack.ml.actions.runPatternAnalysis.description', {
+    description: i18n.translate('uiActions.triggers.ml.actions.runPatternAnalysis.description', {
       defaultMessage: 'Triggered when user wants to run pattern analysis on a field.',
     }),
   },
   [IN_APP_EMBEDDABLE_EDIT_TRIGGER]: {
     id: IN_APP_EMBEDDABLE_EDIT_TRIGGER,
-    title: i18n.translate('xpack.lens.inAppEditTrigger.title', {
+    title: i18n.translate('uiActions.triggers.lens.inAppEditTrigger.title', {
       defaultMessage: 'In-app embeddable edit',
     }),
-    description: i18n.translate('xpack.lens.inAppEditTrigger.description', {
+    description: i18n.translate('uiActions.triggers.lens.inAppEditTrigger.description', {
       defaultMessage: 'Triggers an in app flyout on the current embeddable',
     }),
   },
   [CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER]: {
     id: CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
-    title: i18n.translate('xpack.ml.actions.createADJobFromPatternAnalysis', {
+    title: i18n.translate('uiActions.triggers.ml.actions.createADJobFromPatternAnalysis', {
       defaultMessage: 'Create categorization anomaly detection job',
     }),
-    description: i18n.translate('xpack.ml.actions.createADJobFromPatternAnalysis', {
+    description: i18n.translate('uiActions.triggers.ml.actions.createADJobFromPatternAnalysis', {
       defaultMessage: 'Create categorization anomaly detection job',
     }),
   },
