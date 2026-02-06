@@ -173,15 +173,22 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
     <>
       <TabTitleAndDescription metric={metric} description={description} />
 
-      <EuiDescriptionList
-        type="responsiveColumn"
-        rowGutterSize="m"
-        data-test-subj="metricsExperienceFlyoutOverviewTabDescriptionList"
-        listItems={descriptionListItems}
-        columnGutterSize='s'
-        columnWidths={['190px', 'auto']}
-      />
-
+      <EuiPanel
+        hasShadow={false}
+        hasBorder
+        css={css`
+          padding: ${euiTheme.size.xs} ${euiTheme.size.m};
+        `}
+      >
+        <EuiDescriptionList
+          type="responsiveColumn"
+          rowGutterSize="m"
+          data-test-subj="metricsExperienceFlyoutOverviewTabDescriptionList"
+          listItems={descriptionListItems}
+          columnGutterSize='s'
+          columnWidths={['190px', 'auto']}
+        />
+      </EuiPanel>
       {metric.dimensions && metric.dimensions.length > 0 && (
         <>
           <EuiSpacer size="m" />
@@ -192,14 +199,14 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
               })}
             </strong>
           </EuiText>
-          <EuiSpacer size="m" />
-           <EuiPanel
-             hasShadow={false}
-             hasBorder
-             css={css`
-               padding: ${euiTheme.size.xs} ${euiTheme.size.m};
-             `}
-           >
+          <EuiSpacer size="s" />
+          <EuiPanel
+            hasShadow={false}
+            hasBorder
+            css={css`
+              padding: ${euiTheme.size.xs} ${euiTheme.size.m};
+            `}
+          >
             <div className="euiScreenReaderOnly" aria-live="assertive" aria-atomic="true">
               {i18n.translate('metricsExperience.overviewTab.dimensionsAnnouncement', {
                 defaultMessage: 'Showing {count} dimensions on page {page} of {total}. {dimensions}',
