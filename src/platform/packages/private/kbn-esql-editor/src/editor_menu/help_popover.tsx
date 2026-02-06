@@ -68,6 +68,7 @@ export const HelpPopover: React.FC = () => {
         const dataView = await getESQLAdHocDataview({
           dataViewsService: data.dataViews,
           query: actions.currentQuery,
+          http,
         });
         if (isMounted) {
           setAdHocDataview(dataView);
@@ -84,7 +85,7 @@ export const HelpPopover: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [actions?.currentQuery, data.dataViews]);
+  }, [actions.currentQuery, data.dataViews, http]);
 
   const { queryForRecommendedQueries, timeFieldName, categorizationField } = useMemo(() => {
     if (adHocDataview) {
