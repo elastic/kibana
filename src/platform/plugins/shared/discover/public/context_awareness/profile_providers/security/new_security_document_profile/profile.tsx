@@ -15,17 +15,20 @@ import type { ProfileProviderServices } from '../../profile_provider_services';
 import { SECURITY_PROFILE_ID } from '../constants';
 import * as i18n from '../translations';
 import type { SecurityProfileProviderFactory } from '../types';
-import { AlertEventOverviewLazy } from '../components';
+import { NewAlertEventOverviewLazy } from '../components';
 
 /**
- * Should be removed in favor of the new profile, once we have the new Security Solution flyout implemented in packages and usable in Discover.
+ * Creates a new document profile provider for the Security Solution plugin.
+ * This profile is experimental, and will stay this way until we have the full Security Solution flyout in packages and usable in Discover.
  * The target is to release an MVP by 9.4 then have it fully functional by 9.5.
+ * At that point, we should be able to remove the isExperimental property, ship it to all users, and delete the old Security Solution flyout profile.
  */
-export const createSecurityDocumentProfileProvider: SecurityProfileProviderFactory<
+export const createNewSecurityDocumentProfileProvider: SecurityProfileProviderFactory<
   DocumentProfileProvider
 > = (_services: ProfileProviderServices) => {
   return {
-    profileId: SECURITY_PROFILE_ID.document,
+    profileId: SECURITY_PROFILE_ID.newDocument,
+    isExperimental: true,
     profile: {
       getDocViewer: (prev) => (params) => {
         const prevDocViewer = prev(params);
@@ -38,7 +41,7 @@ export const createSecurityDocumentProfileProvider: SecurityProfileProviderFacto
               id: 'doc_view_alerts_overview',
               title: i18n.overviewTabTitle(isAlert),
               order: 0,
-              render: (props) => <AlertEventOverviewLazy {...props} />,
+              render: (props) => <NewAlertEventOverviewLazy {...props} />,
             });
 
             return prevDocViewer.docViewsRegistry(registry);

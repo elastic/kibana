@@ -12,9 +12,9 @@ import type { DocViewerComponent } from '@kbn/unified-doc-viewer/types';
 
 /**
  * This component is a placeholder for the new alert/event Overview tab content.
- * It will be rendered only when the discover.securitySolutionFlyout feature flag is enabled.
+ * It will be rendered with the new document profile that is current experimental.
  * The intention keep implementing its content as we're extracting flyout code from the Security Solution plugin to a set of package.
- * The feature flag will remain disabled until we're ready to ship some of the content. The target is to release an MVP by 9.4 then have it fully functional by 9.5.
+ * The experimental flag will remain true until we're ready to ship some of the content. The target is to release an MVP by 9.4 then have it fully functional by 9.5.
  */
 export const NewAlertEventOverview: DocViewerComponent = ({ hit }) => {
   return <></>;
