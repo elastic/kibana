@@ -38,6 +38,7 @@ Review the deprecated functionality for Kibana. While deprecations have no immed
 :subsections:
 :type: deprecation
 :config: /changelog.yml
+:product: kibana
 :::
 
 <!--
