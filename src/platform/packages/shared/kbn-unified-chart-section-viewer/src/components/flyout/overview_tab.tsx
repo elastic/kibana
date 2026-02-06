@@ -19,7 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { MetricField, Dimension } from '../../types';
@@ -71,103 +71,70 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
     []
   );
 
+  // Helper function to create description list items
+  const createDescriptionListItem = useCallback(
+    (
+      titleKey: string,
+      titleDefaultMessage: string,
+      description: React.ReactNode,
+      dataTestSubj?: string
+    ) => ({
+      label: (
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          {...(dataTestSubj ? { 'data-test-subj': dataTestSubj } : {})}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <strong>
+                {i18n.translate(`metricsExperience.overviewTab.strong.${titleKey}`, {
+                  defaultMessage: titleDefaultMessage,
+                })}
+              </strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{description}</EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    }),
+    []
+  );
+
   // Create description list items
   const descriptionListItems = useMemo(
     () => [
-      {
-        label: (
-          <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <strong>
-                  {i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
-                    defaultMessage: 'Data stream',
-                  })}
-                </strong>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText color="primary" size="s">
-                {metric.index}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-      },
-      {
-        label: (
-          <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <strong>
-                  {i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
-                    defaultMessage: 'Field type',
-                  })}
-                </strong>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge>{metric.type}</EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-      },
+      createDescriptionListItem(
+        'dataStreamLabel',
+        'Data stream',
+        <EuiText color="primary" size="s">
+          {metric.index}
+        </EuiText>
+      ),
+      createDescriptionListItem('fieldTypeLabel', 'Field type', <EuiBadge>{metric.type}</EuiBadge>),
       ...(unitLabel
         ? [
-            {
-              label: (
-                <EuiFlexGroup
-                  alignItems="center"
-                  gutterSize="s"
-                  justifyContent="spaceBetween"
-                  data-test-subj="metricsExperienceFlyoutOverviewTabMetricUnitLabel"
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">
-                      <strong>
-                        {i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
-                          defaultMessage: 'Metric unit',
-                        })}
-                      </strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge>{unitLabel}</EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ),
-            },
+            createDescriptionListItem(
+              'metricUnitLabel',
+              'Metric unit',
+              <EuiBadge>{unitLabel}</EuiBadge>,
+              'metricsExperienceFlyoutOverviewTabMetricUnitLabel'
+            ),
           ]
         : []),
       ...(metric.instrument
         ? [
-            {
-              label: (
-                <EuiFlexGroup
-                  alignItems="center"
-                  gutterSize="s"
-                  justifyContent="spaceBetween"
-                  data-test-subj="metricsExperienceFlyoutOverviewTabMetricTypeLabel"
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">
-                      <strong>
-                        {i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
-                          defaultMessage: 'Metric type',
-                        })}
-                      </strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge>{metric.instrument}</EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ),
-            },
+            createDescriptionListItem(
+              'metricTypeLabel',
+              'Metric type',
+              <EuiBadge>{metric.instrument}</EuiBadge>,
+              'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
+            ),
           ]
         : []),
     ],
-    [metric.index, metric.type, metric.instrument, unitLabel]
+    [metric.index, metric.type, metric.instrument, unitLabel, createDescriptionListItem]
   );
 
   // Create list items from dimensions
