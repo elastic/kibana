@@ -71,6 +71,7 @@ const ActionsTableComponent = () => {
     activePage: pageIndex,
     limit: pageSize,
     kuery: isHistoryEnabled ? undefined : 'user_id: *',
+    withResultCounts: isHistoryEnabled,
   });
 
   const onTableChange = useCallback(({ page = {} }: any) => {

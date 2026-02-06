@@ -21,9 +21,6 @@ import { MissingPrivileges } from './components';
 
 const LiveQueriesToHistoryRedirect = () => {
   const location = useLocation();
-  // /live_queries/new → /new (top-level route)
-  // /live_queries/:actionId → /history/:actionId
-  // /live_queries → /history
   const newPath =
     location.pathname === '/live_queries/new'
       ? '/new' + location.search
