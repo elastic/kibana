@@ -94,8 +94,8 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   );
 
   const displayInferenceFlyout = useCallback((selectedEndpoint: InferenceInferenceEndpointInfo) => {
-    setShowInferenceFlyout(true);
     setSelectedInferenceEndpoint(selectedEndpoint);
+    setShowInferenceFlyout(true);
   }, []);
 
   const onCloseInferenceFlyout = useCallback(() => {
@@ -269,7 +269,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         <EuiFlexItem>
           <EuiBasicTable
             columns={tableColumns}
-            itemId="id"
+            itemId="inference_id"
             items={paginatedSortedTableData}
             onChange={handleTableChange}
             pagination={pagination}
