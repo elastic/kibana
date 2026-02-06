@@ -18,6 +18,7 @@ import type {
 } from '@kbn/lens-common';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import {
+  normalizeXySuggestionForTimeSeries,
   mergeSuggestionWithVisContext,
   shouldUseLineChart,
   switchVisualizationType,
@@ -140,10 +141,12 @@ export const suggestionsApi = ({
   const chartType = preferredChartType?.toLowerCase();
 
   // to return line / area instead of a bar chart
-  const xyTargetTypeId = chartType ?? (shouldUseLineChart(context) ? 'line' : undefined);
+  const xySuggestionCandidate = newSuggestions.find((s) => s.visualizationId === 'lnsXY');
+  const xyTargetTypeId =
+    chartType ?? (shouldUseLineChart(context, xySuggestionCandidate) ? 'line' : undefined);
   const xyResult = switchVisualizationType({
     visualizationMap,
-    suggestions: [primarySuggestion, ...newSuggestions],
+    suggestions: newSuggestions,
     targetTypeId: xyTargetTypeId,
     familyType: 'lnsXY',
     forceSwitch: ['area', 'line'].some((type) => xyTargetTypeId?.includes(type)),
@@ -213,7 +216,39 @@ export const suggestionsApi = ({
       const compatibleSuggestion = findCompatibleSuggestion(suggestionsList, targetChartType);
       const selectedSuggestion = compatibleSuggestion ?? suggestionsList[0];
 
-      return [createSuggestionWithAttributes(selectedSuggestion, preferredVisAttributes, context)];
+      const suggestion = createSuggestionWithAttributes(
+        selectedSuggestion,
+        preferredVisAttributes,
+        context
+      );
+
+      // Normalize the final suggestion for TS/PromQL: only return `line` when a date field is used.
+      // Do not override an explicit user preference.
+      if (
+        !preferredChartType &&
+        !preferredVisAttributes &&
+        suggestion.visualizationId === 'lnsXY'
+      ) {
+        return [normalizeXySuggestionForTimeSeries({ visualizationMap, context, suggestion })];
+      }
+
+      return [suggestion];
+    }
+  }
+
+  // Normalize the final suggestions for TS/PromQL: only return `line` when a date field is used.
+  // Do not override an explicit user preference.
+  if (!preferredChartType && !preferredVisAttributes) {
+    const primarySuggestionCandidate = suggestionsList[0];
+    if (primarySuggestionCandidate?.visualizationId === 'lnsXY') {
+      const normalizedPrimary = normalizeXySuggestionForTimeSeries({
+        visualizationMap,
+        context,
+        suggestion: primarySuggestionCandidate,
+      });
+      if (normalizedPrimary !== primarySuggestionCandidate) {
+        return [normalizedPrimary, ...suggestionsList.slice(1)];
+      }
     }
   }
 

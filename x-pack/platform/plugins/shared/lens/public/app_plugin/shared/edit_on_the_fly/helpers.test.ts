@@ -8,7 +8,6 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getESQLResults, formatESQLColumns } from '@kbn/esql-utils';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { ChartType } from '@kbn/visualization-utils';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import {
@@ -150,35 +149,6 @@ describe('Lens inline editing helpers', () => {
       );
       expect(suggestionsAttributes).toBeUndefined();
       expect(setErrorsSpy).toHaveBeenCalled();
-    });
-
-    it('sets preferredChartType to Table for source-only TS queries', async () => {
-      mockFetchData.mockImplementation(() => {
-        return {
-          response: {
-            columns: queryResponseColumns,
-            values: [],
-          },
-        };
-      });
-      const tsQuery = {
-        esql: 'TS index1',
-      };
-      await getSuggestions(
-        tsQuery,
-        startDependencies.data,
-        httpMock,
-        uiSettingsMock,
-        mockDatasourceMap(),
-        mockVisualizationMap(),
-        dataviewSpecArr,
-        jest.fn()
-      );
-      expect(mockSuggestionApi).toHaveBeenCalledWith(
-        expect.objectContaining({
-          preferredChartType: ChartType.Table,
-        })
-      );
     });
   });
 

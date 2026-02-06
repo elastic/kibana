@@ -8,6 +8,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import {
   mergeSuggestionWithVisContext,
   injectESQLQueryIntoLensLayers,
+  getPreferredXyTypeIdForTimeSeries,
   shouldUseLineChart,
   switchVisualizationType,
 } from './helpers';
@@ -967,7 +968,10 @@ describe('lens suggestions api helpers', () => {
 
       it('returns undefined when context has no query', () => {
         expect(
-          shouldUseLineChart(baseTextBasedContext as unknown as typeof context)
+          shouldUseLineChart(
+            baseTextBasedContext as unknown as typeof context,
+            mockAllSuggestions[0]
+          )
         ).toBeUndefined();
       });
 
@@ -989,21 +993,12 @@ describe('lens suggestions api helpers', () => {
           ] as DatatableColumn[],
         };
 
-        expect(shouldUseLineChart(nonTsContext as unknown as typeof context)).toBe(false);
+        expect(
+          shouldUseLineChart(nonTsContext as unknown as typeof context, mockAllSuggestions[0])
+        ).toBe(false);
       });
 
-      it('returns false for TS when there is no date column', () => {
-        const tsContext = {
-          ...baseTextBasedContext,
-          query: {
-            esql: 'TS foo',
-          },
-        };
-
-        expect(shouldUseLineChart(tsContext as unknown as typeof context)).toBe(false);
-      });
-
-      it('returns true for TS when there is a date column', () => {
+      it('returns false for TS when the suggestion does not use a date column', () => {
         const tsContext = {
           ...baseTextBasedContext,
           query: {
@@ -1021,10 +1016,80 @@ describe('lens suggestions api helpers', () => {
           ] as DatatableColumn[],
         };
 
-        expect(shouldUseLineChart(tsContext as unknown as typeof context)).toBe(true);
+        const suggestionWithoutDate = {
+          ...mockAllSuggestions[0],
+          visualizationId: 'lnsXY',
+          visualizationState: {
+            layers: [
+              {
+                layerId: 'layer1',
+                layerType: 'data',
+                xAccessor: 'x',
+              },
+            ],
+          },
+          datasourceState: {
+            layers: {
+              layer1: {
+                columns: [
+                  { columnId: 'x', meta: { type: 'string' } },
+                  { columnId: 'y', meta: { type: 'number' } },
+                ],
+              },
+            },
+          },
+        } as unknown as Suggestion;
+
+        expect(
+          shouldUseLineChart(tsContext as unknown as typeof context, suggestionWithoutDate)
+        ).toBe(false);
       });
 
-      it('returns true for PROMQL when there is a date column', () => {
+      it('returns true for TS when the suggestion uses a date column on x-axis', () => {
+        const tsContext = {
+          ...baseTextBasedContext,
+          query: {
+            esql: 'TS foo',
+          },
+          textBasedColumns: [
+            ...baseTextBasedContext.textBasedColumns,
+            {
+              id: '@timestamp',
+              name: '@timestamp',
+              meta: {
+                type: 'date',
+              },
+            },
+          ] as DatatableColumn[],
+        };
+
+        const suggestionWithDate = {
+          ...mockAllSuggestions[0],
+          visualizationId: 'lnsXY',
+          visualizationState: {
+            layers: [
+              {
+                layerId: 'layer1',
+                layerType: 'data',
+                xAccessor: 'x',
+              },
+            ],
+          },
+          datasourceState: {
+            layers: {
+              layer1: {
+                columns: [{ columnId: 'x', meta: { type: 'date' } }],
+              },
+            },
+          },
+        } as unknown as Suggestion;
+
+        expect(shouldUseLineChart(tsContext as unknown as typeof context, suggestionWithDate)).toBe(
+          true
+        );
+      });
+
+      it('returns true for PROMQL when the suggestion uses a date column on x-axis', () => {
         const promqlContext = {
           ...baseTextBasedContext,
           query: {
@@ -1042,7 +1107,143 @@ describe('lens suggestions api helpers', () => {
           ] as DatatableColumn[],
         };
 
-        expect(shouldUseLineChart(promqlContext as unknown as typeof context)).toBe(true);
+        const suggestionWithDate = {
+          ...mockAllSuggestions[0],
+          visualizationId: 'lnsXY',
+          visualizationState: {
+            layers: [
+              {
+                layerId: 'layer1',
+                layerType: 'data',
+                xAccessor: 'x',
+              },
+            ],
+          },
+          datasourceState: {
+            layers: {
+              layer1: {
+                columns: [{ columnId: 'x', meta: { type: 'date' } }],
+              },
+            },
+          },
+        } as unknown as Suggestion;
+
+        expect(
+          shouldUseLineChart(promqlContext as unknown as typeof context, suggestionWithDate)
+        ).toBe(true);
+      });
+    });
+
+    describe('getPreferredXyTypeIdForTimeSeries', () => {
+      const baseTextBasedContext = {
+        dataViewSpec: {
+          id: 'index1',
+          title: 'index1',
+          name: 'DataView',
+        },
+        fieldName: '',
+        textBasedColumns: [
+          {
+            id: 'field1',
+            name: 'field1',
+            meta: {
+              type: 'number',
+            },
+          },
+        ] as DatatableColumn[],
+      };
+
+      it('returns undefined for non-TS / non-PROMQL ESQL', () => {
+        const nonTsContext = {
+          ...baseTextBasedContext,
+          query: {
+            esql: 'FROM index1 | keep field1',
+          },
+        };
+
+        expect(
+          getPreferredXyTypeIdForTimeSeries(
+            nonTsContext as unknown as typeof context,
+            mockAllSuggestions[0]
+          )
+        ).toBeUndefined();
+      });
+
+      it('returns bar for TS when the suggestion does not use a date column', () => {
+        const tsContext = {
+          ...baseTextBasedContext,
+          query: {
+            esql: 'TS kibana_sample_data_logstsdb',
+          },
+        };
+
+        const suggestionWithoutDate = {
+          ...mockAllSuggestions[0],
+          visualizationId: 'lnsXY',
+          visualizationState: {
+            layers: [
+              {
+                layerId: 'layer1',
+                layerType: 'data',
+                xAccessor: 'x',
+              },
+            ],
+          },
+          datasourceState: {
+            layers: {
+              layer1: {
+                columns: [
+                  { columnId: 'x', meta: { type: 'string' } },
+                  { columnId: 'y', meta: { type: 'number' } },
+                ],
+              },
+            },
+          },
+        } as unknown as Suggestion;
+
+        expect(
+          getPreferredXyTypeIdForTimeSeries(
+            tsContext as unknown as typeof context,
+            suggestionWithoutDate
+          )
+        ).toBe('bar');
+      });
+
+      it('returns line for TS when the suggestion uses a date column', () => {
+        const tsContext = {
+          ...baseTextBasedContext,
+          query: {
+            esql: 'TS kibana_sample_data_logstsdb',
+          },
+        };
+
+        const suggestionWithDate = {
+          ...mockAllSuggestions[0],
+          visualizationId: 'lnsXY',
+          visualizationState: {
+            layers: [
+              {
+                layerId: 'layer1',
+                layerType: 'data',
+                xAccessor: 'x',
+              },
+            ],
+          },
+          datasourceState: {
+            layers: {
+              layer1: {
+                columns: [{ columnId: 'x', meta: { type: 'date' } }],
+              },
+            },
+          },
+        } as unknown as Suggestion;
+
+        expect(
+          getPreferredXyTypeIdForTimeSeries(
+            tsContext as unknown as typeof context,
+            suggestionWithDate
+          )
+        ).toBe('line');
       });
     });
   });

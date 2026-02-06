@@ -19,6 +19,7 @@ import type {
   TypedLensSerializedState,
   VisualizationMap,
   VisualizeEditorContext,
+  XYState,
 } from '@kbn/lens-common';
 
 const datasourceHasIndexPatternRefs = (
@@ -220,21 +221,22 @@ export function switchVisualizationType({
  * A time series context implies that a line chart is the appropriate visualization.
  *
  * Only applicable to TS/PromQL queries. Considered a time series when:
- *   - A date column is available
+ *   - The suggestion uses a date column on the x-axis
  *
  * @param context the lens suggestions api context as being set by the consumers
+ * @param suggestion the suggestion we are about to return/switch (used to detect which columns are actually used)
  * @returns `true` if the context is a time series, `false` if not (including non-TS/PromQL ES|QL queries),
  * or `undefined` if the context is not applicable (e.g., missing query or `textBasedColumns`)
  */
 export const shouldUseLineChart = (
-  context: VisualizeFieldContext | VisualizeEditorContext
+  context: VisualizeFieldContext | VisualizeEditorContext,
+  suggestion?: Suggestion
 ): boolean | undefined => {
   // Only applies to ESQL queries with textBasedColumns
   if (!('textBasedColumns' in context) || !context.textBasedColumns || !('query' in context)) {
     return undefined;
   }
 
-  const columns = context.textBasedColumns;
   const esqlQuery = context.query?.esql;
 
   if (!esqlQuery) return undefined;
@@ -244,6 +246,78 @@ export const shouldUseLineChart = (
 
   if (!isPromqlOrTs) return false;
 
-  // Check if there's at least one date column (for x-axis)
-  return columns.some((col) => col.meta?.type === 'date');
+  if (!suggestion || suggestion.visualizationId !== 'lnsXY') return false;
+
+  const xyState = suggestion.visualizationState as XYState;
+  const xyLayers = xyState.layers ?? [];
+  if (!xyLayers.length) return false;
+
+  const datasourceState = suggestion.datasourceState as TextBasedPrivateState;
+  if (!datasourceState?.layers) return false;
+
+  for (const xyLayer of xyLayers) {
+    if (xyLayer.layerType !== 'data') continue;
+    const { layerId, xAccessor } = xyLayer;
+    if (!xAccessor) continue;
+
+    const layer = datasourceState.layers[layerId];
+    const xColumn = layer?.columns?.find((col) => col.columnId === xAccessor);
+    if (xColumn?.meta?.type === 'date') return true;
+  }
+
+  return false;
+};
+
+/**
+ * Returns the preferred XY subtype for TS/PromQL queries.
+ * - `line` when a date column is used by the suggestion (x-axis)
+ * - `bar` otherwise (to avoid incorrectly defaulting to time-series charts)
+ */
+export const getPreferredXyTypeIdForTimeSeries = (
+  context: VisualizeFieldContext | VisualizeEditorContext,
+  suggestion?: Suggestion
+): string | undefined => {
+  if (!('textBasedColumns' in context) || !context.textBasedColumns || !('query' in context)) {
+    return undefined;
+  }
+
+  const esqlQuery = context.query?.esql;
+  if (!esqlQuery) return undefined;
+
+  const { root } = Parser.parse(esqlQuery);
+  const isPromqlOrTs = root.commands.find(({ name }) => name === 'promql' || name === 'ts');
+  if (!isPromqlOrTs) return undefined;
+
+  return shouldUseLineChart(context, suggestion) ? 'line' : 'bar';
+};
+/**
+ * Normalizes the suggestion for TS/PromQL queries.
+ * @param context the lens suggestions api context as being set by the consumers
+ * @param visualizationMap the visualization map
+ * @param suggestion the suggestion we are about to return/switch (used to detect which columns are actually used)
+ * @returns the normalized suggestion
+ */
+export const normalizeXySuggestionForTimeSeries = ({
+  context,
+  visualizationMap,
+  suggestion,
+}: {
+  context: VisualizeFieldContext | VisualizeEditorContext;
+  visualizationMap: VisualizationMap;
+  suggestion: Suggestion;
+}): Suggestion => {
+  if (suggestion.visualizationId !== 'lnsXY') return suggestion;
+
+  const preferredXyType = getPreferredXyTypeIdForTimeSeries(context, suggestion);
+  if (!preferredXyType) return suggestion;
+
+  const switched = switchVisualizationType({
+    visualizationMap,
+    suggestions: [suggestion],
+    targetTypeId: preferredXyType,
+    familyType: 'lnsXY',
+    forceSwitch: ['area', 'line'].some((type) => preferredXyType.includes(type)),
+  });
+
+  return switched?.[0] ?? suggestion;
 };
