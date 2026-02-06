@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import type { initializeTitleManager } from '@kbn/presentation-publishing';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
@@ -95,6 +95,7 @@ export function initializeInternalApi(
     validationMessages$,
     isEditingInProgress: () => isEditingInProgress$.getValue(),
     updateEditingState: (inProgress: boolean) => isEditingInProgress$.next(inProgress),
+    editingState$: isEditingInProgress$.asObservable().pipe(map(() => {})),
     dispatchError: () => {
       hasRenderCompleted$.next(true);
       renderCount$.next(renderCount$.getValue() + 1);

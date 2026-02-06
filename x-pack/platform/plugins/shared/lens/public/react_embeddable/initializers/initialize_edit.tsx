@@ -242,7 +242,7 @@ export function initializeEditApi(
       // the getState() here contains the wrong filters references but the input attributes
       // are correct as getInlineEditor() handler is using the getModifiedState() function
       onApply: showOnly
-        ? noop
+        ? () => internalApi.updateEditingState(false)
         : (attributes: LensRuntimeState['attributes']) => {
             internalApi.updateEditingState(false);
             updateState({ ...getState(), attributes });
