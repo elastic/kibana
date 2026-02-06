@@ -65,10 +65,12 @@ export function getComputedFeatureInstructions(): string {
  */
 function toComputedFeature(
   generator: ComputedFeatureGenerator,
-  value: Record<string, unknown>
+  value: Record<string, unknown>,
+  streamName: string
 ): BaseFeature {
   return {
     id: generator.type,
+    stream_name: streamName,
     description: generator.description,
     type: generator.type,
     properties: value,
@@ -85,7 +87,7 @@ export async function generateAllComputedFeatures(
   return Promise.all(
     registry.getAll().map(async (generator) => {
       const value = await generator.generate(options);
-      return toComputedFeature(generator, value);
+      return toComputedFeature(generator, value, options.stream.name);
     })
   );
 }
