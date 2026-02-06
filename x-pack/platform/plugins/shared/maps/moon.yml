@@ -99,6 +99,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/react-kibana-mount'
   - '@kbn/css-utils'
+  - '@kbn/presentation-util'
   - '@kbn/licensing-types'
   - '@kbn/control-group-renderer'
   - '@kbn/es-query-server'

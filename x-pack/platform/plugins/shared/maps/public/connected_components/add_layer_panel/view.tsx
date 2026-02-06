@@ -52,6 +52,7 @@ export interface Props {
   enableEditMode: () => void;
   autoOpenLayerWizardId: string;
   clearAutoOpenLayerWizardId: () => void;
+  ariaLabelId?: string;
 }
 
 interface State {
@@ -224,7 +225,14 @@ export class AddLayerPanel extends Component<Props, State> {
       <>
         <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiTitle size="s">
-            <h2>{this.state.currentStep ? this.state.currentStep.label : ADD_LAYER_STEP_LABEL}</h2>
+            <h2
+              id={
+                /* Provide a label to the aria-labelledby prop of the enclosing EuiFlyout */
+                this.props.ariaLabelId
+              }
+            >
+              {this.state.currentStep ? this.state.currentStep.label : ADD_LAYER_STEP_LABEL}
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 

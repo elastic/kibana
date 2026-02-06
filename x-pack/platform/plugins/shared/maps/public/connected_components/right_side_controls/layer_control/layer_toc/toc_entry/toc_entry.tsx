@@ -80,6 +80,25 @@ export class TOCEntry extends Component<Props, State> {
     supportsFitToBounds: false,
   };
 
+  static getTOCEntryEditButton(
+    layerId: string | null,
+    querySelector = document.querySelector // For testing
+  ) {
+    if (!layerId) return null;
+    return querySelector(`[data-layerid="${layerId}"] button[data-edit-button]`);
+  }
+
+  static showHiddenTOCEntryPopoverAction(
+    actionElement: Element,
+    getQuerySelector = (element: any) => Reflect.get(element, 'querySelector') // For testing
+  ) {
+    const enclosingLayer = actionElement.closest('[data-layerid]');
+    const querySelector = enclosingLayer ? getQuerySelector(enclosingLayer) : () => null;
+    const layerTocEntry =
+      (querySelector('button.mapTocEntry__layerName') as HTMLButtonElement) ?? null;
+    layerTocEntry?.focus();
+  }
+
   componentDidMount() {
     this._isMounted = true;
     this._updateDisplayName();
@@ -219,9 +238,11 @@ export class TOCEntry extends Component<Props, State> {
           key="settings"
           isDisabled={this.props.isEditButtonDisabled}
           iconType="pencil"
+          data-edit-button
           aria-label={EDIT_LAYER_SETTINGS_LABEL}
           title={EDIT_LAYER_SETTINGS_LABEL}
           onClick={this._openLayerPanelWithCheck}
+          data-test-subj="editLayerSettingsButton"
         />
       );
       quickActions.push(
