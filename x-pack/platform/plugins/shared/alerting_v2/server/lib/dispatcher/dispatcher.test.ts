@@ -17,9 +17,12 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { createStorageService } from '../services/storage_service/storage_service.mock';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
 import { DispatcherService } from './dispatcher';
-import { createDispatchableAlertEventsResponse } from './fixtures/dispatcher';
+import {
+  createAlertEpisodeSuppressionsResponse,
+  createDispatchableAlertEventsResponse,
+} from './fixtures/dispatcher';
 import { getDispatchableAlertEventsQuery } from './queries';
-import type { AlertEpisode } from './types';
+import type { AlertEpisode, AlertEpisodeSuppression } from './types';
 
 describe('DispatcherService', () => {
   let dispatcherService: DispatcherService;
@@ -40,7 +43,7 @@ describe('DispatcherService', () => {
   });
 
   describe('run', () => {
-    it('indexes fire-events for dispatchable alert episodes', async () => {
+    it('indexes fire actions for dispatchable alert episodes when no suppressions exist', async () => {
       const alertEpisodes: AlertEpisode[] = [
         {
           last_event_timestamp: '2026-01-22T07:10:00.000Z',
@@ -58,9 +61,25 @@ describe('DispatcherService', () => {
         },
       ];
 
-      queryEsClient.esql.query.mockResolvedValue(
-        createDispatchableAlertEventsResponse(alertEpisodes)
-      );
+      const suppressions: AlertEpisodeSuppression[] = [
+        {
+          rule_id: 'rule-1',
+          group_hash: 'hash-1',
+          episode_id: 'episode-1',
+          should_suppress: false,
+        },
+        {
+          rule_id: 'rule-2',
+          group_hash: 'hash-2',
+          episode_id: 'episode-2',
+          should_suppress: false,
+        },
+      ];
+
+      queryEsClient.esql.query
+        .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
+        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions));
+
       storageEsClient.bulk.mockResolvedValue({
         items: [{ create: { _id: '1', status: 201 } }, { create: { _id: '2', status: 201 } }],
         errors: false,
@@ -78,6 +97,7 @@ describe('DispatcherService', () => {
         .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
         .toISOString();
 
+      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(2);
       expect(queryEsClient.esql.query).toHaveBeenCalledWith(
         {
           query: getDispatchableAlertEventsQuery().query,
@@ -114,7 +134,7 @@ describe('DispatcherService', () => {
             group_hash: 'hash-1',
             last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
             actor: 'system',
-            action_type: 'fire-event',
+            action_type: 'fire',
             rule_id: 'rule-1',
             source: 'internal',
           }),
@@ -122,7 +142,82 @@ describe('DispatcherService', () => {
             group_hash: 'hash-2',
             last_series_event_timestamp: '2026-01-22T07:15:00.000Z',
             actor: 'system',
-            action_type: 'fire-event',
+            action_type: 'fire',
+            rule_id: 'rule-2',
+            source: 'internal',
+          }),
+        ])
+      );
+    });
+
+    it('indexes suppress actions for suppressed alert episodes', async () => {
+      const alertEpisodes: AlertEpisode[] = [
+        {
+          last_event_timestamp: '2026-01-22T07:10:00.000Z',
+          rule_id: 'rule-1',
+          group_hash: 'hash-1',
+          episode_id: 'episode-1',
+          episode_status: 'active',
+        },
+        {
+          last_event_timestamp: '2026-01-22T07:15:00.000Z',
+          rule_id: 'rule-2',
+          group_hash: 'hash-2',
+          episode_id: 'episode-2',
+          episode_status: 'active',
+        },
+      ];
+
+      const suppressions: AlertEpisodeSuppression[] = [
+        {
+          rule_id: 'rule-1',
+          group_hash: 'hash-1',
+          episode_id: 'episode-1',
+          should_suppress: true,
+        },
+        {
+          rule_id: 'rule-2',
+          group_hash: 'hash-2',
+          episode_id: 'episode-2',
+          should_suppress: false,
+        },
+      ];
+
+      queryEsClient.esql.query
+        .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
+        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions));
+
+      storageEsClient.bulk.mockResolvedValue({
+        items: [{ create: { _id: '1', status: 201 } }, { create: { _id: '2', status: 201 } }],
+        errors: false,
+      } as BulkResponse);
+
+      const result = await dispatcherService.run({
+        previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+      });
+
+      expect(result.startedAt).toBeInstanceOf(Date);
+
+      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
+      const safeOperations = operations ?? [];
+      const docs = safeOperations.filter((_, index) => index % 2 === 1);
+      expect(docs).toHaveLength(2);
+
+      expect(docs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            group_hash: 'hash-1',
+            last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
+            actor: 'system',
+            action_type: 'suppress',
+            rule_id: 'rule-1',
+            source: 'internal',
+          }),
+          expect.objectContaining({
+            group_hash: 'hash-2',
+            last_series_event_timestamp: '2026-01-22T07:15:00.000Z',
+            actor: 'system',
+            action_type: 'fire',
             rule_id: 'rule-2',
             source: 'internal',
           }),
@@ -138,6 +233,7 @@ describe('DispatcherService', () => {
       });
 
       expect(result.startedAt).toBeInstanceOf(Date);
+      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(1);
       expect(storageEsClient.bulk).not.toHaveBeenCalled();
     });
   });
