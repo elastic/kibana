@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
+import type { FilestoreEntry } from '@kbn/agent-builder-server/runner/filestore';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
-import type { SkillFileEntry, SkillReferencedContentFileEntry } from './types';
+import type { SkillFileEntry, SkillFilestoreEntry, SkillReferencedContentFileEntry } from './types';
 
 export const getSkillEntryPath = ({ skill }: { skill: SkillDefinition }): string => {
   return `${skill.basePath}/${skill.name}/SKILL.md`;
@@ -39,57 +39,71 @@ export const createSkillEntries = (
 ): (SkillFileEntry | SkillReferencedContentFileEntry)[] => {
   const stringifiedContent = getSkillPlainText({ skill });
 
-  return [
-    {
-      type: 'file',
-      path: getSkillEntryPath({
-        skill,
-      }),
-      content: {
-        raw: {
-          body: stringifiedContent,
+  const skillEntry: SkillFileEntry = {
+    type: 'file',
+    path: getSkillEntryPath({
+      skill,
+    }),
+    versions: [
+      {
+        version: 1,
+        metadata: { token_count: estimateTokens(stringifiedContent) },
+        content: {
+          raw: {
+            body: stringifiedContent,
+          },
+          plain_text: stringifiedContent,
         },
-        plain_text: stringifiedContent,
       },
-      metadata: {
-        // generic meta
-        type: FileEntryType.skill,
-        id: skill.id,
-        token_count: estimateTokens(stringifiedContent),
-        readonly: true,
-        // specific tool-result meta
-        skill_name: skill.name,
-        skill_description: skill.description,
-        skill_id: skill.id,
-      },
-    } satisfies SkillFileEntry,
-    ...(skill.referencedContent?.map((referencedContent) => {
+    ],
+    metadata: {
+      // generic meta
+      type: FileEntryType.skill,
+      id: skill.id,
+      readonly: true,
+      // specific tool-result meta
+      skill_name: skill.name,
+      skill_description: skill.description,
+      skill_id: skill.id,
+    },
+  };
+
+  const skillReferenceEntries =
+    skill.referencedContent?.map<SkillReferencedContentFileEntry>((referencedContent) => {
       return {
-        type: 'file' as const,
+        type: 'file',
         path: getSkillReferencedContentEntryPath({
           skill,
           referencedContent,
         }),
-        content: {
-          raw: {
-            body: referencedContent.content,
+        versions: [
+          {
+            version: 1,
+            metadata: {
+              token_count: estimateTokens(referencedContent.content),
+            },
+            content: {
+              raw: {
+                body: referencedContent.content,
+              },
+              plain_text: referencedContent.content,
+            },
           },
-          plain_text: referencedContent.content,
-        },
+        ],
         metadata: {
           // generic meta
           type: FileEntryType.skillReferenceContent,
           id: skill.id,
-          token_count: estimateTokens(referencedContent.content),
           readonly: true,
           // specific tool-result meta
           skill_id: skill.id,
         },
-      } satisfies SkillReferencedContentFileEntry;
-    }) ?? []),
-  ];
+      };
+    }) ?? [];
+
+  return [skillEntry, ...skillReferenceEntries];
 };
 
-export const isSkillFileEntry = (entry: FileEntry): entry is SkillFileEntry => {
+export const isSkillFilestoreEntry = (entry: FilestoreEntry): entry is SkillFilestoreEntry => {
   return entry.metadata.type === FileEntryType.skill;
 };

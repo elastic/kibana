@@ -10,7 +10,7 @@ import {
   getSkillReferencedContentEntryPath,
   getSkillPlainText,
   createSkillEntries,
-  isSkillFileEntry,
+  isSkillFilestoreEntry,
 } from './utils';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
@@ -281,7 +281,7 @@ This is the skill body.`);
           skill_id: 'skill-1',
         },
       };
-      expect(isSkillFileEntry(entry)).toBe(true);
+      expect(isSkillFilestoreEntry(entry)).toBe(true);
     });
 
     it('returns false for tool result entry', () => {
@@ -298,7 +298,7 @@ This is the skill body.`);
           readonly: false,
         },
       };
-      expect(isSkillFileEntry(entry)).toBe(false);
+      expect(isSkillFilestoreEntry(entry)).toBe(false);
     });
 
     it('returns false for attachment entry', () => {
@@ -315,7 +315,7 @@ This is the skill body.`);
           readonly: false,
         },
       };
-      expect(isSkillFileEntry(entry)).toBe(false);
+      expect(isSkillFilestoreEntry(entry)).toBe(false);
     });
 
     it('returns false for skill reference content entry', () => {
@@ -333,7 +333,7 @@ This is the skill body.`);
           skill_id: 'skill-1',
         },
       };
-      expect(isSkillFileEntry(entry)).toBe(false);
+      expect(isSkillFilestoreEntry(entry)).toBe(false);
     });
   });
 });
