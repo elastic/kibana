@@ -235,16 +235,9 @@ export const TableSection = React.memo(
       ({ selectedGroup, groupBucket, closePopover }) => {
         const attack = getAttack(selectedGroup, groupBucket);
         if (!attack) return;
-        return (
-          <AttacksGroupTakeActionItems
-            attack={attack}
-            filters={[...globalFilters, ...defaultFilters]}
-            query={query}
-            closePopover={closePopover}
-          />
-        );
+        return <AttacksGroupTakeActionItems attack={attack} closePopover={closePopover} />;
       },
-      [defaultFilters, getAttack, globalFilters, query]
+      [getAttack]
     );
 
     const accordionExtraActionGroupStats = useGroupStats();

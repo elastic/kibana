@@ -9,7 +9,6 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo } from 'react';
-import type { Filter, Query } from '@kbn/es-query';
 import { useInvalidateFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 import type { inputsModel } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
@@ -22,18 +21,12 @@ import { useAttackInvestigateInTimelineContextMenuItems } from '../../../hooks/a
 
 interface AttacksGroupTakeActionItemsProps {
   attack: AttackDiscoveryAlert;
-  /* filters being passed to the Alert/events table */
-  filters: Filter[];
-  /* query being passed to the Alert/events table */
-  query?: Query;
   /** Optional callback to close the containing popover menu */
   closePopover?: () => void;
 }
 
 export function AttacksGroupTakeActionItems({
   attack,
-  filters,
-  query,
   closePopover,
 }: AttacksGroupTakeActionItemsProps) {
   const invalidateAttackDiscoveriesCache = useInvalidateFindAttackDiscoveries();
@@ -86,8 +79,6 @@ export function AttacksGroupTakeActionItems({
 
   const { items: investigateInTimelineItems } = useAttackInvestigateInTimelineContextMenuItems({
     attack,
-    filters,
-    query,
     closePopover,
   });
 

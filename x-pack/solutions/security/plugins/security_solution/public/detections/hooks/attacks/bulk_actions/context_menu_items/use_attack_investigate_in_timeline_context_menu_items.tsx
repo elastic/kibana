@@ -14,6 +14,9 @@ import { buildAlertsKqlFilter } from '../../../../components/alerts_table/action
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../components/alerts_table/translations';
 
 export interface UseAttackInvestigateInTimelineContextMenuItemsProps {
+  /**
+   *  The attack discovery object
+   */
   attack: AttackDiscoveryAlert;
   /**
    * Optional callback to close the containing popover menu
