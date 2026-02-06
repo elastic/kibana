@@ -68,7 +68,7 @@ export const runAgentStepDefinition = createPublicStepDefinition({
     config: {
       'connector-id': {
         connectorIdSelection: {
-          connectorTypes: ['inference.completion', 'bedrock', 'gen-ai', 'gemini'],
+          connectorTypes: ['inference.unified_completion', 'bedrock', 'gen-ai', 'gemini'],
           enableCreation: false,
         },
       },

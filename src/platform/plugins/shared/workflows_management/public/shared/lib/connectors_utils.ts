@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { TASK_TYPE_BY_SUB_ACTION } from '@kbn/connector-schemas/inference/constants';
 import type { ConnectorIdSelectionHandler } from '@kbn/workflows/types/v1';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { stepSchemas } from '../../../common/step_schemas';
@@ -37,21 +38,6 @@ export function isCreateConnectorEnabledForStepType(stepType: string): boolean {
   return customStepSelectionHandler.enableCreation ?? false;
 }
 
-/**
- * Mapping of sub_action to task_type for inference connectors.
- * This maps each executable sub-action to its corresponding inference endpoint task type.
- */
-export const TASK_TYPE_BY_SUB_ACTION: Record<string, string> = {
-  unified_completion: 'chat_completion',
-  unified_completion_stream: 'chat_completion',
-  unified_completion_async_iterator: 'chat_completion',
-  completion: 'completion',
-  completion_stream: 'completion',
-  rerank: 'rerank',
-  text_embedding: 'text_embedding',
-  sparse_embedding: 'sparse_embedding',
-};
-
 export function getInferenceConnectorTaskTypeFromSubAction(subAction: string): string | undefined {
-  return TASK_TYPE_BY_SUB_ACTION[subAction];
+  return TASK_TYPE_BY_SUB_ACTION[subAction as keyof typeof TASK_TYPE_BY_SUB_ACTION];
 }
