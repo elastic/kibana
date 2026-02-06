@@ -59,20 +59,20 @@ export const readTool = ({
       }
 
       let content: string | object;
-      let truncated = false;
       if (raw) {
         content = entry.content.raw;
       } else {
         content = entry.content.plain_text ?? JSON.stringify(entry.content.raw, undefined, 2);
         const tokenCount = estimateTokens(content);
         if (tokenCount > SAFEGUARD_TOKEN_COUNT) {
-          content = truncateTokens(content as string, SAFEGUARD_TOKEN_COUNT);
-          truncated = true;
+          content =
+            truncateTokens(content as string, SAFEGUARD_TOKEN_COUNT) +
+            '[content was too long and got truncated by our system]';
         }
       }
 
       return {
-        results: [createOtherResult({ path, content, truncated })],
+        results: [createOtherResult({ path, content, meta: entry.metadata })],
       };
     },
   };

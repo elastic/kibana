@@ -72,20 +72,15 @@ type LsEntrySummary = FileEntrySummary | DirEntrySummary;
 function stripContent(entry: LsEntry): LsEntrySummary {
   if (entry.type === 'file') {
     return {
-      path: entry.path,
       type: 'file',
+      path: entry.path,
       metadata: entry.metadata,
     };
+  } else {
+    return {
+      type: 'dir',
+      path: entry.path,
+      children: entry.children?.map(stripContent),
+    };
   }
-
-  const summary: DirEntrySummary = {
-    path: entry.path,
-    type: 'dir',
-  };
-
-  if (entry.children && entry.children.length > 0) {
-    summary.children = entry.children.map(stripContent);
-  }
-
-  return summary;
 }
