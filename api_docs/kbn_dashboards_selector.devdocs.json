@@ -23,7 +23,7 @@
           "EuiComboBoxOptionOption",
           "<string>[]) => void; placeholder?: string | undefined; }) => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+        "path": "src/platform/packages/shared/dashboards/dashboards_selector/components/dashboards_selector.tsx",
         "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
@@ -36,7 +36,7 @@
             "tags": [],
             "label": "{\n  uiActions,\n  dashboardsFormData,\n  onChange,\n  placeholder,\n}",
             "description": [],
-            "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+            "path": "src/platform/packages/shared/dashboards/dashboards_selector/components/dashboards_selector.tsx",
             "lineNumber": 68,
             "columnNumber": 4,
             "deprecated": false,
@@ -136,7 +136,7 @@
                   "UiActionsService",
                   "; }"
                 ],
-                "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                "path": "src/platform/packages/shared/dashboards/dashboards_selector/components/dashboards_selector.tsx",
                 "lineNumber": 69,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -152,7 +152,7 @@
                 "signature": [
                   "{ id: string; }[]"
                 ],
-                "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                "path": "src/platform/packages/shared/dashboards/dashboards_selector/components/dashboards_selector.tsx",
                 "lineNumber": 70,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -170,7 +170,7 @@
                   "EuiComboBoxOptionOption",
                   "<string>[]) => void"
                 ],
-                "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                "path": "src/platform/packages/shared/dashboards/dashboards_selector/components/dashboards_selector.tsx",
                 "lineNumber": 71,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -187,7 +187,7 @@
                       "EuiComboBoxOptionOption",
                       "<string>[]"
                     ],
-                    "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                    "path": "src/platform/packages/shared/dashboards/dashboards_selector/components/dashboards_selector.tsx",
                     "lineNumber": 71,
                     "columnNumber": 14,
                     "deprecated": false,
@@ -207,7 +207,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/platform/packages/shared/dashboards/dashboards-selector/components/dashboards_selector.tsx",
+                "path": "src/platform/packages/shared/dashboards/dashboards_selector/components/dashboards_selector.tsx",
                 "lineNumber": 72,
                 "columnNumber": 3,
                 "deprecated": false,

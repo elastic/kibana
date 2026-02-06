@@ -10,8 +10,8 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/dashboards/dashboards-selector'],
+  roots: ['<rootDir>/src/platform/packages/shared/dashboards/dashboards_selector'],
   setupFilesAfterEnv: [
-    '<rootDir>/src/platform/packages/shared/dashboards/dashboards-selector/setup_tests.ts',
+    '<rootDir>/src/platform/packages/shared/dashboards/dashboards_selector/setup_tests.ts',
   ],
 };

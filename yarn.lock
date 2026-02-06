@@ -6385,7 +6385,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dashboards-selector@link:src/platform/packages/shared/dashboards/dashboards-selector":
+"@kbn/dashboards-selector@link:src/platform/packages/shared/dashboards/dashboards_selector":
   version "0.0.0"
   uid ""
 

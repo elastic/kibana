@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/actionable-obs-team'
   metadata:
-    sourceRoot: src/platform/packages/shared/dashboards/dashboards-selector
+    sourceRoot: src/platform/packages/shared/dashboards/dashboards_selector
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/ui-actions-plugin'
