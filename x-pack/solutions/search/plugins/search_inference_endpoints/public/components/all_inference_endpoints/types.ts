@@ -5,39 +5,7 @@
  * 2.0.
  */
 
-import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-
 export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [25, 50, 100];
-
-export enum GroupByOptions {
-  None = 'none',
-  Model = 'model_id',
-}
-
-export enum SortFieldInferenceEndpoint {
-  inference_id = 'inference_id',
-}
-export enum SortOrder {
-  asc = 'asc',
-  desc = 'desc',
-}
-
-export interface SortingParams {
-  sortField: SortFieldInferenceEndpoint;
-  sortOrder: SortOrder;
-}
-
-export interface QueryParams extends SortingParams {
-  page: number;
-  perPage: number;
-  groupBy: GroupByOptions;
-}
-
-export interface FilterOptions {
-  provider: ServiceProviderKeys[];
-  type: InferenceTaskType[];
-}
 
 export interface InferenceUsageInfo {
   id: string;

@@ -9,7 +9,7 @@ import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { renderHook } from '@testing-library/react';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { useTableData } from './use_table_data';
-import type { FilterOptions } from '../components/all_inference_endpoints/types';
+import type { FilterOptions } from '../types';
 
 const inferenceEndpoints: InferenceAPIConfigResponse[] = [
   {

@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { FilterOptions } from './types';
-import type { QueryParams, AllInferenceEndpointsTableState, FilterOptions } from './types';
-import { GroupByOptions, SortFieldInferenceEndpoint, SortOrder } from './types';
+import {
+  GroupByOptions,
+  SortFieldInferenceEndpoint,
+  SortOrder,
+  type QueryParams,
+  type FilterOptions,
+} from '../../types';
+import type { AllInferenceEndpointsTableState } from './types';
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
 export const DEFAULT_TABLE_LIMIT = 25;
