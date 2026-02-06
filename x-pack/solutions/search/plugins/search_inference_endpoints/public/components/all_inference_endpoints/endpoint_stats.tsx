@@ -53,7 +53,9 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
       <EuiFlexItem grow={false}>
         <EuiText size="s" data-test-subj="endpointStatsServices">
           <EuiTextColor color="subdued">{SERVICES_LABEL}</EuiTextColor>&nbsp;
-          <strong>{stats.servicesCount}</strong>
+          <strong>
+            <span data-test-subj="endpointStatsServicesCount">{stats.servicesCount}</span>
+          </strong>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -62,7 +64,9 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
       <EuiFlexItem grow={false}>
         <EuiText size="s" data-test-subj="endpointStatsModels">
           <EuiTextColor color="subdued">{MODELS_LABEL}</EuiTextColor>&nbsp;
-          <strong>{stats.modelsCount}</strong>
+          <strong>
+            <span data-test-subj="endpointStatsModelsCount">{stats.modelsCount}</span>
+          </strong>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -71,7 +75,9 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
       <EuiFlexItem grow={false}>
         <EuiText size="s" data-test-subj="endpointStatsEndpoints">
           <EuiTextColor color="subdued">{ENDPOINTS_LABEL}</EuiTextColor>&nbsp;
-          <strong>{stats.endpointsCount}</strong>
+          <strong>
+            <span data-test-subj="endpointStatsEndpointsCount">{stats.endpointsCount}</span>
+          </strong>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -80,7 +86,9 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
       <EuiFlexItem grow={false}>
         <EuiText size="s" data-test-subj="endpointStatsTypes">
           <EuiTextColor color="subdued">{TYPES_LABEL}</EuiTextColor>&nbsp;
-          <strong>{stats.typesCount}</strong>
+          <strong>
+            <span data-test-subj="endpointStatsTypesCount">{stats.typesCount}</span>
+          </strong>
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -54,39 +54,39 @@ const mockEndpoints: InferenceInferenceEndpointInfo[] = [
 ] as InferenceInferenceEndpointInfo[];
 
 describe('EndpointStats', () => {
-  it('renders the stats component', () => {
+  it('renders the stats component with count selectors', () => {
     render(<EndpointStats endpoints={mockEndpoints} />);
 
     expect(screen.getByTestId('endpointStats')).toBeInTheDocument();
-    expect(screen.getByTestId('endpointStatsServices')).toBeInTheDocument();
-    expect(screen.getByTestId('endpointStatsModels')).toBeInTheDocument();
-    expect(screen.getByTestId('endpointStatsTypes')).toBeInTheDocument();
-    expect(screen.getByTestId('endpointStatsEndpoints')).toBeInTheDocument();
+    expect(screen.getByTestId('endpointStatsServicesCount')).toBeInTheDocument();
+    expect(screen.getByTestId('endpointStatsModelsCount')).toBeInTheDocument();
+    expect(screen.getByTestId('endpointStatsTypesCount')).toBeInTheDocument();
+    expect(screen.getByTestId('endpointStatsEndpointsCount')).toBeInTheDocument();
   });
 
   it('displays correct counts for services, models, types, and endpoints', () => {
     render(<EndpointStats endpoints={mockEndpoints} />);
 
     // 3 unique services: elasticsearch, elastic, openai
-    expect(screen.getByTestId('endpointStatsServices')).toHaveTextContent('Services: 3');
+    expect(screen.getByTestId('endpointStatsServicesCount')).toHaveTextContent('3');
 
     // 4 unique models: .elser_model_2, .multilingual-e5-small, rainbow-sprinkles, gpt-4
-    expect(screen.getByTestId('endpointStatsModels')).toHaveTextContent('Models: 4');
+    expect(screen.getByTestId('endpointStatsModelsCount')).toHaveTextContent('4');
 
     // 4 unique types: sparse_embedding, text_embedding, chat_completion, rerank
-    expect(screen.getByTestId('endpointStatsTypes')).toHaveTextContent('Types: 4');
+    expect(screen.getByTestId('endpointStatsTypesCount')).toHaveTextContent('4');
 
     // 5 endpoints total
-    expect(screen.getByTestId('endpointStatsEndpoints')).toHaveTextContent('Endpoints: 5');
+    expect(screen.getByTestId('endpointStatsEndpointsCount')).toHaveTextContent('5');
   });
 
   it('displays zero counts when no endpoints are provided', () => {
     render(<EndpointStats endpoints={[]} />);
 
-    expect(screen.getByTestId('endpointStatsServices')).toHaveTextContent('Services: 0');
-    expect(screen.getByTestId('endpointStatsModels')).toHaveTextContent('Models: 0');
-    expect(screen.getByTestId('endpointStatsTypes')).toHaveTextContent('Types: 0');
-    expect(screen.getByTestId('endpointStatsEndpoints')).toHaveTextContent('Endpoints: 0');
+    expect(screen.getByTestId('endpointStatsServicesCount')).toHaveTextContent('0');
+    expect(screen.getByTestId('endpointStatsModelsCount')).toHaveTextContent('0');
+    expect(screen.getByTestId('endpointStatsTypesCount')).toHaveTextContent('0');
+    expect(screen.getByTestId('endpointStatsEndpointsCount')).toHaveTextContent('0');
   });
 
   it('handles endpoints without model_id correctly', () => {
@@ -101,10 +101,10 @@ describe('EndpointStats', () => {
 
     render(<EndpointStats endpoints={endpointsWithoutModel} />);
 
-    expect(screen.getByTestId('endpointStatsServices')).toHaveTextContent('Services: 1');
-    expect(screen.getByTestId('endpointStatsModels')).toHaveTextContent('Models: 0');
-    expect(screen.getByTestId('endpointStatsTypes')).toHaveTextContent('Types: 1');
-    expect(screen.getByTestId('endpointStatsEndpoints')).toHaveTextContent('Endpoints: 1');
+    expect(screen.getByTestId('endpointStatsServicesCount')).toHaveTextContent('1');
+    expect(screen.getByTestId('endpointStatsModelsCount')).toHaveTextContent('0');
+    expect(screen.getByTestId('endpointStatsTypesCount')).toHaveTextContent('1');
+    expect(screen.getByTestId('endpointStatsEndpointsCount')).toHaveTextContent('1');
   });
 
   it('correctly counts duplicate services, models, and types', () => {
@@ -132,15 +132,15 @@ describe('EndpointStats', () => {
     render(<EndpointStats endpoints={endpointsWithDuplicates} />);
 
     // 1 unique service: elasticsearch
-    expect(screen.getByTestId('endpointStatsServices')).toHaveTextContent('Services: 1');
+    expect(screen.getByTestId('endpointStatsServicesCount')).toHaveTextContent('1');
 
     // 2 unique models: model-a, model-b
-    expect(screen.getByTestId('endpointStatsModels')).toHaveTextContent('Models: 2');
+    expect(screen.getByTestId('endpointStatsModelsCount')).toHaveTextContent('2');
 
     // 2 unique types: sparse_embedding, text_embedding
-    expect(screen.getByTestId('endpointStatsTypes')).toHaveTextContent('Types: 2');
+    expect(screen.getByTestId('endpointStatsTypesCount')).toHaveTextContent('2');
 
     // 3 endpoints total
-    expect(screen.getByTestId('endpointStatsEndpoints')).toHaveTextContent('Endpoints: 3');
+    expect(screen.getByTestId('endpointStatsEndpointsCount')).toHaveTextContent('3');
   });
 });

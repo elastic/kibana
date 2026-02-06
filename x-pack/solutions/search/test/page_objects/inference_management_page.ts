@@ -13,23 +13,6 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
   const browser = getService('browser');
   const retry = getService('retry');
 
-  /**
-   * Extracts the numeric count from a stats label text.
-   * Expected format: "Label: X" (e.g., "Services: 3", "Models: 8", "Endpoints: 12")
-   *
-   * @param text - The visible text from a stats element (e.g., "Services: 3")
-   * @returns The parsed integer count
-   * @throws Error if no number is found in the text, making test failures explicit
-   *         rather than silently defaulting to 0
-   */
-  const parseCountFromStatsLabel = (text: string): number => {
-    const match = text.match(/\d+/);
-    if (!match) {
-      throw new Error(`Expected stats label to contain a number, but got: "${text}"`);
-    }
-    return parseInt(match[0], 10);
-  };
-
   return {
     InferenceTabularPage: {
       async expectHeaderToBeExist() {
@@ -61,21 +44,28 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
       async expectEndpointStatsToBeDisplayed() {
         // Verify the endpoint stats bar exists
         await testSubjects.existOrFail('endpointStats');
-        await testSubjects.existOrFail('endpointStatsServices');
-        await testSubjects.existOrFail('endpointStatsModels');
-        await testSubjects.existOrFail('endpointStatsTypes');
-        await testSubjects.existOrFail('endpointStatsEndpoints');
+        await testSubjects.existOrFail('endpointStatsServicesCount');
+        await testSubjects.existOrFail('endpointStatsModelsCount');
+        await testSubjects.existOrFail('endpointStatsTypesCount');
+        await testSubjects.existOrFail('endpointStatsEndpointsCount');
 
         // Verify stats show non-zero counts (we have preconfigured endpoints)
-        const servicesText = await testSubjects.getVisibleText('endpointStatsServices');
-        const modelsText = await testSubjects.getVisibleText('endpointStatsModels');
-        const typesText = await testSubjects.getVisibleText('endpointStatsTypes');
-        const endpointsText = await testSubjects.getVisibleText('endpointStatsEndpoints');
-
-        const servicesCount = parseCountFromStatsLabel(servicesText);
-        const modelsCount = parseCountFromStatsLabel(modelsText);
-        const typesCount = parseCountFromStatsLabel(typesText);
-        const endpointsCount = parseCountFromStatsLabel(endpointsText);
+        const servicesCount = parseInt(
+          await testSubjects.getVisibleText('endpointStatsServicesCount'),
+          10
+        );
+        const modelsCount = parseInt(
+          await testSubjects.getVisibleText('endpointStatsModelsCount'),
+          10
+        );
+        const typesCount = parseInt(
+          await testSubjects.getVisibleText('endpointStatsTypesCount'),
+          10
+        );
+        const endpointsCount = parseInt(
+          await testSubjects.getVisibleText('endpointStatsEndpointsCount'),
+          10
+        );
 
         // We should have at least 1 service, 1 model, 1 type, and 1 endpoint (preconfigured)
         expect(servicesCount).to.greaterThan(0);
@@ -86,8 +76,10 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
 
       async expectEndpointStatsToUpdateOnFilter() {
         // Get initial endpoint count
-        const initialEndpointsText = await testSubjects.getVisibleText('endpointStatsEndpoints');
-        const initialCount = parseCountFromStatsLabel(initialEndpointsText);
+        const initialCount = parseInt(
+          await testSubjects.getVisibleText('endpointStatsEndpointsCount'),
+          10
+        );
 
         // Apply a search filter to reduce results
         const searchField = await testSubjects.find('search-field-endpoints');
@@ -96,8 +88,10 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
 
         // Wait for table to update and check stats using retry
         await retry.try(async () => {
-          const filteredEndpointsText = await testSubjects.getVisibleText('endpointStatsEndpoints');
-          const filteredCount = parseCountFromStatsLabel(filteredEndpointsText);
+          const filteredCount = parseInt(
+            await testSubjects.getVisibleText('endpointStatsEndpointsCount'),
+            10
+          );
 
           // Filtered count should be strictly less than initial count to confirm filter works
           expect(filteredCount).to.be.lessThan(initialCount);
