@@ -30,7 +30,7 @@ import {
 } from './utils';
 import { getMockPolicyAWS, getMockPackageInfoAWS } from './test/mock';
 import type { CloudConnectorCredentials } from './types';
-import { AWS_PROVIDER, AZURE_PROVIDER } from './constants';
+import { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
 
 describe('updateInputVarsWithCredentials - AWS support', () => {
   let mockInputVars: PackagePolicyConfigRecord;
@@ -568,6 +568,89 @@ describe('Cloud Connector Type Guards', () => {
       };
 
       expect(isAzureCloudConnectorVars(awsVars, AZURE_PROVIDER)).toBe(false);
+    });
+  });
+
+  describe('isGcpCloudConnectorVars', () => {
+    it('should return true for GCP cloud connector vars with gcp provider', () => {
+      const gcpVars = {
+        service_account: {
+          value: 'test-service-account@project.iam.gserviceaccount.com',
+          type: 'text',
+        },
+        audience: {
+          value:
+            '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+          type: 'text',
+        },
+        gcp_credentials_cloud_connector_id: { value: 'gcp-connector-id', type: 'text' },
+      };
+
+      expect(isGcpCloudConnectorVars(gcpVars, GCP_PROVIDER)).toBe(true);
+    });
+
+    it('should return false for GCP cloud connector vars with non-gcp provider', () => {
+      const gcpVars = {
+        service_account: {
+          value: 'test-service-account@project.iam.gserviceaccount.com',
+          type: 'text',
+        },
+        audience: {
+          value:
+            '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+          type: 'text',
+        },
+        gcp_credentials_cloud_connector_id: { value: 'gcp-connector-id', type: 'text' },
+      };
+
+      expect(isGcpCloudConnectorVars(gcpVars, AWS_PROVIDER)).toBe(false);
+    });
+
+    it('should return false for AWS cloud connector vars', () => {
+      const awsVars: AwsCloudConnectorVars = {
+        role_arn: { value: 'arn:aws:iam::123456789012:role/MyRole' },
+        external_id: { value: { isSecretRef: true, id: 'secret-id' }, type: 'password' },
+      };
+
+      expect(isGcpCloudConnectorVars(awsVars, GCP_PROVIDER)).toBe(false);
+    });
+
+    it('should return false for Azure cloud connector vars', () => {
+      const azureVars: AzureCloudConnectorVars = {
+        tenant_id: { value: { id: 'tenant-id', isSecretRef: true }, type: 'password' },
+        client_id: { value: { id: 'client-id', isSecretRef: true }, type: 'password' },
+        azure_credentials_cloud_connector_id: {
+          value: 'connector-id',
+          type: 'text',
+        },
+      };
+
+      expect(isGcpCloudConnectorVars(azureVars, GCP_PROVIDER)).toBe(false);
+    });
+
+    it('should return false when missing service_account', () => {
+      const incompleteVars = {
+        audience: {
+          value:
+            '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+          type: 'text',
+        },
+        gcp_credentials_cloud_connector_id: { value: 'gcp-connector-id', type: 'text' },
+      };
+
+      expect(isGcpCloudConnectorVars(incompleteVars, GCP_PROVIDER)).toBe(false);
+    });
+
+    it('should return false when missing audience', () => {
+      const incompleteVars = {
+        service_account: {
+          value: 'test-service-account@project.iam.gserviceaccount.com',
+          type: 'text',
+        },
+        gcp_credentials_cloud_connector_id: { value: 'gcp-connector-id', type: 'text' },
+      };
+
+      expect(isGcpCloudConnectorVars(incompleteVars, GCP_PROVIDER)).toBe(false);
     });
   });
 });

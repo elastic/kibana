@@ -21,7 +21,7 @@ const GCP_CLOUD_CONNECTOR_FIELD_LABELS = {
   gcp_credentials_cloud_connector_id: i18n.translate(
     'xpack.fleet.cloudConnector.gcp.gcpCredentialsCloudConnectorId.label',
     {
-      defaultMessage: 'GCP Cloud Connector ID',
+      defaultMessage: 'Cloud Connector ID',
     }
   ),
 } as const;
@@ -34,6 +34,8 @@ export interface GcpCloudConnectorOptions {
   dataTestSubj: string;
   isSecret?: boolean;
   value: string;
+  helpText?: string;
+  tooltip?: string;
 }
 
 // Define field sequence order
@@ -83,6 +85,8 @@ export const getGcpCloudConnectorsCredentialsFormOptions = (
       type: 'text' as const,
       dataTestSubj: 'gcpServiceAccountInput',
       value: inputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_SERVICE_ACCOUNT].value,
+      tooltip:
+        'The email address of the GCP service account that Elastic will use to authenticate and access your GCP resources.',
     });
   }
 
@@ -103,6 +107,8 @@ export const getGcpCloudConnectorsCredentialsFormOptions = (
       type: 'text' as const,
       dataTestSubj: 'gcpAudienceInput',
       value: inputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_AUDIENCE].value,
+      tooltip:
+        'The intended recipient of the ID token used for workload identity federation between Elastic and GCP.',
     });
   }
 
@@ -113,6 +119,8 @@ export const getGcpCloudConnectorsCredentialsFormOptions = (
       type: 'text' as const,
       dataTestSubj: 'gcpCredentialsCloudConnectorIdInput',
       value: inputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_CREDENTIALS_CLOUD_CONNECTOR_ID].value,
+      tooltip:
+        'A unique identifier for this cloud connector configuration used to link and manage credentials across integrations.',
     });
   }
 
@@ -123,6 +131,5 @@ export const getGcpCloudConnectorsCredentialsFormOptions = (
       fields.push(field);
     }
   });
-
   return fields;
 };

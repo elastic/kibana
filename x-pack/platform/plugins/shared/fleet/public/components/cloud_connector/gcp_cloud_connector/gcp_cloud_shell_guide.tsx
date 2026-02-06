@@ -18,8 +18,8 @@ export const GoogleCloudShellCloudCredentialsGuide: React.FC<
   GoogleCloudShellCloudCredentialsGuideProps
 > = ({ isOrganization = false, commandText }) => {
   const defaultCommand = isOrganization
-    ? 'gcloud config set project <PROJECT_ID> && ORG_ID=<ORG_ID_VALUE> ./deploy_service_account.sh'
-    : 'gcloud config set project <PROJECT_ID> && ./deploy_service_account.sh';
+    ? 'gcloud config set project <PROJECT_ID> && ORG_ID=<ORG_ID_VALUE> ELASTIC_RESOURCE_ID=<ELASTIC_RESOURCE_ID> ./deploy.sh'
+    : 'gcloud config set project <PROJECT_ID> && ELASTIC_RESOURCE_ID=<ELASTIC_RESOURCE_ID> ./deploy.sh';
 
   return (
     <>
@@ -35,13 +35,24 @@ export const GoogleCloudShellCloudCredentialsGuide: React.FC<
             />
           </li>
           <li>
-            <FormattedMessage
-              id="xpack.fleet.cloudConnector.gcp.guide.step2"
-              defaultMessage="Replace {projectIdPlaceholder} in the following command with your project ID then copy the command"
-              values={{
-                projectIdPlaceholder: <EuiCode>&lt;PROJECT_ID&gt;</EuiCode>,
-              }}
-            />
+            {isOrganization ? (
+              <FormattedMessage
+                id="xpack.fleet.cloudConnector.gcp.guide.step2.organization"
+                defaultMessage="Replace {projectIdPlaceholder} and {orgIdPlaceholder} in the following command with your project ID and organization ID then copy the command"
+                values={{
+                  projectIdPlaceholder: <EuiCode>&lt;PROJECT_ID&gt;</EuiCode>,
+                  orgIdPlaceholder: <EuiCode>&lt;ORG_ID_VALUE&gt;</EuiCode>,
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.cloudConnector.gcp.guide.step2"
+                defaultMessage="Replace {projectIdPlaceholder} in the following command with your project ID then copy the command"
+                values={{
+                  projectIdPlaceholder: <EuiCode>&lt;PROJECT_ID&gt;</EuiCode>,
+                }}
+              />
+            )}
             <EuiSpacer size="s" />
             <EuiCodeBlock fontSize="m" paddingSize="m" isCopyable>
               {commandText || defaultCommand}
@@ -88,10 +99,11 @@ export const GoogleCloudShellCloudCredentialsGuide: React.FC<
           <li>
             <FormattedMessage
               id="xpack.fleet.cloudConnector.gcp.guide.step7"
-              defaultMessage="Copy the {targetServiceAccount} and {audience} outputs and paste into inputs below"
+              defaultMessage="Copy the {targetServiceAccount}, {audience}, and {cloudConnectorId} outputs and paste into inputs below"
               values={{
                 targetServiceAccount: <strong>Target Service Account</strong>,
                 audience: <strong>Audience</strong>,
+                cloudConnectorId: <strong>Cloud Connector ID</strong>,
               }}
             />
           </li>

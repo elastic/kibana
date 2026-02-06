@@ -314,4 +314,146 @@ describe('CloudConnectorSelector', () => {
       });
     });
   });
+
+  describe('GCP Cloud Connector Support', () => {
+    const mockGcpCloudConnectors = [
+      {
+        id: 'gcp-connector-1',
+        name: 'GCP Connector 1',
+        cloudProvider: 'gcp',
+        accountType: SINGLE_ACCOUNT,
+        vars: {
+          service_account: { value: 'test-service-account@project.iam.gserviceaccount.com' },
+          audience: {
+            value:
+              '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+          },
+          gcp_credentials_cloud_connector_id: { value: 'gcp-connector-id-1' },
+        },
+        packagePolicyCount: 3,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-02T00:00:00Z',
+      },
+      {
+        id: 'gcp-connector-2',
+        name: 'GCP Connector 2',
+        cloudProvider: 'gcp',
+        accountType: ORGANIZATION_ACCOUNT,
+        vars: {
+          service_account: { value: 'org-service-account@project.iam.gserviceaccount.com' },
+          audience: {
+            value:
+              '//iam.googleapis.com/projects/987654321/locations/global/workloadIdentityPools/org-pool/providers/org-provider',
+          },
+          gcp_credentials_cloud_connector_id: { value: 'gcp-connector-id-2' },
+        },
+        packagePolicyCount: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-02T00:00:00Z',
+      },
+    ];
+
+    beforeEach(() => {
+      mockUseGetCloudConnectors.mockReturnValue({
+        data: mockGcpCloudConnectors,
+        isLoading: false,
+        error: null,
+      } as unknown as ReturnType<typeof useGetCloudConnectors>);
+    });
+
+    it('should display GCP connectors in dropdown', async () => {
+      const user = userEvent.setup();
+      renderSelector({ provider: 'gcp' });
+
+      const selector = screen.getByRole('combobox');
+      await user.click(selector);
+
+      await waitFor(() => {
+        expect(screen.getByText('GCP Connector 1')).toBeInTheDocument();
+        expect(screen.getByText('GCP Connector 2')).toBeInTheDocument();
+      });
+    });
+
+    it('should display gcp_credentials_cloud_connector_id as identifier in dropdown', async () => {
+      const user = userEvent.setup();
+      renderSelector({ provider: 'gcp' });
+
+      const selector = screen.getByRole('combobox');
+      await user.click(selector);
+
+      await waitFor(() => {
+        expect(screen.getByText('gcp-connector-id-1')).toBeInTheDocument();
+        expect(screen.getByText('gcp-connector-id-2')).toBeInTheDocument();
+      });
+    });
+
+    it('should call setCredentials with GCP credentials when selecting a connector', async () => {
+      const user = userEvent.setup();
+      renderSelector({ provider: 'gcp' });
+
+      const selector = screen.getByRole('combobox');
+      await user.click(selector);
+
+      await waitFor(() => {
+        expect(screen.getByText('GCP Connector 1')).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByText('GCP Connector 1'));
+
+      expect(mockSetCredentials).toHaveBeenCalledWith({
+        serviceAccount: 'test-service-account@project.iam.gserviceaccount.com',
+        audience:
+          '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+        gcp_credentials_cloud_connector_id: 'gcp-connector-id-1',
+        cloudConnectorId: 'gcp-connector-1',
+      });
+    });
+
+    it('should display GCP account badges correctly', async () => {
+      const user = userEvent.setup();
+      renderSelector({ provider: 'gcp' });
+
+      const selector = screen.getByRole('combobox');
+      await user.click(selector);
+
+      await waitFor(() => {
+        expect(screen.getByText('Single Account')).toBeInTheDocument();
+        expect(screen.getByText('Organization')).toBeInTheDocument();
+      });
+    });
+
+    it('should display GCP integration count badges', async () => {
+      const user = userEvent.setup();
+      renderSelector({ provider: 'gcp' });
+
+      const selector = screen.getByRole('combobox');
+      await user.click(selector);
+
+      await waitFor(() => {
+        expect(screen.getByText('Used by 3 integrations')).toBeInTheDocument();
+        expect(screen.getByText('Used by 1 integration')).toBeInTheDocument();
+      });
+    });
+
+    it('should display selected GCP connector', () => {
+      renderSelector({
+        provider: 'gcp',
+        cloudConnectorId: 'gcp-connector-1',
+      });
+
+      expect(screen.getByText('GCP Connector 1')).toBeInTheDocument();
+    });
+
+    it('should filter GCP connectors by account type', () => {
+      renderSelector({
+        provider: 'gcp',
+        accountType: ORGANIZATION_ACCOUNT,
+      });
+
+      expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
+        cloudProvider: 'gcp',
+        accountType: ORGANIZATION_ACCOUNT,
+      });
+    });
+  });
 });

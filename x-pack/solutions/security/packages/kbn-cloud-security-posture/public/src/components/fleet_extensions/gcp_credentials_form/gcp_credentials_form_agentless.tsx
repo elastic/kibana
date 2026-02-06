@@ -27,8 +27,6 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   getTemplateUrlFromPackageInfo,
   updatePolicyWithInputs,
-  gcpField,
-  getGcpInputVarsFields,
   getCloudCredentialVarsConfig,
 } from '../utils';
 import {
@@ -44,6 +42,13 @@ import { GoogleCloudShellCredentialsGuide } from './gcp_credentials_guide';
 import type { UpdatePolicy } from '../types';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 import { GcpCredentialTypeSelector } from './gcp_credential_type_selector';
+import {
+  getAgentlessCredentialsType,
+  getGcpAgentlessFormOptions,
+  getGcpCloudConnectorsCredentialsFormOptions,
+  getInputVarsFields,
+  getCloudConnectorCredentialOptions,
+} from './get_gcp_credentials_form_options';
 
 interface GcpFormAgentlessProps {
   input: NewPackagePolicyInput;
@@ -57,44 +62,50 @@ interface GcpFormAgentlessProps {
   isEditPage?: boolean;
 }
 
-const getAgentlessCredentialsType = (
-  input: NewPackagePolicyInput,
-  isGcpCloudConnectorEnabled: boolean
-): string => {
-  const credentialsType = input.streams?.[0]?.vars?.['gcp.credentials.type']?.value;
-
-  if (!credentialsType && isGcpCloudConnectorEnabled) {
-    return GCP_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
-  }
-
-  if (!credentialsType) {
-    return GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON;
-  }
-
-  return credentialsType;
+const getGcpCredentialsType = (input: NewPackagePolicyInput): string | undefined => {
+  return input.streams?.[0]?.vars?.['gcp.credentials.type']?.value;
 };
 
-const getGcpCredentialOptions = (
-  isGcpCloudConnectorEnabled: boolean
-): Array<{
-  value: string;
-  text: string;
-}> => {
-  const options = [
-    {
-      value: GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON,
-      text: 'Credentials JSON',
-    },
-  ];
+const updatePolicyCloudConnectorSupport = (
+  gcpCredentialsType: string,
+  newPolicy: NewPackagePolicy,
+  updatePolicy: UpdatePolicy,
+  input: NewPackagePolicyInput,
+  gcpPolicyType: string
+) => {
+  const currentInputCredType = getGcpCredentialsType(input);
+  const isCloudConnectors = gcpCredentialsType === GCP_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
 
-  if (isGcpCloudConnectorEnabled) {
-    options.unshift({
-      value: GCP_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
-      text: 'Cloud Connectors',
+  // Only update if the input credential type doesn't match the selected type
+  if (!currentInputCredType || currentInputCredType !== gcpCredentialsType) {
+    updatePolicy({
+      updatedPolicy: {
+        ...updatePolicyWithInputs(newPolicy, gcpPolicyType, {
+          'gcp.credentials.type': {
+            value: gcpCredentialsType,
+            type: 'text',
+          },
+          'gcp.supports_cloud_connectors': {
+            value: isCloudConnectors,
+            type: 'bool',
+          },
+        }),
+      },
     });
+    return;
   }
 
-  return options;
+  // Ensure cloud connector support is false if credential type is not cloud_connectors
+  // (CloudConnectorSetup component handles setting it to true when cloud_connectors is selected)
+  if (!isCloudConnectors && newPolicy.supports_cloud_connector) {
+    updatePolicy({
+      updatedPolicy: {
+        ...newPolicy,
+        supports_cloud_connector: false,
+        cloud_connector_id: undefined,
+      },
+    });
+  }
 };
 
 export const GcpCredentialsFormAgentless = ({
@@ -117,9 +128,6 @@ export const GcpCredentialsFormAgentless = ({
   } = useCloudSetup();
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
   const isOrganization = accountType === ORGANIZATION_ACCOUNT;
-  const organizationFields = ['gcp.organization_id', 'gcp.credentials.json'];
-  const singleAccountFields = ['gcp.project_id', 'gcp.credentials.json'];
-
   const gcpCredentialsType = getAgentlessCredentialsType(input, isGcpCloudConnectorEnabled);
   const credentialSelectionDisabled =
     isEditPage &&
@@ -128,32 +136,31 @@ export const GcpCredentialsFormAgentless = ({
 
   // Ensures the cloud connector support is false if the credential type is not cloud_connectors
   React.useEffect(() => {
-    if (
-      gcpCredentialsType &&
-      gcpCredentialsType !== GCP_CREDENTIALS_TYPE.CLOUD_CONNECTORS &&
-      (newPolicy.supports_cloud_connector || newPolicy.cloud_connector_id)
-    ) {
-      updatePolicy({
-        updatedPolicy: {
-          ...newPolicy,
-          supports_cloud_connector: false,
-          cloud_connector_id: undefined,
-        },
-      });
-    }
-  }, [
-    gcpCredentialsType,
-    newPolicy.supports_cloud_connector,
-    newPolicy.cloud_connector_id,
-    newPolicy,
-    updatePolicy,
-  ]);
+    updatePolicyCloudConnectorSupport(
+      gcpCredentialsType,
+      newPolicy,
+      updatePolicy,
+      input,
+      gcpPolicyType
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gcpCredentialsType, newPolicy.supports_cloud_connector, newPolicy.cloud_connector_id]);
+
+  // Get agentless options based on whether cloud connector is enabled
+  const agentlessOptions = isGcpCloudConnectorEnabled
+    ? getGcpCloudConnectorsCredentialsFormOptions()
+    : getGcpAgentlessFormOptions();
+
+  const group = agentlessOptions[gcpCredentialsType as keyof typeof agentlessOptions];
+  const fields = getInputVarsFields(input, group?.fields || {});
 
   /*
     For Agentless only JSON credentials type is supported.
     Also in case of organisation setup, project_id is not required in contrast to Agent-based.
    */
-  const fields = getGcpInputVarsFields(input, gcpField.fields).filter((field) => {
+  const organizationFields = ['gcp.organization_id', 'gcp.credentials.json'];
+  const singleAccountFields = ['gcp.project_id', 'gcp.credentials.json'];
+  const filteredFields = fields.filter((field) => {
     if (isOrganization) {
       return organizationFields.includes(field.id);
     } else {
@@ -178,7 +185,7 @@ export const GcpCredentialsFormAgentless = ({
       {isGcpCloudConnectorEnabled && (
         <>
           <GcpCredentialTypeSelector
-            options={getGcpCredentialOptions(isGcpCloudConnectorEnabled)}
+            options={getCloudConnectorCredentialOptions(agentlessOptions)}
             type={gcpCredentialsType}
             disabled={credentialSelectionDisabled}
             onChange={(optionId) => {
@@ -189,12 +196,22 @@ export const GcpCredentialsFormAgentless = ({
                     supports_cloud_connector: optionId === GCP_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
                   },
                   gcpPolicyType,
-                  getCloudCredentialVarsConfig({
-                    setupTechnology,
-                    optionId,
-                    showCloudConnectors: isGcpCloudConnectorEnabled,
-                    provider: GCP_PROVIDER,
-                  })
+                  {
+                    'gcp.credentials.type': {
+                      value: optionId,
+                      type: 'text',
+                    },
+                    'gcp.supports_cloud_connectors': {
+                      value: optionId === GCP_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
+                      type: 'bool',
+                    },
+                    ...getCloudCredentialVarsConfig({
+                      setupTechnology,
+                      optionId,
+                      showCloudConnectors: isGcpCloudConnectorEnabled,
+                      provider: GCP_PROVIDER,
+                    }),
+                  }
                 ),
               });
             }}
@@ -262,7 +279,7 @@ export const GcpCredentialsFormAgentless = ({
           )}
           <GcpInputVarFields
             disabled={disabled}
-            fields={fields}
+            fields={filteredFields}
             onChange={(key, value) =>
               updatePolicy({
                 updatedPolicy: updatePolicyWithInputs(newPolicy, gcpPolicyType, {

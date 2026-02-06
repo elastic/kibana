@@ -7,6 +7,7 @@
 
 import gte from 'semver/functions/gte';
 import { i18n } from '@kbn/i18n';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 import type {
   NewPackagePolicy,
@@ -18,6 +19,7 @@ import type {
 import type {
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
+  GcpCloudConnectorVars,
   CloudConnectorVars,
 } from '../../../common/types';
 
@@ -47,6 +49,8 @@ import {
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
   AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME,
   AWS_ACCOUNT_TYPE_INPUT_VAR_NAME,
+  CLOUD_CONNECTOR_GCP_CSPM_REUSABLE_MIN_VERSION,
+  CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
 } from './constants';
 
 export type AzureCloudConnectorFieldNames =
@@ -125,6 +129,17 @@ export function isAzureCredentials(
 ): credentials is AzureCloudConnectorCredentials {
   return 'tenantId' in credentials;
 }
+
+export const isGcpCloudConnectorVars = (
+  vars: CloudConnectorVars | PackagePolicyConfigRecord,
+  provider: string
+): vars is GcpCloudConnectorVars => {
+  return (
+    (GCP_CLOUD_CONNECTOR_FIELD_NAMES.SERVICE_ACCOUNT in vars ||
+      GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_SERVICE_ACCOUNT in vars) &&
+    provider === GCP_PROVIDER
+  );
+};
 
 export function isGcpCredentials(
   credentials: CloudConnectorCredentials
@@ -219,6 +234,31 @@ const getTemplateFieldNameByProvider = (provider: CloudProviders): string | unde
   }
 };
 
+/**
+ * Helper function to get the Elastic Resource ID from cloud setup
+ * @param cloud - Cloud setup configuration
+ * @returns Elastic Resource ID or undefined
+ */
+export const getElasticResourceId = (cloud?: CloudSetup): string | undefined => {
+  if (!cloud) return undefined;
+
+  // For serverless, use the project ID
+  if (cloud.isServerlessEnabled && cloud.serverless?.projectId) {
+    return cloud.serverless.projectId;
+  }
+
+  // For cloud deployments, use the Kibana component ID
+  if (cloud.isCloudEnabled) {
+    const deploymentId = getDeploymentIdFromUrl(cloud.deploymentUrl);
+    const kibanaComponentId = getKibanaComponentId(cloud.cloudId);
+    if (deploymentId && kibanaComponentId) {
+      return kibanaComponentId;
+    }
+  }
+
+  return undefined;
+};
+
 export const getCloudConnectorRemoteRoleTemplate = ({
   input,
   cloud,
@@ -226,19 +266,9 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   templateName,
   provider,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
-  let elasticResourceId: string | undefined;
+  const elasticResourceId = getElasticResourceId(cloud);
   const accountType = getAccountTypeFromInput(input, provider);
-  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
-  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
   const templateUrlFieldName = getTemplateFieldNameByProvider(provider);
-
-  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
-    elasticResourceId = cloud.serverless.projectId;
-  }
-
-  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
-    elasticResourceId = kibanaComponentId;
-  }
 
   if (!elasticResourceId || !templateUrlFieldName || !accountType) return undefined;
 
@@ -728,6 +758,13 @@ export const isCloudConnectorReusableEnabled = (
     }
     if (templateName === 'asset_inventory') {
       return gte(packageInfoVersion, CLOUD_CONNECTOR_AZURE_ASSET_INVENTORY_REUSABLE_MIN_VERSION);
+    }
+  } else if (provider === GCP_PROVIDER) {
+    if (templateName === 'cspm') {
+      return gte(packageInfoVersion, CLOUD_CONNECTOR_GCP_CSPM_REUSABLE_MIN_VERSION);
+    }
+    if (templateName === 'asset_inventory') {
+      return gte(packageInfoVersion, CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION);
     }
   }
   return false;

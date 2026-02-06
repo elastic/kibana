@@ -212,7 +212,7 @@ export const updateAgentlessCloudConnectorConfig = (
   const input = packagePolicy.inputs?.find(
     (pinput: NewPackagePolicyInput) => pinput.enabled === true
   );
-  const targetCsp = input?.type.match(/aws|azure/)?.[0];
+  const targetCsp = input?.type.match(/aws|azure|gcp/)?.[0];
 
   // Making sure that the cloud connector is disabled when switching to GCP
   if (

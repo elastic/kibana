@@ -10,7 +10,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 import type { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '../../../common';
 import type { CloudConnectorVar, CloudConnectorSecretVar } from '../../../common/types';
-import type { CloudConnectorSecretReference, CloudProvider } from '../../types';
+import type { CloudConnectorSecretReference, CloudProvider, AccountType } from '../../types';
 
 import type { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
 
@@ -73,6 +73,7 @@ export interface NewCloudConnectorFormProps {
   templateName?: string;
   credentials?: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
+  accountType?: AccountType;
 }
 
 // Define the interface for connector options
@@ -111,10 +112,10 @@ export interface CloudConnectorFormProps {
   hasInvalidRequiredVars: boolean;
   cloud?: CloudSetup;
   cloudProvider?: CloudProvider;
-  isOrganization?: boolean;
   templateName?: string;
   credentials?: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
+  accountType?: AccountType;
 }
 
 export type CloudSetupForCloudConnector = Pick<
@@ -146,4 +147,6 @@ export interface CloudConnectorField {
   dataTestSubj: string;
   value: string;
   id: string;
+  helpText?: string;
+  tooltip?: string;
 }

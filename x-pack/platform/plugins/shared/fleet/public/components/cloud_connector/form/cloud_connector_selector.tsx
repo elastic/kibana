@@ -28,7 +28,11 @@ import {
 import type { AccountType } from '../../../types';
 import type { CloudConnectorCredentials, CloudProviders } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
-import { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from '../utils';
+import {
+  isAwsCloudConnectorVars,
+  isAzureCloudConnectorVars,
+  isGcpCloudConnectorVars,
+} from '../utils';
 import { CloudConnectorPoliciesFlyout } from '../cloud_connector_policies_flyout';
 import { AccountBadge } from '../components/account_badge';
 import { IntegrationCountBadge } from '../components/integration_count_badge';
@@ -88,6 +92,8 @@ export const CloudConnectorSelector = ({
         identifier = connector.vars.role_arn?.value || '';
       } else if (isAzureCloudConnectorVars(connector.vars, provider)) {
         identifier = connector.vars.azure_credentials_cloud_connector_id?.value || '';
+      } else if (isGcpCloudConnectorVars(connector.vars, provider)) {
+        identifier = connector.vars.gcp_credentials_cloud_connector_id?.value || '';
       }
 
       return {
@@ -186,6 +192,14 @@ export const CloudConnectorSelector = ({
           clientId: connector.vars.client_id?.value,
           azure_credentials_cloud_connector_id:
             connector.vars.azure_credentials_cloud_connector_id?.value,
+          cloudConnectorId: connector.id,
+        });
+      } else if (isGcpCloudConnectorVars(connector.vars, provider)) {
+        setCredentials({
+          serviceAccount: connector.vars.service_account?.value,
+          audience: connector.vars.audience?.value,
+          gcp_credentials_cloud_connector_id:
+            connector.vars.gcp_credentials_cloud_connector_id?.value,
           cloudConnectorId: connector.id,
         });
       }

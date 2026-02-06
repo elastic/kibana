@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiAccordion, EuiSpacer, EuiButton, EuiLink, EuiText } from '@elastic/eui';
 
 import { CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ } from '../../../../common/services/cloud_connectors/test_subjects';
-import { extractRawCredentialVars } from '../../../../common';
+import { extractRawCredentialVars, ORGANIZATION_ACCOUNT } from '../../../../common';
 import { type CloudConnectorFormProps } from '../types';
 
 import {
@@ -18,6 +18,7 @@ import {
   getCloudConnectorRemoteRoleTemplate,
   updateInputVarsWithCredentials,
   isGcpCredentials,
+  getElasticResourceId,
   type GcpCloudConnectorFieldNames,
 } from '../utils';
 import { GCP_CLOUD_CONNECTOR_FIELD_NAMES, GCP_PROVIDER } from '../constants';
@@ -35,11 +36,13 @@ export const GCPCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   cloud,
   updatePolicy,
   hasInvalidRequiredVars = false,
-  isOrganization = false,
   templateName,
   credentials,
   setCredentials,
+  accountType,
 }) => {
+  const isOrganization = accountType === ORGANIZATION_ACCOUNT;
+
   const cloudConnectorRemoteRoleTemplate =
     cloud && templateName
       ? getCloudConnectorRemoteRoleTemplate({
@@ -61,29 +64,20 @@ export const GCPCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
 
   const fields = getGcpCloudConnectorsCredentialsFormOptions(updatedInputVars);
 
+  // Get the Elastic Resource ID from cloud setup
+  const elasticResourceId = getElasticResourceId(cloud);
+
+  // Generate command text based on organization type
+  const commandText = isOrganization
+    ? `gcloud config set project <PROJECT_ID> && ORG_ID=<ORG_ID_VALUE> ELASTIC_RESOURCE_ID=${
+        elasticResourceId || '<ELASTIC_RESOURCE_ID>'
+      } ./deploy.sh`
+    : `gcloud config set project <PROJECT_ID> && ELASTIC_RESOURCE_ID=${
+        elasticResourceId || '<ELASTIC_RESOURCE_ID>'
+      } ./deploy.sh`;
+
   return (
     <>
-      <EuiText size="s" color="subdued">
-        <FormattedMessage
-          id="xpack.fleet.cloudConnector.gcp.instructions"
-          defaultMessage="The Google Cloud Shell Command below will generate a Service Account for assessing your GCP environment's security posture. Learn more about {googleCloudShell}"
-          values={{
-            googleCloudShell: (
-              <EuiLink
-                href="https://www.elastic.co/guide/en/security/current/cspm-get-started.html#cspm-setup-gcp"
-                target="_blank"
-                external
-              >
-                <FormattedMessage
-                  id="xpack.fleet.cloudConnector.gcp.googleCloudShellLink"
-                  defaultMessage="Google Cloud Shell"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiText>
-      <EuiSpacer size="m" />
       <CloudConnectorNameField
         value={credentials?.name || ''}
         onChange={(name, isValid, error) => {
@@ -109,8 +103,12 @@ export const GCPCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           </EuiLink>
         }
         paddingSize="l"
+        initialIsOpen={true}
       >
-        <GoogleCloudShellCloudCredentialsGuide isOrganization={isOrganization} />
+        <GoogleCloudShellCloudCredentialsGuide
+          isOrganization={isOrganization}
+          commandText={commandText}
+        />
       </EuiAccordion>
       <EuiSpacer size="l" />
       <EuiButton
@@ -163,6 +161,27 @@ export const GCPCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           hasInvalidRequiredVars={hasInvalidRequiredVars}
         />
       )}
+      <EuiSpacer size="m" />
+      <EuiText size="s" color="subdued">
+        <FormattedMessage
+          id="xpack.fleet.cloudConnector.gcp.readDocumentation"
+          defaultMessage="Read the {documentation} for more details"
+          values={{
+            documentation: (
+              <EuiLink
+                href="https://www.elastic.co/docs/solutions/security/cloud/get-started-with-cspm-for-gcp#cspm-gcp-agentless"
+                target="_blank"
+                external
+              >
+                <FormattedMessage
+                  id="xpack.fleet.cloudConnector.gcp.documentationLink"
+                  defaultMessage="documentation"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
     </>
   );
 };

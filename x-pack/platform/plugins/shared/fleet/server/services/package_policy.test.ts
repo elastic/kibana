@@ -1472,6 +1472,223 @@ describe('Package policy service', () => {
         cloudConnectorService.create = originalCreate;
       }
     });
+
+    it('should create GCP cloud connector when all conditions are met', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-gcp-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: undefined,
+        inputs: [
+          {
+            type: 'cis_gcp',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  service_account: {
+                    value: 'test-service-account@project.iam.gserviceaccount.com',
+                    type: 'text',
+                  },
+                  audience: {
+                    value:
+                      '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+                    type: 'text',
+                  },
+                  gcp_credentials_cloud_connector_id: {
+                    value: 'gcp-connector-id',
+                    type: 'text',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'gcp',
+          },
+        },
+      } as any;
+
+      // Mock the cloud connector service
+      const mockCloudConnector = {
+        id: 'cloud-connector-gcp-123',
+        name: 'test-gcp-connector',
+        cloudProvider: 'gcp',
+        vars: {
+          service_account: {
+            value: 'test-service-account@project.iam.gserviceaccount.com',
+            type: 'text',
+          },
+          audience: {
+            value:
+              '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+            type: 'text',
+          },
+          gcp_credentials_cloud_connector_id: {
+            value: 'gcp-connector-id',
+            type: 'text',
+          },
+        },
+        packagePolicyCount: 1,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+      };
+
+      // Mock the cloudConnectorService.create method
+      const originalCreate = cloudConnectorService.create;
+      cloudConnectorService.create = jest.fn().mockResolvedValue(mockCloudConnector);
+
+      try {
+        const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+          soClient,
+          enrichedPackagePolicy,
+          agentPolicy,
+          mockPackageInfo
+        );
+
+        expect(result).toEqual(mockCloudConnector);
+        expect(cloudConnectorService.create).toHaveBeenCalledWith(soClient, {
+          name: 'gcp-cloud-connector: test-gcp-package-policy',
+          vars: {
+            service_account: {
+              value: 'test-service-account@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'gcp-connector-id',
+              type: 'text',
+            },
+          },
+          cloudProvider: 'gcp',
+        });
+      } finally {
+        // Restore the original method
+        cloudConnectorService.create = originalCreate;
+      }
+    });
+
+    it('should update existing GCP cloud connector when cloud_connector_id is provided', async () => {
+      const soClient = createSavedObjectClientMock();
+      const enrichedPackagePolicy = {
+        name: 'test-gcp-package-policy',
+        supports_cloud_connector: true,
+        cloud_connector_id: 'existing-gcp-connector-id',
+        inputs: [
+          {
+            type: 'cis_gcp',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  service_account: {
+                    value: 'updated-service-account@project.iam.gserviceaccount.com',
+                    type: 'text',
+                  },
+                  audience: {
+                    value:
+                      '//iam.googleapis.com/projects/987654321/locations/global/workloadIdentityPools/new-pool/providers/new-provider',
+                    type: 'text',
+                  },
+                  gcp_credentials_cloud_connector_id: {
+                    value: 'updated-gcp-connector-id',
+                    type: 'text',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const agentPolicy = {
+        id: 'test',
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'gcp',
+          },
+        },
+      } as any;
+
+      // Mock updated cloud connector response
+      const updatedCloudConnector = {
+        id: 'existing-gcp-connector-id',
+        name: 'test-gcp-connector',
+        cloudProvider: 'gcp',
+        vars: {
+          service_account: {
+            value: 'updated-service-account@project.iam.gserviceaccount.com',
+            type: 'text',
+          },
+          audience: {
+            value:
+              '//iam.googleapis.com/projects/987654321/locations/global/workloadIdentityPools/new-pool/providers/new-provider',
+            type: 'text',
+          },
+          gcp_credentials_cloud_connector_id: {
+            value: 'updated-gcp-connector-id',
+            type: 'text',
+          },
+        },
+        packagePolicyCount: 1,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T02:00:00.000Z',
+      };
+
+      // Mock the cloudConnectorService.update method
+      const originalUpdate = cloudConnectorService.update;
+      cloudConnectorService.update = jest.fn().mockResolvedValue(updatedCloudConnector);
+
+      try {
+        const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+          soClient,
+          enrichedPackagePolicy,
+          agentPolicy,
+          mockPackageInfo
+        );
+
+        expect(result).toEqual(updatedCloudConnector);
+        expect(cloudConnectorService.update).toHaveBeenCalledWith(
+          soClient,
+          'existing-gcp-connector-id',
+          {
+            vars: {
+              service_account: {
+                value: 'updated-service-account@project.iam.gserviceaccount.com',
+                type: 'text',
+              },
+              audience: {
+                value:
+                  '//iam.googleapis.com/projects/987654321/locations/global/workloadIdentityPools/new-pool/providers/new-provider',
+                type: 'text',
+              },
+              gcp_credentials_cloud_connector_id: {
+                value: 'updated-gcp-connector-id',
+                type: 'text',
+              },
+            },
+          }
+        );
+      } finally {
+        cloudConnectorService.update = originalUpdate;
+      }
+    });
   });
   describe('inspect', () => {
     it('should return compiled inputs', async () => {
