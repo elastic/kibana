@@ -178,7 +178,7 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
               >
                 docs
                 <span
-                  class="css-1j75qc1"
+                  class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
                   role="presentation"
                 />

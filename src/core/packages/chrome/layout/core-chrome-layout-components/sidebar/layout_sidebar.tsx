@@ -24,12 +24,12 @@ export interface LayoutSidebarProps {
  */
 export const LayoutSidebar = ({ children }: LayoutSidebarProps) => {
   return (
-    <nav
+    <div
       css={styles.root}
       className="kbnChromeLayoutSidebar"
       data-test-subj="kbnChromeLayoutSidebar"
     >
       {children}
-    </nav>
+    </div>
   );
 };

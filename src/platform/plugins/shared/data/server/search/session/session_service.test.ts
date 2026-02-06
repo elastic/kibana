@@ -17,8 +17,10 @@ import moment from 'moment';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { ConfigSchema } from '../../config';
 import type { AuthenticatedUser, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
+import { SEARCH_SESSION_TYPE, SearchSessionStatus, SearchStatus } from '../../../common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import * as updateSessionStatusModule from './status/update_session_status';
+import { createSearchSessionRequestInfoMock } from './mocks';
 
 const MAX_UPDATE_RETRIES = 3;
 
@@ -59,6 +61,9 @@ describe('SearchSessionService', () => {
       username: mockUser1.username,
     },
     references: [],
+  };
+  const mockBulkGetResponse = {
+    saved_objects: [mockSavedObject],
   };
 
   describe('Feature disabled', () => {
@@ -284,7 +289,7 @@ describe('SearchSessionService', () => {
           per_page: 1,
           page: 0,
           statuses: {
-            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS },
+            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS, errors: [] },
           },
         };
         savedObjectsClient.find.mockResolvedValue(mockResponse);
@@ -375,7 +380,7 @@ describe('SearchSessionService', () => {
           per_page: 1,
           page: 0,
           statuses: {
-            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS },
+            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS, errors: [] },
           },
         };
         savedObjectsClient.find.mockResolvedValue(mockResponse);
@@ -567,7 +572,7 @@ describe('SearchSessionService', () => {
           per_page: 1,
           page: 0,
           statuses: {
-            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS },
+            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS, errors: [] },
           },
         };
         savedObjectsClient.find.mockResolvedValue(mockResponse);
@@ -720,6 +725,7 @@ describe('SearchSessionService', () => {
           attributes: {},
         };
         savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
+        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
 
         await service.trackId({ savedObjectsClient }, mockUser1, searchId, {
           sessionId,
@@ -743,6 +749,7 @@ describe('SearchSessionService', () => {
 
       it('passes retryOnConflict param to es', async () => {
         const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
 
         await service.trackId({ savedObjectsClient }, mockUser1, searchId, {
           sessionId,
@@ -774,6 +781,7 @@ describe('SearchSessionService', () => {
           attributes: {},
         };
         savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
+        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
 
         await Promise.all([
           service.trackId({ savedObjectsClient }, mockUser1, searchId1, {
@@ -921,6 +929,123 @@ describe('SearchSessionService', () => {
             "FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0" => "ese",
           }
         `);
+      });
+    });
+
+    describe('updateStatuses', () => {
+      describe('when the user does NOT have access to all sessions', () => {
+        it('should throw', async () => {
+          // Given
+          savedObjectsClient.bulkGet.mockResolvedValue(mockBulkGetResponse);
+
+          // When / Then
+          await expect(
+            service.updateStatuses(
+              { savedObjectsClient, asCurrentUserElasticsearchClient },
+              mockUser2,
+              [mockBulkGetResponse.saved_objects[0].id]
+            )
+          ).rejects.toThrow();
+        });
+      });
+
+      describe('when there are no sessions', () => {
+        it('should return an empty map', async () => {
+          // Given
+          savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
+
+          // When
+          const statuses = await service.updateStatuses(
+            { savedObjectsClient, asCurrentUserElasticsearchClient },
+            mockUser1,
+            []
+          );
+
+          // Then
+          expect(statuses).toEqual({
+            statuses: {},
+          });
+        });
+      });
+
+      it('should return the statuses', async () => {
+        // Given
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            {
+              ...mockSavedObject,
+              id: 'session1',
+              attributes: {
+                ...mockSavedObject.attributes,
+                sessionId: 'session1',
+              },
+            },
+            {
+              ...mockSavedObject,
+              id: 'session2',
+              attributes: {
+                ...mockSavedObject.attributes,
+                sessionId: 'session2',
+              },
+            },
+            {
+              ...mockSavedObject,
+              id: 'session3',
+              attributes: {
+                ...mockSavedObject.attributes,
+                sessionId: 'session3',
+              },
+            },
+          ],
+        });
+
+        const spy = jest.spyOn(updateSessionStatusModule, 'updateSessionStatus');
+
+        spy.mockResolvedValueOnce({
+          status: SearchSessionStatus.COMPLETE,
+        });
+        spy.mockResolvedValueOnce({
+          status: SearchSessionStatus.ERROR,
+          searchStatuses: [
+            createSearchSessionRequestInfoMock({
+              status: SearchStatus.ERROR,
+              error: { code: 500, message: 'Test errors' },
+            }),
+          ],
+        });
+        spy.mockResolvedValueOnce({
+          status: SearchSessionStatus.ERROR,
+          searchStatuses: [
+            createSearchSessionRequestInfoMock({
+              status: SearchStatus.ERROR,
+              error: { code: 500 },
+            }),
+          ],
+        });
+
+        // When
+        const res = await service.updateStatuses(
+          { savedObjectsClient, asCurrentUserElasticsearchClient },
+          mockUser1,
+          ['session1', 'session2', 'session3']
+        );
+
+        // Then
+        expect(res).toEqual({
+          statuses: {
+            session1: { status: SearchSessionStatus.COMPLETE, errors: [] },
+            session2: {
+              status: SearchSessionStatus.ERROR,
+              errors: [
+                'Search status for search with id 1234 threw an error Test errors (statusCode: 500)',
+              ],
+            },
+            session3: {
+              status: SearchSessionStatus.ERROR,
+              errors: ['Search 1234 completed with a 500 status'],
+            },
+          },
+        });
       });
     });
   });

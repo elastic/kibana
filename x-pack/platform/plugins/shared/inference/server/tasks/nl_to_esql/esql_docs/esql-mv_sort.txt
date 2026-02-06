@@ -1,6 +1,6 @@
 # MV_SORT
 
-Sorts a multivalued field in lexicographical order.
+The MV_SORT function sorts the values in a multivalued field in lexicographical order.
 
 ## Syntax
 
@@ -8,25 +8,20 @@ Sorts a multivalued field in lexicographical order.
 
 ### Parameters
 
-#### `field`
+#### field
 
-- Multivalue expression. If `null`, the function returns `null`.
+Multivalue expression to be sorted. If the value is `null`, the function returns `null`.
 
-#### `order`
+#### order
 
-- Sort order. The valid options are `ASC` and `DESC`. The default is `ASC`.
+Optional. Specifies the sort order. Valid options are `ASC` (ascending) and `DESC` (descending). The default is `ASC`.
 
 ## Examples
+
+Sorts the values in the array `[4, 2, -3, 2]` in both ascending and descending order, assigning the sorted arrays to `sa` and `sd` respectively.
 
 ```esql
 ROW a = [4, 2, -3, 2]
 | EVAL sa = mv_sort(a), sd = mv_sort(a, "DESC")
 ```
-
-This example sorts the multivalued field `a` in ascending order (`sa`) and descending order (`sd`).
-
-
-```esql
-FROM bag_of_numbers
-| EVAL sorted = MV_SORT(numbers)
-```
+This example sorts the array `[4, 2, -3, 2]` in ascending order and descending order, storing the results in `sa` and `sd` respectively.
