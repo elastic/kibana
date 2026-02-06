@@ -25,6 +25,7 @@ import {
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { useChildWorkflowExecution } from '../model/use_child_workflow_execution';
 
 const WidthStorageKey = 'WORKFLOWS_EXECUTION_DETAILS_WIDTH';
 const DefaultSidebarWidth = 300;
@@ -68,6 +69,48 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       return null;
     }, [workflowExecution]);
 
+    // Check if selected step is a child step (prefixed with "child::")
+    const isChildStep = useMemo(() => {
+      return selectedStepExecutionId?.startsWith('child::') ?? false;
+    }, [selectedStepExecutionId]);
+
+    // Extract child execution ID and step execution ID from prefixed ID
+    // Handles both single-level and multi-level nesting:
+    // - Single: child::${childExecutionId}::${stepExecutionId}
+    // - Nested: child::${parentChildId}::child::${subChildId}::${stepExecutionId}
+    const { childExecutionId, actualStepExecutionId } = useMemo(() => {
+      if (!isChildStep || !selectedStepExecutionId) {
+        return { childExecutionId: null, actualStepExecutionId: null };
+      }
+      // Split by '::' and parse the structure
+      const parts = selectedStepExecutionId.split('::');
+      if (parts.length >= 3 && parts[0] === 'child') {
+        // Find the last occurrence of 'child' to determine the deepest level
+        // The pattern is: child::execId::child::execId::...::stepId
+        let lastChildIndex = 0;
+        for (let i = 0; i < parts.length; i += 2) {
+          if (parts[i] === 'child') {
+            lastChildIndex = i;
+          } else {
+            break;
+          }
+        }
+        // The execution ID is always after 'child'
+        // The step execution ID is the last part
+        const deepestChildExecutionId = parts[lastChildIndex + 1];
+        const stepExecutionId = parts[parts.length - 1];
+        return {
+          childExecutionId: deepestChildExecutionId,
+          actualStepExecutionId: stepExecutionId,
+        };
+      }
+      return { childExecutionId: null, actualStepExecutionId: null };
+    }, [isChildStep, selectedStepExecutionId]);
+
+    // Fetch child execution if needed
+    const { data: childExecution, isLoading: isLoadingChildExecution } =
+      useChildWorkflowExecution(childExecutionId);
+
     const selectedStepExecution = useMemo(() => {
       if (!selectedStepExecutionId) {
         return undefined;
@@ -81,11 +124,44 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         return buildTriggerStepExecutionFromContext(workflowExecution) ?? undefined;
       }
 
+      // Handle child step selection
+      // Only return the step if child execution is loaded (not loading)
+      if (isChildStep) {
+        if (isLoadingChildExecution) {
+          // Return undefined while loading to show loading state
+          return undefined;
+        }
+        if (childExecution && actualStepExecutionId) {
+          // Handle pseudo-steps for child executions (Overview, Inputs, Trigger)
+          if (actualStepExecutionId === '__overview') {
+            return buildOverviewStepExecutionFromContext(childExecution);
+          }
+          if (
+            actualStepExecutionId === '__pseudo_inputs__' ||
+            actualStepExecutionId === '__pseudo_trigger__' ||
+            actualStepExecutionId === 'trigger'
+          ) {
+            return buildTriggerStepExecutionFromContext(childExecution) ?? undefined;
+          }
+          // For regular steps, find in child execution's step executions
+          return childExecution.stepExecutions?.find((step) => step.id === actualStepExecutionId);
+        }
+        // If child execution failed to load or step not found, return undefined
+        return undefined;
+      }
+
       if (!workflowExecution?.stepExecutions?.length) {
         return undefined;
       }
       return workflowExecution.stepExecutions.find((step) => step.id === selectedStepExecutionId);
-    }, [workflowExecution, selectedStepExecutionId]);
+    }, [
+      workflowExecution,
+      selectedStepExecutionId,
+      isChildStep,
+      childExecution,
+      actualStepExecutionId,
+      isLoadingChildExecution,
+    ]);
 
     return (
       <EuiPanel paddingSize="none" color="plain" hasShadow={false} style={{ height: '100%' }}>
@@ -107,9 +183,13 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
           fixedPanelOrder={ResizableLayoutOrder.Start}
           flexPanel={
             <WorkflowStepExecutionDetails
-              workflowExecutionId={executionId}
+              workflowExecutionId={isChildStep && childExecutionId ? childExecutionId : executionId}
               stepExecution={selectedStepExecution}
-              workflowExecutionDuration={workflowExecution?.duration ?? undefined}
+              workflowExecutionDuration={
+                isChildStep && childExecution
+                  ? childExecution.duration ?? undefined
+                  : workflowExecution?.duration ?? undefined
+              }
             />
           }
           minFlexPanelSize={200}

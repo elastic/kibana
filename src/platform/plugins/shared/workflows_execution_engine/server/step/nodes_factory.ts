@@ -21,7 +21,10 @@ import type {
   ExitNormalPathNode,
   ExitRetryNode,
   HttpGraphNode,
+  WorkflowExecuteAsyncGraphNode,
+  WorkflowExecuteGraphNode,
   WorkflowGraph,
+  WorkflowOutputGraphNode,
 } from '@kbn/workflows/graph';
 import {
   isDataSet,
@@ -61,6 +64,8 @@ import {
   ExitWorkflowTimeoutZoneNodeImpl,
 } from './timeout_zone_step';
 import { WaitStepImpl } from './wait_step/wait_step';
+import { WorkflowExecuteStepImpl } from './workflow_execute_step/workflow_execute_step_impl';
+import { WorkflowOutputStepImpl } from './workflow_output_step/workflow_output_step_impl';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { UrlValidator } from '../lib/url_validator';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
@@ -155,6 +160,8 @@ export class NodesFactory {
     return this.createGenericStepNode(stepExecutionRuntime);
   }
 
+  // Switch is good readable
+  // eslint-disable-next-line complexity
   private createGenericStepNode(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
     const node = stepExecutionRuntime.node;
     const stepLogger = stepExecutionRuntime.stepLogger;
@@ -273,6 +280,49 @@ export class NodesFactory {
           node as AtomicGraphNode,
           stepExecutionRuntime,
           this.connectorExecutor,
+          this.workflowRuntime,
+          stepLogger
+        );
+      case 'workflow.execute':
+      case 'workflow.executeAsync':
+        if (!this.dependencies.workflowsExecutionEngine) {
+          throw new Error('WorkflowsExecutionEngine is not available in dependencies');
+        }
+        if (!this.dependencies.workflowRepository) {
+          throw new Error('WorkflowRepository is not available in dependencies');
+        }
+        if (!this.dependencies.workflowExecutionRepository) {
+          throw new Error('WorkflowExecutionRepository is not available in dependencies');
+        }
+        if (!this.dependencies.stepExecutionRepository) {
+          throw new Error('StepExecutionRepository is not available in dependencies');
+        }
+        if (!this.dependencies.spaceId) {
+          throw new Error('spaceId is not available in dependencies');
+        }
+        if (!this.dependencies.request) {
+          throw new Error('request is not available in dependencies');
+        }
+        return new WorkflowExecuteStepImpl(
+          node as WorkflowExecuteGraphNode | WorkflowExecuteAsyncGraphNode,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          this.dependencies.workflowRepository,
+          this.dependencies.spaceId,
+          this.dependencies.request,
+          this.dependencies.workflowsExecutionEngine,
+          this.dependencies.workflowExecutionRepository,
+          this.dependencies.stepExecutionRepository,
+          this.workflowLogger
+        );
+      case 'workflow.output':
+        this.workflowLogger.logDebug(`Creating workflow.output step`, {
+          event: { action: 'workflow-output-step-creation', outcome: 'success' },
+          tags: ['step-factory', 'workflow-output', 'core-step'],
+        });
+        return new WorkflowOutputStepImpl(
+          node as WorkflowOutputGraphNode,
+          stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger
         );
