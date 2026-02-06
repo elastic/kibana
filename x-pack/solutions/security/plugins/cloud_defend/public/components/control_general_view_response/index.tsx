@@ -9,7 +9,7 @@ import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCallOut,
-  EuiIcon,
+  EuiIconTip,
   EuiToolTip,
   EuiText,
   EuiBadge,
@@ -255,9 +255,11 @@ export const ControlGeneralViewResponse = ({
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={i18n.getResponseIconTooltip(response.type)}>
-              <EuiIcon color="primary" type={getSelectorTypeIcon(response.type)} />
-            </EuiToolTip>
+            <EuiIconTip
+              content={i18n.getResponseIconTooltip(response.type)}
+              color="primary"
+              type={getSelectorTypeIcon(response.type)}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="s" css={styles.accordionHeader}>
@@ -339,13 +341,18 @@ export const ControlGeneralViewResponse = ({
       <EuiForm component="form" fullWidth error={errorList} isInvalid={errorList.length > 0}>
         {warnFIMUsingSlashStarStar && (
           <EuiFormRow fullWidth>
-            <EuiCallOut color="warning" title={i18n.warningFIMUsingSlashStarStarTitle}>
+            <EuiCallOut
+              color="warning"
+              title={i18n.warningFIMUsingSlashStarStarTitle}
+              announceOnMount={false}
+            >
               <p>{i18n.warningFIMUsingSlashStarStarText}</p>
             </EuiCallOut>
           </EuiFormRow>
         )}
         <EuiFormRow label={i18n.matchSelectors} fullWidth isInvalid={!!errors.match}>
           <EuiComboBox
+            isInvalid={!!errors.match}
             aria-label={i18n.matchSelectors}
             fullWidth
             selectedOptions={selectedMatches}

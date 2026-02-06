@@ -167,6 +167,7 @@ import {
   AgentlessPoliciesServiceImpl,
 } from './services/agentless/agentless_policies';
 import { registerReassignAgentsToVersionSpecificPoliciesTask } from './services/agent_policies/reassign_agents_to_version_specific_policies_task';
+import { VersionSpecificPolicyAssignmentTask } from './tasks/version_specific_policy_assignment_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -342,6 +343,7 @@ export class FleetPlugin
   private autoInstallContentPackagesTask?: AutoInstallContentPackagesTask;
   private agentStatusChangeTask?: AgentStatusChangeTask;
   private fleetPolicyRevisionsCleanupTask?: FleetPolicyRevisionsCleanupTask;
+  private versionSpecificPolicyAssignmentTask?: VersionSpecificPolicyAssignmentTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -763,6 +765,14 @@ export class FleetPlugin
         maxPoliciesPerRun: config.fleetPolicyRevisionsCleanup?.maxPoliciesPerRun,
       },
     });
+    this.versionSpecificPolicyAssignmentTask = new VersionSpecificPolicyAssignmentTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+      config: {
+        taskInterval: config.versionSpecificPolicyAssignment?.taskInterval,
+      },
+    });
     this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());
 
     // Register fields metadata extractors
@@ -852,6 +862,9 @@ export class FleetPlugin
       this.configInitialValue as FleetConfigType
     ).catch(() => {});
     this.fleetPolicyRevisionsCleanupTask
+      ?.start({ taskManager: plugins.taskManager })
+      .catch(() => {});
+    this.versionSpecificPolicyAssignmentTask
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});
 

@@ -2,7 +2,7 @@
 
 exports[`Statement component renders a CollapsibleStatement with else body for non-IfElement 1`] = `
 <li
-  className="monPipelineViewer__listItem"
+  css="unknown styles"
 >
   <div
     css="unknown styles"
@@ -37,7 +37,7 @@ exports[`Statement component renders a CollapsibleStatement with else body for n
 
 exports[`Statement component renders a CollapsibleStatement with if body for branch model 1`] = `
 <li
-  className="monPipelineViewer__listItem"
+  css="unknown styles"
 >
   <div
     css="unknown styles"
@@ -82,7 +82,7 @@ exports[`Statement component renders a CollapsibleStatement with if body for bra
 
 exports[`Statement component renders a PluginStatement component for plugin model 1`] = `
 <li
-  className="monPipelineViewer__listItem"
+  css="unknown styles"
 >
   <div
     css="unknown styles"
@@ -114,7 +114,7 @@ exports[`Statement component renders a PluginStatement component for plugin mode
 
 exports[`Statement component renders spacers for element with depth > 0 1`] = `
 <li
-  className="monPipelineViewer__listItem"
+  css="unknown styles"
 >
   <div
     css="unknown styles"

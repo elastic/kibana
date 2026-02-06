@@ -285,6 +285,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     restoreRollback: jest.fn(),
     cleanupRollbackSavedObjects: jest.fn(),
     bumpAgentPolicyRevisionAfterRollback: jest.fn(),
+    compilePackagePolicyForVersions: jest.fn(),
   };
 };
 
