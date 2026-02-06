@@ -26,7 +26,7 @@ import type {
   LensCreateRequestQuery,
   LensItemMeta,
   LensUpdateRequestQuery,
-} from '../../server/api/routes/visualizations/types';
+} from '../../server/api/routes/types';
 import { getLensBuilder } from '../lazy_builder';
 
 export interface LensItemResponse<M extends Record<string, string | boolean> = {}> {

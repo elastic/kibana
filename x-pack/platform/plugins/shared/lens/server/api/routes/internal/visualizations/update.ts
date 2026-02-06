@@ -9,18 +9,22 @@ import { boomify, isBoom } from '@hapi/boom';
 
 import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
-import { LENS_VIS_API_PATH, LENS_API_VERSION, LENS_API_ACCESS } from '../../../../common/constants';
-import type { LensUpdateIn, LensSavedObject } from '../../../content_management';
-import type { LensUpdateResponseBody, RegisterAPIRouteFn } from '../../types';
+import {
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
+} from '../../../../../common/constants';
+import type { LensUpdateIn, LensSavedObject } from '../../../../content_management';
+import type { LensUpdateResponseBody, RegisterAPIRouteFn } from '../../../types';
 import {
   lensUpdateRequestBodySchema,
   lensUpdateRequestParamsSchema,
   lensUpdateRequestQuerySchema,
   lensUpdateResponseBodySchema,
 } from './schema';
-import { getLensRequestConfig, getLensResponseItem } from '../utils';
+import { getLensRequestConfig, getLensResponseItem } from '../../utils';
 
-export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
+export const registerLensInternalVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
   router,
   { contentManagement, builder }
 ) => {

@@ -9,7 +9,7 @@ import type { Optional } from 'utility-types';
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { lensCMGetResultSchema } from '../../../content_management';
+import type { lensCMGetResultSchema } from '../../../../content_management';
 import type {
   lensCreateRequestBodySchema,
   lensCreateRequestQuerySchema,

@@ -8,18 +8,22 @@
 import { boomify, isBoom } from '@hapi/boom';
 
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
-import { LENS_VIS_API_PATH, LENS_API_VERSION, LENS_API_ACCESS } from '../../../../common/constants';
-import type { LensCreateIn, LensSavedObject } from '../../../content_management';
-import type { LensCreateResponseBody, RegisterAPIRouteFn } from '../../types';
+import {
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
+} from '../../../../../common/constants';
+import type { LensCreateIn, LensSavedObject } from '../../../../content_management';
+import type { LensCreateResponseBody, RegisterAPIRouteFn } from '../../../types';
 import {
   lensCreateRequestBodySchema,
   lensCreateRequestParamsSchema,
   lensCreateRequestQuerySchema,
   lensCreateResponseBodySchema,
 } from './schema';
-import { getLensRequestConfig, getLensResponseItem } from '../utils';
+import { getLensRequestConfig, getLensResponseItem } from '../../utils';
 
-export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
+export const registerLensInternalVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   router,
   { contentManagement, builder }
 ) => {

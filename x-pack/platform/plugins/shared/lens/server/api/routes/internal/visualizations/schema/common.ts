@@ -11,8 +11,8 @@ import {
   lensCommonSavedObjectSchemaV2,
   lensItemDataSchemaV2,
   lensSavedObjectSchemaV2,
-} from '../../../../content_management';
-import { pickFromObjectSchema } from '../../../../utils';
+} from '../../../../../content_management';
+import { pickFromObjectSchema } from '../../../../../utils';
 
 /**
  * The Lens item meta returned from the server

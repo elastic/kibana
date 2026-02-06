@@ -12,10 +12,10 @@ import {
   lensCMCreateOptionsSchema,
   lensItemDataSchemaV2,
   lensItemSchemaV2,
-} from '../../../../content_management';
-import { lensItemDataSchemaV0 } from '../../../../content_management/v0';
-import { lensItemDataSchemaV1 } from '../../../../content_management/v1';
-import { pickFromObjectSchema } from '../../../../utils';
+} from '../../../../../content_management';
+import { lensItemDataSchemaV0 } from '../../../../../content_management/v0';
+import { lensItemDataSchemaV1 } from '../../../../../content_management/v1';
+import { pickFromObjectSchema } from '../../../../../utils';
 import { lensResponseItemSchema } from './common';
 
 export const lensCreateRequestParamsSchema = schema.object(

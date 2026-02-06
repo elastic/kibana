@@ -6,10 +6,10 @@
  */
 
 import type { RegisterAPIRoutesArgs } from '../types';
-import { registerLensVisualizationsAPIRoutes } from './visualizations';
+import { registerLensInternalAPIRoutes } from './internal';
 
 export function registerLensAPIRoutes(args: RegisterAPIRoutesArgs) {
-  registerLensVisualizationsAPIRoutes(args);
+  registerLensInternalAPIRoutes(args);
 }
 
-export * from './schema';
+export * from './internal/schema';
