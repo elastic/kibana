@@ -18,6 +18,9 @@ export const COMMON_HEADERS = {
 export const ES_ARCHIVE_BASIC_INDEX =
   'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
+export const ES_ARCHIVE_CONFLICTS =
+  'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/conflicts';
+
 export const KBN_ARCHIVE_SAVED_OBJECTS_BASIC =
   'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json';
 

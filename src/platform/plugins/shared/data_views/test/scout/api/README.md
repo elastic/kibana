@@ -1,10 +1,10 @@
 # Data Views API Tests - Scout Migration
 
-This directory contains Scout API test skeletons migrated from FTR tests located in `x-pack/platform/test/serverless/api_integration/test_suites/data_views/`.
+This directory contains Scout API tests migrated from FTR tests located in `src/platform/test/api_integration/apis/data_views/`.
 
 ## Status
 
-✅ **All 35 skeleton files created!** (2 config files + 33 test files) These are skeleton files with TODO comments. The actual test implementation needs to be completed.
+✅ **All test files migrated and implemented!** (2 config files + 38 test files)
 
 ## Structure
 
@@ -23,6 +23,7 @@ src/platform/plugins/shared/data_views/test/scout/api/
 │   ├── fields_for_wildcard_route_filter.spec.ts   # ✅ Created
 │   ├── data_views_crud_create_validation.spec.ts  # ✅ Created
 │   ├── data_views_crud_create_main.spec.ts        # ✅ Created
+│   ├── data_views_crud_create_spaces.spec.ts      # ✅ Created - Namespaces/spaces tests
 │   ├── data_views_crud_get_errors.spec.ts         # ✅ Created
 │   ├── data_views_crud_get_main.spec.ts           # ✅ Created
 │   ├── data_views_crud_get_all.spec.ts            # ✅ Created
@@ -50,15 +51,15 @@ src/platform/plugins/shared/data_views/test/scout/api/
 └── README.md                                       # This file
 ```
 
-## All 35 Files Created ✅
+## All 38 Test Files Created ✅
 
 ### Configuration & Fixtures (2 files)
 1. **playwright.config.ts** - Playwright configuration
 2. **fixtures/constants.ts** - Common headers and archive paths
 
-### Test Skeleton Files (33 files)
+### Test Files (38 files)
 
-All test files include proper Scout imports, test structure, fixtures, and numbered TODO comments for implementation.
+All test files are fully implemented with proper Scout structure and best practices.
 
 **ES Errors (1 file):**
 - `es_errors.spec.ts`
@@ -73,9 +74,10 @@ All test files include proper Scout imports, test structure, fixtures, and numbe
 - `fields_for_wildcard_route_conflicts.spec.ts`
 - `fields_for_wildcard_route_filter.spec.ts`
 
-**Data Views CRUD (9 files):**
+**Data Views CRUD (10 files):**
 - `data_views_crud_create_validation.spec.ts`
 - `data_views_crud_create_main.spec.ts`
+- `data_views_crud_create_spaces.spec.ts` - Tests for namespaces/spaces functionality
 - `data_views_crud_get_errors.spec.ts`
 - `data_views_crud_get_main.spec.ts`
 - `data_views_crud_get_all.spec.ts`
@@ -107,30 +109,46 @@ All test files include proper Scout imports, test structure, fixtures, and numbe
 - `swap_references_main.spec.ts`
 - `integration.spec.ts`
 
-## Next Steps
+## Running Tests
 
-1. **Implement test logic**: Fill in the TODO comments with actual implementation based on original FTR tests
-2. **Add API helpers** (optional): Consider creating a data views API service in `@kbn/scout` for common operations
-3. **Run tests**: Use `node scripts/scout.js run-tests --stateful --config src/platform/plugins/shared/data_views/test/scout/api/playwright.config.ts`
+```bash
+node scripts/scout.js run-tests --stateful --config src/platform/plugins/shared/data_views/test/scout/api/playwright.config.ts
+```
 
-## Migration Guidelines
+## Migration Notes
 
-When implementing the TODOs:
+### Intentionally Not Migrated
 
-- Use `apiTest` instead of `test` for API tests
-- Import from `@kbn/scout`: `import { expect, apiTest, tags } from '@kbn/scout'`
-- Use fixtures: `{ apiClient, kbnClient, esClient, requestAuth }`
-- Set proper headers using `COMMON_HEADERS` and API credentials
-- Reference original FTR tests in `x-pack/platform/test/serverless/api_integration/test_suites/data_views/`
+The following FTR tests were **intentionally not migrated** because they test deprecated features not supported in Serverless:
+
+- `scripted_fields_crud/` - Scripted fields are deprecated
+- `deprecations/scripted_fields.ts` - Tests scripted fields deprecation warnings
+- `es_errors/errors.js` - Unit tests for error utilities (not API endpoint tests)
+
+### Best Practices Applied
+
+- **Cleanup in hooks**: All tests use `afterEach` hooks to clean up created resources
+- **Response body validation**: Tests verify response structure, not just status codes
+- **Deployment agnostic**: All tests use `tags.DEPLOYMENT_AGNOSTIC` tag
+- **API credentials**: Tests use `requestAuth.getApiKey()` for authentication
+
+### Admin Role Usage
+
+These tests use the `admin` role because they require:
+- Creating/deleting data views across spaces
+- Managing Kibana spaces
+- Full index pattern management privileges
+
+For tests that only need to read data views, consider using a `viewer` or `editor` role.
 
 ## Tags
 
-All tests use `tags.PLATFORM` since these are platform-level API tests that should run on:
+All tests use `tags.DEPLOYMENT_AGNOSTIC` since these are platform-level API tests that should run on:
 - ESS (Stateful)
 - Serverless (all project types)
 
 ## Reference Documentation
 
 - Scout README: `src/platform/packages/shared/kbn-scout/README.md`
-- Migration Guide: `src/platform/packages/private/kbn-scout-info/llms/README.md`
-- Original FTR tests: `x-pack/platform/test/serverless/api_integration/test_suites/data_views/`
+- Scout Best Practices: `src/platform/packages/private/kbn-scout-info/llms/scout-best-practices.md`
+- Original FTR tests: `src/platform/test/api_integration/apis/data_views/`

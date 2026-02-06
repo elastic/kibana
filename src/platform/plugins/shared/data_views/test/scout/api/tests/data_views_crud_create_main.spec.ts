@@ -17,15 +17,37 @@ configArray.forEach((config) => {
     { tag: tags.DEPLOYMENT_AGNOSTIC },
     () => {
       let adminApiCredentials: RoleApiCredentials;
+      // Track created data view IDs for cleanup
+      let createdIds: string[] = [];
 
       apiTest.beforeAll(async ({ esArchiver, requestAuth, log }) => {
-        // Use admin role - API key auth for public endpoints
+        // Admin role required for creating data views and managing spaces
         adminApiCredentials = await requestAuth.getApiKey('admin');
         log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
 
         // Load ES archive for tests that need basic_index
         await esArchiver.loadIfNeeded(ES_ARCHIVE_BASIC_INDEX);
         log.info(`Loaded ES archive: ${ES_ARCHIVE_BASIC_INDEX}`);
+      });
+
+      apiTest.afterEach(async ({ apiClient, log }) => {
+        // Cleanup: delete all data views created during the test
+        for (const id of createdIds) {
+          try {
+            await apiClient.delete(`${config.path}/${id}`, {
+              headers: {
+                ...COMMON_HEADERS,
+                ...adminApiCredentials.apiKeyHeader,
+              },
+            });
+            log.debug(`Cleaned up ${config.serviceKey} with id: ${id}`);
+          } catch (e) {
+            log.debug(
+              `Failed to clean up ${config.serviceKey} with id: ${id}: ${(e as Error).message}`
+            );
+          }
+        }
+        createdIds = [];
       });
 
       apiTest('can create an index_pattern with just a title', async ({ apiClient, log }) => {
@@ -52,6 +74,8 @@ configArray.forEach((config) => {
         log.info(`Response body: ${JSON.stringify(response.body, null, 2)}`);
 
         expect(response.statusCode).toBe(200);
+        // Track created ID for cleanup - always present on successful creation
+        createdIds.push(response.body[config.serviceKey].id);
       });
 
       apiTest('returns back the created index_pattern object', async ({ apiClient }) => {
@@ -73,6 +97,7 @@ configArray.forEach((config) => {
         expect(response.body[config.serviceKey].title).toBe(title);
         expect(typeof response.body[config.serviceKey].id).toBe('string');
         expect(response.body[config.serviceKey].id.length).toBeGreaterThan(0);
+        createdIds.push(response.body[config.serviceKey].id);
       });
 
       apiTest(
@@ -101,6 +126,7 @@ configArray.forEach((config) => {
           expect(response.body[config.serviceKey].id).toBe(id);
           expect(response.body[config.serviceKey].type).toBe('test-type');
           expect(response.body[config.serviceKey].timeFieldName).toBe('test-timeFieldName');
+          createdIds.push(response.body[config.serviceKey].id);
         }
       );
 
@@ -129,6 +155,7 @@ configArray.forEach((config) => {
           expect(response.statusCode).toBe(200);
           expect(response.body[config.serviceKey].title).toBe(title);
           expect(response.body[config.serviceKey].sourceFilters[0].value).toBe('foo');
+          createdIds.push(response.body[config.serviceKey].id);
         }
       );
 
@@ -158,6 +185,7 @@ configArray.forEach((config) => {
           expect(response.statusCode).toBe(200);
           expect(response.body[config.serviceKey].fieldFormats.foo.id).toBe('test-id');
           expect(response.body[config.serviceKey].fieldFormats.foo.params).toStrictEqual({});
+          createdIds.push(response.body[config.serviceKey].id);
         }
       );
 
@@ -177,6 +205,8 @@ configArray.forEach((config) => {
         });
 
         expect(response.statusCode).toBe(200);
+        // Track created ID for cleanup - always present on successful creation
+        createdIds.push(response.body[config.serviceKey].id);
       });
 
       apiTest(
@@ -210,6 +240,7 @@ configArray.forEach((config) => {
           expect(response.body[config.serviceKey].fields.foo.customLabel).toBe('Custom Label');
           expect(response.body[config.serviceKey].fields.bar.name).toBe('bar'); // created from es index
           expect(response.body[config.serviceKey].fields.bar.type).toBe('boolean');
+          createdIds.push(response.body[config.serviceKey].id);
         }
       );
 
@@ -244,6 +275,7 @@ configArray.forEach((config) => {
         expect(response.body[config.serviceKey].fields.foo.name).toBe('foo');
         expect(response.body[config.serviceKey].fields.foo.type).toBe('number'); // picked up from index
         expect(response.body[config.serviceKey].fields.fake).toBeUndefined(); // not in index, so not created
+        createdIds.push(response.body[config.serviceKey].id);
       });
 
       apiTest('can add runtime fields', async ({ apiClient }) => {
@@ -276,6 +308,7 @@ configArray.forEach((config) => {
         expect(response.body[config.serviceKey].runtimeFieldMap.runtimeFoo.script.source).toBe(
           'emit(doc["foo"].value)'
         );
+        createdIds.push(response.body[config.serviceKey].id);
       });
 
       apiTest(
@@ -297,6 +330,8 @@ configArray.forEach((config) => {
           });
 
           expect(response.statusCode).toBe(200);
+          // Track created ID for cleanup - always present on successful creation
+          createdIds.push(response.body[config.serviceKey].id);
         }
       );
 
@@ -326,6 +361,7 @@ configArray.forEach((config) => {
           expect(response.statusCode).toBe(200);
           expect(response.body[config.serviceKey].fieldAttrs.foo.count).toBe(123);
           expect(response.body[config.serviceKey].fieldAttrs.foo.customLabel).toBe('test');
+          createdIds.push(response.body[config.serviceKey].id);
         }
       );
 
@@ -361,6 +397,8 @@ configArray.forEach((config) => {
 
           expect(response1.statusCode).toBe(200);
           expect(response2.statusCode).toBe(400);
+          // Track the first one for cleanup (second one failed)
+          createdIds.push(response1.body[config.serviceKey].id);
         }
       );
 
@@ -402,6 +440,8 @@ configArray.forEach((config) => {
           expect(response1.body[config.serviceKey].timeFieldName).toBe('foo');
           expect(response2.body[config.serviceKey].timeFieldName).toBe('bar');
           expect(response1.body[config.serviceKey].id).toBe(response1.body[config.serviceKey].id);
+          // Only track the final one (override replaced the first)
+          createdIds.push(response2.body[config.serviceKey].id);
         }
       );
     }
