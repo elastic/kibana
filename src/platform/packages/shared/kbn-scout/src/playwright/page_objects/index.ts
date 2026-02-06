@@ -14,7 +14,7 @@ import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
-import { FilterBar } from './fiter_bar';
+import { FilterBar } from './filter_bar';
 import { MapsPage } from './maps_page';
 import { RenderablePage } from './renderable_page';
 import { Toasts } from './toasts';
