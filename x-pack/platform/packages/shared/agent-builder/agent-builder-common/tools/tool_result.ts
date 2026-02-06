@@ -80,7 +80,6 @@ export type ResourceListResult = ToolResultMixin<ToolResultType.resourceList>;
 // esql results
 
 export interface EsqlResultsData {
-  source?: 'esql';
   query: string;
   columns: EsqlEsqlColumnInfo[];
   values: FieldValue[][];
