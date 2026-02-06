@@ -17,7 +17,11 @@ import {
   EuiFlexGroup,
   EuiSkeletonText,
   EuiToolTip,
+  EuiBadge,
+  EuiAvatar,
+  EuiText,
 } from '@elastic/eui';
+import { UserAvatar, getUserDisplayName } from '@kbn/user-profile-components';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
@@ -92,8 +96,8 @@ const ActionsTableComponent = () => {
     );
   }, [isHistoryEnabled, items]);
 
-  const { data: _casesMap } = useBulkGetCases(caseIds);
-  const { data: _userProfilesMap } = useBulkGetUserProfiles(profileUids);
+  const { data: casesMap } = useBulkGetCases(caseIds);
+  const { data: userProfilesMap } = useBulkGetUserProfiles(profileUids);
 
   const onTableChange = useCallback(({ page = {} }: any) => {
     const { index, size } = page;
@@ -206,6 +210,111 @@ const ActionsTableComponent = () => {
     [handlePlayClick]
   );
 
+  const renderResultsColumn = useCallback((_: unknown, item: SearchHit) => {
+    const action = item._source as ActionDetails;
+    const counts = action?.result_counts;
+    if (!counts) return <>-</>;
+
+    if (action.pack_id && counts.queries_total != null) {
+      return <>{counts.queries_with_results ?? 0} of {counts.queries_total}</>;
+    }
+
+    return <>{counts.total_rows ?? 0}</>;
+  }, []);
+
+  const renderHistoryAgentsColumn = useCallback((_: unknown, item: SearchHit) => {
+    const action = item._source as ActionDetails;
+    const counts = action?.result_counts;
+    if (!counts || counts.successful_agents == null) {
+      const agentCount = item.fields?.agents?.length ?? action?.agents?.length ?? 0;
+
+      return <>{agentCount}</>;
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="success">{counts.successful_agents}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">x</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color={counts.error_agents ? 'danger' : 'subdued'}>
+            {counts.error_agents ?? 0}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }, []);
+
+  const renderSourceColumn = useCallback((_: unknown, item: SearchHit) => {
+    const action = item._source as ActionDetails;
+    if (action?.user_id) {
+      return <EuiBadge color="hollow">Manual</EuiBadge>;
+    }
+
+    return <EuiBadge color="hollow">Rule</EuiBadge>;
+  }, []);
+
+  const renderCasesColumn = useCallback((_: unknown, item: SearchHit) => {
+    const action = item._source as ActionDetails;
+    const actionCaseIds = action?.case_ids;
+    if (!actionCaseIds?.length || !casesMap) return <>-</>;
+
+    const caseNames = actionCaseIds
+      .map((id) => casesMap.get(id)?.title)
+      .filter(Boolean);
+
+    if (caseNames.length === 0) return <>-</>;
+    if (caseNames.length === 1) return <>{caseNames[0]}</>;
+
+    return (
+      <EuiToolTip content={caseNames.join(', ')}>
+        <>{caseNames[0]} +{caseNames.length - 1}</>
+      </EuiToolTip>
+    );
+  }, [casesMap]);
+
+  const renderRunByColumn = useCallback((_: unknown, item: SearchHit) => {
+    const action = item._source as ActionDetails;
+    const profileUid = action?.user_profile_uid;
+    const userId = action?.user_id;
+
+    if (profileUid && userProfilesMap?.get(profileUid)) {
+      const profile = userProfilesMap.get(profileUid)!;
+      const displayName = getUserDisplayName(profile.user);
+
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{displayName}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    if (userId) {
+      const initials = userId.substring(0, 2).toUpperCase();
+
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiAvatar name={userId} initials={initials} size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{userId}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    return <>-</>;
+  }, [userProfilesMap]);
+
   const existingPackIds = useMemo(() => map(packsData?.data ?? [], 'id'), [packsData]);
 
   const isPlayButtonAvailable = useCallback(
@@ -221,6 +330,95 @@ const ActionsTableComponent = () => {
       return !!(permissions.runSavedQueries || permissions.writeLiveQueries);
     },
     [permissions, existingPackIds]
+  );
+
+  const historyColumns = useMemo(
+    () => [
+      {
+        name: i18n.translate('xpack.osquery.history.table.actionsColumnTitle', {
+          defaultMessage: 'Actions',
+        }),
+        width: '80px',
+        actions: [
+          {
+            available: isPlayButtonAvailable,
+            render: renderPlayButton,
+          },
+          {
+            render: renderActionsColumn,
+          },
+        ],
+      },
+      {
+        field: 'query',
+        name: i18n.translate('xpack.osquery.history.table.queryColumnTitle', {
+          defaultMessage: 'Pack or query',
+        }),
+        truncateText: true,
+        width: '30%',
+        render: renderQueryColumn,
+      },
+      {
+        field: 'results',
+        name: i18n.translate('xpack.osquery.history.table.resultsColumnTitle', {
+          defaultMessage: 'Results',
+        }),
+        width: '100px',
+        render: renderResultsColumn,
+      },
+      {
+        field: 'source',
+        name: i18n.translate('xpack.osquery.history.table.sourceColumnTitle', {
+          defaultMessage: 'Source',
+        }),
+        width: '100px',
+        render: renderSourceColumn,
+      },
+      {
+        field: 'cases',
+        name: i18n.translate('xpack.osquery.history.table.casesColumnTitle', {
+          defaultMessage: 'Cases',
+        }),
+        width: '120px',
+        render: renderCasesColumn,
+      },
+      {
+        field: 'agents',
+        name: i18n.translate('xpack.osquery.history.table.agentsColumnTitle', {
+          defaultMessage: 'Agents',
+        }),
+        width: '120px',
+        render: renderHistoryAgentsColumn,
+      },
+      {
+        field: 'created_at',
+        name: i18n.translate('xpack.osquery.history.table.createdAtColumnTitle', {
+          defaultMessage: 'Created at',
+        }),
+        width: '200px',
+        render: renderTimestampColumn,
+      },
+      {
+        field: 'run_by',
+        name: i18n.translate('xpack.osquery.history.table.runByColumnTitle', {
+          defaultMessage: 'Run by',
+        }),
+        width: '180px',
+        render: renderRunByColumn,
+      },
+    ],
+    [
+      isPlayButtonAvailable,
+      renderActionsColumn,
+      renderCasesColumn,
+      renderHistoryAgentsColumn,
+      renderPlayButton,
+      renderQueryColumn,
+      renderResultsColumn,
+      renderRunByColumn,
+      renderSourceColumn,
+      renderTimestampColumn,
+    ]
   );
 
   const columns = useMemo(
@@ -305,12 +503,14 @@ const ActionsTableComponent = () => {
     return <EuiSkeletonText lines={10} />;
   }
 
+  const activeColumns = isHistoryEnabled ? historyColumns : columns;
+
   return (
     <EuiBasicTable
       items={actionsData?.data?.items ?? EMPTY_ARRAY}
       loading={isFetching && !isLoading}
       // @ts-expect-error update types
-      columns={columns}
+      columns={activeColumns}
       pagination={pagination}
       onChange={onTableChange}
       rowProps={rowProps}

@@ -110,6 +110,9 @@ export const findLiveQueryRoute = (
               if (action.pack_id) {
                 let totalRows = 0;
                 let queriesWithResults = 0;
+                let successfulAgents = 0;
+                let errorAgents = 0;
+                let maxRespondedAgents = 0;
 
                 for (const query of action.queries) {
                   if (query.action_id) {
@@ -118,6 +121,12 @@ export const findLiveQueryRoute = (
                       totalRows += counts.totalRows;
                       if (counts.totalRows > 0) {
                         queriesWithResults++;
+                      }
+
+                      if (counts.respondedAgents > maxRespondedAgents) {
+                        maxRespondedAgents = counts.respondedAgents;
+                        successfulAgents = counts.successfulAgents;
+                        errorAgents = counts.errorAgents;
                       }
                     }
                   }
@@ -131,6 +140,8 @@ export const findLiveQueryRoute = (
                       total_rows: totalRows,
                       queries_with_results: queriesWithResults,
                       queries_total: action.queries.length,
+                      successful_agents: successfulAgents,
+                      error_agents: errorAgents,
                     },
                   },
                 };

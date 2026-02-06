@@ -38,6 +38,14 @@ export interface ActionDetails {
   case_ids?: string[];
   alert_ids?: string[];
   event_ids?: string[];
+  result_counts?: {
+    total_rows: number;
+    responded_agents?: number;
+    successful_agents?: number;
+    error_agents?: number;
+    queries_with_results?: number;
+    queries_total?: number;
+  };
   queries?: Array<{
     action_id: string;
     id: string;
