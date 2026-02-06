@@ -19,6 +19,7 @@ import type { ProjectMonitor } from '../../../../common/runtime_types';
 
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { ProjectMonitorFormatter } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
+import { getBrowserTimeoutWarningsForProjectMonitors } from '../monitor_warnings';
 
 const MAX_PAYLOAD_SIZE = 1048576 * 100; // 50MiB
 
@@ -94,10 +95,13 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
 
       await pushMonitorFormatter.configureAllProjectMonitors();
 
+      const warnings = getBrowserTimeoutWarningsForProjectMonitors(monitors);
+
       return {
         createdMonitors: pushMonitorFormatter.createdMonitors,
         updatedMonitors: pushMonitorFormatter.updatedMonitors,
         failedMonitors: pushMonitorFormatter.failedMonitors,
+        ...(warnings.length > 0 ? { warnings } : {}),
       };
     } catch (error) {
       if (error.output?.statusCode === 404) {

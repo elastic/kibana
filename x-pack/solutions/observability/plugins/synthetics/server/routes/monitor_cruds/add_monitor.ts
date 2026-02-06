@@ -19,9 +19,11 @@ import {
 import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
 import type { SyntheticsRestApiRouteFactory } from '../types';
+import type { MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
+import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -143,7 +145,12 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       addMonitorAPI.initDefaultAlerts(newMonitor.attributes.name);
       addMonitorAPI.setupGettingStarted(newMonitor.id);
 
-      return mapSavedObjectToMonitor({ monitor: newMonitor, internal });
+      const warning = getBrowserTimeoutWarningForMonitor(
+        normalizedMonitor as MonitorFields,
+        newMonitor.id
+      );
+      const monitorResponse = mapSavedObjectToMonitor({ monitor: newMonitor, internal });
+      return warning ? { ...monitorResponse, warnings: [warning] } : monitorResponse;
     } catch (error) {
       if (error instanceof InvalidLocationError || error instanceof InvalidScheduleError) {
         return response.badRequest({ body: { message: error.message } });
