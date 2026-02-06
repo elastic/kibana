@@ -210,8 +210,9 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
               data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsList"
               listItems={dimensionListItems}
               flush
-              gutterSize="s"
+              gutterSize="none"
               wrapText={false}
+              maxWidth={false}
               css={css`
                 .euiListGroupItem {
                   border-bottom: ${euiTheme.border.thin};
@@ -219,7 +220,6 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
                 .euiListGroupItem__text {
                   padding: ${euiTheme.size.s} ${euiTheme.size.xs} ;
                 }
-                gap: 0px;
               `}
             />
             <EuiSpacer size="s" />
