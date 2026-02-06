@@ -347,7 +347,7 @@ export class WrappingPrettyPrinter {
         // Check if this command has special comma rules
         const specialRule = commandsWithSpecialCommaRules.get(ctx.node.name);
         const needsComma = specialRule ? specialRule(argIndex) : commaBetweenArgs;
-        let separator = txt ? (needsComma ? ',' : '') : '';
+        let separator = txt ? (needsComma ? ',' : ' ') : '';
 
         argIndex++;
 
@@ -376,7 +376,7 @@ export class WrappingPrettyPrinter {
           argsPerLine = 1;
         } else {
           argsPerLine++;
-          fragment = separator + (separator ? ' ' : '') + formattedArg;
+          fragment = separator + (needsComma && separator ? ' ' : '') + formattedArg;
           remainingCurrentLine -= fragment.length;
         }
         txt += fragment;
