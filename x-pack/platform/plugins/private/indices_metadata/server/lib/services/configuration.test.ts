@@ -137,9 +137,17 @@ describe('ConfigurationService', () => {
   });
 
   describe('error handling during configuration refresh', () => {
+    const aggregateCauseError = new Error('request failed', {
+      cause: new AggregateError([new Error('connection refused')], 'aggregate error'),
+    });
+
     const errorCases = [
       { name: 'ManifestNotFoundError', error: new ManifestNotFoundError('test-manifest') },
       { name: 'ArtifactNotFoundError', error: new ArtifactNotFoundError('test-artifact') },
+      {
+        name: 'AggregateError (as cause)',
+        error: aggregateCauseError,
+      },
       { name: 'UnexpectedError', error: new Error('unexpected error during artifact retrieval') },
     ];
 
@@ -176,6 +184,79 @@ describe('ConfigurationService', () => {
         // After errors occur, no new emissions should happen as the configuration remains unchanged
         expect(updatedCount).toBe(2);
       });
+    });
+
+    it('should log a warning with error metadata when ManifestNotFoundError occurs', async () => {
+      const error = new ManifestNotFoundError('test-manifest');
+      jest.spyOn(artifactService, 'getArtifact').mockRejectedValue(error);
+
+      configurationService.start(artifactService, defaultConfiguration);
+      configurationService.getIndicesMetadataConfiguration$().subscribe();
+
+      await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Indices metadata configuration manifest not found',
+        { error }
+      );
+    });
+
+    it('should log a warning with error metadata when ArtifactNotFoundError occurs', async () => {
+      const error = new ArtifactNotFoundError('test-artifact');
+      jest.spyOn(artifactService, 'getArtifact').mockRejectedValue(error);
+
+      configurationService.start(artifactService, defaultConfiguration);
+      configurationService.getIndicesMetadataConfiguration$().subscribe();
+
+      await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Indices metadata configuration artifact not found',
+        { error }
+      );
+    });
+
+    it('should log an error with cause details when error has AggregateError cause', async () => {
+      const cause = new AggregateError([new Error('connection refused')], 'aggregate error');
+      const error = new Error('request failed', { cause });
+
+      jest.spyOn(artifactService, 'getArtifact').mockRejectedValue(error);
+
+      configurationService.start(artifactService, defaultConfiguration);
+      configurationService.getIndicesMetadataConfiguration$().subscribe();
+
+      await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        `AggregateError while getting indices metadata configuration: ${cause}`,
+        {
+          error,
+          code: (error as NodeJS.ErrnoException).code,
+          message: error.message,
+          cause,
+        }
+      );
+    });
+
+    it('should log an error with metadata for unexpected errors', async () => {
+      const error = new Error('unexpected error during artifact retrieval');
+
+      jest.spyOn(artifactService, 'getArtifact').mockRejectedValue(error);
+
+      configurationService.start(artifactService, defaultConfiguration);
+      configurationService.getIndicesMetadataConfiguration$().subscribe();
+
+      await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        `Unexpected error while getting indices metadata configuration: ${error}`,
+        {
+          error,
+          code: undefined,
+          message: 'unexpected error during artifact retrieval',
+          cause: undefined,
+        }
+      );
     });
   });
 });
