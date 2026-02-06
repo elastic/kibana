@@ -131,7 +131,7 @@ export class LogsExtractionClient {
       engineDescriptor.type,
       engineDescriptor.logExtractionState.additionalIndexPattern
     );
-    const latestIndex = getLatestEntitiesIndexName(engineDescriptor.type, this.namespace);
+    const latestIndex = getLatestEntitiesIndexName(this.namespace);
 
     const { fromDateISO, toDateISO } =
       opts?.specificWindow ||
@@ -232,7 +232,7 @@ export class LogsExtractionClient {
   }
 
   private async getIndexPatterns(type: EntityType, additionalIndexPatterns: string) {
-    const updatesDataStream = getUpdatesEntitiesDataStreamName(type, this.namespace);
+    const updatesDataStream = getUpdatesEntitiesDataStreamName(this.namespace);
     const cleanAdditionalIndicesPatterns = additionalIndexPatterns
       .split(',')
       .filter((index) => index !== '');

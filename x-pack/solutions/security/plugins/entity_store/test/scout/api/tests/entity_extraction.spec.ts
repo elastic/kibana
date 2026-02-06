@@ -61,21 +61,23 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     );
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
-    expect(extractionResponse.body.count).toBe(16);
+    expect(extractionResponse.body.count).toBe(21);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_host_default',
+      index: '.entities.v2.latest.security_default',
+      query: {
+        term: { 'entity.EngineMetadata.Type': 'host' },
+      },
       size: 1000, // a lot just to be sure we are not capping it
     });
 
-    expect(entities.hits.hits).toHaveLength(16);
+    expect(entities.hits.hits).toHaveLength(21);
     // it's deterministic because of the MD5 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject([
       {
-        _index: '.entities.v2.latest.security_host_default',
+        _index: '.entities.v2.latest.security_default',
         _id: 'a3872e401531d41f50a187fa61fbfffe',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'host',
           'host.id': 'host-123',
@@ -87,9 +89,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_host_default',
+        _index: '.entities.v2.latest.security_default',
         _id: 'c51b57fc40995ed530907fcdf981ced9',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'host',
           'host.name': 'server-01',
@@ -102,9 +103,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_host_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '1260e35e2450159f1676fedb4b67ce46',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'host',
           'host.domain': 'corp.local',
@@ -117,9 +117,21 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_host_default',
+        _index: '.entities.v2.latest.security_default',
+        _id: 'd5b2488f87685ca7ef426aad7ccc777e',
+        _source: {
+          'entity.EngineMetadata.Type': 'host',
+          'host.name': 'server-01',
+          'entity.name': 'host:server-01',
+          'entity.type': 'Host',
+          '@timestamp': '2026-01-20T12:05:02.000Z',
+          'entity.id': 'host:server-01',
+          'host.entity.id': 'host:server-01',
+        },
+      },
+      {
+        _index: '.entities.v2.latest.security_default',
         _id: 'b3f4c3355bd6bec40156867ae5ddb158',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'host',
           'host.hostname': 'laptop-01',
@@ -131,9 +143,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_host_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '5e72f85ad33f4e4cf981dcff134c050c',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'host',
           'entity.name': 'host:non-generated-host',
@@ -144,9 +155,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_host_default',
+        _index: '.entities.v2.latest.security_default',
         _id: 'cb20977f0b08562677a022f7362b3e9a',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'host',
           'host.name': 'desktop-02',
@@ -158,9 +168,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_host_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '0074d60e067281b4286ec527953c8e7b',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'host',
           'host.name': 'server-02',
@@ -174,9 +183,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_host_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '7ce02ea9458bb0c3adccc71ea36acced',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'host',
           'host.domain': 'corp.local',
@@ -190,9 +198,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_host_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '180b7320d4ce161699c962c956c9bb46',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'host',
           'host.name': 'server-03',
@@ -206,9 +213,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_host_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '8b261663c77543e6a4544fc85cdc62ef',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'host',
           'host.name': 'server-04',
@@ -222,9 +228,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_host_default',
+        _index: '.entities.v2.latest.security_default',
         _id: 'b4e5db4fb8eb7f13d284ee386210b26e',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'host',
           'host.name': 'server-05',
@@ -237,9 +242,35 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_host_default',
+        _index: '.entities.v2.latest.security_default',
+        _id: '9fff579a1f2d32a2c470ed711de1e04b',
+        _source: {
+          'entity.EngineMetadata.Type': 'host',
+          'host.id': 'host-404',
+          'entity.name': 'host:host-404',
+          'entity.type': 'Host',
+          '@timestamp': '2026-01-20T12:05:10.000Z',
+          'entity.id': 'host:host-404',
+          'host.entity.id': 'host:host-404',
+        },
+      },
+      {
+        _index: '.entities.v2.latest.security_default',
+        _id: '4bf68ff60fc8b19cec2241992556322a',
+        _source: {
+          'entity.EngineMetadata.Type': 'host',
+          'host.id': '',
+          'host.name': 'workstation-05',
+          'entity.name': 'host:workstation-05',
+          'entity.type': 'Host',
+          '@timestamp': '2026-01-20T12:05:11.000Z',
+          'entity.id': 'host:workstation-05',
+          'host.entity.id': 'host:workstation-05',
+        },
+      },
+      {
+        _index: '.entities.v2.latest.security_default',
         _id: '40b5875887d5e812570327b9604425a6',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'host',
           'host.domain': 'corp.local',
@@ -252,9 +283,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_host_default',
+        _index: '.entities.v2.latest.security_default',
         _id: 'a5d3d8b58538b9ee1ca73b50d15d4b52',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'host',
           'host.name': 'server-06',
@@ -267,23 +297,33 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_host_default',
-        _id: '68c7ffbdcf9404e4494ac43a83719ef5',
-        _score: 1,
+        _index: '.entities.v2.latest.security_default',
+        _id: 'ad6d0148f3ab302b6d9389a05e04e01d',
         _source: {
           'entity.EngineMetadata.Type': 'host',
-          'host.name': 'server-07',
-          'entity.name': 'host:server-07',
+          'entity.name': 'host:host-505',
           'entity.type': 'Host',
-          '@timestamp': '2026-01-20T12:05:14.000Z',
-          'entity.id': 'host:server-07',
-          'host.entity.id': 'host:server-07',
+          '@timestamp': '2026-01-20T12:05:16.000Z',
+          'entity.id': 'host:host-505',
+          'host.entity.id': 'host:host-505',
         },
       },
       {
-        _index: '.entities.v2.latest.security_host_default',
+        _index: '.entities.v2.latest.security_default',
+        _id: 'dbc04494402b73d5414cdf90850d777e',
+        _source: {
+          'entity.EngineMetadata.Type': 'host',
+          'host.id': 'host-606',
+          'entity.name': 'host:host-606',
+          'entity.type': 'Host',
+          '@timestamp': '2026-01-20T12:05:17.000Z',
+          'entity.id': 'host:host-606',
+          'host.entity.id': 'host:host-606',
+        },
+      },
+      {
+        _index: '.entities.v2.latest.security_default',
         _id: 'f69c44458b36688926b09ed388c8b5be',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'host',
           'host.name': 'server-08',
@@ -297,9 +337,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_host_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '1fba7560b67c8b51827bac3b6c86fce1',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'host',
           'host.hostname': 'workstation-30',
@@ -308,6 +347,19 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
           '@timestamp': '2026-01-20T12:05:18.000Z',
           'entity.id': 'host:workstation-30',
           'host.entity.id': 'host:workstation-30',
+        },
+      },
+      {
+        _index: '.entities.v2.latest.security_default',
+        _id: '68c7ffbdcf9404e4494ac43a83719ef5',
+        _source: {
+          'entity.EngineMetadata.Type': 'host',
+          'host.name': 'server-07',
+          'entity.name': 'host:server-07',
+          'entity.type': 'Host',
+          '@timestamp': '2026-01-20T12:05:18.000Z',
+          'entity.id': 'host:server-07',
+          'host.entity.id': 'host:server-07',
         },
       },
     ]);
@@ -330,7 +382,10 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     expect(extractionResponse.body.count).toBe(20);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_user_default',
+      index: '.entities.v2.latest.security_default',
+      query: {
+        term: { 'entity.EngineMetadata.Type': 'user' },
+      },
       size: 1000, // a lot just to be sure we are not capping it
     });
 
@@ -339,9 +394,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject([
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '1d9cb6c21dfa9156571de1281d707719',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.name': 'john.doe',
@@ -354,9 +408,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '34e67fc3f53984dbfd0ed097197cc453',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.name': 'jane.smith',
@@ -369,9 +422,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: 'ba6d49220ff970733fff891e87d09e56',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.name': 'bob.jones',
@@ -384,9 +436,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: 'd0ddd45157d6fe1cbde790dea38d8817',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.name': 'alice.brown',
@@ -399,9 +450,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: 'bd55eef67b506ab8735e6f0f59e8bee8',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.id': 'user-101',
@@ -413,9 +463,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '025d1e3fbf1982fba259d37978ee5709',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'entity.name': 'user:non-generated-user',
@@ -426,9 +475,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '6f42b467570b3e7ab0d0ae8b60965648',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.email': 'test@example.com',
@@ -440,9 +488,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: 'e7f943e1388a4bb2e06e96821fe7cc13',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.domain': 'corp',
@@ -455,9 +502,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: 'a870b6e8cd872aeb6696cc70997484fd',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.name': 'david.lee',
@@ -469,9 +515,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: 'c049dff0ed865eb3709c2577344652df',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.name': '',
@@ -484,9 +529,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '7b71429fa06bece73a69aa3b6c111933',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.id': 'user-303',
@@ -498,9 +542,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: 'a71d3785ad04601f4b98990e871cd82b',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.name': 'eve.martin',
@@ -514,9 +557,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: 'd4ccc5552730aec959408caca3473ee7',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.name': 'frank.taylor',
@@ -530,9 +572,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '9c2027667a9851d44876ae4e4008b108',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.email': 'grace@example.com',
@@ -545,9 +586,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: 'fcaaebb1c3ef5431de17f325a54bf97f',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.name': 'henry.clark',
@@ -559,9 +599,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '8b8b96fb0537d319e1397a175681a6b6',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.domain': '',
@@ -574,9 +613,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '4b11dd6cf7a4b049ce8afd5f38064094',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.name': 'jack.white',
@@ -588,9 +626,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '9211621cb08e16e69dc48158e35579c8',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.name': 'karen.green',
@@ -604,9 +641,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '5a3d5fc12af596c35c9bcce0ec15e297',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.email': 'larry@example.com',
@@ -620,9 +656,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_user_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '855f0e0353f2a443af0c6baea478a6d8',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'user',
           'user.domain': 'corp',
@@ -655,7 +690,10 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     expect(extractionResponse.body.count).toBe(2);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_service_default',
+      index: '.entities.v2.latest.security_default',
+      query: {
+        term: { 'entity.EngineMetadata.Type': 'service' },
+      },
       size: 1000, // a lot just to be sure we are not capping it
     });
 
@@ -664,9 +702,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject([
       {
-        _index: '.entities.v2.latest.security_service_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '15b621f577206d843980a40d38554c70',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'service',
           'entity.name': 'service:non-generated-service-id',
@@ -677,9 +714,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
       {
-        _index: '.entities.v2.latest.security_service_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '0f9d5fcd02e63ca500ca9515f76ce174',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'service',
           'entity.name': 'service:service-name',
@@ -709,7 +745,10 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     expect(extractionResponse.body.count).toBe(1);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_generic_default',
+      index: '.entities.v2.latest.security_default',
+      query: {
+        term: { 'entity.EngineMetadata.Type': 'generic' },
+      },
       size: 1000, // a lot just to be sure we are not capping it
     });
 
@@ -718,9 +757,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject([
       {
-        _index: '.entities.v2.latest.security_generic_default',
+        _index: '.entities.v2.latest.security_default',
         _id: '9e606449c558b5253d8b1f028fe7dca0',
-        _score: 1,
         _source: {
           'entity.EngineMetadata.Type': 'generic',
           'entity.name': 'generic:generic-id',
