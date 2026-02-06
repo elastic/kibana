@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { timeRangeSchema } from './src/time_range';
-export { querySchema } from './src/query';
-export { storedFilterSchema } from './src/stored_filter';
+import type { TypeOf } from '@kbn/config-schema';
+import type { Writable } from '@kbn/utility-types';
+import type { storedFilterSchema } from '@kbn/es-query-server';
 
-export type {
-  TimeRange,
-  AbsoluteTimeRange,
-  RelativeTimeRange,
-  AggregateQuery,
-  Query,
-} from './src/types';
+/**
+ * Local type definition for stored filters
+ * Inferred from the storedFilterSchema in @kbn/es-query-server
+ */
+export type StoredFilter = Writable<TypeOf<typeof storedFilterSchema>>;

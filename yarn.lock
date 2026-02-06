@@ -4945,6 +4945,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/as-code-filters-constants@link:src/platform/packages/shared/as-code/filters-constants":
+  version "0.0.0"
+  uid ""
+
+"@kbn/as-code-filters-schema@link:src/platform/packages/shared/as-code/filters-schema":
+  version "0.0.0"
+  uid ""
+
+"@kbn/as-code-filters-transforms@link:src/platform/packages/shared/as-code/filters-transforms":
+  version "0.0.0"
+  uid ""
+
 "@kbn/audit-log-plugin@link:x-pack/platform/test/security_api_integration/plugins/audit_log":
   version "0.0.0"
   uid ""

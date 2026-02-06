@@ -8,10 +8,24 @@
  */
 
 /**
- * An enum to denote whether a filter is specific to an application's context or whether it should be applied globally.
- * @public
+ * As Code Filter operator constants
+ * These operators are used in SimpleFilterCondition to specify how to match field values
  */
-export enum FilterStateStore {
-  APP_STATE = 'appState',
-  GLOBAL_STATE = 'globalState',
-}
+export const ASCODE_FILTER_OPERATOR = {
+  IS: 'is',
+  IS_ONE_OF: 'is_one_of',
+  EXISTS: 'exists',
+  RANGE: 'range',
+} as const;
+
+export const ASCODE_GROUPED_CONDITION_TYPE = {
+  AND: 'and',
+  OR: 'or',
+} as const;
+
+export const ASCODE_FILTER_TYPE = {
+  CONDITION: 'condition',
+  GROUP: 'group',
+  DSL: 'dsl',
+  SPATIAL: 'spatial',
+} as const;
