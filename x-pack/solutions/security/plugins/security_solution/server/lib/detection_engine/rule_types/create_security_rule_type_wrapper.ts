@@ -20,10 +20,8 @@ import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
-  checkPrivilegesFromEsClient,
   getExceptions,
   getRuleRangeTuples,
-  hasReadIndexPrivileges,
   hasTimestampFields,
   isMachineLearningParams,
   isEsqlParams,
@@ -304,19 +302,27 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           if (!isMachineLearningParams(params)) {
             try {
               const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asCurrentUser);
-              const existingIndices = await indexPatterns.getExistingIndices(inputIndex);
+              const indexPatternsWithMatches = await indexPatterns.getIndexPatternsWithMatches(
+                inputIndex
+              );
 
-              if (existingIndices.length > 0) {
-                const privileges = await checkPrivilegesFromEsClient(esClient, existingIndices);
-                const readIndexWarningMessage = await hasReadIndexPrivileges({
-                  privileges,
-                  ruleExecutionLogger,
-                  docLinks,
-                });
-
-                if (readIndexWarningMessage != null) {
-                  wrapperWarnings.push(readIndexWarningMessage);
-                }
+              if (indexPatternsWithMatches.length === 0) {
+                const warningMessage = `No matching indices found for rule ${rule.name}. This warning will continue to appear until a matching index is created or this rule is disabled.`;
+                wrapperWarnings.push(warningMessage);
+              } else {
+                ruleExecutionLogger.debug(
+                  `Number of indices found: ${indexPatternsWithMatches.length}`
+                );
+                ruleExecutionLogger.debug(
+                  `Number of index patterns that did not match any indices: ${
+                    inputIndex.length - indexPatternsWithMatches.length
+                  }`
+                );
+                ruleExecutionLogger.debug(
+                  `Index patterns that did not match any indices: ${inputIndex
+                    .filter((index) => !indexPatternsWithMatches.includes(index))
+                    .join(', ')}`
+                );
               }
             } catch (exc) {
               wrapperWarnings.push(`Check privileges failed to execute ${exc}`);

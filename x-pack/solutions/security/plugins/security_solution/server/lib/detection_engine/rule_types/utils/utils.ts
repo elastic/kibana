@@ -7,7 +7,7 @@
 
 import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { get, invert, isArray, isEmpty, merge, partition } from 'lodash';
+import { get, invert, isArray, isEmpty, merge } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
@@ -30,7 +30,7 @@ import type {
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { DocLinksServiceSetup, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
@@ -85,32 +85,6 @@ import {
 } from './apm_field_names';
 import { buildTimeRangeFilter } from './build_events_query';
 export const MAX_RULE_GAP_RATIO = 4;
-
-export const hasReadIndexPrivileges = async (args: {
-  privileges: Privilege;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  docLinks: DocLinksServiceSetup;
-}): Promise<string | undefined> => {
-  const { privileges, ruleExecutionLogger, docLinks } = args;
-  const apiKeyDocs = docLinks.links.alerting.authorization;
-  const indexNames = Object.keys(privileges.index);
-  const [, indexesWithNoReadPrivileges] = partition(
-    indexNames,
-    (indexName) => privileges.index[indexName].read
-  );
-  let warningStatusMessage;
-
-  // Some indices have read privileges others do not.
-  if (indexesWithNoReadPrivileges.length > 0) {
-    const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
-    warningStatusMessage = `This rule's API key is unable to access all indices that match the ${indexesString} pattern. To learn how to update and manage API keys, refer to ${apiKeyDocs}.`;
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: warningStatusMessage,
-    });
-  }
-  return warningStatusMessage;
-};
 
 export const hasTimestampFields = async (args: {
   timestampField: string;

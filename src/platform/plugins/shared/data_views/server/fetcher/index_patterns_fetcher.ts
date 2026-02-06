@@ -160,8 +160,8 @@ export class IndexPatternsFetcher {
    * @param indices - index pattern list
    * @returns index pattern list of index patterns that match indices
    */
-  async getExistingIndices(indices: string[]): Promise<string[]> {
-    const indicesObs = indices.map((indexPattern) => {
+  async getIndexPatternsWithMatches(indexPatterns: string[]): Promise<string[]> {
+    const indexPatternsObs = indexPatterns.map((indexPattern) => {
       // when checking a negative pattern, check if the positive pattern exists
       const indexToQuery = indexPattern.trim().startsWith('-')
         ? indexPattern.trim().substring(1)
@@ -178,15 +178,15 @@ export class IndexPatternsFetcher {
     });
 
     return new Promise<boolean[]>((resolve) => {
-      rateLimitingForkJoin(indicesObs, 3, { fields: [], indices: [] }).subscribe((value) => {
+      rateLimitingForkJoin(indexPatternsObs, 3, { fields: [], indices: [] }).subscribe((value) => {
         resolve(value.map((v) => v.indices.length > 0));
       });
     })
       .then((allPatterns: boolean[]) =>
-        indices.filter(
+        indexPatterns.filter(
           (indexPattern, i, self) => self.indexOf(indexPattern) === i && allPatterns[i]
         )
       )
-      .catch(() => indices);
+      .catch(() => indexPatterns);
   }
 }
