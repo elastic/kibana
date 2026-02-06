@@ -34,7 +34,7 @@ import {
 import {
   actionTaskParamsModelVersions,
   connectorModelVersions,
-  connectorTokenModelVersions,
+  getConnectorTokenModelVersions,
   oauthStateModelVersions,
 } from './model_versions';
 
@@ -131,7 +131,7 @@ export function setupSavedObjects(
     management: {
       importableAndExportable: false,
     },
-    modelVersions: connectorTokenModelVersions,
+    modelVersions: getConnectorTokenModelVersions(encryptedSavedObjects),
   });
 
   encryptedSavedObjects.registerType({
