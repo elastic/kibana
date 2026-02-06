@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-otel-semantic-conventions'],
+  roots: ['<rootDir>/src/platform/packages/shared/kbn_otel_semantic_conventions'],
 };

@@ -455,6 +455,7 @@ src/platform/packages/shared/feedback-components @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_card @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_tab @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_types @elastic/appex-sharedux
+src/platform/packages/shared/kbn_otel_semantic_conventions @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-actions-types @elastic/response-ops
 src/platform/packages/shared/kbn-actions-utils @elastic/response-ops
 src/platform/packages/shared/kbn-aiops-utils @elastic/ml-ui
@@ -583,7 +584,6 @@ src/platform/packages/shared/kbn-opentelemetry-attributes @elastic/kibana-core
 src/platform/packages/shared/kbn-opentelemetry-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-otel-demo @elastic/obs-onboarding-team
-src/platform/packages/shared/kbn-otel-semantic-conventions @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-palettes @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-profiler @elastic/observability-ui
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-presentation-team

@@ -8025,7 +8025,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/otel-semantic-conventions@link:src/platform/packages/shared/kbn-otel-semantic-conventions":
+"@kbn/otel-semantic-conventions@link:src/platform/packages/shared/kbn_otel_semantic_conventions":
   version "0.0.0"
   uid ""
 

@@ -105,13 +105,13 @@ node scripts/generate_otel_semconv.js
 
 ```bash
 # From Kibana root
-yarn test:jest src/platform/packages/shared/kbn-otel-semantic-conventions
+yarn test:jest src/platform/packages/shared/kbn_otel_semantic_conventions
 ```
 
 ## File Structure
 
 ```
-src/platform/packages/shared/kbn-otel-semantic-conventions/
+src/platform/packages/shared/kbn_otel_semantic_conventions/
 ├── assets/
 │   └── resolved-semconv.yaml           # Input YAML from OpenTelemetry
 ├── src/
@@ -180,7 +180,7 @@ The package includes comprehensive tests covering:
 
 Run tests with `yarn test` or from Kibana root:
 ```bash
-yarn test:jest src/platform/packages/shared/kbn-otel-semantic-conventions
+yarn test:jest src/platform/packages/shared/kbn_otel_semantic_conventions
 ```
 
 ## Troubleshooting

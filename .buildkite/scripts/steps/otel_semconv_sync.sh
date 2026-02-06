@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-OTEL_PACKAGE_DIR="src/platform/packages/shared/kbn-otel-semantic-conventions"
+OTEL_PACKAGE_DIR="src/platform/packages/shared/kbn_otel_semantic_conventions"
 GIT_SCOPE="$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml $OTEL_PACKAGE_DIR/src/generated/resolved-semconv.ts"
 
 clone_otel_repository() {

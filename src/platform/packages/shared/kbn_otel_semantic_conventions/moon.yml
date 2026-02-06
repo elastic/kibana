@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/obs-onboarding-team'
   metadata:
-    sourceRoot: src/platform/packages/shared/kbn-otel-semantic-conventions
+    sourceRoot: src/platform/packages/shared/kbn_otel_semantic_conventions
 dependsOn: []
 tags:
   - shared-common
