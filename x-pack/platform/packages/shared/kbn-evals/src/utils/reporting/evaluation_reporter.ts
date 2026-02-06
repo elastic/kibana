@@ -14,8 +14,9 @@ import type { ReportDisplayOptions } from '../../types';
 
 export type EvaluationReporter = (
   scoreRepository: EvaluationScoreRepository,
-  runIdOrOptions: string | { runId: string; taskModelId?: string; suiteId?: string },
-  log: SomeDevLog
+  runId: string,
+  log: SomeDevLog,
+  options?: { taskModelId?: string; suiteId?: string }
 ) => Promise<void>;
 
 function buildReportHeader(taskModel: Model, evaluatorModel: Model): string[] {
@@ -31,17 +32,16 @@ export function createDefaultTerminalReporter(
 ): EvaluationReporter {
   return async (
     scoreRepository: EvaluationScoreRepository,
-    runIdOrOptions: string | { runId: string; taskModelId?: string; suiteId?: string },
-    log: SomeDevLog
+    runId: string,
+    log: SomeDevLog,
+    filter
   ) => {
-    const { runId, taskModelId, suiteId } =
-      typeof runIdOrOptions === 'string' ? { runId: runIdOrOptions } : runIdOrOptions;
-    const runStats = await scoreRepository.getStatsByRunId(runId, { taskModelId, suiteId });
+    const runStats = await scoreRepository.getStatsByRunId(runId, filter);
 
     if (!runStats || runStats.stats.length === 0) {
       const filterSuffix = [
-        taskModelId ? `task.model.id=${taskModelId}` : null,
-        suiteId ? `suite.id=${suiteId}` : null,
+        filter?.taskModelId ? `task.model.id=${filter.taskModelId}` : null,
+        filter?.suiteId ? `suite.id=${filter.suiteId}` : null,
       ]
         .filter(Boolean)
         .join(', ');

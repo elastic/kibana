@@ -108,7 +108,8 @@ function aggregateStatsByScenario(stats: EvaluatorStats[], log: SomeDevLog): Eva
 async function buildScenarioReport(
   scoreRepository: EvaluationScoreRepository,
   runId: string,
-  log: SomeDevLog
+  log: SomeDevLog,
+  filter?: { taskModelId?: string; suiteId?: string }
 ): Promise<{
   stats: EvaluatorStats[];
   totalRepetitions: number;
@@ -117,7 +118,7 @@ async function buildScenarioReport(
 }> {
   log.info(`Building scenario report for run ID: ${runId}`);
 
-  const runStats = await scoreRepository.getStatsByRunId(runId);
+  const runStats = await scoreRepository.getStatsByRunId(runId, filter);
 
   if (!runStats || runStats.stats.length === 0) {
     throw new Error(`No scores found for run ID: ${runId}`);
@@ -144,12 +145,13 @@ export function createScenarioSummaryReporter(
   return async (
     scoreRepository: EvaluationScoreRepository,
     runId: string,
-    log: SomeDevLog
+    log: SomeDevLog,
+    filter?: { taskModelId?: string; suiteId?: string }
   ): Promise<void> => {
     try {
       log.info(chalk.bold.blue('\n🔍 === SCENARIO SUMMARY REPORT ==='));
 
-      const report = await buildScenarioReport(scoreRepository, runId, log);
+      const report = await buildScenarioReport(scoreRepository, runId, log, filter);
 
       if (!report.stats || report.stats.length === 0) {
         log.warning('⚠️ No scenarios found to display');

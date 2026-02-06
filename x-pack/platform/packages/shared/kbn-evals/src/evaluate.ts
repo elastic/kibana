@@ -248,11 +248,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         throw error;
       }
 
-      await reportModelScore(
-        scoreRepository,
-        { runId: currentRunId, taskModelId: model.id, suiteId: process.env.EVAL_SUITE_ID },
-        log
-      );
+      await reportModelScore(scoreRepository, currentRunId, log, {
+        taskModelId: model.id,
+        suiteId: process.env.EVAL_SUITE_ID,
+      });
     },
     {
       scope: 'worker',
