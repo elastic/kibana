@@ -5,21 +5,6 @@
  * 2.0.
  */
 
-import { SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-
 export { MockEsqlTabContent } from './esql_tab_content';
 
-export const mockApplyFilterTrigger = {
-  exec: jest.fn().mockResolvedValue(undefined),
-};
-
 export const mockPreventDefault = jest.fn();
-
-export const mockUIActionsGetTrigger = jest.fn().mockImplementation((triggerName: string) => {
-  switch (triggerName) {
-    case SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER:
-      return mockApplyFilterTrigger;
-    default:
-      return undefined;
-  }
-});
