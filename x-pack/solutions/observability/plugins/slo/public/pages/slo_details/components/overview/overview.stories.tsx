@@ -8,7 +8,7 @@
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { buildSlo } from '../../../../data/slo/slo';
 import { SloDetailsPageDefinition as Component } from '../definition/page_definition';
-import type { SloDetailsDefinitionProps } from '../definition';
+import type { SloDetailsDefinitionProps } from '../definition/types';
 
 export default {
   component: Component,

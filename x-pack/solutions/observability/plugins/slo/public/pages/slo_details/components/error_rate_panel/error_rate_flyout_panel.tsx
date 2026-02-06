@@ -14,10 +14,11 @@ import type { ErrorRatePanelProps } from './types';
 export function ErrorRateFlyoutPanel({ slo, dataTimeRange, onBrushed }: ErrorRatePanelProps) {
   return (
     <SloFlyoutPanel
-      title={i18n.translate('xpack.slo.sloDetailsHistory.h2.errorRatePanelTitle', {
+      title={i18n.translate('xpack.slo.errorRateFlyoutPanel.errorRatePanelTitle', {
         defaultMessage: 'Error rate',
       })}
       renderTooltip
+      data-test-subj="errorRatePanel"
     >
       <ErrorRateChart
         slo={slo}
