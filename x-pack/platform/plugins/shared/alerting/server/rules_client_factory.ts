@@ -215,31 +215,41 @@ export class RulesClientFactory {
         // API key for the user, instead of having the user create it themselves, which requires api_key
         // privileges
         let createUiamApiKeyResult;
-
         if (this.isServerless) {
-          createUiamApiKeyResult = await securityService.authc.apiKeys.uiam?.grant(request, {
-            name: `uiam-${name}`,
-          });
+          try {
+            createUiamApiKeyResult = await securityService.authc.apiKeys.uiam?.grant(request, {
+              name: `uiam-${name}`,
+            });
+          } catch (err) {
+            this.logger.error(
+              `Failed to create UIAM API key for alerting rule : ${name} with error: ${err}`
+            );
+          }
         }
 
-        const createAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(
-          request,
-          {
+        let createAPIKeyResult;
+        try {
+          createAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(request, {
             name,
             role_descriptors: {},
             metadata: { managed: true, kibana: { type: 'alerting_rule' } },
-          }
-        );
+          });
+        } catch (err) {
+          this.logger.error(
+            `Failed to create API key for alerting rule : ${name} with error: ${err}`
+          );
+        }
 
         // TODO should we return partial success  here  if one  of the two  creations fail?
-        if (!createAPIKeyResult || (this.isServerless && !createUiamApiKeyResult)) {
+        // we may need to check if uiam service is enabled too
+        if (!createAPIKeyResult && !createUiamApiKeyResult) {
           this.logger.error(`Failed to create API key for alerting rule : ${name}`);
           return { apiKeysEnabled: false };
         }
 
         return {
           apiKeysEnabled: true,
-          result: createAPIKeyResult,
+          ...(createAPIKeyResult ? { result: createAPIKeyResult } : {}),
           ...(createUiamApiKeyResult ? { uiamResult: createUiamApiKeyResult } : {}),
         };
       },
