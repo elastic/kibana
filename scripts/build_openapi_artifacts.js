@@ -8,13 +8,17 @@
  */
 
 require('@kbn/setup-node-env');
-const { runScript } = require('@kbn/product-doc-artifact-builder');
+var runScript = require('@kbn/product-doc-artifact-builder').runScript;
 
 // Prepend 'openapi' command if not already present
-const args = process.argv.slice(2);
+var args = process.argv.slice(2);
 if (args[0] !== 'openapi') {
   args.unshift('openapi');
 }
-process.argv = [process.argv[0], process.argv[1], ...args];
+var newArgv = [process.argv[0], process.argv[1]];
+for (var i = 0; i < args.length; i++) {
+  newArgv.push(args[i]);
+}
+process.argv = newArgv;
 
 runScript();
