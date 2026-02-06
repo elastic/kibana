@@ -9,12 +9,13 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiPageHeader, EuiPageSection, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useParams } from 'react-router-dom';
+import type { MainCategories } from '@kbn/siem-readiness';
 import { SIEM_READINESS_PATH } from '../../../common/constants';
 import { VisibilitySectionBoxes, type VisibilityTabId } from './visibility_section_boxes';
 import { VisibilitySectionTabs } from './visibility_section_tabs';
-import { CategoryConfigurationPanel, type CategoryOption } from './components/configuration_panel';
+import { CategoryConfigurationPanel } from './components/configuration_panel';
 
-const ALL_CATEGORIES: CategoryOption[] = [
+const ALL_CATEGORIES: MainCategories[] = [
   'Endpoint',
   'Identity',
   'Network',
@@ -30,7 +31,7 @@ const SiemReadinessDashboard = () => {
   const { tab } = useParams<{ tab?: string }>();
 
   // State for category filtering (shared across all tabs)
-  const [selectedCategories, setSelectedCategories] = useState<CategoryOption[]>(ALL_CATEGORIES);
+  const [selectedCategories, setSelectedCategories] = useState<MainCategories[]>(ALL_CATEGORIES);
 
   // State for showing configuration modal
   const [isConfigModalVisible, setIsConfigModalVisible] = useState(false);

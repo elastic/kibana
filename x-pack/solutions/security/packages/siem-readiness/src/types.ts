@@ -10,7 +10,7 @@ export interface IndexInfo {
   docs: number;
 }
 
-type MainCategories = 'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/SaaS';
+export type MainCategories = 'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/SaaS';
 
 export interface CategoryGroup {
   category: MainCategories | string;

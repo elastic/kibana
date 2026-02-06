@@ -24,19 +24,17 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-// Category options available for filtering
-export type CategoryOption = 'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/SaaS';
+import type { MainCategories } from '@kbn/siem-readiness';
 
 // Props interface for tabs that use selectedCategories
 export interface SiemReadinessTabSelectedCategoriesProps {
-  selectedCategories: CategoryOption[];
+  selectedCategories: MainCategories[];
 }
 
 // Type for checkbox state mapping
-type CategorySelectionMap = Record<CategoryOption, boolean>;
+type CategorySelectionMap = Record<MainCategories, boolean>;
 
-const CATEGORY_OPTIONS: CategoryOption[] = [
+const CATEGORY_OPTIONS: MainCategories[] = [
   'Endpoint',
   'Identity',
   'Network',
@@ -47,7 +45,7 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
 const MAX_COLUMNS_PER_ROW = 3;
 
 // Helper function to convert category array to selection map
-const getMapFromCategories = (selected: CategoryOption[]): CategorySelectionMap => {
+const getMapFromCategories = (selected: MainCategories[]): CategorySelectionMap => {
   const map: CategorySelectionMap = {} as CategorySelectionMap;
   CATEGORY_OPTIONS.forEach((category) => {
     map[category] = selected.includes(category);
@@ -56,7 +54,7 @@ const getMapFromCategories = (selected: CategoryOption[]): CategorySelectionMap 
 };
 
 // Category labels for i18n
-const CATEGORY_LABELS: Record<CategoryOption, string> = {
+const CATEGORY_LABELS: Record<MainCategories, string> = {
   Endpoint: i18n.translate(
     'xpack.securitySolution.siemReadiness.coverage.configuration.endpointLabel',
     { defaultMessage: 'Endpoint' }
@@ -79,14 +77,14 @@ const CATEGORY_LABELS: Record<CategoryOption, string> = {
 };
 
 // Split categories into rows for layout
-const CATEGORY_ROWS: CategoryOption[][] = [
+const CATEGORY_ROWS: MainCategories[][] = [
   ['Endpoint', 'Identity', 'Network'],
   ['Cloud', 'Application/SaaS'],
 ];
 
 interface CategoryConfigurationPanelProps {
-  selectedCategories?: CategoryOption[];
-  onSelectionChange?: (selectedCategories: CategoryOption[]) => void;
+  selectedCategories?: MainCategories[];
+  onSelectionChange?: (selectedCategories: MainCategories[]) => void;
   isVisible: boolean;
   onClose: () => void;
 }
@@ -108,7 +106,7 @@ export const CategoryConfigurationPanel: React.FC<CategoryConfigurationPanelProp
   }, [selectedCategories, isVisible]);
 
   // Handle checkbox changes using functional update to avoid stale closure
-  const handleCheckboxChange = useCallback((optionId: CategoryOption) => {
+  const handleCheckboxChange = useCallback((optionId: MainCategories) => {
     setIdToSelectedMap((prev) => ({
       ...prev,
       [optionId]: !prev[optionId],

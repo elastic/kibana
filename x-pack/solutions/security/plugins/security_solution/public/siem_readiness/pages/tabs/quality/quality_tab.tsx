@@ -20,7 +20,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useSiemReadinessApi } from '@kbn/siem-readiness';
-import type { IndexInfo, DataQualityResultDocument } from '@kbn/siem-readiness';
+import type { IndexInfo, DataQualityResultDocument, MainCategories } from '@kbn/siem-readiness';
 import {
   CategoryAccordionTable,
   type CategoryData,
@@ -34,10 +34,7 @@ import {
   getQualityCaseTitle,
   getQualityCaseTags,
 } from './quality_add_case_details';
-import type {
-  CategoryOption,
-  SiemReadinessTabSelectedCategoriesProps,
-} from '../../components/configuration_panel';
+import type { SiemReadinessTabSelectedCategoriesProps } from '../../components/configuration_panel';
 
 // Extended IndexInfo with computed fields
 interface IndexInfoWithStatus extends IndexInfo, Record<string, unknown> {
@@ -67,7 +64,7 @@ export const QualityTab: React.FC<SiemReadinessTabSelectedCategoriesProps> = ({
     if (!getReadinessCategoriesData?.mainCategoriesMap) return [];
 
     return getReadinessCategoriesData.mainCategoriesMap
-      .filter((category) => selectedCategories.includes(category.category as CategoryOption))
+      .filter((category) => selectedCategories.includes(category.category as MainCategories))
       .map((category) => ({
         category: category.category,
         items: category.indices.map((index) => {
