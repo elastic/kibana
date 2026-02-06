@@ -28,33 +28,61 @@
         "size": 100
       },
       "aggregations": {
-        "buckets": {
-          "date_histogram": {
-            "field": "@timestamp",
-            "fixed_interval": "5m"
+        "host.name": {
+          "terms": {
+            "field": "host.name"
           },
           "aggregations": {
-            "@timestamp": {
-              "max": {
-                "field": "@timestamp"
-              }
-            },
-            "bytes_in_max": {
-              "max": {
-                "field": "system.network.in.bytes"
-              }
-            },
-            "bytes_in_derivative": {
-              "derivative": {
-                "buckets_path": "bytes_in_max"
-              }
-            },
-            "positive_only": {
-              "bucket_script": {
-                "buckets_path": {
-                  "in_derivative": "bytes_in_derivative.value"
-                },
-                "script": "params.in_derivative > 0.0 ? params.in_derivative : 0.0"
+            "host.name": {
+              "terms": {
+                "field": "host.name",
+                "size": 100
+              },
+              "aggregations": {
+                "buckets": {
+                  "date_histogram": {
+                    "field": "@timestamp",
+                    "fixed_interval": "5m"
+                  },
+                  "aggregations": {
+                    "@timestamp": {
+                      "max": {
+                        "field": "@timestamp"
+                      }
+                    },
+                    "interfaces": {
+                      "terms": {
+                        "field": "system.network.name",
+                        "size": 20
+                      },
+                      "aggregations": {
+                        "max_bytes": {
+                          "max": {
+                            "field": "system.network.in.bytes"
+                          }
+                        }
+                      }
+                    },
+                    "total_max_bytes": {
+                      "sum_bucket": {
+                        "buckets_path": "interfaces>max_bytes"
+                      }
+                    },
+                    "bytes_in_derivative": {
+                      "derivative": {
+                        "buckets_path": "total_max_bytes"
+                      }
+                    },
+                    "positive_only": {
+                      "bucket_script": {
+                        "buckets_path": {
+                          "in_derivative": "bytes_in_derivative.value"
+                        },
+                        "script": "params.in_derivative > 0.0 ? params.in_derivative : 0.0"
+                      }
+                    }
+                  }
+                }
               }
             }
           }
