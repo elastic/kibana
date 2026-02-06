@@ -80,15 +80,6 @@ while read -r mode; do
   EXIT_CODE=$?
   set -e;
 
-  timeSec=$(($(date +%s)-start))
-  if [[ $timeSec -gt 60 ]]; then
-    min=$((timeSec/60))
-    sec=$((timeSec-(min*60)))
-    duration="${min}m ${sec}s"
-  else
-    duration="${timeSec}s"
-  fi
-
   if [[ $EXIT_CODE -ne 0 ]]; then
     failedModes+=("$mode")
     FINAL_EXIT_CODE=10  # Ensure we exit with failure if any test fails with (exit code 10 to match FTR)
