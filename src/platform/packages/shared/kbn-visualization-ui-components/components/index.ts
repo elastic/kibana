@@ -11,6 +11,8 @@ export * from './field_picker';
 
 export * from './name_input';
 
+export * from './link_pattern_input';
+
 export * from './debounced_input';
 
 export * from './color_picker';

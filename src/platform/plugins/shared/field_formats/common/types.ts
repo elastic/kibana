@@ -8,11 +8,12 @@
  */
 
 import type { Serializable, SerializableRecord } from '@kbn/utility-types';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { FieldFormat } from './field_format';
 import type { FieldFormatsRegistry } from './field_formats_registry';
 
 /** @public **/
-export type FieldFormatsContentType = 'html' | 'text';
+export type FieldFormatsContentType = 'html' | 'text' | 'link';
 
 /**
  * Html converter options
@@ -28,6 +29,19 @@ export interface HtmlContextTypeOptions {
  * @public
  */
 export type HtmlContextTypeConvert = (value: any, options?: HtmlContextTypeOptions) => string;
+
+/**
+ * Html link converter options
+ */
+export interface HtmlLinkContextTypeOptions extends HtmlContextTypeOptions {
+  link?: string;
+}
+
+/**
+ * To html link converter function
+ * @public
+ */
+export type HtmlLinkContextTypeConvert = (value: any, options?: HtmlLinkContextTypeOptions) => string;
 
 /**
  * Plain text converter options
@@ -48,12 +62,13 @@ export type TextContextTypeConvert = (value: any, options?: TextContextTypeOptio
  * Converter function
  * @public
  */
-export type FieldFormatConvertFunction = HtmlContextTypeConvert | TextContextTypeConvert;
+export type FieldFormatConvertFunction = HtmlContextTypeConvert | TextContextTypeConvert | HtmlLinkContextTypeConvert;
 
 /** @public **/
 export interface FieldFormatConvert {
   text: TextContextTypeConvert;
   html: HtmlContextTypeConvert;
+  link: HtmlLinkContextTypeConvert;
 }
 
 /** @public **/
