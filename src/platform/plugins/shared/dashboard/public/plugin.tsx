@@ -178,10 +178,7 @@ export class DashboardPlugin
         })
       );
 
-      const initialFeatureFlags = core.featureFlags.getInitialFeatureFlags();
-      if (Boolean(initialFeatureFlags['dashboardPlugin.dashboardJsonExport'])) {
-        share.registerShareIntegration('dashboard', dashboardExportProvider());
-      }
+      share.registerShareIntegration('dashboard', dashboardExportProvider());
     }
 
     const {

@@ -8,38 +8,13 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-} from '@kbn/core-http-common';
 import type { DashboardReadResponseBody } from '@kbn/dashboard-plugin/server';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-
-const FEATURE_FLAG_SETTING = 'dashboardPlugin.dashboardJsonExport';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, exports } = getPageObjects(['dashboard', 'exports']);
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
-  const kibanaServer = getService('kibanaServer');
-
-  const setExportDashboardJsonFeatureFlag = async (enabled: boolean) => {
-    await kibanaServer.request({
-      path: '/internal/core/_settings',
-      method: 'PUT',
-      headers: {
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'ftr',
-      },
-      body: {
-        feature_flags: {
-          overrides: {
-            [FEATURE_FLAG_SETTING]: enabled,
-          },
-        },
-      },
-    });
-  };
 
   describe('dashboard export json', function () {
     before(async function () {
@@ -57,19 +32,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.savedObjects.cleanStandardList();
-      await setExportDashboardJsonFeatureFlag(false);
-    });
-
-    it('does not show the export JSON option when the feature flag is disabled (default)', async function () {
-      await dashboard.gotoDashboardLandingPage();
-      await dashboard.loadSavedDashboard('dashboard with everything');
-      await dashboard.waitForRenderComplete();
-      expect(await exports.exportButtonExists()).to.be(false);
     });
 
     it('exports existing dashboard as JSON', async function () {
-      await setExportDashboardJsonFeatureFlag(true);
-      await browser.refresh();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.loadSavedDashboard('dashboard with everything');
       await dashboard.waitForRenderComplete();
 
       await exports.clickExportTopNavButton();
