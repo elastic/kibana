@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
+import type { Status } from '../../../../../common/api/detection_engine';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
 import { useUserData } from '../../user_info';
 import { AlertActionItems } from './alerts_action_items';
@@ -17,6 +18,7 @@ jest.mock('../../user_info');
 
 describe('AlertActionItems', () => {
   const baseProps: Parameters<typeof AlertActionItems>[0] = {
+    statusFilter: [],
     tableId: 'test-table',
     groupNumber: 1,
     selectedGroup: 'host.name',
@@ -24,11 +26,13 @@ describe('AlertActionItems', () => {
     query: '{"bool":{"filter":[]}}',
   };
 
+  const { statusFilter: _statusFilter, ...baseActionItemsProps } = baseProps;
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('enables alert status actions when user has write + maintenance privileges', () => {
+  it('enables alert status actions when user has write + maintenance privileges, passing statusFilter as currentStatus', () => {
     (useUserData as jest.Mock).mockReturnValue([
       {
         hasIndexWrite: true,
@@ -39,17 +43,19 @@ describe('AlertActionItems', () => {
     const getActionItems = jest.fn().mockReturnValue(<div data-test-subj="action-items" />);
     (useGroupTakeActionsItems as jest.Mock).mockReturnValue(getActionItems);
 
-    render(<AlertActionItems {...baseProps} />);
+    const statusFilter: Status[] = ['open'];
+    render(<AlertActionItems {...baseProps} statusFilter={statusFilter} />);
 
-    expect(useGroupTakeActionsItems).toHaveBeenCalledWith({ showAlertStatusActions: true });
+    expect(useGroupTakeActionsItems).toHaveBeenCalledWith({
+      currentStatus: statusFilter,
+      showAlertStatusActions: true,
+    });
     expect(getActionItems).toHaveBeenCalledWith(
       expect.objectContaining({
-        tableId: baseProps.tableId,
-        groupNumber: baseProps.groupNumber,
-        selectedGroup: baseProps.selectedGroup,
-        query: baseProps.query,
+        ...baseActionItemsProps,
       })
     );
+    expect((getActionItems as jest.Mock).mock.calls[0][0]).not.toHaveProperty('statusFilter');
     expect(screen.getByTestId('action-items')).toBeInTheDocument();
   });
 
@@ -66,8 +72,11 @@ describe('AlertActionItems', () => {
 
     render(<AlertActionItems {...baseProps} />);
 
-    expect(useGroupTakeActionsItems).toHaveBeenCalledWith({ showAlertStatusActions: false });
-    expect(getActionItems).toHaveBeenCalledWith(expect.objectContaining(baseProps));
+    expect(useGroupTakeActionsItems).toHaveBeenCalledWith({
+      currentStatus: baseProps.statusFilter,
+      showAlertStatusActions: false,
+    });
+    expect(getActionItems).toHaveBeenCalledWith(expect.objectContaining(baseActionItemsProps));
   });
 
   it('disables alert status actions when maintenance privilege is null', () => {
@@ -83,7 +92,10 @@ describe('AlertActionItems', () => {
 
     render(<AlertActionItems {...baseProps} />);
 
-    expect(useGroupTakeActionsItems).toHaveBeenCalledWith({ showAlertStatusActions: false });
-    expect(getActionItems).toHaveBeenCalledWith(expect.objectContaining(baseProps));
+    expect(useGroupTakeActionsItems).toHaveBeenCalledWith({
+      currentStatus: baseProps.statusFilter,
+      showAlertStatusActions: false,
+    });
+    expect(getActionItems).toHaveBeenCalledWith(expect.objectContaining(baseActionItemsProps));
   });
 });

@@ -5,15 +5,24 @@
  * 2.0.
  */
 
+import type { Status } from '../../../../../common/api/detection_engine';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
 import type { GroupTakeActionItems } from '../../alerts_table/types';
 import { useUserData } from '../../user_info';
 
-export function AlertActionItems(props: Parameters<GroupTakeActionItems>[0]) {
+type GroupTakeActionItemsProps = Parameters<GroupTakeActionItems>[0];
+interface AlertActionItemsProps extends GroupTakeActionItemsProps {
+  statusFilter: Status[];
+}
+
+export const AlertActionItems = ({ statusFilter, ...props }: AlertActionItemsProps) => {
   const [{ hasIndexWrite, hasIndexMaintenance }] = useUserData();
   const getActionItems = useGroupTakeActionsItems({
+    currentStatus: statusFilter,
     showAlertStatusActions: Boolean(hasIndexWrite) && Boolean(hasIndexMaintenance),
   });
 
   return getActionItems(props);
-}
+};
+
+AlertActionItems.displayName = 'AlertActionItems';

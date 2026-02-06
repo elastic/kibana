@@ -236,10 +236,10 @@ export const TableSection = React.memo(
     const groupTakeActionItems: GroupTakeActionItems = useCallback(
       (props) => {
         const attack = getAttack(props.selectedGroup, props.groupBucket);
-        if (!attack) return <AlertActionItems {...props} />;
+        if (!attack) return <AlertActionItems statusFilter={statusFilter} {...props} />;
         return <AttacksGroupTakeActionItems attack={attack} />;
       },
-      [getAttack]
+      [getAttack, statusFilter]
     );
 
     const accordionExtraActionGroupStats = useGroupStats();
