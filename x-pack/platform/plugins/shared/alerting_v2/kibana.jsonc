@@ -14,6 +14,7 @@
       "features",
       "spaces",
       "data",
+      "dataViews",
       "security"
     ],
     "optionalPlugins": ["management"],
