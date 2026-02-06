@@ -42,7 +42,7 @@ interface SourceViewerProps {
 
 interface SourceViewerRestorableState {
   // Fetched JSON for the current doc
-  documentJson: string;
+  jsonValue: string;
   // JSON viewer scroll position
   viewerScrollTop: number;
 }
@@ -50,7 +50,7 @@ interface SourceViewerRestorableState {
 // Minimum height for the source content to guarantee minimum space when the flyout is scrollable.
 export const MIN_HEIGHT = 400;
 
-const { withRestorableState, useRestorableRef } =
+const { withRestorableState, useRestorableState, useRestorableRef } =
   createRestorableStateProvider<SourceViewerRestorableState>();
 
 const InternalDocViewerSource = ({
@@ -66,12 +66,13 @@ const InternalDocViewerSource = ({
 
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [editorHeight, setEditorHeight] = useState<number>();
-  const [jsonValue, setJsonValue] = useState<string>('');
+  const [jsonValue, setJsonValue] = useRestorableState('jsonValue', '');
   const [requestState, hit] = useEsDocSearch({
     id,
     index,
     dataView,
     esqlHit,
+    skip: jsonValue !== '',
   });
 
   const scrollTopRef = useRestorableRef('viewerScrollTop', 0);
@@ -81,7 +82,7 @@ const InternalDocViewerSource = ({
     if (requestState === ElasticRequestState.Found && hit) {
       setJsonValue(JSON.stringify(omit(hit.raw, '_score'), undefined, 2));
     }
-  }, [requestState, hit]);
+  }, [requestState, hit, setJsonValue]);
 
   // setting editor height to fill the available space of the document flyout
   useEffect(() => {
