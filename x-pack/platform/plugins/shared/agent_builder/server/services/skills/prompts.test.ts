@@ -27,7 +27,6 @@ describe('getSkillsInstructions', () => {
   ): SkillFilestoreEntry => ({
     type: 'file',
     path,
-    version: 1,
     content: {
       raw: {},
       plain_text: `---\nname: ${skillName}\ndescription: ${skillDescription}\n---\n\nBody content`,
@@ -37,6 +36,8 @@ describe('getSkillsInstructions', () => {
       id: skillName,
       token_count: 10,
       readonly: true,
+      version: 1,
+      last_version: 1,
       skill_name: skillName,
       skill_description: skillDescription,
       skill_id: skillName,
@@ -46,7 +47,6 @@ describe('getSkillsInstructions', () => {
   const createNonSkillFileEntry = (path: string): FilestoreEntry => ({
     type: 'file',
     path,
-    version: 1,
     content: {
       raw: {},
     },
@@ -55,6 +55,8 @@ describe('getSkillsInstructions', () => {
       id: path,
       token_count: 10,
       readonly: false,
+      version: 1,
+      last_version: 1,
     },
   });
 

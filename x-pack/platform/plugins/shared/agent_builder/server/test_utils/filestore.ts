@@ -113,6 +113,8 @@ export interface CreateFilestoreEntryOptions<TContent extends object = object> {
   tokenCount?: number;
   /** Version number */
   version?: number;
+  /** Latest version number */
+  lastVersion?: number;
   /** Additional overrides for the FilestoreEntry */
   overrides?: Partial<FilestoreEntry<TContent>>;
 }
@@ -125,7 +127,8 @@ export const createFilestoreEntry = <TContent extends object = object>(
   path: string,
   options: CreateFilestoreEntryOptions<TContent> = {}
 ): FilestoreEntry<TContent> => {
-  const { content, tokenCount = 100, version = 1, overrides = {} } = options;
+  const { content, tokenCount = 100, version = 1, lastVersion, overrides = {} } = options;
+  const resolvedLastVersion = lastVersion ?? version;
 
   const defaultContent: FileEntryContent<TContent> = content ?? {
     raw: { name: `content for ${path}` } as TContent,
@@ -134,12 +137,13 @@ export const createFilestoreEntry = <TContent extends object = object>(
   return {
     path,
     type: 'file',
-    version,
     metadata: {
       type: FileEntryType.toolResult,
       id: path,
       readonly: true,
       token_count: tokenCount,
+      version,
+      last_version: resolvedLastVersion,
     },
     content: defaultContent,
     ...overrides,
@@ -171,10 +175,11 @@ export const toFilestoreEntry = <TContent extends object = object>(
   return {
     path: entry.path,
     type: 'file',
-    version: latest.version,
     metadata: {
       ...entry.metadata,
       ...latest.metadata,
+      version: latest.version,
+      last_version: latest.version,
     },
     content: latest.content,
   };

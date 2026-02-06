@@ -227,13 +227,15 @@ export class FileSystemStore implements IFileStore {
     if (!selectedVersion) {
       return undefined;
     }
+    const latestVersion = this.getLatestVersion(entry);
     return {
       path: entry.path,
       type: 'file',
-      version: selectedVersion.version,
       metadata: {
         ...entry.metadata,
         ...selectedVersion.metadata,
+        version: selectedVersion.version,
+        last_version: latestVersion.version,
       },
       content: selectedVersion.content,
     };

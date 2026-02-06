@@ -274,7 +274,6 @@ This is the skill body.`);
       const entry: SkillFilestoreEntry = {
         type: 'file',
         path: '/path/to/skill.md',
-        version: 1,
         content: {
           raw: {},
         },
@@ -283,6 +282,8 @@ This is the skill body.`);
           id: 'skill-1',
           token_count: 100,
           readonly: true,
+          version: 1,
+          last_version: 1,
           skill_name: 'test-skill',
           skill_description: 'Test',
           skill_id: 'skill-1',
@@ -295,7 +296,6 @@ This is the skill body.`);
       const entry: FilestoreEntry = {
         type: 'file',
         path: '/path/to/result.json',
-        version: 1,
         content: {
           raw: {},
         },
@@ -304,6 +304,8 @@ This is the skill body.`);
           id: 'result-1',
           token_count: 100,
           readonly: false,
+          version: 1,
+          last_version: 1,
         },
       };
       expect(isSkillFilestoreEntry(entry)).toBe(false);
@@ -313,7 +315,6 @@ This is the skill body.`);
       const entry: FilestoreEntry = {
         type: 'file',
         path: '/path/to/attachment.pdf',
-        version: 1,
         content: {
           raw: {},
         },
@@ -322,6 +323,8 @@ This is the skill body.`);
           id: 'attachment-1',
           token_count: 100,
           readonly: false,
+          version: 1,
+          last_version: 1,
         },
       };
       expect(isSkillFilestoreEntry(entry)).toBe(false);
