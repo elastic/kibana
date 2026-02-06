@@ -71,10 +71,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
       expect(esqlToolCallMsg.role).to.eql('tool');
 
       const toolCallContent = JSON.parse(esqlToolCallMsg?.content as string);
-      [queryResult, esqlResults] = toolCallContent.results as [
-        QueryResult,
-        EsqlResults
-      ];
+      [queryResult, esqlResults] = toolCallContent.results as [QueryResult, EsqlResults];
     });
 
     after(async () => {

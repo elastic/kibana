@@ -15,9 +15,7 @@ interface EsqlResultsStepProps {
   result: EsqlResults;
 }
 
-export const EsqlResultsStep: React.FC<EsqlResultsStepProps> = ({
-  result: { data },
-}) => {
+export const EsqlResultsStep: React.FC<EsqlResultsStepProps> = ({ result: { data } }) => {
   const {
     startDependencies: { share },
   } = useAgentBuilderServices();

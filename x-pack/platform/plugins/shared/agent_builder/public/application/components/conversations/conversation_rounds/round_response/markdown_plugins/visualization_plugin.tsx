@@ -69,8 +69,11 @@ export function createVisualizationRenderer({
     );
 
     // First, look for esql results (from execute_esql)
-    let toolResult: EsqlResults | VisualizationResult | undefined =
-      findToolResult<EsqlResults>(steps, toolResultId, ToolResultType.esqlResults);
+    let toolResult: EsqlResults | VisualizationResult | undefined = findToolResult<EsqlResults>(
+      steps,
+      toolResultId,
+      ToolResultType.esqlResults
+    );
 
     // If not found, look for visualization results (from create_visualization)
     if (!toolResult) {
