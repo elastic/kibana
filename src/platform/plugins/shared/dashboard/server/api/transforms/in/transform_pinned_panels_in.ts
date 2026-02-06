@@ -16,10 +16,14 @@ import type { LegacyStoredPinnedControlState } from '@kbn/controls-schemas';
 
 import { type DashboardState, prefixReferencesFromPanel } from '../../../../common';
 import { embeddableService, logger } from '../../../kibana_services';
+import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object/schema';
 
 type PinnedPanelsState = Required<DashboardState>['pinned_panels'];
 
-export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState) {
+export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
+  pinnedPanels?: Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
+  references: Reference[];
+} {
   if (!pinnedPanels) return { references: [] };
 
   let references: Reference[] = [];

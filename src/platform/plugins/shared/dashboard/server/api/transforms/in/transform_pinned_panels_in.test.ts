@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlsGroupState } from '@kbn/controls-schemas';
-import { transformPinnedPanelsIn } from './transform_pinned_panels_in';
 import { CONTROL_WIDTH_SMALL } from '@kbn/controls-constants';
+import type { DashboardState } from '../../types';
+import { transformPinnedPanelsIn } from './transform_pinned_panels_in';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid'),
@@ -21,30 +21,30 @@ jest.mock('../../../kibana_services', () => ({
   },
 }));
 
-describe(' transformPinnedPanelsIn', () => {
-  const mockControlsGroupState: ControlsGroupState = [
+describe('transformPinnedPanelsIn', () => {
+  const mockPinnedPanelsState: Required<DashboardState>['pinned_panels'] = [
     {
       uid: 'control1',
       type: 'type1',
       width: CONTROL_WIDTH_SMALL,
       config: { bizz: 'buzz' },
       grow: false,
-    } as unknown as ControlsGroupState[number],
+    } as unknown as Required<DashboardState>['pinned_panels'][number],
     {
       type: 'type2',
       grow: true,
       width: CONTROL_WIDTH_SMALL,
       config: { boo: 'bear' },
-    } as unknown as ControlsGroupState[number],
+    } as unknown as Required<DashboardState>['pinned_panels'][number],
   ];
 
-  it('should return empty references if controlsGroupState is undefined', () => {
+  it('should return empty references if pinned_panels is undefined', () => {
     const result = transformPinnedPanelsIn(undefined);
     expect(result.references).toEqual([]);
   });
 
-  it('should transform controlsGroupState correctly', () => {
-    const result = transformPinnedPanelsIn(mockControlsGroupState);
+  it('should transform pinned panels state correctly', () => {
+    const result = transformPinnedPanelsIn(mockPinnedPanelsState);
 
     expect(result.pinnedPanels).toEqual({
       control1: {
@@ -64,9 +64,9 @@ describe(' transformPinnedPanelsIn', () => {
     });
   });
 
-  it('should handle empty controls array', () => {
-    const controlsGroupState: ControlsGroupState = [];
-    const result = transformPinnedPanelsIn(controlsGroupState);
+  it('should handle empty pinned panels array', () => {
+    const pinnedPanelsState: Required<DashboardState>['pinned_panels'] = [];
+    const result = transformPinnedPanelsIn(pinnedPanelsState);
     expect(result).toEqual({ pinnedPanels: {}, references: [] });
   });
 });
