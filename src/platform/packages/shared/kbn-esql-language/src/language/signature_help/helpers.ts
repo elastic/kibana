@@ -8,15 +8,13 @@
  */
 
 import { within } from '../../ast';
-import type {
-  ESQLAstPromqlCommand,
-  ESQLBinaryExpression,
-  ESQLFunction,
-  ESQLParens,
-} from '../../types';
+import type { ESQLAstPromqlCommand, ESQLFunction } from '../../types';
 import type { PromQLAstExpression, PromQLAstNode, PromQLFunction } from '../../promql/types';
 import { childrenOfPromqlNode } from '../../promql/traversal';
-import { getPromqlFunctionDefinition } from '../../commands/definitions/utils/promql';
+import {
+  getPromqlFunctionDefinition,
+  getPromqlQueryLocation,
+} from '../../commands/definitions/utils/promql';
 
 /**
  * Extracts the parameter list from a formatted function signature.
@@ -103,51 +101,17 @@ export function getArgumentToHighlightIndex(
 // PromQL Helpers
 // ============================================================================
 
-/**
- * Isolates the PromQL expression text and its starting position from the command.
- *
- * Handles three query formats:
- * - Direct parens: `PROMQL (rate(...))`
- * - Raw expression: `PROMQL rate(...)`
- * - Named assignment: `PROMQL col0 = (rate(...))`
- */
+/** Extracts the PromQL expression text and its starting offset, for passing to PromQLParser.parse(). */
 export function extractPromqlText(
   query: ESQLAstPromqlCommand['query'],
   fullText: string
 ): { text: string; start: number } | undefined {
-  if (!query) {
-    return undefined;
-  }
+  const loc = getPromqlQueryLocation(query);
+  if (!loc) return undefined;
 
-  // Direct parens: (query)
-  if (query.type === 'parens') {
-    return extractFromParens(query as ESQLParens, fullText);
-  }
+  const { min, max } = loc;
 
-  // Raw PromQL expression without wrapper
-  if ('expression' in query) {
-    const { min, max } = query.location;
-
-    return { text: fullText.substring(min, max + 1), start: min };
-  }
-
-  // Named assignment: col0 = (query)
-  if (query.type === 'function' && 'subtype' in query && query.subtype === 'binary-expression') {
-    const rightSide = (query as ESQLBinaryExpression<'='>).args[1];
-
-    if (rightSide && 'type' in rightSide && rightSide.type === 'parens') {
-      return extractFromParens(rightSide as ESQLParens, fullText);
-    }
-  }
-
-  return undefined;
-}
-
-/** Extracts text inside parentheses, skipping the opening paren. */
-function extractFromParens(parens: ESQLParens, fullText: string): { text: string; start: number } {
-  const start = parens.location.min + 1;
-
-  return { text: fullText.substring(start, parens.location.max), start };
+  return { text: fullText.substring(min, max + 1), start: min };
 }
 
 /**
