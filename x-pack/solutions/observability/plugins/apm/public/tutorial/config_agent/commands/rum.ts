@@ -47,7 +47,7 @@ var apm = initApm({
 })`;
 
 export const rumScript = `\
-<script src="https://your-cdn-host.com/path/to/elastic-apm-rum.umd.min.js" crossorigin></script>
+<script src="https://cdn.example.com/path/to/elastic-apm-rum.umd.min.js" crossorigin></script>
 <script>
   elasticApm.init({
     ${rumVariables.apmServiceName}: '{{{apmServiceName}}}',
