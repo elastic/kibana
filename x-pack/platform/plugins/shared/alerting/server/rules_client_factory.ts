@@ -35,6 +35,7 @@ import {
   RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from './saved_objects';
 import type { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
+import { isUiamApiKey } from '@kbn/security-plugin/server/uiam/utils';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -280,8 +281,7 @@ export class RulesClientFactory {
             .toString()
             .split(':');
 
-          const isUiamApiKey = apiKey[1]?.startsWith('essu_');
-          if (isUiamApiKey && this.isServerless) {
+          if (isUiamApiKey(apiKey[1]) && this.isServerless) {
             return {
               apiKeysEnabled: true,
               uiamResult: {

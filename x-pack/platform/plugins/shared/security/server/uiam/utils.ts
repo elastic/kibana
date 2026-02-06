@@ -20,3 +20,12 @@ export function isUiamCredential(credential: HTTPAuthorizationHeader | string) {
     credential instanceof HTTPAuthorizationHeader ? credential.credentials : credential
   ).startsWith(UIAM_CREDENTIALS_PREFIX);
 }
+
+/**
+ * Checks if the given API key is a UIAM API key.
+ * @param apiKey
+ * @returns True if the API Key starts with UIAM_CREDENTIALS_PREFIX, false otherwise.
+ */
+export function isUiamApiKey(apiKey: string) {
+  return apiKey.startsWith(UIAM_CREDENTIALS_PREFIX);
+}
