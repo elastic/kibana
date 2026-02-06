@@ -18,7 +18,7 @@ project:
   metadata:
     sourceRoot: x-pack/solutions/security/packages/kbn-cloud-security-posture/graph
 dependsOn:
-  - '@kbn/fleet-plugin'
+  - '@kbn/cloud-security-posture-common'
   - '@kbn/data-views-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/ui-theme'
@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/fleet-plugin'
   - '@kbn/core-http-browser'
+  - '@kbn/fleet-plugin'
 tags:
   - shared-browser
   - package
