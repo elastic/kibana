@@ -21,15 +21,11 @@ jest.mock('../hooks/url_filters', () => ({
   useAddUrlFilters: () => mockUseAddUrlFilters(),
 }));
 
-jest.mock('../../../../../hooks', () => {
-  const actualModule = jest.requireActual('../../../../../hooks');
-  return {
-    ...actualModule,
-    useAuthz: () => mockUseAuthz(),
-    useStartServices: () => mockUseStartServices(),
-    usePutSettingsMutation: () => mockUsePutSettingsMutation(),
-  };
-});
+jest.mock('../../../../../hooks', () => ({
+  useAuthz: () => mockUseAuthz(),
+  useStartServices: () => mockUseStartServices(),
+  usePutSettingsMutation: () => mockUsePutSettingsMutation(),
+}));
 
 import { SearchAndFiltersBar } from './search_and_filters_bar';
 

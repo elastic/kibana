@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 import { uniq } from 'lodash';
 
@@ -177,6 +177,15 @@ export const useAvailablePackages = ({
   const [onlyAgentlessFilter, setOnlyAgentlessFilter] = useState(initialOnlyAgentless);
   const [showBeta, setShowBeta] = useState<boolean | undefined>(initialShowBeta);
   const [showDeprecated, setShowDeprecated] = useState<boolean | undefined>(initialShowDeprecated);
+
+  // Sync state with URL parameters when they change
+  useEffect(() => {
+    setShowBeta(initialShowBeta);
+  }, [initialShowBeta]);
+
+  useEffect(() => {
+    setShowDeprecated(initialShowDeprecated);
+  }, [initialShowDeprecated]);
 
   // Use showBeta state if defined, otherwise fall back to prereleaseIntegrationsEnabled
   // This ensures the query updates immediately when the filter changes

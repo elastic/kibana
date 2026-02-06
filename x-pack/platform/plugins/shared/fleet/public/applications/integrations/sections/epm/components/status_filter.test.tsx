@@ -16,15 +16,11 @@ const mockUseAuthz = jest.fn();
 const mockUseStartServices = jest.fn();
 const mockUsePutSettingsMutation = jest.fn();
 
-jest.mock('../../../hooks', () => {
-  const actualModule = jest.requireActual('../../../hooks');
-  return {
-    ...actualModule,
-    useAuthz: () => mockUseAuthz(),
-    useStartServices: () => mockUseStartServices(),
-    usePutSettingsMutation: () => mockUsePutSettingsMutation(),
-  };
-});
+jest.mock('../../../hooks', () => ({
+  useAuthz: () => mockUseAuthz(),
+  useStartServices: () => mockUseStartServices(),
+  usePutSettingsMutation: () => mockUsePutSettingsMutation(),
+}));
 
 describe('StatusFilter', () => {
   const mockOnChange = jest.fn();
@@ -274,6 +270,65 @@ describe('StatusFilter', () => {
     expect(mockOnChange).toHaveBeenNthCalledWith(2, {
       showBeta: undefined,
       showDeprecated: true,
+    });
+  });
+
+  it('does not update beta settings when only deprecated filter is toggled', async () => {
+    mockMutateAsync.mockResolvedValue({ error: null });
+    const { getByTestId } = renderStatusFilter();
+
+    fireEvent.click(getByTestId('test.statusBtn'));
+
+    const deprecatedOption = getByTestId('test.statusDeprecatedOption');
+    fireEvent.click(deprecatedOption);
+
+    await waitFor(() => {
+      expect(mockOnChange).toHaveBeenCalledWith({
+        showBeta: undefined,
+        showDeprecated: true,
+      });
+    });
+
+    // Verify that beta settings were NOT updated
+    expect(mockMutateAsync).not.toHaveBeenCalled();
+  });
+
+  it('updates beta settings to false when unchecking beta option', async () => {
+    mockMutateAsync.mockResolvedValue({ error: null });
+    const { getByTestId } = renderStatusFilter({ showBeta: true });
+
+    fireEvent.click(getByTestId('test.statusBtn'));
+
+    const betaOption = getByTestId('test.statusBetaOption');
+    fireEvent.click(betaOption);
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith({
+        prerelease_integrations_enabled: false,
+      });
+    });
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      showBeta: undefined,
+      showDeprecated: undefined,
+    });
+  });
+
+  it('passes undefined for both filters when neither is checked', async () => {
+    const { getByTestId } = renderStatusFilter({ showDeprecated: true });
+
+    fireEvent.click(getByTestId('test.statusBtn'));
+
+    const deprecatedOption = getByTestId('test.statusDeprecatedOption');
+
+    // Click to disable (it's currently enabled)
+    fireEvent.click(deprecatedOption);
+
+    await waitFor(() => {
+      expect(mockOnChange).toHaveBeenCalledWith({
+        showBeta: undefined,
+        showDeprecated: undefined,
+      });
     });
   });
 });

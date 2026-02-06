@@ -95,18 +95,24 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
       const betaOption = newOptions.find((option) => option.key === 'beta');
       const deprecatedOption = newOptions.find((option) => option.key === 'deprecated');
 
-      const newShowBeta = betaOption?.checked === 'on';
-      const newShowDeprecated = deprecatedOption?.checked === 'on';
+      // Pass true when checked, undefined when unchecked (to remove from URL and fall back to default)
+      const newShowBeta = betaOption?.checked === 'on' ? true : undefined;
+      const newShowDeprecated = deprecatedOption?.checked === 'on' ? true : undefined;
 
       // Update server settings if beta changed
-      if (newShowBeta !== undefined && newShowBeta !== showBeta) {
-        updateBetaSettings(newShowBeta);
+      if (newShowBeta !== showBeta) {
+        // Only update settings when beta filter is explicitly toggled
+        if (newShowBeta === true) {
+          updateBetaSettings(true);
+        } else if (showBeta === true && newShowBeta === undefined) {
+          // Beta was on and is now being turned off
+          updateBetaSettings(false);
+        }
       }
 
-      // Pass true when checked, undefined when unchecked (to remove from URL and fall back to default)
       onChange({
-        showBeta: newShowBeta ? true : undefined,
-        showDeprecated: newShowDeprecated ? true : undefined,
+        showBeta: newShowBeta,
+        showDeprecated: newShowDeprecated,
       });
     },
     [showBeta, onChange, updateBetaSettings]

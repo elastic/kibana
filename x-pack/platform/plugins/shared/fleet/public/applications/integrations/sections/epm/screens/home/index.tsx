@@ -47,11 +47,9 @@ export const getParams = (params: CategoryParams, search: string) => {
   const onlyAgentlessParam = queryParams.get(INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM) === 'true';
 
   // Return undefined if param is not present, so we can fall back to the global setting
-  const showBetaParam =
-    queryParams.get('showBeta') !== null && queryParams.get('showBeta') === 'true';
+  const showBetaParam = queryParams.get('showBeta') === 'true' ? true : undefined;
 
-  const showDeprecatedParam =
-    queryParams.get('showDeprecated') !== null && queryParams.get('showDeprecated') === 'true';
+  const showDeprecatedParam = queryParams.get('showDeprecated') === 'true' ? true : undefined;
 
   return {
     selectedCategory,
