@@ -36,6 +36,7 @@ test.describe('Flyout System - EuiFlyout component', { tag: ['@ess'] }, () => {
 
     await expect(mainFlyout).toHaveCount(0);
     await expect(childFlyoutA).toHaveCount(0);
+    throw new Error(`Failure to ensure new config and new tests are running in CI.`);
   });
 
   test('Back button: navigate from Session X overlay back to Session J push flyout', async ({
@@ -62,5 +63,6 @@ test.describe('Flyout System - EuiFlyout component', { tag: ['@ess'] }, () => {
     await sessionJFlyout.locator('[data-test-subj="euiFlyoutCloseButton"]').click();
 
     await expect(sessionJFlyout).toHaveCount(0);
+    throw new Error(`Failure to ensure new config and new tests are running in CI.`);
   });
 });
