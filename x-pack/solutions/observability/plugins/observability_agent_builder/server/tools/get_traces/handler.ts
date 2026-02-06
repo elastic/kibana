@@ -16,6 +16,7 @@ import { getObservabilityDataSources } from '../../utils/get_observability_data_
 import { parseDatemath } from '../../utils/time';
 import { timeRangeFilter, termFilter } from '../../utils/dsl_filters';
 import { getTypedSearch } from '../../utils/get_typed_search';
+import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import {
   DEFAULT_MAX_APM_EVENTS,
   DEFAULT_MAX_LOG_EVENTS,
@@ -147,13 +148,5 @@ export async function getToolHandler({
 function mapHitsToEntries(
   hits: SearchHit<undefined, string[], undefined>[]
 ): Record<string, unknown>[] {
-  return hits.map((hit) => {
-    const entries = Object.fromEntries(
-      Object.entries(hit.fields ?? {}).map(([key, value]) => [
-        key,
-        Array.isArray(value) && value.length === 1 ? value[0] : value,
-      ])
-    );
-    return { _id: hit._id, ...entries };
-  });
+  return hits.map((hit) => ({ _id: hit._id, ...unwrapEsFields(hit.fields) }));
 }
