@@ -336,6 +336,7 @@ export const SideNavCollapseButton: FC<Props> = ({
     const defaultOrder = defaultState.navItemsConfig.map((item) => item.id);
     const currentOrder = navItemsConfig.map((item) => item.id);
     if (JSON.stringify(defaultOrder) !== JSON.stringify(currentOrder)) {
+      return false;
     }
     
     // Check visibility - all should be visible
