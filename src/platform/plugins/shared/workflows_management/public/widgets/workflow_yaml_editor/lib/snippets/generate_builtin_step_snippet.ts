@@ -9,7 +9,7 @@
 
 import type { ToStringOptions } from 'yaml';
 import { stringify } from 'yaml';
-import type { BuiltInStepType } from '@kbn/workflows';
+import type { BuiltInStepType, WorkflowOutput } from '@kbn/workflows';
 
 interface GenerateBuiltInStepSnippetOptions {
   full?: boolean;
@@ -22,11 +22,13 @@ interface GenerateBuiltInStepSnippetOptions {
  * @param options - Configuration options for snippet generation
  * @param options.full - Whether to include the full YAML structure with step name and type prefix
  * @param options.withStepsSection - Whether to include the "steps:" section
+ * @param workflowOutputs - Optional workflow outputs schema for workflow.output step
  * @returns The formatted YAML step snippet with appropriate parameters and structure
  */
 export function generateBuiltInStepSnippet(
   stepType: BuiltInStepType,
-  { full, withStepsSection }: GenerateBuiltInStepSnippetOptions = {}
+  { full, withStepsSection }: GenerateBuiltInStepSnippetOptions = {},
+  workflowOutputs?: WorkflowOutput[]
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
   let parameters: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -79,6 +81,73 @@ export function generateBuiltInStepSnippet(
     case 'wait':
       parameters = {
         with: { duration: '5s' },
+      };
+      break;
+    case 'workflow.execute':
+      parameters = {
+        with: {
+          'workflow-id': 'workflow-id',
+          inputs: {},
+        },
+      };
+      break;
+    case 'workflow.executeAsync':
+      parameters = {
+        with: {
+          'workflow-id': 'workflow-id',
+          inputs: {},
+        },
+      };
+      break;
+    case 'workflow.output':
+      if (workflowOutputs && workflowOutputs.length > 0) {
+        const withBlock: Record<string, string> = {};
+        workflowOutputs.forEach((output, index) => {
+          // Generate placeholder based on type
+          let placeholder: string;
+          switch (output.type) {
+            case 'string':
+              placeholder = `\${${index + 1}:value}`;
+              break;
+            case 'number':
+              placeholder = `\${${index + 1}:0}`;
+              break;
+            case 'boolean':
+              placeholder = `\${${index + 1}:true}`;
+              break;
+            case 'array':
+              placeholder = `\${${index + 1}:[]}`;
+              break;
+            case 'choice':
+              placeholder =
+                output.options && output.options.length > 0
+                  ? `\${${index + 1}:${output.options[0]}}`
+                  : `\${${index + 1}:value}`;
+              break;
+            default:
+              placeholder = `\${${index + 1}:value}`;
+          }
+          withBlock[output.name] = placeholder;
+        });
+        parameters = {
+          status: 'completed',
+          with: withBlock,
+        };
+      } else {
+        // Fallback if no outputs schema provided
+        parameters = {
+          status: 'completed',
+          with: {
+            result: '{{steps.previous_step.output}}',
+          },
+        };
+      }
+      break;
+    case 'workflow.fail':
+      parameters = {
+        with: {
+          message: '${1:Error message}',
+        },
       };
       break;
     default:

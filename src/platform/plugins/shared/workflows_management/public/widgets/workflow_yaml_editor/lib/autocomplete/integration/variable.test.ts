@@ -78,6 +78,8 @@ steps:
         'kibanaUrl',
         'now',
         'workflow',
+        'output',
+        'parent',
         'steps',
         'execution',
         'inputs',
@@ -93,6 +95,8 @@ steps:
         '"{{ inputs$0 }}"',
         '"{{ consts$0 }}"',
         '"{{ now$0 }}"',
+        '"{{ output$0 }}"',
+        '"{{ parent$0 }}"',
         '"{{ steps$0 }}"',
         '"{{ variables$0 }}"',
       ].sort()
@@ -121,6 +125,8 @@ steps:
         '{{ inputs$0 }}',
         '{{ consts$0 }}',
         '{{ now$0 }}',
+        '{{ output$0 }}',
+        '{{ parent$0 }}',
         '{{ steps$0 }}',
         '{{ variables$0 }}',
       ].sort()
