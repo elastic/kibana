@@ -72,6 +72,82 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
     []
   );
 
+  // Create description list items
+  const descriptionListItems = useMemo(
+    () => [
+      {
+        title: (
+          <EuiText size="s">
+            <strong>
+              {i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
+                defaultMessage: 'Data stream',
+              })}
+            </strong>
+          </EuiText>
+        ),
+        description: (
+          <EuiText color="primary" size="s">
+            {metric.index}
+          </EuiText>
+        ),
+      },
+      {
+        title: (
+          <EuiText size="s">
+            <strong>
+              {i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
+                defaultMessage: 'Field type',
+              })}
+            </strong>
+            <EuiSpacer size="xs" />
+          </EuiText>
+        ),
+        description: <EuiBadge>{metric.type}</EuiBadge>,
+      },
+      ...(unitLabel
+        ? [
+            {
+              title: (
+                <EuiText
+                  size="s"
+                  data-test-subj="metricsExperienceFlyoutOverviewTabMetricUnitLabel"
+                >
+                  <strong>
+                    {i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
+                      defaultMessage: 'Metric unit',
+                    })}
+                  </strong>
+                  <EuiSpacer size="xs" />
+                </EuiText>
+              ),
+              description: <EuiBadge>{unitLabel}</EuiBadge>,
+            },
+          ]
+        : []),
+      ...(metric.instrument
+        ? [
+            {
+              title: (
+                <EuiText
+                  size="s"
+                  data-test-subj="metricsExperienceFlyoutOverviewTabMetricTypeLabel"
+                >
+                  <strong>
+                    {i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
+                      defaultMessage: 'Metric type',
+                    })}
+                  </strong>
+                  <EuiSpacer size="xs" />
+                </EuiText>
+              ),
+              description: <EuiBadge>{metric.instrument}</EuiBadge>,
+            },
+          ]
+        : []),
+    ],
+    [metric.index, metric.type, metric.instrument, unitLabel]
+  );
+
   // Create list items from dimensions
   const dimensionListItems = paginatedDimensions.map((dimension: Dimension) => {
     const hasIcon = iconMap.has(dimension.type);
@@ -104,77 +180,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
         compressed
         rowGutterSize="m"
         data-test-subj="metricsExperienceFlyoutOverviewTabDescriptionList"
-        listItems={[
-          {
-            title: (
-              <EuiText size="s">
-                <strong>
-                  {i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
-                    defaultMessage: 'Data stream',
-                  })}
-                </strong>
-              </EuiText>
-            ),
-            description: (
-              <EuiText color="primary" size="s">
-                {metric.index}
-              </EuiText>
-            ),
-          },
-          {
-            title: (
-              <EuiText size="s">
-                <strong>
-                  {i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
-                    defaultMessage: 'Field type',
-                  })}
-                </strong>
-                <EuiSpacer size="xs" />
-              </EuiText>
-            ),
-            description: <EuiBadge>{metric.type}</EuiBadge>,
-          },
-          ...(unitLabel
-            ? [
-                {
-                  title: (
-                    <EuiText
-                      size="s"
-                      data-test-subj="metricsExperienceFlyoutOverviewTabMetricUnitLabel"
-                    >
-                      <strong>
-                        {i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
-                          defaultMessage: 'Metric unit',
-                        })}
-                      </strong>
-                      <EuiSpacer size="xs" />
-                    </EuiText>
-                  ),
-                  description: <EuiBadge>{unitLabel}</EuiBadge>,
-                },
-              ]
-            : []),
-          ...(metric.instrument
-            ? [
-                {
-                  title: (
-                    <EuiText
-                      size="s"
-                      data-test-subj="metricsExperienceFlyoutOverviewTabMetricTypeLabel"
-                    >
-                      <strong>
-                        {i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
-                          defaultMessage: 'Metric type',
-                        })}
-                      </strong>
-                      <EuiSpacer size="xs" />
-                    </EuiText>
-                  ),
-                  description: <EuiBadge>{metric.instrument}</EuiBadge>,
-                },
-              ]
-            : []),
-        ]}
+        listItems={descriptionListItems}
       />
 
       {metric.dimensions && metric.dimensions.length > 0 && (
