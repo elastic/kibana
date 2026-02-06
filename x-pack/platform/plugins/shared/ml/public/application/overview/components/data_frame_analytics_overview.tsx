@@ -7,16 +7,18 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../locator';
-import dfaImage from '../../data_frame_analytics/pages/analytics_management/components/empty_prompt/data_frame_analytics_kibana.png';
+import dfaImage from '../../data_frame_analytics/pages/analytics_management/components/empty_prompt/analysis_monitors.png';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
 import { mlNodesAvailable } from '../../ml_nodes_check';
 import { MLEmptyPromptCard } from '../../components/overview/ml_empty_prompt_card';
 import { AnalyticsEmptyPrompt } from '../../data_frame_analytics/pages/analytics_management/components/empty_prompt/empty_prompt';
+import { useOverviewPageCustomCss } from '../overview_ml_page';
+
 export const DataFrameAnalyticsOverviewCard: FC = () => {
   const mlLocator = useMlLocator();
   const mlManagementLocator = useMlManagementLocator();
@@ -28,6 +30,7 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
       'canStartStopDataFrameAnalytics',
       'canGetDataFrameAnalytics',
     ]);
+  const overviewPageCardCustomCss = useOverviewPageCustomCss();
 
   const disabled =
     !mlNodesAvailable() || !canCreateDataFrameAnalytics || !canStartStopDataFrameAnalytics;
@@ -55,23 +58,22 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
     if (hasDFAs) {
       actions.push(
         <EuiButton
-          fill
-          color="primary"
+          color="text"
           onClick={navigateToResultsExplorer}
           isDisabled={!canGetDataFrameAnalytics}
           data-test-subj="mlAnalyticsResultsExplorerButton"
         >
           <FormattedMessage
             id="xpack.ml.overview.dataFrameAnalytics.resultsExplorerButtonText"
-            defaultMessage="Results explorer"
+            defaultMessage="Open results explorer"
           />
         </EuiButton>
       );
     }
     if (!disabled) {
       actions.push(
-        <EuiButton
-          color="primary"
+        <EuiButtonEmpty
+          color="text"
           onClick={navigateToDFAManagementPath}
           isDisabled={disabled}
           data-test-subj="mlAnalyticsManageDFAJobsButton"
@@ -80,7 +82,7 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
             id="xpack.ml.overview.dataFrameAnalytics.manageJobsButton"
             defaultMessage="Manage jobs"
           />
-        </EuiButton>
+        </EuiButtonEmpty>
       );
     }
     return actions;
@@ -104,21 +106,24 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
   }, [mlApi]);
 
   return !hasDFAs ? (
-    <AnalyticsEmptyPrompt />
+    <AnalyticsEmptyPrompt customCss={overviewPageCardCustomCss} />
   ) : (
     <MLEmptyPromptCard
+      customCss={overviewPageCardCustomCss}
       iconSrc={dfaImage}
       iconAlt={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
-        defaultMessage: 'Trained analysis of your data',
+        defaultMessage: 'Tailored predictive models',
       })}
       title={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
-        defaultMessage: 'Trained analysis of your data',
+        defaultMessage: 'Tailored predictive models',
       })}
       body={
-        <FormattedMessage
-          id="xpack.ml.overview.analyticsList.emptyPromptText"
-          defaultMessage="Train outlier detection, regression, or classification machine learning models using data frame analytics."
-        />
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.ml.overview.analyticsList.emptyPromptText"
+            defaultMessage="Categorize data, predict values, and detect outliers using supervised and unsupervised machine learning in data frame analytics."
+          />
+        </EuiText>
       }
       actions={availableActions}
       data-test-subj="mlOverviewDataFrameAnalyticsCard"
