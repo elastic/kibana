@@ -12,7 +12,7 @@ import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/li
 import { warningAndAboveLogFilter } from '../../../utils/warning_and_above_log_filter';
 import { getTypedSearch } from '../../../utils/get_typed_search';
 import { kqlFilter as buildKqlFilter, timeRangeFilter } from '../../../utils/dsl_filters';
-import type { AnchorLog } from '../types';
+import type { AnchorLog, Correlation } from '../types';
 import type { CorrelationFieldAggregations } from './types';
 
 export async function getAnchorLogs({
@@ -35,7 +35,7 @@ export async function getAnchorLogs({
   correlationFields: string[];
   logger: Logger;
   maxSequences: number;
-}) {
+}): Promise<Correlation[]> {
   const search = getTypedSearch(esClient.asCurrentUser);
 
   // Use aggregation-based approach to get diverse samples across all correlation fields.
@@ -75,7 +75,7 @@ export async function getAnchorLogs({
 
   logger.debug(`Found ${anchorLogs.length} unique anchor logs across correlation fields`);
 
-  return anchorLogs.slice(0, maxSequences);
+  return anchorLogs.slice(0, maxSequences).map((anchor) => anchor.correlation);
 }
 
 /**
@@ -98,15 +98,31 @@ function getAggNameForField(field: string): string {
  * 3. Terms with execution_hint 'map': Avoids Global Ordinals memory overhead
  * 4. Top Hits: Fetches document metadata in a single pass
  */
-function buildDiversifiedSamplerAggregations(
+export function buildDiversifiedSamplerAggregations(
   correlationFields: string[],
   maxSequences: number
 ): Record<string, AggregationsAggregationContainer> {
-  return correlationFields.reduce((acc, field) => {
+  return correlationFields.reduce((acc, field, index) => {
     const aggName = getAggNameForField(field);
 
     const fieldAgg: AggregationsAggregationContainer = {
-      filter: { exists: { field } },
+      filter: {
+        bool: {
+          filter: [
+            { exists: { field } },
+            // must not have previously checked correlation fields (e.g., if we're currently checking 'request.id', exclude docs with 'trace.id' since they would have been captured in the 'trace.id' aggregation)
+            ...(index > 0
+              ? correlationFields.slice(0, index - 1).map((f) => ({
+                  bool: {
+                    must_not: {
+                      exists: { field: f },
+                    },
+                  },
+                }))
+              : []),
+          ],
+        },
+      },
       aggs: {
         diverse_sampler: {
           diversified_sampler: {
@@ -140,7 +156,7 @@ function buildDiversifiedSamplerAggregations(
   }, {} as Record<string, AggregationsAggregationContainer>);
 }
 
-function parseAnchorLogsFromAggregations(
+export function parseAnchorLogsFromAggregations(
   aggregations: CorrelationFieldAggregations | undefined,
   correlationFields: string[]
 ): AnchorLog[] {

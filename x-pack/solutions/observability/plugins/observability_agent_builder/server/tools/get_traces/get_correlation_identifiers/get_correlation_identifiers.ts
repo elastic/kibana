@@ -78,20 +78,8 @@ export async function getCorrelationIdentifiers({
   // Merge and de-dupe correlations to avoid redundant downstream queries.
   // - De-dupe by field+value since that is what later queries are keyed on.
   // - Preserve order (log anchors first), so `uniqBy` keeps the earliest occurrence.
-  const merged = uniqBy(
+  return uniqBy(
     [...anchorLogs, ...apmCorrelations],
-    (c) => `${c.correlation.field}:${c.correlation.value}`
+    (correlation) => `${correlation.field}:${correlation.value}`
   ).slice(0, maxSequences);
-
-  return merged.map((anchor) => {
-    const { correlation } = anchor;
-    return {
-      identifier: {
-        field: correlation.field,
-        value: correlation.value,
-      },
-      start: startTime,
-      end: endTime,
-    };
-  });
 }

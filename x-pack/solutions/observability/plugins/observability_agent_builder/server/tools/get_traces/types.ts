@@ -23,20 +23,13 @@ export interface GetTracesToolResult {
   };
 }
 
+export interface Correlation {
+  field: string;
+  value: string;
+}
 export interface AnchorLog {
   '@timestamp': string;
-  correlation: {
-    field: string;
-    value: string;
+  correlation: Correlation & {
     anchorLogId: string;
-  };
-}
-
-export interface Correlation {
-  start: number;
-  end: number;
-  identifier: {
-    field: string;
-    value: string;
   };
 }

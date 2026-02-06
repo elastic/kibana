@@ -32,11 +32,14 @@ import type { Correlation, TraceSequence } from './types';
 export function getApmTraceError({
   apmEventClient,
   correlationIdentifier,
+  startTime,
+  endTime,
 }: {
   apmEventClient: APMEventClient;
   correlationIdentifier: Correlation;
+  startTime: number;
+  endTime: number;
 }) {
-  const { identifier, start, end } = correlationIdentifier;
   const excludedLogLevels = ['debug', 'info', 'warning'];
   const ERROR_LOG_LEVEL = 'error.log.level';
   return apmEventClient.search('get_errors_docs', {
@@ -53,8 +56,8 @@ export function getApmTraceError({
     query: {
       bool: {
         filter: [
-          ...timeRangeFilter('@timestamp', { start, end }),
-          ...termFilter(identifier.field, identifier.value),
+          ...timeRangeFilter('@timestamp', { start: startTime, end: endTime }),
+          ...termFilter(correlationIdentifier.field, correlationIdentifier.value),
         ],
         must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
       },
@@ -67,11 +70,14 @@ export function getApmTraceError({
 export function getTraceDocs({
   apmEventClient,
   correlationIdentifier,
+  startTime,
+  endTime,
 }: {
   apmEventClient: APMEventClient;
   correlationIdentifier: Correlation;
+  startTime: number;
+  endTime: number;
 }) {
-  const { identifier, start, end } = correlationIdentifier;
   return apmEventClient.search('observability_agent_builder_get_trace_docs', {
     apm: {
       events: [ProcessorEvent.transaction, ProcessorEvent.span, ProcessorEvent.error],
@@ -84,8 +90,8 @@ export function getTraceDocs({
     query: {
       bool: {
         filter: [
-          ...timeRangeFilter('@timestamp', { start, end }),
-          ...termFilter(identifier.field, identifier.value),
+          ...timeRangeFilter('@timestamp', { start: startTime, end: endTime }),
+          ...termFilter(correlationIdentifier.field, correlationIdentifier.value),
         ],
       },
     },
@@ -96,12 +102,15 @@ export function getCorrelatedLogs({
   esClient,
   correlationIdentifier,
   index,
+  startTime,
+  endTime,
 }: {
   esClient: IScopedClusterClient;
   correlationIdentifier: Correlation;
   index: string[];
+  startTime: number;
+  endTime: number;
 }) {
-  const { identifier, start, end } = correlationIdentifier;
   const search = getTypedSearch(esClient.asCurrentUser);
 
   return search({
@@ -114,8 +123,8 @@ export function getCorrelatedLogs({
     query: {
       bool: {
         filter: [
-          ...timeRangeFilter('@timestamp', { start, end }),
-          ...termFilter(identifier.field, identifier.value),
+          ...timeRangeFilter('@timestamp', { start: startTime, end: endTime }),
+          ...termFilter(correlationIdentifier.field, correlationIdentifier.value),
         ],
       },
     },
@@ -170,12 +179,16 @@ export async function getToolHandler({
       const apmResponse = await getTraceDocs({
         apmEventClient,
         correlationIdentifier,
+        startTime,
+        endTime,
       });
       const apmHits = apmResponse.hits.hits;
 
       const errorResponse = await getApmTraceError({
         apmEventClient,
         correlationIdentifier,
+        startTime,
+        endTime,
       });
 
       const errorHits = errorResponse.hits.hits;
@@ -184,6 +197,8 @@ export async function getToolHandler({
         esClient,
         correlationIdentifier,
         index: logsIndices,
+        startTime,
+        endTime,
       });
       const logHits = logsResponse?.hits.hits ?? [];
 
