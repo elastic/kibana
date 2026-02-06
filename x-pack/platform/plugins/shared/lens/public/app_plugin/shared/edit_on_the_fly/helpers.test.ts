@@ -62,8 +62,6 @@ jest.mock('@kbn/esql-utils', () => {
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     getESQLAdHocDataview: jest.fn().mockResolvedValue({}),
     formatESQLColumns: jest.fn().mockReturnValue(queryResponseColumns),
-    hasTransformationalCommand: jest.fn().mockReturnValue(false),
-    mapVariableToColumn: jest.fn().mockImplementation((_query, _vars, columns) => columns),
   };
 });
 
