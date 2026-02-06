@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getSplunkDashboardXmlParser } from '../../../../../../../../common/siem_migrations/parsers/splunk/get_dashboard_xml_parser';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import { generateAssistantComment } from '../../../../../common/task/util/comments';
 import { SplunkXmlDashboardParser } from '../../../../../../../../common/siem_migrations/parsers/splunk/dashboard_xml';
@@ -31,7 +32,7 @@ export const getParseOriginalDashboardNode = (): GraphNode => {
       };
     }
 
-    const parser = new SplunkXmlDashboardParser(state.original_dashboard.data);
+    const parser = await getSplunkDashboardXmlParser(state.original_dashboard.data);
     const panels = await parser.extractPanels();
 
     return {

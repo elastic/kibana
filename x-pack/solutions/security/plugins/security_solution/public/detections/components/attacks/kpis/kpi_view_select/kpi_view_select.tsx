@@ -22,23 +22,24 @@ export interface KpiViewSelectProps {
   setKpiViewSelection: (view: KpiViewSelection) => void;
 }
 
-export const KpiViewSelect: React.FC<KpiViewSelectProps> = ({
-  kpiViewSelection,
-  setKpiViewSelection,
-}) => {
-  const options = useMemo(() => KPI_VIEW_OPTIONS.map((option) => getOptionProperties(option)), []);
+export const KpiViewSelect: React.FC<KpiViewSelectProps> = React.memo(
+  ({ kpiViewSelection, setKpiViewSelection }) => {
+    const options = useMemo(
+      () => KPI_VIEW_OPTIONS.map((option) => getOptionProperties(option)),
+      []
+    );
 
-  return (
-    <EuiButtonGroup
-      legend={i18n.LEGEND_TITLE}
-      options={options}
-      idSelected={kpiViewSelection}
-      onChange={(id) => setKpiViewSelection(id as KpiViewSelection)}
-      buttonSize="compressed"
-      color="primary"
-      data-test-subj="kpi-view-select-tabs"
-    />
-  );
-};
-
+    return (
+      <EuiButtonGroup
+        legend={i18n.LEGEND_TITLE}
+        options={options}
+        idSelected={kpiViewSelection}
+        onChange={(id) => setKpiViewSelection(id as KpiViewSelection)}
+        buttonSize="compressed"
+        color="primary"
+        data-test-subj="kpi-view-select-tabs"
+      />
+    );
+  }
+);
 KpiViewSelect.displayName = 'KpiViewSelect';

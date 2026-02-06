@@ -319,7 +319,7 @@ export class SavedMap {
         pageTitle: this._getPageTitle(),
         isByValue: this.isByValue(),
         getHasUnsavedChanges: this.hasUnsavedChanges,
-        originatingApp: this._originatingApp,
+        originatingApp: this.hasOriginatingApp() ? this._originatingApp : undefined,
         getAppNameFromId: this._getStateTransfer().getAppNameFromId,
         history,
       });
@@ -339,8 +339,14 @@ export class SavedMap {
     return this._originatingApp ? this.getAppNameFromId(this._originatingApp) : undefined;
   }
 
+  private _isFromDashboardListing(): boolean {
+    return (
+      this._originatingApp === 'dashboards' && Boolean(this._originatingPath?.includes('/list/'))
+    );
+  }
+
   public hasOriginatingApp(): boolean {
-    return !!this._originatingApp;
+    return !!this._originatingApp && !this._isFromDashboardListing();
   }
 
   public getOriginatingPath(): string | undefined {
@@ -391,7 +397,7 @@ export class SavedMap {
 
   public isByValue(): boolean {
     const hasSavedObjectId = !!this.getSavedObjectId();
-    return !!this._originatingApp && !hasSavedObjectId;
+    return this.hasOriginatingApp() && !hasSavedObjectId;
   }
 
   public async save({
