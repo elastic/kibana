@@ -50,6 +50,7 @@ export const useAllLiveQueries = ({
         direction,
         limit,
         sortField,
+        kuery,
         withResultCounts,
         ...(alertId ? { alertId } : {}),
       },
