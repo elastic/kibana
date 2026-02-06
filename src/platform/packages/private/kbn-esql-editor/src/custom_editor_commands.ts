@@ -145,9 +145,11 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
   commandDisposables.push(
     monaco.editor.registerCommand('esql.multiCommands', (...args) => {
       const [, { commands }] = args;
-      const commandsToExecute: { id: string; payload?: unknown }[] = JSON.parse(commands);
+      const commandsToExecute: { id: string; payload?: unknown; arguments?: unknown[] }[] =
+        JSON.parse(commands);
       commandsToExecute.forEach((command) => {
-        editorRef.current?.trigger(undefined, command.id, command.payload ?? {});
+        const payload = command.payload ?? command.arguments?.[0] ?? {};
+        editorRef.current?.trigger(undefined, command.id, payload);
       });
     })
   );
