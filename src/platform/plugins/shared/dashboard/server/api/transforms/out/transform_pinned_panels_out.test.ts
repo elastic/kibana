@@ -15,7 +15,7 @@ import {
 } from '@kbn/controls-constants';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import {
-  transformLegacyPinnedPanelProperties,
+  transformPinnedPanelProperties,
   transformPinnedPanelsObjectToArray,
   transformPinnedPanelsOut,
 } from './transform_pinned_panels_out';
@@ -97,7 +97,7 @@ describe('pinned panels', () => {
   describe('transform <9.4 legacy controls', () => {
     it('should transform controls explicit input', () => {
       const controlsArray = transformPinnedPanelsObjectToArray(mockPinnedPanels);
-      const result = transformLegacyPinnedPanelProperties(controlsArray);
+      const result = transformPinnedPanelProperties(controlsArray);
 
       expect(result).toHaveProperty('0.config.foo', 'bar');
       expect(result).not.toHaveProperty('0.explicitInput');

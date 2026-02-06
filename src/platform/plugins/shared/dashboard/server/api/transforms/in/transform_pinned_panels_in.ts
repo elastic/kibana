@@ -33,7 +33,7 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
       const transforms = embeddableService.getTransforms(type);
 
       let transformedControlState = { ...controlState } as Partial<
-        LegacyStoredPinnedControlState[string]
+        Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'][number]
       >;
       try {
         if (transforms?.transformIn) {
@@ -48,8 +48,8 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
           if ('dataViewRefName' in transformedState) {
             transformedControlState = {
               ...transformedControlState,
-              explicitInput: {
-                ...(transformedState as LegacyStoredPinnedControlState[string]['explicitInput']),
+              config: {
+                ...transformedState,
                 dataViewRefName: `${uid}:${transformedState.dataViewRefName}`,
               },
             };
@@ -57,8 +57,7 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
         } else {
           transformedControlState = {
             ...transformedControlState,
-            explicitInput:
-              controlState.config as LegacyStoredPinnedControlState[string]['explicitInput'],
+            config: controlState.config,
           };
         }
       } catch (transformInError) {
@@ -68,7 +67,7 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
         );
       }
 
-      const { width, grow, explicitInput } = transformedControlState;
+      const { width, grow, config } = transformedControlState;
       return [
         uid,
         {
@@ -76,7 +75,7 @@ export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
           type,
           width,
           grow,
-          explicitInput: { ...omit(explicitInput, ['type']) },
+          config: { ...omit(config, ['type']) },
         },
       ];
     })

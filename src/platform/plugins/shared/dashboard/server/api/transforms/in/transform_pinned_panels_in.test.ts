@@ -52,14 +52,14 @@ describe('transformPinnedPanelsIn', () => {
         type: 'type1',
         width: 'small',
         grow: false,
-        explicitInput: { bizz: 'buzz' },
+        config: { bizz: 'buzz' },
       },
       'mock-uuid': {
         order: 1,
         type: 'type2',
         width: 'small',
         grow: true,
-        explicitInput: { boo: 'bear' },
+        config: { boo: 'bear' },
       },
     });
   });

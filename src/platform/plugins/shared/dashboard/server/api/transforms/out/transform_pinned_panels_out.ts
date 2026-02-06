@@ -8,7 +8,10 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { LegacyIgnoreParentSettings } from '@kbn/controls-schemas';
+import type {
+  LegacyIgnoreParentSettings,
+  LegacyStoredPinnedControlState,
+} from '@kbn/controls-schemas';
 import { flow } from 'lodash';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import type { DashboardState } from '../../types';
@@ -32,10 +35,7 @@ export function transformPinnedPanelsOut(
      * >=9.4, pinned panels are stored in the SO under the key `pinned_panels` without any JSON bucketing
      */
     return injectPinnedPanelReferences(
-      flow(
-        transformPinnedPanelsObjectToArray,
-        transformLegacyPinnedPanelProperties
-      )(pinnedPanels.panels),
+      flow(transformPinnedPanelsObjectToArray, transformPinnedPanelProperties)(pinnedPanels.panels),
       containerReferences
     );
   } else if (controlGroupInput) {
@@ -48,7 +48,7 @@ export function transformPinnedPanelsOut(
           flow(
             JSON.parse,
             transformPinnedPanelsObjectToArray,
-            transformLegacyPinnedPanelProperties
+            transformPinnedPanelProperties
           )(controlGroupInput.panelsJSON),
           containerReferences
         )
@@ -91,19 +91,25 @@ export function transformPinnedPanelsObjectToArray(
 
 /**
  * <9.4 The SO stores the panel config under `explicitInput`
+ * >=9.4 the SO stores the panel config under `config`
  */
-export function transformLegacyPinnedPanelProperties(
-  controls: Array<StoredPinnedPanels[string] & { id: string }>
+export function transformPinnedPanelProperties(
+  controls: Array<
+    (
+      | LegacyStoredPinnedControlState[number]
+      | Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'][number]
+    ) & { id: string }
+  >
 ): PinnedPanelsState {
   return controls
     .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
-    .map(({ explicitInput, id, type, grow, width }) => {
+    .map(({ id, type, grow, width, ...rest }) => {
       return {
         uid: id,
         type,
         ...(grow !== undefined && { grow }),
         ...(width !== undefined && { width }),
-        config: explicitInput,
+        config: 'explicitInput' in rest ? rest.explicitInput : rest.config,
       } as PinnedPanelsState[number];
     });
 }

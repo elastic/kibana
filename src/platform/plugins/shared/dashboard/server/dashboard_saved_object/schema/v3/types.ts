@@ -26,7 +26,7 @@ export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema> & {
         order: number;
         width?: string;
         grow?: boolean;
-        explicitInput: object;
+        config: object;
       };
     };
   };
