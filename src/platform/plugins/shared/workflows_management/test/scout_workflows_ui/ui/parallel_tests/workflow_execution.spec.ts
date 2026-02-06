@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expect, KibanaCodeEditorWrapper, tags, spaceTest as test } from '@kbn/scout';
+import { expect, tags } from '@kbn/scout';
+import { spaceTest as test } from '../fixtures';
 
 const getTestRunWorkflowYaml = (name: string) => `
 name: ${name}
@@ -61,28 +62,21 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  test('should run unsaved workflow as test run with isTestRun: true', async ({ page }) => {
+  test('should run unsaved workflow as test run with isTestRun: true', async ({
+    pageObjects,
+    page,
+  }) => {
     const workflowName = `Test Workflow ${Math.floor(Math.random() * 10000)}`;
 
     // Step 1-3: Go to workflows page and create a new workflow
-    await page.gotoApp('workflows');
-    await page.testSubj.click('createWorkflowButton');
+    await pageObjects.workflowEditor.gotoNewWorkflow();
 
-    const yamlEditor = page.testSubj.locator('workflowYamlEditor');
-    await expect(yamlEditor).toBeVisible();
-
-    const yamlEditorWrapper = new KibanaCodeEditorWrapper(page);
-    await yamlEditorWrapper.setCodeEditorValue(getTestRunWorkflowYaml(workflowName));
+    await pageObjects.workflowEditor.setYamlEditorValue(getTestRunWorkflowYaml(workflowName));
 
     // Step 4: Don't save - the workflow remains unsaved
 
     // Step 5: Hit run (play) button from the header
-    await page.testSubj.click('runWorkflowHeaderButton');
-
-    await page.testSubj.waitForSelector('runWorkflowWithUnsavedChangesConfirmationModal', {
-      state: 'visible',
-    });
-    await page.testSubj.click('confirmModalConfirmButton');
+    await pageObjects.workflowEditor.runWorkflowWithUnsavedChanges();
 
     // Wait for execute modal to appear
     await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
@@ -105,26 +99,21 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   });
 
   test('should run saved workflow from editor as test run with isTestRun: true', async ({
+    pageObjects,
     page,
   }) => {
     const workflowName = `Test Workflow ${Math.floor(Math.random() * 10000)}`;
 
     // Create and save a workflow
-    await page.gotoApp('workflows');
-    await page.testSubj.click('createWorkflowButton');
+    await pageObjects.workflowEditor.gotoNewWorkflow();
 
-    const yamlEditor = page.testSubj.locator('workflowYamlEditor');
-    await expect(yamlEditor).toBeVisible();
-
-    const yamlEditorWrapper = new KibanaCodeEditorWrapper(page);
-    await yamlEditorWrapper.setCodeEditorValue(getTestRunWorkflowYaml(workflowName));
+    await pageObjects.workflowEditor.setYamlEditorValue(getTestRunWorkflowYaml(workflowName));
 
     // Step 7: Save the workflow
-    await page.testSubj.click('saveWorkflowHeaderButton');
-    await page.testSubj.waitForSelector('workflowSavedChangesBadge');
+    await pageObjects.workflowEditor.saveWorkflow();
 
     // Step 8: Hit run (play) button from the header
-    await page.testSubj.click('runWorkflowHeaderButton');
+    await pageObjects.workflowEditor.clickRunButton();
 
     // Wait for execute modal to appear
     await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
@@ -146,22 +135,19 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Test run: true');
   });
 
-  test('should not allow running a disabled workflow, then enable and run it', async ({ page }) => {
+  test('should not allow running a disabled workflow, then enable and run it', async ({
+    pageObjects,
+    page,
+  }) => {
     const workflowName = `Test Workflow ${Math.floor(Math.random() * 10000)}`;
 
     // Step 1: Create workflow with enabled: false
-    await page.gotoApp('workflows');
-    await page.testSubj.click('createWorkflowButton');
+    await pageObjects.workflowEditor.gotoNewWorkflow();
 
-    const yamlEditor = page.testSubj.locator('workflowYamlEditor');
-    await expect(yamlEditor).toBeVisible();
-
-    const yamlEditorWrapper = new KibanaCodeEditorWrapper(page);
-    await yamlEditorWrapper.setCodeEditorValue(getTestRunWorkflowYaml(workflowName));
+    await pageObjects.workflowEditor.setYamlEditorValue(getTestRunWorkflowYaml(workflowName));
 
     // Save the workflow
-    await page.testSubj.click('saveWorkflowHeaderButton');
-    await page.testSubj.waitForSelector('workflowSavedChangesBadge');
+    await pageObjects.workflowEditor.saveWorkflow();
 
     // Step 2: Go to workflows list
     await page.gotoApp('workflows');
@@ -213,18 +199,13 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Test run: false');
   });
 
-  test('should run individual step with custom context override', async ({ page }) => {
+  test('should run individual step with custom context override', async ({ pageObjects, page }) => {
     const workflowName = `Test Workflow with loop ${Math.floor(Math.random() * 10000)}`;
 
     // Step 1: Create workflow with loop
-    await page.gotoApp('workflows');
-    await page.testSubj.click('createWorkflowButton');
+    await pageObjects.workflowEditor.gotoNewWorkflow();
 
-    const yamlEditor = page.testSubj.locator('workflowYamlEditor');
-    await expect(yamlEditor).toBeVisible();
-
-    const codeEditorWrapper = new KibanaCodeEditorWrapper(page);
-    await codeEditorWrapper.setCodeEditorValue(getWorkflowWithLoopYaml(workflowName));
+    await pageObjects.workflowEditor.setYamlEditorValue(getWorkflowWithLoopYaml(workflowName));
 
     // focus editor
     await page.getByText('enabled: false').click();
@@ -241,19 +222,8 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     await expect(runStepButton).toBeVisible();
     await runStepButton.click();
 
-    // Step 4: Verify "Test step" modal is open
-    await page.testSubj.waitForSelector('testStepModal', { state: 'visible' });
-
-    // Step 4.2: Step inputs editor is present with predefined JSON having execution.isTestRun value
-    const stepInputsEditor = page.testSubj.locator('workflow-event-json-editor');
-    await expect(stepInputsEditor).toBeVisible();
-
-    // Step 5: Update execution.isTestRun value to false
-    // The editor should contain the step context - we need to modify the isTestRun value
-    const inputEditorWrapper = new KibanaCodeEditorWrapper(page);
-    await inputEditorWrapper.setCodeEditorValue(
-      JSON.stringify({ execution: { isTestRun: false } }, null, 2)
-    );
+    // Step 4: Verify "Test step" modal is open and set inputs
+    await pageObjects.workflowEditor.setTestStepInputs({ execution: { isTestRun: false } });
 
     // Step 6: Click "Run" button in the modal
     await page.testSubj.click('submit-step-run');
