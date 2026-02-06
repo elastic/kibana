@@ -4,11 +4,7 @@ steps:
     agents:
       machineType: n2d-highcpu-8
       preemptible: true
-<<<<<<< HEAD
-      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
-=======
       spotZones: us-central1-f,us-central1-c,us-central1-a
->>>>>>> upstream/main
     key: renovate_validation
     timeout_in_minutes: 60
     retry:

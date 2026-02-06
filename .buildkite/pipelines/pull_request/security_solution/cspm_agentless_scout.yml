@@ -4,11 +4,7 @@ steps:
     agents:
       machineType: n2d-standard-8
       preemptible: true
-<<<<<<< HEAD
-      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
-=======
       spotZones: us-central1-f,us-central1-c,us-central1-a
->>>>>>> upstream/main
     depends_on:
       - build
       - quick_checks

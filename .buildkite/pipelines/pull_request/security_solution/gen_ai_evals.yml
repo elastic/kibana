@@ -22,11 +22,7 @@ steps:
         agents:
           machineType: n2d-standard-4
           preemptible: true
-<<<<<<< HEAD
-          spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
-=======
           spotZones: us-central1-f,us-central1-c,us-central1-a
->>>>>>> upstream/main
         retry:
           automatic:
             - exit_status: '-1'
