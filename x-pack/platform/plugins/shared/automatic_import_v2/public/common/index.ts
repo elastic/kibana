@@ -30,4 +30,7 @@ export {
 
 export type { CreateUpdateIntegrationRequest } from './lib/api';
 
+export { getLangSmithOptions } from './lib/lang_smith';
+export type { LangSmithOptions } from './lib/lang_smith';
+
 export { generateId } from './lib/helper_functions';
