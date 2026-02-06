@@ -11,7 +11,6 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
   fieldMetricOrFormulaOperationDefinitionSchema,
-  esqlColumnSchema,
   esqlColumnOperationWithLabelAndFormatSchema,
 } from '../metric_ops';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
@@ -59,7 +58,7 @@ export const regionMapStateSchemaESQL = schema.object(
     /**
      * Configure how to break down to regions
      */
-    region: esqlColumnSchema.extends(regionMapStateRegionOptionsSchema),
+    region: esqlColumnOperationWithLabelAndFormatSchema.extends(regionMapStateRegionOptionsSchema),
   },
   { meta: { id: 'regionMapESQL' } }
 );

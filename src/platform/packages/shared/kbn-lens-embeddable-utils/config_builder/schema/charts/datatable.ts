@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
+import { esqlColumnOperationWithLabelAndFormatSchema } from '../metric_ops';
 import { applyColorToSchema, colorByValueSchema, colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -431,7 +431,7 @@ export const datatableStateSchemaESQL = schema.object(
      * Row configuration, optional operations.
      */
     rows: schema.maybe(
-      schema.arrayOf(esqlColumnSchema.extends(datatableStateRowsOptionsESQLSchema), {
+      schema.arrayOf(esqlColumnOperationWithLabelAndFormatSchema.extends(datatableStateRowsOptionsESQLSchema), {
         minSize: 1,
         maxSize: 50,
         meta: { description: 'Array of operations to split the datatable rows by' },
@@ -441,7 +441,7 @@ export const datatableStateSchemaESQL = schema.object(
      * Split metrics by configuration, optional operations.
      */
     split_metrics_by: schema.maybe(
-      schema.arrayOf(esqlColumnSchema, {
+      schema.arrayOf(esqlColumnOperationWithLabelAndFormatSchema, {
         minSize: 1,
         maxSize: 20,
         meta: { description: 'Array of operations to split the metric columns by' },
