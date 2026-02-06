@@ -16,6 +16,7 @@ import {
   EuiTablePagination,
   EuiToken,
   useEuiTheme,
+  EuiPanel,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
@@ -178,52 +179,59 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
               })}
             </strong>
           </EuiText>
-          <div className="euiScreenReaderOnly" aria-live="assertive" aria-atomic="true">
-            {i18n.translate('metricsExperience.overviewTab.dimensionsAnnouncement', {
-              defaultMessage: 'Showing {count} dimensions on page {page} of {total}. {dimensions}',
-              values: {
-                count: paginatedDimensions.length,
-                page: activePage + 1,
-                total: pageCount,
-                dimensions: paginatedDimensions.map((d) => `${d.name}`).join('. '),
-              },
-            })}
-          </div>
-          <EuiListGroup
-            data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsList"
-            listItems={dimensionListItems}
-            flush
-            gutterSize="s"
-            wrapText={false}
-            css={css`
-              .euiListGroupItem__text {
-                padding-inline: 0;
-                min-block-size: ${euiTheme.size.base};
-              }
-              gap: 0px;
-            `}
-          />
-          <EuiSpacer size="s" />
-          {sortedDimensions.length >= DEFAULT_PAGINATION_SIZE && (
-            <EuiTablePagination
-              data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsPagination"
-              aria-label={i18n.translate(
-                'metricsExperience.overviewTab.dimensionsPaginationLabel',
-                {
-                  defaultMessage: 'Dimensions pagination',
+          <EuiSpacer size="m" />
+           <EuiPanel
+             hasShadow={false}
+             hasBorder
+             css={css`
+               padding: ${euiTheme.size.xs} ${euiTheme.size.m};
+             `}
+           >
+            <div className="euiScreenReaderOnly" aria-live="assertive" aria-atomic="true">
+              {i18n.translate('metricsExperience.overviewTab.dimensionsAnnouncement', {
+                defaultMessage: 'Showing {count} dimensions on page {page} of {total}. {dimensions}',
+                values: {
+                  count: paginatedDimensions.length,
+                  page: activePage + 1,
+                  total: pageCount,
+                  dimensions: paginatedDimensions.map((d) => `${d.name}`).join('. '),
+                },
+              })}
+            </div>
+            <EuiListGroup
+              data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsList"
+              listItems={dimensionListItems}
+              flush
+              gutterSize="s"
+              wrapText={false}
+              css={css`
+                .euiListGroupItem__text {
                 }
-              )}
-              pageCount={pageCount}
-              activePage={activePage}
-              onChangePage={setActivePage}
-              itemsPerPage={itemsPerPage}
-              onChangeItemsPerPage={(newItemsPerPage) => {
-                setItemsPerPage(newItemsPerPage);
-                setActivePage(0);
-              }}
-              itemsPerPageOptions={[0, 10, 20, 50]}
+                gap: 0px;
+              `}
             />
-          )}
+            <EuiSpacer size="s" />
+            {sortedDimensions.length >= DEFAULT_PAGINATION_SIZE && (
+              <EuiTablePagination
+                data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsPagination"
+                aria-label={i18n.translate(
+                  'metricsExperience.overviewTab.dimensionsPaginationLabel',
+                  {
+                    defaultMessage: 'Dimensions pagination',
+                  }
+                )}
+                pageCount={pageCount}
+                activePage={activePage}
+                onChangePage={setActivePage}
+                itemsPerPage={itemsPerPage}
+                onChangeItemsPerPage={(newItemsPerPage) => {
+                  setItemsPerPage(newItemsPerPage);
+                  setActivePage(0);
+                }}
+                itemsPerPageOptions={[0, 10, 20, 50]}
+              />
+            )}
+          </EuiPanel>
         </>
       )}
     </>
