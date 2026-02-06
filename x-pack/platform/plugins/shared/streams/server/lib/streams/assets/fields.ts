@@ -10,6 +10,9 @@ export const ASSET_UUID = 'asset.uuid';
 export const ASSET_ID = 'asset.id';
 export const ASSET_TYPE = 'asset.type';
 
+/** Whether a Kibana rule exists for this asset. Stored at document root (does not mention query in the field name). */
+export const RULE_BACKED = 'rule_backed';
+
 export const QUERY_TITLE = 'query.title';
 export const QUERY_KQL_BODY = 'query.kql.query';
 export const QUERY_SEVERITY_SCORE = 'query.severity_score';

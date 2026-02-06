@@ -181,7 +181,10 @@
     "visTypeVega": "src/platform/plugins/private/vis_types/vega",
     "visTypeVislib": "src/platform/plugins/private/vis_types/vislib",
     "visTypeXy": "src/platform/plugins/private/vis_types/xy",
-    "visualizations": "src/platform/plugins/shared/visualizations",
+    "visualizations": [
+      "src/platform/plugins/shared/visualizations",
+      "src/platform/packages/shared/kbn-visualization-listing-components"
+    ],
     "visualizationUiComponents": "src/platform/packages/shared/kbn-visualization-ui-components",
     "visualizationUtils": "src/platform/packages/shared/kbn-visualization-utils",
     "unifiedDocViewer": [
