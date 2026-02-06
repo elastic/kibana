@@ -33,5 +33,5 @@ The custom server config is located at:
 
 It extends the default config and adds:
 ```
---xpack.apm.featureFlags.serviceMapUseReactFlow=true
+--feature_flags.overrides.apm.serviceMapUseReactFlow=true
 ```

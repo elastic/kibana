@@ -32,6 +32,21 @@ export const EditInferenceFlyout: React.FC<EditInterfaceFlyoutProps> = ({
   const onEditSuccess = useCallback(() => {
     refetch();
   }, [refetch]);
+  const onFocusReturn = useCallback(() => {
+    // Defer focus until after any closing animations complete
+    requestAnimationFrame(() => {
+      const actionsButtonParent = document.getElementById(
+        `${selectedInferenceEndpoint.inference_id}-actions`
+      );
+      if (actionsButtonParent) {
+        const actionsButton = actionsButtonParent.querySelector('button');
+        if (actionsButton) {
+          actionsButton.focus();
+        }
+      }
+    });
+    return false;
+  }, [selectedInferenceEndpoint.inference_id]);
 
   const inferenceEndpoint: InferenceEndpoint = {
     config: {
@@ -56,6 +71,9 @@ export const EditInferenceFlyout: React.FC<EditInterfaceFlyoutProps> = ({
       enforceAdaptiveAllocations={!!serverless}
       onSubmitSuccess={onEditSuccess}
       inferenceEndpoint={inferenceEndpoint}
+      focusTrapProps={{
+        returnFocus: onFocusReturn,
+      }}
     />
   );
 };

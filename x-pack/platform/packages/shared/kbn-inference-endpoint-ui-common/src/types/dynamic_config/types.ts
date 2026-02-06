@@ -66,6 +66,8 @@ export interface OverrideFieldsContentType {
   hidden?: string[];
   additional?: FieldsConfiguration[];
   supplementalData?: Record<string, Partial<ConfigProperties>>[];
+  /** Default values to apply to existing provider configuration fields (e.g., model_id default values) */
+  defaultValues?: Record<string, string | number | boolean | null>;
 }
 export type InternalOverrideFieldsType = {
   [Key in ServiceProviderKeysType | string]?: OverrideFieldsContentType;

@@ -243,13 +243,11 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const newProvider = updatedProviders?.find(
         (p) => p.service === (config.provider === '' ? providerSelected : config.provider)
       );
-      if (newProvider?.service) {
-        const overrides = getOverrides(newProvider);
-        const newProviderSchema: ConfigEntryView[] = mapProviderFields(
-          taskType,
-          newProvider,
-          overrides
-        );
+      const overrides = newProvider ? getOverrides(newProvider) : undefined;
+      const newProviderSchema: ConfigEntryView[] = newProvider
+        ? mapProviderFields(taskType, newProvider, overrides)
+        : [];
+      if (newProvider) {
         setProviderSchema(newProviderSchema);
       }
 
@@ -279,7 +277,9 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           newProvider?.configurations[k]?.supported_task_types &&
           newProvider?.configurations[k].supported_task_types.includes(taskType)
         ) {
-          newConfigToUse[k] = newProvider?.configurations[k]?.default_value ?? null;
+          // Get default value from schema (which includes overridden defaults from INTERNAL_OVERRIDE_FIELDS)
+          const schemaField = newProviderSchema.find((f) => f.key === k);
+          newConfigToUse[k] = schemaField?.default_value ?? null;
         }
       });
 
@@ -335,11 +335,8 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         const defaultConfigToUse =
           fieldConfig.location === TASK_SETTINGS ? defaultTaskTypeConfig : defaultProviderConfig;
         if (!fieldConfig.sensitive) {
-          if (fieldConfig && !!fieldConfig.default_value) {
-            defaultConfigToUse[fieldConfig.key] = fieldConfig.default_value;
-          } else {
-            defaultConfigToUse[fieldConfig.key] = null;
-          }
+          // default_value now includes overridden defaults from INTERNAL_OVERRIDE_FIELDS
+          defaultConfigToUse[fieldConfig.key] = fieldConfig.default_value;
         } else {
           defaultProviderSecrets[fieldConfig.key] = null;
         }

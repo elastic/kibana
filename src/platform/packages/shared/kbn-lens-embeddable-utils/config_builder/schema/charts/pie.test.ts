@@ -167,7 +167,7 @@ describe('Pie/Donut Schema', () => {
         expect(validated.group_by).toHaveLength(3);
       });
 
-      it('validates configuration with color by value', () => {
+      it('validates configuration with color mapping', () => {
         const input: PieState = {
           ...basePieConfig,
           metrics: [
@@ -182,11 +182,41 @@ describe('Pie/Donut Schema', () => {
               size: 5,
               fields: ['category'],
               color: {
-                type: 'dynamic',
-                range: 'absolute',
-                steps: [
-                  { type: 'from', from: 0, color: 'red' },
-                  { type: 'to', to: 100, color: 'blue' },
+                mode: 'categorical',
+                palette: 'default',
+                mapping: [
+                  {
+                    values: ['success'],
+                    color: {
+                      type: 'from_palette',
+                      palette: 'default',
+                      index: 6,
+                    },
+                  },
+                  {
+                    values: ['info'],
+                    color: {
+                      type: 'from_palette',
+                      palette: 'default',
+                      index: 9,
+                    },
+                  },
+                  {
+                    values: ['security'],
+                    color: {
+                      type: 'from_palette',
+                      palette: 'default',
+                      index: 4,
+                    },
+                  },
+                  {
+                    values: ['__other__'],
+                    color: {
+                      type: 'from_palette',
+                      palette: 'default',
+                      index: 5,
+                    },
+                  },
                 ],
               },
             },
@@ -194,7 +224,7 @@ describe('Pie/Donut Schema', () => {
         };
 
         const validated = pieStateSchema.validate(input);
-        expect(validated.group_by?.[0].color).toHaveProperty('type', 'dynamic');
+        expect(validated.group_by?.[0].color).toHaveProperty('mode', 'categorical');
       });
 
       it('validates configuration with collapsed dimensions', () => {
@@ -451,7 +481,7 @@ describe('Pie/Donut Schema', () => {
             };
 
             expect(() => pieStateSchema.validate(input)).toThrow(
-              /number of non-collapsed group by dimensions must not exceed 3/i
+              /number of non-collapsed group_by dimensions must not exceed 3/i
             );
           });
         });
@@ -578,7 +608,7 @@ describe('Pie/Donut Schema', () => {
             expect(() => pieStateSchema.validate(input)).not.toThrow();
           });
 
-          it('throws when multiple metrics have three non-collapsed breakdowns', () => {
+          it('throws when multiple metrics have more than 2 non-collapsed breakdowns', () => {
             const input: PieState = {
               ...basePieConfig,
               metrics: [
@@ -612,7 +642,7 @@ describe('Pie/Donut Schema', () => {
             };
 
             expect(() => pieStateSchema.validate(input)).toThrow(
-              /number of group by dimensions must not exceed 2/i
+              /the number of non-collapsed group_by dimensions must not exceed 2/i
             );
           });
 
@@ -660,7 +690,7 @@ describe('Pie/Donut Schema', () => {
             };
 
             expect(() => pieStateSchema.validate(input)).toThrow(
-              /number of group by dimensions must not exceed 2/i
+              /the number of non-collapsed group_by dimensions must not exceed 2/i
             );
           });
         });
@@ -756,11 +786,41 @@ describe('Pie/Donut Schema', () => {
               operation: 'value',
               column: 'category',
               color: {
-                type: 'dynamic',
-                range: 'absolute',
-                steps: [
-                  { type: 'from', from: 0, color: 'red' },
-                  { type: 'to', to: 100, color: 'blue' },
+                mode: 'categorical',
+                palette: 'default',
+                mapping: [
+                  {
+                    values: ['success'],
+                    color: {
+                      type: 'from_palette',
+                      palette: 'default',
+                      index: 6,
+                    },
+                  },
+                  {
+                    values: ['info'],
+                    color: {
+                      type: 'from_palette',
+                      palette: 'default',
+                      index: 9,
+                    },
+                  },
+                  {
+                    values: ['security'],
+                    color: {
+                      type: 'from_palette',
+                      palette: 'default',
+                      index: 4,
+                    },
+                  },
+                  {
+                    values: ['__other__'],
+                    color: {
+                      type: 'from_palette',
+                      palette: 'default',
+                      index: 5,
+                    },
+                  },
                 ],
               },
             },

@@ -13,9 +13,9 @@ import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { Agent } from '../../../../../types';
 
 import { createPackagePolicyMock } from '../../../../../../../../common/mocks';
+import type { OutputsForAgentPolicy } from '../../../../../../../../server/types';
 
 import { AgentDetailsIntegrationOutputs } from './agent_details_integration_outputs';
-import type { OutputsForAgentPolicy } from '../../../../../../../../server/types';
 
 describe('AgentDetailsIntegrationOutputs', () => {
   const agent: Agent = {
