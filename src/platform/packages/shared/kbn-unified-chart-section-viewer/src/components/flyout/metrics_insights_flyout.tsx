@@ -103,7 +103,7 @@ export const MetricInsightsFlyout = ({ metric, esqlQuery, onClose }: MetricInsig
     >
       {screenReaderDescription}
       <EuiFlyoutHeader>
-        <EuiTitle size="s" data-test-subj="metricsExperienceFlyoutRowDetailsTitle">
+        <EuiTitle size="xs" data-test-subj="metricsExperienceFlyoutRowDetailsTitle">
           <h2 id={metricFlyoutTitleId}>{metricFlyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
