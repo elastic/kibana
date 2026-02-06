@@ -6989,6 +6989,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/feedback-components@link:src/platform/packages/shared/feedback-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/feedback-plugin@link:x-pack/platform/plugins/private/feedback":
+  version "0.0.0"
+  uid ""
+
+"@kbn/feedback-registry@link:x-pack/platform/packages/private/feedback-registry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/field-formats-common@link:src/platform/packages/shared/kbn-field-formats-common":
   version "0.0.0"
   uid ""
