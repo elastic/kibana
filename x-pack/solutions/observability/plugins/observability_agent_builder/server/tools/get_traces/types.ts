@@ -27,9 +27,9 @@ export interface Correlation {
   field: string;
   value: string;
 }
-export interface AnchorLog {
+export interface Anchor {
   '@timestamp': string;
   correlation: Correlation & {
-    anchorLogId: string;
+    anchorId: string;
   };
 }

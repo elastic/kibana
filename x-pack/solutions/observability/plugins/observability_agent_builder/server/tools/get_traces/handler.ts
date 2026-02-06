@@ -15,7 +15,7 @@ import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
-import { getLogsIndices } from '../../utils/get_logs_indices';
+import { getObservabilityDataSources } from '../../utils/get_observability_data_sources';
 import { parseDatemath } from '../../utils/time';
 import { buildApmResources } from '../../utils/build_apm_resources';
 import { timeRangeFilter, termFilter } from '../../utils/dsl_filters';
@@ -156,15 +156,21 @@ export async function getToolHandler({
   errorLogsOnly: boolean;
   maxSequences: number;
 }) {
-  const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
+  const dataSources = await getObservabilityDataSources({ core, plugins, logger });
+  const logsIndices = index?.split(',') ?? dataSources.logIndexPatterns;
+
   const startTime = parseDatemath(start);
   const endTime = parseDatemath(end, { roundUp: true });
   const { apmEventClient } = await buildApmResources({ core, plugins, request, logger });
 
   const correlationIdentifiers = await getCorrelationIdentifiers({
     esClient,
-    apmEventClient,
     logsIndices,
+    apmIndexPatterns: [
+      dataSources.apmIndexPatterns.transaction,
+      dataSources.apmIndexPatterns.span,
+      dataSources.apmIndexPatterns.error,
+    ],
     startTime,
     endTime,
     kqlFilter,

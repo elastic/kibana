@@ -8,34 +8,34 @@
 import { uniqBy } from 'lodash';
 import { createHash } from 'crypto';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
-import { warningAndAboveLogFilter } from '../../../utils/warning_and_above_log_filter';
 import { getTypedSearch } from '../../../utils/get_typed_search';
 import { kqlFilter as buildKqlFilter, timeRangeFilter } from '../../../utils/dsl_filters';
-import type { AnchorLog, Correlation } from '../types';
+import type { Anchor } from '../types';
 import type { CorrelationFieldAggregations } from './types';
 
-export async function getAnchorLogs({
+export async function getAnchors({
   esClient,
   logsIndices,
   startTime,
   endTime,
   kqlFilter,
-  errorLogsOnly,
   correlationFields,
   logger,
   maxSequences,
+  query,
 }: {
   esClient: IScopedClusterClient;
   logsIndices: string[];
   startTime: number;
   endTime: number;
   kqlFilter: string | undefined;
-  errorLogsOnly: boolean;
   correlationFields: string[];
   logger: Logger;
   maxSequences: number;
-}): Promise<Correlation[]> {
+  query?: QueryDslQueryContainer[];
+}): Promise<Anchor[]> {
   const search = getTypedSearch(esClient.asCurrentUser);
 
   // Use aggregation-based approach to get diverse samples across all correlation fields.
@@ -49,7 +49,7 @@ export async function getAnchorLogs({
         filter: [
           ...timeRangeFilter('@timestamp', { start: startTime, end: endTime }),
           ...buildKqlFilter(kqlFilter),
-
+          ...(query ?? []),
           // must have at least one correlation field
           {
             bool: {
@@ -57,9 +57,6 @@ export async function getAnchorLogs({
               minimum_should_match: 1,
             },
           },
-
-          // filter by error severity (default) or include all logs
-          ...(errorLogsOnly ? [warningAndAboveLogFilter()] : []),
         ],
       },
     },
@@ -68,14 +65,14 @@ export async function getAnchorLogs({
 
   const response = await search(searchRequest);
 
-  const anchorLogs = parseAnchorLogsFromAggregations(
+  const anchors = parseAnchorFromAggregations(
     response.aggregations as CorrelationFieldAggregations | undefined,
     correlationFields
   );
 
-  logger.debug(`Found ${anchorLogs.length} unique anchor logs across correlation fields`);
+  logger.debug(`Found ${anchors.length} unique anchors across correlation fields`);
 
-  return anchorLogs.slice(0, maxSequences).map((anchor) => anchor.correlation);
+  return anchors.slice(0, maxSequences);
 }
 
 /**
@@ -127,7 +124,6 @@ export function buildDiversifiedSamplerAggregations(
         diverse_sampler: {
           diversified_sampler: {
             shard_size: Math.max(100, maxSequences * 10), // Oversample to improve diversity
-            // shard_size: 1000, // Fixed oversampling to improve diversity
             field,
             max_docs_per_value: 1,
           },
@@ -156,10 +152,10 @@ export function buildDiversifiedSamplerAggregations(
   }, {} as Record<string, AggregationsAggregationContainer>);
 }
 
-export function parseAnchorLogsFromAggregations(
+export function parseAnchorFromAggregations(
   aggregations: CorrelationFieldAggregations | undefined,
   correlationFields: string[]
-): AnchorLog[] {
+): Anchor[] {
   if (!aggregations) return [];
 
   const allAnchors = correlationFields.flatMap((field) => {
@@ -169,7 +165,7 @@ export function parseAnchorLogsFromAggregations(
 
     const buckets = filterAgg.diverse_sampler?.unique_values?.buckets ?? [];
 
-    return buckets.map((bucket): AnchorLog => {
+    return buckets.map((bucket): Anchor => {
       const firstHit = bucket.anchor_doc.hits.hits[0];
 
       return {
@@ -177,7 +173,7 @@ export function parseAnchorLogsFromAggregations(
         correlation: {
           field,
           value: String(bucket.key),
-          anchorLogId: firstHit?._id ?? 'unknown',
+          anchorId: firstHit?._id ?? 'unknown',
         },
       };
     });
@@ -187,7 +183,7 @@ export function parseAnchorLogsFromAggregations(
   // When the same document has multiple correlation fields (e.g., trace.id AND request.id),
   // we keep only the one from the highest priority field since correlationFields is ordered.
   // Then dedupe by field+value to ensure each correlation identity appears only once.
-  const dedupedByDocId = uniqBy(allAnchors, (anchor) => anchor.correlation.anchorLogId);
+  const dedupedByDocId = uniqBy(allAnchors, (anchor) => anchor.correlation.anchorId);
   return uniqBy(
     dedupedByDocId,
     (anchor) => `${anchor.correlation.field}_${anchor.correlation.value}`

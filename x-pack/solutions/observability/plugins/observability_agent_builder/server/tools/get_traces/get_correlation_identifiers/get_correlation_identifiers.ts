@@ -7,10 +7,9 @@
 
 import { uniqBy } from 'lodash';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import type { Correlation } from '../types';
-import { getAnchorLogs } from './get_anchor_logs';
-import { getCorrelationIdentifierTraceDocs } from './get_correlation_identifiers_trace';
+import { getAnchors } from './get_anchors';
+import { warningAndAboveLogFilter } from '../../../utils/warning_and_above_log_filter';
 
 // Correlation identifier fields in priority order
 const CORRELATION_IDENTIFIER_FIELDS = [
@@ -35,8 +34,8 @@ const CORRELATION_IDENTIFIER_FIELDS = [
 
 export async function getCorrelationIdentifiers({
   esClient,
-  apmEventClient,
   logsIndices,
+  apmIndexPatterns,
   startTime,
   endTime,
   kqlFilter,
@@ -45,8 +44,8 @@ export async function getCorrelationIdentifiers({
   maxSequences,
 }: {
   esClient: IScopedClusterClient;
-  apmEventClient: APMEventClient;
   logsIndices: string[];
+  apmIndexPatterns: string[];
   startTime: number;
   endTime: number;
   kqlFilter: string | undefined;
@@ -54,32 +53,32 @@ export async function getCorrelationIdentifiers({
   logger: Logger;
   maxSequences: number;
 }): Promise<Correlation[]> {
-  const anchorLogs = await getAnchorLogs({
+  const logAnchors = await getAnchors({
     esClient,
     logsIndices,
     startTime,
     endTime,
     kqlFilter,
-    errorLogsOnly,
+    // filter by error severity (default) or include all logs
+    query: errorLogsOnly ? [warningAndAboveLogFilter()] : [],
     correlationFields: CORRELATION_IDENTIFIER_FIELDS,
     logger,
     maxSequences,
   });
 
-  const apmCorrelations = await getCorrelationIdentifierTraceDocs({
-    apmEventClient,
+  const apmAnchors = await getAnchors({
+    esClient,
+    logsIndices: apmIndexPatterns,
     startTime,
     endTime,
     kqlFilter,
     correlationFields: CORRELATION_IDENTIFIER_FIELDS,
+    logger,
     maxSequences,
   });
 
-  // Merge and de-dupe correlations to avoid redundant downstream queries.
-  // - De-dupe by field+value since that is what later queries are keyed on.
-  // - Preserve order (log anchors first), so `uniqBy` keeps the earliest occurrence.
   return uniqBy(
-    [...anchorLogs, ...apmCorrelations],
+    [...logAnchors, ...apmAnchors].map((anchor) => anchor.correlation),
     (correlation) => `${correlation.field}:${correlation.value}`
   ).slice(0, maxSequences);
 }
