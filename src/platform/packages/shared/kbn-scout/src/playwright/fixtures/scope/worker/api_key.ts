@@ -14,7 +14,7 @@ import type { ElasticsearchRoleDescriptor, KibanaRole } from '../../../../common
 import {
   measurePerformanceAsync,
   isElasticsearchRole,
-  PROJECT_DEFAULT_ROLES,
+  getPrivilegedRoleName,
 } from '../../../../common';
 
 export interface ApiKey {
@@ -187,18 +187,9 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
       const getApiKeyForViewer = () => getApiKey('viewer');
 
       const getApiKeyForPrivilegedUser = async (): Promise<RoleApiCredentials> => {
-        if (!config.serverless) {
-          return getApiKey('editor');
-        }
-
-        const roleName = PROJECT_DEFAULT_ROLES.get(config.projectType!);
-        if (!roleName) {
-          throw new Error(
-            `No default privileged role defined for serverless project type: '${config.projectType}'`
-          );
-        }
-
-        return getApiKey(roleName);
+        return getApiKey(
+          getPrivilegedRoleName({ serverless: config.serverless, projectType: config.projectType! })
+        );
       };
 
       await use({
