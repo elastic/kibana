@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createBadRequestError, isBadRequestError } from '@kbn/agent-builder-common';
+import { isHooksExecutionError } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { HooksService } from './hooks_service';
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
@@ -13,14 +13,15 @@ import type {
   BeforeConversationRoundHookContext,
   BeforeToolCallHookContext,
   AfterToolCallHookContext,
+  AfterConversationRoundHookContext,
 } from '@kbn/agent-builder-server';
+import { ToolResultType } from '@kbn/agent-builder-common';
+import { type ConversationRound, ConversationRoundStatus } from '@kbn/agent-builder-common';
 
 const TEST_AGENT_ID = 'agent-1';
 const TEST_CONVERSATION_ID = 'conv-1';
 
 const baseToolCallContext: BeforeToolCallHookContext = {
-  agentId: TEST_AGENT_ID,
-  conversationId: TEST_CONVERSATION_ID,
   toolId: 'tool-1',
   toolCallId: 'call-1',
   toolParams: {},
@@ -74,21 +75,25 @@ describe('HooksService', () => {
     setup.register({
       id: 'h1',
       priority: 5,
-      [HookLifecycle.beforeConversationRound]: {
-        mode: HookExecutionMode.blocking,
-        handler: async () => {
-          calls.push('h1');
-          return { nextInput: { message: 'mutated' } };
+      hooks: {
+        [HookLifecycle.beforeConversationRound]: {
+          mode: HookExecutionMode.blocking,
+          handler: async () => {
+            calls.push('h1');
+            return { nextInput: { message: 'mutated' } };
+          },
         },
       },
     });
     setup.register({
       id: 'h2',
       priority: 10,
-      [HookLifecycle.beforeConversationRound]: {
-        mode: HookExecutionMode.blocking,
-        handler: async (ctx: BeforeConversationRoundHookContext) => {
-          calls.push(`h2:${ctx.nextInput.message}`);
+      hooks: {
+        [HookLifecycle.beforeConversationRound]: {
+          mode: HookExecutionMode.blocking,
+          handler: async (ctx: BeforeConversationRoundHookContext) => {
+            calls.push(`h2:${ctx.nextInput.message}`);
+          },
         },
       },
     });
@@ -107,35 +112,41 @@ describe('HooksService', () => {
     // No priority: order is registration order. Before = registration order, after = reverse.
     setup.register({
       id: 'order-first',
-      [HookLifecycle.beforeToolCall]: {
-        mode: HookExecutionMode.blocking,
-        handler: handler('before-first'),
-      },
-      [HookLifecycle.afterToolCall]: {
-        mode: HookExecutionMode.blocking,
-        handler: handler('after-first'),
+      hooks: {
+        [HookLifecycle.beforeToolCall]: {
+          mode: HookExecutionMode.blocking,
+          handler: handler('before-first'),
+        },
+        [HookLifecycle.afterToolCall]: {
+          mode: HookExecutionMode.blocking,
+          handler: handler('after-first'),
+        },
       },
     });
     setup.register({
       id: 'order-second',
-      [HookLifecycle.beforeToolCall]: {
-        mode: HookExecutionMode.blocking,
-        handler: handler('before-second'),
-      },
-      [HookLifecycle.afterToolCall]: {
-        mode: HookExecutionMode.blocking,
-        handler: handler('after-second'),
+      hooks: {
+        [HookLifecycle.beforeToolCall]: {
+          mode: HookExecutionMode.blocking,
+          handler: handler('before-second'),
+        },
+        [HookLifecycle.afterToolCall]: {
+          mode: HookExecutionMode.blocking,
+          handler: handler('after-second'),
+        },
       },
     });
     setup.register({
       id: 'order-third',
-      [HookLifecycle.beforeToolCall]: {
-        mode: HookExecutionMode.blocking,
-        handler: handler('before-third'),
-      },
-      [HookLifecycle.afterToolCall]: {
-        mode: HookExecutionMode.blocking,
-        handler: handler('after-third'),
+      hooks: {
+        [HookLifecycle.beforeToolCall]: {
+          mode: HookExecutionMode.blocking,
+          handler: handler('before-third'),
+        },
+        [HookLifecycle.afterToolCall]: {
+          mode: HookExecutionMode.blocking,
+          handler: handler('after-third'),
+        },
       },
     });
 
@@ -162,37 +173,43 @@ describe('HooksService', () => {
     setup.register({
       id: 'priority-low',
       priority: 1,
-      [HookLifecycle.beforeToolCall]: {
-        mode: HookExecutionMode.blocking,
-        handler: handler('before-low'),
-      },
-      [HookLifecycle.afterToolCall]: {
-        mode: HookExecutionMode.blocking,
-        handler: handler('after-low'),
+      hooks: {
+        [HookLifecycle.beforeToolCall]: {
+          mode: HookExecutionMode.blocking,
+          handler: handler('before-low'),
+        },
+        [HookLifecycle.afterToolCall]: {
+          mode: HookExecutionMode.blocking,
+          handler: handler('after-low'),
+        },
       },
     });
     setup.register({
       id: 'priority-mid',
       priority: 5,
-      [HookLifecycle.beforeToolCall]: {
-        mode: HookExecutionMode.blocking,
-        handler: handler('before-mid'),
-      },
-      [HookLifecycle.afterToolCall]: {
-        mode: HookExecutionMode.blocking,
-        handler: handler('after-mid'),
+      hooks: {
+        [HookLifecycle.beforeToolCall]: {
+          mode: HookExecutionMode.blocking,
+          handler: handler('before-mid'),
+        },
+        [HookLifecycle.afterToolCall]: {
+          mode: HookExecutionMode.blocking,
+          handler: handler('after-mid'),
+        },
       },
     });
     setup.register({
       id: 'priority-high',
       priority: 10,
-      [HookLifecycle.beforeToolCall]: {
-        mode: HookExecutionMode.blocking,
-        handler: handler('before-high'),
-      },
-      [HookLifecycle.afterToolCall]: {
-        mode: HookExecutionMode.blocking,
-        handler: handler('after-high'),
+      hooks: {
+        [HookLifecycle.beforeToolCall]: {
+          mode: HookExecutionMode.blocking,
+          handler: handler('before-high'),
+        },
+        [HookLifecycle.afterToolCall]: {
+          mode: HookExecutionMode.blocking,
+          handler: handler('after-high'),
+        },
       },
     });
 
@@ -216,16 +233,20 @@ describe('HooksService', () => {
 
     setup.register({
       id: 'blocking',
-      [HookLifecycle.beforeToolCall]: {
-        mode: HookExecutionMode.blocking,
-        handler: handler('blocking'),
+      hooks: {
+        [HookLifecycle.beforeToolCall]: {
+          mode: HookExecutionMode.blocking,
+          handler: handler('blocking'),
+        },
       },
     });
     setup.register({
       id: 'non-blocking',
-      [HookLifecycle.beforeToolCall]: {
-        mode: HookExecutionMode.nonBlocking,
-        handler: handler('non-blocking'),
+      hooks: {
+        [HookLifecycle.beforeToolCall]: {
+          mode: HookExecutionMode.nonBlocking,
+          handler: handler('non-blocking'),
+        },
       },
     });
 
@@ -243,35 +264,41 @@ describe('HooksService', () => {
 
     setup.register({
       id: 'nonBlocking-first',
-      [HookLifecycle.beforeToolCall]: {
-        mode: HookExecutionMode.nonBlocking,
-        handler: handler('before-first'),
-      },
-      [HookLifecycle.afterToolCall]: {
-        mode: HookExecutionMode.nonBlocking,
-        handler: handler('after-first'),
+      hooks: {
+        [HookLifecycle.beforeToolCall]: {
+          mode: HookExecutionMode.nonBlocking,
+          handler: handler('before-first'),
+        },
+        [HookLifecycle.afterToolCall]: {
+          mode: HookExecutionMode.nonBlocking,
+          handler: handler('after-first'),
+        },
       },
     });
     setup.register({
       id: 'nonBlocking-second',
-      [HookLifecycle.beforeToolCall]: {
-        mode: HookExecutionMode.nonBlocking,
-        handler: handler('before-second'),
-      },
-      [HookLifecycle.afterToolCall]: {
-        mode: HookExecutionMode.nonBlocking,
-        handler: handler('after-second'),
+      hooks: {
+        [HookLifecycle.beforeToolCall]: {
+          mode: HookExecutionMode.nonBlocking,
+          handler: handler('before-second'),
+        },
+        [HookLifecycle.afterToolCall]: {
+          mode: HookExecutionMode.nonBlocking,
+          handler: handler('after-second'),
+        },
       },
     });
     setup.register({
       id: 'nonBlocking-third',
-      [HookLifecycle.beforeToolCall]: {
-        mode: HookExecutionMode.nonBlocking,
-        handler: handler('before-third'),
-      },
-      [HookLifecycle.afterToolCall]: {
-        mode: HookExecutionMode.nonBlocking,
-        handler: handler('after-third'),
+      hooks: {
+        [HookLifecycle.beforeToolCall]: {
+          mode: HookExecutionMode.nonBlocking,
+          handler: handler('before-third'),
+        },
+        [HookLifecycle.afterToolCall]: {
+          mode: HookExecutionMode.nonBlocking,
+          handler: handler('after-third'),
+        },
       },
     });
 
@@ -291,15 +318,49 @@ describe('HooksService', () => {
     ]);
   });
 
-  it('aborts blocking execution when a hook throws a non-AgentBuilderError', async () => {
+  it('runs hooks with undefined priority after those with priority', async () => {
+    const { setup, start } = createService();
+    const hookCalls: string[] = [];
+    const handler = createCallRecorder(hookCalls);
+
+    setup.register({
+      id: 'undefined-priority',
+      hooks: {
+        [HookLifecycle.beforeToolCall]: {
+          mode: HookExecutionMode.blocking,
+          handler: handler('undefined-priority'),
+        },
+      },
+    });
+
+    setup.register({
+      id: 'priority-1',
+      priority: 1,
+      hooks: {
+        [HookLifecycle.beforeToolCall]: {
+          mode: HookExecutionMode.blocking,
+          handler: handler('priority-1'),
+        },
+      },
+    });
+
+    await start.run(HookLifecycle.beforeToolCall, baseToolCallContext);
+    await flushEventLoop();
+
+    expect(hookCalls).toEqual(['priority-1', 'undefined-priority']);
+  });
+
+  it('aborts blocking execution when a hook throws an error', async () => {
     const { setup, start } = createService();
 
     setup.register({
-      id: 'h1',
-      [HookLifecycle.beforeConversationRound]: {
-        mode: HookExecutionMode.blocking,
-        handler: async () => {
-          throw new Error('nope');
+      id: 'error-hook',
+      hooks: {
+        [HookLifecycle.beforeConversationRound]: {
+          mode: HookExecutionMode.blocking,
+          handler: async () => {
+            throw new Error('error');
+          },
         },
       },
     });
@@ -308,8 +369,8 @@ describe('HooksService', () => {
       await start.run(HookLifecycle.beforeConversationRound, baseContext);
       throw new Error('Expected hook execution to throw');
     } catch (e) {
-      expect(e).toMatchObject({ message: 'nope' });
-      expect(isBadRequestError(e)).toBe(true);
+      expect(e).toMatchObject({ message: 'error' });
+      expect(isHooksExecutionError(e)).toBe(true);
     }
   });
 
@@ -318,13 +379,15 @@ describe('HooksService', () => {
 
     setup.register({
       id: 'slow-hook',
-      [HookLifecycle.beforeConversationRound]: {
-        mode: HookExecutionMode.blocking,
-        timeout: 50,
-        handler: () =>
-          new Promise<void>((resolve) => {
-            setTimeout(resolve, 500);
-          }),
+      hooks: {
+        [HookLifecycle.beforeConversationRound]: {
+          mode: HookExecutionMode.blocking,
+          timeout: 50,
+          handler: () =>
+            new Promise<void>((resolve) => {
+              setTimeout(resolve, 500);
+            }),
+        },
       },
     });
 
@@ -339,32 +402,6 @@ describe('HooksService', () => {
     });
   });
 
-  it('preserves AgentBuilderErrors thrown by hooks and augments metadata', async () => {
-    const { setup, start } = createService();
-
-    setup.register({
-      id: 'h1',
-      [HookLifecycle.beforeConversationRound]: {
-        mode: HookExecutionMode.blocking,
-        handler: async () => {
-          throw createBadRequestError('blocked', { reason: 'test' });
-        },
-      },
-    });
-
-    await expect(
-      start.run(HookLifecycle.beforeConversationRound, baseContext)
-    ).rejects.toMatchObject({
-      message: 'blocked',
-      meta: expect.objectContaining({
-        reason: 'test',
-        hookId: 'h1-beforeConversationRound',
-        hookLifecycle: HookLifecycle.beforeConversationRound,
-        hookMode: HookExecutionMode.blocking,
-      }),
-    });
-  });
-
   it('runs non-blocking hooks without blocking and swallows errors', async () => {
     const { setup, start } = createService();
 
@@ -374,12 +411,124 @@ describe('HooksService', () => {
 
     setup.register({
       id: 'p1',
-      [HookLifecycle.beforeConversationRound]: {
-        mode: HookExecutionMode.nonBlocking,
-        handler,
+      hooks: {
+        [HookLifecycle.beforeConversationRound]: {
+          mode: HookExecutionMode.nonBlocking,
+          handler,
+        },
       },
     });
 
     expect(() => start.run(HookLifecycle.beforeConversationRound, baseContext)).not.toThrow();
+  });
+
+  it('applies afterConversationRound mutation and returns modified round', async () => {
+    const { setup, start } = createService();
+    const baseRound = {
+      id: 'round-1',
+    } as unknown as ConversationRound;
+    const baseAfterRoundContext: AfterConversationRoundHookContext = {
+      ...baseContext,
+      round: baseRound,
+    };
+
+    setup.register({
+      id: 'round-mutator',
+      hooks: {
+        [HookLifecycle.afterConversationRound]: {
+          mode: HookExecutionMode.blocking,
+          handler: async (ctx) => ({
+            round: {
+              ...ctx.round,
+              response: { message: 'modified-by-hook' },
+            },
+          }),
+        },
+      },
+    });
+
+    const result = await start.run(HookLifecycle.afterConversationRound, baseAfterRoundContext);
+    expect(result.round.response).toEqual({ message: 'modified-by-hook' });
+  });
+
+  it('applies afterToolCall mutation and returns modified toolReturn', async () => {
+    const { setup, start } = createService();
+    const originalToolReturn = {
+      results: [
+        {
+          tool_result_id: 'res-1',
+          type: ToolResultType.other as const,
+          data: { a: 1 },
+        },
+      ],
+    };
+    const afterContext = createAfterToolCallContext({ toolReturn: originalToolReturn });
+
+    const modifiedToolReturn = {
+      results: [
+        {
+          tool_result_id: 'res-hook',
+          type: ToolResultType.other as const,
+          data: { from: 'hook' },
+        },
+      ],
+    };
+    setup.register({
+      id: 'tool-return-mutator',
+      hooks: {
+        [HookLifecycle.afterToolCall]: {
+          mode: HookExecutionMode.blocking,
+          handler: async () => ({ toolReturn: modifiedToolReturn }),
+        },
+      },
+    });
+
+    const result = await start.run(HookLifecycle.afterToolCall, afterContext);
+    expect(result.toolReturn).toEqual(modifiedToolReturn);
+  });
+
+  it('run() returns context unchanged when no hooks are registered for that lifecycle', async () => {
+    const { setup, start } = createService();
+    // Register only for a different lifecycle so the target lifecycle has no handlers
+    setup.register({
+      id: 'other',
+      hooks: {
+        [HookLifecycle.beforeConversationRound]: {
+          mode: HookExecutionMode.blocking,
+          handler: async (ctx) => ctx,
+        },
+      },
+    });
+
+    const contextForAfterRound: AfterConversationRoundHookContext = {
+      ...baseContext,
+      round: { id: 'r1' } as unknown as ConversationRound,
+    };
+
+    const result = await start.run(HookLifecycle.afterConversationRound, contextForAfterRound);
+    expect(result).toBe(contextForAfterRound);
+  });
+
+  it('forwards abortSignal from context to handler', async () => {
+    const { setup, start } = createService();
+    const controller = new AbortController();
+    const contextWithSignal = { ...baseContext, abortSignal: controller.signal };
+
+    let receivedSignal: AbortSignal | undefined;
+    setup.register({
+      id: 'signal-check',
+      hooks: {
+        [HookLifecycle.beforeConversationRound]: {
+          mode: HookExecutionMode.blocking,
+          handler: async (ctx) => {
+            receivedSignal = ctx.abortSignal;
+            return ctx;
+          },
+        },
+      },
+    });
+
+    await start.run(HookLifecycle.beforeConversationRound, contextWithSignal);
+    expect(receivedSignal).toBe(controller.signal);
   });
 });

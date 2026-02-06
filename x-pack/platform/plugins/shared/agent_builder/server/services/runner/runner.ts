@@ -163,16 +163,12 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     conversation,
     nextInput,
     promptState,
-    agentId,
-    conversationId,
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
     conversation?: Conversation;
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
-    agentId?: string;
-    conversationId?: string;
   }): ScopedRunner => {
     const { resultStore, skillsStore, filestore } = createStore({ conversation, runnerDeps });
 
@@ -184,10 +180,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     const promptManager = createPromptManager({ state: promptState });
     const toolManager = createToolManager();
 
-    const modelProvider = modelProviderFactory({
-      request,
-      defaultConnectorId,
-    });
+    const modelProvider = modelProviderFactory({ request, defaultConnectorId });
     const allDeps = {
       ...runnerDeps,
       modelProvider,
@@ -216,21 +209,19 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       return runner.runInternalTool(otherParams);
     },
     runAgent: (params) => {
-      const { request, defaultConnectorId, agentId, ...otherParams } = params;
+      const { request, defaultConnectorId, ...otherParams } = params;
       const { nextInput, conversation } = params.agentParams;
       const runner = createScopedRunnerWithDeps({
         request,
         defaultConnectorId,
         conversation,
         nextInput,
-        agentId,
-        conversationId: conversation?.id ?? '',
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,
         }),
       });
-      return runner.runAgent({ ...otherParams, agentId });
+      return runner.runAgent(otherParams);
     },
   };
 };

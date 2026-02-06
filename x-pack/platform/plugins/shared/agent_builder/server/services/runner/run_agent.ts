@@ -99,7 +99,8 @@ export const runAgent = async ({
 }): Promise<RunAgentReturn> => {
   const { agentId, agentParams, abortSignal } = agentExecutionParams;
 
-  const context = forkContextForAgentRun({ parentContext: parentManager.context, agentId });
+  const forkedContext = forkContextForAgentRun({ parentContext: parentManager.context, agentId });
+  const context = { ...forkedContext, abortSignal };
   const manager = parentManager.createChild(context);
 
   const { agentsService, request } = manager.deps;

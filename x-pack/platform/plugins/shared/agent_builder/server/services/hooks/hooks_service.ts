@@ -6,12 +6,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import {
-  createBadRequestError,
-  createRequestAbortedError,
-  isAgentBuilderError,
-} from '@kbn/agent-builder-common';
-import { safeJsonStringify, withTimeout } from '@kbn/std';
+import { createBadRequestError, createRequestAbortedError } from '@kbn/agent-builder-common';
+import { withTimeout } from '@kbn/std';
 import type {
   HookContext,
   HookRegistration,
@@ -24,7 +20,10 @@ import {
   HookLifecycle,
 } from '@kbn/agent-builder-server';
 import { orderBy } from 'lodash';
-import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
+import {
+  createHooksExecutionError,
+  isHooksExecutionError,
+} from '@kbn/agent-builder-common/base/errors';
 
 export interface HooksServiceSetupDeps {
   logger: Logger;
@@ -50,81 +49,21 @@ type NonBlockingHookRegistration<E extends HookLifecycle> = Extract<
   { mode: HookExecutionMode.nonBlocking }
 >;
 
-const getStringProp = (context: HookContext<HookLifecycle>, key: string): string | undefined => {
-  const value = (context as unknown as Record<string, unknown>)[key];
-  return typeof value === 'string' && value.length > 0 ? value : undefined;
-};
-
-const getHookSpanAttributes = <E extends HookLifecycle>(
-  lifecycle: E,
-  hook: HookRegistration<E>,
-  context: HookContext<E>
-): Record<string, string> => {
-  const attributes: Record<string, string> = {
-    [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
-    'hook.lifecycle': lifecycle,
-    'hook.id': hook.id,
-    'hook.mode': hook.mode,
-  };
-
-  const agentId = getStringProp(context, 'agentId');
-  if (agentId) {
-    attributes[ElasticGenAIAttributes.AgentId] = agentId;
-  }
-
-  const conversationId = getStringProp(context, 'conversationId');
-  if (conversationId) {
-    attributes[ElasticGenAIAttributes.AgentConversationId] = conversationId;
-  }
-
-  const connectorId = getStringProp(context, 'connectorId');
-  if (connectorId) {
-    attributes['hook.connector.id'] = connectorId;
-  }
-
-  const toolId = getStringProp(context, 'toolId');
-  if (toolId) {
-    attributes['hook.tool.id'] = toolId;
-  }
-
-  const toolCallId = getStringProp(context, 'toolCallId');
-  if (toolCallId) {
-    attributes['hook.tool_call.id'] = toolCallId;
-  }
-
-  const model = getStringProp(context, 'model');
-  if (model) {
-    attributes['hook.model'] = model;
-  }
-
-  const phase = getStringProp(context, 'phase');
-  if (phase) {
-    attributes['hook.model.phase'] = phase;
-  }
-
-  return attributes;
-};
-
 const normalizeHookError = <E extends HookLifecycle>(
-  event: E,
+  hookLifecycle: E,
   hook: Pick<HookRegistration<E>, 'id' | 'mode'>,
   err: unknown
 ) => {
-  if (isAgentBuilderError(err)) {
-    err.meta = {
-      ...err.meta,
-      hookLifecycle: event,
-      hookId: hook.id,
-      hookMode: hook.mode,
-    };
+  if (isHooksExecutionError(err)) {
     return err;
   }
-  const error = err instanceof Error ? err : new Error(String(err));
-  return createBadRequestError(error.message, {
-    hookLifecycle: event,
-    hookId: hook.id,
-    hookMode: hook.mode,
-  });
+
+  return createHooksExecutionError(
+    err instanceof Error ? err.message : String(err),
+    hookLifecycle,
+    hook.id,
+    hook.mode
+  );
 };
 
 export class HooksService {
@@ -138,23 +77,26 @@ export class HooksService {
   setup(deps: HooksServiceSetupDeps): HooksServiceSetup {
     this.setupDeps = deps;
 
+    for (const lifecycle of Object.values(HookLifecycle)) {
+      this.registrationsByEvent.set(lifecycle, []);
+    }
+
     return {
       register: (bundle) => {
-        const lifecycles = Object.values(HookLifecycle);
-        for (const lifecycle of lifecycles) {
-          const entry = bundle[lifecycle];
-          if (entry === undefined) continue;
+        for (const [lifeCycle, entry] of Object.entries(bundle.hooks)) {
+          const lifeCycleId = `${bundle.id}-${lifeCycle}`;
+          const hooksLifecycleEntries = this.registrationsByEvent.get(lifeCycle as HookLifecycle);
 
-          const lifeCycleId = `${bundle.id}-${lifecycle}`;
-
-          const existing = this.registrationsByEvent.get(lifecycle) ?? [];
-          if (existing.some((r) => r.id === lifeCycleId)) {
+          if (!hooksLifecycleEntries) {
+            throw new Error(`Hook lifecycle "${lifeCycle}" was not initialized in setup`);
+          }
+          if (hooksLifecycleEntries.some((r) => r.id === lifeCycleId)) {
             throw new Error(
-              `Hook with id "${lifeCycleId}" is already registered for event "${lifecycle}".`
+              `Hook with id "${lifeCycleId}" is already registered for event "${lifeCycle}".`
             );
           }
 
-          existing.push({
+          hooksLifecycleEntries.push({
             ...entry,
             id: lifeCycleId,
             priority: bundle.priority,
@@ -183,12 +125,9 @@ export class HooksService {
       HookRegistration<E>
     >;
 
-    const direction = isAfterEvent(lifecycle) ? 'asc' : 'desc';
-    return orderBy(
-      hooks.filter((h) => h.mode === mode),
-      [(h) => h.priority ?? 0],
-      [direction]
-    );
+    const filtered = hooks.filter((h) => h.mode === mode);
+    const sorted = orderBy(filtered, [(h) => h.priority ?? 0], ['desc']);
+    return isAfterEvent(lifecycle) ? sorted.reverse() : sorted;
   }
 
   start(): HooksServiceStart {
@@ -216,22 +155,7 @@ export class HooksService {
         try {
           const timeoutMs = hook.timeout ?? DEFAULT_HOOK_TIMEOUT_MS;
           const timed = await withTimeout({
-            promise: withActiveInferenceSpan(
-              `Hook:${hook.id}`,
-              {
-                attributes: getHookSpanAttributes(lifecycle, hook, currentContext),
-              },
-              async (span) => {
-                const hookResult = await hook.handler(currentContext);
-                if (hookResult !== undefined) {
-                  const stringified = safeJsonStringify(hookResult);
-                  if (stringified) {
-                    span?.setAttribute('hook.result', stringified);
-                  }
-                }
-                return hookResult;
-              }
-            ),
+            promise: (async () => hook.handler(currentContext))(),
             timeoutMs,
           });
           if (timed.timedout) {
@@ -257,31 +181,11 @@ export class HooksService {
       for (const hook of hooks) {
         // Fire-and-forget. Must never throw to the caller.
         Promise.resolve()
-          .then(() =>
-            withActiveInferenceSpan(
-              `Hook:${hook.id}`,
-              {
-                attributes: getHookSpanAttributes(lifecycle, hook, context),
-              },
-              async (span) => {
-                const hookResult = await hook.handler(context);
-                if (hookResult !== undefined) {
-                  const stringified = safeJsonStringify(hookResult);
-                  if (stringified) {
-                    span?.setAttribute('hook.result', stringified);
-                  }
-                }
-                return hookResult;
-              }
-            )
-          )
+          .then(() => hook.handler(context))
           .catch((err) => {
             const normalized = normalizeHookError(lifecycle, hook, err);
-            logger.error(
-              `Non-blocking hook "${hook.id}" failed for event "${lifecycle}": ${
-                normalized instanceof Error ? normalized.message : String(normalized)
-              }`
-            );
+            // Log and swallow the error
+            logger.error(`Non-blocking hook "${hook.id}" failed: ${normalized.message}`);
           });
       }
     };

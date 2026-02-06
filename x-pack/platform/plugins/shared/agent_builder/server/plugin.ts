@@ -9,7 +9,6 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import type { MaybePromise } from '@kbn/utility-types';
 import type { AgentBuilderConfig } from './config';
 import { ServiceManager } from './services';
 import type {
@@ -28,7 +27,6 @@ import { createAgentBuilderUsageCounter } from './telemetry/usage_counters';
 import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
-import { registerAgentBuilderHooksExample } from './examples/register_hooks_example';
 import { registerSampleData } from './register_sample_data';
 
 export class AgentBuilderPlugin
@@ -128,8 +126,6 @@ export class AgentBuilderPlugin
         registerSkill: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
       },
     };
-
-    registerAgentBuilderHooksExample(setupContract);
 
     return setupContract;
   }

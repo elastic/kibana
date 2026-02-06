@@ -102,9 +102,10 @@ export interface RunContext {
    */
   stack: RunContextStackEntry[];
   /**
-   * Optional conversation id when the run is part of a conversation (e.g. agent execution).
+   * Optional abort signal for the run (e.g. from the request).
+   * Propagated to hooks so they can respect cancellation.
    */
-  conversationId?: string;
+  abortSignal?: AbortSignal;
 }
 
 /**

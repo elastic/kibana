@@ -10,12 +10,12 @@ import type { ToolResult, ToolType } from '@kbn/agent-builder-common';
 import { createBadRequestError } from '@kbn/agent-builder-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
-  RunContext,
+  AfterToolCallHookContext,
+  BeforeToolCallHookContext,
   RunToolReturn,
   ToolHandlerContext,
   ToolHandlerReturn,
 } from '@kbn/agent-builder-server';
-import { context as otelContext } from '@opentelemetry/api';
 import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunInternalToolParams,
@@ -37,11 +37,6 @@ import {
 import { toolConfirmationId, createToolConfirmationPrompt } from './utils/prompts';
 import type { RunnerManager } from './runner';
 import { HookLifecycle } from '../hooks';
-
-function getAgentIdFromRunContext(context: RunContext): string | undefined {
-  const agentEntry = [...context.stack].reverse().find((e) => e.type === 'agent');
-  return agentEntry?.type === 'agent' ? agentEntry.agentId : undefined;
-}
 
 export const runTool = async <TParams = Record<string, unknown>>({
   toolExecutionParams,
@@ -89,20 +84,16 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   const manager = parentManager.createChild(context);
   const { resultStore, promptManager } = manager.deps;
 
-  const hookTracingContext = otelContext.active();
-
   let toolParams = initialToolParams as unknown as Record<string, unknown>;
   const hooks = manager.deps.hooks;
   if (hooks) {
-    const hookContext = {
-      agentId: getAgentIdFromRunContext(parentManager.context),
-      conversationId: manager.context.conversationId,
+    const hookContext: BeforeToolCallHookContext = {
       toolId: tool.id,
       toolCallId,
       toolParams,
       source,
       request: manager.deps.request,
-      tracingContext: hookTracingContext,
+      abortSignal: manager.context.abortSignal,
     };
     const updated = await hooks.run(HookLifecycle.beforeToolCall, hookContext);
     toolParams = updated.toolParams;
@@ -155,7 +146,11 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
 
       try {
         const toolHandler = await tool.getHandler();
-        return await toolHandler(validation.data as Record<string, unknown>, toolHandlerContext);
+        const result = await toolHandler(
+          validation.data as Record<string, unknown>,
+          toolHandlerContext
+        );
+        return result;
       } catch (err) {
         return {
           results: [createErrorResult(err.message)],
@@ -179,16 +174,14 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   }
 
   if (hooks) {
-    const postContext = {
-      agentId: getAgentIdFromRunContext(parentManager.context) ?? '',
-      conversationId: manager.context.conversationId,
+    const postContext: AfterToolCallHookContext = {
       toolId: tool.id,
       toolCallId,
       toolParams,
       source,
       request: manager.deps.request,
       toolReturn: runToolReturn,
-      tracingContext: hookTracingContext,
+      abortSignal: context.abortSignal,
     };
     const updated = await hooks.run(HookLifecycle.afterToolCall, postContext);
     runToolReturn = updated.toolReturn;

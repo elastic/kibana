@@ -57,7 +57,6 @@ export const createAgentGraph = ({
   structuredOutput = false,
   outputSchema,
   processedConversation,
-  abortSignal,
   promptFactory,
 }: {
   chatModel: InferenceChatModel;
@@ -69,7 +68,6 @@ export const createAgentGraph = ({
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
   processedConversation: ProcessedConversation;
-  abortSignal?: AbortSignal;
   promptFactory: PromptFactory;
 }) => {
   const init = async () => {
@@ -88,8 +86,7 @@ export const createAgentGraph = ({
       const response = await researcherModel.invoke(
         await promptFactory.getMainPrompt({
           actions: state.mainActions,
-        }),
-        { signal: abortSignal }
+        })
       );
 
       const action = processResearchResponse(response);
@@ -202,8 +199,7 @@ export const createAgentGraph = ({
         await promptFactory.getAnswerPrompt({
           actions: state.mainActions,
           answerActions: state.answerActions,
-        }),
-        { signal: abortSignal }
+        })
       );
 
       const action = processAnswerResponse(response);
@@ -231,7 +227,6 @@ export const createAgentGraph = ({
     events,
     outputSchema,
     logger,
-    abortSignal,
   });
 
   const answerAgentEdge = async (state: StateType) => {

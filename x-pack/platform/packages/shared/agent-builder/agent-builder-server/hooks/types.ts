@@ -6,39 +6,24 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { Conversation, ConverseInput, ConversationRound } from '@kbn/agent-builder-common';
+import {
+  type Conversation,
+  type ConverseInput,
+  type ConversationRound,
+  HookLifecycle,
+  HookExecutionMode,
+} from '@kbn/agent-builder-common';
 import type { RunToolReturn } from '../runner';
 
-/**
- * Lifecycle events that can trigger hooks.
- *
- * Note: this is intentionally scoped to server-side agent execution lifecycle.
- */
-export enum HookLifecycle {
-  beforeConversationRound = 'beforeConversationRound',
-  afterConversationRound = 'afterConversationRound',
-  beforeToolCall = 'beforeToolCall',
-  afterToolCall = 'afterToolCall',
-}
-
-/**
- * Determines when the hook is executed relative to the main agent execution flow.
- *
- * - blocking: executed before proceeding; errors abort the main agent execution.
- * - nonBlocking: executed in the background; errors are logged and do not abort.
- */
-export enum HookExecutionMode {
-  blocking = 'blocking',
-  nonBlocking = 'nonBlocking',
-}
+export { HookLifecycle, HookExecutionMode };
 
 interface AgentHookContextBase {
-  agentId?: string;
   request: KibanaRequest;
   abortSignal?: AbortSignal;
 }
 
 interface ConversationRoundHookContextBase extends AgentHookContextBase {
+  agentId: string;
   conversation: Conversation;
 }
 
@@ -51,7 +36,6 @@ export interface AfterConversationRoundHookContext extends ConversationRoundHook
 }
 
 interface ToolCallHookContextBase extends AgentHookContextBase {
-  conversationId?: string;
   toolId: string;
   toolCallId: string;
   toolParams: Record<string, unknown>;
@@ -136,7 +120,7 @@ export type HookRegistration<E extends HookLifecycle = HookLifecycle> = Pick<
  * Bundle of hook registrations for one or more lifecycles in a single call.
  * id and priority apply to all entries in the bundle.
  */
-type HookRegistrationsBundle = {
+interface HookRegistrationsBundle {
   /**
    * Unique id for this bundle (used as prefix per lifecycle, e.g. `id-beforeToolCall`).
    */
@@ -145,9 +129,10 @@ type HookRegistrationsBundle = {
    * Priority for all hooks in this bundle. Higher values run earlier.
    */
   priority?: number;
-} & {
-  [K in HookLifecycle]?: HookRegistrationEntry<K>;
-};
+  hooks: {
+    [K in HookLifecycle]?: HookRegistrationEntry<K>;
+  };
+}
 
 export interface HooksServiceSetup {
   /**

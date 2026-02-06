@@ -157,8 +157,7 @@ export const registerAgentBuilderHooks = (agentBuilder?: AgentBuilderPluginSetup
     [HookLifecycle.beforeConversationRound]: {
       mode: HookExecutionMode.blocking,
       handler: (context) => {
-        // eslint-disable-next-line no-console
-        console.log('beforeConversationRound', context);
+        console.log('beforeConversationRound');
         return {
           nextInput: {
             ...context.nextInput,
@@ -172,15 +171,13 @@ export const registerAgentBuilderHooks = (agentBuilder?: AgentBuilderPluginSetup
     [HookLifecycle.afterConversationRound]: {
       mode: HookExecutionMode.blocking,
       handler: (context) => {
-        // eslint-disable-next-line no-console
-        console.log('afterConversationRound', context);
+        console.log('afterConversationRound');
       },
     },
     [HookLifecycle.beforeToolCall]: {
       mode: HookExecutionMode.blocking,
       handler: (context) => {
-        // eslint-disable-next-line no-console
-        console.log('beforeToolCall', context);
+        console.log('beforeToolCall');
         return {
           toolParams: {
             ...context.toolParams,
@@ -192,12 +189,41 @@ export const registerAgentBuilderHooks = (agentBuilder?: AgentBuilderPluginSetup
     [HookLifecycle.afterToolCall]: {
       mode: HookExecutionMode.blocking,
       handler: (context) => {
-        // eslint-disable-next-line no-console
-        console.log('afterToolCall', context);
+        console.log('afterToolCall');
       },
     },
   });
 };
+```
+
+
+### Execution order
+The hook execution respect the priority field  and after that the registration order.
+
+* before* hooks: First to last
+* after* hooks: Last to first (reverse)
+
+#### Execution flow
+```
+Before hooks run in order:
+
+    hook_1 beforeConversationRound
+    hook_2 beforeConversationRound
+    hook_3 beforeConversationRound
+
+    hook_1 beforeToolCall
+    hook_2 beforeToolCall
+    hook_3 beforeToolCall
+
+After hooks run in reverse order:
+
+    hook_3 afterToolCall
+    hook_2 afterToolCall
+    hook_1.afterToolCall
+
+    hook_3 afterConversationRound
+    hook_2 afterConversationRound
+    hook_1.afterConversationRound
 ```
 
 ## MCP Server

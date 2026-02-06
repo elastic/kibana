@@ -36,6 +36,7 @@ import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import type { StateType } from './state';
+
 const chatAgentGraphName = 'default-agent-builder-agent';
 
 export type RunChatAgentParams = Omit<RunAgentParams, 'mode'> & {
@@ -175,7 +176,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     structuredOutput,
     outputSchema,
     processedConversation,
-    abortSignal,
     promptFactory,
   });
 

@@ -139,17 +139,19 @@ class ChatServiceImpl implements ChatService {
             agentService: this.dependencies.agentService,
             browserApiTools,
             configurationOverrides,
-          }).pipe(
-            mergeMap(
-              runAfterConversationRoundHook({
-                agentId,
-                request,
-                abortSignal,
-                conversation: context.conversation,
-                hooks: this.dependencies.hooks,
-              })
+          })
+            .pipe(
+              mergeMap(
+                runAfterConversationRoundHook({
+                  agentId,
+                  request,
+                  abortSignal,
+                  conversation: context.conversation,
+                  hooks: this.dependencies.hooks,
+                })
+              )
             )
-          );
+            .pipe(shareReplay());
 
           // Generate title (for CREATE) or use existing title (for UPDATE)
           const title$ =
@@ -209,7 +211,7 @@ class ChatServiceImpl implements ChatService {
                 this.dependencies.logger.error(error);
               }
             }),
-            shareReplay()
+            shareReplay() // Required to prevent multiple subscriptions to the same event stream
           );
         })
       );
