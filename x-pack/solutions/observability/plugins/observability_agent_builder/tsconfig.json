@@ -30,7 +30,6 @@
     "@kbn/inference-plugin",
     "@kbn/server-route-repository",
     "@kbn/server-route-repository-utils",
-    "@kbn/std",
     "@kbn/spaces-plugin",
     "@kbn/management-settings-ids",
     "@kbn/logging",
@@ -47,6 +46,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/server-route-repository-client",
     "@kbn/observability-plugin"
+    "@kbn/apm-types"
   ],
   "exclude": ["target/**/*"]
 }

@@ -3,7 +3,7 @@ steps:
     label: Build Kibana Distribution
     agents:
       machineType: c3d-standard-16-lssd
-      zones: us-central1-a,us-central1-b,us-central1-c
+      zones: northamerica-northeast2-b,us-central1-c,us-central1-a
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 90
@@ -92,9 +92,9 @@ steps:
     label: 'Check Types'
     agents:
       machineType: c4-standard-4
-      diskType: 'hyperdisk-balanced'
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c
+      spotZones: northamerica-northeast2-b,us-central1-c,us-central1-a
       diskSizeGb: 115
     key: check_types
     timeout_in_minutes: 60

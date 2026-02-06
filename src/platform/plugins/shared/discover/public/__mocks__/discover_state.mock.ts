@@ -43,6 +43,8 @@ import { getInitialAppState } from '../application/main/state_management/utils/g
 import { updateSavedSearch } from '../application/main/state_management/utils/update_saved_search';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SaveDiscoverSessionThunkParams } from '../application/main/state_management/redux/actions';
+import { filter, firstValueFrom, timeout } from 'rxjs';
+import { FetchStatus } from '../application/types';
 
 interface CreateInternalStateStoreMockOptions {
   runtimeStateManager?: RuntimeStateManager;
@@ -177,6 +179,7 @@ export function getDiscoverInternalStateMock({
   const toolkit = {
     internalState,
     runtimeStateManager,
+    services,
     initializeTabs: async ({
       persistedDiscoverSession,
     }: { persistedDiscoverSession?: DiscoverSession } = {}) => {
@@ -198,41 +201,93 @@ export function getDiscoverInternalStateMock({
         )
         .unwrap();
     },
-    initializeSingleTab: assertTabsAreInitialized(async ({ tabId }: { tabId: string }) => {
-      await toolkit.switchToTab({ tabId });
+    initializeSingleTab: assertTabsAreInitialized(
+      async ({
+        tabId,
+        skipWaitForDataFetching,
+      }: {
+        tabId: string;
+        skipWaitForDataFetching?: boolean;
+      }) => {
+        await toolkit.switchToTab({ tabId });
 
+        const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+
+        if (tabRuntimeState.stateContainer$.getValue()) {
+          throw new Error(`Tab with ID "${tabId}" has already been initialized`);
+        }
+
+        const stateContainer = getDiscoverStateContainer({
+          tabId: internalState.getState().tabs.unsafeCurrentId,
+          services,
+          customizationContext,
+          stateStorageContainer,
+          internalState,
+          runtimeStateManager,
+          searchSessionManager,
+        });
+        const customizationService = await getConnectedCustomizationService({
+          stateContainer,
+          customizationCallbacks: [],
+          services,
+        });
+
+        await internalState.dispatch(
+          internalStateActions.initializeSingleTab({
+            tabId,
+            initializeSingleTabParams: {
+              stateContainer,
+              customizationService,
+              dataViewSpec: undefined,
+              esqlControls: undefined,
+              defaultUrlState: undefined,
+            },
+          })
+        );
+
+        if (!skipWaitForDataFetching) {
+          await toolkit.waitForDataFetching({ tabId });
+        }
+
+        return { stateContainer, customizationService };
+      }
+    ),
+    waitForDataFetching: assertTabsAreInitialized(async ({ tabId }: { tabId: string }) => {
       const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+      const stateContainer = tabRuntimeState.stateContainer$.getValue();
+      const dataMain$ = stateContainer?.dataState.data$.main$;
 
-      if (tabRuntimeState.stateContainer$.getValue()) {
-        throw new Error(`Tab with ID "${tabId}" has already been initialized`);
+      if (!dataMain$) {
+        throw new Error(`Tab with ID "${tabId}" has not been initialized yet`);
       }
 
-      const stateContainer = getDiscoverStateContainer({
-        tabId: internalState.getState().tabs.unsafeCurrentId,
-        services,
-        customizationContext,
-        stateStorageContainer,
-        internalState,
-        runtimeStateManager,
-        searchSessionManager,
-      });
-      const customizationService = await getConnectedCustomizationService({
-        stateContainer,
-        customizationCallbacks: [],
-        services,
-      });
+      const fetchLoadingStatuses = [
+        FetchStatus.LOADING,
+        FetchStatus.LOADING_MORE,
+        FetchStatus.PARTIAL,
+      ];
 
-      await internalState.dispatch(
-        internalStateActions.initializeSingleTab({
-          tabId,
-          initializeSingleTabParams: {
-            stateContainer,
-            customizationService,
-            dataViewSpec: undefined,
-            esqlControls: undefined,
-            defaultUrlState: undefined,
-          },
-        })
+      try {
+        await firstValueFrom(
+          dataMain$.pipe(
+            filter(({ fetchStatus }) => fetchLoadingStatuses.includes(fetchStatus)),
+            timeout({ first: 250 })
+          )
+        );
+      } catch {
+        // eslint-disable-next-line no-console
+        console.log(`Data fetching did not start within 250ms for tab with ID "${tabId}"`);
+        return;
+      }
+
+      const fetchFinishedStatuses = [
+        FetchStatus.UNINITIALIZED,
+        FetchStatus.COMPLETE,
+        FetchStatus.ERROR,
+      ];
+
+      await firstValueFrom(
+        dataMain$.pipe(filter(({ fetchStatus }) => fetchFinishedStatuses.includes(fetchStatus)))
       );
     }),
     getCurrentTab: assertTabsAreInitialized(() => {
@@ -422,7 +477,6 @@ export function getDiscoverStateMock({
       updateSavedSearch({
         savedSearch: finalSavedSearch,
         dataView,
-        initialInternalState: undefined,
         appState: currentTab.appState,
         globalState: currentTab.globalState,
         services,

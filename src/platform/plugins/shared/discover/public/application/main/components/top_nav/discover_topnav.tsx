@@ -15,6 +15,7 @@ import {
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
+import { useESQLQueryStats } from '@kbn/esql/public';
 import {
   type Filter,
   type Query,
@@ -128,7 +129,6 @@ export const DiscoverTopNav = ({
   );
   const { onSaveControl, getActivePanels } = useESQLVariables({
     isEsqlMode,
-    stateContainer,
     currentEsqlVariables: esqlVariables,
     controlGroupApi,
     onUpdateESQLQuery,
@@ -204,6 +204,11 @@ export const DiscoverTopNav = ({
       }
     },
     [dispatch, setAppState, stateContainer, updateAppState]
+  );
+
+  const esqlQueryStats = useESQLQueryStats(
+    isEsqlMode,
+    stateContainer.dataState.inspectorAdapters.requests
   );
 
   const transitionFromESQLToDataView = useCurrentTabAction(
@@ -414,6 +419,7 @@ export const DiscoverTopNav = ({
               }
             : undefined
         }
+        esqlQueryStats={esqlQueryStats}
         onOpenQueryInNewTab={onOpenQueryInNewTab}
       />
       {isESQLToDataViewTransitionModalVisible && (

@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { replaceFunctionParams } from './create_aggregation';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import {
+  replaceFunctionParams,
+  getAggregationTemplate,
+  createTimeBucketAggregation,
+} from './create_aggregation';
 
 describe('replaceFunctionParams', () => {
   it('should substitute a ?? placeholder and add backticks where needed', () => {
@@ -37,5 +42,61 @@ describe('replaceFunctionParams', () => {
       metricField: 'system.network.in.bytes',
     });
     expect(result).toBe('SUM(RATE(system.network.`in`.bytes))');
+  });
+});
+
+describe('getAggregationTemplate', () => {
+  it('should return SUM as default', () => {
+    const result = getAggregationTemplate({
+      type: ES_FIELD_TYPES.HISTOGRAM,
+      instrument: 'counter',
+      placeholderName: 'metricName',
+    });
+    expect(result).toBe('SUM(RATE(??metricName))');
+  });
+
+  it('returns custom function template when customFunction is provided, ignoring instrument', () => {
+    const placeholderName = 'metricName';
+    const customFunction = 'custom';
+    const expectedTemplate = 'custom(??metricName)';
+
+    const instruments = ['gauge', 'counter', 'histogram'] as const;
+    instruments.forEach((instrument) => {
+      const template = getAggregationTemplate({
+        type: ES_FIELD_TYPES.HISTOGRAM,
+        instrument,
+        placeholderName,
+        customFunction,
+      });
+      expect(template).toBe(expectedTemplate);
+    });
+  });
+
+  it('should return PERCENTILE for exponential histogram instrument', () => {
+    const result = getAggregationTemplate({
+      type: ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
+      instrument: 'counter',
+      placeholderName: 'metricName',
+    });
+    expect(result).toBe('PERCENTILE(??metricName, 95)');
+  });
+
+  it('should return PERCENTILE for tdigest instrument', () => {
+    const result = getAggregationTemplate({
+      type: ES_FIELD_TYPES.TDIGEST,
+      instrument: 'counter',
+      placeholderName: 'metricName',
+    });
+    expect(result).toBe('PERCENTILE(??metricName, 95)');
+  });
+});
+
+describe('createTimeBucketAggregation', () => {
+  it('should return the correct time bucket aggregation', () => {
+    const result = createTimeBucketAggregation({
+      targetBuckets: 100,
+      timestampField: '@timestamp',
+    });
+    expect(result).toBe('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
   });
 });
