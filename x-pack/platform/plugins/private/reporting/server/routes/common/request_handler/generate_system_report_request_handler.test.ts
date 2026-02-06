@@ -21,7 +21,7 @@ import type { ReportingStore } from '../../../lib/store';
 import { Report } from '../../../lib/store';
 import { createMockPluginStart, createMockReportingCore } from '../../../test_helpers';
 import type { ReportingRequestHandlerContext, ReportingSetup, ReportingUser } from '../../../types';
-import type { RequestParams } from './request_handler';
+
 import {
   GenerateSystemReportRequestHandler,
   handleGenerateSystemReportRequest,
@@ -62,7 +62,7 @@ const mockJobParams: JobParamsCSV = {
   searchSource: mockReportParams.searchSource,
 };
 
-const mockRequestParams: RequestParams = {
+const mockRequestParams = {
   exportTypeId: 'csv_searchsource',
   jobParams: mockJobParams,
 };
@@ -225,6 +225,22 @@ describe('GenerateSystemReportRequestHandler', () => {
       expect(response.status).toBe(403);
     });
 
+    test('disallows unsupported index', async () => {
+      const response = await requestHandler.handleRequest({
+        ...mockRequestParams,
+        jobParams: {
+          ...mockJobParams,
+          searchSource: {
+            ...mockJobParams.searchSource,
+            index: 'unsupported-index-*',
+          },
+        },
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.payload).toBe('Unsupported index of unsupported-index-* for system report');
+    });
+
     test('successfully handles system report request', async () => {
       await requestHandler.handleRequest(mockRequestParams);
 
@@ -351,37 +367,5 @@ describe('handleGenerateSystemReportRequest', () => {
     );
 
     expect(mockHandleResponse).toHaveBeenCalledWith(null, expect.any(Error));
-  });
-
-  test('returns bad request when index is not supported', async () => {
-    const mockSecurityService = {
-      authc: {
-        getCurrentUser: jest.fn().mockReturnValue(null),
-      },
-    };
-    reportingCore.getPluginStartDeps = jest.fn().mockResolvedValue({
-      securityService: mockSecurityService,
-    });
-
-    await handleGenerateSystemReportRequest(
-      reportingCore,
-      mockLogger,
-      '/api/some-plugin/resource/_generateReport',
-      {
-        ...requestParams,
-        reportParams: {
-          ...mockReportParams,
-          searchSource: {
-            ...mockReportParams.searchSource,
-            index: 'unsupported-index-*',
-          },
-        },
-      },
-      mockHandleResponse
-    );
-
-    expect(mockResponseFactory.badRequest).toHaveBeenCalledWith({
-      body: `Unsupported index of unsupported-index-* for system report`,
-    });
   });
 });

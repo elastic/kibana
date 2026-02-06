@@ -17,6 +17,7 @@ import type {
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 
 import type { ReportingCore } from '../../..';
 import type { ReportingRequestHandlerContext, ReportingUser } from '../../../types';
@@ -24,6 +25,7 @@ import type { SavedReport } from '../../../lib/store';
 import { Report } from '../../../lib/store';
 import type { RequestParams } from './request_handler';
 import { RequestHandler } from './request_handler';
+import { authorizedUserPreRouting } from '../authorized_user_pre_routing';
 
 export interface InternalReportParams {
   title: string;
@@ -130,8 +132,8 @@ export class GenerateSystemReportRequestHandler<
     return report;
   }
 
-  public async handleRequest(params: RequestParams) {
-    const { exportTypeId } = params;
+  public async handleRequest(params: RequestParams & { jobParams: JobParamsCSV }) {
+    const { exportTypeId, jobParams } = params;
 
     const unsupportedErrorResponse = this.checkSupportedExportType(exportTypeId);
 
@@ -143,6 +145,12 @@ export class GenerateSystemReportRequestHandler<
 
     if (checkErrorResponse) {
       return checkErrorResponse;
+    }
+
+    const unsupportedIndexErrorResponse = this.checkSupportedIndex(jobParams);
+
+    if (unsupportedIndexErrorResponse) {
+      return unsupportedIndexErrorResponse;
     }
 
     try {
@@ -167,6 +175,20 @@ export class GenerateSystemReportRequestHandler<
     }
     return null;
   }
+
+  private checkSupportedIndex(jobParams: JobParamsCSV): IKibanaResponse | null {
+    const index =
+      typeof jobParams.searchSource.index === 'string'
+        ? jobParams.searchSource.index
+        : jobParams.searchSource.index?.title;
+
+    if (index && !SUPPORTED_INDICES.includes(index)) {
+      return this.opts.res.badRequest({
+        body: `Unsupported index of ${index} for system report`,
+      });
+    }
+    return null;
+  }
 }
 
 export type HandleGenerateSystemReportRequestFunc = ReturnType<
@@ -181,55 +203,44 @@ export async function handleGenerateSystemReportRequest(
   handleResponse: HandleResponseFunc
 ) {
   const { reportParams, request: req, response: res, context } = requestParams;
-  const { title, searchSource, timezone } = reportParams;
-  const index =
-    typeof searchSource.index === 'string' ? searchSource.index : searchSource.index?.title;
 
-  if (index && !SUPPORTED_INDICES.includes(index)) {
-    logger.error(`Attempted to generate system report with unsupported index: ${index}`);
-    return res.badRequest({
-      body: `Unsupported index of ${index} for system report`,
-    });
-  }
-
-  const exportTypeId = 'csv_searchsource';
-  const jobParams = {
-    title,
-    searchSource,
-    browserTimezone: timezone ?? 'UTC',
-    version: reporting.getKibanaPackageInfo().version,
-    objectType: 'search',
-    columns: searchSource.fields,
-  };
-
-  const { securityService } = await reporting.getPluginStartDeps();
   const reportingContext = {
     ...context,
     reporting: Promise.resolve(reporting.getContract()),
   };
-  const user = securityService.authc.getCurrentUser(req);
 
-  if (!user) {
-    return res.unauthorized({ body: `Sorry, you aren't authenticated` });
-  }
+  const authorizedHandler = await authorizedUserPreRouting(reporting, (user) => {
+    const { title, searchSource, timezone } = reportParams;
 
-  const requestHandler = new GenerateSystemReportRequestHandler(
-    {
-      reporting,
-      user,
-      context: reportingContext,
-      path,
-      req: req as KibanaRequest<TypeOf<typeof Params>, TypeOf<typeof Query>, TypeOf<typeof Body>>,
-      res,
-      logger,
-    },
-    {
-      handleResponse,
-    }
-  );
+    const exportTypeId = 'csv_searchsource';
+    const jobParams = {
+      title,
+      searchSource,
+      browserTimezone: timezone ?? 'UTC',
+      version: reporting.getKibanaPackageInfo().version,
+      objectType: 'search',
+      columns: searchSource.fields as string[],
+    };
+    const requestHandler = new GenerateSystemReportRequestHandler(
+      {
+        reporting,
+        user,
+        context: reportingContext,
+        path,
+        req: req as KibanaRequest<TypeOf<typeof Params>, TypeOf<typeof Query>, TypeOf<typeof Body>>,
+        res,
+        logger,
+      },
+      {
+        handleResponse,
+      }
+    );
 
-  return await requestHandler.handleRequest({
-    exportTypeId,
-    jobParams,
+    return requestHandler.handleRequest({
+      exportTypeId,
+      jobParams,
+    });
   });
+
+  return await authorizedHandler(reportingContext, req, res);
 }
