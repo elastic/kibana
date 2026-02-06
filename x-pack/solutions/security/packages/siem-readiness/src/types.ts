@@ -70,6 +70,7 @@ export interface DataQualityResultDocument {
 
 export interface RelatedIntegrationRuleResponse {
   related_integrations?: Array<RelatedIntegration>;
+  enabled: boolean;
 }
 
 export interface RelatedIntegration {
@@ -92,4 +93,10 @@ export interface PipelineStats {
   indices: string[];
   docsCount: number;
   failedDocsCount: number;
+}
+export interface CasesSearchResponse {
+  total: number;
+  countOpenCases: number;
+  countClosedCases: number;
+  countInProgressCases: number;
 }

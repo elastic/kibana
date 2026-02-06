@@ -32,7 +32,9 @@ import {
   getContinuityCaseTitle,
   getContinuityCaseTags,
 } from './continuity_add_case_details';
+import { ViewCasesButton } from '../../components/view_cases_button';
 
+const DATA_CONTINUITY_CASE_TAGS = ['siem-readiness', 'data-continuity', 'ingest-pipelines'];
 // Extended PipelineStats with computed fields and Record<string, unknown> for CategoryAccordionTable
 export interface PipelineInfoWithStatus extends PipelineStats, Record<string, unknown> {
   failureRate: string;
@@ -368,19 +370,24 @@ export const ContinuityTab: React.FC = () => {
           </EuiText>
         </EuiFlexItem>
         {hasDocFailures && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconSide="right"
-              size="s"
-              iconType="plusInCircle"
-              onClick={handleCreateCase}
-              data-test-subj="createNewCaseButton"
-            >
-              {i18n.translate('xpack.securitySolution.siemReadiness.continuity.createCase', {
-                defaultMessage: 'Create new case',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          <>
+            <EuiFlexItem grow={false}>
+              <ViewCasesButton caseTagsArray={DATA_CONTINUITY_CASE_TAGS} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconSide="right"
+                size="s"
+                iconType="plusInCircle"
+                onClick={handleCreateCase}
+                data-test-subj="createNewCaseButton"
+              >
+                {i18n.translate('xpack.securitySolution.siemReadiness.continuity.createCase', {
+                  defaultMessage: 'Create new case',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </>
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />

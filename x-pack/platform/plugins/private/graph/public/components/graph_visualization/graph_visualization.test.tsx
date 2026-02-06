@@ -135,7 +135,7 @@ describe('graph_visualization', () => {
       )
     ).toMatchInlineSnapshot(`
       <svg
-        className="gphGraph"
+        css="unknown styles"
         height="100%"
         id="graphSvg"
         pointerEvents="all"
