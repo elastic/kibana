@@ -67,7 +67,7 @@ export const runAgentStepDefinition = createPublicStepDefinition({
   editorHandlers: {
     config: {
       'connector-id': {
-        connectorIdSelection: { actionTypeIds: ['.gen-ai', '.inference'], enableCreation: true },
+        connectorIdSelection: { actionTypeIds: ['.gen-ai', '.inference'], enableCreation: false },
       },
     },
     dynamicSchema: {
