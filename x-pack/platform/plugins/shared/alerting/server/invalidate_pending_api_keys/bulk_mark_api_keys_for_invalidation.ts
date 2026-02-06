@@ -7,8 +7,8 @@
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 import { isUiamApiKey } from '@kbn/security-plugin/server/uiam/utils';
+import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 
 export const bulkMarkApiKeysForInvalidation = async (
   { apiKeys }: { apiKeys: string[] },
