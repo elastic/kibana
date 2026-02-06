@@ -1410,6 +1410,29 @@ export const runActionTestSuite = ({
       }
     });
 
+    it('rejects search with closed PIT when allow_partial_search_results is false', async () => {
+      const openPitTask = openPit({ client, index: 'existing_index_with_docs' });
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
+
+      const pitId = pitResponse.right.pitId;
+      await closePit({ client, pitId })();
+
+      await client.bulk({
+        refresh: 'wait_for',
+        operations: [
+          { index: { _index: 'existing_index_with_docs', _id: 'pit-invalidation-doc-2' } },
+          { type: 'test', value: 2 },
+        ],
+      });
+
+      const searchTask = client.search({
+        pit: { id: pitId },
+        allow_partial_search_results: false,
+      });
+
+      await expect(searchTask).rejects.toThrow('search_phase_execution_exception');
+    });
+
     it('rejects if PIT does not exist', async () => {
       const closePitTask = closePit({ client, pitId: 'no_such_pit' });
       await expect(closePitTask()).rejects.toThrow('illegal_argument_exception');
