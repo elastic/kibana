@@ -16,17 +16,17 @@ describe('convertFilterOptions', () => {
 
   it('filters by `translated` status', () => {
     const filters = convertFilterOptions({ status: StatusFilterBase.TRANSLATED });
-    expect(filters).toEqual({ installed: false, fullyTranslated: true });
+    expect(filters).toEqual({ installed: false, fullyTranslated: true, failed: false });
   });
 
   it('filters by `partially translated` status', () => {
     const filters = convertFilterOptions({ status: StatusFilterBase.PARTIALLY_TRANSLATED });
-    expect(filters).toEqual({ installed: false, partiallyTranslated: true });
+    expect(filters).toEqual({ installed: false, partiallyTranslated: true, failed: false });
   });
 
   it('filters by `untranslatable` status', () => {
     const filters = convertFilterOptions({ status: StatusFilterBase.UNTRANSLATABLE });
-    expect(filters).toEqual({ untranslatable: true });
+    expect(filters).toEqual({ untranslatable: true, failed: false });
   });
 
   it('filters by `failed` status', () => {
