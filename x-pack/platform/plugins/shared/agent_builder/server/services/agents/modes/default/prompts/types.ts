@@ -7,7 +7,8 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
-import type { IFileStore, ExperimentalFeatures } from '@kbn/agent-builder-server';
+import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
+import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import type { ResolvedConfiguration } from '../../types';
 import type { ProcessedConversation } from '../../utils/prepare_conversation';
 import type { ToolCallResultTransformer } from '../../utils/create_result_transformer';
@@ -25,9 +26,6 @@ export interface PromptFactoryParams {
   resultTransformer: ToolCallResultTransformer;
   outputSchema?: Record<string, unknown>;
   conversationTimestamp: string;
-  /**
-   * Experimental features configuration for this execution.
-   */
   experimentalFeatures: ExperimentalFeatures;
 }
 
