@@ -2604,8 +2604,7 @@ groups:
 
       - setting: xpack.alerting.rules.apiKeyType
         description: |
-          The API key type to use for executing alerting rules. The default value, corresponding to the existing behavior, is `es`, which uses an Elasticsearch API key.
-          Set this to `uiam` to use UIAM API keys instead.
+          The API key type to use for executing alerting rules. The default value, corresponding to the existing behavior, is `es`, which uses an Elasticsearch API key. Set this to `uiam` to use UIAM API keys instead.
         datatype: string
         default: es
         options:
