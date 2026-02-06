@@ -7,7 +7,7 @@
 
 import type supertest from 'supertest';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getUrlPrefix } from '../../../../../common/lib';
+import { getUrlPrefix } from '../common/lib';
 
 export const getFindGaps = ({
   supertest,

@@ -2424,6 +2424,8 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_online/** 
 /x-pack/platform/plugins/shared/alerting/server/lib/rule_gaps @elastic/response-ops @elastic/security-detection-engine
 /x-pack/platform/plugins/shared/alerting/server/routes/gaps @elastic/response-ops @elastic/security-detection-engine
 /x-pack/platform/test/alerting_api_integration/security_and_spaces/group8/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engine
+/x-pack/platform/test/alerting_api_integration/security_and_spaces/group9/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engine
+/x-pack/platform/test/alerting_api_integration/security_and_spaces/group10/tests/alerting/gap @elastic/response-ops @elastic/security-detection-engine
 
 # Enterprise Search
 # search
