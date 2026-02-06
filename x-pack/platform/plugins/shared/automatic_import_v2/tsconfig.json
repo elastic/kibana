@@ -15,8 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/core-elasticsearch-server",
-    "@kbn/es-types",
     "@kbn/licensing-plugin",
     "@kbn/actions-plugin",
     "@kbn/inference-plugin",
@@ -52,6 +50,7 @@
     "@kbn/react-query",
     "@kbn/elastic-assistant",
     "@kbn/kibana-utils-plugin",
-    "@kbn/ingest-pipelines-plugin"
+    "@kbn/ingest-pipelines-plugin",
+    "@kbn/utility-types"
   ]
 }
