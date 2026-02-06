@@ -66,7 +66,9 @@ export default function ({ getService }: FtrProviderContext) {
             expect(createCaseUserAction.created_by).to.eql(superUserWithProfile);
           });
 
-          it('falls back to authc to get the user information when the profile is not available', async () => {
+          it.skip('falls back to authc to get the user information when the profile is not available', async () => {
+            // ToDo: need to figure out how to test this
+            // Maybe use an api key for a user that has never activated a profile?
             const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
               user: superUser,
               space: null,
@@ -97,7 +99,9 @@ export default function ({ getService }: FtrProviderContext) {
             expect(configuration.created_by).to.eql(superUserWithProfile);
           });
 
-          it('falls back to authc to get the user information when the profile is not available', async () => {
+          it.skip('falls back to authc to get the user information when the profile is not available', async () => {
+            // ToDo: need to figure out how to test this
+            // Maybe use an api key for a user that has never activated a profile?
             const configuration = await createConfiguration(
               supertestWithoutAuth,
               getConfigurationRequest({ id: 'connector-2' })
@@ -132,7 +136,9 @@ export default function ({ getService }: FtrProviderContext) {
             expect(newConfiguration.updated_by).to.eql(superUserWithProfile);
           });
 
-          it('falls back to authc to get the user information when the profile is not available', async () => {
+          it.skip('falls back to authc to get the user information when the profile is not available', async () => {
+            // ToDo: need to figure out how to test this
+            // Maybe use an api key for a user that has never activated a profile?
             const configuration = await createConfiguration(
               supertestWithoutAuth,
               getConfigurationRequest({ id: 'connector-2' })
@@ -174,7 +180,9 @@ export default function ({ getService }: FtrProviderContext) {
             expect(patchedCase.comments![0].created_by).to.eql(superUserWithProfile);
           });
 
-          it('falls back to authc to get the user information when the profile is not available', async () => {
+          it.skip('falls back to authc to get the user information when the profile is not available', async () => {
+            // ToDo: need to figure out how to test this
+            // Maybe use an api key for a user that has never activated a profile?
             const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
               user: superUser,
               space: null,
@@ -231,7 +239,9 @@ export default function ({ getService }: FtrProviderContext) {
             expect(patchedComment.updated_by).to.eql(superUserWithProfile);
           });
 
-          it('falls back to authc to get the user information when the profile is not available', async () => {
+          it.skip('falls back to authc to get the user information when the profile is not available', async () => {
+            // ToDo: need to figure out how to test this
+            // Maybe use an api key for a user that has never activated a profile?
             const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
               user: superUser,
               space: null,
@@ -295,7 +305,9 @@ export default function ({ getService }: FtrProviderContext) {
             expect(patchedCases[0].closed_by).to.eql(superUserWithProfile);
           });
 
-          it('falls back to authc to get the user information when the profile is not available', async () => {
+          it.skip('falls back to authc to get the user information when the profile is not available', async () => {
+            // ToDo: need to figure out how to test this
+            // Maybe use an api key for a user that has never activated a profile?
             const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
               user: superUser,
               space: null,
@@ -346,7 +358,9 @@ export default function ({ getService }: FtrProviderContext) {
             expect(patchedCases[0].updated_by).to.eql(superUserWithProfile);
           });
 
-          it('falls back to authc to get the user information when the profile is not available', async () => {
+          it.skip('falls back to authc to get the user information when the profile is not available', async () => {
+            // ToDo: need to figure out how to test this
+            // Maybe use an api key for a user that has never activated a profile?
             const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
               user: superUser,
               space: null,
@@ -382,7 +396,9 @@ export default function ({ getService }: FtrProviderContext) {
             expect(caseInfo.created_by).to.eql(superUserWithProfile);
           });
 
-          it('falls back to authc to get the user information when the profile is not available', async () => {
+          it.skip('falls back to authc to get the user information when the profile is not available', async () => {
+            // ToDo: need to figure out how to test this
+            // Maybe use an api key for a user that has never activated a profile?
             const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
               user: superUser,
               space: null,

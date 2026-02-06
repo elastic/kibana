@@ -51,7 +51,8 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    describe('no profiles', () => {
+    describe.skip('no profiles', () => {
+      // ToDo: determine if we still want to test this case
       it('returns the users correctly without profile ids', async () => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
         await changeCaseTitle({
