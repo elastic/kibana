@@ -32,35 +32,35 @@ export function filterDownstreamConnections(
 
   // BFS traversal starting from rootServiceName
   const visitedServices = new Set<string>();
-  const reachableConnections: ConnectionWithKey[] = [];
+  const results: ConnectionWithKey[] = [];
   const queue: string[] = [rootServiceName];
 
   while (queue.length > 0) {
-    const currentService = queue.shift()!;
+    const currentService = queue.pop()!; // dequeue last element from queue
 
-    if (visitedServices.has(currentService)) {
-      continue;
-    }
-    visitedServices.add(currentService);
+    // Skip already-visited nodes to avoid cycles
+    if (!visitedServices.has(currentService)) {
+      visitedServices.add(currentService);
 
-    // Get all connections from this service
-    const outgoingConnections = adjacencyMap.get(currentService) ?? [];
+      // Get all connections from this service
+      const outgoingConnections = adjacencyMap.get(currentService) ?? [];
 
-    for (const conn of outgoingConnections) {
-      reachableConnections.push(conn);
+      for (const conn of outgoingConnections) {
+        results.push(conn);
 
-      // If target is a service (not external dependency), add to queue for further traversal
-      const target = conn.target;
-      if ('service.name' in target) {
-        const targetServiceName = target['service.name'];
-        if (!visitedServices.has(targetServiceName)) {
-          queue.push(targetServiceName);
+        // If target is a service (not external dependency), add to queue for further traversal
+        const target = conn.target;
+        if ('service.name' in target) {
+          const targetServiceName = target['service.name'];
+          if (!visitedServices.has(targetServiceName)) {
+            queue.push(targetServiceName);
+          }
         }
       }
     }
   }
 
-  return reachableConnections;
+  return results;
 }
 
 /**
@@ -108,39 +108,38 @@ export function filterUpstreamConnections(
   // BFS traversal starting from the root service, going backwards through callers
   const visitedServices = new Set<string>();
   const visitedEdges = new Set<string>();
-  const reachableConnections: ConnectionWithKey[] = [];
+  const results: ConnectionWithKey[] = [];
   const queue: string[] = [rootServiceName];
 
   while (queue.length > 0) {
-    const currentService = queue.shift()!;
+    const currentService = queue.pop()!; // dequeue last element from queue
 
-    if (visitedServices.has(currentService)) {
-      continue;
-    }
-    visitedServices.add(currentService);
+    if (!visitedServices.has(currentService)) {
+      visitedServices.add(currentService);
 
-    // Find connections where target['service.name'] matches (resolved service-to-service edges)
-    const connsByService = reverseAdjacencyByService.get(currentService) ?? [];
+      // Find connections where target['service.name'] matches (resolved service-to-service edges)
+      const connsByService = reverseAdjacencyByService.get(currentService) ?? [];
 
-    // For the root node only, also find connections by exact dependency name.
-    // This handles external dependencies like "postgres" where the user queries by the
-    // resource name and there is no resolved target['service.name'].
-    const connsByDep =
-      currentService === rootServiceName ? reverseAdjacencyByDep.get(currentService) ?? [] : [];
+      // For the root node only, also find connections by exact dependency name.
+      // This handles external dependencies like "postgres" where the user queries by the
+      // resource name and there is no resolved target['service.name'].
+      const connsByDep =
+        currentService === rootServiceName ? reverseAdjacencyByDep.get(currentService) ?? [] : [];
 
-    // Process both sets of connections, deduplicating by edge key
-    for (const conn of [...connsByService, ...connsByDep]) {
-      if (!visitedEdges.has(conn._key)) {
-        visitedEdges.add(conn._key);
-        reachableConnections.push(conn);
+      // Process both sets of connections, deduplicating by edge key
+      for (const conn of [...connsByService, ...connsByDep]) {
+        if (!visitedEdges.has(conn._key)) {
+          visitedEdges.add(conn._key);
+          results.push(conn);
 
-        const sourceName = conn._sourceName;
-        if (!visitedServices.has(sourceName)) {
-          queue.push(sourceName);
+          const sourceName = conn._sourceName;
+          if (!visitedServices.has(sourceName)) {
+            queue.push(sourceName);
+          }
         }
       }
     }
   }
 
-  return reachableConnections;
+  return results;
 }

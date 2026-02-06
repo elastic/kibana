@@ -42,7 +42,9 @@ export function buildConnectionsFromSpans(spans: ServiceMapSpan[]): ConnectionWi
         source,
         target,
         metrics: null,
-        _key: connectionKey,
+
+        // internal fields, not part of the public API
+        _key: connectionKey, // deduplication key
         _sourceName: sourceName,
         _dependencyName: dependencyName,
       });
