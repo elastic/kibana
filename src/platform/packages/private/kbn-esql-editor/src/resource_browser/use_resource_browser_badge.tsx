@@ -20,7 +20,11 @@ interface UseSourcesBadgeParams {
   openIndicesBrowser: (options?: { openedFrom?: 'badge' | 'autocomplete' }) => void;
 }
 
-export const useSourcesBadge = ({ editorRef, editorModel, openIndicesBrowser }: UseSourcesBadgeParams) => {
+export const useSourcesBadge = ({
+  editorRef,
+  editorModel,
+  openIndicesBrowser,
+}: UseSourcesBadgeParams) => {
   const { euiTheme } = useEuiTheme();
   const decorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(undefined);
 
@@ -173,4 +177,3 @@ export const useSourcesBadge = ({ editorRef, editorModel, openIndicesBrowser }: 
     sourcesLabelKeyDownHandler,
   };
 };
-
