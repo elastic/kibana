@@ -3,18 +3,18 @@
 exports[`Initializing the store should initialize all datasources with state from doc 1`] = `
 Object {
   "lens": Object {
-    "activeDatasourceId": "testDatasource",
+    "activeDatasourceId": "formBased",
     "annotationGroups": Object {},
     "dataViews": Object {
       "indexPatternRefs": Array [],
       "indexPatterns": Object {},
     },
     "datasourceStates": Object {
-      "testDatasource": Object {
+      "formBased": Object {
         "isLoading": false,
         "state": undefined,
       },
-      "testDatasource2": Object {
+      "textBased": Object {
         "isLoading": false,
         "state": undefined,
       },
@@ -39,7 +39,7 @@ Object {
           "savedObjectId": "1234",
           "state": Object {
             "datasourceStates": Object {
-              "testDatasource": Object {
+              "formBased": Object {
                 "isLoading": false,
                 "state": Object {},
               },
@@ -74,10 +74,10 @@ Object {
       "savedObjectId": "1234",
       "state": Object {
         "datasourceStates": Object {
-          "testDatasource": Object {
+          "formBased": Object {
             "datasource1": "",
           },
-          "testDatasource2": Object {
+          "textBased": Object {
             "datasource2": "",
           },
         },

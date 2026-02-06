@@ -47,6 +47,7 @@ interface PackageInstallerOpts {
   esClient: ElasticsearchClient;
   productDocClient: ProductDocInstallClient;
   artifactRepositoryUrl: string;
+  artifactRepositoryProxyUrl?: string;
   kibanaVersion: string;
   elserInferenceId?: string;
   isServerless?: boolean;
@@ -58,6 +59,7 @@ export class PackageInstaller {
   private readonly esClient: ElasticsearchClient;
   private readonly productDocClient: ProductDocInstallClient;
   private readonly artifactRepositoryUrl: string;
+  private readonly artifactRepositoryProxyUrl?: string;
   private readonly currentVersion: string;
   private readonly elserInferenceId: string;
   private readonly isServerless: boolean;
@@ -68,6 +70,7 @@ export class PackageInstaller {
     esClient,
     productDocClient,
     artifactRepositoryUrl,
+    artifactRepositoryProxyUrl,
     elserInferenceId,
     kibanaVersion,
     isServerless,
@@ -76,6 +79,7 @@ export class PackageInstaller {
     this.productDocClient = productDocClient;
     this.artifactsFolder = artifactsFolder;
     this.artifactRepositoryUrl = artifactRepositoryUrl;
+    this.artifactRepositoryProxyUrl = artifactRepositoryProxyUrl;
     this.currentVersion = majorMinor(kibanaVersion);
     this.log = logger;
     this.elserInferenceId = elserInferenceId || defaultInferenceEndpoints.ELSER;
@@ -151,6 +155,7 @@ export class PackageInstaller {
     const { inferenceId } = params;
     const repositoryVersions = await fetchArtifactVersions({
       artifactRepositoryUrl: this.artifactRepositoryUrl,
+      artifactRepositoryProxyUrl: this.artifactRepositoryProxyUrl,
     });
     const allProducts = Object.values(DocumentationProduct) as ProductName[];
     const inferenceInfo = await this.getInferenceInfo(inferenceId);
@@ -237,7 +242,11 @@ export class PackageInstaller {
       const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
       const artifactPathAtVolume = `${this.artifactsFolder}/${artifactFileName}`;
       this.log.debug(`Downloading from [${artifactUrl}] to [${artifactPathAtVolume}]`);
-      const artifactFullPath = await downloadToDisk(artifactUrl, artifactPathAtVolume);
+      const artifactFullPath = await downloadToDisk(
+        artifactUrl,
+        artifactPathAtVolume,
+        this.artifactRepositoryProxyUrl
+      );
 
       zipArchive = await openZipArchive(artifactFullPath);
       validateArtifactArchive(zipArchive);
@@ -361,6 +370,7 @@ export class PackageInstaller {
       if (!selectedVersion) {
         const availableVersions = await fetchSecurityLabsVersions({
           artifactRepositoryUrl: this.artifactRepositoryUrl,
+          artifactRepositoryProxyUrl: this.artifactRepositoryProxyUrl,
         });
         if (availableVersions.length === 0) {
           throw new Error('No Security Labs versions available');
@@ -382,7 +392,11 @@ export class PackageInstaller {
       const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
 
       this.log.debug(`Downloading Security Labs from [${artifactUrl}] to [${artifactPath}]`);
-      const downloadedFullPath = await downloadToDisk(artifactUrl, artifactPath);
+      const downloadedFullPath = await downloadToDisk(
+        artifactUrl,
+        artifactPath,
+        this.artifactRepositoryProxyUrl
+      );
 
       zipArchive = await openZipArchive(downloadedFullPath);
       validateArtifactArchive(zipArchive);
