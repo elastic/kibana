@@ -9,3 +9,4 @@
 
 import './prototype';
 export { unsafeConsole } from './console';
+export { getSanitizedError } from './axios';
