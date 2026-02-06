@@ -10,7 +10,6 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { omit } from 'lodash';
-import { DATA_TYPES } from '@kbn/lens-common';
 import { filterSchema } from './filter';
 import { formatSchema } from './format';
 import {
@@ -199,15 +198,7 @@ export const lastValueOperationSchema = fieldBasedOperationSharedSchema.extends(
      * Defaults to 'number' for backward compatibility.
      */
     data_type: schema.maybe(
-      schema.string({
-        validate: (value) => {
-          const validTypes = new Set<string>(DATA_TYPES);
-          if (!validTypes.has(value)) {
-            return `must be one of: ${DATA_TYPES.join(', ')}`;
-          }
-        },
-        meta: { description: 'Data type of the field' },
-      })
+      schema.string({ meta: { description: 'Data type of the field' } })
     ),
   },
   { meta: { id: 'lastValueOperation' } }
