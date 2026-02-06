@@ -15,7 +15,7 @@ import {
   getEntitiesAliasPattern,
 } from '../constants';
 import { getUpdatesComponentTemplateName } from './component_templates';
-import { ALL_ENTITY_TYPES } from '../definitions/entity_schema';
+import { ALL_ENTITY_TYPES } from '../../../common/domain/definitions/entity_schema';
 
 const DATA_RETENTION_PERIOD = '1d';
 export const getUpdatesIndexTemplateId = (namespace: string) =>
