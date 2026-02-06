@@ -17,7 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EMPTY_FILTER_MESSAGE, GROUP_BY_NONE, GROUP_BY_MODELS } from '../../../common/translations';
-import { GroupByOptions } from './types';
+import { GroupByOptions } from '../../types';
 import { GroupByFilterButton, GroupBySelectableContainer } from './styles';
 
 interface GroupBySelectProps {

@@ -8,6 +8,7 @@
 import React from 'react';
 import { act, render, screen, within } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import { TabularPage } from './tabular_page';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
@@ -160,7 +161,9 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 const renderTabularPageWithProviders = () => {
   return render(
     <EuiThemeProvider>
-      <TabularPage inferenceEndpoints={inferenceEndpoints} />
+      <I18nProvider>
+        <TabularPage inferenceEndpoints={inferenceEndpoints} />
+      </I18nProvider>
     </EuiThemeProvider>
   );
 };

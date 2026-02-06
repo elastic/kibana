@@ -18,6 +18,8 @@ import type {
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { EisCloudConnectPromoCallout, EisPromotionalCallout } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
+
+import { docLinks } from '../../../common/doc_links';
 import {
   ENDPOINT,
   ENDPOINT_COPY_ID_ACTION_LABEL,
@@ -28,10 +30,13 @@ import {
   SERVICE_PROVIDER,
 } from '../../../common/translations';
 
+import { useKibana } from '../../hooks/use_kibana';
 import { useTableData } from '../../hooks/use_table_data';
 import { useEndpointActions } from '../../hooks/use_endpoint_actions';
-import type { FilterOptions } from './types';
-import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from './types';
+import { type FilterOptions, GroupByOptions } from '../../types';
+import { getModelId } from '../../utils/get_model_id';
+import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
+import { EditInferenceFlyout } from '../edit_inference_endpoints/edit_inference_flyout';
 
 import { DEFAULT_FILTER_OPTIONS } from './constants';
 import { ServiceProviderFilter } from './filter/service_provider_filter';
@@ -42,11 +47,8 @@ import { EndpointInfo } from './render_table_columns/render_endpoint/endpoint_in
 import { Model } from './render_table_columns/render_model/model';
 import { ServiceProvider } from './render_table_columns/render_service_provider/service_provider';
 import { DeleteAction } from './render_table_columns/render_actions/actions/delete/delete_action';
-import { useKibana } from '../../hooks/use_kibana';
-import { getModelId } from '../../utils/get_model_id';
-import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
-import { EditInferenceFlyout } from '../edit_inference_endpoints/edit_inference_flyout';
-import { docLinks } from '../../../common/doc_links';
+import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from './types';
+
 import { EndpointStats } from './endpoint_stats';
 
 const searchContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
@@ -62,6 +64,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     services: { cloud, application },
   } = useKibana();
   const [searchKey, setSearchKey] = useState('');
+  const [groupBy, setGroupBy] = React.useState<GroupByOptions>(GroupByOptions.None);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
 
   const {
@@ -214,9 +217,9 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <GroupBySelect
-                  value={queryParams.groupBy}
+                  value={groupBy ?? GroupByOptions.None}
                   onChange={(value) => {
-                    setQueryParams({ groupBy: value });
+                    setGroupBy(value ?? GroupByOptions.None);
                   }}
                 />
               </EuiFlexItem>

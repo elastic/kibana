@@ -10,7 +10,7 @@ import { render, fireEvent, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { GroupBySelect } from './group_by_select';
-import { GroupByOptions } from './types';
+import { GroupByOptions } from '../../types';
 
 // Wrapper component to provide necessary context
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -50,7 +50,7 @@ describe('GroupBySelect', () => {
   });
 
   it('should open the popover when the filter button is clicked', async () => {
-    const { getByText, getByRole } = render(
+    const { getByRole } = render(
       <Wrapper>
         <GroupBySelect value={GroupByOptions.None} onChange={mockOnChange} />
       </Wrapper>
@@ -67,7 +67,7 @@ describe('GroupBySelect', () => {
   });
 
   it('should close the popover when the filter button is clicked again', async () => {
-    const { getByRole, queryByRole } = render(
+    const { getByRole } = render(
       <Wrapper>
         <GroupBySelect value={GroupByOptions.None} onChange={mockOnChange} />
       </Wrapper>
