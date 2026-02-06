@@ -16,7 +16,7 @@ import { ingestEntities } from '../infra/elasticsearch/ingest';
 import { HASHED_ID } from './logs_extraction/logs_extraction_query_builder';
 import { LogExtractionState, type EngineDescriptorClient } from './definitions/saved_objects';
 import { ENGINE_STATUS } from './constants';
-import type { EntityType } from './definitions/entity_schema';
+import type { EntityType } from '../../common/domain/definitions/entity_schema';
 
 jest.mock('../infra/elasticsearch/esql');
 jest.mock('../infra/elasticsearch/ingest');
@@ -112,7 +112,7 @@ describe('LogsExtractionClient', () => {
       expect(result.success && result.scannedIndices).toContain('logs-*');
       expect(result.success && result.scannedIndices).toContain('filebeat-*');
       expect(result.success && result.scannedIndices).toContain(
-        '.entities.v2.updates.security_user_default'
+        '.entities.v2.updates.security_default'
       );
       expect(result.success && result.scannedIndices).not.toContain(
         '.alerts-security.alerts-default'
@@ -130,7 +130,7 @@ describe('LogsExtractionClient', () => {
         esClient: mockEsClient,
         esqlResponse: mockEsqlResponse,
         esIdField: HASHED_ID,
-        targetIndex: expect.stringContaining('.entities.v2.latest.security_user_default'),
+        targetIndex: expect.stringContaining('.entities.v2.latest.security_default'),
         logger: expect.any(Object),
       });
 
@@ -511,7 +511,7 @@ describe('LogsExtractionClient', () => {
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
       expect(mockIngestEntities).toHaveBeenCalledWith(
         expect.objectContaining({
-          targetIndex: expect.stringContaining('.entities.v2.latest.security_host_default'),
+          targetIndex: expect.stringContaining('.entities.v2.latest.security_default'),
         })
       );
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('host', {
