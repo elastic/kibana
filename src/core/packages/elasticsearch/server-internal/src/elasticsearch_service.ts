@@ -42,11 +42,14 @@ import { isInlineScriptingEnabled } from './is_scripting_enabled';
 import { mergeConfig } from './merge_config';
 import { type ClusterInfo, getClusterInfo$ } from './get_cluster_info';
 import { getElasticsearchCapabilities } from './get_capabilities';
+import type { CrossProjectExpressionGetter } from './cross_project_expression';
+import { CrossProjectExpression } from './cross_project_expression';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
   http: InternalHttpServiceSetup;
   executionContext: InternalExecutionContextSetup;
+  fetchCrossProjectExpression: CrossProjectExpressionGetter;
 }
 
 /** @internal */
@@ -64,6 +67,7 @@ export class ElasticsearchService
   private clusterInfo$?: Observable<ClusterInfo>;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
   private agentManager?: AgentManager;
+  private crossProjectExpression?: CrossProjectExpression;
   // @ts-expect-error - CPS is not yet implemented
   private cpsEnabled = false;
 
@@ -100,6 +104,7 @@ export class ElasticsearchService
 
     this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
+    this.crossProjectExpression = new CrossProjectExpression(deps.fetchCrossProjectExpression);
     this.client = this.createClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
@@ -228,7 +233,6 @@ export class ElasticsearchService
     clientConfig: Partial<ElasticsearchClientConfig> = {}
   ) {
     const config = mergeConfig(baseConfig, clientConfig);
-
     return new ClusterClient({
       config,
       logger: this.coreContext.logger.get('elasticsearch'),
@@ -238,6 +242,10 @@ export class ElasticsearchService
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
       agentFactoryProvider: this.getAgentManager(baseConfig),
       kibanaVersion: this.kibanaVersion,
+      getCrossProjectExpression: {
+        asInternal: this.crossProjectExpression!.asInternal.bind(this.crossProjectExpression),
+        asScoped: this.crossProjectExpression!.asScoped.bind(this.crossProjectExpression),
+      },
     });
   }
 
