@@ -14,6 +14,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type {
   DiscoverGridSettings,
   DiscoverSession,
@@ -144,7 +145,7 @@ export interface TabState extends TabItem {
   // Persistable attributes of the tab (stored in Discover Session and in local storage).
   attributes: {
     visContext: UnifiedHistogramVisContext | {} | undefined;
-    controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
+    controlGroupState: ControlPanelsState<OptionsListESQLControlState> | undefined;
   };
 
   // The following properties are used to manage the tab's state after it has been initialized.
