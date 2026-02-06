@@ -566,26 +566,23 @@ export default ({ getService }: FtrProviderContext): void => {
       };
 
       before(async () => {
-        await rolesUsersProvider.createRole({
-          predefinedRole: ROLE.endpoint_response_actions_no_access,
-        });
-        await rolesUsersProvider.createUser({
+        superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole({
           name: ROLE.endpoint_response_actions_no_access,
-          roles: [ROLE.endpoint_response_actions_no_access],
+          privileges: rolesUsersProvider.loader.getPreDefinedRole(
+            ROLE.endpoint_response_actions_no_access
+          ),
         });
-
-        superTestResponseActionsNoAuthz = await utils.createSuperTest(
-          ROLE.endpoint_response_actions_no_access
-        );
       });
 
       beforeEach(async () => {
-        const { body } = await detectionsApi.createRule({
-          body: getCustomQueryRuleParams({
-            rule_id: uuidV4(),
-            response_actions: [{ action_type_id: '.endpoint', params: { command: 'isolate' } }],
-          }),
-        });
+        const { body } = await detectionsApi
+          .createRule({
+            body: getCustomQueryRuleParams({
+              rule_id: uuidV4(),
+              response_actions: [{ action_type_id: '.endpoint', params: { command: 'isolate' } }],
+            }),
+          })
+          .expect(200);
 
         id = body.id;
 

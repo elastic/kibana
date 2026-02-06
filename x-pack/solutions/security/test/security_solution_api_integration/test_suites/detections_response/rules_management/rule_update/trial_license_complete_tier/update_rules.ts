@@ -786,17 +786,12 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         before(async () => {
-          await rolesUsersProvider.createRole({
-            predefinedRole: ROLE.endpoint_response_actions_no_access,
-          });
-          await rolesUsersProvider.createUser({
+          superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole({
             name: ROLE.endpoint_response_actions_no_access,
-            roles: [ROLE.endpoint_response_actions_no_access],
+            privileges: rolesUsersProvider.loader.getPreDefinedRole(
+              ROLE.endpoint_response_actions_no_access
+            ),
           });
-
-          superTestResponseActionsNoAuthz = await utils.createSuperTest(
-            ROLE.endpoint_response_actions_no_access
-          );
         });
 
         beforeEach(async () => {
