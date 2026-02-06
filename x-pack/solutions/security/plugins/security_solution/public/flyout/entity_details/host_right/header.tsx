@@ -24,6 +24,8 @@ interface HostPanelHeaderProps {
 
 const linkTitleCSS = { width: 'fit-content' };
 
+const urlParamOverride = { timeline: { isOpen: false } };
+
 export const HostPanelHeader = ({ hostName, observedHost }: HostPanelHeaderProps) => {
   const lastSeenDate = useMemo(
     () => observedHost.lastSeen.date && new Date(observedHost.lastSeen.date),
@@ -46,6 +48,7 @@ export const HostPanelHeader = ({ hostName, observedHost }: HostPanelHeaderProps
             target={'_blank'}
             external={false}
             css={linkTitleCSS}
+            override={urlParamOverride}
           >
             <FlyoutTitle title={hostName} iconType={'storage'} isLink />
           </SecuritySolutionLinkAnchor>

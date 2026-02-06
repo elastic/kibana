@@ -88,6 +88,10 @@ export function getAggregationTemplate({
   placeholderName,
   customFunction,
 }: AggegationTemplateParams): string {
+  if (customFunction) {
+    return `${customFunction}(??${placeholderName})`;
+  }
+
   if (type === 'exponential_histogram' || type === 'tdigest') {
     return `PERCENTILE(??${placeholderName}, 95)`;
   }
@@ -96,8 +100,7 @@ export function getAggregationTemplate({
     return `SUM(RATE(??${placeholderName}))`;
   }
 
-  // Default to AVG or custom function
-  return `${customFunction || 'AVG'}(??${placeholderName})`;
+  return `AVG(??${placeholderName})`;
 }
 
 /**
