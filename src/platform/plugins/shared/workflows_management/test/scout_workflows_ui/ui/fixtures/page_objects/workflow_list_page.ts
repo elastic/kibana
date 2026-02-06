@@ -48,11 +48,7 @@ steps:
     await this.navigate();
 
     for (const workflowName of workflowNamesToCheck) {
-      await this.page
-        .locator('tr')
-        .filter({ hasText: workflowName })
-        .locator('td:first-child input[type="checkbox"]')
-        .check();
+      await this.getSelectCheckboxForWorkflow(workflowName).then((locator) => locator.click());
     }
   }
 
@@ -65,6 +61,10 @@ steps:
     await this.page.testSubj.click(`workflows-bulk-action-${action}`);
   }
 
+  async getWorkflowRow(workflowName: string) {
+    return this.page.locator('tr').filter({ hasText: workflowName });
+  }
+
   async getThreeDotsMenuAction(
     workflowName: string,
     action:
@@ -73,35 +73,30 @@ steps:
       | 'cloneWorkflowAction'
       | 'deleteWorkflowAction'
   ) {
-    await this.page
-      .locator('tr')
-      .filter({ hasText: workflowName })
+    (await this.getWorkflowRow(workflowName))
       .locator('[data-test-subj="euiCollapsedItemActionsButton"]')
       .click();
-    return this.page.locator(`.euiContextMenuPanel button[data-test-subj="${action}"]`);
+    return this.page.locator(`.euiContextMenuPanel [data-test-subj="${action}"]`);
   }
 
   async getWorkflowAction(
     workflowName: string,
     action: 'runWorkflowAction' | 'editWorkflowAction'
   ) {
-    return this.page
-      .locator('tr')
-      .filter({ hasText: workflowName })
-      .locator(`[data-test-subj="${action}"]`);
+    return this.getWorkflowRow(workflowName).then((row) =>
+      row.locator(`[data-test-subj="${action}"]`)
+    );
   }
 
   async getSelectCheckboxForWorkflow(workflowName: string) {
-    return this.page
-      .locator('tr')
-      .filter({ hasText: workflowName })
-      .locator('td:first-child input[type="checkbox"]');
+    return this.getWorkflowRow(workflowName).then((row) =>
+      row.locator('td:first-child input[type="checkbox"]')
+    );
   }
 
   async getWorkflowStateToggle(workflowName: string): Promise<Locator> {
-    return this.page
-      .locator('tr')
-      .filter({ hasText: workflowName })
-      .locator('[data-test-subj^="workflowToggleSwitch-"]');
+    return this.getWorkflowRow(workflowName).then((row) =>
+      row.locator('[data-test-subj^="workflowToggleSwitch-"]')
+    );
   }
 }
