@@ -5289,11 +5289,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/control-group-renderer@link:src/platform/packages/shared/controls/control-group-renderer":
+"@kbn/control-group-renderer@link:src/platform/packages/shared/controls/control_group_renderer":
   version "0.0.0"
   uid ""
 
-"@kbn/controls-constants@link:src/platform/packages/shared/controls/controls-constants":
+"@kbn/controls-constants@link:src/platform/packages/shared/controls/controls_constants":
   version "0.0.0"
   uid ""
 
@@ -5309,7 +5309,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/controls-schemas@link:src/platform/packages/shared/controls/controls-schemas":
+"@kbn/controls-schemas@link:src/platform/packages/shared/controls/controls_schemas":
   version "0.0.0"
   uid ""
 

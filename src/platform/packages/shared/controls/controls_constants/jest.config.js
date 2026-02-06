@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/controls/controls-constants'],
+  roots: ['<rootDir>/src/platform/packages/shared/controls/controls_constants'],
 };

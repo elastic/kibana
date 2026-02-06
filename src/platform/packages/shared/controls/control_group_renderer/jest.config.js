@@ -10,6 +10,6 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/controls/control-group-renderer'],
+  roots: ['<rootDir>/src/platform/packages/shared/controls/control_group_renderer'],
   setupFiles: ['<rootDir>/src/platform/plugins/shared/controls/jest_setup.ts'],
 };

@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/kibana-presentation'
   metadata:
-    sourceRoot: src/platform/packages/shared/controls/controls-constants
+    sourceRoot: src/platform/packages/shared/controls/controls_constants
 dependsOn: []
 tags:
   - shared-common

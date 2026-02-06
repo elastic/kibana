@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/kibana-presentation'
   metadata:
-    sourceRoot: src/platform/packages/shared/controls/control-group-renderer
+    sourceRoot: src/platform/packages/shared/controls/control_group_renderer
 dependsOn:
   - '@kbn/controls-constants'
   - '@kbn/controls-schemas'
