@@ -56,9 +56,7 @@ export namespace QueryStream {
   export type Source = BaseStream.Source<QueryStream.Definition>;
 
   export interface GetResponse extends BaseStream.GetResponse<Definition> {
-    stream: Omit<Definition, 'query'> & {
-      query: QueryWithEsql;
-    };
+    stream: Definition;
     inherited_fields: InheritedFieldDefinition;
   }
 
@@ -77,11 +75,6 @@ export const QueryStream: ModelValidation<BaseStream.Model, QueryStream.Model> =
       query: QueryWithEsql.right,
     }),
     GetResponse: z.object({
-      stream: z
-        .object({
-          query: QueryWithEsql.right,
-        })
-        .passthrough(),
       inherited_fields: inheritedFieldDefinitionSchema,
     }),
     UpsertRequest: z.object({
