@@ -242,6 +242,14 @@ export const internalStateSlice = createSlice({
         tab.appState = action.payload.appState;
       }),
 
+    /**
+     * Set the tab attributes state
+     */
+    setAttributes: (state, action: TabAction<Pick<TabState, 'attributes'>>) =>
+      withTab(state, action.payload, (tab) => {
+        tab.attributes = action.payload.attributes;
+      }),
+
     setOverriddenVisContextAfterInvalidation: (
       state,
       action: TabAction<Pick<TabState, 'overriddenVisContextAfterInvalidation'>>
@@ -249,16 +257,6 @@ export const internalStateSlice = createSlice({
       withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation =
           action.payload.overriddenVisContextAfterInvalidation;
-      }),
-
-    setControlGroupState: (
-      state,
-      action: TabAction<{
-        controlGroupState: TabState['controlGroupState'];
-      }>
-    ) =>
-      withTab(state, action.payload, (tab) => {
-        tab.controlGroupState = action.payload.controlGroupState;
       }),
 
     setCascadedDocumentsState: (
@@ -494,6 +492,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
         withTab(listenerApi.getState(), action.payload, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
             internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id),
+            attributes: tab.attributes,
             appState: tab.appState,
             globalState: tab.globalState,
           });

@@ -8,8 +8,11 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { getEntityDefinition } from './definitions/registry';
-import type { EntityType, ManagedEntityDefinition } from './definitions/entity_schema';
+import { getEntityDefinition } from '../../common/domain/definitions/registry';
+import type {
+  EntityType,
+  ManagedEntityDefinition,
+} from '../../common/domain/definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 import type { EngineDescriptorClient, LogExtractionState } from './definitions/saved_objects';

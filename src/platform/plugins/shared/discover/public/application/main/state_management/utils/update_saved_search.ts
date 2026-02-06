@@ -13,7 +13,7 @@ import { cloneDeep } from 'lodash';
 import type { DiscoverAppState } from '../redux';
 import type { DiscoverServices } from '../../../../build_services';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
-import type { TabState, TabStateGlobalState } from '../redux';
+import type { TabStateGlobalState } from '../redux';
 
 /**
  * Updates the saved search with a given data view & Appstate
@@ -29,7 +29,6 @@ import type { TabState, TabStateGlobalState } from '../redux';
 export function updateSavedSearch({
   savedSearch,
   dataView,
-  initialInternalState,
   appState,
   globalState,
   services,
@@ -37,7 +36,6 @@ export function updateSavedSearch({
 }: {
   savedSearch: SavedSearch;
   dataView: DataView | undefined;
-  initialInternalState: TabState['initialInternalState'] | undefined;
   appState: DiscoverAppState | undefined;
   globalState: TabStateGlobalState | undefined;
   services: DiscoverServices;
@@ -48,14 +46,6 @@ export function updateSavedSearch({
     if (!dataView.isPersisted()) {
       savedSearch.usesAdHocDataView = true;
     }
-  }
-
-  if (initialInternalState?.visContext) {
-    savedSearch.visContext = initialInternalState.visContext;
-  }
-
-  if (initialInternalState?.controlGroupJson) {
-    savedSearch.controlGroupJson = initialInternalState.controlGroupJson;
   }
 
   if (useFilterAndQueryServices) {

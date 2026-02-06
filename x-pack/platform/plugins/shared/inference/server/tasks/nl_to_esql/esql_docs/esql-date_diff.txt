@@ -1,6 +1,6 @@
-## DATE_DIFF
+# DATE_DIFF
 
-Calculates the difference between two timestamps in multiples of a specified unit. If the start timestamp is later than the end timestamp, the result will be negative.
+The DATE_DIFF function subtracts the `startTimestamp` from the `endTimestamp` and returns the difference in multiples of the specified `unit`. If `startTimestamp` is later than `endTimestamp`, the result will be negative.
 
 ## Syntax
 
@@ -8,45 +8,35 @@ Calculates the difference between two timestamps in multiples of a specified uni
 
 ### Parameters
 
-#### `unit`
+#### unit
 
-The unit of time for the difference calculation.
+Time difference unit.
 
-#### `startTimestamp`
+#### startTimestamp
 
-A string representing the starting timestamp.
+A string representing a start timestamp.
 
-#### `endTimestamp`
+#### endTimestamp
 
-A string representing the ending timestamp.
+A string representing an end timestamp.
 
 ## Examples
 
-Calculate the difference in microseconds between two timestamps:
+Calculates the difference in microseconds between two datetime values.
 
 ```esql
-ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")
+ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"),
+    date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")
 | EVAL dd_ms = DATE_DIFF("microseconds", date1, date2)
 ```
 
-Calculate the difference in calendar units (e.g., years) between timestamps. Only fully elapsed units are counted. To include remainders, switch to a smaller unit and perform additional calculations:
+Calculates the difference in years between several datetime values, counting only fully elapsed calendar years.
 
 ```esql
-ROW end_23=TO_DATETIME("2023-12-31T23:59:59.999Z"),
-  start_24=TO_DATETIME("2024-01-01T00:00:00.000Z"),
-    end_24=TO_DATETIME("2024-12-31T23:59:59.999")
+ROW end_23 = TO_DATETIME("2023-12-31T23:59:59.999Z"),
+  start_24 = TO_DATETIME("2024-01-01T00:00:00.000Z"),
+    end_24 = TO_DATETIME("2024-12-31T23:59:59.999")
 | EVAL end23_to_start24 = DATE_DIFF("year", end_23, start_24)
-| EVAL end23_to_end24 = DATE_DIFF("year", end_23, end_24)
-| EVAL start_to_end_24 = DATE_DIFF("year", start_24, end_24)
+| EVAL end23_to_end24   = DATE_DIFF("year", end_23, end_24)
+| EVAL start_to_end_24  = DATE_DIFF("year", start_24, end_24)
 ```
-
-## Limitations
-
-- The function’s supported units and ES|QL’s time span literals are distinct and not interchangeable.
-- Supported abbreviations align with other established implementations but may differ from Elasticsearch’s date-time nomenclature.
-
-## Notes
-
-- If the `startTimestamp` is later than the `endTimestamp`, the function will return a negative value.
-
-- It's important to note that while there is some overlap between the units supported by this function and ESQL's time span literals, these sets are not interchangeable. Also, the abbreviations supported by this function are shared with other established products and may not align with the date-time nomenclature used by Elasticsearch.

@@ -5,12 +5,30 @@
  * 2.0.
  */
 
-import { ActionsMenuGroup, type PublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { i18n } from '@kbn/i18n';
-import { RunAgentStepTypeId, runAgentStepCommonDefinition } from '../../common/step_types';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
+import {
+  RunAgentStepTypeId,
+  runAgentStepCommonDefinition,
+  RunAgentOutputSchema,
+} from '../../common/step_types';
 
-export const runAgentStepDefinition: PublicStepDefinition = {
+export const runAgentStepDefinition = createPublicStepDefinition({
   ...runAgentStepCommonDefinition,
+  editorHandlers: {
+    dynamicSchema: {
+      getOutputSchema: ({ input }) => {
+        if (!input.schema) {
+          return RunAgentOutputSchema;
+        }
+
+        return RunAgentOutputSchema.extend({
+          structured_output: fromJSONSchema(input.schema),
+        });
+      },
+    },
+  },
   label: i18n.translate('xpack.agentBuilder.runAgentStep.label', {
     defaultMessage: 'Run Agent',
   }),
@@ -59,4 +77,4 @@ export const runAgentStepDefinition: PublicStepDefinition = {
 \`\`\``,
     ],
   },
-};
+});
