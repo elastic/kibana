@@ -1012,52 +1012,66 @@ export const RulesListTable = (props: RulesListTableProps) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{ColumnSelector}</EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiBasicTable
-          tableCaption={i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.rulesListTable.description',
-            {
-              defaultMessage: 'Displays rule list data',
-            }
-          )}
-          loading={isLoading}
-          /* Don't display rules until we have the rule types initialized */
-          items={items}
-          itemId="id"
-          columns={[selectionColumn, ...rulesListColumns]}
-          sorting={{ sort }}
-          rowHeader="name"
-          rowProps={rowProps}
-          css={ruleRowCss}
-          cellProps={(rule: RuleTableItem) => ({
-            'data-test-subj': 'cell',
-            className: !ruleTypesState.data.get(rule.ruleTypeId)?.enabledInLicense
-              ? 'actRulesList__tableCellDisabled'
-              : '',
-          })}
-          data-test-subj="rulesList"
-          pagination={{
-            pageIndex: page.index,
-            pageSize: page.size,
-            /* Don't display rule count until we have the rule types initialized */
-            totalItemCount: ruleTypesState.isInitialLoad ? 0 : rulesState.totalItemCount,
-          }}
-          onChange={({
-            page: changedPage,
-            sort: changedSort,
-          }: {
-            page?: Pagination;
-            sort?: EuiTableSortingType<RuleTableItem>['sort'];
-          }) => {
-            if (changedPage) {
-              onPage(changedPage);
-            }
-            if (changedSort) {
-              onSort(changedSort);
-            }
-          }}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        />
+      <EuiFlexItem
+        grow={true}
+        css={css`
+          min-width: 0;
+          overflow-x: auto;
+        `}
+      >
+        <div
+          css={css`
+            min-width: max(1200px, 100%);
+          `}
+        >
+          <EuiBasicTable
+            tableCaption={i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.description',
+              {
+                defaultMessage: 'Displays rule list data',
+              }
+            )}
+            loading={isLoading}
+            /* Don't display rules until we have the rule types initialized */
+            items={items}
+            itemId="id"
+            columns={[selectionColumn, ...rulesListColumns]}
+            sorting={{ sort }}
+            rowHeader="name"
+            rowProps={rowProps}
+            css={ruleRowCss}
+            cellProps={(rule: RuleTableItem) => ({
+              'data-test-subj': 'cell',
+              className: !ruleTypesState.data.get(rule.ruleTypeId)?.enabledInLicense
+                ? 'actRulesList__tableCellDisabled'
+                : '',
+            })}
+            data-test-subj="rulesList"
+            pagination={{
+              pageIndex: page.index,
+              pageSize: page.size,
+              /* Don't display rule count until we have the rule types initialized */
+              totalItemCount: ruleTypesState.isInitialLoad ? 0 : rulesState.totalItemCount,
+            }}
+            onChange={({
+              page: changedPage,
+              sort: changedSort,
+            }: {
+              page?: Pagination;
+              sort?: EuiTableSortingType<RuleTableItem>['sort'];
+            }) => {
+              if (changedPage) {
+                onPage(changedPage);
+              }
+              if (changedSort) {
+                onSort(changedSort);
+              }
+            }}
+            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+            responsiveBreakpoint={false}
+            tableLayout="auto"
+          />
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
