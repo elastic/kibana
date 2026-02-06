@@ -213,7 +213,6 @@ enabled:
   - x-pack/platform/test/functional/apps/canvas/config.ts
   - x-pack/platform/test/functional/apps/cross_cluster_replication/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group1/config.ts
-  - x-pack/platform/test/functional/apps/dashboard/group2/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
   - x-pack/platform/test/functional/apps/data_views/config.ts
   - x-pack/platform/test/functional/apps/dev_tools/config.ts
@@ -251,8 +250,11 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_integrations/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_result_views/config.ts
-  - x-pack/platform/test/functional/apps/ml/data_frame_analytics/config.ts
-  - x-pack/platform/test/functional/apps/ml/data_visualizer/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_frame_analytics/group1/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_frame_analytics/group2/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_visualizer/group1/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_visualizer/group2/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_visualizer/group3/config.ts
   - x-pack/platform/test/functional/apps/ml/permissions/config.ts
   - x-pack/platform/test/functional/apps/ml/short_tests/config.ts
   - x-pack/platform/test/functional/apps/ml/stack_management_jobs/config.ts

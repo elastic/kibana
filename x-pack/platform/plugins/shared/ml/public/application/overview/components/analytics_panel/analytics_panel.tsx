@@ -125,7 +125,7 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
         defaultMessage: 'data frame analytics panel',
       })}
     >
-      {noDFAJobs ? <AnalyticsEmptyPrompt /> : null}
+      {noDFAJobs ? <AnalyticsEmptyPrompt iconSize="s" /> : null}
 
       {typeof errorMessage !== 'undefined' ? errorDisplay : null}
 
