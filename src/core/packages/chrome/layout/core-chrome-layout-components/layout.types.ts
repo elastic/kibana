@@ -68,6 +68,6 @@ export interface ChromeLayoutSlots {
  *
  * @todo - we want to make sure layout code is kibana agnostic, so we need to evaluate if these styles
  *         are generic enough or if they should be moved to a kibana specific package.
- *         https://github.com/elastic/kibana-team/issues/2710
+ *         https://github.com/elastic/kibana/issues/251035
  */
 export type ChromeStyle = 'classic' | 'project';

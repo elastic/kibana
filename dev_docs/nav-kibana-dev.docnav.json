@@ -296,6 +296,10 @@
           "label": "Chrome Layout"
         },
         {
+          "id": "kibDevDocsChromeNavigation",
+          "label": "Chrome Navigation"
+        },
+        {
           "id": "kibDevDocsChromeRecentlyAccessed",
           "label": "Recently Viewed"
         },
@@ -306,6 +310,10 @@
         {
           "id": "kibDevDocsChromeAppMenu",
           "label": "App Menu"
+        },
+        {
+          "id": "kibDevDocsChromeSidebar",
+          "label": "Chrome Sidebar"
         }
       ]
     },

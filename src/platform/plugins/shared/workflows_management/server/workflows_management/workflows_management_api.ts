@@ -16,7 +16,6 @@ import type {
   CreateWorkflowCommand,
   EsWorkflow,
   EsWorkflowStepExecution,
-  TriggerType,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -27,6 +26,7 @@ import type {
 } from '@kbn/workflows';
 import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
+import type { TriggerType } from '@kbn/workflows/spec/schema/triggers/trigger_schema';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { LogSearchResult } from '@kbn/workflows-execution-engine/server/repositories/logs_repository';
 import type {
@@ -48,6 +48,7 @@ export interface GetWorkflowsParams {
   page: number;
   createdBy?: string[];
   enabled?: boolean[];
+  tags?: string[];
   query?: string;
   _full?: boolean;
 }

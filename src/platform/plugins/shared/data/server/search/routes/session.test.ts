@@ -26,6 +26,7 @@ enum PostHandlerIndex {
   FIND,
   CANCEL,
   EXTEND,
+  STATUS,
 }
 
 describe('registerSessionRoutes', () => {
@@ -176,5 +177,24 @@ describe('registerSessionRoutes', () => {
     await extendHandler(mockContext, mockRequest, mockResponse);
 
     expect(mockContext.search.extendSession).toHaveBeenCalledWith(id, new Date(expires));
+  });
+
+  it('post status updates statuses with ids', async () => {
+    const sessionIds = [
+      'd7170a35-7e2c-48d6-8dec-9a056721b489',
+      'a3170a35-7e2c-48d6-8dec-9a056721b480',
+    ];
+    const body = { sessionIds };
+
+    const mockRequest = httpServerMock.createKibanaRequest({ body });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const [[, statusHandler]] =
+      mockRouter.versioned.post.mock.results[PostHandlerIndex.STATUS].value.addVersion.mock.calls;
+
+    await statusHandler(mockContext, mockRequest, mockResponse);
+
+    expect(mockContext.search!.updateSessionStatuses).toHaveBeenCalledWith(sessionIds);
   });
 });

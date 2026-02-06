@@ -9,8 +9,6 @@ require('@kbn/setup-node-env');
 
 const fs = require('fs');
 // eslint-disable-next-line import/no-extraneous-dependencies
-const fetch = require('node-fetch');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const { camelCase, sortBy } = require('lodash');
 const { resolve } = require('path');
 
