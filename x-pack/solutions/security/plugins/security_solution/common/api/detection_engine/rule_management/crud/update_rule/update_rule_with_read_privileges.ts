@@ -9,7 +9,7 @@ import type { RuleSource, RuleUpdateProps } from '../../../model';
 
 export type ReadAuthRuleUpdateProps = Pick<
   RuleUpdateProps,
-  'exceptions_list' | 'note' | 'investigation_fields'
+  'exceptions_list' | 'note' | 'investigation_fields' | 'enabled'
 >;
 
 export type ReadAuthRuleUpdateWithRuleSource = ReadAuthRuleUpdateProps & {
@@ -25,4 +25,5 @@ export const READ_AUTH_EDIT_FIELDS: Record<keyof ReadAuthRuleUpdateWithRuleSourc
   note: true,
   investigation_fields: true,
   rule_source: true,
+  enabled: true,
 };

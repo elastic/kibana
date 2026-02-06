@@ -67,18 +67,25 @@ export const patchRule = async ({
 
   validateNonCustomizablePatchFields(rulePatch, existingRule);
 
+  const patchedRule = await applyRulePatch({
+    prebuiltRuleAssetClient,
+    existingRule,
+    rulePatch,
+  });
+
   /**
    * RBAC logic branch
    *
    * Certain fields on the rule object are still able to be modified even if the user only has read permissions,
    * given they have crud permissions for the specific fields they're modifying.
    *
-   * If all fields in the PATCH request (besides id/rule_id) are included in the `ValidReadAuthEditFields` type,
-   * we check if the user has read authz privileges for the fields and use the `bulkEditRuleParamsWithReadAuth` method
-   * provided by the alerting rules client to update the rule fields individually. Otherwise the user will
-   * need `all` privileges for rules.
+   * If the user does not have permission to edit rules but all fields in the PATCH request (besides id/rule_id) are
+   * included in the `ValidReadAuthEditFields` type, we check if the user has read authz privileges for the fields
+   * and use the `bulkEditRuleParamsWithReadAuth` method provided by the alerting rules client to update the rule fields
+   * individually. Otherwise the user will need `all` privileges for rules.
    */
   if (
+    !rulesAuthz.canEditRules &&
     !isEmpty(rulePatchObjWithoutIds) &&
     Object.keys(rulePatchObjWithoutIds).every((key) => isKeyUpdateableWithReadPermission(key))
   ) {
@@ -86,7 +93,7 @@ export const patchRule = async ({
       {
         rulesClient,
         // Don't want to pass ID fields to the read authz PATCH method as it will apply patches on all fields in the object
-        rulePatch: rulePatchObjWithoutIds,
+        rulePatch: { ...rulePatchObjWithoutIds, rule_source: patchedRule.rule_source },
         existingRule,
         prebuiltRuleAssetClient,
         rulesAuthz,
@@ -98,14 +105,17 @@ export const patchRule = async ({
       throw new Error(patchErrors);
     }
 
-    return convertAlertingRuleToRuleResponse(appliedPatchWithReadPrivs.rules[0]);
-  } else {
-    const patchedRule = await applyRulePatch({
-      prebuiltRuleAssetClient,
-      existingRule,
-      rulePatch,
-    });
+    const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, patchedRule);
 
+    if (appliedPatchWithReadPrivs.skipped.length) {
+      return {
+        ...existingRule,
+        enabled,
+      };
+    }
+
+    return convertAlertingRuleToRuleResponse({ ...appliedPatchWithReadPrivs.rules[0], enabled });
+  } else {
     const patchedInternalRule = await rulesClient.update({
       id: existingRule.id,
       data: convertRuleResponseToAlertingRule(patchedRule, actionsClient),

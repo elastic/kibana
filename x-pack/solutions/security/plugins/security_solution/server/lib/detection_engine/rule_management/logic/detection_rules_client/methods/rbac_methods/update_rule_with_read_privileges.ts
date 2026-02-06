@@ -33,16 +33,14 @@ export const updateReadAuthEditRuleFields = async ({
 }): Promise<BulkEditResult<RuleParams>> => {
   validateFieldWritePermissions(ruleUpdate, rulesAuthz);
 
-  const operations = Object.keys(ruleUpdate)
-    .filter((field) => ruleUpdate[field as keyof typeof ruleUpdate] != null)
-    .map((field) => {
-      const camelCasedField = camelCase(field) as ValidReadAuthEditFields; // RuleParams schema is camel cased
-      return {
-        field: camelCasedField,
-        operation: 'set' as const,
-        value: getReadAuthFieldValue(field, ruleUpdate),
-      };
-    });
+  const operations = Object.keys(ruleUpdate).map((field) => {
+    const camelCasedField = camelCase(field) as ValidReadAuthEditFields; // RuleParams schema is camel cased
+    return {
+      field: camelCasedField,
+      operation: 'set' as const,
+      value: getReadAuthFieldValue(field, ruleUpdate),
+    };
+  });
 
   return rulesClient.bulkEditRuleParamsWithReadAuth<RuleParams>({
     ids: [existingRule.id],
