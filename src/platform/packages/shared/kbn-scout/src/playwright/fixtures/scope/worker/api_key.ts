@@ -131,7 +131,9 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
           const invalidatedCount = response.body?.itemsInvalidated?.length || 0;
           const errorCount = response.body?.errors?.length || 0;
           log.info(
-            `Invalidated ${invalidatedCount} API keys${errorCount > 0 ? ` (${errorCount} errors)` : ''}`
+            `Invalidated ${invalidatedCount} API keys${
+              errorCount > 0 ? ` (${errorCount} errors)` : ''
+            }`
           );
           if (errorCount > 0) {
             log.debug(`API key invalidation errors: ${JSON.stringify(response.body.errors)}`);
