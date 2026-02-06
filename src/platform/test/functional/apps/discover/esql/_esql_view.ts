@@ -488,7 +488,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilTabIsLoaded();
 
-        await testSubjects.click('ESQLEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-icon');
         const historyItem = await esql.getHistoryItem(0);
         await historyItem.findByTestSubject('ESQLEditor-queryHistory-error');
       });
