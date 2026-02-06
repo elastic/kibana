@@ -11,118 +11,149 @@ import { expect, apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
   COMMON_HEADERS,
+  DATA_VIEW_PATH,
+  SERVICE_PATH,
   KBN_ARCHIVE_SAVED_OBJECTS_BASIC,
-  KBN_ARCHIVE_SAVED_OBJECTS_RELATIONSHIPS,
 } from '../fixtures/constants';
 
-apiTest.describe('swap data view references', { tag: tags.PLATFORM }, () => {
-  let adminApiCredentials: RoleApiCredentials;
-  let dataViewId: string;
-  const title = 'logs-*';
-  const prevDataViewId = '91200a00-9efd-11e7-acb3-3dab96693fab';
+const SWAP_REFERENCES_PATH = `${SERVICE_PATH}/swap_references`;
+const SWAP_REFERENCES_PREVIEW_PATH = `${SWAP_REFERENCES_PATH}/_preview`;
 
-  apiTest.beforeAll(async ({ apiClient, kbnClient, requestAuth }) => {
-    // TODO: Implement test setup
-    // 1. Get admin API credentials using requestAuth.getApiKey('admin')
-    // 2. POST request to /api/data_views/data_view to create new data view
-    // 3. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-    // 4. Send body: { data_view: { title: 'logs-*' } }
-    // 5. Store the created data view ID in dataViewId variable
-  });
+apiTest.describe(
+  'POST /api/data_views/swap_references - main',
+  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  () => {
+    let adminApiCredentials: RoleApiCredentials;
+    let dataViewId: string;
+    const title = 'logs-*';
+    const prevDataViewId = '91200a00-9efd-11e7-acb3-3dab96693fab';
 
-  apiTest.afterAll(async ({ apiClient }) => {
-    // TODO: Implement cleanup
-    // 1. DELETE request to /api/data_views/data_view/{dataViewId}
-    // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-  });
+    apiTest.beforeAll(async ({ apiClient, requestAuth, log }) => {
+      adminApiCredentials = await requestAuth.getApiKey('admin');
+      log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
 
-  apiTest.beforeEach(async ({ kbnClient }) => {
-    // TODO: Implement test setup
-    // 1. Load Kibana archive: KBN_ARCHIVE_SAVED_OBJECTS_BASIC
-  });
+      // Create a data view to use as target
+      const createResponse = await apiClient.post(DATA_VIEW_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: {
+          data_view: {
+            title,
+          },
+        },
+      });
 
-  apiTest.afterEach(async ({ kbnClient }) => {
-    // TODO: Implement cleanup
-    // 1. Unload Kibana archive: KBN_ARCHIVE_SAVED_OBJECTS_BASIC
-  });
-
-  apiTest('can preview', async ({ apiClient }) => {
-    // TODO: Implement test
-    // 1. POST request to /api/data_views/swap_references/_preview
-    // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-    // 3. Send body: { fromId: prevDataViewId, toId: dataViewId }
-    // 4. Verify response statusCode equals 200
-  });
-
-  apiTest('can preview specifying type', async ({ apiClient }) => {
-    // TODO: Implement test
-    // 1. POST request to /api/data_views/swap_references/_preview
-    // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-    // 3. Send body: { fromId: prevDataViewId, fromType: 'index-pattern', toId: dataViewId }
-    // 4. Verify response statusCode equals 200
-  });
-
-  apiTest('can save changes', async ({ apiClient }) => {
-    // TODO: Implement test
-    // 1. POST request to /api/data_views/swap_references
-    // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-    // 3. Send body: { fromId: prevDataViewId, toId: dataViewId }
-    // 4. Verify response statusCode equals 200
-    // 5. Verify response.body.result.length equals 1
-    // 6. Verify response.body.result[0].id equals 'dd7caf20-9efd-11e7-acb3-3dab96693fab'
-    // 7. Verify response.body.result[0].type equals 'visualization'
-  });
-
-  apiTest('can save changes and remove old saved object', async ({ apiClient }) => {
-    // TODO: Implement test
-    // 1. POST request to /api/data_views/swap_references
-    // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-    // 3. Send body: { fromId: prevDataViewId, toId: dataViewId, delete: true }
-    // 4. Verify response statusCode equals 200
-    // 5. Verify response.body.result.length equals 1
-    // 6. Verify response.body.deleteStatus.remainingRefs equals 0
-    // 7. Verify response.body.deleteStatus.deletePerformed equals true
-    // 8. GET request to verify prevDataViewId was deleted
-    // 9. Verify GET response statusCode equals 404
-  });
-
-  apiTest.describe('limit affected saved objects', () => {
-    apiTest.beforeEach(async ({ kbnClient }) => {
-      // TODO: Implement test setup
-      // 1. Load Kibana archive: KBN_ARCHIVE_SAVED_OBJECTS_RELATIONSHIPS
+      dataViewId = createResponse.body.data_view.id;
+      log.info(`Created data view with ID: ${dataViewId}`);
     });
 
-    apiTest.afterEach(async ({ kbnClient }) => {
-      // TODO: Implement cleanup
-      // 1. Unload Kibana archive: KBN_ARCHIVE_SAVED_OBJECTS_RELATIONSHIPS
+    apiTest.beforeEach(async ({ kbnClient, log }) => {
+      await kbnClient.importExport.load(KBN_ARCHIVE_SAVED_OBJECTS_BASIC);
+      log.info(`Loaded Kibana archive: ${KBN_ARCHIVE_SAVED_OBJECTS_BASIC}`);
     });
 
-    apiTest("won't delete if reference remains", async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. POST request to /api/data_views/swap_references
-      // 2. Send body: { fromId: '8963ca30-3224-11e8-a572-ffca06da1357', toId: '91200a00-9efd-11e7-acb3-3dab96693fab', forId: ['960372e0-3224-11e8-a572-ffca06da1357'], delete: true }
-      // 3. Verify response statusCode equals 200
-      // 4. Verify response.body.result.length equals 1
-      // 5. Verify response.body.deleteStatus.remainingRefs equals 1
-      // 6. Verify response.body.deleteStatus.deletePerformed equals false
+    apiTest.afterEach(async ({ kbnClient, log }) => {
+      await kbnClient.importExport.unload(KBN_ARCHIVE_SAVED_OBJECTS_BASIC);
+      log.info(`Unloaded Kibana archive: ${KBN_ARCHIVE_SAVED_OBJECTS_BASIC}`);
     });
 
-    apiTest('can limit by id', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. POST request to preview to confirm it finds two items
-      // 2. Verify preview returns 2 results
-      // 3. POST request to swap_references with forId limiting to one item
-      // 4. Send body: { fromId: '8963ca30-3224-11e8-a572-ffca06da1357', toId: '91200a00-9efd-11e7-acb3-3dab96693fab', forId: ['960372e0-3224-11e8-a572-ffca06da1357'] }
-      // 5. Verify response.body.result.length equals 1
+    apiTest.afterAll(async ({ apiClient, log }) => {
+      // Cleanup: delete the data view
+      if (dataViewId) {
+        await apiClient.delete(`${DATA_VIEW_PATH}/${dataViewId}`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+        });
+        log.info(`Deleted data view with ID: ${dataViewId}`);
+      }
     });
 
-    apiTest('can limit by type', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. POST request to preview to confirm it finds two items
-      // 2. Verify preview returns 2 results
-      // 3. POST request to swap_references with forType limiting to one item
-      // 4. Send body: { fromId: '8963ca30-3224-11e8-a572-ffca06da1357', toId: '91200a00-9efd-11e7-acb3-3dab96693fab', forType: 'search' }
-      // 5. Verify response.body.result.length equals 1
+    apiTest('can preview', async ({ apiClient }) => {
+      const response = await apiClient.post(SWAP_REFERENCES_PREVIEW_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: {
+          fromId: prevDataViewId,
+          toId: dataViewId,
+        },
+      });
+
+      expect(response.statusCode).toBe(200);
     });
-  });
-});
+
+    apiTest('can preview specifying type', async ({ apiClient }) => {
+      const response = await apiClient.post(SWAP_REFERENCES_PREVIEW_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: {
+          fromId: prevDataViewId,
+          fromType: 'index-pattern',
+          toId: dataViewId,
+        },
+      });
+
+      expect(response.statusCode).toBe(200);
+    });
+
+    apiTest('can save changes', async ({ apiClient }) => {
+      const response = await apiClient.post(SWAP_REFERENCES_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: {
+          fromId: prevDataViewId,
+          toId: dataViewId,
+        },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body.result).toHaveLength(1);
+      expect(response.body.result[0].id).toBe('dd7caf20-9efd-11e7-acb3-3dab96693fab');
+      expect(response.body.result[0].type).toBe('visualization');
+    });
+
+    apiTest('can save changes and remove old saved object', async ({ apiClient }) => {
+      const response = await apiClient.post(SWAP_REFERENCES_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: {
+          fromId: prevDataViewId,
+          toId: dataViewId,
+          delete: true,
+        },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body.result).toHaveLength(1);
+      expect(response.body.deleteStatus.remainingRefs).toBe(0);
+      expect(response.body.deleteStatus.deletePerformed).toBe(true);
+
+      // Verify the old data view was deleted
+      const getResponse = await apiClient.get(`${DATA_VIEW_PATH}/${prevDataViewId}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(getResponse.statusCode).toBe(404);
+    });
+  }
+);

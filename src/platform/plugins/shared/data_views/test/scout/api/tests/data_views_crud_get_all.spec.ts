@@ -9,49 +9,33 @@
 
 import { expect, apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS, SERVICE_PATH, SERVICE_KEY } from '../fixtures/constants';
 
-apiTest.describe('GET /api/data_views - get all', { tag: tags.PLATFORM }, () => {
-  let adminApiCredentials: RoleApiCredentials;
+// Note: The FTR equivalent only tests the data view API for get_all,
+// as the legacy index patterns API doesn't have a get-all endpoint.
+apiTest.describe(
+  `GET ${SERVICE_PATH} - get all (data view api)`,
+  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  () => {
+    let adminApiCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    // TODO: Implement test setup
-    // 1. Get admin API credentials using requestAuth.getApiKey('admin')
-  });
-
-  apiTest.describe('legacy API', () => {
-    apiTest('returns empty array when no index patterns exist', async ({ apiClient, kbnClient }) => {
-      // TODO: Implement test
-      // 1. Clean all saved objects
-      // 2. GET request to /api/index_patterns
-      // 3. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 4. Verify response.body.index_pattern is an empty array
+    apiTest.beforeAll(async ({ requestAuth, log }) => {
+      adminApiCredentials = await requestAuth.getApiKey('admin');
+      log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
     });
 
-    apiTest('returns all index patterns', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. Create 2-3 index patterns
-      // 2. GET request to /api/index_patterns
-      // 3. Verify response contains all created index patterns
-      // 4. Delete all created index patterns
-    });
-  });
+    apiTest(`returns list of ${SERVICE_KEY}s`, async ({ apiClient }) => {
+      const response = await apiClient.get(SERVICE_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
 
-  apiTest.describe('data view API', () => {
-    apiTest('returns empty array when no data views exist', async ({ apiClient, kbnClient }) => {
-      // TODO: Implement test
-      // 1. Clean all saved objects
-      // 2. GET request to /api/data_views
-      // 3. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 4. Verify response.body.data_view is an empty array
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toHaveProperty(SERVICE_KEY);
+      expect(Array.isArray(response.body[SERVICE_KEY])).toBe(true);
     });
-
-    apiTest('returns all data views', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. Create 2-3 data views
-      // 2. GET request to /api/data_views
-      // 3. Verify response contains all created data views
-      // 4. Delete all created data views
-    });
-  });
-});
+  }
+);

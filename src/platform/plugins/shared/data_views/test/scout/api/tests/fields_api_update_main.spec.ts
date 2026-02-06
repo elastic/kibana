@@ -9,182 +9,386 @@
 
 import { expect, apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { COMMON_HEADERS, ES_ARCHIVE_BASIC_INDEX } from '../fixtures/constants';
+import { COMMON_HEADERS, ES_ARCHIVE_BASIC_INDEX, configArray } from '../fixtures/constants';
 
-apiTest.describe('POST /api/data_views/data_view/{id}/fields - main', { tag: tags.PLATFORM }, () => {
-  let adminApiCredentials: RoleApiCredentials;
+configArray.forEach((config) => {
+  apiTest.describe(
+    `POST ${config.path}/{id}/fields - main (${config.name})`,
+    { tag: tags.DEPLOYMENT_AGNOSTIC },
+    () => {
+      let adminApiCredentials: RoleApiCredentials;
+      let createdIds: string[] = [];
 
-  apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
-    // TODO: Implement test setup
-    // 1. Get admin API credentials using requestAuth.getApiKey('admin')
-    // 2. Load ES archive: ES_ARCHIVE_BASIC_INDEX
-  });
+      apiTest.beforeAll(async ({ esArchiver, requestAuth, log }) => {
+        adminApiCredentials = await requestAuth.getApiKey('admin');
+        log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
 
-  apiTest.afterAll(async ({ kbnClient }) => {
-    // TODO: Implement cleanup
-    // 1. Unload ES archive: ES_ARCHIVE_BASIC_INDEX
-  });
-
-  apiTest.describe('legacy API', () => {
-    apiTest('can update multiple fields', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. Create an index pattern
-      // 2. POST to /api/index_patterns/index_pattern/{id}/fields
-      // 3. Update fields: { foo: { count: 123, customLabel: 'test' }, bar: { count: 456 } }
-      // 4. Verify response contains updated fieldAttrs
-      // 5. GET the index pattern and verify fields persisted
-      // 6. Delete the index pattern
-    });
-
-    apiTest.describe('count', () => {
-      apiTest('can set field "count" attribute on non-existing field', async ({ apiClient }) => {
-        // TODO: Implement test
-        // 1. Create index pattern
-        // 2. Update field count for non-existing field 'foo'
-        // 3. Verify fieldAttrs.foo.count equals 123
-        // 4. Delete index pattern
+        await esArchiver.loadIfNeeded(ES_ARCHIVE_BASIC_INDEX);
+        log.info(`Loaded ES archive: ${ES_ARCHIVE_BASIC_INDEX}`);
       });
 
-      apiTest('can update "count" attribute in index_pattern attribute map', async ({
-        apiClient,
-      }) => {
-        // TODO: Implement test
-        // 1. Create index pattern with existing fieldAttrs.foo.count = 1
-        // 2. Update to count = 2
-        // 3. Verify updated value
-        // 4. Delete index pattern
+      apiTest.afterEach(async ({ apiClient, log }) => {
+        for (const id of createdIds) {
+          try {
+            await apiClient.delete(`${config.path}/${id}`, {
+              headers: {
+                ...COMMON_HEADERS,
+                ...adminApiCredentials.apiKeyHeader,
+              },
+            });
+            log.info(`Cleaned up ${config.serviceKey} with id: ${id}`);
+          } catch {
+            log.info(`Failed to clean up ${config.serviceKey} with id: ${id}`);
+          }
+        }
+        createdIds = [];
       });
 
-      apiTest('can delete "count" attribute from index_pattern attribute map', async ({
-        apiClient,
-      }) => {
-        // TODO: Implement test
-        // 1. Create index pattern with fieldAttrs.foo.count = 1
-        // 2. Update with count: null
-        // 3. Verify count is undefined
-        // 4. Delete index pattern
-      });
-    });
+      apiTest('can update multiple fields', async ({ apiClient }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const createResponse = await apiClient.post(config.path, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: { [config.serviceKey]: { title } },
+        });
 
-    apiTest.describe('customLabel', () => {
-      apiTest('can set field "customLabel" attribute on non-existing field', async ({
-        apiClient,
-      }) => {
-        // TODO: Implement test
-        // 1. Create index pattern
-        // 2. Set customLabel for non-existing field
-        // 3. Verify customLabel was set
-        // 4. Delete index pattern
-      });
+        expect(createResponse.statusCode).toBe(200);
+        const id = createResponse.body[config.serviceKey].id;
+        createdIds.push(id);
 
-      apiTest('can update "customLabel" attribute', async ({ apiClient }) => {
-        // TODO: Implement test
-        // 1. Create index pattern with customLabel
-        // 2. Update customLabel to new value
-        // 3. Verify update
-        // 4. Delete index pattern
-      });
+        const updateResponse = await apiClient.post(`${config.path}/${id}/fields`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: {
+            fields: {
+              foo: { count: 123, customLabel: 'test' },
+              bar: { count: 456, customDescription: 'desc' },
+            },
+          },
+        });
 
-      apiTest('can delete "customLabel" attribute', async ({ apiClient }) => {
-        // TODO: Implement test
-        // 1. Create with customLabel
-        // 2. Delete by setting to null
-        // 3. Verify deletion
-        // 4. Delete index pattern
-      });
+        expect(updateResponse.statusCode).toBe(200);
+        expect(updateResponse.body[config.serviceKey].fieldAttrs.foo.count).toBe(123);
+        expect(updateResponse.body[config.serviceKey].fieldAttrs.foo.customLabel).toBe('test');
+        expect(updateResponse.body[config.serviceKey].fieldAttrs.bar.count).toBe(456);
+        expect(updateResponse.body[config.serviceKey].fieldAttrs.bar.customDescription).toBe(
+          'desc'
+        );
 
-      apiTest('can set field "customLabel" attribute on an existing field', async ({
-        apiClient,
-      }) => {
-        // TODO: Implement test
-        // 1. Create index pattern with existing field
-        // 2. Set customLabel on existing field
-        // 3. Verify customLabel appears in fields array
-        // 4. Delete index pattern
-      });
-    });
+        const getResponse = await apiClient.get(`${config.path}/${id}`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+        });
 
-    apiTest.describe('format', () => {
-      apiTest('can set field "format" attribute on non-existing field', async ({ apiClient }) => {
-        // TODO: Implement test
-        // 1. Create index pattern
-        // 2. Set format: { id: 'bar', params: { baz: 'qux' } }
-        // 3. Verify fieldFormats.foo contains format
-        // 4. Delete index pattern
+        expect(getResponse.statusCode).toBe(200);
+        expect(getResponse.body[config.serviceKey].fieldAttrs.foo.count).toBe(123);
+        expect(getResponse.body[config.serviceKey].fieldAttrs.foo.customLabel).toBe('test');
+        expect(getResponse.body[config.serviceKey].fieldAttrs.bar.count).toBe(456);
+        expect(getResponse.body[config.serviceKey].fieldAttrs.bar.customDescription).toBe('desc');
       });
 
-      apiTest('can update "format" attribute', async ({ apiClient }) => {
-        // TODO: Implement test
-        // 1. Create with existing format
-        // 2. Update to new format
-        // 3. Verify update
-        // 4. Delete index pattern
+      apiTest('can set field count attribute on non-existing field', async ({ apiClient }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const createResponse = await apiClient.post(config.path, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: { [config.serviceKey]: { title } },
+        });
+
+        expect(createResponse.statusCode).toBe(200);
+        const id = createResponse.body[config.serviceKey].id;
+        createdIds.push(id);
+
+        const updateResponse = await apiClient.post(`${config.path}/${id}/fields`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: { fields: { foo: { count: 123 } } },
+        });
+
+        expect(updateResponse.statusCode).toBe(200);
+        expect(updateResponse.body[config.serviceKey].fieldAttrs.foo.count).toBe(123);
+
+        const getResponse = await apiClient.get(`${config.path}/${id}`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+        });
+
+        expect(getResponse.statusCode).toBe(200);
+        expect(getResponse.body[config.serviceKey].fieldAttrs.foo.count).toBe(123);
       });
 
-      apiTest('can remove "format" attribute', async ({ apiClient }) => {
-        // TODO: Implement test
-        // 1. Create with format
-        // 2. Remove by setting to null
-        // 3. Verify removal
-        // 4. Delete index pattern
-      });
-    });
-  });
+      apiTest('can update count attribute in attribute map', async ({ apiClient }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const createResponse = await apiClient.post(config.path, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: { [config.serviceKey]: { title, fieldAttrs: { foo: { count: 1 } } } },
+        });
 
-  apiTest.describe('data view API', () => {
-    // Duplicate the same test structure for data view API
-    apiTest('can update multiple fields', async ({ apiClient }) => {
-      // TODO: Implement test - same as legacy but for /api/data_views/data_view/{id}/fields
-    });
+        expect(createResponse.statusCode).toBe(200);
+        expect(createResponse.body[config.serviceKey].fieldAttrs.foo.count).toBe(1);
+        const id = createResponse.body[config.serviceKey].id;
+        createdIds.push(id);
 
-    apiTest.describe('count', () => {
-      apiTest('can set field "count" attribute on non-existing field', async ({ apiClient }) => {
-        // TODO: Implement test for data view API
-      });
+        const updateResponse = await apiClient.post(`${config.path}/${id}/fields`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: { fields: { foo: { count: 2 } } },
+        });
 
-      apiTest('can update "count" attribute', async ({ apiClient }) => {
-        // TODO: Implement test for data view API
-      });
+        expect(updateResponse.statusCode).toBe(200);
+        expect(updateResponse.body[config.serviceKey].fieldAttrs.foo.count).toBe(2);
 
-      apiTest('can delete "count" attribute', async ({ apiClient }) => {
-        // TODO: Implement test for data view API
-      });
-    });
+        const getResponse = await apiClient.get(`${config.path}/${id}`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+        });
 
-    apiTest.describe('customLabel', () => {
-      apiTest('can set field "customLabel" attribute on non-existing field', async ({
-        apiClient,
-      }) => {
-        // TODO: Implement test for data view API
+        expect(getResponse.statusCode).toBe(200);
+        expect(getResponse.body[config.serviceKey].fieldAttrs.foo.count).toBe(2);
       });
 
-      apiTest('can update "customLabel" attribute', async ({ apiClient }) => {
-        // TODO: Implement test for data view API
+      apiTest('can delete count attribute from attribute map', async ({ apiClient }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const createResponse = await apiClient.post(config.path, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: { [config.serviceKey]: { title, fieldAttrs: { foo: { count: 1 } } } },
+        });
+
+        expect(createResponse.statusCode).toBe(200);
+        expect(createResponse.body[config.serviceKey].fieldAttrs.foo.count).toBe(1);
+        const id = createResponse.body[config.serviceKey].id;
+        createdIds.push(id);
+
+        const updateResponse = await apiClient.post(`${config.path}/${id}/fields`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: { fields: { foo: { count: null } } },
+        });
+
+        expect(updateResponse.statusCode).toBe(200);
+        expect(updateResponse.body[config.serviceKey].fieldAttrs.foo.count).toBeUndefined();
+
+        const getResponse = await apiClient.get(`${config.path}/${id}`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+        });
+
+        expect(getResponse.statusCode).toBe(200);
+        expect(getResponse.body[config.serviceKey].fieldAttrs.foo.count).toBeUndefined();
       });
 
-      apiTest('can delete "customLabel" attribute', async ({ apiClient }) => {
-        // TODO: Implement test for data view API
+      apiTest(
+        'can set field customLabel attribute on non-existing field',
+        async ({ apiClient }) => {
+          const title = `foo-${Date.now()}-${Math.random()}*`;
+          const createResponse = await apiClient.post(config.path, {
+            headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+            responseType: 'json',
+            body: { [config.serviceKey]: { title } },
+          });
+
+          expect(createResponse.statusCode).toBe(200);
+          const id = createResponse.body[config.serviceKey].id;
+          createdIds.push(id);
+
+          const updateResponse = await apiClient.post(`${config.path}/${id}/fields`, {
+            headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+            responseType: 'json',
+            body: { fields: { foo: { customLabel: 'foo' } } },
+          });
+
+          expect(updateResponse.statusCode).toBe(200);
+          expect(updateResponse.body[config.serviceKey].fieldAttrs.foo.customLabel).toBe('foo');
+
+          const getResponse = await apiClient.get(`${config.path}/${id}`, {
+            headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+            responseType: 'json',
+          });
+
+          expect(getResponse.statusCode).toBe(200);
+          expect(getResponse.body[config.serviceKey].fieldAttrs.foo.customLabel).toBe('foo');
+        }
+      );
+
+      apiTest('can update customLabel attribute', async ({ apiClient }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const createResponse = await apiClient.post(config.path, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: { [config.serviceKey]: { title, fieldAttrs: { foo: { customLabel: 'foo' } } } },
+        });
+
+        expect(createResponse.statusCode).toBe(200);
+        expect(createResponse.body[config.serviceKey].fieldAttrs.foo.customLabel).toBe('foo');
+        const id = createResponse.body[config.serviceKey].id;
+        createdIds.push(id);
+
+        const updateResponse = await apiClient.post(`${config.path}/${id}/fields`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: { fields: { foo: { customLabel: 'bar' } } },
+        });
+
+        expect(updateResponse.statusCode).toBe(200);
+        expect(updateResponse.body[config.serviceKey].fieldAttrs.foo.customLabel).toBe('bar');
+
+        const getResponse = await apiClient.get(`${config.path}/${id}`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+        });
+
+        expect(getResponse.statusCode).toBe(200);
+        expect(getResponse.body[config.serviceKey].fieldAttrs.foo.customLabel).toBe('bar');
       });
 
-      apiTest('can set field "customLabel" attribute on an existing field', async ({
-        apiClient,
-      }) => {
-        // TODO: Implement test for data view API
-      });
-    });
+      apiTest('can delete customLabel attribute', async ({ apiClient }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const createResponse = await apiClient.post(config.path, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: { [config.serviceKey]: { title, fieldAttrs: { foo: { customLabel: 'foo' } } } },
+        });
 
-    apiTest.describe('format', () => {
-      apiTest('can set field "format" attribute on non-existing field', async ({ apiClient }) => {
-        // TODO: Implement test for data view API
+        expect(createResponse.statusCode).toBe(200);
+        expect(createResponse.body[config.serviceKey].fieldAttrs.foo.customLabel).toBe('foo');
+        const id = createResponse.body[config.serviceKey].id;
+        createdIds.push(id);
+
+        const updateResponse = await apiClient.post(`${config.path}/${id}/fields`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: { fields: { foo: { customLabel: null } } },
+        });
+
+        expect(updateResponse.statusCode).toBe(200);
+        expect(updateResponse.body[config.serviceKey].fieldAttrs.foo.customLabel).toBeUndefined();
+
+        const getResponse = await apiClient.get(`${config.path}/${id}`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+        });
+
+        expect(getResponse.statusCode).toBe(200);
+        expect(getResponse.body[config.serviceKey].fieldAttrs.foo.customLabel).toBeUndefined();
       });
 
-      apiTest('can update "format" attribute', async ({ apiClient }) => {
-        // TODO: Implement test for data view API
+      apiTest('can set field format attribute on non-existing field', async ({ apiClient }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const createResponse = await apiClient.post(config.path, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: { [config.serviceKey]: { title } },
+        });
+
+        expect(createResponse.statusCode).toBe(200);
+        const id = createResponse.body[config.serviceKey].id;
+        createdIds.push(id);
+
+        const updateResponse = await apiClient.post(`${config.path}/${id}/fields`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: { fields: { foo: { format: { id: 'bar', params: { baz: 'qux' } } } } },
+        });
+
+        expect(updateResponse.statusCode).toBe(200);
+        expect(updateResponse.body[config.serviceKey].fieldFormats.foo).toStrictEqual({
+          id: 'bar',
+          params: { baz: 'qux' },
+        });
+
+        const getResponse = await apiClient.get(`${config.path}/${id}`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+        });
+
+        expect(getResponse.statusCode).toBe(200);
+        expect(getResponse.body[config.serviceKey].fieldFormats.foo).toStrictEqual({
+          id: 'bar',
+          params: { baz: 'qux' },
+        });
       });
 
-      apiTest('can remove "format" attribute', async ({ apiClient }) => {
-        // TODO: Implement test for data view API
+      apiTest('can update format attribute', async ({ apiClient }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const createResponse = await apiClient.post(config.path, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: {
+            [config.serviceKey]: {
+              title,
+              fieldFormats: { foo: { id: 'bar', params: { baz: 'qux' } } },
+            },
+          },
+        });
+
+        expect(createResponse.statusCode).toBe(200);
+        expect(createResponse.body[config.serviceKey].fieldFormats.foo).toStrictEqual({
+          id: 'bar',
+          params: { baz: 'qux' },
+        });
+        const id = createResponse.body[config.serviceKey].id;
+        createdIds.push(id);
+
+        const updateResponse = await apiClient.post(`${config.path}/${id}/fields`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: { fields: { foo: { format: { id: 'bar-2', params: { baz: 'qux-2' } } } } },
+        });
+
+        expect(updateResponse.statusCode).toBe(200);
+        expect(updateResponse.body[config.serviceKey].fieldFormats.foo).toStrictEqual({
+          id: 'bar-2',
+          params: { baz: 'qux-2' },
+        });
+
+        const getResponse = await apiClient.get(`${config.path}/${id}`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+        });
+
+        expect(getResponse.statusCode).toBe(200);
+        expect(getResponse.body[config.serviceKey].fieldFormats.foo).toStrictEqual({
+          id: 'bar-2',
+          params: { baz: 'qux-2' },
+        });
       });
-    });
-  });
+
+      apiTest('can remove format attribute', async ({ apiClient }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const createResponse = await apiClient.post(config.path, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: {
+            [config.serviceKey]: {
+              title,
+              fieldFormats: { foo: { id: 'bar', params: { baz: 'qux' } } },
+            },
+          },
+        });
+
+        expect(createResponse.statusCode).toBe(200);
+        const id = createResponse.body[config.serviceKey].id;
+        createdIds.push(id);
+
+        const updateResponse = await apiClient.post(`${config.path}/${id}/fields`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: { fields: { foo: { format: null } } },
+        });
+
+        expect(updateResponse.statusCode).toBe(200);
+        expect(updateResponse.body[config.serviceKey].fieldFormats.foo).toBeUndefined();
+
+        const getResponse = await apiClient.get(`${config.path}/${id}`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+        });
+
+        expect(getResponse.statusCode).toBe(200);
+        expect(getResponse.body[config.serviceKey].fieldFormats.foo).toBeUndefined();
+      });
+    }
+  );
 });

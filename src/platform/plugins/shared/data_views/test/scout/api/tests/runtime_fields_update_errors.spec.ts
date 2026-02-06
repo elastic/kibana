@@ -9,40 +9,70 @@
 
 import { expect, apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS, configArray } from '../fixtures/constants';
 
-apiTest.describe('POST /api/data_views/data_view/{id}/runtime_field/{name} - update errors', { tag: tags.PLATFORM }, () => {
-  let adminApiCredentials: RoleApiCredentials;
+configArray.forEach((config) => {
+  apiTest.describe(
+    `POST ${config.path}/{id}/runtime_field/{name} - update errors (${config.name})`,
+    { tag: tags.DEPLOYMENT_AGNOSTIC },
+    () => {
+      let adminApiCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    // TODO: Get admin API credentials
-  });
+      apiTest.beforeAll(async ({ requestAuth, log }) => {
+        adminApiCredentials = await requestAuth.getApiKey('admin');
+        log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
+      });
 
-  apiTest.describe('legacy API', () => {
-    apiTest('returns 404 for non-existent index pattern', async ({ apiClient }) => {
-      // TODO: POST update to non-existent pattern, verify 404
-    });
+      apiTest('returns 404 error on non-existing index_pattern', async ({ apiClient }) => {
+        const nonExistentId = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
 
-    apiTest('returns 404 for non-existent runtime field', async ({ apiClient }) => {
-      // TODO: Create pattern, POST update to non-existent field, verify 404, delete pattern
-    });
+        const response = await apiClient.post(`${config.path}/${nonExistentId}/runtime_field/foo`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            runtimeField: {
+              type: 'keyword',
+              script: {
+                source: "doc['something_new'].value",
+              },
+            },
+          },
+        });
 
-    apiTest('returns error when runtimeField is not provided', async ({ apiClient }) => {
-      // TODO: Create pattern with field, POST update without runtimeField, verify 400, delete
-    });
-  });
+        expect(response.statusCode).toBe(404);
+      });
 
-  apiTest.describe('data view API', () => {
-    apiTest('returns 404 for non-existent data view', async ({ apiClient }) => {
-      // TODO: Same for data view API
-    });
+      apiTest('returns error when field name is specified in body', async ({ apiClient }) => {
+        const nonExistentId = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
 
-    apiTest('returns 404 for non-existent runtime field', async ({ apiClient }) => {
-      // TODO: Same for data view API
-    });
+        // The update endpoint should NOT accept a 'name' field in the body
+        // (the name comes from the URL path parameter)
+        const response = await apiClient.post(`${config.path}/${nonExistentId}/runtime_field/foo`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            name: 'foo',
+            runtimeField: {
+              type: 'keyword',
+              script: {
+                source: "doc['something_new'].value",
+              },
+            },
+          },
+        });
 
-    apiTest('returns error when runtimeField is not provided', async ({ apiClient }) => {
-      // TODO: Same for data view API
-    });
-  });
+        expect(response.statusCode).toBe(400);
+        expect(response.body.statusCode).toBe(400);
+        expect(response.body.message).toBe(
+          "[request body.name]: a value wasn't expected to be present"
+        );
+      });
+    }
+  );
 });

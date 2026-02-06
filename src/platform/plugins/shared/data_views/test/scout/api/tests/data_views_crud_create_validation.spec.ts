@@ -9,111 +9,132 @@
 
 import { expect, apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS, configArray } from '../fixtures/constants';
 
-apiTest.describe('POST /api/data_views - validation', { tag: tags.PLATFORM }, () => {
-  let adminApiCredentials: RoleApiCredentials;
+configArray.forEach((config) => {
+  apiTest.describe(
+    `POST ${config.path} - validation (${config.name})`,
+    { tag: tags.DEPLOYMENT_AGNOSTIC },
+    () => {
+      let adminApiCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    // TODO: Implement test setup
-    // 1. Get admin API credentials using requestAuth.getApiKey('admin')
-  });
+      apiTest.beforeAll(async ({ requestAuth, log }) => {
+        adminApiCredentials = await requestAuth.getApiKey('admin');
+        log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
+      });
 
-  apiTest.describe('legacy index pattern API', () => {
-    apiTest('returns error when index_pattern object is not provided', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. POST request to /api/index_patterns/index_pattern
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send no body (null)
-      // 4. Verify response statusCode equals 400
-      // 5. Verify error message: 'expected a plain object value, but found [null] instead.'
-    });
+      apiTest(
+        `returns error when ${config.serviceKey} object is not provided`,
+        async ({ apiClient }) => {
+          const response = await apiClient.post(config.path, {
+            headers: {
+              ...COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+            responseType: 'json',
+            body: null,
+          });
 
-    apiTest('returns error on empty index_pattern object', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. POST request to /api/index_patterns/index_pattern
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send body: { index_pattern: {} }
-      // 4. Verify response statusCode equals 400
-      // 5. Verify error message contains 'expected value of type [string] but got [undefined]'
-    });
+          expect(response.statusCode).toBe(400);
+          expect(response.body.statusCode).toBe(400);
+          expect(response.body.message).toBe(
+            '[request body]: expected a plain object value, but found [null] instead.'
+          );
+        }
+      );
 
-    apiTest('returns error when "override" parameter is not a boolean', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. POST request to /api/index_patterns/index_pattern
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send body: { override: 123, index_pattern: { title: 'foo' } }
-      // 4. Verify response statusCode equals 400
-      // 5. Verify error message: 'expected value of type [boolean] but got [number]'
-    });
+      apiTest(`returns error on empty ${config.serviceKey} object`, async ({ apiClient }) => {
+        const response = await apiClient.post(config.path, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            [config.serviceKey]: {},
+          },
+        });
 
-    apiTest('returns error when "refresh_fields" parameter is not a boolean', async ({
-      apiClient,
-    }) => {
-      // TODO: Implement test
-      // 1. POST request to /api/index_patterns/index_pattern
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send body: { refresh_fields: 123, index_pattern: { title: 'foo' } }
-      // 4. Verify response statusCode equals 400
-      // 5. Verify error message: 'expected value of type [boolean] but got [number]'
-    });
+        expect(response.statusCode).toBe(400);
+        expect(response.body.statusCode).toBe(400);
+        expect(response.body.message).toBe(
+          `[request body.${config.serviceKey}.title]: expected value of type [string] but got [undefined]`
+        );
+      });
 
-    apiTest('returns an error when unknown runtime field type', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. POST request to /api/index_patterns/index_pattern
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send body with override: true, title: 'basic_index*'
-      // 4. Include runtimeFieldMap with invalid type 'wrong-type'
-      // 5. Verify response statusCode equals 400
-    });
-  });
+      apiTest('returns error when "override" parameter is not a boolean', async ({ apiClient }) => {
+        const response = await apiClient.post(config.path, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            override: 123,
+            [config.serviceKey]: {
+              title: 'foo',
+            },
+          },
+        });
 
-  apiTest.describe('data view API', () => {
-    apiTest('returns error when data_view object is not provided', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. POST request to /api/data_views/data_view
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send no body (null)
-      // 4. Verify response statusCode equals 400
-      // 5. Verify error message: 'expected a plain object value, but found [null] instead.'
-    });
+        expect(response.statusCode).toBe(400);
+        expect(response.body.statusCode).toBe(400);
+        expect(response.body.message).toBe(
+          '[request body.override]: expected value of type [boolean] but got [number]'
+        );
+      });
 
-    apiTest('returns error on empty data_view object', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. POST request to /api/data_views/data_view
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send body: { data_view: {} }
-      // 4. Verify response statusCode equals 400
-      // 5. Verify error message contains 'expected value of type [string] but got [undefined]'
-    });
+      apiTest(
+        'returns error when "refresh_fields" parameter is not a boolean',
+        async ({ apiClient }) => {
+          const response = await apiClient.post(config.path, {
+            headers: {
+              ...COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+            responseType: 'json',
+            body: {
+              refresh_fields: 123,
+              [config.serviceKey]: {
+                title: 'foo',
+              },
+            },
+          });
 
-    apiTest('returns error when "override" parameter is not a boolean', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. POST request to /api/data_views/data_view
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send body: { override: 123, data_view: { title: 'foo' } }
-      // 4. Verify response statusCode equals 400
-      // 5. Verify error message: 'expected value of type [boolean] but got [number]'
-    });
+          expect(response.statusCode).toBe(400);
+          expect(response.body.statusCode).toBe(400);
+          expect(response.body.message).toBe(
+            '[request body.refresh_fields]: expected value of type [boolean] but got [number]'
+          );
+        }
+      );
 
-    apiTest('returns error when "refresh_fields" parameter is not a boolean', async ({
-      apiClient,
-    }) => {
-      // TODO: Implement test
-      // 1. POST request to /api/data_views/data_view
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send body: { refresh_fields: 123, data_view: { title: 'foo' } }
-      // 4. Verify response statusCode equals 400
-      // 5. Verify error message: 'expected value of type [boolean] but got [number]'
-    });
+      apiTest('returns an error when unknown runtime field type', async ({ apiClient }) => {
+        const title = 'basic_index*';
+        const response = await apiClient.post(config.path, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            override: true,
+            [config.serviceKey]: {
+              title,
+              runtimeFieldMap: {
+                runtimeFoo: {
+                  type: 'wrong-type',
+                  script: {
+                    source: 'emit(doc["foo"].value)',
+                  },
+                },
+              },
+            },
+          },
+        });
 
-    apiTest('returns an error when unknown runtime field type', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. POST request to /api/data_views/data_view
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send body with override: true, title: 'basic_index*'
-      // 4. Include runtimeFieldMap with invalid type 'wrong-type'
-      // 5. Verify response statusCode equals 400
-    });
-  });
+        expect(response.statusCode).toBe(400);
+      });
+    }
+  );
 });

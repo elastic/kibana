@@ -9,49 +9,104 @@
 
 import { expect, apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS, configArray } from '../fixtures/constants';
 
-apiTest.describe('DELETE /api/data_views/data_view/{id} - main', { tag: tags.PLATFORM }, () => {
-  let adminApiCredentials: RoleApiCredentials;
+configArray.forEach((config) => {
+  apiTest.describe(
+    `DELETE ${config.path}/{id} - main (${config.name})`,
+    { tag: tags.DEPLOYMENT_AGNOSTIC },
+    () => {
+      let adminApiCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    // TODO: Implement test setup
-    // 1. Get admin API credentials using requestAuth.getApiKey('admin')
-  });
+      apiTest.beforeAll(async ({ requestAuth, log }) => {
+        adminApiCredentials = await requestAuth.getApiKey('admin');
+        log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
+      });
 
-  apiTest.describe('legacy API', () => {
-    apiTest('can delete an index pattern', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. Create an index pattern
-      // 2. DELETE request to /api/index_patterns/index_pattern/{id}
-      // 3. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 4. Verify response statusCode equals 200
-      // 5. Verify GET request returns 404
-    });
+      apiTest(`deletes an ${config.serviceKey}`, async ({ apiClient }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
 
-    apiTest('returns 200 status code', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. Create an index pattern
-      // 2. DELETE the index pattern
-      // 3. Verify response statusCode equals 200
-    });
-  });
+        // Create an index pattern/data view
+        const createResponse = await apiClient.post(config.path, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            [config.serviceKey]: {
+              title,
+            },
+          },
+        });
 
-  apiTest.describe('data view API', () => {
-    apiTest('can delete a data view', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. Create a data view
-      // 2. DELETE request to /api/data_views/data_view/{id}
-      // 3. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 4. Verify response statusCode equals 200
-      // 5. Verify GET request returns 404
-    });
+        const id = createResponse.body[config.serviceKey].id;
 
-    apiTest('returns 200 status code', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. Create a data view
-      // 2. DELETE the data view
-      // 3. Verify response statusCode equals 200
-    });
-  });
+        // Verify it exists
+        const getResponse = await apiClient.get(`${config.path}/${id}`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
+
+        expect(getResponse.statusCode).toBe(200);
+
+        // Delete it
+        const deleteResponse = await apiClient.delete(`${config.path}/${id}`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
+
+        expect(deleteResponse.statusCode).toBe(200);
+
+        // Verify it no longer exists
+        const verifyResponse = await apiClient.get(`${config.path}/${id}`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
+
+        expect(verifyResponse.statusCode).toBe(404);
+      });
+
+      apiTest('returns nothing', async ({ apiClient }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+
+        // Create an index pattern/data view
+        const createResponse = await apiClient.post(config.path, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            [config.serviceKey]: {
+              title,
+            },
+          },
+        });
+
+        const id = createResponse.body[config.serviceKey].id;
+
+        // Delete it
+        const deleteResponse = await apiClient.delete(`${config.path}/${id}`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
+
+        // Verify empty response
+        expect(Object.keys(deleteResponse.body)).toHaveLength(0);
+      });
+    }
+  );
 });

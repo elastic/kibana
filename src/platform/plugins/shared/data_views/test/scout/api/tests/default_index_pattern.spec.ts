@@ -9,41 +9,130 @@
 
 import { expect, apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS, configArray } from '../fixtures/constants';
 
-apiTest.describe('default index pattern API', { tag: tags.PLATFORM }, () => {
-  let adminApiCredentials: RoleApiCredentials;
+configArray.forEach((config) => {
+  apiTest.describe(
+    `default ${config.serviceKey} API (${config.name})`,
+    { tag: tags.DEPLOYMENT_AGNOSTIC },
+    () => {
+      let adminApiCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    // TODO: Implement test setup
-    // 1. Get admin API credentials using requestAuth.getApiKey('admin')
-  });
+      const newId = () => `default-id-${Date.now()}-${Math.random()}`;
 
-  apiTest.describe('legacy API', () => {
-    apiTest('can set default index pattern', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. Generate unique default ID
-      // 2. POST to /api/index_patterns/default with force: true
-      // 3. Verify response.acknowledged is true
-      // 4. GET /api/index_patterns/default and verify it matches
-      // 5. POST new default without force flag
-      // 6. Verify original default is still used
-      // 7. POST with force: true and null value to clear default
-      // 8. Verify default is cleared (empty string)
-    });
-  });
+      apiTest.beforeAll(async ({ requestAuth, log }) => {
+        adminApiCredentials = await requestAuth.getApiKey('admin');
+        log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
+      });
 
-  apiTest.describe('data view API', () => {
-    apiTest('can set default data view', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. Generate unique default ID
-      // 2. POST to /api/data_views/default with force: true
-      // 3. Verify response.acknowledged is true
-      // 4. GET /api/data_views/default and verify it matches
-      // 5. POST new default without force flag
-      // 6. Verify original default is still used
-      // 7. POST with force: true and null value to clear default
-      // 8. Verify default is cleared (empty string)
-    });
-  });
+      apiTest.afterEach(async ({ apiClient, log }) => {
+        // Always clear the default after each test to ensure clean state
+        const defaultPath = `${config.basePath}/default`;
+        const serviceKeyId = `${config.serviceKey}_id`;
+
+        try {
+          await apiClient.post(defaultPath, {
+            headers: {
+              ...COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+            responseType: 'json',
+            body: {
+              [serviceKeyId]: null,
+              force: true,
+            },
+          });
+          log.info(`Cleared default ${config.serviceKey}`);
+        } catch {
+          log.info(`Failed to clear default ${config.serviceKey}`);
+        }
+      });
+
+      apiTest(`can set default ${config.serviceKey}`, async ({ apiClient }) => {
+        const defaultId = newId();
+        const defaultPath = `${config.basePath}/default`;
+        const serviceKeyId = `${config.serviceKey}_id`;
+
+        // Set the default with force: true
+        const response1 = await apiClient.post(defaultPath, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            [serviceKeyId]: defaultId,
+            force: true,
+          },
+        });
+
+        expect(response1.statusCode).toBe(200);
+        expect(response1.body.acknowledged).toBe(true);
+
+        // Verify the default was set
+        const response2 = await apiClient.get(defaultPath, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
+
+        expect(response2.statusCode).toBe(200);
+        expect(response2.body[serviceKeyId]).toBe(defaultId);
+
+        // Try to set a new default without force flag
+        const response3 = await apiClient.post(defaultPath, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            [serviceKeyId]: newId(),
+            // no force this time, so this new default shouldn't be set
+          },
+        });
+
+        expect(response3.statusCode).toBe(200);
+
+        // Verify original default is still used
+        const response4 = await apiClient.get(defaultPath, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
+
+        expect(response4.body[serviceKeyId]).toBe(defaultId);
+
+        // Verify default can be cleared with force: true and null value
+        const response5 = await apiClient.post(defaultPath, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            [serviceKeyId]: null,
+            force: true,
+          },
+        });
+
+        expect(response5.statusCode).toBe(200);
+
+        // Verify default is cleared (empty string)
+        const response6 = await apiClient.get(defaultPath, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
+
+        expect(response6.body[serviceKeyId]).toBe('');
+      });
+    }
+  );
 });

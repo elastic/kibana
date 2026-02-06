@@ -9,49 +9,133 @@
 
 import { expect, apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS, configArray } from '../fixtures/constants';
 
-apiTest.describe('POST /api/data_views/data_view/{id} - errors', { tag: tags.PLATFORM }, () => {
-  let adminApiCredentials: RoleApiCredentials;
+configArray.forEach((config) => {
+  apiTest.describe(
+    `POST ${config.path}/{id} - errors (${config.name})`,
+    { tag: tags.DEPLOYMENT_AGNOSTIC },
+    () => {
+      let adminApiCredentials: RoleApiCredentials;
+      let createdIds: string[] = [];
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    // TODO: Implement test setup
-    // 1. Get admin API credentials using requestAuth.getApiKey('admin')
-  });
+      apiTest.beforeAll(async ({ requestAuth, log }) => {
+        adminApiCredentials = await requestAuth.getApiKey('admin');
+        log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
+      });
 
-  apiTest.describe('legacy API', () => {
-    apiTest('returns 404 when updating non-existent index pattern', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. POST request to /api/index_patterns/index_pattern/non-existent-id
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send update body
-      // 4. Verify response statusCode equals 404
-    });
+      apiTest.afterEach(async ({ apiClient, log }) => {
+        for (const id of createdIds) {
+          try {
+            await apiClient.delete(`${config.path}/${id}`, {
+              headers: {
+                ...COMMON_HEADERS,
+                ...adminApiCredentials.apiKeyHeader,
+              },
+            });
+            log.info(`Cleaned up ${config.serviceKey} with id: ${id}`);
+          } catch {
+            log.info(`Failed to clean up ${config.serviceKey} with id: ${id}`);
+          }
+        }
+        createdIds = [];
+      });
 
-    apiTest('returns error when index_pattern object is not provided', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. Create an index pattern
-      // 2. POST update without index_pattern in body
-      // 3. Verify response statusCode equals 400
-      // 4. Delete the index pattern
-    });
-  });
+      apiTest(
+        `returns error when ${config.serviceKey} object is not provided`,
+        async ({ apiClient }) => {
+          const response = await apiClient.post(`${config.path}/foo`, {
+            headers: {
+              ...COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+            responseType: 'json',
+            body: null,
+          });
 
-  apiTest.describe('data view API', () => {
-    apiTest('returns 404 when updating non-existent data view', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. POST request to /api/data_views/data_view/non-existent-id
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send update body
-      // 4. Verify response statusCode equals 404
-    });
+          expect(response.statusCode).toBe(400);
+          expect(response.body.statusCode).toBe(400);
+          expect(response.body.message).toBe(
+            '[request body]: expected a plain object value, but found [null] instead.'
+          );
+        }
+      );
 
-    apiTest('returns error when data_view object is not provided', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. Create a data view
-      // 2. POST update without data_view in body
-      // 3. Verify response statusCode equals 400
-      // 4. Delete the data view
-    });
-  });
+      apiTest(`returns error on non-existing ${config.serviceKey}`, async ({ apiClient }) => {
+        const response = await apiClient.post(`${config.path}/non-existing-index-pattern`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            [config.serviceKey]: {},
+          },
+        });
+
+        expect(response.statusCode).toBe(404);
+        expect(response.body.statusCode).toBe(404);
+        expect(response.body.message).toBe(
+          'Saved object [index-pattern/non-existing-index-pattern] not found'
+        );
+      });
+
+      apiTest(
+        'returns error when "refresh_fields" parameter is not a boolean',
+        async ({ apiClient }) => {
+          const response = await apiClient.post(`${config.path}/foo`, {
+            headers: {
+              ...COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+            responseType: 'json',
+            body: {
+              refresh_fields: 123,
+              [config.serviceKey]: {
+                title: 'foo',
+              },
+            },
+          });
+
+          expect(response.statusCode).toBe(400);
+          expect(response.body.statusCode).toBe(400);
+          expect(response.body.message).toBe(
+            '[request body.refresh_fields]: expected value of type [boolean] but got [number]'
+          );
+        }
+      );
+
+      apiTest('returns success when update patch is empty', async ({ apiClient }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const createResponse = await apiClient.post(config.path, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            [config.serviceKey]: {
+              title,
+            },
+          },
+        });
+
+        const id = createResponse.body[config.serviceKey].id;
+        createdIds.push(id);
+
+        const updateResponse = await apiClient.post(`${config.path}/${id}`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            [config.serviceKey]: {},
+          },
+        });
+
+        expect(updateResponse.statusCode).toBe(200);
+      });
+    }
+  );
 });

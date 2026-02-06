@@ -9,71 +9,109 @@
 
 import { expect, apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { COMMON_HEADERS, ES_ARCHIVE_BASIC_INDEX } from '../fixtures/constants';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+
+const EXISTING_INDICES_PATH = 'internal/data_views/_existing_indices';
+
+// Internal APIs use version '1' instead of the public API version '2023-10-31'
+const INTERNAL_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'kibana',
+  [ELASTIC_HTTP_VERSION_HEADER]: '1',
+};
 
 apiTest.describe(
-  'GET /internal/data_views/_existing_indices - params',
-  { tag: tags.PLATFORM },
+  `GET /${EXISTING_INDICES_PATH} - params`,
+  { tag: tags.DEPLOYMENT_AGNOSTIC },
   () => {
     let adminApiCredentials: RoleApiCredentials;
 
-    apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
-      // TODO: Implement test setup
-      // 1. Get admin API credentials using requestAuth.getApiKey('admin')
-      // 2. Load ES archive: ES_ARCHIVE_BASIC_INDEX
-    });
-
-    apiTest.afterAll(async ({ kbnClient }) => {
-      // TODO: Implement cleanup
-      // 1. Unload ES archive: ES_ARCHIVE_BASIC_INDEX
+    apiTest.beforeAll(async ({ requestAuth, log }) => {
+      adminApiCredentials = await requestAuth.getApiKey('admin');
+      log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
     });
 
     apiTest('requires a query param', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. GET request to /internal/data_views/_existing_indices
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send empty query params {}
-      // 4. Verify response statusCode equals 400
+      const response = await apiClient.get(EXISTING_INDICES_PATH, {
+        headers: {
+          ...INTERNAL_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(response.statusCode).toBe(400);
     });
 
     apiTest('accepts indices param as single index string', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. GET request to /internal/data_views/_existing_indices
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send query params: { indices: 'filebeat-*' }
-      // 4. Verify response statusCode equals 200
+      const response = await apiClient.get(`${EXISTING_INDICES_PATH}?indices=filebeat-*`, {
+        headers: {
+          ...INTERNAL_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(response.statusCode).toBe(200);
     });
 
     apiTest('accepts indices param as single index array', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. GET request to /internal/data_views/_existing_indices
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send query params: { indices: ['filebeat-*'] }
-      // 4. Verify response statusCode equals 200
+      const params = new URLSearchParams();
+      params.append('indices', 'filebeat-*');
+      const response = await apiClient.get(`${EXISTING_INDICES_PATH}?${params.toString()}`, {
+        headers: {
+          ...INTERNAL_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(response.statusCode).toBe(200);
     });
 
-    apiTest('accepts indices param', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. GET request to /internal/data_views/_existing_indices
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send query params: { indices: ['filebeat-*', 'packetbeat-*'] }
-      // 4. Verify response statusCode equals 200
+    apiTest('accepts indices param as array', async ({ apiClient }) => {
+      const params = new URLSearchParams();
+      params.append('indices', 'filebeat-*');
+      params.append('indices', 'packetbeat-*');
+      const response = await apiClient.get(`${EXISTING_INDICES_PATH}?${params.toString()}`, {
+        headers: {
+          ...INTERNAL_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(response.statusCode).toBe(200);
     });
 
     apiTest('rejects unexpected query params', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. GET request to /internal/data_views/_existing_indices
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send query params with random word key-value pair
-      // 4. Verify response statusCode equals 400
+      const response = await apiClient.get(
+        `${EXISTING_INDICES_PATH}?unexpectedParam=unexpectedValue`,
+        {
+          headers: {
+            ...INTERNAL_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        }
+      );
+
+      expect(response.statusCode).toBe(400);
     });
 
     apiTest('rejects a comma-separated list of indices', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. GET request to /internal/data_views/_existing_indices
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send query params: { indices: 'filebeat-*,packetbeat-*' }
-      // 4. Verify response statusCode equals 400
+      const response = await apiClient.get(
+        `${EXISTING_INDICES_PATH}?indices=filebeat-*,packetbeat-*`,
+        {
+          headers: {
+            ...INTERNAL_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        }
+      );
+
+      expect(response.statusCode).toBe(400);
     });
   }
 );

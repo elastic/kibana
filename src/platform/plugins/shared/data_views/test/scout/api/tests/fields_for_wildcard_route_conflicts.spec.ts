@@ -9,40 +9,88 @@
 
 import { expect, apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
+const FIELDS_FOR_WILDCARD_PATH = 'internal/data_views/_fields_for_wildcard';
 const ES_ARCHIVE_CONFLICTS =
   'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/conflicts';
 
+// Internal APIs use version '1' instead of the public API version '2023-10-31'
+const INTERNAL_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'kibana',
+  [ELASTIC_HTTP_VERSION_HEADER]: '1',
+};
+
 apiTest.describe(
   'GET /internal/data_views/_fields_for_wildcard - conflicts',
-  { tag: tags.PLATFORM },
+  { tag: tags.DEPLOYMENT_AGNOSTIC },
   () => {
     let adminApiCredentials: RoleApiCredentials;
 
-    apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
-      // TODO: Implement test setup
-      // 1. Get admin API credentials using requestAuth.getApiKey('admin')
-      // 2. Load ES archive: ES_ARCHIVE_CONFLICTS
-    });
+    apiTest.beforeAll(async ({ esArchiver, requestAuth, log }) => {
+      adminApiCredentials = await requestAuth.getApiKey('admin');
+      log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
 
-    apiTest.afterAll(async ({ kbnClient }) => {
-      // TODO: Implement cleanup
-      // 1. Unload ES archive: ES_ARCHIVE_CONFLICTS
+      await esArchiver.loadIfNeeded(ES_ARCHIVE_CONFLICTS);
+      log.info(`Loaded ES archive: ${ES_ARCHIVE_CONFLICTS}`);
     });
 
     apiTest('flags fields with mismatched types as conflicting', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. GET request to /internal/data_views/_fields_for_wildcard
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send query params: { pattern: 'logs-2017.01.*' }
-      // 4. Verify response statusCode equals 200
-      // 5. Verify response contains fields:
-      //    - @timestamp (type: date)
-      //    - number_conflict (type: number, esTypes: ['float', 'integer'])
-      //    - string_conflict (type: string, esTypes: ['keyword', 'text'])
-      //    - success (type: conflict, esTypes: ['keyword', 'boolean'])
-      // 6. Verify conflict field has conflictDescriptions property
+      const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?pattern=logs-*`, {
+        headers: {
+          ...INTERNAL_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toStrictEqual({
+        fields: [
+          {
+            name: '@timestamp',
+            type: 'date',
+            esTypes: ['date'],
+            aggregatable: true,
+            searchable: true,
+            readFromDocValues: true,
+            metadata_field: false,
+          },
+          {
+            name: 'number_conflict',
+            type: 'number',
+            esTypes: ['float', 'integer'],
+            aggregatable: true,
+            searchable: true,
+            readFromDocValues: true,
+            metadata_field: false,
+          },
+          {
+            name: 'string_conflict',
+            type: 'string',
+            esTypes: ['keyword', 'text'],
+            aggregatable: true,
+            searchable: true,
+            readFromDocValues: true,
+            metadata_field: false,
+          },
+          {
+            name: 'success',
+            type: 'conflict',
+            esTypes: ['keyword', 'boolean'],
+            aggregatable: true,
+            searchable: true,
+            readFromDocValues: false,
+            conflictDescriptions: {
+              boolean: ['logs-2017.01.02'],
+              keyword: ['logs-2017.01.01'],
+            },
+            metadata_field: false,
+          },
+        ],
+        indices: ['logs-2017.01.01', 'logs-2017.01.02'],
+      });
     });
   }
 );

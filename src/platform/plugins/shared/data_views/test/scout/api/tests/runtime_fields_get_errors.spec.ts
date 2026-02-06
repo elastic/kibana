@@ -9,32 +9,99 @@
 
 import { expect, apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS, ES_ARCHIVE_BASIC_INDEX, configArray } from '../fixtures/constants';
 
-apiTest.describe('GET /api/data_views/data_view/{id}/runtime_field/{name} - errors', { tag: tags.PLATFORM }, () => {
-  let adminApiCredentials: RoleApiCredentials;
+configArray.forEach((config) => {
+  apiTest.describe(
+    `GET ${config.path}/{id}/runtime_field/{name} - errors (${config.name})`,
+    { tag: tags.DEPLOYMENT_AGNOSTIC },
+    () => {
+      let adminApiCredentials: RoleApiCredentials;
+      let indexPatternId: string;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    // TODO: Get admin API credentials
-  });
+      apiTest.beforeAll(async ({ esArchiver, requestAuth, apiClient, log }) => {
+        adminApiCredentials = await requestAuth.getApiKey('admin');
+        log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
 
-  apiTest.describe('legacy API', () => {
-    apiTest('returns 404 for non-existent index pattern', async ({ apiClient }) => {
-      // TODO: GET non-existent pattern, verify 404
-    });
+        await esArchiver.loadIfNeeded(ES_ARCHIVE_BASIC_INDEX);
+        log.info(`Loaded ES archive: ${ES_ARCHIVE_BASIC_INDEX}`);
 
-    apiTest('returns 404 for non-existent runtime field', async ({ apiClient }) => {
-      // TODO: Create pattern, GET non-existent field, verify 404, delete pattern
-    });
-  });
+        // Create an index pattern/data view for tests that need one
+        const basicIndex = '*asic_index';
+        const createResponse = await apiClient.post(config.path, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            [config.serviceKey]: {
+              title: basicIndex,
+            },
+          },
+        });
 
-  apiTest.describe('data view API', () => {
-    apiTest('returns 404 for non-existent data view', async ({ apiClient }) => {
-      // TODO: Same for data view API
-    });
+        indexPatternId = createResponse.body[config.serviceKey].id;
+        log.info(`Created ${config.serviceKey} with ID: ${indexPatternId}`);
+      });
 
-    apiTest('returns 404 for non-existent runtime field', async ({ apiClient }) => {
-      // TODO: Same for data view API
-    });
-  });
+      apiTest.afterAll(async ({ apiClient, log }) => {
+        // Cleanup: delete the index pattern/data view
+        if (indexPatternId) {
+          await apiClient.delete(`${config.path}/${indexPatternId}`, {
+            headers: {
+              ...COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+          });
+          log.info(`Deleted ${config.serviceKey} with ID: ${indexPatternId}`);
+        }
+      });
+
+      apiTest('returns 404 error on non-existing index_pattern', async ({ apiClient }) => {
+        const nonExistentId = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
+
+        const response = await apiClient.get(`${config.path}/${nonExistentId}/runtime_field/foo`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
+
+        expect(response.statusCode).toBe(404);
+      });
+
+      apiTest('returns 404 error on non-existing runtime field', async ({ apiClient }) => {
+        const response = await apiClient.get(
+          `${config.path}/${indexPatternId}/runtime_field/nonExistentField`,
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+            responseType: 'json',
+          }
+        );
+
+        expect(response.statusCode).toBe(404);
+      });
+
+      apiTest('returns error when ID is too long', async ({ apiClient }) => {
+        // Create an ID that exceeds the 1000 character limit
+        const longId = 'x'.repeat(1100);
+
+        const response = await apiClient.get(`${config.path}/${longId}/runtime_field/foo`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.message).toContain('must have a maximum length of [1000]');
+      });
+    }
+  );
 });

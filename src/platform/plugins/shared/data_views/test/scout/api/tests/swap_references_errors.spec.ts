@@ -9,41 +9,81 @@
 
 import { expect, apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS, DATA_VIEW_PATH, SERVICE_PATH } from '../fixtures/constants';
 
-apiTest.describe('swap data view references - errors', { tag: tags.PLATFORM }, () => {
-  let adminApiCredentials: RoleApiCredentials;
-  let dataViewId: string;
-  const prevDataViewId = '91200a00-9efd-11e7-acb3-3dab96693fab';
+const SWAP_REFERENCES_PATH = `${SERVICE_PATH}/swap_references`;
 
-  apiTest.beforeAll(async ({ apiClient, requestAuth }) => {
-    // TODO: Implement test setup
-    // 1. Get admin API credentials using requestAuth.getApiKey('admin')
-    // 2. POST request to /api/data_views/data_view to create new data view
-    // 3. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-    // 4. Send body: { data_view: { title: 'logs-*' } }
-    // 5. Store the created data view ID in dataViewId variable
-  });
+apiTest.describe(
+  'POST /api/data_views/swap_references - errors',
+  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  () => {
+    let adminApiCredentials: RoleApiCredentials;
+    let dataViewId: string;
+    const prevDataViewId = '91200a00-9efd-11e7-acb3-3dab96693fab';
 
-  apiTest.afterAll(async ({ apiClient }) => {
-    // TODO: Implement cleanup
-    // 1. DELETE request to /api/data_views/data_view/{dataViewId}
-    // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-  });
+    apiTest.beforeAll(async ({ apiClient, requestAuth, log }) => {
+      adminApiCredentials = await requestAuth.getApiKey('admin');
+      log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
 
-  apiTest('requires toId parameter', async ({ apiClient }) => {
-    // TODO: Implement test
-    // 1. POST request to /api/data_views/swap_references
-    // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-    // 3. Send body without toId: { fromId: prevDataViewId }
-    // 4. Verify response statusCode equals 400
-  });
+      // Create a data view to use as target
+      const createResponse = await apiClient.post(DATA_VIEW_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: {
+          data_view: {
+            title: 'logs-*',
+          },
+        },
+      });
 
-  apiTest('requires fromId parameter', async ({ apiClient }) => {
-    // TODO: Implement test
-    // 1. POST request to /api/data_views/swap_references
-    // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-    // 3. Send body without fromId: { toId: dataViewId }
-    // 4. Verify response statusCode equals 400
-  });
-});
+      dataViewId = createResponse.body.data_view.id;
+      log.info(`Created data view with ID: ${dataViewId}`);
+    });
+
+    apiTest.afterAll(async ({ apiClient, log }) => {
+      // Cleanup: delete the data view
+      if (dataViewId) {
+        await apiClient.delete(`${DATA_VIEW_PATH}/${dataViewId}`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+        });
+        log.info(`Deleted data view with ID: ${dataViewId}`);
+      }
+    });
+
+    apiTest('requires toId parameter', async ({ apiClient }) => {
+      const response = await apiClient.post(SWAP_REFERENCES_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: {
+          fromId: prevDataViewId,
+        },
+      });
+
+      expect(response.statusCode).toBe(400);
+    });
+
+    apiTest('requires fromId parameter', async ({ apiClient }) => {
+      const response = await apiClient.post(SWAP_REFERENCES_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: {
+          toId: dataViewId,
+        },
+      });
+
+      expect(response.statusCode).toBe(400);
+    });
+  }
+);

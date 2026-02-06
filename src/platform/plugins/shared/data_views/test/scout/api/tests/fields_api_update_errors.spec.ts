@@ -9,69 +9,180 @@
 
 import { expect, apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS, configArray } from '../fixtures/constants';
 
-apiTest.describe('POST /api/data_views/data_view/{id}/fields - errors', { tag: tags.PLATFORM }, () => {
-  let adminApiCredentials: RoleApiCredentials;
+configArray.forEach((config) => {
+  apiTest.describe(
+    `POST ${config.path}/{id}/fields - errors (${config.name})`,
+    { tag: tags.DEPLOYMENT_AGNOSTIC },
+    () => {
+      let adminApiCredentials: RoleApiCredentials;
+      let createdIds: string[] = [];
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    // TODO: Implement test setup
-    // 1. Get admin API credentials using requestAuth.getApiKey('admin')
-  });
+      apiTest.beforeAll(async ({ requestAuth, log }) => {
+        adminApiCredentials = await requestAuth.getApiKey('admin');
+        log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
+      });
 
-  apiTest.describe('legacy API', () => {
-    apiTest('returns 404 when updating fields for non-existent index pattern', async ({
-      apiClient,
-    }) => {
-      // TODO: Implement test
-      // 1. POST request to /api/index_patterns/index_pattern/non-existent-id/fields
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send body with fields update
-      // 4. Verify response statusCode equals 404
-    });
+      apiTest.afterEach(async ({ apiClient, log }) => {
+        // Clean up any data views created during the test
+        for (const id of createdIds) {
+          try {
+            await apiClient.delete(`${config.path}/${id}`, {
+              headers: {
+                ...COMMON_HEADERS,
+                ...adminApiCredentials.apiKeyHeader,
+              },
+            });
+            log.info(`Cleaned up ${config.serviceKey} with id: ${id}`);
+          } catch {
+            log.info(`Failed to clean up ${config.serviceKey} with id: ${id}`);
+          }
+        }
+        createdIds = [];
+      });
 
-    apiTest('returns error when fields object is not provided', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. Create an index pattern
-      // 2. POST to fields endpoint without fields in body
-      // 3. Verify response statusCode equals 400
-      // 4. Delete the index pattern
-    });
+      apiTest(`returns 404 error on non-existing ${config.serviceKey}`, async ({ apiClient }) => {
+        const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
+        const response = await apiClient.post(`${config.path}/${id}/fields`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            fields: {
+              foo: {},
+            },
+          },
+        });
 
-    apiTest('returns error when fields is not an object', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. Create an index pattern
-      // 2. POST with fields as non-object value
-      // 3. Verify response statusCode equals 400
-      // 4. Delete the index pattern
-    });
-  });
+        expect(response.statusCode).toBe(404);
+      });
 
-  apiTest.describe('data view API', () => {
-    apiTest('returns 404 when updating fields for non-existent data view', async ({
-      apiClient,
-    }) => {
-      // TODO: Implement test
-      // 1. POST request to /api/data_views/data_view/non-existent-id/fields
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send body with fields update
-      // 4. Verify response statusCode equals 404
-    });
+      apiTest('returns error when "fields" payload attribute is invalid', async ({ apiClient }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
 
-    apiTest('returns error when fields object is not provided', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. Create a data view
-      // 2. POST to fields endpoint without fields in body
-      // 3. Verify response statusCode equals 400
-      // 4. Delete the data view
-    });
+        // Create the data view / index pattern
+        const createResponse = await apiClient.post(config.path, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            [config.serviceKey]: {
+              title,
+            },
+          },
+        });
 
-    apiTest('returns error when fields is not an object', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. Create a data view
-      // 2. POST with fields as non-object value
-      // 3. Verify response statusCode equals 400
-      // 4. Delete the data view
-    });
-  });
+        expect(createResponse.statusCode).toBe(200);
+        const id = createResponse.body[config.serviceKey].id;
+        createdIds.push(id);
+
+        // Try to update with invalid fields value
+        const response = await apiClient.post(`${config.path}/${id}/fields`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            fields: 123,
+          },
+        });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.statusCode).toBe(400);
+        expect(response.body.message).toBe(
+          '[request body.fields]: expected value of type [object] but got [number]'
+        );
+      });
+
+      apiTest('returns error if no changes are specified', async ({ apiClient }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+
+        // Create the data view / index pattern
+        const createResponse = await apiClient.post(config.path, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            [config.serviceKey]: {
+              title,
+            },
+          },
+        });
+
+        expect(createResponse.statusCode).toBe(200);
+        const id = createResponse.body[config.serviceKey].id;
+        createdIds.push(id);
+
+        // Try to update with empty field changes
+        const response = await apiClient.post(`${config.path}/${id}/fields`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            fields: {
+              foo: {},
+              bar: {},
+              baz: {},
+            },
+          },
+        });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.statusCode).toBe(400);
+        expect(response.body.message).toBe('Change set is empty.');
+      });
+
+      apiTest('returns validation error for too long customDescription', async ({ apiClient }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+
+        // Create the data view / index pattern
+        const createResponse = await apiClient.post(config.path, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            [config.serviceKey]: {
+              title,
+            },
+          },
+        });
+
+        expect(createResponse.statusCode).toBe(200);
+        const id = createResponse.body[config.serviceKey].id;
+        createdIds.push(id);
+
+        // Try to update with too long customDescription
+        const response = await apiClient.post(`${config.path}/${id}/fields`, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            fields: {
+              foo: {
+                customDescription: 'too long value'.repeat(50),
+              },
+            },
+          },
+        });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.statusCode).toBe(400);
+        expect(response.body.message).toContain('it must have a maximum length');
+      });
+    }
+  );
 });

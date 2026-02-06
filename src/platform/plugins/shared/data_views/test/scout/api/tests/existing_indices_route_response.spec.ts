@@ -9,41 +9,63 @@
 
 import { expect, apiTest, tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { COMMON_HEADERS, ES_ARCHIVE_BASIC_INDEX } from '../fixtures/constants';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { ES_ARCHIVE_BASIC_INDEX } from '../fixtures/constants';
+
+const EXISTING_INDICES_PATH = 'internal/data_views/_existing_indices';
+
+// Internal APIs use version '1' instead of the public API version '2023-10-31'
+const INTERNAL_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'kibana',
+  [ELASTIC_HTTP_VERSION_HEADER]: '1',
+};
 
 apiTest.describe(
   'GET /internal/data_views/_existing_indices - response',
-  { tag: tags.PLATFORM },
+  { tag: tags.DEPLOYMENT_AGNOSTIC },
   () => {
     let adminApiCredentials: RoleApiCredentials;
 
-    apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
-      // TODO: Implement test setup
-      // 1. Get admin API credentials using requestAuth.getApiKey('admin')
-      // 2. Load ES archive: ES_ARCHIVE_BASIC_INDEX
-    });
+    apiTest.beforeAll(async ({ esArchiver, requestAuth, log }) => {
+      adminApiCredentials = await requestAuth.getApiKey('admin');
+      log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
 
-    apiTest.afterAll(async ({ kbnClient }) => {
-      // TODO: Implement cleanup
-      // 1. Unload ES archive: ES_ARCHIVE_BASIC_INDEX
+      await esArchiver.loadIfNeeded(ES_ARCHIVE_BASIC_INDEX);
+      log.info(`Loaded ES archive: ${ES_ARCHIVE_BASIC_INDEX}`);
     });
 
     apiTest('returns an array of existing indices', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. GET request to /internal/data_views/_existing_indices
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send query params: { indices: ['basic_index', 'bad_index'] }
-      // 4. Verify response statusCode equals 200
-      // 5. Verify response body equals ['basic_index']
+      const params = new URLSearchParams();
+      params.append('indices', 'basic_index');
+      params.append('indices', 'bad_index');
+
+      const response = await apiClient.get(`${EXISTING_INDICES_PATH}?${params.toString()}`, {
+        headers: {
+          ...INTERNAL_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toStrictEqual(['basic_index']);
     });
 
     apiTest('returns an empty array when no indices exist', async ({ apiClient }) => {
-      // TODO: Implement test
-      // 1. GET request to /internal/data_views/_existing_indices
-      // 2. Set COMMON_HEADERS and adminApiCredentials.apiKeyHeader
-      // 3. Send query params: { indices: ['bad_index'] }
-      // 4. Verify response statusCode equals 200
-      // 5. Verify response body equals []
+      const params = new URLSearchParams();
+      params.append('indices', 'bad_index');
+
+      const response = await apiClient.get(`${EXISTING_INDICES_PATH}?${params.toString()}`, {
+        headers: {
+          ...INTERNAL_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toStrictEqual([]);
     });
   }
 );
