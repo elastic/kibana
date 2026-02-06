@@ -38,12 +38,15 @@ import {
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
 jest.mock('../../../../common/components/ml/hooks/use_get_jobs');
 jest.mock('../../../../common/components/ml_popover/hooks/use_security_jobs');
 jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../common/components/user_privileges');
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -130,6 +133,14 @@ describe('StepAboutRuleComponent', () => {
       },
     ]);
     (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        rules: { edit: true },
+        investigationGuide: { edit: true },
+        customHighlightedFields: { edit: true },
+      },
+    });
     useGetInstalledJobMock = (useGetInstalledJob as jest.Mock).mockImplementation(() => ({
       jobs: [],
     }));
