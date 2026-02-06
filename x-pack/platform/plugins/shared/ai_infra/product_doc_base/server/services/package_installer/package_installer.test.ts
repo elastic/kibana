@@ -118,7 +118,8 @@ describe('PackageInstaller', () => {
       expect(downloadToDiskMock).toHaveBeenCalledTimes(1);
       expect(downloadToDiskMock).toHaveBeenCalledWith(
         `${artifactRepositoryUrl}/${artifactName}`,
-        `${artifactsFolder}/${artifactName}`
+        `${artifactsFolder}/${artifactName}`,
+        undefined
       );
 
       expect(openZipArchiveMock).toHaveBeenCalledTimes(1);
@@ -338,7 +339,8 @@ describe('PackageInstaller', () => {
       expect(fetchSecurityLabsVersionsMock).toHaveBeenCalledTimes(1);
       expect(downloadToDiskMock).toHaveBeenCalledWith(
         `${artifactRepositoryUrl}/${artifactName}`,
-        `${artifactsFolder}/${artifactName}`
+        `${artifactsFolder}/${artifactName}`,
+        undefined
       );
 
       // Critical: openZipArchive must use the full path returned by downloadToDisk.

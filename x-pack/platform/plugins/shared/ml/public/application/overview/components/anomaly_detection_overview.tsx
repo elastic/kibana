@@ -8,16 +8,17 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MlSummaryJobs } from '../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../locator';
-import adImage from '../../jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_kibana.png';
+import adImage from '../../jobs/jobs_list/components/anomaly_detection_empty_state/machine_learning_cog.png';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../ml_nodes_check';
 import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
 import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_empty_state';
 import { MLEmptyPromptCard } from '../../components/overview/ml_empty_prompt_card';
+import { useOverviewPageCustomCss } from '../overview_ml_page';
 
 export const AnomalyDetectionOverviewCard: FC = () => {
   const [canGetJobs, canCreateJob] = usePermissionCheck(['canGetJobs', 'canCreateJob']);
@@ -28,6 +29,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
   const mlApi = useMlApi();
   const mlLocator = useMlLocator();
   const mlManagementLocator = useMlManagementLocator();
+  const overviewPageCardCustomCss = useOverviewPageCustomCss();
 
   const loadJobs = useCallback(async () => {
     setIsLoading(true);
@@ -73,23 +75,22 @@ export const AnomalyDetectionOverviewCard: FC = () => {
     if (hasADJobs) {
       actions.push(
         <EuiButton
-          color="primary"
-          fill
+          color="text"
           onClick={redirectToMultiMetricExplorer}
           isDisabled={!canGetJobs}
           data-test-subj="multiMetricExplorerButton"
         >
           <FormattedMessage
             id="xpack.ml.overview.anomalyDetection.anomalyExplorerButtonText"
-            defaultMessage="Anomaly explorer"
+            defaultMessage="Open anomaly explorer"
           />
         </EuiButton>
       );
     }
     if (canGetJobs && canCreateJob) {
       actions.push(
-        <EuiButton
-          color="primary"
+        <EuiButtonEmpty
+          color="text"
           onClick={redirectToManageJobs}
           isDisabled={disableCreateAnomalyDetectionJob}
           data-test-subj="manageJobsButton"
@@ -98,7 +99,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
             id="xpack.ml.overview.anomalyDetection.manageJobsButton"
             defaultMessage="Manage jobs"
           />
-        </EuiButton>
+        </EuiButtonEmpty>
       );
     }
     return actions;
@@ -112,9 +113,10 @@ export const AnomalyDetectionOverviewCard: FC = () => {
   ]);
 
   return showEmptyState ? (
-    <AnomalyDetectionEmptyState />
+    <AnomalyDetectionEmptyState customCss={overviewPageCardCustomCss} />
   ) : (
     <MLEmptyPromptCard
+      customCss={overviewPageCardCustomCss}
       layout="horizontal"
       hasBorder={true}
       hasShadow={false}
@@ -123,15 +125,15 @@ export const AnomalyDetectionOverviewCard: FC = () => {
         defaultMessage: 'Anomaly detection',
       })}
       title={i18n.translate('xpack.ml.overview.anomalyDetection.createFirstJobMessage', {
-        defaultMessage: 'Spot anomalies faster',
+        defaultMessage: 'Anomaly detection',
       })}
       body={
-        <p>
+        <EuiText size="s">
           <FormattedMessage
             id="xpack.ml.overview.anomalyDetection.emptyPromptText"
-            defaultMessage="Start automatically spotting anomalies hiding in your time series data and resolve issues faster."
+            defaultMessage="Automatically spot anomalies and surface issues before they become incidents, with detection that adapts to the unique patterns in your data."
           />
-        </p>
+        </EuiText>
       }
       actions={availableActions}
       data-test-subj="mlOverviewAnomalyDetectionCard"
