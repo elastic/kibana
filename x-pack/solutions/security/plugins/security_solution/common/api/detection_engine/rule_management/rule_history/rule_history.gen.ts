@@ -23,7 +23,8 @@ export const RuleHistoryResult = z.object({
   timestamp: z.string().optional(),
   userId: z.string().optional(),
   revision: z.number().int().optional(),
-  message: z.string().optional(),
+  version: z.number().int().optional(),
+  action: z.string().optional(),
   changes: z.array(z.string()).optional(),
 });
 

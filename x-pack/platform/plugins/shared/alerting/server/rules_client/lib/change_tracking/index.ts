@@ -101,7 +101,7 @@ export class ChangeTrackingService implements IChangeTrackingService {
       // - Override ILM policy (defaults to none = keep forever)
       const mappings = {
         ...changeHistoryMappings,
-        meta: { created: new Date().toISOString() }, // <-- track the creation date (we'll use this later)
+        // meta: { created: new Date().toISOString() }, // <-- track the creation date (we'll use this later)
       };
       const dataStream: DataStreamDefinition<typeof mappings> = {
         name: dataStreamName,

@@ -17,9 +17,10 @@ import { DEFAULT_QUERY_OPTIONS } from './constants';
 export type ChangeHistoryResult = z.infer<typeof ChangeHistoryResult>;
 export const ChangeHistoryResult = z.object({
   timestamp: z.string().datetime(),
+  revision: z.number().int().optional(),
   version: z.number().int().optional(),
   userId: z.string(),
-  message: z.string(),
+  action: z.string(),
   changes: z.array(z.string()),
 });
 export type ChangeHistoryResponse = z.infer<typeof ChangeHistoryResponse>;

@@ -51,7 +51,8 @@ const mapHistoryItem = (item: ChangeHistoryDocument): RuleHistoryResult => {
     timestamp: item['@timestamp'],
     userId: user?.id,
     revision: object.snapshot?.revision,
-    message: event.action,
+    version: object.snapshot?.version,
+    action: event.action,
     changes: object.changes ?? [],
   };
 };
