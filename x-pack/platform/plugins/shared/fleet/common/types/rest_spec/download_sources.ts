@@ -63,7 +63,7 @@ export interface PostDownloadSourceRequest {
       password?: string;
       api_key?: string;
       headers?: Array<{ key: string; value: string }>;
-    };
+    } | null;
     secrets?: DownloadSourceSecrets;
   };
 }

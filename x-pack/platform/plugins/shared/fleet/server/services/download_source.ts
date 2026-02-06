@@ -277,41 +277,17 @@ class DownloadSourceService {
       updateData.ssl = null;
     }
 
-    // Handle auth field: API key and username/password are mutually exclusive
-    const isApiKeyBeingSet =
-      newData.auth?.api_key !== undefined || newData.secrets?.auth?.api_key !== undefined;
-    const isUsernamePasswordBeingSet =
-      newData.auth?.username !== undefined ||
-      newData.auth?.password !== undefined ||
-      newData.secrets?.auth?.password !== undefined;
+    // Handle auth field:
+    // - auth undefined AND no secrets.auth: preserve existing auth
+    // - auth null: clear all auth
+    // - auth object: replace entire auth state
+    const isAuthBeingUpdated = newData.auth !== undefined || newData.secrets?.auth !== undefined;
 
     let computedAuth: DownloadSourceBase['auth'] | null | undefined;
-    if (newData.auth) {
-      const authCopy = { ...newData.auth };
-      // If API key is set, remove username/password from the auth object
-      if (isApiKeyBeingSet) {
-        delete authCopy.username;
-        delete authCopy.password;
-      }
-      // If username/password is set, remove api_key from the auth object
-      if (isUsernamePasswordBeingSet) {
-        delete authCopy.api_key;
-      }
-      computedAuth = authCopy;
-    } else if (newData.auth === null) {
-      // Explicitly set to null to allow to delete the field
+    if (newData.auth !== undefined) {
+      computedAuth = newData.auth;
+    } else if (newData.secrets?.auth !== undefined) {
       computedAuth = null;
-    } else if (isApiKeyBeingSet && (originalItem.auth?.username || originalItem.auth?.password)) {
-      // API key is being set via secrets but no new auth provided: clear the existing username/password
-      const authCopy = { ...originalItem.auth };
-      delete authCopy.username;
-      delete authCopy.password;
-      computedAuth = authCopy;
-    } else if (isUsernamePasswordBeingSet && originalItem.auth?.api_key) {
-      // Username/password is being set via secrets but no new auth provided: clear the existing api_key
-      const authCopy = { ...originalItem.auth };
-      delete authCopy.api_key;
-      computedAuth = authCopy;
     }
 
     if (updateData.is_default) {
@@ -329,7 +305,6 @@ class DownloadSourceService {
     );
 
     const isSslBeingUpdated = newData.ssl !== undefined || newData.secrets?.ssl !== undefined;
-    const isAuthBeingUpdated = newData.auth !== undefined || newData.secrets?.auth !== undefined;
 
     const getSecretId = (soSecret: unknown): string | undefined => {
       if (typeof soSecret === 'object' && soSecret !== null && 'id' in soSecret) {
@@ -388,9 +363,6 @@ class DownloadSourceService {
         }
       }
 
-      // Auth secrets: they are mutually exclusive (password OR api_key)
-      // When auth is being updated, use ONLY the new auth secrets
-      // When auth is NOT being updated, preserve the old auth secrets
       if (authSecretStorageEnabled) {
         if (isAuthBeingUpdated) {
           const newAuthSecrets = newSecrets?.auth;

@@ -85,7 +85,10 @@ export const AuthenticationFormSection: React.FunctionComponent<AuthenticationFo
   onToggleSecretAndClearValueApiKey,
 }) => {
   const authType = inputs.authTypeInput.value as AuthType;
-  const showAccordionOpen = authType !== 'none';
+  const hasHeaders = inputs.headersInput.value.some(
+    (header) => header.key !== '' || header.value !== ''
+  );
+  const showAccordionOpen = authType !== 'none' || hasHeaders;
 
   return (
     <>
@@ -259,7 +262,7 @@ export const AuthenticationFormSection: React.FunctionComponent<AuthenticationFo
             </>
           )}
 
-          {authType !== 'none' && <DownloadSourceHeaders inputs={inputs} />}
+          <DownloadSourceHeaders inputs={inputs} />
         </EuiPanel>
       </EuiAccordion>
       <EuiSpacer size="m" />

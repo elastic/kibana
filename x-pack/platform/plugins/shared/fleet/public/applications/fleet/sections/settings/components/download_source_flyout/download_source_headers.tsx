@@ -65,9 +65,9 @@ export const DownloadSourceHeaders: React.FunctionComponent<{
     [keyValuePairs, onChange]
   );
 
-  const deleteButtonDisabled = keyValuePairs.length === 1;
-  const addKeyValuePairButtonDisabled =
-    keyValuePairs.length === 1 && keyValuePairs[0].key === '' && keyValuePairs[0].value === '';
+  const deleteButtonDisabled = false;
+  const hasEmptyRow = keyValuePairs.some((pair) => pair.key === '' && pair.value === '');
+  const addKeyValuePairButtonDisabled = hasEmptyRow;
 
   const displayErrors = (errorMessages?: string[]) => {
     return errorMessages?.length

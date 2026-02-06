@@ -582,6 +582,33 @@ export default function (providerContext: FtrProviderContext) {
           { key: 'X-Custom-Header', value: 'custom-value' },
         ]);
       });
+
+      it('should allow creating a download source with auth headers only', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Download source with headers only ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              headers: [
+                { key: 'X-Custom-Header', value: 'custom-value' },
+                { key: 'X-Another-Header', value: 'another-value' },
+              ],
+            },
+          })
+          .expect(200);
+
+        expect(postResponse.item.auth.headers).to.eql([
+          { key: 'X-Custom-Header', value: 'custom-value' },
+          { key: 'X-Another-Header', value: 'another-value' },
+        ]);
+
+        expect(postResponse.item.auth.username).to.be(undefined);
+        expect(postResponse.item.auth.password).to.be(undefined);
+        expect(postResponse.item.auth.api_key).to.be(undefined);
+      });
     });
 
     describe('PUT /agent_download_sources/{sourceId}', () => {
@@ -769,7 +796,6 @@ export default function (providerContext: FtrProviderContext) {
         await clearAgents();
         await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.4.0');
 
-        // Create with username/password
         const { body: createRes } = await supertest
           .post(`/api/fleet/agent_download_sources`)
           .set('kbn-xsrf', 'xxxx')
@@ -791,7 +817,6 @@ export default function (providerContext: FtrProviderContext) {
         const dsId = createRes.item.id;
         const passwordSecretId = createRes.item.secrets.auth.password.id;
 
-        // Update to api_key
         await supertest
           .put(`/api/fleet/agent_download_sources/${dsId}`)
           .set('kbn-xsrf', 'xxxx')
@@ -807,7 +832,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        // Verify old password secret was deleted
         try {
           await getSecretById(passwordSecretId);
           expect().fail('Password secret should have been deleted');
@@ -815,7 +839,6 @@ export default function (providerContext: FtrProviderContext) {
           // not found - expected
         }
 
-        // Verify new state
         const { body: getRes } = await supertest
           .get(`/api/fleet/agent_download_sources/${dsId}`)
           .expect(200);
@@ -828,7 +851,6 @@ export default function (providerContext: FtrProviderContext) {
         await clearAgents();
         await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.4.0');
 
-        // Create with api_key
         const { body: createRes } = await supertest
           .post(`/api/fleet/agent_download_sources`)
           .set('kbn-xsrf', 'xxxx')
@@ -847,7 +869,6 @@ export default function (providerContext: FtrProviderContext) {
         const dsId = createRes.item.id;
         const apiKeySecretId = createRes.item.secrets.auth.api_key.id;
 
-        // Update to username/password
         await supertest
           .put(`/api/fleet/agent_download_sources/${dsId}`)
           .set('kbn-xsrf', 'xxxx')
@@ -866,7 +887,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        // Verify old api_key secret was deleted
         try {
           await getSecretById(apiKeySecretId);
           expect().fail('API key secret should have been deleted');
@@ -874,7 +894,6 @@ export default function (providerContext: FtrProviderContext) {
           // not found - expected
         }
 
-        // Verify new state
         const { body: getRes } = await supertest
           .get(`/api/fleet/agent_download_sources/${dsId}`)
           .expect(200);
@@ -887,7 +906,6 @@ export default function (providerContext: FtrProviderContext) {
         await clearAgents();
         await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.4.0');
 
-        // Create with plain text auth
         const { body: createRes } = await supertest
           .post(`/api/fleet/agent_download_sources`)
           .set('kbn-xsrf', 'xxxx')
@@ -902,9 +920,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        // When auth secret storage is enabled, plain text password should be converted to secret
         expect(createRes.item.auth.username).to.eql('testuser');
-        // Password should be stored as secret, not in auth
         expect(createRes.item.auth.password).to.be(undefined);
         expect(createRes.item.secrets.auth.password).to.have.property('id');
 
@@ -957,6 +973,90 @@ export default function (providerContext: FtrProviderContext) {
           { key: 'X-Updated-Header', value: 'updated-value' },
           { key: 'X-New-Header', value: 'new-value' },
         ]);
+      });
+
+      it('should replace auth entirely when updating with headers only', async function () {
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.4.0');
+
+        const { body: createRes } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Replace auth test ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              username: 'testuser',
+              headers: [{ key: 'X-Original-Header', value: 'original-value' }],
+            },
+            secrets: { auth: { password: 'SECRET_PASSWORD' } },
+          })
+          .expect(200);
+
+        const dsId = createRes.item.id;
+
+        const { body: updateRes } = await supertest
+          .put(`/api/fleet/agent_download_sources/${dsId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Replace auth test updated ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              headers: [
+                { key: 'X-Updated-Header', value: 'updated-value' },
+                { key: 'X-New-Header', value: 'new-value' },
+              ],
+            },
+          })
+          .expect(200);
+
+        expect(updateRes.item.auth.headers).to.eql([
+          { key: 'X-Updated-Header', value: 'updated-value' },
+          { key: 'X-New-Header', value: 'new-value' },
+        ]);
+        expect(updateRes.item.auth.username).to.be(undefined);
+        expect(updateRes.item.secrets?.auth?.password).to.be(undefined);
+      });
+
+      it('should replace api_key auth with headers only (complete replacement)', async function () {
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.4.0');
+
+        const { body: createRes } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Replace api_key test ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              headers: [{ key: 'X-Original-Header', value: 'original-value' }],
+            },
+            secrets: { auth: { api_key: 'SECRET_API_KEY' } },
+          })
+          .expect(200);
+
+        const dsId = createRes.item.id;
+
+        const { body: updateRes } = await supertest
+          .put(`/api/fleet/agent_download_sources/${dsId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Replace api_key test updated ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              headers: [{ key: 'X-Updated-Header', value: 'updated-value' }],
+            },
+          })
+          .expect(200);
+
+        expect(updateRes.item.auth.headers).to.eql([
+          { key: 'X-Updated-Header', value: 'updated-value' },
+        ]);
+        expect(updateRes.item.secrets?.auth?.api_key).to.be(undefined);
       });
 
       it('should preserve SSL secrets when updating only name/host', async function () {

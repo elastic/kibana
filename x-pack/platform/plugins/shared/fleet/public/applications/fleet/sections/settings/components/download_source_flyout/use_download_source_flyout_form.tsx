@@ -156,7 +156,6 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     const sslKeyValid = sslKeyInput.validate();
     const sslKeySecretValid = sslKeySecretInput.validate();
 
-    // Auth validation
     const usernameValid = usernameInput.validate();
     const passwordValid = passwordInput.validate();
     const passwordSecretValid = passwordSecretInput.validate();
@@ -164,32 +163,42 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     const apiKeySecretValid = apiKeySecretInput.validate();
     const headersValid = headersInput.validate();
 
-    // Validate username and password are provided together when username_password auth type is selected
+    // Validate auth credentials based on selected auth type
     const authType = authTypeInput.value as AuthType;
     let authValid = true;
     if (authType === 'username_password') {
+      // Username & password tab: require both username and password
       const hasUsername = !!usernameInput.value;
       const hasPassword = !!passwordInput.value || !!passwordSecretInput.value;
-      if (hasUsername && !hasPassword) {
+      if (!hasUsername) {
+        usernameInput.setErrors([
+          i18n.translate('xpack.fleet.settings.dowloadSourceFlyoutForm.usernameRequired', {
+            defaultMessage: 'Username is required',
+          }),
+        ]);
+        authValid = false;
+      }
+      if (!hasPassword) {
         const passwordRequiredError = [
-          i18n.translate(
-            'xpack.fleet.settings.dowloadSourceFlyoutForm.passwordRequiredWithUsername',
-            { defaultMessage: 'Password is required when username is provided' }
-          ),
+          i18n.translate('xpack.fleet.settings.dowloadSourceFlyoutForm.passwordRequired', {
+            defaultMessage: 'Password is required',
+          }),
         ];
-        // Set error on both inputs since we don't know which one is displayed
-        // (depends on useSecretsStorage which is not available here)
         passwordInput.setErrors(passwordRequiredError);
         passwordSecretInput.setErrors(passwordRequiredError);
         authValid = false;
       }
-      if (hasPassword && !hasUsername) {
-        usernameInput.setErrors([
-          i18n.translate(
-            'xpack.fleet.settings.dowloadSourceFlyoutForm.usernameRequiredWithPassword',
-            { defaultMessage: 'Username is required when password is provided' }
-          ),
-        ]);
+    } else if (authType === 'api_key') {
+      // API key tab: require api_key
+      const hasApiKey = !!apiKeyInput.value || !!apiKeySecretInput.value;
+      if (!hasApiKey) {
+        const apiKeyRequiredError = [
+          i18n.translate('xpack.fleet.settings.dowloadSourceFlyoutForm.apiKeyRequired', {
+            defaultMessage: 'API key is required',
+          }),
+        ];
+        apiKeyInput.setErrors(apiKeyRequiredError);
+        apiKeySecretInput.setErrors(apiKeyRequiredError);
         authValid = false;
       }
     }
@@ -230,31 +239,32 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
       }
       setIsloading(true);
 
-      // Build auth object based on selected auth type
-      // When auth type is "none", we don't include any auth fields (including headers)
       const authType = authTypeInput.value as AuthType;
-      let auth: PostDownloadSourceRequest['body']['auth'];
+      let auth: PostDownloadSourceRequest['body']['auth'] | null;
 
-      // Filter out empty headers (both key and value are empty)
       const filteredHeaders = headersInput.value.filter(
         (header) => header.key !== '' || header.value !== ''
       );
+      const hasHeaders = filteredHeaders.length > 0;
 
-      if (authType === 'username_password') {
+      if (authType === 'none') {
+        // None tab: headers only or clear all auth
+        auth = hasHeaders ? { headers: filteredHeaders } : null;
+      } else if (authType === 'username_password') {
         auth = {
           username: usernameInput.value || undefined,
           password: passwordInput.value || undefined,
-          headers: filteredHeaders.length > 0 ? filteredHeaders : undefined,
+          headers: hasHeaders ? filteredHeaders : undefined,
         };
       } else if (authType === 'api_key') {
         auth = {
           api_key: apiKeyInput.value || undefined,
-          headers: filteredHeaders.length > 0 ? filteredHeaders : undefined,
+          headers: hasHeaders ? filteredHeaders : undefined,
         };
+      } else {
+        auth = null;
       }
-      // When authType is 'none', auth remains undefined, clearing any existing auth settings
 
-      // Build secrets object
       const sslSecrets =
         !sslKeyInput.value && sslKeySecretInput.value
           ? { key: sslKeySecretInput.value }
@@ -287,27 +297,21 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
           key: sslKeyInput.value || undefined,
           certificate_authorities: sslCertificateAuthoritiesInput.value.filter((val) => val !== ''),
         },
-        ...(auth && { auth }),
+        auth,
         ...(secrets && { secrets }),
       };
 
       if (downloadSource) {
-        // Update
         if (!(await confirmUpdate(downloadSource, confirm))) {
           setIsloading(false);
           return;
         }
 
-        // For updates, explicitly set auth to null when auth type is "none"
-        // to clear any existing auth settings (username, password, api_key, headers)
-        const updateData = authType === 'none' ? { ...data, auth: null } : data;
-
-        const res = await sendPutDownloadSource(downloadSource.id, updateData);
+        const res = await sendPutDownloadSource(downloadSource.id, data);
         if (res.error) {
           throw res.error;
         }
       } else {
-        // Create
         const res = await sendPostDownloadSource(data);
         if (res.error) {
           throw res.error;

@@ -1064,6 +1064,49 @@ describe('Download Service', () => {
           })
         );
       });
+
+      it('should replace auth entirely when updating with headers only', async () => {
+        const soClientMock = getMockedSoClient();
+        mockedIsSSLSecretStorageEnabled.mockResolvedValue(false);
+        mockedIsDownloadSourceAuthSecretStorageEnabled.mockResolvedValue(true);
+
+        const esoClientMockLocal = getMockedEncryptedSoClient();
+        esoClientMockLocal.getDecryptedAsInternalUser.mockResolvedValue(
+          mockDownloadSourceSO('download-source-test', {
+            is_default: false,
+            name: 'Test',
+            host: 'http://test.co',
+            auth: JSON.stringify({ username: 'user1' }),
+            secrets: { auth: { password: { id: 'existing-auth-secret-id' } } },
+          })
+        );
+
+        mockedExtractAndUpdateDownloadSourceSecrets.mockResolvedValue({
+          downloadSourceUpdate: {
+            auth: { headers: [{ key: 'X-Custom', value: 'test' }] },
+          },
+          secretReferences: [],
+          secretsToDelete: [{ id: 'existing-auth-secret-id' }],
+        });
+
+        await downloadSourceService.update(soClientMock, esClient, 'download-source-test', {
+          auth: { headers: [{ key: 'X-Custom', value: 'test' }] },
+        });
+
+        expect(mockedDeleteSecrets).toBeCalledWith(
+          expect.objectContaining({
+            ids: ['existing-auth-secret-id'],
+          })
+        );
+
+        expect(soClientMock.update).toBeCalledWith(
+          expect.anything(),
+          'download-source-test',
+          expect.objectContaining({
+            auth: JSON.stringify({ headers: [{ key: 'X-Custom', value: 'test' }] }),
+          })
+        );
+      });
     });
   });
 
