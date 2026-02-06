@@ -6,23 +6,12 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { ToolType } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { InternalToolDefinition } from '@kbn/agent-builder-server/tools';
-
-export interface ToolCreateParams<TConfig extends object = {}> {
-  id: string;
-  type: ToolType;
-  description?: string;
-  tags?: string[];
-  configuration: TConfig;
-}
-
-export interface ToolUpdateParams<TConfig extends object = {}> {
-  description?: string;
-  tags?: string[];
-  configuration?: Partial<TConfig>;
-}
+import type {
+  InternalToolDefinition,
+  ToolCreateParams,
+  ToolUpdateParams,
+} from '@kbn/agent-builder-server/tools';
 
 export type ToolTypeCreateParams<TConfig extends object = {}> = ToolCreateParams<TConfig>;
 export type ToolTypeUpdateParams<TConfig extends object = {}> = ToolUpdateParams<TConfig>;
