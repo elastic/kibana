@@ -9,6 +9,7 @@
 
 import { DataGridDensity, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import React, { useMemo } from 'react';
+import { escape } from 'lodash';
 import { EuiButtonIcon, EuiCodeBlock, EuiFlexGroup, EuiText, EuiTitle } from '@elastic/eui';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -168,7 +169,7 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
   });
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
-    : { language: 'txt', dangerouslySetInnerHTML: { __html: value ?? '' } };
+    : { language: 'txt', dangerouslySetInnerHTML: { __html: escape(value ?? '') } };
   const shouldRenderContent = Boolean(field && value);
 
   const shouldRenderSource = !shouldRenderContent;

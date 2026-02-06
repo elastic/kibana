@@ -8,6 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { escape } from 'lodash';
 import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { ShouldShowFieldInTableHandler, DataTableRecord } from '@kbn/discover-utils';
 import {
@@ -70,7 +71,9 @@ const getHighlightedMessage = (
   euiTheme: EuiThemeComputed,
   isDarkTheme: boolean
 ): string => {
-  return value.replace(LOG_LEVEL_REGEX, (match) => {
+  // Escape HTML entities to prevent XSS and ensure angle brackets are displayed correctly
+  const escapedValue = escape(value);
+  return escapedValue.replace(LOG_LEVEL_REGEX, (match) => {
     const coalesced = getLogLevelCoalescedValue(match);
     if (!coalesced) return match;
 
