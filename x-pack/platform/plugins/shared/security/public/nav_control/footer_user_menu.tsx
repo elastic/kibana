@@ -12,6 +12,10 @@ import {
   EuiContextMenuPanel,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
@@ -26,9 +30,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserMenuLink } from '@kbn/security-plugin-types-public';
 import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-components';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 
-import { getUserDisplayName, isUserAnonymous } from '../../common/model';
+import { getUserDisplayName, isUserAnonymous, canUserHaveProfile } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
+import type { UserProfileData } from '../../common';
+import { ProfileModal } from './profile_modal';
 
 // Import tooltip hook - we'll need to create a simple version or use inline logic
 const TOOLTIP_OFFSET = 4;
@@ -93,6 +101,7 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
 
   const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar,userSettings');
   const currentUser = useCurrentUser();
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const displayName = currentUser.value ? getUserDisplayName(currentUser.value) : '';
 
@@ -210,9 +219,11 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
         />
       ),
       icon: <EuiIcon type="user" size="m" />,
-      href: editProfileUrl,
-      onClick: () => {
+      onClick: (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         setIsPopoverOpen(false);
+        setIsProfileModalOpen(true);
       },
       'data-test-subj': 'footerProfileLink',
     };
@@ -274,6 +285,7 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
   );
 
   return (
+    <>
       <EuiPopover
         id="footerUserMenu"
         ownFocus
@@ -285,20 +297,29 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
         panelPaddingSize="none"
         offset={5}
       >
-      <EuiContextMenu
-        className="chrNavControl__userMenu"
-        initialPanelId={0}
-        panels={[
-          {
-            id: 0,
-            title: displayName,
-            content: (
-              <ContextMenuContent items={items} closePopover={() => setIsPopoverOpen(false)} />
-            ),
-          },
-        ]}
-        data-test-subj="footerUserMenu"
-      />
-    </EuiPopover>
+        <EuiContextMenu
+          className="chrNavControl__userMenu"
+          initialPanelId={0}
+          panels={[
+            {
+              id: 0,
+              title: displayName,
+              content: (
+                <ContextMenuContent items={items} closePopover={() => setIsPopoverOpen(false)} />
+              ),
+            },
+          ]}
+          data-test-subj="footerUserMenu"
+        />
+      </EuiPopover>
+      {isProfileModalOpen && currentUser.value && (
+        <ProfileModal
+          user={currentUser.value}
+          userProfileData={userProfile.value?.data}
+          onClose={() => setIsProfileModalOpen(false)}
+        />
+      )}
+    </>
   );
 };
+

@@ -20,6 +20,8 @@ import type {
   UserMenuLink,
 } from '@kbn/security-plugin-types-public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { FooterUserMenu } from './footer_user_menu';
 import type { SecurityLicense } from '../../common';
@@ -163,7 +165,15 @@ export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   <KibanaContextProvider services={services}>
     <AuthenticationProvider authc={authc}>
       <SecurityApiClientsProvider {...securityApiClients}>
-        <RedirectAppLinks coreStart={services}>{children}</RedirectAppLinks>
+        <UserProfilesKibanaProvider
+          core={services}
+          security={{
+            userProfiles: securityApiClients.userProfiles,
+          }}
+          toMountPoint={toMountPoint}
+        >
+          <RedirectAppLinks coreStart={services}>{children}</RedirectAppLinks>
+        </UserProfilesKibanaProvider>
       </SecurityApiClientsProvider>
     </AuthenticationProvider>
   </KibanaContextProvider>
