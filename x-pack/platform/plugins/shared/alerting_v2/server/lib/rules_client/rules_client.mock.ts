@@ -12,6 +12,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { RulesClient } from './rules_client';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
+import { UserService } from '../services/user_service/user_service';
 
 export function createRulesClient(): {
   rulesClient: RulesClient;
@@ -22,6 +23,7 @@ export function createRulesClient(): {
   const http = httpServiceMock.createStartContract();
   const taskManager = taskManagerMock.createStart();
   const security = securityMock.createStart();
+  const userService = new UserService(request, security);
 
   http.basePath.get.mockReturnValue('/s/default');
 
@@ -34,7 +36,7 @@ export function createRulesClient(): {
     http,
     rulesSavedObjectService,
     taskManager,
-    security
+    userService
   );
 
   return { rulesClient, mockSavedObjectsClient };
