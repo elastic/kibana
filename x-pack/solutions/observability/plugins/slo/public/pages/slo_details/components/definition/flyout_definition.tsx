@@ -35,7 +35,7 @@ import {
 } from '../../../../utils/slo/labels';
 import { SloFlyoutPanel } from '../../shared_flyout/flyout_panel';
 import { useKibana } from '../../../../hooks/use_kibana';
-import type { SloDetailsDefinitionProps } from '.';
+import type { SloDetailsDefinitionProps } from './types';
 import { DESCRIPTION_LIST_ROW_WIDTH_BREAKPOINT } from '../../shared_flyout/constants';
 import { DisplayQuery } from '../overview/display_query';
 

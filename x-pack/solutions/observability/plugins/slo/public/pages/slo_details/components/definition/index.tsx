@@ -6,13 +6,9 @@
  */
 
 import React from 'react';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { SloDetailsFlyoutDefinition } from './flyout_definition';
 import { SloDetailsPageDefinition } from './page_definition';
-
-export interface SloDetailsDefinitionProps {
-  slo: SLOWithSummaryResponse;
-}
+import type { SloDetailsDefinitionProps } from './types';
 
 interface Props extends SloDetailsDefinitionProps {
   isFlyout?: boolean;
