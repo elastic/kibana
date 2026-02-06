@@ -67,18 +67,11 @@ export const patchRule = async ({
 
   validateNonCustomizablePatchFields(rulePatch, existingRule);
 
-  // Zod v4 materializes some defaulted optional fields on PATCH payloads (e.g. max_signals),
-  // even when the client did not send them. Filter to fields that are both defined and
-  // actually changed so RBAC decisions are based on effective user changes.
-  const rulePatchDefinedFields: Record<string, unknown> = {};
-  let allKeysUpdateable = true;
-
-  for (const [key, value] of Object.entries(rulePatchObjWithoutIds)) {
-    if (value !== undefined && !isEqual(value, (existingRule as Record<string, unknown>)[key])) {
-      rulePatchDefinedFields[key] = value;
-      allKeysUpdateable = allKeysUpdateable && isKeyUpdateableWithReadPermission(key);
-    }
-  }
+  const patchedRule = await applyRulePatch({
+    prebuiltRuleAssetClient,
+    existingRule,
+    rulePatch,
+  });
 
   /**
    * RBAC logic branch
@@ -86,19 +79,21 @@ export const patchRule = async ({
    * Certain fields on the rule object are still able to be modified even if the user only has read permissions,
    * given they have crud permissions for the specific fields they're modifying.
    *
-   * If all fields in the PATCH request (besides id/rule_id) are included in the `ValidReadAuthEditFields` type,
-   * we check if the user has read authz privileges for the fields and use the `bulkEditRuleParamsWithReadAuth` method
-   * provided by the alerting rules client to update the rule fields individually. Otherwise the user will
-   * need `all` privileges for rules.
+   * If the user does not have permission to edit rules but all fields in the PATCH request (besides id/rule_id) are
+   * included in the `ValidReadAuthEditFields` type, we check if the user has read authz privileges for the fields
+   * and use the `bulkEditRuleParamsWithReadAuth` method provided by the alerting rules client to update the rule fields
+   * individually. Otherwise the user will need `all` privileges for rules.
    */
-  if (!isEmpty(rulePatchDefinedFields) && allKeysUpdateable) {
+  if (
+    !rulesAuthz.canEditRules &&
+    !isEmpty(rulePatchObjWithoutIds) &&
+    Object.keys(rulePatchObjWithoutIds).every((key) => isKeyUpdateableWithReadPermission(key))
+  ) {
     const appliedPatchWithReadPrivs: BulkEditResult<RuleParams> = await patchReadAuthEditRuleFields(
       {
         rulesClient,
         // Don't want to pass ID fields to the read authz PATCH method as it will apply patches on all fields in the object
-        rulePatch: rulePatchDefinedFields as Parameters<
-          typeof patchReadAuthEditRuleFields
-        >[0]['rulePatch'],
+        rulePatch: { ...rulePatchObjWithoutIds, rule_source: patchedRule.rule_source },
         existingRule,
         prebuiltRuleAssetClient,
         rulesAuthz,
@@ -110,14 +105,17 @@ export const patchRule = async ({
       throw new Error(patchErrors);
     }
 
-    return convertAlertingRuleToRuleResponse(appliedPatchWithReadPrivs.rules[0]);
-  } else {
-    const patchedRule = await applyRulePatch({
-      prebuiltRuleAssetClient,
-      existingRule,
-      rulePatch,
-    });
+    const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, patchedRule);
 
+    if (appliedPatchWithReadPrivs.skipped.length) {
+      return {
+        ...existingRule,
+        enabled,
+      };
+    }
+
+    return convertAlertingRuleToRuleResponse({ ...appliedPatchWithReadPrivs.rules[0], enabled });
+  } else {
     const patchedInternalRule = await rulesClient.update({
       id: existingRule.id,
       data: convertRuleResponseToAlertingRule(patchedRule, actionsClient),

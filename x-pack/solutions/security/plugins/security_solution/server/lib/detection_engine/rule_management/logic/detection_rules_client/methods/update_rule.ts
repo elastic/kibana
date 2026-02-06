@@ -77,12 +77,12 @@ export const updateRule = async ({
    * Certain fields on the rule object are still able to be modified even if the user only has read permissions,
    * given they have crud permissions for the specific fields they're modifying.
    *
-   * If the only fields in the PUT request that have been changed from the existing rule are of `ValidReadAuthEditFields` type,
-   * we check if the user has read authz privileges for the fields and use the `bulkEditRuleParamsWithReadAuth` method
-   * provided by the alerting rules client to update the rule fields individually. Otherwise the user will
-   * need `all` privileges for rules.
+   * If the user does not have permissions to edit rules but only fields in the PUT request that have been changed
+   * from the existing rule are of `ValidReadAuthEditFields` type, we check if the user has read authz privileges
+   * for the fields and use the `bulkEditRuleParamsWithReadAuth` method provided by the alerting rules client to
+   * update the rule fields individually. Otherwise the user will need `all` privileges for rules.
    */
-  if (hasOnlyReadAuthEditableChanges(ruleWithUpdates, existingRule)) {
+  if (!rulesAuthz.canEditRules && hasOnlyReadAuthEditableChanges(ruleWithUpdates, existingRule)) {
     // We're only modifying the fields that are editable with read permissions
     const modifiedFields = extractChangedUpdatableFields(ruleWithUpdates, existingRule);
 
@@ -98,8 +98,16 @@ export const updateRule = async ({
     if (updateErrors) {
       throw new Error(updateErrors);
     }
+    const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleWithUpdates);
 
-    return convertAlertingRuleToRuleResponse(appliedUpdateWithReadPrivs.rules[0]);
+    if (appliedUpdateWithReadPrivs.skipped.length) {
+      return {
+        ...existingRule,
+        enabled,
+      };
+    }
+
+    return convertAlertingRuleToRuleResponse({ ...appliedUpdateWithReadPrivs.rules[0], enabled });
   }
 
   const updatedRule = await rulesClient.update({

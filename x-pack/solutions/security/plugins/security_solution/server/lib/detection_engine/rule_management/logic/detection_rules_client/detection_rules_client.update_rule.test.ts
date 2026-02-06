@@ -25,6 +25,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 import { getMockRulesAuthz } from '../../__mocks__/authz';
+import { convertAlertingRuleToRuleResponse } from './converters/convert_alerting_rule_to_rule_response';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -263,7 +264,9 @@ describe('DetectionRulesClient.updateRule', () => {
         },
       ],
     });
-    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(
+      convertAlertingRuleToRuleResponse(existingRule)
+    );
     rulesClient.update.mockResolvedValue(
       getRuleMock(getQueryRuleParams(), {
         actions: [

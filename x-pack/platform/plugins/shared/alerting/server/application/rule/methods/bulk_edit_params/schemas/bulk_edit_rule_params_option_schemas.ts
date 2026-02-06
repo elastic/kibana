@@ -20,7 +20,7 @@ export const bulkEditParamsOperationSchema = schema.object({
     bulkEditInvestigationFieldsField,
     bulkEditRuleSourceField,
   ]),
-  value: schema.any(),
+  value: schema.maybe(schema.any()),
 });
 
 export const bulkEditParamsOperationsSchema = schema.arrayOf(bulkEditParamsOperationSchema);
@@ -44,7 +44,7 @@ export const bulkEditRuleParamsOperationSchema = schema.object({
     bulkEditInvestigationFieldsParamField,
     bulkEditRuleSourceParamField,
   ]),
-  value: schema.any(),
+  value: schema.maybe(schema.any()),
 });
 
 export const bulkEditRuleParamsOperationsSchema = schema.arrayOf(

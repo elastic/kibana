@@ -41,8 +41,8 @@ describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServer
     cy.get(RULE_NAME).should('have.text', getCustomQueryRuleParams().name);
   });
 
-  it('Does not display select boxes for rules', () => {
-    cy.get(RULE_CHECKBOX).should('not.exist');
+  it('Does display select boxes for rules', () => {
+    cy.get(RULE_CHECKBOX).should('exist');
   });
 
   it('Disables value lists upload', () => {

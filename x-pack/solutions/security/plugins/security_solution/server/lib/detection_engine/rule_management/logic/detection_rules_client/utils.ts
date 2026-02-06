@@ -57,7 +57,7 @@ export const validateMlAuth = async (mlAuthz: MlAuthz, ruleType: Type) => {
  * Throws a 403 ClientError if the user lacks permissions for any field they're trying to update.
  */
 export const validateFieldWritePermissions = (
-  ruleUpdate: ReadAuthRuleUpdateProps,
+  ruleUpdate: Partial<ReadAuthRuleUpdateProps>,
   rulesAuthz: DetectionRulesAuthz
 ) => {
   const errors = [];
@@ -166,22 +166,13 @@ export const getReadAuthFieldValue = (
 ) => {
   switch (camelCase(field)) {
     case validFields.EXCEPTIONS_LIST:
-      if (ruleUpdate.exceptions_list != null) {
-        return ruleUpdate.exceptions_list;
-      }
-      break;
+      return ruleUpdate.exceptions_list;
 
     case validFields.NOTE:
-      if (ruleUpdate.note != null) {
-        return ruleUpdate.note;
-      }
-      break;
+      return ruleUpdate.note;
 
     case validFields.INVESTIGATION_FIELDS:
-      if (ruleUpdate.investigation_fields != null) {
-        return ruleUpdate.investigation_fields;
-      }
-      break;
+      return ruleUpdate.investigation_fields;
 
     case validFields.RULE_SOURCE:
       return convertObjectKeysToCamelCase(ruleUpdate.rule_source);
@@ -239,7 +230,8 @@ export const hasOnlyReadAuthEditableChanges = (
 /**
  * Extracts only the read-auth editable fields that have actually changed between
  * the proposed update and the existing rule. Fields that haven't changed are
- * returned as undefined to avoid unnecessary updates.
+ * omitted from the returned object entirely (rather than being set to undefined)
+ * to distinguish between "no change" and "intentionally unsetting".
  *
  * This is used to build the minimal payload for `bulkEditRuleParamsWithReadAuth`,
  * ensuring only changed fields are included in the update operation.
@@ -251,13 +243,23 @@ export const hasOnlyReadAuthEditableChanges = (
 export const extractChangedUpdatableFields = (
   ruleUpdate: RuleResponse,
   existingRule: RuleResponse
-): ReadAuthRuleUpdateWithRuleSource => ({
-  exceptions_list: !isEqual(ruleUpdate.exceptions_list, existingRule.exceptions_list)
-    ? ruleUpdate.exceptions_list
-    : undefined,
-  note: !isEqual(ruleUpdate.note, existingRule.note) ? ruleUpdate.note : undefined,
-  investigation_fields: !isEqual(ruleUpdate.investigation_fields, existingRule.investigation_fields)
-    ? ruleUpdate.investigation_fields
-    : undefined,
-  rule_source: ruleUpdate.rule_source,
-});
+): ReadAuthRuleUpdateWithRuleSource => {
+  // rule_source will always be in the updated fields
+  const result: ReadAuthRuleUpdateWithRuleSource = {
+    rule_source: ruleUpdate.rule_source,
+  };
+
+  if (!isEqual(ruleUpdate.exceptions_list, existingRule.exceptions_list)) {
+    result.exceptions_list = ruleUpdate.exceptions_list;
+  }
+
+  if (!isEqual(ruleUpdate.note, existingRule.note)) {
+    result.note = ruleUpdate.note;
+  }
+
+  if (!isEqual(ruleUpdate.investigation_fields, existingRule.investigation_fields)) {
+    result.investigation_fields = ruleUpdate.investigation_fields;
+  }
+
+  return result;
+};
