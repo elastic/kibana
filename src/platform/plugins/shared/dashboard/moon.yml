@@ -131,7 +131,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/scout/**/*
-    - test/scout/**/*.json
     - test/scout_oas_schema/**/*
     - test/scout_oas_schema/**/*.json
     - '!target/**/*'
