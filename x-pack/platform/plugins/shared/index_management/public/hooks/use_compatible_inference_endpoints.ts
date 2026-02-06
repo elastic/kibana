@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import { useLicense } from './use_license';
 
 const COMPATIBLE_TASK_TYPES = ['text_embedding', 'sparse_embedding'] as const;
@@ -28,6 +29,7 @@ interface EndpointDefinition {
   requiredLicense: string | undefined;
   /** Whether the endpoint is accessible to the current license. Defaults to true if no license requirement is specified. */
   accessible: boolean;
+  description: string;
 }
 interface CompatibleEndpointsData {
   defaultInferenceId: string | undefined;
@@ -56,6 +58,11 @@ export const useCompatibleInferenceEndpoints = (
       if (!COMPATIBLE_TASK_TYPES.includes(endpoint.task_type as CompatibleTaskType)) {
         return;
       }
+      const provider = SERVICE_PROVIDERS[endpoint.service];
+      const modelId = endpoint.service_settings.model_id ?? endpoint.service_settings.model;
+      const service = provider?.name ?? endpoint.service;
+      const description = modelId ? `${service} - ${modelId}` : service;
+
       const isElserInEis =
         endpoint.inference_id === defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID;
       const requiredLicense = INFERENCE_ENDPOINT_LICENSE_MAP[endpoint.inference_id];
@@ -70,10 +77,12 @@ export const useCompatibleInferenceEndpoints = (
           defaultInferenceId = endpoint.inference_id;
         }
       }
+
       endpointDefinitions.push({
         inference_id: endpoint.inference_id,
         requiredLicense,
         accessible,
+        description,
       });
     });
     return {

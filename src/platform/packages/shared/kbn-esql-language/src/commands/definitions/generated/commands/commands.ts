@@ -68,6 +68,10 @@ export const commandsMetadata: Record<string, unknown> = {
     type: 'command',
     name: 'lookup_join',
   },
+  mmr: {
+    type: 'command',
+    name: 'mmr',
+  },
   mv_expand: {
     type: 'command',
     name: 'mv_expand',
@@ -97,3 +101,28 @@ export const commandsMetadata: Record<string, unknown> = {
     name: 'where',
   },
 };
+
+export enum EsqlCommandNames {
+  CHANGE_POINT = 'change_point',
+  DISSECT = 'dissect',
+  DROP = 'drop',
+  ENRICH = 'enrich',
+  EVAL = 'eval',
+  EXPLAIN = 'explain',
+  FORK = 'fork',
+  GROK = 'grok',
+  INLINE_STATS = 'inline_stats',
+  INSIST = 'insist',
+  KEEP = 'keep',
+  LIMIT = 'limit',
+  LOOKUP = 'lookup',
+  LOOKUP_JOIN = 'lookup_join',
+  MMR = 'mmr',
+  MV_EXPAND = 'mv_expand',
+  RENAME = 'rename',
+  RERANK = 'rerank',
+  SAMPLE = 'sample',
+  SORT = 'sort',
+  STATS = 'stats',
+  WHERE = 'where',
+}

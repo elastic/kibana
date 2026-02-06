@@ -99,3 +99,4 @@ components:
         - createdBy
         - updatedAt
         - updatedBy
+        - fileSize

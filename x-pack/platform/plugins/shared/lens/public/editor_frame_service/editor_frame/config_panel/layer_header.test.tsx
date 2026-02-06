@@ -36,8 +36,8 @@ describe('LayerHeader', () => {
     visualizationMapOverrides,
   }: RenderLayerSettingsOptions = {}) => {
     const datasourceMap = datasourceMapOverrides ?? {
-      testDatasource: createMockDatasource(),
-      testDatasource2: createMockDatasource('testDatasource2'),
+      formBased: createMockDatasource(),
+      textBased: createMockDatasource('textBased'),
     };
     const visualizationMap = visualizationMapOverrides ?? {
       testVis: createMockVisualization(),
@@ -81,7 +81,7 @@ describe('LayerHeader', () => {
             selectedLayerId: null,
           },
           datasourceStates: mockDatasourceStates(),
-          activeDatasourceId: 'testDatasource',
+          activeDatasourceId: 'formBased',
           ...preloadedStateOverrides,
         },
       }

@@ -142,6 +142,28 @@ describe('conditionToESQLAst', () => {
       });
     });
 
+    describe('multivalue contains (includes)', () => {
+      it('should handle includes with string value', () => {
+        const condition: Condition = { field: 'tags', includes: 'error' };
+        expect(prettyPrint(condition)).toBe('MV_CONTAINS(tags, "error")');
+      });
+
+      it('should handle includes with numeric value', () => {
+        const condition: Condition = { field: 'status_codes', includes: 200 };
+        expect(prettyPrint(condition)).toBe('MV_CONTAINS(status_codes, 200)');
+      });
+
+      it('should handle includes with boolean value', () => {
+        const condition: Condition = { field: 'flags', includes: true };
+        expect(prettyPrint(condition)).toBe('MV_CONTAINS(flags, TRUE)');
+      });
+
+      it('should handle includes with nested field name', () => {
+        const condition: Condition = { field: 'user.roles', includes: 'admin' };
+        expect(prettyPrint(condition)).toBe('MV_CONTAINS(`user.roles`, "admin")');
+      });
+    });
+
     describe('type handling', () => {
       it('should handle string values', () => {
         const condition: Condition = { field: 'name', eq: 'test' };

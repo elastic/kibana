@@ -331,7 +331,7 @@ describe('FORK Autocomplete', () => {
                 ...getFunctionSignaturesByReturnType(
                   Location.STATS,
                   [...AVG_TYPES, 'aggregate_metric_double'],
-                  { scalar: true }
+                  { scalar: true, grouping: true }
                 ),
               ],
               mockCallbacks
@@ -345,6 +345,7 @@ describe('FORK Autocomplete', () => {
                   [...AVG_TYPES, 'unsigned_long'],
                   {
                     scalar: true,
+                    grouping: true,
                   },
                   undefined,
                   ['acos']
