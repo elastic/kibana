@@ -55,7 +55,7 @@ export const SectionPanel = memo(
     'data-test-subj': dataTestSubj = 'sectionPanel',
   }: SectionPanelProps) => {
     const { euiTheme } = useEuiTheme();
-    const xsFontSize = useEuiFontSize('s').fontSize;
+    const fontSize = useEuiFontSize('s').fontSize;
 
     const styles = useMemo(() => {
       return {
@@ -72,11 +72,11 @@ export const SectionPanel = memo(
           font-weight: ${euiTheme.font.weight.bold};
         `,
         titleLink: css`
-          font-size: ${xsFontSize};
+          font-size: ${fontSize};
           font-weight: ${euiTheme.font.weight.bold};
         `,
       };
-    }, [euiTheme, xsFontSize]);
+    }, [euiTheme, fontSize]);
 
     const titleContent = useMemo(() => {
       if (link?.callback) {
@@ -84,7 +84,7 @@ export const SectionPanel = memo(
           <EuiToolTip content={link.tooltip}>
             <EuiLink
               css={styles.titleLink}
-              data-test-subj="sectionPanelTitleLink"
+              data-test-subj={`${dataTestSubj}TitleLink`}
               onClick={link.callback}
               color={highlightTitle ? 'primary' : 'text'}
             >
@@ -98,12 +98,21 @@ export const SectionPanel = memo(
           color={highlightTitle ? euiTheme.colors.primary : 'default'}
           css={styles.title}
           size="s"
-          data-test-subj="sectionPanelTitleText"
+          data-test-subj={`${dataTestSubj}TitleText`}
         >
           {title}
         </EuiText>
       );
-    }, [link, highlightTitle, title, euiTheme.colors.primary, styles.title, styles.titleLink]);
+    }, [
+      link?.callback,
+      link?.tooltip,
+      highlightTitle,
+      euiTheme.colors.primary,
+      styles.title,
+      styles.titleLink,
+      dataTestSubj,
+      title,
+    ]);
 
     return (
       <EuiPanel data-test-subj={dataTestSubj} css={styles.panel} hasBorder paddingSize="none">
@@ -111,7 +120,7 @@ export const SectionPanel = memo(
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               {icon && (
-                <EuiFlexItem data-test-subj="sectionPanelIcon" grow={false}>
+                <EuiFlexItem data-test-subj={`${dataTestSubj}Icon`} grow={false}>
                   {icon}
                 </EuiFlexItem>
               )}
@@ -123,7 +132,7 @@ export const SectionPanel = memo(
                     css={css`
                       margin: ${euiTheme.size.s} 0;
                     `}
-                    data-test-subj="sectionPanelLinkIcon"
+                    data-test-subj={`${dataTestSubj}LinkIcon`}
                   />
                 </EuiFlexItem>
               )}
