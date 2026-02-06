@@ -175,4 +175,112 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.failure_store).to.be('used');
     });
   });
+
+  // Test logs.otel and logs.ecs root streams with the same validation rules
+  ['logs.otel', 'logs.ecs'].forEach((rootStream) => {
+    describe(`${rootStream} root stream`, () => {
+      before(async () => {
+        apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
+        await enableStreams(apiClient);
+      });
+
+      after(async () => {
+        await disableStreams(apiClient);
+      });
+
+      it('Should not allow processing changes', async () => {
+        const body: Streams.WiredStream.UpsertRequest = {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              ...rootStreamDefinition.ingest,
+              processing: {
+                steps: [
+                  {
+                    action: 'grok' as const,
+                    from: 'body.text',
+                    patterns: [
+                      '%{TIMESTAMP_ISO8601:attributes.inner_timestamp} %{LOGLEVEL:severity_text} %{GREEDYDATA:attributes.message2}',
+                    ],
+                    where: { always: {} },
+                  },
+                ],
+              },
+            },
+          },
+        };
+        const response = await putStream(apiClient, rootStream, body, 400);
+        expect(response).to.have.property(
+          'message',
+          'Desired stream state is invalid: Root stream processing rules cannot be changed'
+        );
+      });
+
+      it('Should not allow fields changes', async () => {
+        const body: Streams.WiredStream.UpsertRequest = {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              ...rootStreamDefinition.ingest,
+              processing: omit(rootStreamDefinition.ingest.processing, 'updated_at'),
+              wired: {
+                ...rootStreamDefinition.ingest.wired,
+                fields: {
+                  ...rootStreamDefinition.ingest.wired.fields,
+                  'log.level': {
+                    type: 'boolean',
+                  },
+                },
+              },
+            },
+          },
+        };
+        const response = await putStream(apiClient, rootStream, body, 400);
+
+        expect(response).to.have.property(
+          'message',
+          'Desired stream state is invalid: Root stream fields cannot be changed'
+        );
+      });
+
+      it('Should allow routing changes', async () => {
+        const body: Streams.WiredStream.UpsertRequest = {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              ...rootStreamDefinition.ingest,
+              processing: omit(rootStreamDefinition.ingest.processing, 'updated_at'),
+              wired: {
+                ...rootStreamDefinition.ingest.wired,
+                routing: [
+                  {
+                    destination: `${rootStream}.gcpcloud`,
+                    where: {
+                      field: 'cloud.provider',
+                      eq: 'gcp',
+                    },
+                    status: 'enabled',
+                  },
+                ],
+              },
+            },
+          },
+        };
+        const response = await putStream(apiClient, rootStream, body);
+        expect(response).to.have.property('acknowledged', true);
+      });
+
+      it('Should not allow sending data directly to a child stream', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          message: 'test',
+        };
+        const response = await indexDocument(esClient, `${rootStream}.gcpcloud`, doc, false);
+        expect(response.failure_store).to.be('used');
+      });
+    });
+  });
 }
