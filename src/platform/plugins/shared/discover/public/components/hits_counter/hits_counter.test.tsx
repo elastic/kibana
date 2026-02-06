@@ -12,7 +12,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, within } from '@testing-library/react';
 import { HitsCounter, HitsCounterMode } from './hits_counter';
 import { BehaviorSubject } from 'rxjs';
-import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../__mocks__/discover_state.mock';
 import type {
   DataDocuments$,
   DataTotalHits$,
@@ -28,9 +28,18 @@ function getDocuments$(count: number = 5) {
   }) as DataDocuments$;
 }
 
+async function setup() {
+  const toolkit = getDiscoverInternalStateMock();
+  await toolkit.initializeTabs();
+  const { stateContainer } = await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
+  });
+  return { stateContainer };
+}
+
 describe('hits counter', function () {
-  it('expect to render the number of hits', function () {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  it('expect to render the number of hits', async function () {
+    const { stateContainer } = await setup();
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: 1,
@@ -56,8 +65,8 @@ describe('hits counter', function () {
     component2.unmount();
   });
 
-  it('expect to render 1,899 hits if 1899 hits given', function () {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  it('expect to render 1,899 hits if 1899 hits given', async function () {
+    const { stateContainer } = await setup();
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: 1899,
@@ -80,8 +89,8 @@ describe('hits counter', function () {
     component2.unmount();
   });
 
-  it('renders with custom hit counter labels', function () {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  it('renders with custom hit counter labels', async function () {
+    const { stateContainer } = await setup();
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: 1899,
@@ -133,8 +142,8 @@ describe('hits counter', function () {
     component3.unmount();
   });
 
-  it('should render a EuiLoadingSpinner when status is partial', () => {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  it('should render a EuiLoadingSpinner when status is partial', async () => {
+    const { stateContainer } = await setup();
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.PARTIAL,
       result: 2,
@@ -150,8 +159,8 @@ describe('hits counter', function () {
     expect(progressElement[0]).toHaveClass('euiLoadingSpinner');
   });
 
-  it('should render discoverQueryHitsPartial when status is partial', () => {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  it('should render discoverQueryHitsPartial when status is partial', async () => {
+    const { stateContainer } = await setup();
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.PARTIAL,
       result: 2,
@@ -164,8 +173,8 @@ describe('hits counter', function () {
     expect(screen.queryByTestId('discoverQueryTotalHits')).toHaveTextContent('≥2 results');
   });
 
-  it('should not render if loading', () => {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  it('should not render if loading', async () => {
+    const { stateContainer } = await setup();
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.LOADING,
       result: undefined,
@@ -178,8 +187,8 @@ describe('hits counter', function () {
     expect(component.container).toBeEmptyDOMElement();
   });
 
-  it('should render discoverQueryHitsPartial when status is error', () => {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  it('should render discoverQueryHitsPartial when status is error', async () => {
+    const { stateContainer } = await setup();
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.ERROR,
       result: undefined,
