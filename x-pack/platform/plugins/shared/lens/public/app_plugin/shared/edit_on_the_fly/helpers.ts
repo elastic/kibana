@@ -4,25 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Parser } from '@kbn/esql-language';
 import {
   getIndexPatternFromESQLQuery,
   getESQLAdHocDataview,
   getESQLResults,
   formatESQLColumns,
   mapVariableToColumn,
-  hasTransformationalCommand,
 } from '@kbn/esql-utils';
 import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLRow } from '@kbn/es-types';
-import {
-  ChartType,
-  getLensAttributesFromSuggestion,
-  mapVisToChartType,
-} from '@kbn/visualization-utils';
+import { getLensAttributesFromSuggestion, mapVisToChartType } from '@kbn/visualization-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -155,15 +149,7 @@ export const getSuggestions = async (
     // User deliberately changed the chart type
     const userDefinedChartType = readUserChartTypeFromSessionStorage();
 
-    const esqlQuery = query.esql;
-    const { root } = Parser.parse(esqlQuery);
-    const isTsQuery = root.commands.find(({ name }) => name === 'ts');
-    const isTsSourceOnlyQuery = isTsQuery && !hasTransformationalCommand(query.esql);
-
-    // For TS "source-only" queries (ex: `TS my_index`), table is the preferred chart type.
-    const preferredChartType = isTsSourceOnlyQuery
-      ? ChartType.Table
-      : userDefinedChartType
+    const preferredChartType = userDefinedChartType
       ? mapVisToChartType(userDefinedChartType)
       : undefined;
 
