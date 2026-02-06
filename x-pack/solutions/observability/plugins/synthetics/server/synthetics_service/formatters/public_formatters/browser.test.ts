@@ -6,7 +6,8 @@
  */
 
 import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
-import { browserTimeoutFormatterPublic, throttlingFormatter } from './browser';
+import { throttlingFormatter } from './browser';
+import { publicTimeoutFormatter } from './timeout';
 
 describe('formatters', () => {
   describe('throttling formatter', () => {
@@ -71,7 +72,7 @@ describe('formatters', () => {
   describe('timeout formatter', () => {
     it('returns null for browser monitors', () => {
       expect(
-        browserTimeoutFormatterPublic!(
+        publicTimeoutFormatter!(
           {
             [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
             [ConfigKey.TIMEOUT]: '60',
@@ -83,7 +84,7 @@ describe('formatters', () => {
 
     it('returns timeout for non-browser monitors', () => {
       expect(
-        browserTimeoutFormatterPublic!(
+        publicTimeoutFormatter!(
           {
             [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
             [ConfigKey.TIMEOUT]: '45',

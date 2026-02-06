@@ -16,7 +16,7 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { omit } from 'lodash';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-export const INSTALLED_VERSION = '1.4.2';
+export const INSTALLED_VERSION = '1.5.0';
 
 export class PrivateLocationTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;

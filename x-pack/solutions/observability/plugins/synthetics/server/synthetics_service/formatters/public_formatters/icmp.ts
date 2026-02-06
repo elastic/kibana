@@ -10,11 +10,13 @@ import { ConfigKey } from '../../../../common/runtime_types';
 import { secondsToCronFormatter } from '../formatting_utils';
 import type { Formatter } from './common';
 import { commonFormatters } from './common';
+import { publicTimeoutFormatter } from './timeout';
 
 export type ICMPFormatMap = Record<keyof ICMPFields, Formatter>;
 export const icmpFormatters: ICMPFormatMap = {
   ...commonFormatters,
   [ConfigKey.HOSTS]: null,
+  [ConfigKey.TIMEOUT]: publicTimeoutFormatter,
   [ConfigKey.WAIT]: secondsToCronFormatter,
   [ConfigKey.MODE]: null,
   [ConfigKey.IPV4]: null,

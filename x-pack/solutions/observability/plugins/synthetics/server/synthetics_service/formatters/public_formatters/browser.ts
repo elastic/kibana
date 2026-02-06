@@ -8,7 +8,7 @@
 import { inlineSourceFormatter } from '../formatting_utils';
 import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../../../../common/constants/monitor_defaults';
 import type { BrowserFields } from '../../../../common/runtime_types';
-import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 import type { Formatter } from './common';
 import { commonFormatters } from './common';
 import { tlsFormatters } from './tls';
@@ -35,17 +35,6 @@ export const throttlingFormatter: Formatter = (fields) => {
   };
 };
 
-export const browserTimeoutFormatterPublic: Formatter = (fields) => {
-  // Browser monitors are not allowed to set a custom timeout when using public locations
-  if (fields[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER) {
-    return null;
-  }
-  
-  // For other types (should not reach here, but for safety)
-  const value = (fields[ConfigKey.TIMEOUT] as string) ?? '';
-  return value ? `${value}s` : null;
-};
-
 export const browserFormatters: BrowserFormatMap = {
   ...commonFormatters,
   ...tlsFormatters,
@@ -62,9 +51,9 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SYNTHETICS_ARGS]: arrayFormatter,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayFormatter,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: stringToObjectFormatter,
+  [ConfigKey.TIMEOUT]: null,
   // @ts-expect-error upgrade typescript v5.1.6
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayFormatter,
   // @ts-expect-error upgrade typescript v5.1.6
   [ConfigKey.PLAYWRIGHT_OPTIONS]: stringToObjectFormatter,
-  [ConfigKey.TIMEOUT]: browserTimeoutFormatterPublic,
 };

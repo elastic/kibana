@@ -22,6 +22,6 @@ export const publicFormatters: Formatters = {
   ...httpFormatters,
   ...icmpFormatters,
   ...tcpFormatters,
-  ...browserFormatters,
   ...commonFormatters,
+  ...browserFormatters,
 };

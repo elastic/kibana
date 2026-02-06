@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { omit, omitBy } from 'lodash';
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
-import type { HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { HTTPFields, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
@@ -45,14 +45,18 @@ export default function ({ getService }: FtrProviderContext) {
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
+    let _browserMonitorJson: MonitorFields;
+    let browserMonitorJson: MonitorFields;
 
     before(async () => {
       _httpMonitorJson = getFixtureJson('http_monitor');
+      _browserMonitorJson = getFixtureJson('browser_monitor');
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
     beforeEach(() => {
       httpMonitorJson = _httpMonitorJson;
+      browserMonitorJson = _browserMonitorJson;
     });
 
     it('can create monitor with API key with proper permissions', async () => {
@@ -210,6 +214,51 @@ export default function ({ getService }: FtrProviderContext) {
         await security.user.delete(username);
         await security.role.delete(roleName);
       }
+    });
+
+    it('returns warning for browser timeout without private locations', async () => {
+      const monitor = {
+        ...browserMonitorJson,
+        name: `Browser timeout warning ${uuidv4()}`,
+        locations: ['dev'],
+        timeout: '30',
+      };
+      const apiResponse = await supertestAPI
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(monitor)
+        .expect(200);
+
+      expect(apiResponse.body.warnings).to.have.length(1);
+      const [warning] = apiResponse.body.warnings;
+      expect(warning.id).eql(apiResponse.body.id);
+      expect(warning.message).to.contain('timeout');
+      expect(warning.message).to.contain('no private locations');
+
+      await supertestAPI
+        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send({ ids: [apiResponse.body.id] })
+        .expect(200);
+    });
+
+    it('allows lightweight monitor timeout below 30s', async () => {
+      const monitor = {
+        ...httpMonitorJson,
+        name: `Lightweight timeout ${uuidv4()}`,
+        timeout: '1',
+      };
+      const apiResponse = await supertestAPI
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(monitor)
+        .expect(200);
+
+      await supertestAPI
+        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send({ ids: [apiResponse.body.id] })
+        .expect(200);
     });
   });
 }
