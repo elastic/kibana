@@ -5,9 +5,11 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
+import { uniq } from 'lodash';
 import type { APMConfig } from '../../..';
 import { parseDatemath } from '../../utils/time';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { getTraceSampleIds } from '../../../routes/service_map/get_trace_sample_ids';
 import { fetchExitSpanSamplesFromTraceIds } from '../../../routes/service_map/fetch_exit_span_samples';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
@@ -32,6 +34,7 @@ export type {
  */
 async function buildTopologyFromTraceIds({
   apmEventClient,
+  randomSampler,
   traceIds,
   serviceName,
   startMs,
@@ -39,6 +42,7 @@ async function buildTopologyFromTraceIds({
   filterFn,
 }: {
   apmEventClient: APMEventClient;
+  randomSampler: RandomSampler;
   traceIds: string[];
   serviceName: string;
   startMs: number;
@@ -58,9 +62,10 @@ async function buildTopologyFromTraceIds({
 
   const filtered = filterFn(buildConnectionsFromSpans(spans), serviceName);
 
-  const serviceNames = [...new Set(filtered.map((c) => c._sourceName))];
+  const serviceNames = uniq(filtered.map((c) => c._sourceName));
   const metricsMap = await getConnectionMetrics({
     apmEventClient,
+    randomSampler,
     start: startMs,
     end: endMs,
     serviceNames,
@@ -71,6 +76,7 @@ async function buildTopologyFromTraceIds({
 
 async function getDownstreamTopology({
   apmEventClient,
+  randomSampler,
   config,
   logger,
   serviceName,
@@ -83,6 +89,7 @@ async function getDownstreamTopology({
   serviceName: string;
   startMs: number;
   endMs: number;
+  randomSampler: RandomSampler;
 }): Promise<ServiceTopologyResponse> {
   const { traceIds } = await getTraceSampleIds({
     config,
@@ -97,6 +104,7 @@ async function getDownstreamTopology({
 
   return buildTopologyFromTraceIds({
     apmEventClient,
+    randomSampler,
     traceIds,
     serviceName,
     startMs,
@@ -107,6 +115,7 @@ async function getDownstreamTopology({
 
 async function getUpstreamTopology({
   apmEventClient,
+  randomSampler,
   config,
   logger,
   serviceName,
@@ -119,6 +128,7 @@ async function getUpstreamTopology({
   serviceName: string;
   startMs: number;
   endMs: number;
+  randomSampler: RandomSampler;
 }): Promise<ServiceTopologyResponse> {
   // Strategy: First try to find traces via the service's own transactions.
   // If the service has transactions (it's an instrumented service like "checkout-service"),
@@ -138,6 +148,7 @@ async function getUpstreamTopology({
 
     return buildTopologyFromTraceIds({
       apmEventClient,
+      randomSampler,
       traceIds,
       serviceName,
       startMs,
@@ -163,6 +174,7 @@ async function getUpstreamTopology({
 
   return buildTopologyFromTraceIds({
     apmEventClient,
+    randomSampler,
     traceIds: depTraceIds,
     serviceName,
     startMs,
@@ -180,6 +192,7 @@ async function getUpstreamTopology({
  */
 async function getBothTopology({
   apmEventClient,
+  randomSampler,
   config,
   logger,
   serviceName,
@@ -192,6 +205,7 @@ async function getBothTopology({
   serviceName: string;
   startMs: number;
   endMs: number;
+  randomSampler: RandomSampler;
 }): Promise<ServiceTopologyResponse> {
   const { traceIds } = await getTraceSampleIds({
     config,
@@ -220,6 +234,7 @@ async function getBothTopology({
 
     return buildTopologyFromTraceIds({
       apmEventClient,
+      randomSampler,
       traceIds: depTraceIds,
       serviceName,
       startMs,
@@ -243,15 +258,14 @@ async function getBothTopology({
   const upFiltered = filterUpstreamConnections(allConnections, serviceName);
 
   // Single metrics query with union of service names from both directions
-  const serviceNames = [
-    ...new Set([
-      ...downFiltered.map((c) => c._sourceName),
-      ...upFiltered.map((c) => c._sourceName),
-    ]),
-  ];
+  const serviceNames = uniq([
+    ...downFiltered.map((c) => c._sourceName),
+    ...upFiltered.map((c) => c._sourceName),
+  ]);
 
   const metricsMap = await getConnectionMetrics({
     apmEventClient,
+    randomSampler,
     start: startMs,
     end: endMs,
     serviceNames,
@@ -268,6 +282,7 @@ async function getBothTopology({
 
 export async function getApmServiceTopology({
   apmEventClient,
+  randomSampler,
   config,
   logger,
   serviceName,
@@ -276,6 +291,7 @@ export async function getApmServiceTopology({
   end,
 }: {
   apmEventClient: APMEventClient;
+  randomSampler: RandomSampler;
   config: APMConfig;
   logger: Logger;
   serviceName: string;
@@ -286,7 +302,7 @@ export async function getApmServiceTopology({
   const startMs = parseDatemath(start);
   const endMs = parseDatemath(end);
 
-  const params = { apmEventClient, config, logger, serviceName, startMs, endMs };
+  const params = { apmEventClient, randomSampler, config, logger, serviceName, startMs, endMs };
 
   if (direction === 'downstream') {
     return getDownstreamTopology(params);

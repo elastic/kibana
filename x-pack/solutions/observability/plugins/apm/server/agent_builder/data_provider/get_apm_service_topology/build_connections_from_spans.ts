@@ -8,6 +8,9 @@
 import type { ServiceMapSpan } from '../../../../common/service_map/types';
 import type { ServiceTopologyNode, ExternalNode, ConnectionWithKey } from './types';
 
+export const buildConnectionKey = (sourceName: string, dependencyName: string): string =>
+  `${sourceName}::${dependencyName}`;
+
 export function buildConnectionsFromSpans(spans: ServiceMapSpan[]): ConnectionWithKey[] {
   const connectionMap = new Map<string, ConnectionWithKey>();
 
@@ -35,13 +38,13 @@ export function buildConnectionsFromSpans(spans: ServiceMapSpan[]): ConnectionWi
     // Create a unique key for deduplication using source service + dependency resource
     const sourceName = source['service.name'];
     const dependencyName = span.spanDestinationServiceResource;
-    const connectionKey = `${sourceName}::${dependencyName}`;
+    const connectionKey = buildConnectionKey(sourceName, dependencyName);
 
     if (!connectionMap.has(connectionKey)) {
       connectionMap.set(connectionKey, {
         source,
         target,
-        metrics: null,
+        metrics: undefined,
 
         // internal fields, not part of the public API
         _key: connectionKey, // deduplication key

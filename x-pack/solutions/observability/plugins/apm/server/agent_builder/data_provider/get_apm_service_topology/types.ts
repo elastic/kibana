@@ -18,15 +18,15 @@ export interface ExternalNode {
 }
 
 export interface ConnectionMetrics {
-  errorRate: number | null;
-  latencyMs: number | null;
-  throughputPerMin: number | null;
+  errorRate?: number;
+  latencyMs?: number;
+  throughputPerMin?: number;
 }
 
 export interface ServiceTopologyConnection {
   source: ServiceTopologyNode | ExternalNode;
   target: ServiceTopologyNode | ExternalNode;
-  metrics: ConnectionMetrics | null;
+  metrics: ConnectionMetrics | undefined;
 }
 
 export interface ServiceTopologyResponse {

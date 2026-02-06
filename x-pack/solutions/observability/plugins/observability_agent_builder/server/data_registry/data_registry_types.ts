@@ -38,14 +38,17 @@ interface ServiceSummary {
   deployments: Array<{ '@timestamp': string }>;
 }
 
-export interface APMDownstreamDependency {
+interface ConnectionMetricValues {
+  errorRate?: number;
+  latencyMs?: number;
+  throughputPerMin?: number;
+}
+
+export interface APMDownstreamDependency extends ConnectionMetricValues {
   'service.name'?: string;
   'span.destination.service.resource': string;
   'span.type'?: string;
   'span.subtype'?: string;
-  errorRate?: number;
-  latencyMs?: number;
-  throughputPerMin?: number;
 }
 
 interface APMErrorSample {
@@ -142,16 +145,10 @@ interface ExternalNode {
   'span.subtype': string;
 }
 
-interface ConnectionMetrics {
-  errorRate: number | null;
-  latencyMs: number | null;
-  throughputPerMin: number | null;
-}
-
 interface ServiceTopologyConnection {
   source: ServiceTopologyNode | ExternalNode;
   target: ServiceTopologyNode | ExternalNode;
-  metrics: ConnectionMetrics | null;
+  metrics?: ConnectionMetricValues;
 }
 
 export interface ServiceTopologyResponse {

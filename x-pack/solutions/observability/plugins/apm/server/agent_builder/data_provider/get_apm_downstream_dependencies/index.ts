@@ -4,27 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import datemath from '@elastic/datemath';
-import * as t from 'io-ts';
-import { termQuery } from '@kbn/observability-plugin/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getConnectionStats } from '../../../lib/connections/get_connection_stats';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { NodeType } from '../../../../common/connections';
-
-export const downstreamDependenciesRouteRt = t.intersection([
-  t.type({
-    serviceName: t.string,
-    start: t.string,
-    end: t.string,
-  }),
-  t.partial({
-    serviceEnvironment: t.string,
-  }),
-]);
 
 export interface APMDownstreamDependency {
   'service.name'?: string;
@@ -37,44 +21,41 @@ export interface APMDownstreamDependency {
 }
 
 export async function getApmDownstreamDependencies({
-  arguments: args,
   apmEventClient,
   randomSampler,
+  start,
+  end,
+  filter,
 }: {
-  arguments: t.TypeOf<typeof downstreamDependenciesRouteRt>;
   apmEventClient: APMEventClient;
   randomSampler: RandomSampler;
+  start: number;
+  end: number;
+  filter: QueryDslQueryContainer[];
 }): Promise<APMDownstreamDependency[]> {
-  const start = datemath.parse(args.start)?.valueOf()!;
-  const end = datemath.parse(args.end)?.valueOf()!;
-
   const { statsItems } = await getConnectionStats({
     start,
     end,
     apmEventClient,
-    filter: [
-      ...termQuery(SERVICE_NAME, args.serviceName),
-      ...environmentQuery(args.serviceEnvironment ?? ENVIRONMENT_ALL.value),
-    ],
+    filter,
     collapseBy: 'downstream',
     numBuckets: 1, // not used when withTimeseries: false, but required param
     randomSampler,
     withTimeseries: false,
   });
   return statsItems.map((item) => {
-    const { location, stats } = item;
+    const { location } = item;
 
     // @ts-expect-error - dependencyName exists when collapsing downstream
     const dependencyName = location.dependencyName!;
 
-    const rawThroughput = stats.throughput?.value;
-    const rawLatency = stats.latency?.value;
+    const { errorRate, latency, throughput } = item.stats;
+
     const metrics = {
-      errorRate: stats.errorRate?.value ?? undefined,
-      // Convert from microseconds to milliseconds
-      latencyMs: rawLatency != null ? rawLatency / 1000 : undefined,
-      // Round to 3 decimal places for cleaner LLM output
-      throughputPerMin: rawThroughput != null ? Math.round(rawThroughput * 1000) / 1000 : undefined,
+      errorRate: errorRate?.value ?? undefined,
+      latencyMs: latency?.value != null ? latency.value / 1000 : undefined,
+      throughputPerMin:
+        throughput?.value != null ? Math.round(throughput.value * 1000) / 1000 : undefined,
     };
 
     if (location.type === NodeType.service) {
