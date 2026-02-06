@@ -224,11 +224,7 @@ export const suggestionsApi = ({
 
       // Normalize the final suggestion for TS/PromQL: only return `line` when a date field is used.
       // Do not override an explicit user preference.
-      if (
-        !preferredChartType &&
-        !preferredVisAttributes &&
-        suggestion.visualizationId === 'lnsXY'
-      ) {
+      if (!preferredChartType && suggestion.visualizationId === 'lnsXY') {
         return [normalizeXySuggestionForTimeSeries({ visualizationMap, context, suggestion })];
       }
 
@@ -238,7 +234,7 @@ export const suggestionsApi = ({
 
   // Normalize the final suggestions for TS/PromQL: only return `line` when a date field is used.
   // Do not override an explicit user preference.
-  if (!preferredChartType && !preferredVisAttributes) {
+  if (!preferredChartType) {
     const primarySuggestionCandidate = suggestionsList[0];
     if (primarySuggestionCandidate?.visualizationId === 'lnsXY') {
       const normalizedPrimary = normalizeXySuggestionForTimeSeries({
