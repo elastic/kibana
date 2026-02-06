@@ -11,18 +11,12 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { getLatestEntitiesIndexName } from './assets/latest_index';
 import type { EntityType } from './definitions/entity_schema';
 import { DocumentVersionConflictError, EntityNotFoundError } from './errors';
+import type { Entity } from './schemas/entity.gen';
 
 interface EntityManagerDependencies {
   logger: Logger;
   esClient: ElasticsearchClient;
   namespace: string;
-}
-
-// TODO: Temporary interface to avoid all the error logs
-interface Entity {
-  entity: {
-    type: EntityType;
-  };
 }
 
 export class EntityManager {
@@ -50,10 +44,13 @@ export class EntityManager {
     // TODO: getFlattenedObject()
 
     const id = this.getEntityId(document);
+    if (document.entity.type === undefined) {
+      throw new Error(`Entity ID ${id} type undefined`);
+    }
     this.logger.info(`Upserting entity ID ${id}`);
     const { result } = await this.esClient.update({
       // TODO: remove entity type after single index merge
-      index: getLatestEntitiesIndexName(document.entity.type, this.namespace),
+      index: getLatestEntitiesIndexName(document.entity.type as EntityType, this.namespace),
       id,
       doc: document,
       doc_as_upsert: true,

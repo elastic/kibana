@@ -12,9 +12,9 @@ import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { EntityStoreNotInstalledError } from '../../domain/errors';
+import { Entity } from '../../domain/schemas/entity.gen';
 
-// TODO: openapi schema for body
-const bodySchema = z.array(z.object({}));
+const bodySchema = z.array(Entity);
 
 export function registerCRUDUpsertBulk(router: EntityStorePluginRouter) {
   router.versioned

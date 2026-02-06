@@ -6,15 +6,12 @@
  */
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { EntityStoreNotInstalledError } from '../../domain/errors';
-
-// TODO: openapi schema for body
-const bodySchema = z.object({});
+import { Entity } from '../../domain/schemas/entity.gen';
 
 export function registerCRUDUpsert(router: EntityStorePluginRouter) {
   router.versioned
@@ -31,7 +28,7 @@ export function registerCRUDUpsert(router: EntityStorePluginRouter) {
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(bodySchema),
+            body: buildRouteValidationWithZod(Entity),
           },
         },
       },
