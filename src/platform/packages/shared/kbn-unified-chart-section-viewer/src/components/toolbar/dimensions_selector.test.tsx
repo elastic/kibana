@@ -79,6 +79,14 @@ jest.mock('lodash', () => {
   };
 });
 
+jest.mock('../../common/constants', () => {
+  const actual = jest.requireActual('../../common/constants');
+  return {
+    ...actual,
+    MAX_DIMENSIONS_SELECTIONS: 10, // Override for tests to allow multiple selections
+  };
+});
+
 const mockDimensions: Dimension[] = [
   { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
   { name: 'container.id', type: ES_FIELD_TYPES.KEYWORD },
