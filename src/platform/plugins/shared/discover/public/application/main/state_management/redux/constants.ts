@@ -23,8 +23,11 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
     searchSessionId: undefined,
     isSearchSessionRestored: false,
   },
+  attributes: {
+    visContext: undefined,
+    controlGroupState: undefined,
+  },
   overriddenVisContextAfterInvalidation: undefined,
-  controlGroupState: undefined,
   cascadedDocumentsState: {
     availableCascadeGroups: [],
     selectedCascadeGroups: [],
