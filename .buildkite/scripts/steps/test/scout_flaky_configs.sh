@@ -7,9 +7,6 @@ source .buildkite/scripts/steps/functional/common.sh
 SCOUT_CONFIG=${SCOUT_CONFIG:-}
 SCOUT_SERVER_RUN_FLAGS=${SCOUT_SERVER_RUN_FLAGS:-}
 
-EXTRA_ARGS=${FTR_EXTRA_ARGS:-}
-test -z "$EXTRA_ARGS" || buildkite-agent meta-data set "ftr-extra-args" "$EXTRA_ARGS"
-
 if [[ -z "${SCOUT_REPORTER_ENABLED:-}" ]]; then
   export SCOUT_REPORTER_ENABLED=true
   echo "⚠️ SCOUT_REPORTER_ENABLED not set; defaulting to true for flaky runner"
