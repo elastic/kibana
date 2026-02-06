@@ -269,11 +269,7 @@ describe('InferenceFlyout', () => {
             taskType: 'text_embedding',
             providerConfig: {
               model_id: '.elser_model_2',
-              adaptive_allocations: {
-                enabled: true,
-                min_number_of_allocations: 0,
-                max_number_of_allocations: 5,
-              },
+              'adaptive_allocations.max_number_of_allocations': 5,
             },
           },
           secrets: {
