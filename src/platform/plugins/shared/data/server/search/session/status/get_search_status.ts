@@ -7,21 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { SearchSessionRequestInfo, SearchSessionRequestStatus } from '../../../common';
-import { SearchStatus } from './types';
+import moment from 'moment';
+import {
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  type SearchSessionRequestInfo,
+  type SearchSessionRequestStatus,
+} from '../../../../common';
+import { SearchStatus } from '../types';
 
 function requestByStrategy({
-  session,
+  search,
   asyncId,
   esClient,
 }: {
-  session: SearchSessionRequestInfo;
+  search: SearchSessionRequestInfo;
   asyncId: string;
   esClient: ElasticsearchClient;
 }) {
-  if (session.strategy === 'esql_async') {
+  if (search.strategy === ESQL_ASYNC_SEARCH_STRATEGY) {
     return esClient.esql.asyncQueryGet({ id: asyncId }, { meta: true });
   }
 
@@ -34,54 +38,73 @@ function requestByStrategy({
 }
 
 export async function getSearchStatus({
-  session,
+  search,
   asyncId,
   esClient,
 }: {
-  session: SearchSessionRequestInfo;
+  search: SearchSessionRequestInfo;
   asyncId: string;
   esClient: ElasticsearchClient;
 }): Promise<SearchSessionRequestStatus> {
   // TODO: Handle strategies other than the default one
   // https://github.com/elastic/kibana/issues/127880
+  const isFinished = !!search.status && search.status !== SearchStatus.IN_PROGRESS;
   try {
+    if (isFinished) {
+      return {
+        status: search.status!,
+        startedAt: search.startedAt,
+        completedAt: search.completedAt,
+        error: search.error,
+      };
+    }
+
     const apiResponse = await requestByStrategy({
-      session,
+      search,
       asyncId,
       esClient,
     });
 
     const response = apiResponse.body;
+    const startedAt =
+      'start_time_in_millis' in response
+        ? moment(response.start_time_in_millis).toISOString()
+        : undefined;
+    const completedAt =
+      'completion_time_in_millis' in response && response.completion_time_in_millis
+        ? moment(response.completion_time_in_millis).toISOString()
+        : undefined;
+
     if ('completion_status' in response && response.completion_status! >= 400) {
       return {
         status: SearchStatus.ERROR,
-        error: i18n.translate('data.search.statusError', {
-          defaultMessage: `Search {searchId} completed with a {errorCode} status`,
-          values: { searchId: asyncId, errorCode: response.completion_status },
-        }),
-      };
-    } else if (!response.is_running) {
-      return {
-        status: SearchStatus.COMPLETE,
-        error: undefined,
-      };
-    } else {
-      return {
-        status: SearchStatus.IN_PROGRESS,
-        error: undefined,
+        startedAt,
+        completedAt,
+        error: {
+          code: response.completion_status!,
+        },
       };
     }
+
+    if (!response.is_running) {
+      return {
+        status: SearchStatus.COMPLETE,
+        startedAt,
+        completedAt,
+      };
+    }
+
+    return {
+      status: SearchStatus.IN_PROGRESS,
+      startedAt,
+    };
   } catch (e) {
     return {
       status: SearchStatus.ERROR,
-      error: i18n.translate('data.search.statusThrow', {
-        defaultMessage: `Search status for search with id {searchId} threw an error {message} (statusCode: {errorCode})`,
-        values: {
-          message: e.message,
-          errorCode: e.statusCode || 500,
-          searchId: asyncId,
-        },
-      }),
+      error: {
+        code: e.statusCode || 500,
+        message: e.message,
+      },
     };
   }
 }
