@@ -63,7 +63,7 @@ export const SuccessFormControlled: React.FC<SuccessFormControlledProps> = ({
 
   React.useEffect(() => {
     setAnnouncement(
-      i18n.translate('cloud.connectionDetails.apiKeys.successForm.message', {
+      i18n.translate('cloud.connectionDetails.apiKeys.successForm.mountAnnouncement', {
         defaultMessage:
           'API key created successfully. Current format is {format}. You can change the format in the dropdown and copy the API key using the copy button.',
         values: {
