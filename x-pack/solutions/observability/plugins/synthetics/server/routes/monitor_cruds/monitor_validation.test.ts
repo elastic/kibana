@@ -290,7 +290,8 @@ describe('validateMonitor', () => {
       expect(result).toMatchObject({
         valid: false,
         reason: 'Browser Monitor timeout is invalid',
-        details: 'Invalid timeout 29 seconds supplied. Minimum timeout for browser monitors is 30 seconds.',
+        details:
+          'Invalid timeout 29 seconds supplied. Minimum timeout for browser monitors is 30 seconds.',
         payload: testMonitor,
       });
     });
