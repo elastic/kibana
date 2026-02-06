@@ -617,6 +617,12 @@ export const EndpointList = () => {
         return (
           <EuiBasicTable
             data-test-subj="endpointListTable"
+            tableCaption={i18n.translate(
+              'xpack.securitySolution.endpoint.list.endpointTableCaption',
+              {
+                defaultMessage: 'Endpoint',
+              }
+            )}
             items={mutableListData}
             columns={columns}
             pagination={paginationSetup}

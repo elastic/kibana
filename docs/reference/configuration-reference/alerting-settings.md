@@ -889,7 +889,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 :   Specifies the maximum number of rules to run per minute.
 
     Data type: `int`
-    Default: `10000`
+    Default: `32000`
     
     :::{note}
     :applies_to: serverless:
