@@ -41,7 +41,7 @@ import {
   getLineClampStyles,
   shouldShowInstallationStatus,
 } from './installation_status';
-import { wrapTitle } from './utils';
+import { wrapTitleWithDeprecated } from './utils';
 
 export type PackageCardProps = IntegrationCardItem;
 
@@ -265,7 +265,7 @@ export function PackageCard({
         layout="horizontal"
         title={
           <CardTitle
-            title={wrapTitle({ title, deprecated: isDeprecated })}
+            title={wrapTitleWithDeprecated({ title, deprecated: isDeprecated })}
             titleBadge={titleBadge}
           />
         }

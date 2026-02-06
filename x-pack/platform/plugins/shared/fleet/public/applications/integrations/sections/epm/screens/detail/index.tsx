@@ -60,7 +60,7 @@ import { WithHeaderLayout } from '../../../../layouts';
 import { SideBarColumn } from '../../components/side_bar_column';
 import { PermissionsError } from '../../../../layouts';
 
-import { wrapTitle } from '../../components/utils';
+import { wrapTitleWithDeprecated } from '../../components/utils';
 
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
@@ -366,7 +366,7 @@ export function Detail() {
                   <EuiFlexItem grow={false}>
                     <EuiText>
                       {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                      <h1>{wrapTitle({ packageInfo, integrationInfo })}</h1>
+                      <h1>{wrapTitleWithDeprecated({ packageInfo, integrationInfo })}</h1>
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -588,7 +588,7 @@ export function Detail() {
                                   : {}),
                               })}
                               missingSecurityConfiguration={missingSecurityConfiguration}
-                              packageName={wrapTitle({ packageInfo, integrationInfo })}
+                              packageName={wrapTitleWithDeprecated({ packageInfo, integrationInfo })}
                               onClick={handleAddIntegrationPolicyClick}
                             />
                           </EuiFlexItem>
@@ -821,7 +821,7 @@ export function Detail() {
       `}
     >
       {integrationInfo || packageInfo ? (
-        <Breadcrumbs packageTitle={wrapTitle({ packageInfo, integrationInfo })} />
+        <Breadcrumbs packageTitle={wrapTitleWithDeprecated({ packageInfo, integrationInfo })} />
       ) : null}
       {packageInfoError ? (
         <EuiFlexGroup alignItems="flexStart">
@@ -885,7 +885,7 @@ export function Detail() {
       )}
       {isEditOpen && (
         <EditIntegrationFlyout
-          integrationName={wrapTitle({ packageInfo, integrationInfo, defaultTitle: 'Integration' })}
+          integrationName={wrapTitleWithDeprecated({ packageInfo, integrationInfo, defaultTitle: 'Integration' })}
           onClose={() => setIsEditOpen(false)}
           packageInfo={packageInfo}
           setIsEditOpen={setIsEditOpen}

@@ -20,7 +20,7 @@ import {
   useRollbackPackage,
 } from '../../../../../hooks';
 import { useInstalledIntegrationsActions } from '../../installed_integrations/hooks/use_installed_integrations_actions';
-import { wrapTitle } from '../../../components/utils';
+import { wrapTitleWithDeprecated } from '../../../components/utils';
 
 interface RollbackButtonProps {
   packageInfo: PackageInfo & { installationInfo?: InstallationInfo };
@@ -76,7 +76,7 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
         id="xpack.fleet.integrations.rollbackPackage.rollbackPackageButtonLabel"
         defaultMessage="Rollback {title}"
         values={{
-          title: wrapTitle({ packageInfo }),
+          title: wrapTitleWithDeprecated({ packageInfo }),
         }}
       />
     </EuiButton>

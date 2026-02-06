@@ -7,30 +7,32 @@
 
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../types';
 
-import { wrapTitle } from '.';
+import { wrapTitleWithDeprecated } from '.';
 
-describe('wrapTitle', () => {
+describe('wrapTitleWithDeprecated', () => {
   describe('when title is provided directly', () => {
     it('should return title as-is when not deprecated', () => {
-      expect(wrapTitle({ title: 'My Integration', deprecated: false })).toBe('My Integration');
+      expect(wrapTitleWithDeprecated({ title: 'My Integration', deprecated: false })).toBe(
+        'My Integration'
+      );
     });
 
     it('should add (Deprecated) suffix when deprecated is true', () => {
-      expect(wrapTitle({ title: 'My Integration', deprecated: true })).toBe(
+      expect(wrapTitleWithDeprecated({ title: 'My Integration', deprecated: true })).toBe(
         'My Integration (Deprecated)'
       );
     });
 
     it('should not add (Deprecated) suffix twice if already present', () => {
-      expect(wrapTitle({ title: 'My Integration (Deprecated)', deprecated: true })).toBe(
-        'My Integration (Deprecated)'
-      );
+      expect(
+        wrapTitleWithDeprecated({ title: 'My Integration (Deprecated)', deprecated: true })
+      ).toBe('My Integration (Deprecated)');
     });
 
     it('should not add (Deprecated) suffix if lowercase (deprecated) is present', () => {
-      expect(wrapTitle({ title: 'My Integration (deprecated)', deprecated: true })).toBe(
-        'My Integration (deprecated)'
-      );
+      expect(
+        wrapTitleWithDeprecated({ title: 'My Integration (deprecated)', deprecated: true })
+      ).toBe('My Integration (deprecated)');
     });
   });
 
@@ -40,7 +42,7 @@ describe('wrapTitle', () => {
     } as RegistryPolicyTemplate;
 
     it('should use integrationInfo.title when title is not provided', () => {
-      expect(wrapTitle({ integrationInfo })).toBe('Integration Title');
+      expect(wrapTitleWithDeprecated({ integrationInfo })).toBe('Integration Title');
     });
 
     it('should add (Deprecated) suffix when integrationInfo.deprecated is set', () => {
@@ -49,13 +51,15 @@ describe('wrapTitle', () => {
         deprecated: { description: 'This integration is deprecated' },
       } as RegistryPolicyTemplate;
 
-      expect(wrapTitle({ integrationInfo: deprecatedIntegrationInfo })).toBe(
+      expect(wrapTitleWithDeprecated({ integrationInfo: deprecatedIntegrationInfo })).toBe(
         'Integration Title (Deprecated)'
       );
     });
 
     it('should prefer provided title over integrationInfo.title', () => {
-      expect(wrapTitle({ title: 'Custom Title', integrationInfo })).toBe('Custom Title');
+      expect(wrapTitleWithDeprecated({ title: 'Custom Title', integrationInfo })).toBe(
+        'Custom Title'
+      );
     });
   });
 
@@ -65,7 +69,7 @@ describe('wrapTitle', () => {
     } as PackageInfo;
 
     it('should use packageInfo.title when title and integrationInfo are not provided', () => {
-      expect(wrapTitle({ packageInfo })).toBe('Package Title');
+      expect(wrapTitleWithDeprecated({ packageInfo })).toBe('Package Title');
     });
 
     it('should add (Deprecated) suffix when packageInfo.deprecated is set', () => {
@@ -74,7 +78,9 @@ describe('wrapTitle', () => {
         deprecated: { description: 'This package is deprecated' },
       } as PackageInfo;
 
-      expect(wrapTitle({ packageInfo: deprecatedPackageInfo })).toBe('Package Title (Deprecated)');
+      expect(wrapTitleWithDeprecated({ packageInfo: deprecatedPackageInfo })).toBe(
+        'Package Title (Deprecated)'
+      );
     });
 
     it('should add (Deprecated) suffix when packageInfo.conditions.deprecated is set', () => {
@@ -83,30 +89,32 @@ describe('wrapTitle', () => {
         conditions: { deprecated: { description: 'Deprecated via conditions' } },
       } as PackageInfo;
 
-      expect(wrapTitle({ packageInfo: deprecatedPackageInfo })).toBe('Package Title (Deprecated)');
+      expect(wrapTitleWithDeprecated({ packageInfo: deprecatedPackageInfo })).toBe(
+        'Package Title (Deprecated)'
+      );
     });
 
     it('should prefer integrationInfo.title over packageInfo.title', () => {
       const integrationInfo = { title: 'Integration Title' } as RegistryPolicyTemplate;
-      expect(wrapTitle({ packageInfo, integrationInfo })).toBe('Integration Title');
+      expect(wrapTitleWithDeprecated({ packageInfo, integrationInfo })).toBe('Integration Title');
     });
 
     it('should prefer provided title over packageInfo.title', () => {
-      expect(wrapTitle({ title: 'Custom Title', packageInfo })).toBe('Custom Title');
+      expect(wrapTitleWithDeprecated({ title: 'Custom Title', packageInfo })).toBe('Custom Title');
     });
 
     it('should return default title when no title source is provided', () => {
-      expect(wrapTitle({ defaultTitle: 'Default Title' })).toBe('Default Title');
+      expect(wrapTitleWithDeprecated({ defaultTitle: 'Default Title' })).toBe('Default Title');
     });
   });
 
   describe('when no title source is provided', () => {
     it('should return empty string when nothing is provided', () => {
-      expect(wrapTitle({})).toBe('');
+      expect(wrapTitleWithDeprecated({})).toBe('');
     });
 
     it('should return empty string with (Deprecated) suffix when deprecated is true', () => {
-      expect(wrapTitle({ deprecated: true })).toBe(' (Deprecated)');
+      expect(wrapTitleWithDeprecated({ deprecated: true })).toBe(' (Deprecated)');
     });
   });
 
@@ -115,27 +123,29 @@ describe('wrapTitle', () => {
     const integrationInfo = { title: 'Integration Title' } as RegistryPolicyTemplate;
 
     it('should prioritize: title > integrationInfo.title > packageInfo.title', () => {
-      expect(wrapTitle({ title: 'Direct Title', integrationInfo, packageInfo })).toBe(
+      expect(wrapTitleWithDeprecated({ title: 'Direct Title', integrationInfo, packageInfo })).toBe(
         'Direct Title'
       );
-      expect(wrapTitle({ integrationInfo, packageInfo })).toBe('Integration Title');
-      expect(wrapTitle({ packageInfo })).toBe('Package Title');
+      expect(wrapTitleWithDeprecated({ integrationInfo, packageInfo })).toBe('Integration Title');
+      expect(wrapTitleWithDeprecated({ packageInfo })).toBe('Package Title');
     });
   });
 
   describe('priority of deprecation sources', () => {
     it('should be deprecated if any deprecation flag is set', () => {
-      expect(wrapTitle({ title: 'Test', deprecated: true })).toBe('Test (Deprecated)');
+      expect(wrapTitleWithDeprecated({ title: 'Test', deprecated: true })).toBe(
+        'Test (Deprecated)'
+      );
 
       expect(
-        wrapTitle({
+        wrapTitleWithDeprecated({
           title: 'Test',
           packageInfo: { deprecated: { description: 'Deprecated' } } as PackageInfo,
         })
       ).toBe('Test (Deprecated)');
 
       expect(
-        wrapTitle({
+        wrapTitleWithDeprecated({
           title: 'Test',
           packageInfo: {
             conditions: { deprecated: { description: 'Deprecated via conditions' } },
@@ -144,7 +154,7 @@ describe('wrapTitle', () => {
       ).toBe('Test (Deprecated)');
 
       expect(
-        wrapTitle({
+        wrapTitleWithDeprecated({
           title: 'Test',
           integrationInfo: {
             deprecated: { description: 'Deprecated integration' },
@@ -159,37 +169,37 @@ describe('wrapTitle', () => {
         conditions: { deprecated: { description: 'Deprecated' } },
       } as PackageInfo;
 
-      expect(wrapTitle({ packageInfo })).toBe('Test (Deprecated)');
+      expect(wrapTitleWithDeprecated({ packageInfo })).toBe('Test (Deprecated)');
     });
   });
 
   describe('edge cases', () => {
     it('should handle null packageInfo', () => {
-      expect(wrapTitle({ title: 'Test', packageInfo: null })).toBe('Test');
+      expect(wrapTitleWithDeprecated({ title: 'Test', packageInfo: null })).toBe('Test');
     });
 
     it('should handle undefined packageInfo', () => {
-      expect(wrapTitle({ title: 'Test', packageInfo: undefined })).toBe('Test');
+      expect(wrapTitleWithDeprecated({ title: 'Test', packageInfo: undefined })).toBe('Test');
     });
 
     it('should handle empty string title', () => {
-      expect(wrapTitle({ title: '' })).toBe('');
+      expect(wrapTitleWithDeprecated({ title: '' })).toBe('');
     });
 
     it('should handle title with only spaces', () => {
-      expect(wrapTitle({ title: '   ', deprecated: true })).toBe('    (Deprecated)');
+      expect(wrapTitleWithDeprecated({ title: '   ', deprecated: true })).toBe('    (Deprecated)');
     });
 
     it('should handle deprecated suffix in middle of title (not at end)', () => {
-      expect(wrapTitle({ title: 'My (deprecated) Integration', deprecated: true })).toBe(
-        'My (deprecated) Integration (Deprecated)'
-      );
+      expect(
+        wrapTitleWithDeprecated({ title: 'My (deprecated) Integration', deprecated: true })
+      ).toBe('My (deprecated) Integration (Deprecated)');
     });
 
     it('should only match deprecated suffix at the end of the string', () => {
-      expect(wrapTitle({ title: 'Integration (deprecated) v2', deprecated: true })).toBe(
-        'Integration (deprecated) v2 (Deprecated)'
-      );
+      expect(
+        wrapTitleWithDeprecated({ title: 'Integration (deprecated) v2', deprecated: true })
+      ).toBe('Integration (deprecated) v2 (Deprecated)');
     });
   });
 
@@ -202,7 +212,7 @@ describe('wrapTitle', () => {
         title: 'Apache Logs',
       } as RegistryPolicyTemplate;
 
-      expect(wrapTitle({ packageInfo, integrationInfo })).toBe('Apache Logs');
+      expect(wrapTitleWithDeprecated({ packageInfo, integrationInfo })).toBe('Apache Logs');
     });
 
     it('should handle a deprecated integration with custom title', () => {
@@ -211,7 +221,7 @@ describe('wrapTitle', () => {
         deprecated: { description: 'This integration is deprecated' },
       } as PackageInfo;
 
-      expect(wrapTitle({ title: 'Custom Old Integration', packageInfo })).toBe(
+      expect(wrapTitleWithDeprecated({ title: 'Custom Old Integration', packageInfo })).toBe(
         'Custom Old Integration (Deprecated)'
       );
     });
@@ -224,7 +234,7 @@ describe('wrapTitle', () => {
         },
       } as PackageInfo;
 
-      expect(wrapTitle({ packageInfo })).toBe('Legacy Integration (Deprecated)');
+      expect(wrapTitleWithDeprecated({ packageInfo })).toBe('Legacy Integration (Deprecated)');
     });
   });
 });
