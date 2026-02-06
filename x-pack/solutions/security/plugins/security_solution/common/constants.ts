@@ -229,6 +229,10 @@ export enum SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM {
 /** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
 export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh' as const;
 
+/** This Kibana Advanced Setting enables the Detection Engine Health UI */
+export const ENABLE_DE_HEALTH_UI_SETTING =
+  'securitySolution:enableDetectionEngineHealthUI' as const;
+
 /** This Kibana Advanced Setting specifies the URL of the News feed widget */
 export const NEWS_FEED_URL_SETTING = 'securitySolution:newsFeedUrl' as const;
 

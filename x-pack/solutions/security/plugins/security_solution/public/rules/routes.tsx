@@ -18,6 +18,7 @@ import {
   COVERAGE_OVERVIEW_PATH,
   DE_RULE_HEALTH_PATH,
   DE_SPACE_RULES_HEALTH_PATH,
+  ENABLE_DE_HEALTH_UI_SETTING,
   RULES_LANDING_PATH,
   RULES_PATH,
   AI_RULE_CREATION_PATH,
@@ -45,7 +46,7 @@ import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pag
 import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { hasCapabilities } from '../common/lib/capabilities';
-import { useKibana } from '../common/lib/kibana/kibana_react';
+import { useKibana, useUiSetting$ } from '../common/lib/kibana/kibana_react';
 
 interface Features {
   deHealthUIEnabled: boolean;
@@ -122,7 +123,9 @@ const getRulesSubRoutes = (capabilities: Capabilities, { deHealthUIEnabled }: Fe
 const RulesContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
   const { capabilities } = useKibana().services.application;
-  const deHealthUIEnabled = useIsExperimentalFeatureEnabled('deHealthUIEnabled');
+  const deHealthUiFFEnabled = useIsExperimentalFeatureEnabled('deHealthUIEnabled');
+  const [deHealthUIAdvancedSetting] = useUiSetting$<boolean>(ENABLE_DE_HEALTH_UI_SETTING, false);
+  const deHealthUIEnabled = deHealthUiFFEnabled && deHealthUIAdvancedSetting;
 
   const subRoutes = useMemo(() => {
     return getRulesSubRoutes(capabilities, { deHealthUIEnabled }).map((route) => (
