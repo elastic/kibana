@@ -51,7 +51,7 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
       data-test-subj="endpointStats"
     >
       <EuiFlexItem grow={false}>
-        <EuiText size="s" data-test-subj="endpointStatsServices">
+        <EuiText size="s">
           <EuiTextColor color="subdued">{SERVICES_LABEL}</EuiTextColor>&nbsp;
           <strong>
             <span data-test-subj="endpointStatsServicesCount">{stats.servicesCount}</span>
@@ -62,7 +62,7 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
         <EuiText size="s">|</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="s" data-test-subj="endpointStatsModels">
+        <EuiText size="s">
           <EuiTextColor color="subdued">{MODELS_LABEL}</EuiTextColor>&nbsp;
           <strong>
             <span data-test-subj="endpointStatsModelsCount">{stats.modelsCount}</span>
@@ -73,7 +73,7 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
         <EuiText size="s">|</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="s" data-test-subj="endpointStatsEndpoints">
+        <EuiText size="s">
           <EuiTextColor color="subdued">{ENDPOINTS_LABEL}</EuiTextColor>&nbsp;
           <strong>
             <span data-test-subj="endpointStatsEndpointsCount">{stats.endpointsCount}</span>
@@ -84,7 +84,7 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
         <EuiText size="s">|</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="s" data-test-subj="endpointStatsTypes">
+        <EuiText size="s">
           <EuiTextColor color="subdued">{TYPES_LABEL}</EuiTextColor>&nbsp;
           <strong>
             <span data-test-subj="endpointStatsTypesCount">{stats.typesCount}</span>

@@ -308,15 +308,15 @@ describe('When the tabular page is loaded', () => {
     expect(stats).toBeInTheDocument();
 
     // 3 unique services: elasticsearch, openai, elastic
-    expect(screen.getByTestId('endpointStatsServices')).toHaveTextContent('Services: 3');
+    expect(screen.getByTestId('endpointStatsServicesCount')).toHaveTextContent('3');
 
     // 8 unique models
-    expect(screen.getByTestId('endpointStatsModels')).toHaveTextContent('Models: 8');
+    expect(screen.getByTestId('endpointStatsModelsCount')).toHaveTextContent('8');
 
     // 4 unique types: sparse_embedding, text_embedding, rerank, chat_completion
-    expect(screen.getByTestId('endpointStatsTypes')).toHaveTextContent('Types: 4');
+    expect(screen.getByTestId('endpointStatsTypesCount')).toHaveTextContent('4');
 
     // 11 endpoints total
-    expect(screen.getByTestId('endpointStatsEndpoints')).toHaveTextContent('Endpoints: 11');
+    expect(screen.getByTestId('endpointStatsEndpointsCount')).toHaveTextContent('11');
   });
 });
