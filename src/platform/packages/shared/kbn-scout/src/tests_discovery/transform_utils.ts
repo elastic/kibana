@@ -9,6 +9,8 @@
 
 import type { DeploymentType, FlattenedConfigGroup, ModuleDiscoveryInfo } from './types';
 
+const CLEAN_ENV_TAG = '@cleanEnv';
+
 // Counts modules by type (plugins and packages)
 export const countModulesByType = (
   modules: ModuleDiscoveryInfo[]
@@ -91,6 +93,7 @@ export const flattenModulesByServerRunFlag = (
 ): FlattenedConfigGroup[] => {
   // Using a map with composite key: `${mode}:${group}:${serverRunFlag}`
   const groupsMap = new Map<string, FlattenedConfigGroup>();
+  const configsByGroup = new Map<string, Array<{ path: string; tags: string[] }>>();
 
   for (const module of modules) {
     for (const config of module.configs) {
@@ -120,10 +123,25 @@ export const flattenModulesByServerRunFlag = (
           groupsMap.set(key, group);
         }
 
-        // Add config path to group
-        group.configs.push(config.path);
+        const configsForGroup = configsByGroup.get(key) ?? [];
+        configsForGroup.push({ path: config.path, tags: config.tags });
+        configsByGroup.set(key, configsForGroup);
       }
     }
+  }
+
+  for (const [key, group] of groupsMap.entries()) {
+    const configsForGroup = configsByGroup.get(key) ?? [];
+    // sort configs within group: those with @cleanEnv first, then alphabetically by path
+    const sortedConfigs = configsForGroup.sort((left, right) => {
+      const leftIsCleanEnv = left.tags.includes(CLEAN_ENV_TAG);
+      const rightIsCleanEnv = right.tags.includes(CLEAN_ENV_TAG);
+      if (leftIsCleanEnv !== rightIsCleanEnv) {
+        return leftIsCleanEnv ? -1 : 1;
+      }
+      return left.path.localeCompare(right.path);
+    });
+    group.configs = sortedConfigs.map((config) => config.path);
   }
 
   // Convert map to array and sort for consistent output
