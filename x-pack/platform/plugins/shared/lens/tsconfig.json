@@ -3,7 +3,14 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
+  "include": [
+    "*.ts", 
+    "common/**/*", 
+    "public/**/*", 
+    "server/**/*", 
+    "../../../../../typings/**/*", 
+    "test/scout/**/*",
+  ],
   "kbn_references": [
     "@kbn/spaces-plugin",
     "@kbn/core",
@@ -135,9 +142,9 @@
     "@kbn/cps",
     "@kbn/kql",
     "@kbn/controls-constants",
-    "@kbn/react-env",
     "@kbn/core-base-browser-mocks",
     "@kbn/react-kibana-context-env",
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }
