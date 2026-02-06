@@ -20,6 +20,7 @@ import {
   type AccessControlClient,
 } from '@kbn/content-management-access-control-public';
 
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
 import type { DashboardLocatorParams } from '../../../../common';
 import { shareService, coreServices, spacesService } from '../../../services/kibana_services';

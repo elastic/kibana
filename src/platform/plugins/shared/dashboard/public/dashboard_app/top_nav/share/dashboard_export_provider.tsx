@@ -11,11 +11,11 @@ import React from 'react';
 import { EuiCallOut, EuiCodeBlock, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { downloadFileAs } from '../../../../share/public';
-import type { ExportShare, RegisterShareIntegrationArgs } from '../../../../share/public/types';
-import type { DashboardReadResponseBody } from '../../../server';
-import type { DashboardApi } from '../../dashboard_api/types';
-import { dashboardClient } from '../../dashboard_client';
+import { downloadFileAs } from '@kbn/share-plugin/public';
+import type { ExportShare, RegisterShareIntegrationArgs } from '@kbn/share-plugin/public/types';
+import type { DashboardReadResponseBody } from '../../../../server';
+import type { DashboardApi } from '../../../dashboard_api/types';
+import { dashboardClient } from '../../../dashboard_client';
 
 const EMPTY_DASHBOARD_ID = '';
 
@@ -28,7 +28,7 @@ export const dashboardExportProvider = (): RegisterShareIntegrationArgs<ExportSh
   id: 'dashboardJsonExport',
   groupId: 'export',
   getShareIntegrationConfig: async ({ sharingData }) => {
-    const { title, dashboardApi } = sharingData as DashboardExportSharingData;
+    const { title, dashboardApi } = sharingData as unknown as DashboardExportSharingData;
     const exportLabel = i18n.translate('dashboard.shareIntegration.exportDashboardJsonTitle', {
       defaultMessage: 'JSON',
     });

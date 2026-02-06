@@ -12,8 +12,8 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import type { DashboardReadResponseBody } from '../../../../../plugins/shared/dashboard/server';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { DashboardReadResponseBody } from '@kbn/dashboard-plugin/server';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const FEATURE_FLAG_SETTING = 'dashboardPlugin.dashboardJsonExport';
 

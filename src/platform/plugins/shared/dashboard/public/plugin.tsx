@@ -178,7 +178,8 @@ export class DashboardPlugin
         })
       );
 
-      if (core.featureFlags.getBooleanValue('dashboardPlugin.dashboardJsonExport', false)) {
+      const initialFeatureFlags = core.featureFlags.getInitialFeatureFlags();
+      if (Boolean(initialFeatureFlags['dashboardPlugin.dashboardJsonExport'])) {
         share.registerShareIntegration('dashboard', dashboardExportProvider());
       }
     }

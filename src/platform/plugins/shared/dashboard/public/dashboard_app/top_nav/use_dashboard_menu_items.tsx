@@ -192,10 +192,7 @@ export const useDashboardMenuItems = ({
     canManageAccessControl,
     accessControl,
     saveFromShareModal,
-    dashboardApi.changeAccessMode,
-    dashboardApi.createdBy,
     accessControlClient,
-    dashboardApi.isManaged,
     dashboardApi,
   ]);
 
