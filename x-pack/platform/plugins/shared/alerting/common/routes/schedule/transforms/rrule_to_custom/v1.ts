@@ -23,8 +23,6 @@ const transformFrequencyToEvery = (frequency: Frequency) => {
       return 'w';
     case Frequency.DAILY:
       return 'd';
-    case Frequency.HOURLY:
-      return 'h';
     default:
       return;
   }
