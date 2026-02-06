@@ -603,17 +603,13 @@ export class HttpServer {
 
     this.server!.ext('onPostAuth', async (request, responseToolkit) => {
       if (this.truncatedSessionIdGetter) {
-        try {
-          // Store the truncated session ID on the request state so the user
-          // activity service can read it later. We cannot call the service
-          // directly here because this handler is async and would use its
-          // own user-activity
-          const kibanaRequest = CoreKibanaRequest.from(request);
-          (request.app as KibanaRequestState).truncatedSessionId =
-            await this.truncatedSessionIdGetter(kibanaRequest);
-        } catch {
-          // If session retrieval fails, leave truncatedSessionId undefined
-        }
+        // Store the truncated session ID on the request state so the user
+        // activity service can read it later. We cannot call the service
+        // directly here because this handler is async and would use its
+        // own user-activity
+        const kibanaRequest = CoreKibanaRequest.from(request);
+        (request.app as KibanaRequestState).truncatedSessionId =
+          await this.truncatedSessionIdGetter(kibanaRequest);
       }
       return responseToolkit.continue;
     });
