@@ -15,6 +15,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../../common';
 import {
   AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
+  GCP_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
   getCloudConnectorEditIconTestSubj,
 } from '../../../../common/services/cloud_connectors/test_subjects';
 
@@ -365,7 +366,7 @@ describe('CloudConnectorSelector', () => {
       const user = userEvent.setup();
       renderSelector({ provider: 'gcp' });
 
-      const selector = screen.getByRole('combobox');
+      const selector = screen.getByTestId(GCP_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       await user.click(selector);
 
       await waitFor(() => {
@@ -378,7 +379,7 @@ describe('CloudConnectorSelector', () => {
       const user = userEvent.setup();
       renderSelector({ provider: 'gcp' });
 
-      const selector = screen.getByRole('combobox');
+      const selector = screen.getByTestId(GCP_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       await user.click(selector);
 
       await waitFor(() => {
@@ -391,7 +392,7 @@ describe('CloudConnectorSelector', () => {
       const user = userEvent.setup();
       renderSelector({ provider: 'gcp' });
 
-      const selector = screen.getByRole('combobox');
+      const selector = screen.getByTestId(GCP_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       await user.click(selector);
 
       await waitFor(() => {
@@ -413,7 +414,7 @@ describe('CloudConnectorSelector', () => {
       const user = userEvent.setup();
       renderSelector({ provider: 'gcp' });
 
-      const selector = screen.getByRole('combobox');
+      const selector = screen.getByTestId(GCP_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       await user.click(selector);
 
       await waitFor(() => {
@@ -426,7 +427,7 @@ describe('CloudConnectorSelector', () => {
       const user = userEvent.setup();
       renderSelector({ provider: 'gcp' });
 
-      const selector = screen.getByRole('combobox');
+      const selector = screen.getByTestId(GCP_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       await user.click(selector);
 
       await waitFor(() => {

@@ -137,6 +137,8 @@ export const isGcpCloudConnectorVars = (
   return (
     (GCP_CLOUD_CONNECTOR_FIELD_NAMES.SERVICE_ACCOUNT in vars ||
       GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_SERVICE_ACCOUNT in vars) &&
+    (GCP_CLOUD_CONNECTOR_FIELD_NAMES.AUDIENCE in vars ||
+      GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_AUDIENCE in vars) &&
     provider === GCP_PROVIDER
   );
 };

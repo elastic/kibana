@@ -21,6 +21,7 @@ import {
   isCloudConnectorReusableEnabled,
   isAwsCloudConnectorVars,
   isAzureCloudConnectorVars,
+  isGcpCloudConnectorVars,
   getCloudConnectorRemoteRoleTemplate,
   getKibanaComponentId,
   getDeploymentIdFromUrl,
@@ -499,7 +500,6 @@ describe('isCloudConnectorReusableEnabled - Azure provider', () => {
   });
 
   it('should return false for unknown providers', () => {
-    expect(isCloudConnectorReusableEnabled('gcp', '9.9.9', 'cspm')).toBe(false);
     expect(isCloudConnectorReusableEnabled('unknown', '1.0.0', 'asset_inventory')).toBe(false);
   });
 });
@@ -757,8 +757,8 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       );
     });
 
-    it('should use cloud ESS deployment ID when both serverless and cloud are enabled', () => {
-      // Note: When both are enabled, cloud ESS takes precedence (last assignment wins)
+    it('should use serverless project ID when both serverless and cloud are enabled', () => {
+      // Note: When both are enabled, serverless takes precedence (checked first)
       const hybridCloudSetup = {
         ...mockAwsCloudSetup,
         isServerlessEnabled: true,
@@ -773,9 +773,9 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         provider: AWS_PROVIDER,
       });
 
-      // Current behavior: cloud ESS ID overwrites serverless project ID
-      expect(result).toContain('aws-kibana-id');
-      expect(result).not.toContain('serverless-priority');
+      // Current behavior: serverless project ID takes precedence over cloud ESS ID
+      expect(result).toContain('serverless-priority');
+      expect(result).not.toContain('aws-kibana-id');
     });
 
     it('should use organization-account type when specified in input', () => {

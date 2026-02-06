@@ -9,7 +9,11 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiAccordion, EuiSpacer, EuiButton, EuiLink, EuiText } from '@elastic/eui';
 
-import { CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ } from '../../../../common/services/cloud_connectors/test_subjects';
+import {
+  CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
+  GCP_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ,
+  GCP_LAUNCH_CLOUD_CONNECTOR_CLOUD_SHELL_TEST_SUBJ,
+} from '../../../../common/services/cloud_connectors/test_subjects';
 import { extractRawCredentialVars, ORGANIZATION_ACCOUNT } from '../../../../common';
 import { type CloudConnectorFormProps } from '../types';
 
@@ -93,7 +97,7 @@ export const GCPCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
       <EuiSpacer size="m" />
       <EuiAccordion
         id="googleCloudShellAccordianInstructions"
-        data-test-subj="launchGoogleCloudShellAccordianInstructions"
+        data-test-subj={GCP_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ}
         buttonContent={
           <EuiLink>
             <FormattedMessage
@@ -112,7 +116,7 @@ export const GCPCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
       </EuiAccordion>
       <EuiSpacer size="l" />
       <EuiButton
-        data-test-subj="launchGoogleCloudShellAgentlessButton"
+        data-test-subj={GCP_LAUNCH_CLOUD_CONNECTOR_CLOUD_SHELL_TEST_SUBJ}
         target="_blank"
         iconSide="left"
         iconType="launch"

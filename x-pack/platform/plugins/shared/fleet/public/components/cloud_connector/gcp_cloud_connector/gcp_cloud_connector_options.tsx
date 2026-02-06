@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import type { PackagePolicyConfigRecord } from '../../../../common';
+import { GCP_INPUT_FIELDS_TEST_SUBJECTS } from '../../../../common/services/cloud_connectors/test_subjects';
 import { GCP_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 
 // Cloud Connector field labels
@@ -73,7 +74,7 @@ export const getGcpCloudConnectorsCredentialsFormOptions = (
       id: GCP_CLOUD_CONNECTOR_FIELD_NAMES.SERVICE_ACCOUNT,
       label: GCP_CLOUD_CONNECTOR_FIELD_LABELS.service_account,
       type: 'text' as const,
-      dataTestSubj: 'gcpServiceAccountInput',
+      dataTestSubj: GCP_INPUT_FIELDS_TEST_SUBJECTS.SERVICE_ACCOUNT,
       value: inputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.SERVICE_ACCOUNT].value,
     });
   }
@@ -83,7 +84,7 @@ export const getGcpCloudConnectorsCredentialsFormOptions = (
       id: GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_SERVICE_ACCOUNT,
       label: GCP_CLOUD_CONNECTOR_FIELD_LABELS.service_account,
       type: 'text' as const,
-      dataTestSubj: 'gcpServiceAccountInput',
+      dataTestSubj: GCP_INPUT_FIELDS_TEST_SUBJECTS.SERVICE_ACCOUNT,
       value: inputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_SERVICE_ACCOUNT].value,
       tooltip:
         'The email address of the GCP service account that Elastic will use to authenticate and access your GCP resources.',
@@ -95,7 +96,7 @@ export const getGcpCloudConnectorsCredentialsFormOptions = (
       id: GCP_CLOUD_CONNECTOR_FIELD_NAMES.AUDIENCE,
       label: GCP_CLOUD_CONNECTOR_FIELD_LABELS.audience,
       type: 'text' as const,
-      dataTestSubj: 'gcpAudienceInput',
+      dataTestSubj: GCP_INPUT_FIELDS_TEST_SUBJECTS.AUDIENCE,
       value: inputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.AUDIENCE].value,
     });
   }
@@ -105,7 +106,7 @@ export const getGcpCloudConnectorsCredentialsFormOptions = (
       id: GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_AUDIENCE,
       label: GCP_CLOUD_CONNECTOR_FIELD_LABELS.audience,
       type: 'text' as const,
-      dataTestSubj: 'gcpAudienceInput',
+      dataTestSubj: GCP_INPUT_FIELDS_TEST_SUBJECTS.AUDIENCE,
       value: inputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_AUDIENCE].value,
       tooltip:
         'The intended recipient of the ID token used for workload identity federation between Elastic and GCP.',
@@ -117,7 +118,7 @@ export const getGcpCloudConnectorsCredentialsFormOptions = (
       id: GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_CREDENTIALS_CLOUD_CONNECTOR_ID,
       label: GCP_CLOUD_CONNECTOR_FIELD_LABELS.gcp_credentials_cloud_connector_id,
       type: 'text' as const,
-      dataTestSubj: 'gcpCredentialsCloudConnectorIdInput',
+      dataTestSubj: GCP_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID,
       value: inputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_CREDENTIALS_CLOUD_CONNECTOR_ID].value,
       tooltip:
         'A unique identifier for this cloud connector configuration used to link and manage credentials across integrations.',

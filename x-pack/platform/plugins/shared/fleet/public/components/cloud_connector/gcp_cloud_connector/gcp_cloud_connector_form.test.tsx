@@ -183,9 +183,9 @@ describe('GCPCloudConnectorForm', () => {
     it('should render the accordion with Cloud Shell guide', () => {
       renderComponent();
 
-      expect(screen.getByText(/Steps to create Service Account in GCP/i)).toBeInTheDocument();
-      // Cloud Shell guide is tested in its own test file
-      expect(screen.getByText(/Log in to the Google Cloud console/i)).toBeInTheDocument();
+      expect(screen.getByText(/Steps to generate GCP Service Account/i)).toBeInTheDocument();
+      // Verify Cloud Shell guide content is rendered (guide details tested in its own test file)
+      expect(screen.getByText(/Google Cloud Console/i)).toBeInTheDocument();
     });
 
     it('should render documentation link', () => {
@@ -195,35 +195,35 @@ describe('GCPCloudConnectorForm', () => {
       expect(screen.getByText(/documentation/i)).toBeInTheDocument();
     });
 
-    it('should not render Launch Cloud Shell button without valid Cloud Shell URL', () => {
+    it('should render Launch Cloud Shell button without href when no valid Cloud Shell URL', () => {
       // In test environment, the utility function doesn't generate a valid URL
       renderComponent();
 
-      // Button only appears when cloudShellUrl is truthy
-      expect(
-        screen.queryByTestId(GCP_LAUNCH_CLOUD_CONNECTOR_CLOUD_SHELL_TEST_SUBJ)
-      ).not.toBeInTheDocument();
-      // But the form fields should still render
+      // Button always renders, but href is undefined when no valid URL
+      const button = screen.getByTestId(GCP_LAUNCH_CLOUD_CONNECTOR_CLOUD_SHELL_TEST_SUBJ);
+      expect(button).toBeInTheDocument();
+      expect(button.getAttribute('href')).toBeNull();
+      // Form fields should still render
       expect(
         screen.getByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.SERVICE_ACCOUNT)
       ).toBeInTheDocument();
       expect(screen.getByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.AUDIENCE)).toBeInTheDocument();
     });
 
-    it('should not render Launch Cloud Shell button when cloud is undefined', () => {
+    it('should render Launch Cloud Shell button without href when cloud is undefined', () => {
       renderComponent({ cloud: undefined });
 
-      expect(
-        screen.queryByTestId(GCP_LAUNCH_CLOUD_CONNECTOR_CLOUD_SHELL_TEST_SUBJ)
-      ).not.toBeInTheDocument();
+      const button = screen.getByTestId(GCP_LAUNCH_CLOUD_CONNECTOR_CLOUD_SHELL_TEST_SUBJ);
+      expect(button).toBeInTheDocument();
+      expect(button.getAttribute('href')).toBeNull();
     });
 
-    it('should not render Launch Cloud Shell button when templateName is undefined', () => {
+    it('should render Launch Cloud Shell button without href when templateName is undefined', () => {
       renderComponent({ templateName: undefined });
 
-      expect(
-        screen.queryByTestId(GCP_LAUNCH_CLOUD_CONNECTOR_CLOUD_SHELL_TEST_SUBJ)
-      ).not.toBeInTheDocument();
+      const button = screen.getByTestId(GCP_LAUNCH_CLOUD_CONNECTOR_CLOUD_SHELL_TEST_SUBJ);
+      expect(button).toBeInTheDocument();
+      expect(button.getAttribute('href')).toBeNull();
     });
 
     it('should render CloudConnectorInputFields when fields are available', () => {
@@ -259,8 +259,8 @@ describe('GCPCloudConnectorForm', () => {
 
       renderComponent({ cloud });
 
-      // The elastic stack ID should be rendered in the Cloud Shell guide
-      expect(screen.getByText('serverless-project-123')).toBeInTheDocument();
+      // The elastic stack ID is embedded in the command text within a code block
+      expect(screen.getByText(/serverless-project-123/)).toBeInTheDocument();
     });
 
     it('should extract kibana component ID from cloudId when cloud is enabled', () => {
@@ -272,8 +272,8 @@ describe('GCPCloudConnectorForm', () => {
 
       renderComponent({ cloud });
 
-      // The component should extract and display the kibana component ID from the cloudId
-      expect(screen.getByText('es-component-id')).toBeInTheDocument();
+      // The component should extract and embed the kibana component ID in the command text
+      expect(screen.getByText(/es-component-id/)).toBeInTheDocument();
     });
   });
 

@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
   AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
+  GCP_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
   getCloudConnectorEditIconTestSubj,
 } from '../../../../common/services/cloud_connectors/test_subjects';
 import type { AccountType } from '../../../types';
@@ -207,10 +208,18 @@ export const CloudConnectorSelector = ({
     [cloudConnectors, provider, setCredentials]
   );
 
-  const testSubj =
-    provider === 'aws'
-      ? AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ
-      : AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ;
+  const getTestSubj = () => {
+    switch (provider) {
+      case 'aws':
+        return AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ;
+      case 'gcp':
+        return GCP_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ;
+      case 'azure':
+      default:
+        return AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ;
+    }
+  };
+  const testSubj = getTestSubj();
 
   return (
     <>
