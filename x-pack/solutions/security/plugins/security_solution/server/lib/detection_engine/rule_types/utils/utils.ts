@@ -12,7 +12,6 @@ import moment from 'moment';
 import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type { estypes, TransportResult } from '@elastic/elasticsearch';
 import {
   ALERT_UUID,
@@ -31,11 +30,7 @@ import type {
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type {
-  DocLinksServiceSetup,
-  ElasticsearchClient,
-  IUiSettingsClient,
-} from '@kbn/core/server';
+import type { DocLinksServiceSetup, ElasticsearchClient } from '@kbn/core/server';
 import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
@@ -75,7 +70,6 @@ import type {
   EqlShellAlertLatest,
   WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
 import type {
   ExtraFieldsForShellAlert,
@@ -95,20 +89,13 @@ export const MAX_RULE_GAP_RATIO = 4;
 export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  uiSettingsClient: IUiSettingsClient;
   docLinks: DocLinksServiceSetup;
 }): Promise<string | undefined> => {
-  const { privileges, ruleExecutionLogger, uiSettingsClient, docLinks } = args;
+  const { privileges, ruleExecutionLogger, docLinks } = args;
   const apiKeyDocs = docLinks.links.alerting.authorization;
-  const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
   const indexNames = Object.keys(privileges.index);
-  const filteredIndexNames = isCcsPermissionWarningEnabled
-    ? indexNames
-    : indexNames.filter((indexName) => {
-        return !isCCSRemoteIndexName(indexName);
-      });
   const [, indexesWithNoReadPrivileges] = partition(
-    filteredIndexNames,
+    indexNames,
     (indexName) => privileges.index[indexName].read
   );
   let warningStatusMessage;

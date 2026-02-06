@@ -182,7 +182,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           const {
             savedObjectsClient,
             scopedClusterClient,
-            uiSettingsClient,
             ruleMonitoringService,
             ruleResultService,
           } = services;
@@ -312,7 +311,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 const readIndexWarningMessage = await hasReadIndexPrivileges({
                   privileges,
                   ruleExecutionLogger,
-                  uiSettingsClient,
                   docLinks,
                 });
 

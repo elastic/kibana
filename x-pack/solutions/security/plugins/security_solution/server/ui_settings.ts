@@ -34,7 +34,6 @@ import {
   DEFAULT_TO,
   ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-  ENABLE_CCS_READ_WARNING_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
   ENABLE_NEWS_FEED_SETTING,
@@ -375,21 +374,6 @@ export const initUiSettings = (
           url_template: schema.string(),
         })
       ),
-      solutionViews: ['classic', 'security'],
-    },
-    [ENABLE_CCS_READ_WARNING_SETTING]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.enableCcsReadWarningLabel', {
-        defaultMessage: 'CCS Rule Privileges Warning',
-      }),
-      value: true,
-      description: i18n.translate('xpack.securitySolution.uiSettings.enableCcsWarningDescription', {
-        defaultMessage: '<p>Enables privilege check warnings in rules for CCS indices</p>',
-        values: { p: (chunks) => `<p>${chunks}</p>` },
-      }),
-      type: 'boolean',
-      category: [APP_ID],
-      requiresPageReload: false,
-      schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
     },
     [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING]: {
