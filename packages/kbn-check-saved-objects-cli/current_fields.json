@@ -90,6 +90,7 @@
     "updatedBy"
   ],
   "alerting_rule_template": [
+    "description",
     "name",
     "ruleTypeId",
     "tags"
@@ -1064,6 +1065,7 @@
     "realmName",
     "realmType",
     "sessionId",
+    "status",
     "username"
   ],
   "search-telemetry": [],

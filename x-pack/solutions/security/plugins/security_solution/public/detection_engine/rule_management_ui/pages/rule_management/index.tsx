@@ -32,12 +32,15 @@ import { HeaderPage } from '../../../../common/components/header_page';
 import { RuleUpdateCallouts } from '../../components/rule_update_callouts/rule_update_callouts';
 import { BlogPostPrebuiltRuleCustomizationCallout } from '../../components/blog_post_prebuilt_rule_customization_callout';
 import { RuleImportModal } from '../../components/rule_import_modal/rule_import_modal';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { CreateRuleMenu } from '../../components/create_rule_menu';
 import { RuleSettingsModal } from '../../../rule_gaps/components/rule_settings_modal';
 import {
   GapAutoFillSchedulerProvider,
   useGapAutoFillSchedulerContext,
 } from '../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 
 const RulesPageContent = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -48,7 +51,7 @@ const RulesPageContent = () => {
 
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
-  const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges;
+  const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges.rules;
   const {
     loading: listsConfigLoading,
     canWriteIndex: canWriteListsIndex,
@@ -58,6 +61,10 @@ const RulesPageContent = () => {
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
   const { canAccessGapAutoFill } = useGapAutoFillSchedulerContext();
+
+  const aiRuleCreationEnabled = useIsExperimentalFeatureEnabled('aiRuleCreationEnabled');
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const isAiRuleCreationAvailable = aiRuleCreationEnabled && isAgentBuilderEnabled;
 
   if (
     redirectToDetections(
@@ -139,15 +146,19 @@ const RulesPageContent = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <SecuritySolutionLinkButton
-                  data-test-subj="create-new-rule"
-                  fill
-                  iconType="plusInCircle"
-                  isDisabled={!canEditRules || loading}
-                  deepLinkId={SecurityPageName.rulesCreate}
-                >
-                  {i18n.ADD_NEW_RULE}
-                </SecuritySolutionLinkButton>
+                {isAiRuleCreationAvailable ? (
+                  <CreateRuleMenu loading={loading} isDisabled={!canEditRules || loading} />
+                ) : (
+                  <SecuritySolutionLinkButton
+                    data-test-subj="create-new-rule"
+                    fill
+                    iconType="plusInCircle"
+                    isDisabled={!canEditRules || loading}
+                    deepLinkId={SecurityPageName.rulesCreate}
+                  >
+                    {i18n.ADD_NEW_RULE}
+                  </SecuritySolutionLinkButton>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>

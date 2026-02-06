@@ -294,11 +294,11 @@ export const FindAttackDiscoveryAlertsParams = z.object({
 
 export type AttackDiscoveryGenerationConfig = z.infer<typeof AttackDiscoveryGenerationConfig>;
 export const AttackDiscoveryGenerationConfig = z.object({
-  /** 
+  /**
       * The (space specific) index pattern that contains the alerts to use as
 context for the attack discovery.
 Example: .alerts-security.alerts-default
- 
+
       */
   alertsIndexPattern: z.string(),
   /**
@@ -311,7 +311,7 @@ Example: .alerts-security.alerts-default
   apiConfig: ApiConfig,
   connectorName: z.string().optional(),
   end: z.string().optional(),
-  /** 
+  /**
       * An Elasticsearch-style query DSL object used to filter alerts. For example:
 ```json {
   "filter": {
@@ -335,7 +335,7 @@ Example: .alerts-security.alerts-default
       "must_not": []
     }
   }
-} ``` 
+} ```
       */
   filter: z.object({}).catchall(z.unknown()).optional(),
   langSmithProject: z.string().optional(),

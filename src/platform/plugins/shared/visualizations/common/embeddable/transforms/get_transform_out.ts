@@ -9,20 +9,20 @@
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
+import { flow } from 'lodash';
 import { injectVisReferences } from '../../references/inject_vis_references';
 import { VIS_SAVED_OBJECT_REF_NAME } from './get_transform_in';
 import type { StoredVisualizeByValueState, StoredVisualizeEmbeddableState } from './types';
 
-export function getTransformOut(
-  transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
-) {
+export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
   function transformOut(storedState: StoredVisualizeEmbeddableState, references?: Reference[]) {
-    const state = transformTitlesOut(storedState);
-    const enhancementsState = state.enhancements
-      ? transformEnhancementsOut(state.enhancements, references ?? [])
-      : undefined;
+    const transformsFlow = flow(
+      transformTitlesOut<StoredVisualizeEmbeddableState>,
+      (state: StoredVisualizeEmbeddableState) => transformDrilldownsOut(state, references)
+    );
+    const state = transformsFlow(storedState);
 
     // by ref
     const savedObjectRef = (references ?? []).find(
@@ -31,7 +31,6 @@ export function getTransformOut(
     if (savedObjectRef) {
       return {
         ...state,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         savedObjectId: savedObjectRef.id,
       };
     }
@@ -45,15 +44,11 @@ export function getTransformOut(
 
       return {
         ...state,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         savedVis,
       };
     }
 
-    return {
-      ...state,
-      ...(enhancementsState ? { enhancements: enhancementsState } : {}),
-    };
+    return state;
   }
   return transformOut;
 }

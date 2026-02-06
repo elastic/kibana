@@ -26,11 +26,12 @@ import type {
   MergeStep,
   ParallelStep,
   Step,
-  TriggerType,
   WaitStep,
   WorkflowYaml,
 } from '../spec/schema';
-import { BuiltInStepProperties, BuiltInStepTypes, TriggerTypes } from '../spec/schema';
+import { BuiltInStepProperties, BuiltInStepTypes } from '../spec/schema';
+import type { TriggerType } from '../spec/schema/triggers/trigger_schema';
+import { TriggerTypes } from '../spec/schema/triggers/trigger_schema';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml

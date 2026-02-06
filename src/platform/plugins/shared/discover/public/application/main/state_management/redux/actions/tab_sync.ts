@@ -13,8 +13,7 @@ import {
   noSearchSessionStorageCapabilityMessage,
 } from '@kbn/data-plugin/public';
 import { syncState } from '@kbn/kibana-utils-plugin/public';
-import { type AggregateQuery, FilterStateStore, isOfAggregateQueryType } from '@kbn/es-query';
-import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
+import { FilterStateStore, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TabActionPayload, InternalStateThunkActionCreator } from '../internal_state';
 import { selectTab, selectTabAppState } from '../selectors';
 import { selectTabRuntimeState } from '../runtime_state';
@@ -25,6 +24,7 @@ import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../commo
 import { getCurrentUrlState } from '../../utils/cleanup_url_state';
 import { buildStateSubscribe } from '../../utils/build_state_subscribe';
 import { createUrlSyncObservables } from '../../utils/create_url_sync_observables';
+import { createTabAttributesObservable } from '../../utils/create_tab_attributes_observable';
 import { createSearchSessionRestorationDataProvider } from '../../utils/create_search_session_restoration_data_provider';
 import {
   createDataViewDataSource,
@@ -143,27 +143,6 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
         );
       }
 
-      if (
-        isOfAggregateQueryType(appState.query) &&
-        services.discoverFeatureFlags.getCascadeLayoutEnabled()
-      ) {
-        // on first load if the data cascade layout feature flag is enabled,
-        // we need to set the available cascade groups from the user's query and selected cascade groups
-        const availableCascadeGroups = getESQLStatsQueryMeta(
-          (appState.query as AggregateQuery).esql
-        ).groupByFields.map((group) => group.field);
-
-        dispatch(
-          internalStateActions.setCascadeUiState({
-            tabId,
-            cascadeUiState: {
-              availableCascadeGroups,
-              selectedCascadeGroups: [availableCascadeGroups[0]].filter(Boolean),
-            },
-          })
-        );
-      }
-
       // syncs `_a` portion of url with query services
       const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
         data.query,
@@ -262,6 +241,12 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       .getCurrent$()
       .subscribe(syncLocallyPersistedTabState);
 
+    const tabAttributesSubscription = createTabAttributesObservable({
+      tabId,
+      internalState$: getInternalState$(),
+      getState,
+    }).subscribe(syncLocallyPersistedTabState);
+
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = stateContainer.dataState.subscribe();
 
@@ -301,6 +286,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
 
     const unsubscribeFn = () => {
       savedSearchChangesSubscription.unsubscribe();
+      tabAttributesSubscription.unsubscribe();
       unsubscribeData();
       appStateSubscription.unsubscribe();
       unsubscribeUrlState();

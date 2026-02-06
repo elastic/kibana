@@ -301,6 +301,9 @@
   "alerting_rule_template": {
     "dynamic": false,
     "properties": {
+      "description": {
+        "type": "text"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -3462,6 +3465,9 @@
         "type": "keyword"
       },
       "sessionId": {
+        "type": "keyword"
+      },
+      "status": {
         "type": "keyword"
       },
       "username": {
