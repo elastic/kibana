@@ -24,6 +24,14 @@ const configSchema = schema.object({
       }
     ),
   }),
+  collectQueueMetrics: schema.boolean({
+    defaultValue: false,
+    meta: {
+      description:
+        'When enabled, stores queue delay metrics (scheduledAt, runAt, queueDelayMs, scheduleDelayMs) in workflow executions. ' +
+        'Useful for observability but adds to document size. Disabled by default for performance.',
+    },
+  }),
 });
 
 export type WorkflowsExecutionEngineConfig = TypeOf<typeof configSchema>;

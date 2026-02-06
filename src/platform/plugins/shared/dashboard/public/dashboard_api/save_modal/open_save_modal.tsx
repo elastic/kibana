@@ -63,6 +63,23 @@ export async function openSaveModal({
     if (viewMode === 'edit' && isManaged) {
       return undefined;
     }
+
+    /**
+     * Only add access control for new dashboards being created by a logged in user that is not an anonymous user or
+     * user authenticated via authenticating proxy.
+     */
+    const getShouldAddAccessControl = async () => {
+      try {
+        const currentUser = await coreServices.userProfile.getCurrent();
+        const isCreatingNewDashboard = Boolean(!lastSavedId);
+        return isCreatingNewDashboard && Boolean(currentUser);
+      } catch {
+        return false;
+      }
+    };
+
+    const shouldAddAccessControl = await getShouldAddAccessControl();
+
     const saveAsTitle = lastSavedId ? await getSaveAsTitle(title) : title;
     return new Promise<(SaveDashboardReturn & { savedState: DashboardState }) | undefined>(
       (resolve) => {
@@ -118,8 +135,7 @@ export async function openSaveModal({
               saveOptions,
               dashboardState: dashboardStateToSave,
               lastSavedId,
-              // Only pass access mode for new dashboard creation (no lastSavedId)
-              accessMode: !lastSavedId && newAccessMode ? newAccessMode : undefined,
+              accessMode: shouldAddAccessControl && newAccessMode ? newAccessMode : undefined,
             });
 
             const addDuration = window.performance.now() - beforeAddTime;
@@ -156,7 +172,7 @@ export async function openSaveModal({
             onSave={onSaveAttempt}
             accessControl={accessControl}
             customModalTitle={getCustomModalTitle(viewMode)}
-            isDuplicateAction={Boolean(lastSavedId)}
+            showAccessContainer={shouldAddAccessControl}
           />
         );
       }

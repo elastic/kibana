@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { isNumber } from 'lodash';
-import React from 'react';
+import { isEqual, isNumber, omit } from 'lodash';
+import React, { memo } from 'react';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asPercentage } from '../../utils/formatters/as_percentage';
@@ -51,7 +51,7 @@ interface Props {
   totalSeconds: number;
 }
 
-export function FlameGraphTooltip({
+function FlameGraphTooltipComponent({
   annualCO2KgsInclusive,
   annualCostsUSDInclusive,
   baselineScaleFactor,
@@ -238,3 +238,11 @@ export function FlameGraphTooltip({
     </TooltipContainer>
   );
 }
+
+// Memoize the component to prevent re-renders when props haven't changed
+// This was added to prevents recalculation when mouse moves but tooltip data is the same
+const arePropsEqual = (prevProps: Props, nextProps: Props): boolean => {
+  return isEqual(omit(prevProps, 'onShowMoreClick'), omit(nextProps, 'onShowMoreClick'));
+};
+
+export const FlameGraphTooltip = memo(FlameGraphTooltipComponent, arePropsEqual);

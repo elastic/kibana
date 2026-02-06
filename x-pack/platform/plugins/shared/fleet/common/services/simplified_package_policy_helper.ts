@@ -172,6 +172,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
   packageInfo: PackageInfo,
   options?: {
     experimental_data_stream_features?: ExperimentalDataStreamFeature[];
+    policyTemplate?: string;
   }
 ): NewPackagePolicy {
   const {
@@ -194,7 +195,8 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       policyId && isEmpty(policyIds) ? policyId : policyIds,
       namespace,
       name,
-      description
+      description,
+      options?.policyTemplate
     ),
     supports_agentless: supportsAgentless,
     supports_cloud_connector: supportsCloudConnector,

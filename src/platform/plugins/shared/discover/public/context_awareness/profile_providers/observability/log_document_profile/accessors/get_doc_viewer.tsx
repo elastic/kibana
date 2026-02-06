@@ -7,14 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import type {
+  ObservabilityLogsAIAssistantFeature,
+  ObservabilityLogsAIInsightFeature,
+  ObservabilityStreamsFeature,
+} from '@kbn/discover-shared-plugin/public';
+import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { i18n } from '@kbn/i18n';
 import {
   UnifiedDocViewerLogsOverview,
   type UnifiedDocViewerLogsOverviewApi,
 } from '@kbn/unified-doc-viewer-plugin/public';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import React, { useEffect, useRef, useState } from 'react';
+import type { BehaviorSubject } from 'rxjs';
 import { filter, skip } from 'rxjs';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
+import type { LogOverviewContext } from '../../logs_data_source_profile/profile';
 import type { LogDocumentProfileProvider } from '../profile';
 
 export const createGetDocViewer =
@@ -50,56 +59,15 @@ export const createGetDocViewer =
             defaultMessage: 'Log overview',
           }),
           order: 0,
-          component: function LogOverviewTab(props) {
-            const [logsOverviewApi, setLogsOverviewApi] =
-              useState<UnifiedDocViewerLogsOverviewApi | null>(null);
-            const initialAccordionSection = useRef(
-              context.logOverviewContext$.getValue()?.initialAccordionSection
-            );
-
-            useEffect(() => {
-              if (!logsOverviewApi) {
-                return;
-              }
-
-              context.logOverviewContext$.next(undefined);
-
-              if (initialAccordionSection.current) {
-                logsOverviewApi.openAndScrollToSection(initialAccordionSection.current);
-              }
-
-              initialAccordionSection.current = undefined;
-
-              const subscription = context.logOverviewContext$
-                .pipe(
-                  skip(1),
-                  filter((overviewContext) => {
-                    return (
-                      overviewContext !== undefined &&
-                      overviewContext.initialAccordionSection !== undefined &&
-                      overviewContext.recordId === props.hit.id
-                    );
-                  })
-                )
-                .subscribe((overviewContext) => {
-                  logsOverviewApi.openAndScrollToSection(overviewContext!.initialAccordionSection!);
-                  context.logOverviewContext$.next(undefined);
-                });
-
-              return () => {
-                subscription.unsubscribe();
-              };
-            }, [logsOverviewApi, props.hit.id]);
-
+          render: (props: DocViewRenderProps) => {
             return (
-              <UnifiedDocViewerLogsOverview
-                {...props}
-                ref={setLogsOverviewApi}
-                renderAIAssistant={logsAIAssistantFeature?.render}
-                renderAIInsight={logsAIInsightFeature?.render}
-                renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
-                renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
+              <LogOverviewTab
+                logOverviewContext$={context.logOverviewContext$}
+                logsAIAssistantFeature={logsAIAssistantFeature}
+                logsAIInsightFeature={logsAIInsightFeature}
+                streamsFeature={streamsFeature}
                 indexes={indexes}
+                {...props}
               />
             );
           },
@@ -109,3 +77,79 @@ export const createGetDocViewer =
       },
     };
   };
+
+interface LogOverviewTabProps extends DocViewRenderProps {
+  logOverviewContext$: BehaviorSubject<LogOverviewContext | undefined>;
+  logsAIAssistantFeature: ObservabilityLogsAIAssistantFeature | undefined;
+  logsAIInsightFeature: ObservabilityLogsAIInsightFeature | undefined;
+  streamsFeature: ObservabilityStreamsFeature | undefined;
+  indexes: ObservabilityIndexes;
+}
+
+const LogOverviewTab = ({
+  logOverviewContext$,
+  logsAIAssistantFeature,
+  logsAIInsightFeature,
+  streamsFeature,
+  indexes,
+  ...props
+}: LogOverviewTabProps) => {
+  const [logsOverviewApi, setLogsOverviewApi] = useState<UnifiedDocViewerLogsOverviewApi | null>(
+    null
+  );
+  useAccordionExpansionEffect(logOverviewContext$, logsOverviewApi, props.hit.id);
+
+  return (
+    <UnifiedDocViewerLogsOverview
+      {...props}
+      ref={setLogsOverviewApi}
+      renderAIAssistant={logsAIAssistantFeature?.render}
+      renderAIInsight={logsAIInsightFeature?.render}
+      renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
+      renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
+      indexes={indexes}
+    />
+  );
+};
+
+const useAccordionExpansionEffect = (
+  logOverviewContext$: BehaviorSubject<LogOverviewContext | undefined>,
+  logsOverviewApi: UnifiedDocViewerLogsOverviewApi | null,
+  recordId: string
+) => {
+  const initialAccordionSection = useRef(logOverviewContext$.getValue()?.initialAccordionSection);
+
+  useEffect(() => {
+    if (!logsOverviewApi) {
+      return;
+    }
+
+    logOverviewContext$.next(undefined);
+
+    if (initialAccordionSection.current) {
+      logsOverviewApi.openAndScrollToSection(initialAccordionSection.current);
+    }
+
+    initialAccordionSection.current = undefined;
+
+    const subscription = logOverviewContext$
+      .pipe(
+        skip(1),
+        filter((overviewContext) => {
+          return (
+            overviewContext !== undefined &&
+            overviewContext.initialAccordionSection !== undefined &&
+            overviewContext.recordId === recordId
+          );
+        })
+      )
+      .subscribe((overviewContext) => {
+        logsOverviewApi.openAndScrollToSection(overviewContext!.initialAccordionSection!);
+        logOverviewContext$.next(undefined);
+      });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [logOverviewContext$, logsOverviewApi, recordId]);
+};

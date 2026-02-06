@@ -7,9 +7,6 @@
 
 import { lazy } from 'react';
 
-export const LazyIconWorkflow = lazy(() =>
-  import('./workflow').then(({ iconWorkflow }) => ({ default: iconWorkflow }))
-);
 export const LazyIconAgentBuilder = lazy(() =>
   import('./agent_builder').then(({ iconAgentBuilder }) => ({ default: iconAgentBuilder }))
 );

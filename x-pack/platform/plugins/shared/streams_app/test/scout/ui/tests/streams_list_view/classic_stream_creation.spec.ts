@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, type EsClient, type ApiServicesFixture } from '@kbn/scout';
+import { type EsClient, type ApiServicesFixture } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { Locator } from '@kbn/scout';
 import { test } from '../../fixtures';
 
@@ -112,8 +113,6 @@ test.describe('Streams list view - classic stream creation', { tag: ['@ess', '@s
 
       // Step 1: Select template
       await selectClassicStreamTemplate(flyout, templateName);
-
-      await flyout.getByTestId('nextButton').click();
 
       // Step 2: Name and confirm (fill the single wildcard part)
       const wildcardInput = flyout.getByTestId('streamNameInput-wildcard-0');

@@ -47,7 +47,10 @@ import {
   createGenericNotFoundErrorPayload,
   updateSuccess,
   mockTimestampFieldsWithCreated,
+  ACCESS_CONTROL_TYPE,
+  MULTI_NAMESPACE_TYPE,
 } from '../../test_helpers/repository.test.common';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 
 describe('#update', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -833,6 +836,127 @@ describe('#update', () => {
             },
           })
         );
+      });
+
+      describe('access control', () => {
+        it('should define access control metadata when upserting a supporting type', async () => {
+          securityExtension.getCurrentUser.mockReturnValue(
+            mockAuthenticatedUser({ profile_uid: 'u_test_user_version' })
+          );
+
+          const options = { upsert: { title: 'foo', description: 'bar' } };
+          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
+          await updateSuccess(
+            client,
+            repository,
+            registry,
+            ACCESS_CONTROL_TYPE,
+            id,
+            attributes,
+            {
+              upsert: {
+                title: 'foo',
+                description: 'bar',
+              },
+            },
+            {
+              mockGetResponseAsNotFound: { found: false } as estypes.GetResponse,
+            }
+          );
+          await repository.update(ACCESS_CONTROL_TYPE, id, attributes, options);
+          expect(client.get).toHaveBeenCalledTimes(2);
+          const expectedType = {
+            accessControlType: { description: 'bar', title: 'foo' },
+            namespaces: ['default'],
+            type: 'accessControlType',
+            accessControl: {
+              accessMode: 'default',
+              owner: 'u_test_user_version',
+            },
+            created_by: 'u_test_user_version',
+            updated_by: 'u_test_user_version',
+            ...mockTimestampFieldsWithCreated,
+          };
+          expect(
+            (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+              .document!
+          ).toEqual(expectedType);
+        });
+
+        it('should not define access control metadata when upserting a supporting type but there is no active user profile', async () => {
+          securityExtension.getCurrentUser.mockReturnValue(null);
+          const options = { upsert: { title: 'foo', description: 'bar' } };
+          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
+          await updateSuccess(
+            client,
+            repository,
+            registry,
+            ACCESS_CONTROL_TYPE,
+            id,
+            attributes,
+            {
+              upsert: {
+                title: 'foo',
+                description: 'bar',
+              },
+            },
+            {
+              mockGetResponseAsNotFound: { found: false } as estypes.GetResponse,
+            }
+          );
+          await repository.update(ACCESS_CONTROL_TYPE, id, attributes, options);
+          expect(client.get).toHaveBeenCalledTimes(2);
+          const expectedType = {
+            accessControlType: { description: 'bar', title: 'foo' },
+            namespaces: ['default'],
+            type: 'accessControlType',
+            ...mockTimestampFieldsWithCreated,
+          };
+          expect(
+            (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+              .document!
+          ).toEqual(expectedType);
+        });
+
+        it('should not define access control metadata when upserting a non-supporting type', async () => {
+          securityExtension.getCurrentUser.mockReturnValue(
+            mockAuthenticatedUser({ profile_uid: 'u_test_user_version' })
+          );
+
+          const options = { upsert: { title: 'foo', description: 'bar' } };
+          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
+          await updateSuccess(
+            client,
+            repository,
+            registry,
+            MULTI_NAMESPACE_TYPE,
+            id,
+            attributes,
+            {
+              upsert: {
+                title: 'foo',
+                description: 'bar',
+              },
+            },
+            {
+              mockGetResponseAsNotFound: { found: false } as estypes.GetResponse,
+            }
+          );
+          await repository.update(MULTI_NAMESPACE_TYPE, id, attributes, options);
+          expect(client.get).toHaveBeenCalledTimes(2);
+          const expectedType = {
+            multiNamespaceType: { description: 'bar', title: 'foo' },
+            namespaces: ['default'],
+            type: 'multiNamespaceType',
+            created_by: 'u_test_user_version',
+            updated_by: 'u_test_user_version',
+            ...mockTimestampFieldsWithCreated,
+          };
+          expect(
+            (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+              .document!
+          ).toEqual(expectedType);
+        });
       });
     });
   });

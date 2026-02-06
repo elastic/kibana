@@ -35,15 +35,17 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   // Track current props, starting with initial props
   const [currentProps, setCurrentProps] = useState<EmbeddableConversationProps>(contextProps);
 
-  // Register callback to receive prop updates from parent.
-  const onPropsUpdate = contextProps.onPropsUpdate;
+  // Register callbacks to allow parent to update props and clear browserApiTools
+  const onRegisterCallbacks = contextProps.onRegisterCallbacks;
   useEffect(() => {
-    if (onPropsUpdate) {
-      onPropsUpdate((newProps) => {
-        setCurrentProps(newProps);
+    if (onRegisterCallbacks) {
+      onRegisterCallbacks({
+        updateProps: (newProps) => setCurrentProps(newProps),
+        resetBrowserApiTools: () =>
+          setCurrentProps((prevProps) => ({ ...prevProps, browserApiTools: undefined })),
       });
     }
-  }, [onPropsUpdate]);
+  }, [onRegisterCallbacks]);
 
   // Create a QueryClient per instance to ensure cache isolation between multiple embeddable conversations
   const queryClient = useMemo(() => new QueryClient(), []);

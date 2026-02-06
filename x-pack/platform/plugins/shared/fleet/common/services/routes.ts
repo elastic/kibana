@@ -351,6 +351,9 @@ export const agentRouteService = {
   postChangeAgentPrivilegeLevel: (agentId: string) =>
     AGENT_API_ROUTES.PRIVILEGE_LEVEL_CHANGE_PATTERN.replace('{agentId}', agentId),
   postBulkChangeAgentPrivilegeLevel: () => AGENT_API_ROUTES.BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN,
+  postAgentRollback: (agentId: string) =>
+    AGENT_API_ROUTES.ROLLBACK_PATTERN.replace('{agentId}', agentId),
+  postBulkAgentRollback: () => AGENT_API_ROUTES.BULK_ROLLBACK_PATTERN,
 };
 
 export const outputRoutesService = {

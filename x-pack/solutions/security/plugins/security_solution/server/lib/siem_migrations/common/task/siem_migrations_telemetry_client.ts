@@ -8,6 +8,7 @@
 import type { AnalyticsServiceSetup, Logger, EventTypeOpts } from '@kbn/core/server';
 import type { ItemDocument } from '../types';
 import type { MigrationState } from './types';
+import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/model/common.gen';
 
 interface StartMigrationTaskTelemetry<I extends ItemDocument = ItemDocument> {
   startItemTranslation: () => {
@@ -26,7 +27,8 @@ export abstract class SiemMigrationTelemetryClient<I extends ItemDocument = Item
     protected readonly telemetry: AnalyticsServiceSetup,
     protected readonly logger: Logger,
     protected readonly migrationId: string,
-    protected readonly modelName: string = ''
+    protected readonly modelName: string = '',
+    protected readonly vendor: SiemMigrationVendor
   ) {}
 
   protected reportEvent<T extends object>(eventTypeOpts: EventTypeOpts<T>, data: T): void {

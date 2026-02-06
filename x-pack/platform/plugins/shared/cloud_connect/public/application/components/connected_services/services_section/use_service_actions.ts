@@ -24,7 +24,13 @@ interface UseServiceActionsParams {
 }
 
 export const useServiceActions = ({ onServiceUpdate, services }: UseServiceActionsParams) => {
-  const { notifications, telemetryService, apiService } = useCloudConnectedAppContext();
+  const {
+    notifications,
+    telemetryService,
+    apiService,
+    hasActionsSavePrivilege,
+    setHasAnyDefaultLLMConnectors,
+  } = useCloudConnectedAppContext();
 
   // Tracks which service is currently being updated (for loading spinner)
   const [loadingService, setLoadingService] = useState<string | null>(null);
@@ -97,6 +103,16 @@ export const useServiceActions = ({ onServiceUpdate, services }: UseServiceActio
     setLoadingService(null);
     // Optimistically update the UI
     onServiceUpdate(serviceKey, enabled);
+
+    // When EIS is enabled and user has actions.save privilege, we know default LLM connectors were created
+    if (
+      serviceKey === 'eis' &&
+      enabled &&
+      hasActionsSavePrivilege &&
+      setHasAnyDefaultLLMConnectors
+    ) {
+      setHasAnyDefaultLLMConnectors(true);
+    }
   };
 
   // Enables a service directly without confirmation
@@ -129,6 +145,30 @@ export const useServiceActions = ({ onServiceUpdate, services }: UseServiceActio
     window.open(url, '_blank');
   };
 
+  const handleRotateServiceApiKey = async (serviceKey: ServiceType) => {
+    setLoadingService(serviceKey);
+
+    const { error } = await apiService.rotateServiceApiKey(serviceKey);
+
+    setLoadingService(null);
+
+    if (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.cloudConnect.services.rotateApiKey.errorTitle', {
+          defaultMessage: 'Failed to rotate API key',
+        }),
+        text: error.message,
+      });
+      return;
+    }
+
+    notifications.toasts.addSuccess({
+      title: i18n.translate('xpack.cloudConnect.services.rotateApiKey.successTitle', {
+        defaultMessage: 'Service API key rotated successfully',
+      }),
+    });
+  };
+
   return {
     loadingService,
     disableModalService,
@@ -137,5 +177,6 @@ export const useServiceActions = ({ onServiceUpdate, services }: UseServiceActio
     showDisableModal,
     closeDisableModal,
     handleEnableServiceByUrl,
+    handleRotateServiceApiKey,
   };
 };

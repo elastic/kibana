@@ -11,6 +11,7 @@ import type {
   SavedObjectsClosePointInTimeResponse,
   SavedObjectsOpenPointInTimeResponse,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -449,6 +450,7 @@ export class ExceptionListClient {
    * Create an exception list container
    * @param options
    * @param options.description a description of the exception list
+   * @param options.osTypes item os types to apply
    * @param options.immutable True if it's a immutable list, otherwise false
    * @param options.listId the "list_id" of the exception list
    * @param options.meta Optional meta data to add to the exception list
@@ -461,6 +463,7 @@ export class ExceptionListClient {
    */
   public createExceptionList = async ({
     description,
+    osTypes,
     immutable,
     listId,
     meta,
@@ -478,6 +481,7 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType,
+      osTypes,
       savedObjectsClient,
       tags,
       type,
@@ -1075,7 +1079,16 @@ export class ExceptionListClient {
     sortOrder,
   }: FindEndpointListItemOptions): Promise<FoundExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
-    await this.createEndpointList();
+
+    // Attempt to auto-create the endpoint list for users with write access.
+    // Silently ignore forbidden errors for read-only users - they can still query existing lists.
+    try {
+      await this.createEndpointList();
+    } catch (err) {
+      if (!SavedObjectsErrorHelpers.isForbiddenError(err)) {
+        throw err;
+      }
+    }
 
     const findOptions = {
       filter,

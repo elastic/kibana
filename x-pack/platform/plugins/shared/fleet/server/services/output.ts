@@ -137,7 +137,6 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
     parsedSsl = typeof ssl === 'string' ? JSON.parse(ssl) : undefined;
   } catch (e) {
     logger.warn(`Unable to parse ssl for output ${so.id}: ${e.message}`);
-    logger.warn(`ssl value: ${ssl}`);
   }
   return {
     id: outputId ?? so.id,

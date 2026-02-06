@@ -4,6 +4,7 @@ steps:
     agents:
       machineType: n2-highcpu-8
       preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     key: renovate_validation
     timeout_in_minutes: 60
     retry:

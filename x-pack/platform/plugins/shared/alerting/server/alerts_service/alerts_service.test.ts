@@ -764,7 +764,6 @@ describe('Alerts Service', () => {
               aliases: {
                 '.alerts-test.alerts-another-namespace': {
                   is_write_index: true,
-                  is_hidden: true,
                 },
               },
             });

@@ -34,5 +34,10 @@ import _ from 'lodash';
 // Using doMock to avoid hoisting so that I can override only the debounce method in lodash
 jest.doMock('lodash', () => ({
   ..._,
-  debounce: (func: () => any) => func,
+  debounce: (func: any) => {
+    const debounced: any = func;
+    debounced.flush = jest.fn();
+    debounced.cancel = jest.fn();
+    return debounced;
+  },
 }));

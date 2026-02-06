@@ -271,6 +271,7 @@ describe('WorkflowContextManager', () => {
 
       const context = testContainer.underTest.getContext();
       expect(context.inputs).toEqual({
+        name: '', // Default value from workflow definition is applied
         remainingKey: 'some string',
         overridenKey: false,
         newKey: 123,

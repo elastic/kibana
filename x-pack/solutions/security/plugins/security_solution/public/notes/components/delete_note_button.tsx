@@ -30,6 +30,12 @@ export const DELETE_NOTE_ERROR = i18n.translate(
     defaultMessage: 'Error deleting note',
   }
 );
+const DELETE_NOTE_FAILURE = i18n.translate(
+  'xpack.securitySolution.notes.deleteNote.failureMessage',
+  {
+    defaultMessage: 'Failed to delete note',
+  }
+);
 
 export interface DeleteNoteButtonIconProps {
   /**
@@ -67,7 +73,9 @@ export const DeleteNoteButtonIcon = memo(({ note, index }: DeleteNoteButtonIconP
 
   useEffect(() => {
     if (deleteStatus === ReqStatus.Failed && deleteError) {
-      addErrorToast(null, {
+      const errorMessage =
+        'message' in deleteError && deleteError.message ? deleteError.message : DELETE_NOTE_FAILURE;
+      addErrorToast(new Error(errorMessage), {
         title: DELETE_NOTE_ERROR,
       });
     }

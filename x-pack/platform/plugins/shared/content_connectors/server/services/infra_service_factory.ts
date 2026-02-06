@@ -30,7 +30,7 @@ export class AgentlessConnectorsInfraServiceFactory {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const savedObjects = coreStart.savedObjects;
 
-    const agentPolicyService = plugins.fleet.agentPolicyService;
+    const agentlessPolicyService = plugins.fleet.agentlessPoliciesService;
     const packagePolicyService = plugins.fleet.packagePolicyService;
     const agentService = plugins.fleet.agentService;
 
@@ -40,7 +40,7 @@ export class AgentlessConnectorsInfraServiceFactory {
       soClient,
       esClient,
       packagePolicyService,
-      agentPolicyService,
+      agentlessPolicyService,
       agentService,
       logger
     );

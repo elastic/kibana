@@ -143,6 +143,36 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                     ]
                   `);
           });
+
+          it('ensures anomaly scores are never null or undefined', () => {
+            // Validates the fix for the bug where top_metrics on mixed document types
+            // (record + model_plot) could return model_plot docs with null record_score
+            const dataWithAnomalies = response.body.anomalies?.serviceAnomalies;
+            expect(dataWithAnomalies).not.to.be.empty();
+
+            dataWithAnomalies.forEach((anomaly) => {
+              // anomalyScore must be a valid finite number >= 0 (never null/undefined/NaN)
+              expect(anomaly.anomalyScore).to.be.a('number');
+              expect(anomaly.anomalyScore).not.to.be(null);
+              expect(Number.isFinite(anomaly.anomalyScore)).to.be(true);
+              expect(anomaly.anomalyScore >= 0).to.be(true);
+
+              // All monitored services must have complete, valid data
+              expect(anomaly.actualValue).to.be.a('number');
+              expect(Number.isFinite(anomaly.actualValue)).to.be(true);
+              expect(anomaly.transactionType).to.be.a('string');
+              expect(anomaly.transactionType.length).to.be.greaterThan(0);
+              expect(anomaly.serviceName).to.be.a('string');
+              expect(anomaly.serviceName.length).to.be.greaterThan(0);
+              expect(anomaly.jobId).to.match(/^apm-/);
+
+              // healthStatus must be valid and match anomalyScore
+              expect(anomaly.healthStatus).to.match(/^(healthy|warning|critical)$/);
+              if (anomaly.anomalyScore === 0) {
+                expect(anomaly.healthStatus).to.equal('healthy');
+              }
+            });
+          });
         });
         describe('with a user that does not have access to ML', () => {
           before(async () => {

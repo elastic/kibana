@@ -6,11 +6,21 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiBadge, EuiPopover, EuiSelectable } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiSelectable,
+} from '@elastic/eui';
 import { useLoadConnectors } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useUiPrivileges } from '../../../../../hooks/use_ui_privileges';
+import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useSendMessage } from '../../../../../context/send_message/send_message_context';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
@@ -81,6 +91,39 @@ const DefaultConnectorBadge = () => {
     <EuiBadge color="hollow" data-test-subj="defaultConnectorBadge">
       {defaultConnectorLabel}
     </EuiBadge>
+  );
+};
+
+const manageConnectorsAriaLabel = i18n.translate(
+  'xpack.onechat.conversationInput.connectorSelector.manageConnectors.ariaLabel',
+  {
+    defaultMessage: 'Manage connectors',
+  }
+);
+
+const ConnectorListFooter: React.FC = () => {
+  const { manageConnectorsUrl } = useNavigation();
+  const { showManagement } = useUiPrivileges();
+  return (
+    <EuiPopoverFooter paddingSize="s">
+      <EuiFlexGroup responsive={false} justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            size="s"
+            iconType="gear"
+            color="text"
+            aria-label={manageConnectorsAriaLabel}
+            href={manageConnectorsUrl}
+            disabled={!showManagement}
+          >
+            <FormattedMessage
+              id="xpack.onechat.conversationInput.agentSelector.manageAgents"
+              defaultMessage="Manage"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPopoverFooter>
   );
 };
 
@@ -202,7 +245,12 @@ export const ConnectorSelector: React.FC<{}> = () => {
           onFocusBadge: false,
         }}
       >
-        {(list) => <div>{list}</div>}
+        {(list) => (
+          <div>
+            {list}
+            <ConnectorListFooter />
+          </div>
+        )}
       </EuiSelectable>
     </EuiPopover>
   );

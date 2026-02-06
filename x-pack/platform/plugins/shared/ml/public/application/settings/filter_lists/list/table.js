@@ -217,6 +217,9 @@ export function FilterListsTable({
             pagination={true}
             sorting={sorting}
             selection={tableSelection}
+            tableCaption={i18n.translate('xpack.ml.settings.filterLists.tableCaption', {
+              defaultMessage: 'Filter lists',
+            })}
             data-test-subj="mlFilterListsTable"
             rowProps={(item) => ({
               'data-test-subj': `mlFilterListRow row-${item.filter_id}`,

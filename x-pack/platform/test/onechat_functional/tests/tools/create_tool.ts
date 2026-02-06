@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { ToolType } from '@kbn/onechat-common';
 import type { OneChatUiFtrProviderContext } from '../../../onechat/services/functional';
 
@@ -55,7 +54,10 @@ export default function ({ getPageObjects, getService }: OneChatUiFtrProviderCon
 
       await onechat.saveTool();
 
-      expect(await onechat.isToolInTable(toolId)).to.be(true);
+      // Search for the tool to handle pagination
+      const search = onechat.toolsSearch();
+      await search.type(toolId);
+      await testSubjects.existOrFail(`agentBuilderToolsTableRow-${toolId}`);
     });
 
     it('should create an index search tool', async () => {
@@ -74,7 +76,10 @@ export default function ({ getPageObjects, getService }: OneChatUiFtrProviderCon
 
       await onechat.saveTool();
 
-      expect(await onechat.isToolInTable(toolId)).to.be(true);
+      // Search for the tool to handle pagination
+      const search = onechat.toolsSearch();
+      await search.type(toolId);
+      await testSubjects.existOrFail(`agentBuilderToolsTableRow-${toolId}`);
     });
   });
 }

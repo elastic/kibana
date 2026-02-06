@@ -27,9 +27,13 @@ Alternatively, you can create a connector that supports multiple channels. For e
 :screenshot:
 :::
 
-If you use the latter method, you must provide a valid list of Slack channel IDs. When you create a rule, each action can communicate with one of these channels.
+If you use the latter method, you must provide a valid list of Slack channels. Do one of the following:
 
-For Slack setup details, go to [Configure a Slack account](#configuring-slack).
+- {applies_to}`stack: ga 9.3+` In the **Allowed channel names** field, you can enter up to 500 channels. Channel names must include a `#` at the front, for example: `#alert-notifications`. If you don't specify allowed channels, you can enter any channel name when configuring the Slack action for a rule.
+
+- {applies_to}`stack: ga 9.0-9.2`: In the **Channel IDs** field, enter the names of the Slack channels you want to message.
+
+When you create a rule, each action can communicate with one of the specified channels. For Slack setup details, go to [Configure a Slack account](#configuring-slack).
 
 ## Test connectors [slack-action-configuration]
 

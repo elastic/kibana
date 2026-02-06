@@ -10,13 +10,18 @@
 /**
  * SCENARIO: Generated Services
  *
- * Story: Generates multiple services in different environments (production, staging, development)
- * to verify `get_services` tool and its filtering capabilities.
+ * Story: Generates multiple services from APM and Logs in different environments
+ * (production, staging, development) to verify `get_services` tool and its filtering capabilities.
  *
+ * APM Services:
  * - `checkout-service` (production, nodejs)
  * - `payment-service` (production, java) - 50% error rate
  * - `frontend` (staging, rum-js)
  * - `experimental-service` (development, ruby)
+ *
+ * Logs-only Services:
+ * - `log-processor` (production)
+ * - `data-ingestion` (staging)
  *
  * Validate via:
  *
@@ -32,16 +37,17 @@
  * ```
  */
 
-import type { ApmFields, Timerange } from '@kbn/synthtrace-client';
-import { apm } from '@kbn/synthtrace-client';
+import type { ApmFields, LogDocument, Timerange } from '@kbn/synthtrace-client';
+import { apm, log } from '@kbn/synthtrace-client';
 import { createCliScenario } from '../../../../lib/utils/create_scenario';
 import { withClient, type ScenarioReturnType } from '../../../../lib/utils/with_client';
 import type { ApmSynthtraceEsClient } from '../../../../lib/apm/client/apm_synthtrace_es_client';
+import type { LogsSynthtraceEsClient } from '../../../../lib/logs/logs_synthtrace_es_client';
 
 /**
- * Configuration for a service to generate
+ * Configuration for an APM service to generate
  */
-export interface ServiceConfig {
+export interface ApmServiceConfig {
   name: string;
   environment: string;
   agentName: string;
@@ -52,17 +58,26 @@ export interface ServiceConfig {
 }
 
 /**
+ * Configuration for a logs-only service to generate
+ */
+export interface LogsServiceConfig {
+  name: string;
+  environment?: string;
+  dataset?: string;
+}
+
+/**
  * Generates APM service data.
  * Can be used both by CLI (via default export) and by API tests (via direct import).
  */
-export function generateServicesData({
+export function generateApmServicesData({
   range,
   apmEsClient,
   services,
 }: {
   range: Timerange;
   apmEsClient: ApmSynthtraceEsClient;
-  services: ServiceConfig[];
+  services: ApmServiceConfig[];
 }): ScenarioReturnType<ApmFields> {
   const data = range
     .interval('1m')
@@ -87,45 +102,94 @@ export function generateServicesData({
   return withClient(apmEsClient, data);
 }
 
-export default createCliScenario(({ range, clients: { apmEsClient } }) => {
-  const services: ServiceConfig[] = [
-    {
-      name: 'checkout-service',
-      environment: 'production',
-      agentName: 'nodejs',
-      transactionName: 'POST /api/checkout',
-      transactionType: 'request',
-      duration: 150,
-      errorRate: 0,
-    },
-    {
-      name: 'payment-service',
-      environment: 'production',
-      agentName: 'java',
-      transactionName: 'POST /api/pay',
-      transactionType: 'request',
-      duration: 200,
-      errorRate: 0.5, // 50% error rate
-    },
-    {
-      name: 'frontend',
-      environment: 'staging',
-      agentName: 'rum-js',
-      transactionName: 'PAGE_LOAD /home',
-      transactionType: 'page-load',
-      duration: 500,
-      errorRate: 0,
-    },
-    {
-      name: 'experimental-service',
-      environment: 'development',
-      agentName: 'ruby',
-      transactionName: 'GET /test',
-      transactionType: 'request',
-      duration: 200,
-      errorRate: 0,
-    },
-  ];
+/**
+ * Generates logs data with service.name field.
+ * Can be used both by CLI (via default export) and by API tests (via direct import).
+ */
+export function generateLogsServicesData({
+  range,
+  logsEsClient,
+  services,
+}: {
+  range: Timerange;
+  logsEsClient: LogsSynthtraceEsClient;
+  services: LogsServiceConfig[];
+}): ScenarioReturnType<LogDocument> {
+  const logGenerators = services.map((serviceConfig) =>
+    range
+      .interval('1m')
+      .rate(5)
+      .generator((timestamp) =>
+        log
+          .create()
+          .message(`Log message from ${serviceConfig.name}`)
+          .logLevel('info')
+          .service(serviceConfig.name)
+          .dataset(serviceConfig.dataset ?? 'generic')
+          .defaults({
+            'service.name': serviceConfig.name,
+            ...(serviceConfig.environment && {
+              'service.environment': serviceConfig.environment,
+            }),
+          })
+          .timestamp(timestamp)
+      )
+  );
 
-  return generateServicesData({ range, apmEsClient, services });
-});
+  return withClient(logsEsClient, logGenerators);
+}
+
+export default createCliScenario<ApmFields | LogDocument>(
+  ({ range, clients: { apmEsClient, logsEsClient } }) => {
+    // APM services
+    const apmServices: ApmServiceConfig[] = [
+      {
+        name: 'checkout-service',
+        environment: 'production',
+        agentName: 'nodejs',
+        transactionName: 'POST /api/checkout',
+        transactionType: 'request',
+        duration: 150,
+        errorRate: 0,
+      },
+      {
+        name: 'payment-service',
+        environment: 'production',
+        agentName: 'java',
+        transactionName: 'POST /api/pay',
+        transactionType: 'request',
+        duration: 200,
+        errorRate: 0.5, // 50% error rate
+      },
+      {
+        name: 'frontend',
+        environment: 'staging',
+        agentName: 'rum-js',
+        transactionName: 'PAGE_LOAD /home',
+        transactionType: 'page-load',
+        duration: 500,
+        errorRate: 0,
+      },
+      {
+        name: 'experimental-service',
+        environment: 'development',
+        agentName: 'ruby',
+        transactionName: 'GET /test',
+        transactionType: 'request',
+        duration: 200,
+        errorRate: 0,
+      },
+    ];
+
+    // Logs-only services
+    const logsServices: LogsServiceConfig[] = [
+      { name: 'log-processor', environment: 'production' },
+      { name: 'data-ingestion', environment: 'staging' },
+    ];
+
+    const apmData = generateApmServicesData({ range, apmEsClient, services: apmServices });
+    const logsData = generateLogsServicesData({ range, logsEsClient, services: logsServices });
+
+    return [apmData, logsData];
+  }
+);

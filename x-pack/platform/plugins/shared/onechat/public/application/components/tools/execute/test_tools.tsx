@@ -7,7 +7,6 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCodeBlock,
   EuiFieldNumber,
   EuiFieldText,
@@ -15,7 +14,6 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
@@ -37,7 +35,6 @@ import { docLinks } from '../../../../../common/doc_links';
 import type { ExecuteToolResponse } from '../../../../../common/http_api/tools';
 import { useExecuteTool } from '../../../hooks/tools/use_execute_tools';
 import { useTool } from '../../../hooks/tools/use_tools';
-import { ToolFormMode } from '../form/tool_form';
 import { labels } from '../../../utils/i18n';
 
 const flyoutStyles = css`
@@ -251,10 +248,9 @@ const renderFormField = ({
 export interface ToolTestFlyoutProps {
   toolId: string;
   onClose: () => void;
-  formMode?: ToolFormMode;
 }
 
-export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose, formMode }) => {
+export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose }) => {
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
   const [response, setResponse] = useState<string>('{}');
   // Re-mount new responses, needed for virtualized EuiCodeBlock
@@ -405,17 +401,6 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
           </FormProvider>
         )}
       </EuiFlyoutBody>
-      {formMode === ToolFormMode.Edit && (
-        <EuiFlyoutFooter>
-          <EuiButtonEmpty
-            aria-label={labels.tools.testTool.backToEditToolButton}
-            iconType="sortLeft"
-            onClick={onClose}
-          >
-            {labels.tools.testTool.backToEditToolButton}
-          </EuiButtonEmpty>
-        </EuiFlyoutFooter>
-      )}
     </EuiFlyout>
   );
 };

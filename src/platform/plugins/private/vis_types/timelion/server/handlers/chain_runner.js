@@ -17,6 +17,17 @@ import indexArguments from './lib/index_arguments';
 import validateTime from './lib/validate_time';
 import { calculateInterval } from '../../common/lib';
 
+/**
+ * The processing implementation allows more then one sheet per request, but
+ * the actual rendering/request code only send a single expression/sheet per chart.
+ */
+const MAX_SHEETS = 1;
+/**
+ * This is the max number of series per sheet.
+ * We should not render/compute more then 100 series per chart, doesn't have a analyticsl sense
+ */
+const MAX_SERIES_PER_SHEET = 100;
+
 export default function chainRunner(tlConfig) {
   const preprocessChain = require('./lib/preprocess_chain')(tlConfig);
 
@@ -204,7 +215,10 @@ export default function chainRunner(tlConfig) {
     queryCache = {};
 
     // This is setting the "global" sheet, required for resolving references
-    sheet = parseSheet(request.sheet);
+    sheet = parseSheet(request.sheet)
+      .slice(0, MAX_SHEETS) // this is already limited at the API validation but it is here for reduce risks
+      .map((s) => s.slice(0, MAX_SERIES_PER_SHEET)); // this limits the number of series computed per chart
+
     return preProcessSheet(sheet).then(function () {
       return _.map(sheet, function (chainList, i) {
         return resolveChainList(chainList)
