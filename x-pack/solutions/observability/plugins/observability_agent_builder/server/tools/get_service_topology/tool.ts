@@ -48,23 +48,17 @@ export function createGetServiceTopologyTool({
   const toolDefinition: BuiltinToolDefinition<typeof getServiceTopologyToolSchema> = {
     id: OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves the service topology showing dependencies and callers for a service, with health metrics.
+    description: `Retrieves the multi-hop service topology (dependency graph) for a service, with RED metrics (latency, throughput, error rate) per connection.
 
-Returns:
-- Number of traces sampled to build the topology
-- List of connections showing source and target nodes
-- For service nodes: service name
-- For external dependencies: resource identifier, span type/subtype
-- Health metrics per connection: error rate (0-1), latency (ms), throughput (rpm)
+Returns connections with source/target nodes and RED metrics. Supports downstream, upstream, or both directions.
 
 When to use:
-- Tracing cascading failures through multi-hop dependencies (direction: "downstream")
-- Understanding blast radius when a service fails (direction: "upstream" to see affected callers)
-- Identifying which path in the dependency chain is unhealthy
+- Tracing cascading failures through multi-hop dependency chains
+- Understanding blast radius of a failing service (direction: "upstream")
 - Visualizing the full architecture around a service (direction: "both")
 
 When NOT to use:
-- For single-hop dependencies with metrics, use \`observability.get_downstream_dependencies\`
+- For immediate (single-hop) dependencies only, prefer \`observability.get_downstream_dependencies\` — it is faster and returns the same metrics
 - For service-level metrics without topology, use \`observability.get_trace_metrics\``,
     schema: getServiceTopologyToolSchema,
     tags: ['observability', 'apm', 'service-map', 'topology'],

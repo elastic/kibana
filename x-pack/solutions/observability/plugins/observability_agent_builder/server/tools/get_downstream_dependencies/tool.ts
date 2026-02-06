@@ -44,18 +44,16 @@ export function createDownstreamDependenciesTool({
   const toolDefinition: BuiltinToolDefinition<typeof getDownstreamDependenciesToolSchema> = {
     id: OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves downstream dependencies (other services, databases, external APIs) that a service calls, including health metrics.
+    description: `Retrieves the immediate (single-hop) downstream dependencies of a service, with RED metrics (latency, throughput, error rate) per dependency.
 
-Returns for each dependency:
-- Service name (if resolved) or resource identifier (IP:port, hostname)
-- Error rate (0-1, where 1 = 100% failures)
-- Latency in milliseconds
-- Throughput (calls per minute)
+Returns for each dependency: service name or resource identifier, and RED metrics (error rate 0-1, latency in ms, throughput in rpm).
 
 When to use:
-- Identifying which downstream dependencies are failing (high error rate)
+- Checking which direct dependencies are failing or slow
 - Diagnosing if a service's errors are caused by a downstream outage
-- Mapping what external services/databases a service depends on`,
+
+When NOT to use:
+- For multi-hop dependency chains or upstream callers, use \`observability.get_service_topology\``,
     schema: getDownstreamDependenciesToolSchema,
     tags: ['observability', 'apm', 'dependencies'],
     availability: {
