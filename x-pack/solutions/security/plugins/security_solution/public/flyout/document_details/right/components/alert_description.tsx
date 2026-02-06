@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
