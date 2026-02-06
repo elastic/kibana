@@ -11,7 +11,7 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { ALL_ENTITY_TYPES, EntityType } from '../../domain/definitions/entity_schema';
+import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
 
 const bodySchema = z.object({
   entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
