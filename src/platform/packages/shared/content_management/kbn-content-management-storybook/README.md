@@ -15,7 +15,7 @@ Centralized Storybook configuration for the Content Management component ecosyst
 
 ## Overview
 
-This package provides a shared Storybook configuration for all packages under `src/platform/packages/shared/content-management/`. It enables developers to build and test UI components in isolation without requiring a running Kibana backend.
+This package provides a shared Storybook configuration for all packages under `src/platform/packages/shared/content_management/`. It enables developers to build and test UI components in isolation without requiring a running Kibana backend.
 
 The Storybook aggregates stories from sibling packages including:
 
@@ -111,7 +111,7 @@ For advanced mock data usage (custom `findItems`, user profiles, status sorting)
 Stories are discovered from sibling packages via the `main.ts` configuration:
 
 ```
-src/platform/packages/shared/content-management/
+src/platform/packages/shared/content_management/
 ├── kbn-content-management-storybook/   # This package (Storybook config)
 │   ├── main.ts                         # Story discovery: ../**/*.stories.+(tsx|mdx)
 │   ├── preview.ts                      # Global decorators and parameters

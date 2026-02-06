@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: src/platform/packages/shared/content-management/content_editor
+    sourceRoot: src/platform/packages/shared/content_management/content_editor
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'

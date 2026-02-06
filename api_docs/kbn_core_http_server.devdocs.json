@@ -3472,7 +3472,7 @@
               },
               {
                 "plugin": "@kbn/content-management-favorites-server",
-                "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts"
+                "path": "src/platform/packages/shared/content_management/favorites/favorites_server/src/favorites_routes.ts"
               },
               {
                 "plugin": "customIntegrations",
@@ -3500,7 +3500,7 @@
               },
               {
                 "plugin": "@kbn/content-management-content-insights-server",
-                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
+                "path": "src/platform/packages/shared/content_management/content_insights/content_insights_server/src/register.ts"
               },
               {
                 "plugin": "features",
@@ -3624,11 +3624,11 @@
               },
               {
                 "plugin": "@kbn/content-management-access-control-server",
-                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
+                "path": "src/platform/packages/shared/content_management/access_control/access_control_server/src/register_access_control.ts"
               },
               {
                 "plugin": "@kbn/content-management-access-control-server",
-                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
+                "path": "src/platform/packages/shared/content_management/access_control/access_control_server/src/register_access_control.ts"
               },
               {
                 "plugin": "monitoringCollection",
@@ -6460,11 +6460,11 @@
               },
               {
                 "plugin": "@kbn/content-management-favorites-server",
-                "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts"
+                "path": "src/platform/packages/shared/content_management/favorites/favorites_server/src/favorites_routes.ts"
               },
               {
                 "plugin": "@kbn/content-management-favorites-server",
-                "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts"
+                "path": "src/platform/packages/shared/content_management/favorites/favorites_server/src/favorites_routes.ts"
               },
               {
                 "plugin": "contentManagement",
@@ -6484,7 +6484,7 @@
               },
               {
                 "plugin": "@kbn/content-management-content-insights-server",
-                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
+                "path": "src/platform/packages/shared/content_management/content_insights/content_insights_server/src/register.ts"
               },
               {
                 "plugin": "spaces",
@@ -6604,7 +6604,7 @@
               },
               {
                 "plugin": "@kbn/content-management-access-control-server",
-                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
+                "path": "src/platform/packages/shared/content_management/access_control/access_control_server/src/register_access_control.ts"
               },
               {
                 "plugin": "encryptedSavedObjects",

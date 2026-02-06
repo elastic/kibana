@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client
+    sourceRoot: src/platform/packages/shared/content_management/content_list/kbn-content-list-provider-client
 dependsOn:
   - '@kbn/content-list-provider'
   - '@kbn/content-management-table-list-view-common'

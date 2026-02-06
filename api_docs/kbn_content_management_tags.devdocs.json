@@ -23,7 +23,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+        "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/services.tsx",
         "lineNumber": 245,
         "columnNumber": 14,
         "deprecated": false,
@@ -47,7 +47,7 @@
               },
               ">"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/services.tsx",
             "lineNumber": 247,
             "columnNumber": 6,
             "deprecated": false,
@@ -70,7 +70,7 @@
         "signature": [
           "(props: React.PropsWithChildren<Services>) => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+        "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/services.tsx",
         "lineNumber": 212,
         "columnNumber": 14,
         "deprecated": false,
@@ -86,7 +86,7 @@
             "signature": [
               "React.PropsWithChildren<Services>"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/services.tsx",
             "lineNumber": 213,
             "columnNumber": 3,
             "deprecated": false,
@@ -117,7 +117,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_badge.tsx",
+        "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_badge.tsx",
         "lineNumber": 61,
         "columnNumber": 14,
         "deprecated": false,
@@ -139,7 +139,7 @@
                 "text": "TagBadgeProps"
               }
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_badge.tsx",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_badge.tsx",
             "lineNumber": 61,
             "columnNumber": 45,
             "deprecated": false,
@@ -170,7 +170,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.tsx",
+        "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_list.tsx",
         "lineNumber": 46,
         "columnNumber": 14,
         "deprecated": false,
@@ -192,7 +192,7 @@
                 "text": "TagListProps"
               }
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.tsx",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_list.tsx",
             "lineNumber": 46,
             "columnNumber": 43,
             "deprecated": false,
@@ -225,7 +225,7 @@
           },
           ") => React.JSX.Element | null"
         ],
-        "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.component.tsx",
+        "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_list.component.tsx",
         "lineNumber": 49,
         "columnNumber": 14,
         "deprecated": false,
@@ -247,7 +247,7 @@
                 "text": "TagListComponentProps"
               }
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.component.tsx",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_list.component.tsx",
             "lineNumber": 49,
             "columnNumber": 61,
             "deprecated": false,
@@ -272,7 +272,7 @@
         "signature": [
           "() => Services | undefined"
         ],
-        "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+        "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/services.tsx",
         "lineNumber": 326,
         "columnNumber": 14,
         "deprecated": false,
@@ -310,7 +310,7 @@
             "text": "UseTagsReturn"
           }
         ],
-        "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+        "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/tags_query.ts",
         "lineNumber": 80,
         "columnNumber": 14,
         "deprecated": false,
@@ -333,7 +333,7 @@
               },
               "<T>"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/tags_query.ts",
             "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
@@ -357,7 +357,7 @@
         "description": [
           "\nDependencies required from Kibana plugins to enable content management tags functionality.\n\nThis interface defines the contract between the content management tags package and\nthe Kibana plugin ecosystem. Consumers should provide these dependencies when using\n{@link ContentManagementTagsKibanaProvider}.\n"
         ],
-        "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+        "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/services.tsx",
         "lineNumber": 47,
         "columnNumber": 1,
         "deprecated": false,
@@ -383,7 +383,7 @@
               },
               ", \"getTagList\" | \"parseSearchQuery\" | \"getSearchBarFilter\" | \"getTagIdFromName\">; }"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/services.tsx",
             "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
@@ -403,7 +403,7 @@
               "IToasts",
               ", \"addError\">; }; }"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/services.tsx",
             "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
@@ -421,7 +421,7 @@
         "description": [
           "\nRepresents the result of parsing a search query that may contain tag filters.\n\nUsed to separate the text search component from tag-based filtering when processing\nuser search input in the format `tag:tagName` or `-tag:tagName`.\n"
         ],
-        "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+        "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/types.ts",
         "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
@@ -436,7 +436,7 @@
             "description": [
               "The search query text with tag clauses removed."
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/types.ts",
             "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
@@ -454,7 +454,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/types.ts",
             "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
@@ -472,7 +472,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/types.ts",
             "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
@@ -490,7 +490,7 @@
         "description": [
           "\nRepresents a content tag with display properties for categorizing and filtering saved objects."
         ],
-        "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+        "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/types.ts",
         "lineNumber": 10,
         "columnNumber": 1,
         "deprecated": false,
@@ -508,7 +508,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/types.ts",
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
@@ -523,7 +523,7 @@
             "description": [
               "The display name of the tag shown in the UI."
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/types.ts",
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
@@ -538,7 +538,7 @@
             "description": [
               "A brief description of the tag's purpose."
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/types.ts",
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
@@ -553,7 +553,7 @@
             "description": [
               "The hex color code used for visual representation (e.g., badge background)."
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/types.ts",
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
@@ -568,7 +568,7 @@
             "description": [
               "Indicates whether the tag is system-managed (true) or user-created (false)."
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/types.ts",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/types.ts",
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
@@ -586,7 +586,7 @@
         "description": [
           "\nProps for the {@link TagBadge} component."
         ],
-        "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_badge.tsx",
+        "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_badge.tsx",
         "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
@@ -610,7 +610,7 @@
                 "text": "Tag"
               }
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_badge.tsx",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_badge.tsx",
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
@@ -636,7 +636,7 @@
               },
               ", withModifierKey: boolean) => void) | undefined"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_badge.tsx",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_badge.tsx",
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
@@ -660,7 +660,7 @@
                     "text": "Tag"
                   }
                 ],
-                "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_badge.tsx",
+                "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_badge.tsx",
                 "lineNumber": 29,
                 "columnNumber": 14,
                 "deprecated": false,
@@ -679,7 +679,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_badge.tsx",
+                "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_badge.tsx",
                 "lineNumber": 29,
                 "columnNumber": 24,
                 "deprecated": false,
@@ -701,7 +701,7 @@
         "description": [
           "\nProps for the {@link TagListComponent}."
         ],
-        "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.component.tsx",
+        "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_list.component.tsx",
         "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
@@ -726,7 +726,7 @@
               },
               "[]"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.component.tsx",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_list.component.tsx",
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
@@ -752,7 +752,7 @@
               },
               ", withModifierKey: boolean) => void) | undefined"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.component.tsx",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_list.component.tsx",
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
@@ -776,7 +776,7 @@
                     "text": "Tag"
                   }
                 ],
-                "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.component.tsx",
+                "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_list.component.tsx",
                 "lineNumber": 27,
                 "columnNumber": 14,
                 "deprecated": false,
@@ -795,7 +795,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.component.tsx",
+                "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_list.component.tsx",
                 "lineNumber": 27,
                 "columnNumber": 24,
                 "deprecated": false,
@@ -835,7 +835,7 @@
           },
           ", \"onClick\">"
         ],
-        "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.tsx",
+        "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_list.tsx",
         "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
@@ -853,7 +853,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/components/tag_list.tsx",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/components/tag_list.tsx",
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
@@ -881,7 +881,7 @@
           },
           "<T>"
         ],
-        "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+        "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/tags_query.ts",
         "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
@@ -899,7 +899,7 @@
             "signature": [
               "Query"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/tags_query.ts",
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
@@ -919,7 +919,7 @@
               "Query",
               ") => void"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/tags_query.ts",
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
@@ -937,7 +937,7 @@
                 "signature": [
                   "Query"
                 ],
-                "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+                "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/tags_query.ts",
                 "lineNumber": 26,
                 "columnNumber": 17,
                 "deprecated": false,
@@ -959,7 +959,7 @@
             "signature": [
               "T[]"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/tags_query.ts",
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
@@ -977,7 +977,7 @@
         "description": [
           "\nReturn value from the {@link useTags} hook."
         ],
-        "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+        "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/tags_query.ts",
         "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
@@ -1003,7 +1003,7 @@
               },
               ") => void"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/tags_query.ts",
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
@@ -1027,7 +1027,7 @@
                     "text": "Tag"
                   }
                 ],
-                "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+                "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/tags_query.ts",
                 "lineNumber": 39,
                 "columnNumber": 28,
                 "deprecated": false,
@@ -1057,7 +1057,7 @@
               },
               ") => void"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/tags_query.ts",
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
@@ -1081,7 +1081,7 @@
                     "text": "Tag"
                   }
                 ],
-                "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+                "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/tags_query.ts",
                 "lineNumber": 44,
                 "columnNumber": 28,
                 "deprecated": false,
@@ -1103,7 +1103,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/tags_query.ts",
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
@@ -1123,7 +1123,7 @@
             "signature": [
               "{ [tagId: string]: string[]; }"
             ],
-            "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/tags_query.ts",
+            "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/tags_query.ts",
             "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
@@ -1147,7 +1147,7 @@
         "signature": [
           "Services"
         ],
-        "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
+        "path": "src/platform/packages/shared/content_management/kbn-content-management-tags/src/services.tsx",
         "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,

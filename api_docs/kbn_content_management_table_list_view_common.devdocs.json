@@ -27,7 +27,7 @@
         "tags": [],
         "label": "UserContentCommonSchema",
         "description": [],
-        "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+        "path": "src/platform/packages/shared/content_management/table_list_view_common/index.ts",
         "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
@@ -40,7 +40,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content_management/table_list_view_common/index.ts",
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
@@ -53,7 +53,7 @@
             "tags": [],
             "label": "updatedAt",
             "description": [],
-            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content_management/table_list_view_common/index.ts",
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
@@ -69,7 +69,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content_management/table_list_view_common/index.ts",
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
@@ -85,7 +85,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content_management/table_list_view_common/index.ts",
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
@@ -101,7 +101,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content_management/table_list_view_common/index.ts",
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
@@ -117,7 +117,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content_management/table_list_view_common/index.ts",
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
@@ -140,7 +140,7 @@
               },
               "[]"
             ],
-            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content_management/table_list_view_common/index.ts",
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
@@ -153,7 +153,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content_management/table_list_view_common/index.ts",
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
@@ -169,7 +169,7 @@
             "signature": [
               "{ title: string; description?: string | undefined; }"
             ],
-            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content_management/table_list_view_common/index.ts",
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,

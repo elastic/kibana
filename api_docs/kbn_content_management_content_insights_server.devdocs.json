@@ -25,7 +25,7 @@
           "ContentInsightsConfig",
           ") => void"
         ],
-        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+        "path": "src/platform/packages/shared/content_management/content_insights/content_insights_server/src/register.ts",
         "lineNumber": 72,
         "columnNumber": 14,
         "deprecated": false,
@@ -41,7 +41,7 @@
             "signature": [
               "ContentInsightsDependencies"
             ],
-            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+            "path": "src/platform/packages/shared/content_management/content_insights/content_insights_server/src/register.ts",
             "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
@@ -58,7 +58,7 @@
             "signature": [
               "ContentInsightsConfig"
             ],
-            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+            "path": "src/platform/packages/shared/content_management/content_insights/content_insights_server/src/register.ts",
             "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
@@ -78,7 +78,7 @@
         "tags": [],
         "label": "ContentInsightsStats",
         "description": [],
-        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+        "path": "src/platform/packages/shared/content_management/content_insights/content_insights_server/src/register.ts",
         "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
@@ -93,7 +93,7 @@
             "description": [
               "\nThe date from which the data is counted"
             ],
-            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+            "path": "src/platform/packages/shared/content_management/content_insights/content_insights_server/src/register.ts",
             "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
@@ -108,7 +108,7 @@
             "description": [
               "\nTotal count of events"
             ],
-            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+            "path": "src/platform/packages/shared/content_management/content_insights/content_insights_server/src/register.ts",
             "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
@@ -126,7 +126,7 @@
             "signature": [
               "{ date: string; count: number; }[]"
             ],
-            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+            "path": "src/platform/packages/shared/content_management/content_insights/content_insights_server/src/register.ts",
             "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
@@ -142,7 +142,7 @@
         "tags": [],
         "label": "ContentInsightsStatsResponse",
         "description": [],
-        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+        "path": "src/platform/packages/shared/content_management/content_insights/content_insights_server/src/register.ts",
         "lineNumber": 47,
         "columnNumber": 1,
         "deprecated": false,
@@ -164,7 +164,7 @@
                 "text": "ContentInsightsStats"
               }
             ],
-            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts",
+            "path": "src/platform/packages/shared/content_management/content_insights/content_insights_server/src/register.ts",
             "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,

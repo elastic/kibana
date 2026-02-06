@@ -11,6 +11,6 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../..',
   roots: [
-    '<rootDir>/src/platform/packages/shared/content-management/content_list/kbn-content-list-provider',
+    '<rootDir>/src/platform/packages/shared/content_management/content_list/kbn-content-list-provider',
   ],
 };

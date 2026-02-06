@@ -11,6 +11,6 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../..',
   roots: [
-    '<rootDir>/src/platform/packages/shared/content-management/access_control/access_control_public',
+    '<rootDir>/src/platform/packages/shared/content_management/access_control/access_control_public',
   ],
 };

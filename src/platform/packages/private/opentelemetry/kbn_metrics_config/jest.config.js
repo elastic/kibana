@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/private/opentelemetry/kbn-metrics-config'],
+  roots: ['<rootDir>/src/platform/packages/private/opentelemetry/kbn_metrics_config'],
 };

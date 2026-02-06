@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: src/platform/packages/shared/content-management/tabbed_table_list_view
+    sourceRoot: src/platform/packages/shared/content_management/tabbed_table_list_view
 dependsOn:
   - '@kbn/content-management-table-list-view'
   - '@kbn/shared-ux-page-kibana-template'

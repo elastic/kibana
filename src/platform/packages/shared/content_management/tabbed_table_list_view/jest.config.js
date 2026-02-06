@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/content-management/tabbed_table_list_view'],
+  roots: ['<rootDir>/src/platform/packages/shared/content_management/tabbed_table_list_view'],
 };

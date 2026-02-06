@@ -11,13 +11,13 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
   roots: [
-    '<rootDir>/src/platform/packages/shared/content-management/kbn-content-management-tags/src',
+    '<rootDir>/src/platform/packages/shared/content_management/kbn-content-management-tags/src',
   ],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/src/platform/packages/shared/content-management/kbn-content-management-tags',
+    '<rootDir>/target/kibana-coverage/jest/src/platform/packages/shared/content_management/kbn-content-management-tags',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/platform/packages/shared/content-management/kbn-content-management-tags/src/**/*.{js,ts,tsx}',
+    '<rootDir>/src/platform/packages/shared/content_management/kbn-content-management-tags/src/**/*.{js,ts,tsx}',
     '!<rootDir>/**/*.stories.*',
   ],
 };

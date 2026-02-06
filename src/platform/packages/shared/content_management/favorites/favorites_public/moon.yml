@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: src/platform/packages/shared/content-management/favorites/favorites_public
+    sourceRoot: src/platform/packages/shared/content_management/favorites/favorites_public
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/core-http-browser'

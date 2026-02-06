@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/core/packages/chrome/app-menu/core-chrome-app-menu-components'],
+  roots: ['<rootDir>/src/core/packages/chrome/app_menu/core-chrome-app-menu-components'],
 };

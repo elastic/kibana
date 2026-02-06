@@ -14,7 +14,7 @@
     "cellActions": "src/platform/packages/shared/kbn-cell-actions",
     "charts": "src/platform/plugins/shared/charts",
     "console": "src/platform/plugins/shared/console",
-    "contentManagement": "src/platform/packages/shared/content-management",
+    "contentManagement": "src/platform/packages/shared/content_management",
     "core": [
       "src/core"
     ],

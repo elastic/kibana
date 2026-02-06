@@ -37,7 +37,7 @@
           },
           ") => Promise<void>"
         ],
-        "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts",
+        "path": "src/platform/packages/shared/content_management/access_control/access_control_server/src/register_access_control.ts",
         "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
@@ -59,7 +59,7 @@
                 "text": "CheckGlobalAccessControlPrivilegeDependencies"
               }
             ],
-            "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts",
+            "path": "src/platform/packages/shared/content_management/access_control/access_control_server/src/register_access_control.ts",
             "lineNumber": 14,
             "columnNumber": 45,
             "deprecated": false,
@@ -79,7 +79,7 @@
         "tags": [],
         "label": "CheckGlobalAccessControlPrivilegeDependencies",
         "description": [],
-        "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/types.ts",
+        "path": "src/platform/packages/shared/content_management/access_control/access_control_server/src/types.ts",
         "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
@@ -100,7 +100,7 @@
               "HttpResources",
               "; }"
             ],
-            "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/types.ts",
+            "path": "src/platform/packages/shared/content_management/access_control/access_control_server/src/types.ts",
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
@@ -113,7 +113,7 @@
             "tags": [],
             "label": "isAccessControlEnabled",
             "description": [],
-            "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/types.ts",
+            "path": "src/platform/packages/shared/content_management/access_control/access_control_server/src/types.ts",
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
@@ -137,7 +137,7 @@
               },
               " | undefined; }>"
             ],
-            "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/types.ts",
+            "path": "src/platform/packages/shared/content_management/access_control/access_control_server/src/types.ts",
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,

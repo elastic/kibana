@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: src/platform/packages/shared/content-management/kbn-content-management-storybook
+    sourceRoot: src/platform/packages/shared/content_management/kbn-content-management-storybook
 dependsOn:
   - '@kbn/content-list-mock-data'
   - '@kbn/storybook'

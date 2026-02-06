@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: src/platform/packages/shared/content-management/access_control/access_control_public
+    sourceRoot: src/platform/packages/shared/content_management/access_control/access_control_public
 dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/core-saved-objects-common'

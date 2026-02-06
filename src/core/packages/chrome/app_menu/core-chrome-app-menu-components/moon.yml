@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: src/core/packages/chrome/app-menu/core-chrome-app-menu-components
+    sourceRoot: src/core/packages/chrome/app_menu/core-chrome-app-menu-components
 dependsOn:
   - '@kbn/split-button'
   - '@kbn/i18n'

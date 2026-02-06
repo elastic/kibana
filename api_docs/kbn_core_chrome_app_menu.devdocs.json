@@ -17,7 +17,7 @@
           "AppMenuProps",
           ") => null"
         ],
-        "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+        "path": "src/core/packages/chrome/app_menu/core-chrome-app-menu/src/app_menu.tsx",
         "lineNumber": 46,
         "columnNumber": 14,
         "deprecated": false,
@@ -33,7 +33,7 @@
             "signature": [
               "AppMenuProps"
             ],
-            "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+            "path": "src/core/packages/chrome/app_menu/core-chrome-app-menu/src/app_menu.tsx",
             "lineNumber": 46,
             "columnNumber": 25,
             "deprecated": false,
@@ -53,7 +53,7 @@
         "tags": [],
         "label": "AppMenuProps",
         "description": [],
-        "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+        "path": "src/core/packages/chrome/app_menu/core-chrome-app-menu/src/app_menu.tsx",
         "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
@@ -73,7 +73,7 @@
               "AppMenuConfig",
               " | undefined) => void"
             ],
-            "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+            "path": "src/core/packages/chrome/app_menu/core-chrome-app-menu/src/app_menu.tsx",
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
@@ -90,7 +90,7 @@
                   "AppMenuConfig",
                   " | undefined"
                 ],
-                "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+                "path": "src/core/packages/chrome/app_menu/core-chrome-app-menu/src/app_menu.tsx",
                 "lineNumber": 17,
                 "columnNumber": 16,
                 "deprecated": false,
@@ -113,7 +113,7 @@
               "AppMenuConfig",
               " | undefined"
             ],
-            "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+            "path": "src/core/packages/chrome/app_menu/core-chrome-app-menu/src/app_menu.tsx",
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,

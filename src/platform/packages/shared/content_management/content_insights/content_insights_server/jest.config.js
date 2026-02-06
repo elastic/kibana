@@ -11,6 +11,6 @@ module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../../../..',
   roots: [
-    '<rootDir>/src/platform/packages/shared/content-management/content_insights/content_insights_server',
+    '<rootDir>/src/platform/packages/shared/content_management/content_insights/content_insights_server',
   ],
 };

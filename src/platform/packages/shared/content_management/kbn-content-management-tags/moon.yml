@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: src/platform/packages/shared/content-management/kbn-content-management-tags
+    sourceRoot: src/platform/packages/shared/content_management/kbn-content-management-tags
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/saved-objects-tagging-oss-plugin'

@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   metadata:
-    sourceRoot: src/platform/packages/private/opentelemetry/kbn-metrics
+    sourceRoot: src/platform/packages/private/opentelemetry/kbn_metrics
 dependsOn:
   - '@kbn/metrics-config'
   - '@kbn/std'

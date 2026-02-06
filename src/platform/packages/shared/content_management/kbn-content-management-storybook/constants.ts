@@ -12,4 +12,4 @@ export const TITLE = 'Content Management Storybook';
 
 /** The remote URL of the root from which Storybook loads stories for Content Management. */
 export const URL =
-  'https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/content-management';
+  'https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/content_management';

@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: src/platform/packages/shared/content-management/content_insights/content_insights_server
+    sourceRoot: src/platform/packages/shared/content_management/content_insights/content_insights_server
 dependsOn:
   - '@kbn/usage-collection-plugin'
   - '@kbn/core'

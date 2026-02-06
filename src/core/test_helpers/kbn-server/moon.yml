@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   metadata:
-    sourceRoot: src/core/test-helpers/kbn-server
+    sourceRoot: src/core/test_helpers/kbn-server
 dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/test'

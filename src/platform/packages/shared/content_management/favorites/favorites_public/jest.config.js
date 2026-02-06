@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/content-management/favorites/favorites_public'],
+  roots: ['<rootDir>/src/platform/packages/shared/content_management/favorites/favorites_public'],
 };

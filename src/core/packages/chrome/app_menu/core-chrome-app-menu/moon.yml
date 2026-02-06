@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: src/core/packages/chrome/app-menu/core-chrome-app-menu
+    sourceRoot: src/core/packages/chrome/app_menu/core-chrome-app-menu
 dependsOn:
   - '@kbn/core-chrome-app-menu-components'
 tags:

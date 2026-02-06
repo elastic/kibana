@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../..',
-  roots: ['<rootDir>/src/core/test-helpers/kbn-server'],
+  roots: ['<rootDir>/src/core/test_helpers/kbn-server'],
 };

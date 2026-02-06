@@ -144,7 +144,7 @@
         "signature": [
           "{ readonly enabled: boolean; readonly opentelemetry: Readonly<{} & { metrics: Readonly<{} & { otlp: Readonly<{ url?: string | undefined; headers?: Record<string, string> | undefined; } & { exportIntervalMillis: number; logLevel: string; }>; prometheus: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
         ],
-        "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/monitoring_collection_schema.ts",
+        "path": "src/platform/packages/private/opentelemetry/kbn_metrics_config/src/monitoring_collection_schema.ts",
         "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,

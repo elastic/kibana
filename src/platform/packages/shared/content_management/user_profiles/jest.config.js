@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/content-management/user_profiles'],
+  roots: ['<rootDir>/src/platform/packages/shared/content_management/user_profiles'],
 };
