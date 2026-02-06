@@ -21,6 +21,7 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import type { CoreSetup } from '@kbn/core/server';
 import type { AlertingPluginsStart } from '../../../../plugin';
+import { ApiKeyType } from '../../../../task_runner/types';
 
 const rulesClient = rulesClientMock.create();
 
@@ -60,7 +61,7 @@ describe('createRuleRoute', () => {
           max: 1000,
         },
       },
-      apiKeyType: 'es',
+      apiKeyType: ApiKeyType.ES,
     },
     rulesSettings: {
       enabled: true,
