@@ -134,7 +134,7 @@ function MyToolbarButton() {
 }
 ```
 
-## Manage accessibility
+## Manage app status
 
 Use `status: 'inaccessible'` when the app depends on async checks (license, permissions).
 
@@ -171,6 +171,55 @@ import { sidebarServiceMock } from '@kbn/core-chrome-sidebar-mocks';
 
 const setupMock = sidebarServiceMock.createSetupContract();
 const startMock = sidebarServiceMock.createStartContract();
+```
+
+## Accessibility
+
+The sidebar renders as an `<aside>` landmark. `SidebarHeader` and `SidebarBody` handle most a11y concerns automatically, but apps must follow a few rules.
+
+### Panel label
+
+`SidebarHeader` requires a `title` prop. It renders as an `<h2>` heading and sets the panel's `aria-label` (e.g. "Side panel: My App"). When using custom header content via `children`, `title` is still required and used for the `aria-label`:
+
+```tsx
+<SidebarHeader title="My App" onClose={onClose}>
+  <CustomHeaderContent />
+</SidebarHeader>
+```
+
+If you don't use `SidebarHeader` at all (fully custom header), you must set the label manually via `useSidebarPanel`:
+
+```tsx
+const { setLabel } = useSidebarPanel();
+
+useEffect(() => {
+  setLabel('My App');
+  return () => setLabel(undefined);
+}, [setLabel]);
+```
+
+### Focus rescue
+
+When the sidebar closes while focus is inside, focus is automatically moved to the main content area. Apps can override this with a custom callback via `useSidebarPanel`:
+
+```tsx
+import { useSidebarPanel } from '@kbn/core-chrome-sidebar-components';
+
+const { setOnFocusRescue } = useSidebarPanel();
+
+useEffect(() => {
+  setOnFocusRescue(() => triggerButtonRef.current?.focus());
+}, [setOnFocusRescue]);
+```
+
+### Scrollable body
+
+Pass `scrollable` to make `SidebarBody` keyboard-scrollable (`tabIndex={0}`) and announce it as a region to screen readers:
+
+```tsx
+<SidebarBody scrollable>
+  {/* long content */}
+</SidebarBody>
 ```
 
 ## Best practices

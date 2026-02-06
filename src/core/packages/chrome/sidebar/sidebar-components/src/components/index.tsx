@@ -14,3 +14,5 @@ export { SidebarHeader } from './sidebar_panel_header';
 export type { SidebarHeaderProps } from './sidebar_panel_header';
 export { SidebarBody } from './sidebar_panel_body';
 export type { SidebarBodyProps } from './sidebar_panel_body';
+export { useSidebarPanel } from './sidebar_panel_context';
+export type { SidebarPanelApi } from './sidebar_panel_context';
