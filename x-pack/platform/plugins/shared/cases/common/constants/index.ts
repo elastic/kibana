@@ -111,6 +111,11 @@ export const INTERNAL_CASE_GET_CASES_BY_ALERTS_URL =
   `${CASES_INTERNAL_URL}/case/alerts/_find_containing_all` as const;
 export const INTERNAL_BULK_CREATE_CASE_OBSERVABLES_URL = `${CASES_INTERNAL_URL}/{case_id}/observables/_bulk_create`;
 
+export const INTERNAL_TEMPLATES_URL = `${CASES_INTERNAL_URL}/templates` as const;
+export const INTERNAL_TEMPLATE_DETAILS_URL = `${INTERNAL_TEMPLATES_URL}/{template_id}` as const;
+export const INTERNAL_BULK_DELETE_TEMPLATES_URL = `${INTERNAL_TEMPLATES_URL}/_bulk_delete` as const;
+export const INTERNAL_BULK_EXPORT_TEMPLATES_URL = `${INTERNAL_TEMPLATES_URL}/_bulk_export` as const;
+
 /**
  * Action routes
  */
