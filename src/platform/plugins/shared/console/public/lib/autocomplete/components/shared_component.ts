@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import _ from 'lodash';
 import { AutocompleteComponent } from './autocomplete_component';
 export class SharedComponent extends AutocompleteComponent {
-  constructor(name, parent) {
+  _nextDict: Record<string, SharedComponent[]>;
+  _parent?: SharedComponent;
+
+  constructor(name: string, parent?: SharedComponent) {
     super(name);
     this._nextDict = {};
     if (parent) {
@@ -20,14 +22,17 @@ export class SharedComponent extends AutocompleteComponent {
     this._parent = parent;
   }
   /* return the first component with a given name */
-  getComponent(name) {
-    return (this._nextDict[name] || [undefined])[0];
+  getComponent(name: string): SharedComponent | undefined {
+    return (this._nextDict[name] ?? [])[0];
   }
 
-  addComponent(component) {
+  addComponent(component: SharedComponent): void {
     const current = this._nextDict[component.name] || [];
     current.push(component);
     this._nextDict[component.name] = current;
-    this.next = [].concat.apply([], _.values(this._nextDict));
+    this.next = Object.values(this._nextDict).reduce<AutocompleteComponent[]>(
+      (acc, list) => acc.concat(list),
+      []
+    );
   }
 }

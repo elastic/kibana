@@ -9,27 +9,34 @@
 
 import _ from 'lodash';
 import { SharedComponent } from './shared_component';
+import type { AutocompleteMatch, AutocompleteTermDefinition } from './autocomplete_component';
+import type { AutoCompleteContext } from '../types';
 export class ConstantComponent extends SharedComponent {
-  constructor(name, parent, options) {
+  options: AutocompleteTermDefinition[];
+
+  constructor(
+    name: string,
+    parent?: SharedComponent,
+    options?: AutocompleteTermDefinition | AutocompleteTermDefinition[]
+  ) {
     super(name, parent);
     if (_.isString(options)) {
       options = [options];
     }
-    this.options = options || [name];
+    this.options = options ? (Array.isArray(options) ? options : [options]) : [name];
   }
-  getTerms() {
+  getTerms(): AutocompleteTermDefinition[] {
     return this.options;
   }
 
-  addOption(options) {
-    if (!Array.isArray(options)) {
-      options = [options];
-    }
+  addOption(options: AutocompleteTermDefinition | AutocompleteTermDefinition[]) {
+    const asArray = Array.isArray(options) ? options : [options];
 
-    [].push.apply(this.options, options);
+    this.options.push(...asArray);
     this.options = _.uniq(this.options);
   }
-  match(token, context, editor) {
+
+  match(token: unknown, context: AutoCompleteContext, editor: unknown): AutocompleteMatch {
     if (token !== this.name) {
       return null;
     }

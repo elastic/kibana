@@ -7,21 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConstantComponent } from './constant_component';
-import type { SharedComponent } from './shared_component';
+require('@kbn/babel-register').install();
 
-export class FullRequestComponent extends ConstantComponent {
-  readonly name: string;
-  constructor(
-    name: string,
-    parent: SharedComponent | undefined,
-    private readonly template: string
-  ) {
-    super(name, parent);
-    this.name = name;
-  }
+// eslint-disable-next-line @kbn/imports/uniform_imports
+const { generateAggregatedDefinitions } = require('./generate_aggregated_definitions.ts');
 
-  getTerms() {
-    return [{ name: this.name, snippet: this.template }];
-  }
-}
+generateAggregatedDefinitions().catch((error) => {
+  // eslint-disable-next-line no-console
+  console.error(error);
+  process.exitCode = 1;
+});

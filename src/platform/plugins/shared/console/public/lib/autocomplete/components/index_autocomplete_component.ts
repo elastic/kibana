@@ -10,16 +10,19 @@
 import _ from 'lodash';
 import { getAutocompleteInfo, ENTITIES } from '../../../services';
 import { ListComponent } from './list_component';
+import type { SharedComponent } from './shared_component';
 
-function nonValidIndexType(token) {
+function nonValidIndexType(token: string) {
   return !(token === '_all' || token[0] !== '_');
 }
 
 export class IndexAutocompleteComponent extends ListComponent {
-  constructor(name, parent, multiValued) {
-    super(name, getAutocompleteInfo().getEntityProvider(ENTITIES.INDICES), parent, multiValued);
+  constructor(name: string, parent?: SharedComponent, multiValued?: boolean) {
+    const provider = getAutocompleteInfo().getEntityProvider(ENTITIES.INDICES);
+    const listGenerator = typeof provider === 'function' ? provider : () => [];
+    super(name, listGenerator, parent, multiValued);
   }
-  validateTokens(tokens) {
+  validateTokens(tokens: string[]) {
     if (!this.multiValued && tokens.length > 1) {
       return false;
     }

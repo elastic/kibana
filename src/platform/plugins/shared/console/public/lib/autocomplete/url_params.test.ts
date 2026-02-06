@@ -10,38 +10,51 @@
 import _ from 'lodash';
 import { UrlParams } from './url_params';
 import { populateContext } from './engine';
+import type { AutoCompleteContext, ResultTerm } from './types';
 
 describe('Url params', () => {
-  function paramTest(name, description, tokenPath, expectedContext, globalParams) {
+  type TokenPath = Array<string | string[]>;
+  type ExpectedContext = Partial<AutoCompleteContext> & {
+    autoCompleteSet?: Array<string | ResultTerm>;
+  };
+
+  function paramTest(
+    name: string,
+    description: ConstructorParameters<typeof UrlParams>[0],
+    tokenPath: string | TokenPath,
+    expectedContext: ExpectedContext,
+    globalParams?: ConstructorParameters<typeof UrlParams>[1]
+  ) {
     test(name, function () {
       const urlParams = new UrlParams(description, globalParams || {});
       if (typeof tokenPath === 'string') {
-        tokenPath = _.map(tokenPath.split('/'), function (p) {
-          p = p.split(',');
-          if (p.length === 1) {
-            return p[0];
+        tokenPath = _.map(tokenPath.split('/'), function (part) {
+          const parts = part.split(',');
+          if (parts.length === 1) {
+            return parts[0];
           }
-          return p;
+          return parts;
         });
       }
 
       if (expectedContext.autoCompleteSet) {
-        expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (t) {
-          if (_.isString(t)) {
-            t = { name: t };
+        expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (term) {
+          if (_.isString(term)) {
+            term = { name: term };
           }
-          return t;
+          return term;
         });
         expectedContext.autoCompleteSet = _.sortBy(expectedContext.autoCompleteSet, 'name');
       }
 
-      const context = {};
+      const context: AutoCompleteContext = {};
 
+      const includeAutoComplete = expectedContext.autoCompleteSet !== undefined;
       populateContext(
         tokenPath,
         context,
         null,
-        expectedContext.autoCompleteSet,
+        includeAutoComplete,
         urlParams.getTopLevelComponents()
       );
 
@@ -53,17 +66,17 @@ describe('Url params', () => {
     });
   }
 
-  function t(name, meta, insertValue) {
-    let r = name;
+  function t(name: string, meta?: string, insertValue?: string): string | ResultTerm {
+    let r: string | ResultTerm = name;
     if (meta) {
-      r = { name: name, meta: meta };
+      r = { name, meta };
       if (meta === 'param' && !insertValue) {
         insertValue = name + '=';
       }
     }
     if (insertValue) {
       if (_.isString(r)) {
-        r = { name: name };
+        r = { name };
       }
       r.insertValue = insertValue;
     }
@@ -87,7 +100,7 @@ describe('Url params', () => {
       [],
       { autoCompleteSet: [t('a', 'param'), t('b', 'flag'), t('c', 'param')] },
       {
-        c: [2],
+        c: ['2'],
       }
     );
 

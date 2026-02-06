@@ -9,19 +9,16 @@
 
 import { getAutocompleteInfo, ENTITIES } from '../../../services';
 import { ListComponent } from './list_component';
+import type { SharedComponent } from './shared_component';
 
 export class IndexTemplateAutocompleteComponent extends ListComponent {
-  constructor(name, parent) {
-    super(
-      name,
-      getAutocompleteInfo().getEntityProvider(ENTITIES.INDEX_TEMPLATES),
-      parent,
-      true,
-      true
-    );
+  constructor(name: string, parent?: SharedComponent) {
+    const provider = getAutocompleteInfo().getEntityProvider(ENTITIES.INDEX_TEMPLATES);
+    const listGenerator = typeof provider === 'function' ? provider : () => [];
+    super(name, listGenerator, parent, true, true);
   }
 
-  getContextKey() {
+  getContextKey(): string {
     return 'index_template';
   }
 }

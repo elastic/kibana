@@ -7,72 +7,73 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { HttpSetup } from '@kbn/core/public';
 import { API_BASE_PATH } from '../../../common/constants';
 
 import {
   IndexAutocompleteComponent,
   FieldAutocompleteComponent,
-  ListComponent,
   LegacyTemplateAutocompleteComponent,
   IndexTemplateAutocompleteComponent,
   ComponentTemplateAutocompleteComponent,
   DataStreamAutocompleteComponent,
 } from '../autocomplete/components';
 
-import _ from 'lodash';
+import type { SharedComponent } from '../autocomplete/components/shared_component';
 
-import Api from './api';
+import { Api } from './api';
+import { isRecord } from '../../../common/utils/record_utils';
 
 let ACTIVE_API = new Api();
 let apiLoaded = false;
-const isNotAnIndexName = (name) => name[0] === '_' && name !== '_all';
 
-const parametrizedComponentFactories = {
-  getComponent: function (name, parent, provideDefault) {
-    if (this[name]) {
-      return this[name];
-    } else if (provideDefault) {
-      return new ListComponent(name, [], parent, false);
-    }
-  },
-  index: function (name, parent) {
-    if (isNotAnIndexName(name)) return;
+type ParamComponentFactory = (name: string, parent?: SharedComponent) => SharedComponent;
+
+const componentFactories: Partial<Record<string, ParamComponentFactory>> = {
+  index(name, parent) {
     return new IndexAutocompleteComponent(name, parent, true);
   },
-  fields: function (name, parent) {
+  fields(name, parent) {
     return new FieldAutocompleteComponent(name, parent, true);
   },
-  field: function (name, parent) {
+  field(name, parent) {
     return new FieldAutocompleteComponent(name, parent, false);
   },
-  // legacy index templates
-  template: function (name, parent) {
+  // index templates (non-composable)
+  template(name, parent) {
     return new LegacyTemplateAutocompleteComponent(name, parent);
   },
   // composable index templates
   // currently seems to be unused, but that is a useful functionality
-  index_template: function (name, parent) {
+  index_template(name, parent) {
     return new IndexTemplateAutocompleteComponent(name, parent);
   },
   // currently seems to be unused, but that is a useful functionality
-  component_template: function (name, parent) {
+  component_template(name, parent) {
     return new ComponentTemplateAutocompleteComponent(name, parent);
   },
   // currently seems to be unused, but that is a useful functionality
-  data_stream: function (name, parent) {
+  data_stream(name, parent) {
     return new DataStreamAutocompleteComponent(name, parent);
   },
+};
+
+const parametrizedComponentFactories = {
+  getComponent(name: string, _parent?: unknown, _provideDefault?: unknown) {
+    return componentFactories[name];
+  },
+  ...componentFactories,
 };
 
 export function getUnmatchedEndpointComponents() {
   return ACTIVE_API.getUnmatchedEndpointComponents();
 }
 
-export function getEndpointDescriptionByEndpoint(endpoint) {
+export function getEndpointDescriptionByEndpoint(endpoint: string) {
   return ACTIVE_API.getEndpointDescriptionByEndpoint(endpoint);
 }
 
-export function getEndpointBodyCompleteComponents(endpoint) {
+export function getEndpointBodyCompleteComponents(endpoint: string) {
   const desc = getEndpointDescriptionByEndpoint(endpoint);
   if (!desc) {
     throw new Error("failed to resolve endpoint ['" + endpoint + "']");
@@ -80,18 +81,20 @@ export function getEndpointBodyCompleteComponents(endpoint) {
   return desc.bodyAutocompleteRootComponents;
 }
 
-export function getTopLevelUrlCompleteComponents(method) {
+export function getTopLevelUrlCompleteComponents(method: string) {
   return ACTIVE_API.getTopLevelUrlCompleteComponents(method);
 }
 
-export function getGlobalAutocompleteComponents(term, throwOnMissing) {
+export function getGlobalAutocompleteComponents(term: string, throwOnMissing?: boolean) {
   return ACTIVE_API.getGlobalAutocompleteComponents(term, throwOnMissing);
 }
 
 function loadApisFromJson(
-  json,
-  urlParametrizedComponentFactories,
-  bodyParametrizedComponentFactories
+  json: unknown,
+  urlParametrizedComponentFactories?: ConstructorParameters<typeof Api>[0] &
+    ConstructorParameters<typeof Api>[1],
+  bodyParametrizedComponentFactories?: ConstructorParameters<typeof Api>[0] &
+    ConstructorParameters<typeof Api>[1]
 ) {
   try {
     urlParametrizedComponentFactories =
@@ -99,24 +102,40 @@ function loadApisFromJson(
     bodyParametrizedComponentFactories =
       bodyParametrizedComponentFactories || urlParametrizedComponentFactories;
     const api = new Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactories);
-    const names = [];
-    _.each(json, function (apiJson, name) {
+    const names: string[] = [];
+    if (!isRecord(json)) {
+      return;
+    }
+
+    for (const [name, apiJson] of Object.entries(json)) {
       names.unshift(name);
-      _.each(apiJson.globals || {}, function (globalJson, globalName) {
-        api.addGlobalAutocompleteRules(globalName, globalJson);
-      });
-      _.each(apiJson.endpoints || {}, function (endpointJson, endpointName) {
-        api.addEndpointDescription(endpointName, endpointJson);
-      });
-    });
+      if (!isRecord(apiJson)) {
+        continue;
+      }
+
+      const globals = apiJson.globals;
+      if (isRecord(globals)) {
+        for (const [globalName, globalJson] of Object.entries(globals)) {
+          api.addGlobalAutocompleteRules(globalName, globalJson);
+        }
+      }
+
+      const endpoints = apiJson.endpoints;
+      if (isRecord(endpoints)) {
+        for (const [endpointName, endpointJson] of Object.entries(endpoints)) {
+          api.addEndpointDescription(endpointName, endpointJson);
+        }
+      }
+    }
     api.name = names.join(',');
     return api;
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error(e);
   }
 }
 
-function setActiveApi(api) {
+function setActiveApi(api: Api | undefined) {
   if (!api) {
     return;
   }
@@ -124,22 +143,25 @@ function setActiveApi(api) {
   ACTIVE_API = api;
 }
 
-export async function loadActiveApi(http) {
+export async function loadActiveApi(http: HttpSetup) {
   // Only load the API data once
   if (apiLoaded) return;
   apiLoaded = true;
 
   try {
-    const data = await http.get(`${API_BASE_PATH}/api_server`);
+    const data: unknown = await http.get(`${API_BASE_PATH}/api_server`);
     setActiveApi(loadApisFromJson(data));
   } catch (err) {
-    console.log(`failed to load API: ${err.responseText}`);
+    const responseText =
+      isRecord(err) && typeof err.responseText === 'string' ? err.responseText : String(err);
+    // eslint-disable-next-line no-console
+    console.log(`failed to load API: ${responseText}`);
     // If we fail to load the API, clear this flag so it can be retried
     apiLoaded = false;
   }
 }
 
 export const _test = {
-  loadApisFromJson: loadApisFromJson,
-  setActiveApi: setActiveApi,
+  loadApisFromJson,
+  setActiveApi,
 };

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable max-classes-per-file */
+
 import _ from 'lodash';
 import { WalkingState, walkTokenPath, wrapComponentWithDefaults } from './engine';
 import {
@@ -16,11 +18,42 @@ import {
   ConditionalProxy,
   GlobalOnlyComponent,
 } from './components';
+import type { AutoCompleteContext, ResultTerm } from './types';
+import { isRecord } from '../../../common/utils/record_utils';
+import type {
+  AutocompleteComponent,
+  AutocompleteMatch,
+  AutocompleteMatchResult,
+  AutocompleteTermDefinition,
+} from './components/autocomplete_component';
 
-function CompilingContext(endpointId, parametrizedComponentFactories) {
-  this.parametrizedComponentFactories = parametrizedComponentFactories;
-  this.endpointId = endpointId;
+interface ParametrizedComponentFactories {
+  getComponent: (
+    value: string,
+    isValue?: boolean
+  ) =>
+    | ((value: string, parent: SharedComponent | undefined, template?: unknown) => SharedComponent)
+    | undefined;
 }
+
+class CompilingContext {
+  public readonly endpointId: string;
+  public readonly parametrizedComponentFactories: ParametrizedComponentFactories;
+
+  constructor(endpointId: string, parametrizedComponentFactories: ParametrizedComponentFactories) {
+    this.parametrizedComponentFactories = parametrizedComponentFactories;
+    this.endpointId = endpointId;
+  }
+}
+
+type BodyCompleterContext = AutoCompleteContext & {
+  endpointComponentResolver: (endpoint: string) => AutocompleteComponent[] | undefined | null;
+  globalComponentResolver: (
+    term: string,
+    nested?: boolean
+  ) => AutocompleteComponent[] | undefined | null;
+  requestStartRow?: number | null;
+};
 
 /**
  * An object to resolve scope links (syntax endpoint.path1.path2)
@@ -34,19 +67,26 @@ function CompilingContext(endpointId, parametrizedComponentFactories) {
  * which should return the top level components for the given endpoint
  */
 
-function resolvePathToComponents(tokenPath, context, editor, components) {
+function resolvePathToComponents(
+  tokenPath: string[],
+  context: BodyCompleterContext,
+  editor: unknown,
+  components: AutocompleteComponent[]
+): AutocompleteComponent[] {
   const walkStates = walkTokenPath(
     tokenPath,
     [new WalkingState('ROOT', components, [])],
     context,
     editor
   );
-  const result = [].concat.apply([], _.map(walkStates, 'components'));
-  return result;
+  return walkStates.reduce<AutocompleteComponent[]>((acc, ws) => acc.concat(ws.components), []);
 }
 
 class ScopeResolver extends SharedComponent {
-  constructor(link, compilingContext) {
+  private link: unknown;
+  private compilingContext: CompilingContext;
+
+  constructor(link: unknown, compilingContext: CompilingContext) {
     super('__scope_link');
     if (_.isString(link) && link[0] === '.') {
       // relative link, inject current endpoint
@@ -60,18 +100,18 @@ class ScopeResolver extends SharedComponent {
     this.compilingContext = compilingContext;
   }
 
-  resolveLinkToComponents(context, editor) {
+  resolveLinkToComponents(context: BodyCompleterContext, editor: unknown): AutocompleteComponent[] {
     if (_.isFunction(this.link)) {
       const desc = this.link(context, editor);
       return compileDescription(desc, this.compilingContext);
     }
     if (!_.isString(this.link)) {
-      throw new Error('unsupported link format', this.link);
+      throw new Error(`unsupported link format: ${String(this.link)}`);
     }
 
     let path = this.link.replace(/\./g, '{').split(/(\{)/);
     const endpoint = path[0];
-    let components;
+    let components: AutocompleteComponent[] | undefined | null;
     try {
       if (endpoint === 'GLOBAL') {
         // global rules need an extra indirection
@@ -88,36 +128,46 @@ class ScopeResolver extends SharedComponent {
     } catch (e) {
       throw new Error('failed to resolve link [' + this.link + ']: ' + e);
     }
-    return resolvePathToComponents(path, context, editor, components);
+    return resolvePathToComponents(path, context, editor, components ?? []);
   }
 
-  getTerms(context, editor) {
-    const options = [];
+  getTerms(context: BodyCompleterContext, editor: unknown): AutocompleteTermDefinition[] {
+    const options: AutocompleteTermDefinition[] = [];
     const components = this.resolveLinkToComponents(context, editor);
     _.each(components, function (component) {
-      options.push.apply(options, component.getTerms(context, editor));
+      const terms = component.getTerms(context, editor);
+      if (terms) {
+        options.push(...terms);
+      }
     });
     return options;
   }
 
-  match(token, context, editor) {
-    const result = {
+  match(token: unknown, context: BodyCompleterContext, editor: unknown): AutocompleteMatch {
+    const result: AutocompleteMatchResult & { next: AutocompleteComponent[] } = {
       next: [],
     };
     const components = this.resolveLinkToComponents(context, editor);
     _.each(components, function (component) {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
-        result.next.push.apply(result.next, componentResult.next);
+        const next = Array.isArray(componentResult.next)
+          ? componentResult.next
+          : [componentResult.next];
+        result.next.push(...next);
       }
     });
 
     return result;
   }
 }
-function getTemplate(description) {
-  if (description.__template) {
-    if (description.__raw && _.isString(description.__template)) {
+
+const getTemplate = (description: unknown): unknown => {
+  if (isRecord(description) && description.__template !== undefined) {
+    const template = description.__template;
+    const raw = description.__raw;
+
+    if (raw && _.isString(template)) {
       return {
         // This is a special secret attribute that gets passed through to indicate that
         // the raw value should be passed through to the console without JSON.stringifying it
@@ -126,18 +176,27 @@ function getTemplate(description) {
         // Primary use case is to allow __templates to contain extended JSON special values like
         // triple quotes.
         __raw: true,
-        value: description.__template,
+        value: template,
       };
     }
-    return description.__template;
-  } else if (description.__one_of) {
+
+    return template;
+  }
+
+  if (isRecord(description) && Array.isArray(description.__one_of)) {
     return getTemplate(description.__one_of[0]);
-  } else if (description.__any_of) {
+  }
+
+  if (isRecord(description) && Array.isArray(description.__any_of)) {
     return [];
-  } else if (description.__scope_link) {
+  }
+
+  if (isRecord(description) && description.__scope_link !== undefined) {
     // assume an object for now.
     return {};
-  } else if (Array.isArray(description)) {
+  }
+
+  if (Array.isArray(description)) {
     if (description.length === 1) {
       if (_.isObject(description[0])) {
         // shortcut to save typing
@@ -147,41 +206,50 @@ function getTemplate(description) {
       }
     }
     return [];
-  } else if (_.isObject(description)) {
+  }
+
+  if (_.isObject(description)) {
     return {};
-  } else if (_.isString(description) && !/^\{.*\}$/.test(description)) {
-    return description;
-  } else {
+  }
+
+  if (_.isString(description) && !/^\{.*\}$/.test(description)) {
     return description;
   }
-}
 
-function getOptions(description) {
-  const options = {};
+  return description;
+};
+
+const getOptions = (description: unknown): ResultTerm => {
+  const options: ResultTerm = {};
   const template = getTemplate(description);
 
   if (!_.isUndefined(template)) {
     options.template = template;
   }
   return options;
-}
+};
 
 /**
  * @param description a json dict describing the endpoint
  * @param compilingContext
  */
-function compileDescription(description, compilingContext) {
+function compileDescription(
+  description: unknown,
+  compilingContext: CompilingContext
+): SharedComponent[] {
   if (Array.isArray(description)) {
     return [compileList(description, compilingContext)];
-  } else if (_.isObject(description)) {
+  }
+
+  if (isRecord(description)) {
     // test for objects list as arrays are also objects
-    if (description.__scope_link) {
+    if (description.__scope_link !== undefined) {
       return [new ScopeResolver(description.__scope_link, compilingContext)];
     }
-    if (description.__any_of) {
+    if (Array.isArray(description.__any_of)) {
       return [compileList(description.__any_of, compilingContext)];
     }
-    if (description.__one_of) {
+    if (Array.isArray(description.__one_of)) {
       return _.flatten(
         _.map(description.__one_of, function (d) {
           return compileDescription(d, compilingContext);
@@ -189,37 +257,50 @@ function compileDescription(description, compilingContext) {
       );
     }
     const obj = compileObject(description, compilingContext);
-    if (description.__condition) {
-      return [compileCondition(description.__condition, obj, compilingContext)];
-    } else {
-      return [obj];
+    if (description.__condition !== undefined) {
+      return [compileCondition(description.__condition, obj)];
     }
-  } else if (_.isString(description) && /^\{.*\}$/.test(description)) {
-    return [compileParametrizedValue(description, compilingContext)];
-  } else {
-    return [new ConstantComponent(description)];
+    return [obj];
   }
+
+  if (_.isString(description) && /^\{.*\}$/.test(description)) {
+    return [compileParametrizedValue(description, compilingContext)];
+  }
+
+  return [new ConstantComponent(_.isString(description) ? description : String(description))];
 }
 
-function compileParametrizedValue(value, compilingContext, template) {
-  value = value.substr(1, value.length - 2).toLowerCase();
-  let component = compilingContext.parametrizedComponentFactories.getComponent(value, true);
-  if (!component) {
-    console.warn("[Console] no factory found for '" + value + "'");
+function compileParametrizedValue(
+  value: string,
+  compilingContext: CompilingContext,
+  template?: unknown
+): SharedComponent {
+  const normalizedValue = value.substr(1, value.length - 2).toLowerCase();
+  const factory = compilingContext.parametrizedComponentFactories.getComponent(
+    normalizedValue,
+    true
+  );
+  if (!factory) {
+    // eslint-disable-next-line no-console
+    console.warn("[Console] no factory found for '" + normalizedValue + "'");
     // using upper case as an indication that this value is a parameter
-    return new ConstantComponent(value.toUpperCase());
+    return new ConstantComponent(normalizedValue.toUpperCase());
   }
-  component = component(value, null, template);
+  let component = factory(normalizedValue, undefined, template);
   if (!_.isUndefined(template)) {
-    component = wrapComponentWithDefaults(component, { template: template });
+    component = wrapComponentWithDefaults(component, { template });
   }
   return component;
 }
 
-function compileObject(objDescription, compilingContext) {
+function compileObject(
+  objDescription: Record<string, unknown>,
+  compilingContext: CompilingContext
+) {
   const objectC = new ConstantComponent('{');
-  const constants = [];
-  const patterns = [];
+  const constants: SharedComponent[] = [];
+  const patterns: SharedComponent[] = [];
+
   _.each(objDescription, function (desc, key) {
     if (key.indexOf('__') === 0) {
       // meta key
@@ -227,7 +308,7 @@ function compileObject(objDescription, compilingContext) {
     }
 
     const options = getOptions(desc);
-    let component;
+    let component: SharedComponent;
     if (/^\{.*\}$/.test(key)) {
       component = compileParametrizedValue(key, compilingContext, options.template);
       patterns.push(component);
@@ -236,18 +317,19 @@ function compileObject(objDescription, compilingContext) {
       patterns.push(component);
     } else {
       options.name = key;
-      component = new ConstantComponent(key, null, [options]);
+      component = new ConstantComponent(key, undefined, [options]);
       constants.push(component);
     }
-    _.map(compileDescription(desc, compilingContext), function (subComponent) {
+    _.each(compileDescription(desc, compilingContext), function (subComponent) {
       component.addComponent(subComponent);
     });
   });
+
   objectC.addComponent(new ObjectComponent('inner', constants, patterns));
   return objectC;
 }
 
-function compileList(listRule, compilingContext) {
+function compileList(listRule: unknown[], compilingContext: CompilingContext) {
   const listC = new ConstantComponent('[');
   _.each(listRule, function (desc) {
     _.each(compileDescription(desc, compilingContext), function (component) {
@@ -257,22 +339,38 @@ function compileList(listRule, compilingContext) {
   return listC;
 }
 
-/** takes a compiled object and wraps in a {@link ConditionalProxy }*/
-function compileCondition(description, compiledObject) {
-  if (description.lines_regex) {
-    return new ConditionalProxy(function (context, editor) {
-      const lines = editor
-        .getLines(context.requestStartRow, editor.getCurrentPosition().lineNumber)
-        .join('\n');
-      return new RegExp(description.lines_regex, 'm').test(lines);
-    }, compiledObject);
-  } else {
-    throw new Error(`unknown condition type - got: ${JSON.stringify(description)}`);
+interface LinesEditor {
+  getLines: (start: number | null | undefined, end: number) => string[];
+  getCurrentPosition: () => { lineNumber: number };
+}
+
+const isLinesEditor = (editor: unknown): editor is LinesEditor => {
+  if (!isRecord(editor)) {
+    return false;
   }
+  return typeof editor.getLines === 'function' && typeof editor.getCurrentPosition === 'function';
+};
+
+/** takes a compiled object and wraps in a {@link ConditionalProxy } */
+function compileCondition(description: unknown, compiledObject: SharedComponent) {
+  if (isRecord(description) && _.isString(description.lines_regex)) {
+    const linesRegex = description.lines_regex;
+    return new ConditionalProxy(function (context: AutoCompleteContext, editor: unknown) {
+      if (!isLinesEditor(editor)) {
+        return false;
+      }
+
+      const startRow = context.requestStartRow;
+      const lines = editor.getLines(startRow, editor.getCurrentPosition().lineNumber).join('\n');
+      return new RegExp(linesRegex, 'm').test(lines);
+    }, compiledObject);
+  }
+
+  throw new Error(`unknown condition type - got: ${JSON.stringify(description)}`);
 }
 
 // a list of component that match anything but give auto complete suggestions based on global API entries.
-export function globalsOnlyAutocompleteComponents() {
+export function globalsOnlyAutocompleteComponents(): AutocompleteComponent[] {
   return [new GlobalOnlyComponent('__global__')];
 }
 
@@ -289,7 +387,11 @@ export function globalsOnlyAutocompleteComponents() {
  *   }
  * }
  */
-export function compileBodyDescription(endpointId, description, parametrizedComponentFactories) {
+export function compileBodyDescription(
+  endpointId: string,
+  description: unknown,
+  parametrizedComponentFactories: ParametrizedComponentFactories
+): AutocompleteComponent[] {
   return compileDescription(
     description,
     new CompilingContext(endpointId, parametrizedComponentFactories)

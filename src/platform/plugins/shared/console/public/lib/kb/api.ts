@@ -14,48 +14,81 @@ import {
   globalsOnlyAutocompleteComponents,
   compileBodyDescription,
 } from '../autocomplete/body_completer';
+import type { AutocompleteComponent } from '../autocomplete/components/autocomplete_component';
+
+type UrlFactories = ConstructorParameters<typeof UrlPatternMatcher>[0];
+type BodyFactories = Parameters<typeof compileBodyDescription>[2];
+type UrlParamsDescription = ConstructorParameters<typeof UrlParams>[0];
+
+type EndpointDescription = Record<string, unknown> & {
+  id: string;
+  patterns: string[];
+  methods: string[];
+  url_params?: UrlParamsDescription;
+  data_autocomplete_rules?: unknown;
+  template?: string;
+  paramsAutocomplete?: UrlParams;
+  bodyAutocompleteRootComponents?: AutocompleteComponent[];
+};
+
+const emptyUrlFactories: UrlFactories = { getComponent: () => undefined };
+const emptyBodyFactories: BodyFactories = { getComponent: () => undefined };
 
 /**
+ * Standalone API container for Console autocomplete.
  *
- * @param urlParametrizedComponentFactories a dictionary of factory functions
- * that will be used as fallback for parametrized path part (i.e., {index} )
- * see UrlPatternMatcher
- * @constructor
- * @param bodyParametrizedComponentFactories same as urlParametrizedComponentFactories but used for body compilation
+ * This intentionally preserves the behavior of the previous JS constructor/prototype pattern.
  */
-function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactories) {
-  this.globalRules = Object.create(null);
-  this.endpoints = Object.create(null);
-  this.urlPatternMatcher = new UrlPatternMatcher(urlParametrizedComponentFactories);
-  this.globalBodyComponentFactories = bodyParametrizedComponentFactories;
-  this.name = '';
-}
+export class Api {
+  public name = '';
 
-(function (cls) {
-  cls.addGlobalAutocompleteRules = function (parentNode, rules) {
+  private globalRules: Record<string, AutocompleteComponent[] | undefined> = Object.create(null);
+  private endpoints: Record<string, EndpointDescription> = Object.create(null);
+
+  private urlPatternMatcher: UrlPatternMatcher;
+  private globalBodyComponentFactories: BodyFactories;
+
+  constructor(
+    urlParametrizedComponentFactories: UrlFactories = emptyUrlFactories,
+    bodyParametrizedComponentFactories: BodyFactories = emptyBodyFactories
+  ) {
+    this.urlPatternMatcher = new UrlPatternMatcher(urlParametrizedComponentFactories);
+    this.globalBodyComponentFactories = bodyParametrizedComponentFactories;
+  }
+
+  public addGlobalAutocompleteRules(parentNode: string, rules: unknown) {
     this.globalRules[parentNode] = compileBodyDescription(
       'GLOBAL.' + parentNode,
       rules,
       this.globalBodyComponentFactories
     );
-  };
+  }
 
-  cls.getGlobalAutocompleteComponents = function (term, throwOnMissing) {
+  public getGlobalAutocompleteComponents(term: string, throwOnMissing?: boolean) {
     const result = this.globalRules[term];
     if (_.isUndefined(result) && (throwOnMissing || _.isUndefined(throwOnMissing))) {
       throw new Error("failed to resolve global components for  ['" + term + "']");
     }
     return result;
-  };
+  }
 
-  cls.addEndpointDescription = function (endpoint, description) {
-    const copiedDescription = {};
-    _.assign(copiedDescription, description || {});
+  public addEndpointDescription(endpoint: string, description: unknown) {
+    const copiedDescription: EndpointDescription = {
+      id: endpoint,
+      patterns: [endpoint],
+      methods: ['GET'],
+    };
+
+    if (description && typeof description === 'object') {
+      _.assign(copiedDescription, description);
+    }
+
     _.defaults(copiedDescription, {
       id: endpoint,
       patterns: [endpoint],
       methods: ['GET'],
     });
+
     _.each(copiedDescription.patterns, (p) => {
       this.urlPatternMatcher.addEndpoint(p, copiedDescription);
     });
@@ -68,24 +101,22 @@ function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactori
     );
 
     this.endpoints[endpoint] = copiedDescription;
-  };
+  }
 
-  cls.getEndpointDescriptionByEndpoint = function (endpoint) {
+  public getEndpointDescriptionByEndpoint(endpoint: string) {
     return this.endpoints[endpoint];
-  };
+  }
 
-  cls.getTopLevelUrlCompleteComponents = function (method) {
+  public getTopLevelUrlCompleteComponents(method: string) {
     return this.urlPatternMatcher.getTopLevelComponents(method);
-  };
+  }
 
-  cls.getUnmatchedEndpointComponents = function () {
+  public getUnmatchedEndpointComponents() {
     return globalsOnlyAutocompleteComponents();
-  };
+  }
 
-  cls.clear = function () {
+  public clear() {
     this.endpoints = {};
     this.globalRules = {};
-  };
-})(Api.prototype);
-
-export default Api;
+  }
+}

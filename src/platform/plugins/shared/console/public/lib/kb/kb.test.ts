@@ -12,9 +12,11 @@ import { populateContext } from '../autocomplete/engine';
 
 import * as kb from '.';
 import { AutocompleteInfo, setAutocompleteInfo } from '../../services';
+import type { AutoCompleteContext, ResultTerm } from '../autocomplete/types';
+import { isRecord } from '../../../common/utils/record_utils';
 
 describe('Knowledge base', () => {
-  let autocompleteInfo;
+  let autocompleteInfo: AutocompleteInfo;
   beforeEach(() => {
     kb._test.setActiveApi(kb._test.loadApisFromJson({}));
     autocompleteInfo = new AutocompleteInfo();
@@ -23,8 +25,7 @@ describe('Knowledge base', () => {
   });
   afterEach(() => {
     kb._test.setActiveApi(kb._test.loadApisFromJson({}));
-    autocompleteInfo = null;
-    setAutocompleteInfo(null);
+    setAutocompleteInfo(autocompleteInfo);
   });
 
   const MAPPING = {
@@ -42,41 +43,39 @@ describe('Knowledge base', () => {
     },
   };
 
-  function testUrlContext(tokenPath, otherTokenValues, expectedContext) {
+  type TokenPath = Array<string | string[]>;
+  type ExpectedContext = Partial<AutoCompleteContext> & {
+    autoCompleteSet?: Array<string | ResultTerm>;
+  };
+
+  const normalizeTerm = (term: string | ResultTerm): ResultTerm =>
+    _.isString(term) ? { name: term } : term;
+
+  function testUrlContext(
+    tokenPath: TokenPath,
+    otherTokenValues: AutoCompleteContext['otherTokenValues'],
+    expectedContext: ExpectedContext
+  ) {
     if (expectedContext.autoCompleteSet) {
-      expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (t) {
-        if (_.isString(t)) {
-          t = { name: t };
-        }
-        return t;
-      });
+      expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, normalizeTerm);
     }
 
-    const context = { otherTokenValues: otherTokenValues };
-    populateContext(
-      tokenPath,
-      context,
-      null,
-      expectedContext.autoCompleteSet,
-      kb.getTopLevelUrlCompleteComponents('GET')
-    );
+    const context: AutoCompleteContext = { otherTokenValues };
+    populateContext(tokenPath, context, null, true, kb.getTopLevelUrlCompleteComponents('GET'));
 
-    // override context to just check on id
-    if (context.endpoint) {
-      context.endpoint = context.endpoint.id;
+    const actualContext: Record<string, unknown> = { ...context };
+
+    // override endpoint to just check on id
+    if (isRecord(actualContext.endpoint) && typeof actualContext.endpoint.id === 'string') {
+      actualContext.endpoint = actualContext.endpoint.id;
     }
 
-    delete context.otherTokenValues;
+    delete actualContext.otherTokenValues;
 
-    function norm(t) {
-      if (_.isString(t)) {
-        return { name: t };
-      }
-      return t;
-    }
+    const norm = (t: string | ResultTerm) => normalizeTerm(t);
 
-    if (context.autoCompleteSet) {
-      context.autoCompleteSet = _.sortBy(_.map(context.autoCompleteSet, norm), 'name');
+    if (Array.isArray(actualContext.autoCompleteSet)) {
+      actualContext.autoCompleteSet = _.sortBy(_.map(actualContext.autoCompleteSet, norm), 'name');
     }
     if (expectedContext.autoCompleteSet) {
       expectedContext.autoCompleteSet = _.sortBy(
@@ -85,17 +84,21 @@ describe('Knowledge base', () => {
       );
     }
 
-    expect(context).toEqual(expectedContext);
+    expect(actualContext).toEqual(expectedContext);
   }
 
-  function i(term) {
+  function i(term: string): ResultTerm {
     return { name: term, meta: 'index' };
   }
 
-  function indexTest(name, tokenPath, otherTokenValues, expectedContext) {
+  function indexTest(
+    name: string,
+    tokenPath: TokenPath,
+    otherTokenValues: AutoCompleteContext['otherTokenValues'],
+    expectedContext: ExpectedContext
+  ) {
     test(name, function () {
-      // eslint-disable-next-line new-cap
-      const testApi = new kb._test.loadApisFromJson(
+      const testApi = kb._test.loadApisFromJson(
         {
           indexTest: {
             endpoints: {
@@ -110,7 +113,7 @@ describe('Knowledge base', () => {
             },
           },
         },
-        kb._test.globalUrlComponentFactories
+        undefined
       );
 
       kb._test.setActiveApi(testApi);

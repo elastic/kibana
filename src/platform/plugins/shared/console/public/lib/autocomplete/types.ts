@@ -9,6 +9,7 @@
 
 import type { MonacoEditorActionsProvider } from '../../application/containers/editor/monaco_editor_actions_provider';
 import type { CoreEditor, Range, Token } from '../../types';
+import type { AutocompleteComponent } from './components';
 
 export interface ResultTerm {
   meta?: string;
@@ -17,7 +18,7 @@ export interface ResultTerm {
   name?: string | boolean;
   value?: string;
   score?: number;
-  template?: { __raw?: boolean; value?: string; [key: string]: unknown };
+  template?: unknown;
 }
 
 export interface DataAutoCompleteRulesOneOf {
@@ -29,6 +30,7 @@ export interface DataAutoCompleteRulesOneOf {
 }
 
 export interface AutoCompleteContext {
+  [key: string]: unknown;
   autoCompleteSet?: null | ResultTerm[];
   /**
    * Stores a state for async results, e.g. fields suggestions based on the mappings definition.
@@ -40,9 +42,9 @@ export interface AutoCompleteContext {
   };
   endpoint?: null | {
     paramsAutocomplete: {
-      getTopLevelComponents: (method?: string | null) => unknown;
+      getTopLevelComponents: (method?: string | null) => AutocompleteComponent[];
     };
-    bodyAutocompleteRootComponents: unknown;
+    bodyAutocompleteRootComponents: AutocompleteComponent[];
     id?: string;
     documentation?: string;
     data_autocomplete_rules?: Record<string, unknown> | null;
@@ -74,7 +76,7 @@ export interface AutoCompleteContext {
   suffixToAdd?: string;
   textBoxPosition?: { lineNumber: number; column: number };
   urlTokenPath?: string[];
-  otherTokenValues?: string;
+  otherTokenValues?: string | string[];
   requestStartRow?: number | null;
   bodyTokenPath?: string[] | null;
   endpointComponentResolver?: unknown;

@@ -8,20 +8,37 @@
  */
 
 import { SharedComponent } from './shared_component';
+import type {
+  AutocompleteComponent,
+  AutocompleteMatch,
+  AutocompleteMatchResult,
+  AutocompleteTermDefinition,
+} from './autocomplete_component';
+import type { AutoCompleteContext } from '../types';
+
+type GlobalOnlyContext = AutoCompleteContext & {
+  globalComponentResolver: (
+    token: unknown,
+    nested: boolean
+  ) => AutocompleteComponent[] | undefined | null;
+};
+
+type MatchResultWithNextArray = AutocompleteMatchResult & { next: AutocompleteComponent[] };
+
 export class GlobalOnlyComponent extends SharedComponent {
-  getTerms() {
+  getTerms(): AutocompleteTermDefinition[] | null {
     return null;
   }
 
-  match(token, context) {
-    const result = {
+  match(token: unknown, context: GlobalOnlyContext): AutocompleteMatch {
+    const result: MatchResultWithNextArray = {
       next: [],
     };
 
     // try to link to GLOBAL rules
     const globalRules = context.globalComponentResolver(token, false);
     if (globalRules) {
-      result.next.push.apply(result.next, globalRules);
+      result.next.push(...globalRules);
     }
 
     if (result.next.length) {

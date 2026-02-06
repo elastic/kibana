@@ -9,57 +9,93 @@
 
 import _ from 'lodash';
 
-export function wrapComponentWithDefaults(component, defaults) {
+import type {
+  AutocompleteComponent,
+  AutocompleteTermDefinition,
+} from './components/autocomplete_component';
+import type { AutoCompleteContext, ResultTerm } from './types';
+
+declare global {
+  interface Window {
+    engine_trace?: boolean;
+  }
+}
+
+type AutocompleteContext = AutoCompleteContext;
+
+export function wrapComponentWithDefaults<T extends AutocompleteComponent>(
+  component: T,
+  defaults: Record<string, unknown>
+): T {
   const originalGetTerms = component.getTerms;
-  component.getTerms = function (context, editor) {
-    let result = originalGetTerms.call(component, context, editor);
+  component.getTerms = function (context: unknown, editor: unknown) {
+    const result = originalGetTerms.call(component, context, editor);
     if (!result) {
       return result;
     }
-    result = _.map(result, (term) => {
-      if (!_.isObject(term)) {
-        term = { name: term };
-      }
-      return _.defaults(term, defaults);
+    return _.map(result, (term: AutocompleteTermDefinition) => {
+      const termObj: ResultTerm = typeof term === 'string' ? { name: term } : term;
+      return _.defaults(termObj, defaults);
     });
-    return result;
   };
   return component;
 }
 
-const tracer = function () {
+const tracer = (...args: unknown[]) => {
   if (window.engine_trace) {
-    console.log.call(console, ...arguments);
+    // eslint-disable-next-line no-console
+    console.log(...args);
   }
 };
 
-function passThroughContext(context, extensionList) {
-  function PTC() {}
-
-  PTC.prototype = context;
-  const result = new PTC();
+function passThroughContext(
+  context: AutocompleteContext,
+  extensionList?: Array<Record<string, unknown>>
+): AutocompleteContext {
+  const result: AutocompleteContext = Object.create(context);
   if (extensionList) {
     extensionList.unshift(result);
-    _.assign.apply(_, extensionList);
+    const [target, ...sources] = extensionList;
+    _.assign(target, ...sources);
     extensionList.shift();
   }
   return result;
 }
 
-export function WalkingState(parentName, components, contextExtensionList, depth, priority) {
-  this.parentName = parentName;
-  this.components = components;
-  this.contextExtensionList = contextExtensionList;
-  this.depth = depth || 0;
-  this.priority = priority;
+export class WalkingState {
+  name?: string;
+  parentName: string | undefined;
+  components: AutocompleteComponent[];
+  contextExtensionList: Array<Record<string, unknown>>;
+  depth: number;
+  priority: number | undefined;
+
+  constructor(
+    parentName: string | undefined,
+    components: AutocompleteComponent[],
+    contextExtensionList: Array<Record<string, unknown>>,
+    depth?: number,
+    priority?: number
+  ) {
+    this.parentName = parentName;
+    this.components = components;
+    this.contextExtensionList = contextExtensionList;
+    this.depth = depth || 0;
+    this.priority = priority;
+  }
 }
 
-export function walkTokenPath(tokenPath, walkingStates, context, editor) {
+export function walkTokenPath(
+  tokenPath: Array<string | string[]>,
+  walkingStates: WalkingState[],
+  context: AutocompleteContext,
+  editor: unknown
+): WalkingState[] {
   if (!tokenPath || tokenPath.length === 0) {
     return walkingStates;
   }
   const token = tokenPath[0];
-  const nextWalkingStates = [];
+  const nextWalkingStates: WalkingState[] = [];
 
   tracer('starting token evaluation [' + token + ']');
 
@@ -70,16 +106,14 @@ export function walkTokenPath(tokenPath, walkingStates, context, editor) {
       const result = component.match(token, contextForState, editor);
       if (result && !_.isEmpty(result)) {
         tracer('matched [' + token + '] with:', result);
-        let next;
-        let extensionList;
-        if (result.next && !Array.isArray(result.next)) {
-          next = [result.next];
-        } else {
-          next = result.next;
+        let next: AutocompleteComponent[] = [];
+        if (result.next) {
+          next = Array.isArray(result.next) ? result.next : [result.next];
         }
+
+        let extensionList: Array<Record<string, unknown>>;
         if (result.context_values) {
-          extensionList = [];
-          [].push.apply(extensionList, ws.contextExtensionList);
+          extensionList = ws.contextExtensionList.slice();
           extensionList.push(result.context_values);
         } else {
           extensionList = ws.contextExtensionList;
@@ -111,7 +145,13 @@ export function walkTokenPath(tokenPath, walkingStates, context, editor) {
   return walkTokenPath(tokenPath.slice(1), nextWalkingStates, context, editor);
 }
 
-export function populateContext(tokenPath, context, editor, includeAutoComplete, components) {
+export function populateContext(
+  tokenPath: Array<string | string[]>,
+  context: AutocompleteContext,
+  editor: unknown,
+  includeAutoComplete: boolean,
+  components: AutocompleteComponent[]
+): void {
   let walkStates = walkTokenPath(
     tokenPath,
     [new WalkingState('ROOT', components, [])],
@@ -119,25 +159,25 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
     editor
   );
   if (includeAutoComplete) {
-    let autoCompleteSet = new Map();
+    const autoCompleteSet = new Map<ResultTerm['name'], ResultTerm>();
     _.each(walkStates, function (ws) {
       const contextForState = passThroughContext(context, ws.contextExtensionList);
       _.each(ws.components, function (component) {
-        _.each(component.getTerms(contextForState, editor), function (term) {
-          if (!_.isObject(term)) {
-            term = { name: term };
-          }
+        const terms = component.getTerms(contextForState, editor);
+        if (!terms) {
+          return;
+        }
+        _.each(terms, function (term) {
+          const termObj: ResultTerm = typeof term === 'string' ? { name: term } : term;
 
           // Add the term to the autoCompleteSet if it doesn't already exist
-          if (!autoCompleteSet.has(term.name)) {
-            autoCompleteSet.set(term.name, term);
+          if (!autoCompleteSet.has(termObj.name)) {
+            autoCompleteSet.set(termObj.name, termObj);
           }
         });
       });
     });
-    // Convert Map values to an array of objects
-    autoCompleteSet = Array.from(autoCompleteSet.values());
-    context.autoCompleteSet = autoCompleteSet;
+    context.autoCompleteSet = Array.from(autoCompleteSet.values());
   }
 
   // apply what values were set so far to context, selecting the deepest on which sets the context
@@ -151,6 +191,7 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
     });
 
     if (!wsToUse && walkStates.length > 1 && !includeAutoComplete) {
+      // eslint-disable-next-line no-console
       console.info(
         "more than one context active for current path, but autocomplete isn't requested",
         walkStates
