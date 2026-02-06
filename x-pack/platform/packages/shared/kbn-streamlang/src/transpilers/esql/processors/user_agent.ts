@@ -20,10 +20,8 @@ import { buildIgnoreMissingFilter, buildWhereCondition } from './common';
  *
  * Conditional execution logic:
  *  - If neither `ignore_missing` nor `where` is provided: emit a single USER_AGENT command.
- *  - Otherwise, use CASE approach to conditionally execute USER_AGENT:
- *      * Create temporary field using CASE to conditionally set to source field or empty string
- *      * Apply USER_AGENT to temporary field
- *      * Drop temporary field
+ *  - Otherwise, use inline CASE expression to conditionally pass source field:
+ *      * USER_AGENT target = CASE(condition, source, "") WITH {...}
  *    Condition: (exists(from) if ignore_missing) AND (where condition, if provided)
  *
  * @example
@@ -71,40 +69,28 @@ export function convertUserAgentProcessorToESQL(processor: UserAgentProcessor): 
     commands.push(
       buildUserAgentCommand(toColumn, fromColumn, regex_file, properties, extract_device_type)
     );
-    return commands;
+  } else {
+    // Build condition for when USER_AGENT should execute
+    const userAgentCondition = buildWhereCondition(from, ignore_missing, where, conditionToESQLAst);
+
+    // Create CASE expression: CASE(condition, source, "")
+    const conditionalSource = Builder.expression.func.call('CASE', [
+      userAgentCondition,
+      fromColumn,
+      Builder.expression.literal.string(''), // Empty string when condition false
+    ]);
+
+    // Apply USER_AGENT with inline CASE expression
+    commands.push(
+      buildUserAgentCommand(
+        toColumn,
+        conditionalSource,
+        regex_file,
+        properties,
+        extract_device_type
+      )
+    );
   }
-
-  // Build condition for when USER_AGENT should execute
-  const userAgentCondition = buildWhereCondition(from, ignore_missing, where, conditionToESQLAst);
-
-  // Create temporary field name for conditional processing
-  const tempFieldName = `__temp_user_agent_where_${from}__`;
-  const tempColumn = Builder.expression.column(tempFieldName);
-
-  // Using CASE, set temporary field to source field if condition passes, empty string otherwise
-  commands.push(
-    Builder.command({
-      name: 'eval',
-      args: [
-        Builder.expression.func.binary('=', [
-          tempColumn,
-          Builder.expression.func.call('CASE', [
-            userAgentCondition,
-            fromColumn,
-            Builder.expression.literal.string(''), // Empty string avoids ES|QL NULL errors
-          ]),
-        ]),
-      ],
-    })
-  );
-
-  // Apply USER_AGENT to the temporary field
-  commands.push(
-    buildUserAgentCommand(toColumn, tempColumn, regex_file, properties, extract_device_type)
-  );
-
-  // Clean up temporary field
-  commands.push(Builder.command({ name: 'drop', args: [tempColumn] }));
 
   return commands;
 }
@@ -121,12 +107,9 @@ function buildUserAgentCommand(
   properties?: UserAgentProperty[],
   extractDeviceType?: boolean
 ): ESQLAstCommand {
-  // Build the assignment: target = source
-  const assignment = Builder.expression.func.binary('=', [toColumn, fromColumn]);
+  const args: ESQLAstItem[] = [Builder.expression.func.binary('=', [toColumn, fromColumn])];
+  const cmd = Builder.command({ name: 'user_agent', args });
 
-  const args: ESQLAstItem[] = [assignment];
-
-  // Build WITH options map if any options are provided
   const mapEntries: ESQLMapEntry[] = [];
 
   if (regexFile !== undefined) {
@@ -155,9 +138,6 @@ function buildUserAgentCommand(
     );
   }
 
-  const cmd = Builder.command({ name: 'user_agent', args });
-
-  // Add WITH option with the map if there are any options
   if (mapEntries.length > 0) {
     cmd.args.push(
       Builder.option({

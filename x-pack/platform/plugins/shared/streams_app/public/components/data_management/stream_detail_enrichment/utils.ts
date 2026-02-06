@@ -114,6 +114,8 @@ const PRIORITIZED_DATE_FIELDS = [
   'attributes.custom.timestamp',
 ];
 
+const PRIORITIZED_USER_AGENT_FIELDS = ['user_agent.original', 'http.request.headers.user-agent'];
+
 export const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {
   // Count occurrences of well-known text fields in the sample documents
   const acceptableDefaultFields = sampleDocs.flatMap((doc) =>
@@ -286,7 +288,7 @@ const defaultConcatProcessorFormState = (): ConcatFormState => ({
 
 const defaultUserAgentProcessorFormState = (sampleDocs: FlattenRecord[]): UserAgentFormState => ({
   action: 'user_agent' as const,
-  from: getDefaultTextField(sampleDocs, ['user_agent.original', 'http.request.headers.user-agent']),
+  from: getDefaultTextField(sampleDocs, PRIORITIZED_USER_AGENT_FIELDS),
   to: 'user_agent',
   ignore_failure: true,
   ignore_missing: true,
