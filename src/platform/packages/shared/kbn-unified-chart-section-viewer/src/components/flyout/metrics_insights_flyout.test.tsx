@@ -34,12 +34,21 @@ jest.mock('react-use/lib/useLocalStorage', () => {
   return jest.fn(() => [544, jest.fn()]);
 });
 
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    useIsWithinMinBreakpoint: jest.fn(() => true),
+  };
+});
+
 describe('MetricInsightsFlyout', () => {
   const mockMetricFlyoutBody = jest.requireMock('./metrics_flyout_body').MetricFlyoutBody;
   const mockUseFlyoutA11y = jest.requireMock('./hooks/use_flyout_a11y').useFlyoutA11y;
   const mockUseFieldsMetadataContext = jest.requireMock(
     '../../context/fields_metadata'
   ).useFieldsMetadataContext;
+  const mockUseIsWithinMinBreakpoint = jest.requireMock('@elastic/eui').useIsWithinMinBreakpoint;
 
   const createMockMetric = (overrides: Partial<MetricField> = {}): MetricField => ({
     name: 'test.metric',
@@ -56,6 +65,7 @@ describe('MetricInsightsFlyout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseIsWithinMinBreakpoint.mockReturnValue(true); // Simulate XL screen (push mode)
     mockUseFieldsMetadataContext.mockReturnValue({ fieldsMetadata: {} });
     mockUseFlyoutA11y.mockReturnValue({ a11yProps: {}, screenReaderDescription: null });
   });
@@ -103,6 +113,23 @@ describe('MetricInsightsFlyout', () => {
 
       const flyout = screen.getByTestId('metricsExperienceFlyout');
       fireEvent.keyDown(flyout, { key: 'Enter', bubbles: true });
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('does not call onClose when Escape is pressed on non-XL screens', () => {
+      mockUseIsWithinMinBreakpoint.mockReturnValue(false);
+      const onClose = jest.fn();
+      render(<MetricInsightsFlyout {...defaultProps} onClose={onClose} />);
+
+      const flyout = screen.getByTestId('metricsExperienceFlyout');
+      const event = new KeyboardEvent('keydown', {
+        key: 'Escape',
+        bubbles: true,
+        cancelable: true,
+      });
+
+      fireEvent(flyout, event);
 
       expect(onClose).not.toHaveBeenCalled();
     });
