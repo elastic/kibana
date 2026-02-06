@@ -958,3 +958,14 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
                 - id: '.server-log'
                   max: 5
     ```
+
+`xpack.alerting.rules.apiKeyType` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   The API key type to use for executing alerting rules. The default value, corresponding to the existing behavior, is `es`, which uses an Elasticsearch API key. Set this to `uiam` to use UIAM API keys instead.
+
+    Data type: `string`
+
+    For example:
+
+    ```yaml
+    xpack.alerting.rules.apiKeyType: uiam
+    ```
